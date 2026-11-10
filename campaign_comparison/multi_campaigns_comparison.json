@@ -1,0 +1,483 @@
+{
+  "analysis": "Multi-Campaign Cross-Validation (5 Independent Empirical Test Runs)",
+  "hardware": "Apple Mac mini M4, 24 GB UMA",
+  "campaigns_evaluated": [
+    "campaign_run_1",
+    "campaign_run_2",
+    "campaign_run_3",
+    "campaign_run_4",
+    "campaign_run_5"
+  ],
+  "treatments": {
+    "PicoClaw_W1_Cold": {
+      "t_task_ms": {
+        "campaign_run_1": 1458.05,
+        "campaign_run_2": 1446.09,
+        "campaign_run_3": 1451.72,
+        "campaign_run_4": 1459.3,
+        "campaign_run_5": 1442.9,
+        "grand_mean": 1451.61,
+        "sd": 7.19,
+        "cv_pct": 0.5,
+        "repeatability_score_pct": 99.5
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 16.73,
+        "campaign_run_2": 11.83,
+        "campaign_run_3": 12.13,
+        "campaign_run_4": 11.92,
+        "campaign_run_5": 11.88,
+        "grand_mean": 12.9,
+        "sd": 2.15,
+        "cv_pct": 16.63
+      },
+      "anova_test": {
+        "f_stat": 1.4615,
+        "p_value": 0.2511,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W1_Cold": {
+      "t_task_ms": {
+        "campaign_run_1": 1693.56,
+        "campaign_run_2": 1454.23,
+        "campaign_run_3": 1456.87,
+        "campaign_run_4": 1461.1,
+        "campaign_run_5": 1454.15,
+        "grand_mean": 1503.98,
+        "sd": 106.01,
+        "cv_pct": 7.05,
+        "repeatability_score_pct": 92.95
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 184.9,
+        "campaign_run_2": 87.72,
+        "campaign_run_3": 87.6,
+        "campaign_run_4": 87.68,
+        "campaign_run_5": 87.67,
+        "grand_mean": 107.11,
+        "sd": 43.48,
+        "cv_pct": 40.6
+      },
+      "anova_test": {
+        "f_stat": 211.9372,
+        "p_value": 0.0,
+        "is_reproducible": false
+      }
+    },
+    "PicoClaw_W1_Warm": {
+      "t_task_ms": {
+        "campaign_run_1": 1447.76,
+        "campaign_run_2": 1448.64,
+        "campaign_run_3": 1470.99,
+        "campaign_run_4": 1441.96,
+        "campaign_run_5": 1461.2,
+        "grand_mean": 1454.11,
+        "sd": 11.76,
+        "cv_pct": 0.81,
+        "repeatability_score_pct": 99.19
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 16.42,
+        "campaign_run_2": 11.7,
+        "campaign_run_3": 12.06,
+        "campaign_run_4": 11.78,
+        "campaign_run_5": 11.83,
+        "grand_mean": 12.76,
+        "sd": 2.05,
+        "cv_pct": 16.08
+      },
+      "anova_test": {
+        "f_stat": 2.1125,
+        "p_value": 0.117,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W1_Warm": {
+      "t_task_ms": {
+        "campaign_run_1": 1459.9,
+        "campaign_run_2": 1461.09,
+        "campaign_run_3": 1466.82,
+        "campaign_run_4": 1440.37,
+        "campaign_run_5": 1473.72,
+        "grand_mean": 1460.38,
+        "sd": 12.46,
+        "cv_pct": 0.85,
+        "repeatability_score_pct": 99.15
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 184.22,
+        "campaign_run_2": 87.8,
+        "campaign_run_3": 87.72,
+        "campaign_run_4": 88.39,
+        "campaign_run_5": 87.9,
+        "grand_mean": 107.21,
+        "sd": 43.05,
+        "cv_pct": 40.16
+      },
+      "anova_test": {
+        "f_stat": 4.6711,
+        "p_value": 0.008,
+        "is_reproducible": false
+      }
+    },
+    "PicoClaw_W2_Cold": {
+      "t_task_ms": {
+        "campaign_run_1": 2896.95,
+        "campaign_run_2": 2990.64,
+        "campaign_run_3": 2954.21,
+        "campaign_run_4": 2927.82,
+        "campaign_run_5": 2963.4,
+        "grand_mean": 2946.6,
+        "sd": 35.7,
+        "cv_pct": 1.21,
+        "repeatability_score_pct": 98.79
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 21.05,
+        "campaign_run_2": 14.85,
+        "campaign_run_3": 14.46,
+        "campaign_run_4": 14.6,
+        "campaign_run_5": 14.54,
+        "grand_mean": 15.9,
+        "sd": 2.88,
+        "cv_pct": 18.13
+      },
+      "anova_test": {
+        "f_stat": 0.7966,
+        "p_value": 0.5413,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W2_Cold": {
+      "t_task_ms": {
+        "campaign_run_1": 3170.18,
+        "campaign_run_2": 2935.27,
+        "campaign_run_3": 2956.88,
+        "campaign_run_4": 2913.42,
+        "campaign_run_5": 3003.85,
+        "grand_mean": 2995.92,
+        "sd": 103.0,
+        "cv_pct": 3.44,
+        "repeatability_score_pct": 96.56
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 230.17,
+        "campaign_run_2": 89.98,
+        "campaign_run_3": 89.79,
+        "campaign_run_4": 89.99,
+        "campaign_run_5": 89.61,
+        "grand_mean": 117.91,
+        "sd": 62.76,
+        "cv_pct": 53.23
+      },
+      "anova_test": {
+        "f_stat": 13.7317,
+        "p_value": 0.0,
+        "is_reproducible": false
+      }
+    },
+    "PicoClaw_W2_Warm": {
+      "t_task_ms": {
+        "campaign_run_1": 2901.67,
+        "campaign_run_2": 2929.7,
+        "campaign_run_3": 2959.28,
+        "campaign_run_4": 2900.64,
+        "campaign_run_5": 2945.08,
+        "grand_mean": 2927.27,
+        "sd": 26.04,
+        "cv_pct": 0.89,
+        "repeatability_score_pct": 99.11
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 21.08,
+        "campaign_run_2": 14.42,
+        "campaign_run_3": 14.72,
+        "campaign_run_4": 14.57,
+        "campaign_run_5": 14.49,
+        "grand_mean": 15.86,
+        "sd": 2.92,
+        "cv_pct": 18.43
+      },
+      "anova_test": {
+        "f_stat": 1.8236,
+        "p_value": 0.1639,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W2_Warm": {
+      "t_task_ms": {
+        "campaign_run_1": 2950.74,
+        "campaign_run_2": 2925.17,
+        "campaign_run_3": 2968.23,
+        "campaign_run_4": 2908.82,
+        "campaign_run_5": 2947.89,
+        "grand_mean": 2940.17,
+        "sd": 23.27,
+        "cv_pct": 0.79,
+        "repeatability_score_pct": 99.21
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 230.37,
+        "campaign_run_2": 89.7,
+        "campaign_run_3": 90.14,
+        "campaign_run_4": 89.9,
+        "campaign_run_5": 89.91,
+        "grand_mean": 118.0,
+        "sd": 62.81,
+        "cv_pct": 53.23
+      },
+      "anova_test": {
+        "f_stat": 1.1622,
+        "p_value": 0.357,
+        "is_reproducible": true
+      }
+    },
+    "PicoClaw_W3_Cold": {
+      "t_task_ms": {
+        "campaign_run_1": 5999.48,
+        "campaign_run_2": 6875.76,
+        "campaign_run_3": 6163.07,
+        "campaign_run_4": 6040.04,
+        "campaign_run_5": 6100.18,
+        "grand_mean": 6235.71,
+        "sd": 363.11,
+        "cv_pct": 5.82,
+        "repeatability_score_pct": 94.18
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 38.55,
+        "campaign_run_2": 13.93,
+        "campaign_run_3": 13.55,
+        "campaign_run_4": 13.63,
+        "campaign_run_5": 13.51,
+        "grand_mean": 18.63,
+        "sd": 11.13,
+        "cv_pct": 59.75
+      },
+      "anova_test": {
+        "f_stat": 1.5818,
+        "p_value": 0.242,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W3_Cold": {
+      "t_task_ms": {
+        "campaign_run_1": 6260.01,
+        "campaign_run_2": 6171.54,
+        "campaign_run_3": 6153.73,
+        "campaign_run_4": 6052.69,
+        "campaign_run_5": 6132.92,
+        "grand_mean": 6154.18,
+        "sd": 74.59,
+        "cv_pct": 1.21,
+        "repeatability_score_pct": 98.79
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 366.27,
+        "campaign_run_2": 93.57,
+        "campaign_run_3": 93.55,
+        "campaign_run_4": 93.15,
+        "campaign_run_5": 93.03,
+        "grand_mean": 147.91,
+        "sd": 122.06,
+        "cv_pct": 82.52
+      },
+      "anova_test": {
+        "f_stat": 12.483,
+        "p_value": 0.0003,
+        "is_reproducible": false
+      }
+    },
+    "PicoClaw_W3_Warm": {
+      "t_task_ms": {
+        "campaign_run_1": 5979.0,
+        "campaign_run_2": 6100.46,
+        "campaign_run_3": 6134.09,
+        "campaign_run_4": 6063.7,
+        "campaign_run_5": 6096.55,
+        "grand_mean": 6074.76,
+        "sd": 59.05,
+        "cv_pct": 0.97,
+        "repeatability_score_pct": 99.03
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 38.88,
+        "campaign_run_2": 13.84,
+        "campaign_run_3": 13.72,
+        "campaign_run_4": 13.44,
+        "campaign_run_5": 13.85,
+        "grand_mean": 18.75,
+        "sd": 11.26,
+        "cv_pct": 60.05
+      },
+      "anova_test": {
+        "f_stat": 16.9742,
+        "p_value": 0.0001,
+        "is_reproducible": false
+      }
+    },
+    "OpenClaw_W3_Warm": {
+      "t_task_ms": {
+        "campaign_run_1": 6049.63,
+        "campaign_run_2": 6180.11,
+        "campaign_run_3": 6170.07,
+        "campaign_run_4": 6087.9,
+        "campaign_run_5": 6143.49,
+        "grand_mean": 6126.24,
+        "sd": 55.81,
+        "cv_pct": 0.91,
+        "repeatability_score_pct": 99.09
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 365.31,
+        "campaign_run_2": 93.67,
+        "campaign_run_3": 94.59,
+        "campaign_run_4": 93.58,
+        "campaign_run_5": 92.18,
+        "grand_mean": 147.87,
+        "sd": 121.56,
+        "cv_pct": 82.21
+      },
+      "anova_test": {
+        "f_stat": 15.939,
+        "p_value": 0.0001,
+        "is_reproducible": false
+      }
+    },
+    "PicoClaw_W4_Cold": {
+      "t_task_ms": {
+        "campaign_run_1": 22671.57,
+        "campaign_run_2": 10832.04,
+        "campaign_run_3": 10913.76,
+        "campaign_run_4": 10653.2,
+        "campaign_run_5": 10816.23,
+        "grand_mean": 13177.36,
+        "sd": 5308.27,
+        "cv_pct": 40.28,
+        "repeatability_score_pct": 59.72
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 33.97,
+        "campaign_run_2": 17.16,
+        "campaign_run_3": 17.28,
+        "campaign_run_4": 16.65,
+        "campaign_run_5": 17.2,
+        "grand_mean": 20.45,
+        "sd": 7.56,
+        "cv_pct": 36.97
+      },
+      "anova_test": {
+        "f_stat": 4329.8484,
+        "p_value": 0.0,
+        "is_reproducible": false
+      }
+    },
+    "OpenClaw_W4_Cold": {
+      "t_task_ms": {
+        "campaign_run_1": 23164.29,
+        "campaign_run_2": 12591.73,
+        "campaign_run_3": 12683.84,
+        "campaign_run_4": 12529.59,
+        "campaign_run_5": 12620.76,
+        "grand_mean": 14718.04,
+        "sd": 4721.92,
+        "cv_pct": 32.08,
+        "repeatability_score_pct": 67.92
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 450.8,
+        "campaign_run_2": 93.12,
+        "campaign_run_3": 93.83,
+        "campaign_run_4": 93.74,
+        "campaign_run_5": 93.91,
+        "grand_mean": 165.08,
+        "sd": 159.72,
+        "cv_pct": 96.75
+      },
+      "anova_test": {
+        "f_stat": 5818.999,
+        "p_value": 0.0,
+        "is_reproducible": false
+      }
+    },
+    "PicoClaw_W4_Warm": {
+      "t_task_ms": {
+        "campaign_run_1": 22630.12,
+        "campaign_run_2": 10842.2,
+        "campaign_run_3": 10814.52,
+        "campaign_run_4": 10722.69,
+        "campaign_run_5": 10762.91,
+        "grand_mean": 13154.49,
+        "sd": 5297.24,
+        "cv_pct": 40.27,
+        "repeatability_score_pct": 59.73
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 33.83,
+        "campaign_run_2": 16.73,
+        "campaign_run_3": 16.69,
+        "campaign_run_4": 17.09,
+        "campaign_run_5": 16.63,
+        "grand_mean": 20.19,
+        "sd": 7.62,
+        "cv_pct": 37.76
+      },
+      "anova_test": {
+        "f_stat": 5346.6164,
+        "p_value": 0.0,
+        "is_reproducible": false
+      }
+    },
+    "OpenClaw_W4_Warm": {
+      "t_task_ms": {
+        "campaign_run_1": 23024.99,
+        "campaign_run_2": 13177.81,
+        "campaign_run_3": 12677.91,
+        "campaign_run_4": 12554.49,
+        "campaign_run_5": 12619.77,
+        "grand_mean": 14810.99,
+        "sd": 4598.38,
+        "cv_pct": 31.05,
+        "repeatability_score_pct": 68.95
+      },
+      "rss_peak_mb": {
+        "campaign_run_1": 448.33,
+        "campaign_run_2": 92.7,
+        "campaign_run_3": 94.73,
+        "campaign_run_4": 92.97,
+        "campaign_run_5": 93.24,
+        "grand_mean": 164.39,
+        "sd": 158.73,
+        "cv_pct": 96.55
+      },
+      "anova_test": {
+        "f_stat": 3188.578,
+        "p_value": 0.0,
+        "is_reproducible": false
+      }
+    }
+  },
+  "poisson_rates": {
+    "picoclaw_w2_tool_rate": {
+      "campaign_run_1": 327.4,
+      "campaign_run_2": 603.77,
+      "campaign_run_3": 567.59,
+      "campaign_run_4": 600.92,
+      "campaign_run_5": 591.11,
+      "mean": 538.16,
+      "sd": 118.67,
+      "cv_pct": 22.05
+    },
+    "openclaw_w2_tool_rate": {
+      "campaign_run_1": 64.4,
+      "campaign_run_2": 913.79,
+      "campaign_run_3": 859.11,
+      "campaign_run_4": 923.16,
+      "campaign_run_5": 889.48,
+      "mean": 729.99,
+      "sd": 372.9,
+      "cv_pct": 51.08
+    }
+  }
+}

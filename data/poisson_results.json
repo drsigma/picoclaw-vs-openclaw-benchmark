@@ -1,0 +1,107 @@
+{
+  "methodology": "Poisson Point Process Rate Estimation with Garwood (1936) Exact Confidence Intervals",
+  "sample_size_requirements": {
+    "target_90pct_assertiveness": {
+      "confidence": 0.9,
+      "z_critical": 1.6449,
+      "max_relative_error": 0.1,
+      "target_assertiveness_pct": 90.0,
+      "required_events_k": 271,
+      "exact_k_float": 270.55
+    },
+    "target_95pct_assertiveness": {
+      "confidence": 0.95,
+      "z_critical": 1.96,
+      "max_relative_error": 0.05,
+      "target_assertiveness_pct": 95.0,
+      "required_events_k": 1537,
+      "exact_k_float": 1536.58
+    },
+    "target_99pct_assertiveness": {
+      "confidence": 0.99,
+      "z_critical": 2.5758,
+      "max_relative_error": 0.01,
+      "target_assertiveness_pct": 99.0,
+      "required_events_k": 66349,
+      "exact_k_float": 66348.97
+    }
+  },
+  "evaluations": {
+    "w2_picoclaw_n100": {
+      "k_events": 300,
+      "total_time_sec": 0.9191,
+      "rate_lambda": 326.3919,
+      "ci_lower": 296.0266,
+      "ci_upper": 359.1337,
+      "ci_width": 63.107,
+      "relative_error_pct": 9.67,
+      "assertiveness_pct": 90.33
+    },
+    "w2_openclaw_n100": {
+      "k_events": 300,
+      "total_time_sec": 4.6657,
+      "rate_lambda": 64.2989,
+      "ci_lower": 58.317,
+      "ci_upper": 70.749,
+      "ci_width": 12.432,
+      "relative_error_pct": 9.67,
+      "assertiveness_pct": 90.33
+    },
+    "w4_picoclaw_n100": {
+      "k_events": 1000,
+      "total_time_sec": 4.4778,
+      "rate_lambda": 223.3246,
+      "ci_lower": 209.6958,
+      "ci_upper": 237.6067,
+      "ci_width": 27.9109,
+      "relative_error_pct": 6.25,
+      "assertiveness_pct": 93.75
+    },
+    "w4_openclaw_n100": {
+      "k_events": 1000,
+      "total_time_sec": 32.9331,
+      "rate_lambda": 30.3646,
+      "ci_lower": 28.5116,
+      "ci_upper": 32.3065,
+      "ci_width": 3.7949,
+      "relative_error_pct": 6.25,
+      "assertiveness_pct": 93.75
+    }
+  },
+  "rate_ratio_advantage": {
+    "w2_pico_over_open": {
+      "rate_ratio": 5.08,
+      "ci90": [
+        4.44,
+        5.81
+      ],
+      "p_value": 0.0
+    },
+    "w4_pico_over_open": {
+      "rate_ratio": 7.35,
+      "ci95": [
+        6.74,
+        8.03
+      ],
+      "p_value": 0.0
+    }
+  },
+  "dispersion_tests": {
+    "w2": {
+      "mean_mu": 3.0,
+      "variance_s2": 0.0,
+      "dispersion_ratio": 0.0,
+      "z_statistic": -70.7107,
+      "p_value": 0.0,
+      "is_equidispersed": false
+    },
+    "w4": {
+      "mean_mu": 10.0,
+      "variance_s2": 0.0,
+      "dispersion_ratio": 0.0,
+      "z_statistic": -70.7107,
+      "p_value": 0.0,
+      "is_equidispersed": false
+    }
+  }
+}

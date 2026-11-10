@@ -1,0 +1,322 @@
+{
+  "README.md": {
+    "bytes": 14158,
+    "sha256": "8323bc093bd2facf17253980f5a2a7a9b4f5226542fcb10b50ec290d4db788f1"
+  },
+  "benchmark/build_layperson_guide.py": {
+    "bytes": 20499,
+    "sha256": "5ac592f7b4dbf92f65b155fd018abc23ecb3a9c6f7835baa16d23a9febf8011c"
+  },
+  "benchmark/build_reports.py": {
+    "bytes": 61652,
+    "sha256": "d0e39b201b4c2939a570bb80641b96a0da91db9d30d44d9b4336517f31fe7653"
+  },
+  "benchmark/compare_campaigns.py": {
+    "bytes": 15999,
+    "sha256": "2087db7fda6074b786644c0a51b56d4d796d2e924d12b6243e4428476546aeb5"
+  },
+  "benchmark/generate_charts.py": {
+    "bytes": 22280,
+    "sha256": "e24c2f1996057ac49fd849a6257ceb3da4511f483d15f4d5561bed8bf401b081"
+  },
+  "benchmark/generate_datasets.py": {
+    "bytes": 4021,
+    "sha256": "1b30905e16ed0f3abe0655f775577ad66a16280a58f7acd9679ce6645b654be8"
+  },
+  "benchmark/generate_screenshots.py": {
+    "bytes": 14743,
+    "sha256": "7d4f462f6d01d151ca663d0ab813aed279e66b46a326a2583794481c8b300017"
+  },
+  "benchmark/openclaw_orch.mjs": {
+    "bytes": 10196,
+    "sha256": "dc03200241f7e0895f26e7425f29b82adb65d134ee4f5e513d4ac7b7ea0ecd1f"
+  },
+  "benchmark/picoclaw_orch": {
+    "bytes": 8276322,
+    "sha256": "086cc0d4bccf9070a779d01c8d6abbf4e575850ba0c799d63999f1a132875e5f"
+  },
+  "benchmark/picoclaw_orch.go": {
+    "bytes": 11257,
+    "sha256": "1c4ffe5ac6c02e4941b235e3630cd672daf915d084327355a8d9364bd220d0a7"
+  },
+  "benchmark/poisson_sampling_validation.py": {
+    "bytes": 12605,
+    "sha256": "5132c77bbba01d28e59a002bd9b92004c593a699fdbb2ab1dec369e84188fc67"
+  },
+  "benchmark/run_all_experiments.py": {
+    "bytes": 22758,
+    "sha256": "7b320f02e0229679ca213e18ec97ab903778c0f3ba936ad99f9bcf25d26363d6"
+  },
+  "benchmark/run_full_campaign.sh": {
+    "bytes": 5200,
+    "sha256": "35c9bbc78eba49c98cb2275bb85e0ac21788857626a31e66341c2c5fc54c1576"
+  },
+  "benchmark/run_live_campaign.py": {
+    "bytes": 11498,
+    "sha256": "602b428a61809471ac56aa45a490c88c7110791ef85bb359983ca8522f9bcde0"
+  },
+  "benchmark/setup_environment.sh": {
+    "bytes": 5478,
+    "sha256": "9716ebf9ce54a5ed7cfafc91c8f0a7a0aa0b2bc6c9a3a0d1c61871ebfae64b54"
+  },
+  "campaign_run_5/raw_trials.jsonl": {
+    "bytes": 31366,
+    "sha256": "2c80c90b54b7a56c3efcbc4853f4d44abb8510fa110b2fa668afe05554b73e32"
+  },
+  "campaign_run_5/summary_campaign_run_5.json": {
+    "bytes": 43703,
+    "sha256": "45209e119870d80b7cd9929c254427c7b8e89c66041790db906d71874f0130c0"
+  },
+  "campaign_run_2/raw_trials.jsonl": {
+    "bytes": 31326,
+    "sha256": "5283e5180244f7489174a8c30310ea60186da8258b6e2ee1fb2c931af6681af8"
+  },
+  "campaign_run_2/summary_campaign_run_2.json": {
+    "bytes": 43616,
+    "sha256": "20e65caf75473034f6abeb72a6597e43af5896d3bb5da94640c787e255cd746c"
+  },
+  "campaign_run_3/raw_trials.jsonl": {
+    "bytes": 31301,
+    "sha256": "8b9b71a91276cada5bd3d64298d0e16c50accb3e55edef1b5caa72422508143e"
+  },
+  "campaign_run_3/summary_campaign_run_3.json": {
+    "bytes": 43602,
+    "sha256": "93bad452703ce01f2fbc8b49b3af7ea7e6ec5ae4476914f3d3d3d2bbc66792a9"
+  },
+  "campaign_run_4/raw_trials.jsonl": {
+    "bytes": 31196,
+    "sha256": "cfccc2b41ae8aea2660dd500f3975d644e4f6469a26f52f05558af67d68608ab"
+  },
+  "campaign_run_4/summary_campaign_run_4.json": {
+    "bytes": 43481,
+    "sha256": "46f964fa950ce17ff6185b341e2758c66cffde8feb3bb707e0af248f96e0f799"
+  },
+  "screenshots/print_screen_01_llama_server.png": {
+    "bytes": 66824,
+    "sha256": "d15f24a72d9ab4936be75371e79e371cbab04e246a73a5288491bbdf558f0f33"
+  },
+  "screenshots/print_screen_02_hyperfine.png": {
+    "bytes": 46259,
+    "sha256": "7543bcc82ec2d1fc8941cefce829aa0b3daf12df8a18c294b0570b07b69ecfcc"
+  },
+  "screenshots/print_screen_03_powermetrics.png": {
+    "bytes": 87777,
+    "sha256": "aac69bb26ff3bc678756e75c416f691c81bed4ea722baf1a56908d633fcb6ce3"
+  },
+  "screenshots/print_screen_04_live_execution.png": {
+    "bytes": 80050,
+    "sha256": "2a256fb6a9738fbb517de2d55bdde6095f26e760f6e543d48aca16d6f3feb038"
+  },
+  "screenshots/print_screen_05_poisson_engine.png": {
+    "bytes": 87102,
+    "sha256": "4efdb7bfdc416956484cca0c749ed83749d7edb0200b4c42321116755129bc8a"
+  },
+  "screenshots/print_screen_06_caffeinate_quiescence.png": {
+    "bytes": 41788,
+    "sha256": "525095683882745183f610b613f11886032741c60b35d8ef269c757f6ef331a8"
+  },
+  "docs/00_GUIA_PRATICO_INTRODUTORIO_PT.md": {
+    "bytes": 6067,
+    "sha256": "9097fef8ccc7d4f9667bdecd1712ad79373e31cfdde343df4c833bfdd96b23c4"
+  },
+  "docs/00_PRACTICAL_INTRODUCTORY_GUIDE_EN.md": {
+    "bytes": 5710,
+    "sha256": "5495d2db69c04c53e9e38097c2ad40192fd0ea59aad57f145ee29f4166943096"
+  },
+  "docs/01_GLOSSARIO_PT.md": {
+    "bytes": 7934,
+    "sha256": "bf5d3bc105cffd2edb413ac5518c040e4dd00cdc86d761a51249d1b456002ec7"
+  },
+  "docs/02_GLOSSARY_EN.md": {
+    "bytes": 6746,
+    "sha256": "1541b91658823a3373a06d32717762ee30c520c4116463d2ff9dede6ef0abbe1"
+  },
+  "docs/03_METODOLOGIA_ESTATISTICA_POISSON.md": {
+    "bytes": 9109,
+    "sha256": "36736fd24fe73ae980cd16061c96157364b659db602477d8ed9388b437617fd2"
+  },
+  "docs/03_POISSON_STATISTICAL_METHODOLOGY_EN.md": {
+    "bytes": 4248,
+    "sha256": "18297000a54e56cfed4ce0c438e856595b7da746d9c76bd1f9aa6c0a958f8ce1"
+  },
+  "docs/04_HARDWARE_TELEMETRY_TERMINAL_OUTPUTS.md": {
+    "bytes": 6661,
+    "sha256": "5052d42dc2c620ad76222e0306828db88f9556317abc65c6b3d51084209456ac"
+  },
+  "docs/04_HARDWARE_TELEMETRY_TERMINAL_OUTPUTS_EN.md": {
+    "bytes": 4386,
+    "sha256": "2ed349644c34cb2e11450764167a4b70b8d4f09adf26a3d949094fe8dfd0e6ad"
+  },
+  "docs/05_GUIA_REPRODUCAO_PASSO_A_PASSO.md": {
+    "bytes": 4043,
+    "sha256": "3d4ec74d86003d3a7d1ec26df074c95c8e19eea3df5a64769c513a588df31410"
+  },
+  "docs/05_STEP_BY_STEP_REPRODUCTION_GUIDE_EN.md": {
+    "bytes": 4090,
+    "sha256": "17f03ff711abf2adc96b039bdd03cf86e2f798dd7f0caf4a4698dee3f03afcef"
+  },
+  "docs/06_ACADEMIC_DEFENSE_FAQ.md": {
+    "bytes": 7429,
+    "sha256": "82cf2d2fc8894f54a8b244444d118cd068bb5ab56f9f7473e0f02fd5007a24e7"
+  },
+  "docs/06_ACADEMIC_DEFENSE_FAQ_EN.md": {
+    "bytes": 6387,
+    "sha256": "34c01d216244e2ee60cbed80c091800b9bf64b207aae98d703c6a2665e8d7317"
+  },
+  "docs/07_PRINTS_PASSO_A_PASSO.md": {
+    "bytes": 5491,
+    "sha256": "3763d2ca074edce6042f53b4cbd5a09995412b0fede5652e74acbe62c9cb0576"
+  },
+  "docs/07_STEP_BY_STEP_SCREENSHOTS_EN.md": {
+    "bytes": 5182,
+    "sha256": "9fd9f1fa1849e4a72a899a6453d062a2b8d248a6c89ff02a12eab4add9bd84cb"
+  },
+  "docs/08_ADJUSTMENTS_AND_CORRECTIVE_ACTIONS_EN.md": {
+    "bytes": 6536,
+    "sha256": "9f2bbd9eed539bd3ed29870769980d0ae464fb193cc82040265743910727d256"
+  },
+  "docs/08_REGISTRO_DE_AJUSTES_E_DESVIOS.md": {
+    "bytes": 7315,
+    "sha256": "faf4bd3e9317c122a0a0b9018a5a6de84ad9820256d14fb2575f670e652b3af1"
+  },
+  "docs/09_EQUALIZED_TEST_CONDITIONS_GUARANTEE_EN.md": {
+    "bytes": 4304,
+    "sha256": "f01121f040b4d649445aebea931a55f8e4ea94e7e06bf4a8b9f18ec5ad81f367"
+  },
+  "docs/09_EQUALIZED_TEST_CONDITIONS_GUARANTEE_PT.md": {
+    "bytes": 4444,
+    "sha256": "bfe19003bfda4daecdc667842c942b229c8d1a2021e37a5927b3b71a9fe05fd6"
+  },
+  "campaign_run_1/powermetrics_idle.txt": {
+    "bytes": 44530,
+    "sha256": "86f45f8633b15f2a8e83193ee370613c0c67af12b5c10f3631e1298ff929a792"
+  },
+  "campaign_run_1/powermetrics_openclaw.txt": {
+    "bytes": 151299,
+    "sha256": "a081916f02d7d67be5b9252e15bb0d80f2c73ef04930d50e6723c1ac68c17d99"
+  },
+  "campaign_run_1/powermetrics_picoclaw.txt": {
+    "bytes": 133577,
+    "sha256": "961c2b1020f38e54cc60dfc6ce1cb87ad18bd2fa0e3f1e3b7e8631b204ffc707"
+  },
+  "campaign_run_1/privileged_quiescence.log": {
+    "bytes": 1631,
+    "sha256": "e7884d929e500781fa4d7735223641cf954233e8c80470b7cd04b9ef98a13a81"
+  },
+  "campaign_run_1/summary_campaign_run_1.json": {
+    "bytes": 93407,
+    "sha256": "21b67a18eaf1e0f20573ec7f04717a6d290a50fdfed8730cadf12b51e448220e"
+  },
+  "campaign_comparison/CAMPAIGN_COMPARISON.md": {
+    "bytes": 3879,
+    "sha256": "ec4c139391658f2d5cf76d225b6574ba1bcd12acfc11f265d7ccc2082d5da287"
+  },
+  "campaign_comparison/CAMPAIGN_COMPARISON_EN.md": {
+    "bytes": 3799,
+    "sha256": "5ae58457acef89b670f053bc728277367856ea55fdd440c841e15be0f03a84f7"
+  },
+  "campaign_comparison/multi_campaigns_comparison.json": {
+    "bytes": 12719,
+    "sha256": "7db8fa39f74ae30552bfe1ab7938ead2bec7ffc3f949b9e0eec31767406376b7"
+  },
+  "campaign_comparison/three_campaigns_comparison.json": {
+    "bytes": 9819,
+    "sha256": "d8d428f7efb7dce6ee40ab0fccf7f1b86742e4cd8c165cca417f94ad2edf2aaa"
+  },
+  "figures/fig1_architecture_topology.png": {
+    "bytes": 550498,
+    "sha256": "8a3ddecb07cd0cdf0dfb91ad5679f8f59203ba83bb26a653d3758e522fe27834"
+  },
+  "figures/fig2_exp1_cold_start_rss.png": {
+    "bytes": 210137,
+    "sha256": "c6b43c3210b5927e70ab0d675e492856dd81d4d406403dec261b73c39d5f59bb"
+  },
+  "figures/fig3_exp2_latency_overhead.png": {
+    "bytes": 215934,
+    "sha256": "f9dcd7caf498306b5e768dab780c35ed8cc2fb4e684f14854cccbab93ef9d1ad"
+  },
+  "figures/fig4_exp3_energy_edp.png": {
+    "bytes": 324000,
+    "sha256": "d6872a7088df186f70ae152255e389e0ee55a1af9701afb06088454f5c4c69d4"
+  },
+  "figures/fig5_exp4_tools_and_bloat.png": {
+    "bytes": 219254,
+    "sha256": "3785deb5756ba0ad62bd12ad0f30067142571c679633434593a01ce64a79e80f"
+  },
+  "figures/fig6_pmc_hardware_counters.png": {
+    "bytes": 201224,
+    "sha256": "4e7de2df299d323f7964f0ef184725cc7ff692142763bf83ca4bea77ed726c50"
+  },
+  "figures/fig7_poisson_assertiveness.png": {
+    "bytes": 395960,
+    "sha256": "47d81aaa9b9f1df51447ab333eebee6bc9c62cd2db2abb0312e20edd4593156f"
+  },
+  "figures/fig8_three_campaigns_reproducibility.png": {
+    "bytes": 323986,
+    "sha256": "c74f1d7aa8de95b2ad1533fe178ded76a134695246200d1649c7cb1e20a3afba"
+  },
+  "data/llama_server_stdout.log": {
+    "bytes": 854,
+    "sha256": "d85a6b346d862a95726b12a4cd4235a34fc540f08ee8e58b5aad005d57bb83fd"
+  },
+  "data/pm_open_run.json": {
+    "bytes": 416,
+    "sha256": "c32c08f976a3117eda5031c926aff41f53fc927f6a724ae9421d5a5d59b6474f"
+  },
+  "data/pm_pico_run.json": {
+    "bytes": 405,
+    "sha256": "d63b5dadd4a583e345cfd184c7cba4ab4e3cae9399583bd60e1871551dcf7bc6"
+  },
+  "data/poisson_results.json": {
+    "bytes": 2628,
+    "sha256": "1148ed07774904829c52dc4b24c89b9fa64561b238f2f285053563eb481a5ebe"
+  },
+  "data/powermetrics_idle.txt": {
+    "bytes": 44530,
+    "sha256": "86f45f8633b15f2a8e83193ee370613c0c67af12b5c10f3631e1298ff929a792"
+  },
+  "data/powermetrics_openclaw.txt": {
+    "bytes": 151299,
+    "sha256": "a081916f02d7d67be5b9252e15bb0d80f2c73ef04930d50e6723c1ac68c17d99"
+  },
+  "data/powermetrics_parsed.json": {
+    "bytes": 20153,
+    "sha256": "5fa3bbd419b131d121b559fc84fb120f9e81e28bafca415a805e66c77c032699"
+  },
+  "data/powermetrics_picoclaw.txt": {
+    "bytes": 133577,
+    "sha256": "961c2b1020f38e54cc60dfc6ce1cb87ad18bd2fa0e3f1e3b7e8631b204ffc707"
+  },
+  "data/privileged_quiescence.log": {
+    "bytes": 1631,
+    "sha256": "e7884d929e500781fa4d7735223641cf954233e8c80470b7cd04b9ef98a13a81"
+  },
+  "data/results_all.json": {
+    "bytes": 93407,
+    "sha256": "21b67a18eaf1e0f20573ec7f04717a6d290a50fdfed8730cadf12b51e448220e"
+  },
+  "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx": {
+    "bytes": 548781,
+    "sha256": "3360d1291f2afecaec63c546c741ce1425b8c8a8a287802ff97635a0ad243bb9"
+  },
+  "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.pdf": {
+    "bytes": 698580,
+    "sha256": "e67b9a3f67a6e8ec62a57caf154b078e2afe9b3b821f2be1a32b5d8e3988cf54"
+  },
+  "reports/CCM313-EEI203-system-testing-Rafael-Paniccia-Cassetta.docx": {
+    "bytes": 1620374,
+    "sha256": "1aab23c42c022d973e5f7a289206411b265901ea948538bb888d015ab5ac0c19"
+  },
+  "reports/CCM313-EEI203-system-testing-Rafael-Paniccia-Cassetta.pdf": {
+    "bytes": 2378036,
+    "sha256": "26c047a9912fe92d8bccf7efccfe626f71382c4aa58e45b5bbf04cdadcc5678f"
+  },
+  "reports/Guia-Explicativo-e-Defesa-Rafael-Paniccia-Cassetta.docx": {
+    "bytes": 26594,
+    "sha256": "647cb1159b8be1d6270de74842a95fadeb08c4037427d0c7dfdf0e7dc538219b"
+  },
+  "reports/Guia-Explicativo-e-Defesa-Rafael-Paniccia-Cassetta.pdf": {
+    "bytes": 195516,
+    "sha256": "936184817d1550b1059df48070c6b7e19c0409d6eb47fabd965d40b9fd3c7b77"
+  }
+}

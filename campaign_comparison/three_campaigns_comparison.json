@@ -1,0 +1,406 @@
+{
+  "analysis": "Three-Campaign Cross-Validation (Empirical Test Runs 1, 2, and 3)",
+  "hardware": "Apple Mac mini M4, 24 GB UMA",
+  "treatments": {
+    "PicoClaw_W1_Cold": {
+      "t_task_ms": {
+        "campaign_1": 1458.05,
+        "campaign_2": 1446.09,
+        "campaign_3": 1451.72,
+        "grand_mean": 1451.95,
+        "sd": 5.99,
+        "cv_pct": 0.41,
+        "repeatability_score_pct": 99.59
+      },
+      "rss_peak_mb": {
+        "campaign_1": 16.73,
+        "campaign_2": 11.83,
+        "campaign_3": 12.13,
+        "grand_mean": 13.56,
+        "sd": 2.74,
+        "cv_pct": 20.22
+      },
+      "anova_test": {
+        "f_stat": 2.3379,
+        "p_value": 0.1648,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W1_Cold": {
+      "t_task_ms": {
+        "campaign_1": 1693.56,
+        "campaign_2": 1454.23,
+        "campaign_3": 1456.87,
+        "grand_mean": 1534.89,
+        "sd": 137.42,
+        "cv_pct": 8.95,
+        "repeatability_score_pct": 91.05
+      },
+      "rss_peak_mb": {
+        "campaign_1": 184.9,
+        "campaign_2": 87.72,
+        "campaign_3": 87.6,
+        "grand_mean": 120.07,
+        "sd": 56.14,
+        "cv_pct": 46.75
+      },
+      "anova_test": {
+        "f_stat": 0.2497,
+        "p_value": 0.6307,
+        "is_reproducible": true
+      }
+    },
+    "PicoClaw_W1_Warm": {
+      "t_task_ms": {
+        "campaign_1": 1447.76,
+        "campaign_2": 1448.64,
+        "campaign_3": 1470.99,
+        "grand_mean": 1455.79,
+        "sd": 13.17,
+        "cv_pct": 0.9,
+        "repeatability_score_pct": 99.1
+      },
+      "rss_peak_mb": {
+        "campaign_1": 16.42,
+        "campaign_2": 11.7,
+        "campaign_3": 12.06,
+        "grand_mean": 13.39,
+        "sd": 2.63,
+        "cv_pct": 19.61
+      },
+      "anova_test": {
+        "f_stat": 2.1957,
+        "p_value": 0.1767,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W1_Warm": {
+      "t_task_ms": {
+        "campaign_1": 1459.9,
+        "campaign_2": 1461.09,
+        "campaign_3": 1466.82,
+        "grand_mean": 1462.6,
+        "sd": 3.7,
+        "cv_pct": 0.25,
+        "repeatability_score_pct": 99.75
+      },
+      "rss_peak_mb": {
+        "campaign_1": 184.22,
+        "campaign_2": 87.8,
+        "campaign_3": 87.72,
+        "grand_mean": 119.91,
+        "sd": 55.69,
+        "cv_pct": 46.44
+      },
+      "anova_test": {
+        "f_stat": 0.2711,
+        "p_value": 0.6167,
+        "is_reproducible": true
+      }
+    },
+    "PicoClaw_W2_Cold": {
+      "t_task_ms": {
+        "campaign_1": 2896.95,
+        "campaign_2": 2990.64,
+        "campaign_3": 2954.21,
+        "grand_mean": 2947.27,
+        "sd": 47.23,
+        "cv_pct": 1.6,
+        "repeatability_score_pct": 98.4
+      },
+      "rss_peak_mb": {
+        "campaign_1": 21.05,
+        "campaign_2": 14.85,
+        "campaign_3": 14.46,
+        "grand_mean": 16.79,
+        "sd": 3.7,
+        "cv_pct": 22.02
+      },
+      "anova_test": {
+        "f_stat": 0.2018,
+        "p_value": 0.6652,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W2_Cold": {
+      "t_task_ms": {
+        "campaign_1": 3170.18,
+        "campaign_2": 2935.27,
+        "campaign_3": 2956.88,
+        "grand_mean": 3020.78,
+        "sd": 129.84,
+        "cv_pct": 4.3,
+        "repeatability_score_pct": 95.7
+      },
+      "rss_peak_mb": {
+        "campaign_1": 230.17,
+        "campaign_2": 89.98,
+        "campaign_3": 89.79,
+        "grand_mean": 136.65,
+        "sd": 80.99,
+        "cv_pct": 59.27
+      },
+      "anova_test": {
+        "f_stat": 0.4033,
+        "p_value": 0.5431,
+        "is_reproducible": true
+      }
+    },
+    "PicoClaw_W2_Warm": {
+      "t_task_ms": {
+        "campaign_1": 2901.67,
+        "campaign_2": 2929.7,
+        "campaign_3": 2959.28,
+        "grand_mean": 2930.21,
+        "sd": 28.81,
+        "cv_pct": 0.98,
+        "repeatability_score_pct": 99.02
+      },
+      "rss_peak_mb": {
+        "campaign_1": 21.08,
+        "campaign_2": 14.42,
+        "campaign_3": 14.72,
+        "grand_mean": 16.74,
+        "sd": 3.76,
+        "cv_pct": 22.46
+      },
+      "anova_test": {
+        "f_stat": 1.1086,
+        "p_value": 0.3231,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W2_Warm": {
+      "t_task_ms": {
+        "campaign_1": 2950.74,
+        "campaign_2": 2925.17,
+        "campaign_3": 2968.23,
+        "grand_mean": 2948.05,
+        "sd": 21.66,
+        "cv_pct": 0.73,
+        "repeatability_score_pct": 99.27
+      },
+      "rss_peak_mb": {
+        "campaign_1": 230.37,
+        "campaign_2": 89.7,
+        "campaign_3": 90.14,
+        "grand_mean": 136.74,
+        "sd": 81.09,
+        "cv_pct": 59.3
+      },
+      "anova_test": {
+        "f_stat": 1.4914,
+        "p_value": 0.2568,
+        "is_reproducible": true
+      }
+    },
+    "PicoClaw_W3_Cold": {
+      "t_task_ms": {
+        "campaign_1": 5999.48,
+        "campaign_2": 6875.76,
+        "campaign_3": 6163.07,
+        "grand_mean": 6346.11,
+        "sd": 465.93,
+        "cv_pct": 7.34,
+        "repeatability_score_pct": 92.66
+      },
+      "rss_peak_mb": {
+        "campaign_1": 38.55,
+        "campaign_2": 13.93,
+        "campaign_3": 13.55,
+        "grand_mean": 22.01,
+        "sd": 14.33,
+        "cv_pct": 65.11
+      },
+      "anova_test": {
+        "f_stat": 0.9647,
+        "p_value": 0.3816,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W3_Cold": {
+      "t_task_ms": {
+        "campaign_1": 6260.01,
+        "campaign_2": 6171.54,
+        "campaign_3": 6153.73,
+        "grand_mean": 6195.1,
+        "sd": 56.92,
+        "cv_pct": 0.92,
+        "repeatability_score_pct": 99.08
+      },
+      "rss_peak_mb": {
+        "campaign_1": 366.27,
+        "campaign_2": 93.57,
+        "campaign_3": 93.55,
+        "grand_mean": 184.47,
+        "sd": 157.45,
+        "cv_pct": 85.35
+      },
+      "anova_test": {
+        "f_stat": 0.119,
+        "p_value": 0.7475,
+        "is_reproducible": true
+      }
+    },
+    "PicoClaw_W3_Warm": {
+      "t_task_ms": {
+        "campaign_1": 5979.0,
+        "campaign_2": 6100.46,
+        "campaign_3": 6134.09,
+        "grand_mean": 6071.18,
+        "sd": 81.58,
+        "cv_pct": 1.34,
+        "repeatability_score_pct": 98.66
+      },
+      "rss_peak_mb": {
+        "campaign_1": 38.88,
+        "campaign_2": 13.84,
+        "campaign_3": 13.72,
+        "grand_mean": 22.15,
+        "sd": 14.49,
+        "cv_pct": 65.43
+      },
+      "anova_test": {
+        "f_stat": 1.4225,
+        "p_value": 0.2989,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W3_Warm": {
+      "t_task_ms": {
+        "campaign_1": 6049.63,
+        "campaign_2": 6180.11,
+        "campaign_3": 6170.07,
+        "grand_mean": 6133.27,
+        "sd": 72.61,
+        "cv_pct": 1.18,
+        "repeatability_score_pct": 98.82
+      },
+      "rss_peak_mb": {
+        "campaign_1": 365.31,
+        "campaign_2": 93.67,
+        "campaign_3": 94.59,
+        "grand_mean": 184.52,
+        "sd": 156.57,
+        "cv_pct": 84.85
+      },
+      "anova_test": {
+        "f_stat": 0.3843,
+        "p_value": 0.5689,
+        "is_reproducible": true
+      }
+    },
+    "PicoClaw_W4_Cold": {
+      "t_task_ms": {
+        "campaign_1": 22671.57,
+        "campaign_2": 10832.04,
+        "campaign_3": 10913.76,
+        "grand_mean": 14805.79,
+        "sd": 6812.09,
+        "cv_pct": 46.01,
+        "repeatability_score_pct": 53.99
+      },
+      "rss_peak_mb": {
+        "campaign_1": 33.97,
+        "campaign_2": 17.16,
+        "campaign_3": 17.28,
+        "grand_mean": 22.8,
+        "sd": 9.67,
+        "cv_pct": 42.41
+      },
+      "anova_test": {
+        "f_stat": 0.1793,
+        "p_value": 0.7132,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W4_Cold": {
+      "t_task_ms": {
+        "campaign_1": 23164.29,
+        "campaign_2": 12591.73,
+        "campaign_3": 12683.84,
+        "grand_mean": 16146.62,
+        "sd": 6077.66,
+        "cv_pct": 37.64,
+        "repeatability_score_pct": 62.36
+      },
+      "rss_peak_mb": {
+        "campaign_1": 450.8,
+        "campaign_2": 93.12,
+        "campaign_3": 93.83,
+        "grand_mean": 212.58,
+        "sd": 206.3,
+        "cv_pct": 97.05
+      },
+      "anova_test": {
+        "f_stat": 1.4527,
+        "p_value": 0.3514,
+        "is_reproducible": true
+      }
+    },
+    "PicoClaw_W4_Warm": {
+      "t_task_ms": {
+        "campaign_1": 22630.12,
+        "campaign_2": 10842.2,
+        "campaign_3": 10814.52,
+        "grand_mean": 14762.28,
+        "sd": 6813.77,
+        "cv_pct": 46.16,
+        "repeatability_score_pct": 53.84
+      },
+      "rss_peak_mb": {
+        "campaign_1": 33.83,
+        "campaign_2": 16.73,
+        "campaign_3": 16.69,
+        "grand_mean": 22.41,
+        "sd": 9.88,
+        "cv_pct": 44.1
+      },
+      "anova_test": {
+        "f_stat": 0.0283,
+        "p_value": 0.882,
+        "is_reproducible": true
+      }
+    },
+    "OpenClaw_W4_Warm": {
+      "t_task_ms": {
+        "campaign_1": 23024.99,
+        "campaign_2": 13177.81,
+        "campaign_3": 12677.91,
+        "grand_mean": 16293.57,
+        "sd": 5834.93,
+        "cv_pct": 35.81,
+        "repeatability_score_pct": 64.19
+      },
+      "rss_peak_mb": {
+        "campaign_1": 448.33,
+        "campaign_2": 92.7,
+        "campaign_3": 94.73,
+        "grand_mean": 211.92,
+        "sd": 204.74,
+        "cv_pct": 96.61
+      },
+      "anova_test": {
+        "f_stat": 4.6897,
+        "p_value": 0.1627,
+        "is_reproducible": true
+      }
+    }
+  },
+  "poisson_rates": {
+    "picoclaw_w2_tool_rate": {
+      "campaign_1": 327.4,
+      "campaign_2": 603.77,
+      "campaign_3": 567.59,
+      "mean": 499.59,
+      "cv_pct": 30.07
+    },
+    "openclaw_w2_tool_rate": {
+      "campaign_1": 64.4,
+      "campaign_2": 913.79,
+      "campaign_3": 859.11,
+      "mean": 612.43,
+      "cv_pct": 77.62
+    }
+  }
+}

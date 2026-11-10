@@ -1,0 +1,9 @@
+0.04.154.161 I srv  llama_server: initializing ...
+0.04.154.169 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.04.154.553 W srv  server_setup: security: no API key is set and CORS allows all origins (see https://github.com/ggml-org/llama.cpp/pull/25655)
+0.04.156.027 I srv    load_model: loading model '/Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/../picoclaw_vs_openclaw/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf'
+0.05.841.379 I cmn          init: llama threadpool init, n_threads = 4
+0.06.149.561 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 32768, kv_unified = 'false'
+0.06.152.620 I srv  server_run_i: model loaded
+0.06.152.626 I srv  server_on_li: listening on http://127.0.0.1:8080
+0.10.223.769 I srv    operator(): operator(): cleaning up before exit...
