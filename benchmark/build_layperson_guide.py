@@ -6,9 +6,10 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
 
-BASE_DIR = "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw"
-TEMPLATE_PATH = "/Users/rafael/.gemini/antigravity/scratch/CCM313-EEI203-system-testing-template-2026.3.docx"
-OUT_DOCX = os.path.join(BASE_DIR, "Guia-Explicativo-e-Defesa-Rafael-Paniccia-Cassetta.docx")
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEMPLATE_PATH = os.path.join(REPO_DIR, "reports", "template.docx")
+REPORTS_DIR = os.path.join(REPO_DIR, "reports")
+OUT_DOCX = os.path.join(REPORTS_DIR, "Guia-Explicativo-e-Defesa-Rafael-Paniccia-Cassetta.docx")
 
 
 def set_cell_shading(cell, color_hex):

@@ -13,13 +13,14 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import OxmlElement, parse_xml
 from docx.oxml.ns import nsdecls, qn
 
-WORKSPACE = "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw"
-TEMPLATE_PATH = "/Users/rafael/.gemini/antigravity/scratch/CCM313-EEI203-system-testing-template-2026.3.docx"
-BENCH_DIR = os.path.join(WORKSPACE, "benchmark")
-FIG_DIR = os.path.join(WORKSPACE, "figures")
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TEMPLATE_PATH = os.path.join(REPO_DIR, "reports", "template.docx")
+BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
+FIG_DIR = os.path.join(REPO_DIR, "figures")
+REPORTS_DIR = os.path.join(REPO_DIR, "reports")
 
-OUT_SYSTEST_DOCX = os.path.join(WORKSPACE, "CCM313-EEI203-system-testing-Rafael-Paniccia-Cassetta.docx")
-OUT_WORKPLAN_DOCX = os.path.join(WORKSPACE, "CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx")
+OUT_SYSTEST_DOCX = os.path.join(REPORTS_DIR, "CCM313-EEI203-system-testing-Rafael-Paniccia-Cassetta.docx")
+OUT_WORKPLAN_DOCX = os.path.join(REPORTS_DIR, "CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx")
 
 SUCCINCT_TITLE = (
     "PicoClaw vs. OpenClaw: Performance Analysis of Go and TypeScript AI Agents on Apple Silicon M4"

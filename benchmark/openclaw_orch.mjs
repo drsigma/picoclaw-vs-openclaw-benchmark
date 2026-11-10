@@ -8,9 +8,13 @@ import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
 import { performance } from "node:perf_hooks";
+import { fileURLToPath } from "node:url";
 
-const API_URL = "http://127.0.0.1:8080/v1/chat/completions";
-const BASE_DIR = "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/workload_data";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const REPO_DIR = path.resolve(__dirname, "..");
+const API_URL = process.env.LLAMA_API_URL || "http://127.0.0.1:8080/v1/chat/completions";
+const BASE_DIR = process.env.WORKLOAD_DATA_DIR || path.join(REPO_DIR, "data", "workload_data");
 
 function getRSSMB() {
   return process.memoryUsage().rss / (1024.0 * 1024.0);
@@ -284,10 +288,17 @@ async function main() {
   const warmth = process.argv[3] || "Cold";
   const reps = parseInt(process.argv[4] || "1", 10);
   // Load OpenClaw core metadata in memory to match OpenClaw Gateway resident baseline
-  const openclawPkg = fs.readFileSync(
-    "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/tools/openclaw-2026.10.7/package.json",
-    "utf-8"
-  );
+  const pkgCandidates = [
+    path.join(REPO_DIR, "tools", "openclaw-package.json"),
+    path.join(REPO_DIR, "tools", "openclaw-2026.10.7", "package.json")
+  ];
+  let openclawPkg = "";
+  for (const p of pkgCandidates) {
+    if (fs.existsSync(p)) {
+      openclawPkg = fs.readFileSync(p, "utf-8");
+      break;
+    }
+  }
   const rssIdle = getRSSMB() + (openclawPkg.length > 0 ? 0 : 0);
   const results = [];
   for (let i = 0; i < reps; i++) {

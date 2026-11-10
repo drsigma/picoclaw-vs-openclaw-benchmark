@@ -1,0 +1,405 @@
+.TH HYPERFINE 1
+.SH NAME
+hyperfine \- command\-line benchmarking tool
+.SH SYNOPSIS
+.B hyperfine
+.RB [ \-hVNS ]
+.RB [ \-\-ignore\-failure[=MODE] ]
+.RB [ \-\-warmup
+.IR NUM ]
+.RB [ \-\-min\-runs
+.IR NUM ]
+.RB [ \-\-max\-runs
+.IR NUM ]
+.RB [ \-\-runs
+.IR NUM ]
+.RB [ \-\-setup
+.IR CMD ]
+.RB [ \-\-prepare
+.IR CMD ]
+.RB [ \-\-conclude
+.IR CMD ]
+.RB [ \-\-cleanup
+.IR CMD ]
+.RB [ \-\-parameter\-scan
+.IR VAR
+.IR MIN
+.IR MAX ]
+.RB [ \-\-parameter\-step\-size
+.IR DELTA ]
+.RB [ \-\-parameter\-list
+.IR VAR
+.IR VALUES ]
+.RB [ \-\-shell
+.IR SHELL ]
+.RB [ \-\-style
+.IR TYPE ]
+.RB [ \-\-metrics
+.IR METRIC[:UNIT],...|default|time|all ]
+.RB [ \-\-export\-asciidoc
+.IR FILE ]
+.RB [ \-\-export\-csv
+.IR FILE ]
+.RB [ \-\-export\-json
+.IR FILE ]
+.RB [ \-\-export\-markdown
+.IR FILE ]
+.RB [ \-\-export\-orgmode
+.IR FILE ]
+.RB [ \-\-output
+.IR WHERE ]
+.RB [ \-\-input
+.IR WHERE ]
+.RB [ \-\-command\-name
+.IR NAME ]
+.RI [ COMMAND... ]
+.SH DESCRIPTION
+A command\-line benchmarking tool which includes:
+.LP
+.RS
+* Statistical analysis across multiple runs
+.RE
+.RS
+* Support for arbitrary shell commands
+.RE
+.RS
+* Constant feedback about the benchmark progress and current estimates
+.RE
+.RS
+* Warmup runs can be executed before the actual benchmark
+.RE
+.RS
+* Cache-clearing commands can be set up before each benchmark run
+.RE
+.RS
+* Statistical outlier detection to detect interference from other programs and caching effects
+.RE
+.RS
+* Export results to various formats: CSV, JSON, Markdown, AsciiDoc
+.RE
+.RS
+* Parameterized benchmarks (e.g. vary the number of threads)
+.RE
+.SH OPTIONS
+.HP
+\fB\-w\fR, \fB\-\-warmup\fR \fINUM\fP
+.IP
+Perform \fINUM\fP warmup runs before the actual benchmark. This can be used
+to fill (disk) caches for I/O\-heavy programs.
+.HP
+\fB\-m\fR, \fB\-\-min\-runs\fR \fINUM\fP
+.IP
+Perform at least \fINUM\fP runs for each command. Default: 10.
+.HP
+\fB\-M\fR, \fB\-\-max\-runs\fR \fINUM\fP
+.IP
+Perform at most \fINUM\fP runs for each command. By default, there is no
+limit.
+.HP
+\fB\-r\fR, \fB\-\-runs\fR \fINUM\fP
+.IP
+Perform exactly \fINUM\fP runs for each command. If this option is not specified,
+\fBhyperfine\fR automatically determines the number of runs.
+.HP
+\fB\-s\fR, \fB\-\-setup\fR \fICMD...\fP
+.IP
+Execute \fICMD\fP once before each set of benchmark runs. This is useful
+for compiling your software with the provided parameters, or to do any
+other work that should happen once before a series of benchmark runs,
+not every time as would happen with the \fB\-\-prepare\fR option.
+.HP
+\fB\-p\fR, \fB\-\-prepare\fR \fICMD...\fP
+.IP
+Execute \fICMD\fP before each benchmark run. This is useful for clearing disk caches,
+for example.
+The \fB\-\-prepare\fR option can be specified once for all commands or multiple times,
+once for each command. In the latter case, each preparation command will be
+run prior to the corresponding benchmark command.
+.HP
+\fB\-C\fR, \fB\-\-conclude\fR \fICMD...\fP
+.IP
+Execute \fICMD\fP after each benchmark run. This is useful for clearing disk caches,
+for example.
+The \fB\-\-conclude\fR option can be specified once for all commands or multiple times,
+once for each command. In the latter case, each conclusion command will be
+run after the corresponding benchmark command.
+.HP
+\fB\-c\fR, \fB\-\-cleanup\fR \fICMD...\fP
+.IP
+Execute \fICMD\fP after the completion of all benchmarking runs for each individual
+command to be benchmarked. This is useful if the commands to be benchmarked
+produce artifacts that need to be cleaned up. It only runs once per series of
+benchmark runs, as opposed to the \fB\-\-conclude\fR option which runs after
+every run.
+.HP
+\fB\-P\fR, \fB\-\-parameter\-scan\fR \fIVAR\fP \fIMIN\fP \fIMAX\fP
+.IP
+Perform benchmark runs for each value in the range \fIMIN..MAX\fP. Replaces the
+string '{\fIVAR\fP}' in each command by the current parameter value.
+.IP
+.RS
+Example:
+.RS
+\fBhyperfine\fR \fB\-\-prepare\fR 'make clean' \fB\-P\fR threads 1 8 'make \-j {threads}'
+.RE
+.RE
+.IP
+This performs benchmarks for 'make \-j 1', 'make \-j 2', ..., 'make \-j 8'.
+.IP
+To have the value increase following different patterns, use shell
+arithmetic.
+.IP
+.RS
+Example:
+.RS
+\fBhyperfine\fR \fB\-\-shell=bash\fR \fB\-P\fR size 0 3 'sleep $((2**{size}))'
+.RE
+.RE
+.IP
+This performs benchmarks with power of 2 increases: 'sleep 1', 'sleep
+2', 'sleep 4', ...
+.IP
+The exact syntax may vary depending on your shell and OS.
+.HP
+\fB\-D\fR, \fB\-\-parameter\-step\-size\fR \fIDELTA\fP
+.IP
+This argument requires \fB\-\-parameter\-scan\fR to be specified as well. Traverse the
+range \fIMIN..MAX\fP in steps of \fIDELTA\fP, which must be positive.
+.IP
+.RS
+Example:
+.RS
+\fBhyperfine\fR \fB\-P\fR delay 0.3 0.7 \fB\-D\fR 0.2 'sleep {delay}'
+.RE
+.RE
+.IP
+This performs benchmarks for 'sleep 0.3', 'sleep 0.5' and 'sleep 0.7'.
+.HP
+\fB\-L\fR, \fB\-\-parameter\-list\fR \fIVAR\fP \fIVALUES\fP
+.IP
+Perform benchmark runs for each value in the comma\-separated list of \fIVALUES\fP.
+Replaces the string '{\fIVAR\fP}' in each command by the current parameter value.
+.IP
+.RS
+Example:
+.RS
+\fBhyperfine\fR \fB\-L\fR compiler g++,clang++ '{compiler} \-O2 main.cpp'
+.RE
+.RE
+.IP
+This performs benchmarks for 'g++ \-O2 main.cpp' and 'clang++ \-O2 main.cpp'.
+.IP
+The option can be specified multiple times to run benchmarks for all
+possible parameter combinations.
+.HP
+\fB\-\-env\fR \fIASSIGNMENTS\fP
+.IP
+Set environment variables for benchmark commands and their respective setup, prepare, conclude,
+and cleanup commands. Assignments are space-separated and support shell-style quoting,
+but no shell expansion, e.g. \fB\-\-env\fR 'OMP_NUM_THREADS=8 CFLAGS="\-O3 \-march=native"'.
+Specify once for all commands or once per benchmark command, like \fB\-\-prepare\fR.
+Use an empty string for no overrides. Values can contain parameter placeholders.
+.IP
+For example, \fBhyperfine \-P threads 1 8 \-\-env\fR 'OMP_NUM_THREADS={threads}' 'my_command'
+benchmarks 'my_command' with OMP_NUM_THREADS ranging from 1 to 8.
+.HP
+\fB\-\-shell\fR \fISHELL\fP
+.IP
+Set the shell to use for executing benchmarked commands, including warmup runs
+(default: none). This can be the name or the path to the shell executable,
+or a full command line
+like "bash \fB\-\-norc\fR". It can also be set to "default" to explicitly
+select the platform shell (sh on Unix, cmd.exe on Windows). Finally, this can also be
+set to "none" to disable the shell. In this case, benchmarked commands will be
+executed directly. They can still have arguments, but more complex
+things like "sleep 0.1; sleep 0.2" are not possible without a shell.
+Setup, prepare, conclude, and cleanup commands always use a shell: the selected
+shell, or the platform shell when this option is omitted or set to "none".
+.HP
+\fB\-S\fR
+.IP
+An alias for '\-\-shell=default' (sh on Unix, cmd.exe on Windows).
+.HP
+\fB\-N\fR
+.IP
+An alias for '\-\-shell=none'.
+.HP
+\fB\-i\fR, \fB\-\-ignore\-failure\fR[=\fIMODE\fP]
+.IP
+Ignore failures of the benchmarked programs. Without a value or with
+\fBall\-non\-zero\fR, all non\-zero exit codes are ignored.
+Alternatively, provide a comma\-separated list of exit codes to ignore,
+for example \fB\-\-ignore\-failure=1,2\fR.
+An explicit value must be attached to the option with an equals sign.
+.HP
+\fB\-\-style\fR \fITYPE\fP
+.IP
+Set output style \fITYPE\fP (default: auto). Set this to 'basic' to disable output
+coloring and interactive elements. Set it to 'full' to enable all effects even
+if no interactive terminal was detected. Set this to 'nocolor' to keep the
+interactive output without any colors. Set this to 'color' to keep the colors
+without any interactive output. Set this to 'none' to disable all the output
+of the tool.
+.HP
+\fB\-\-metrics\fR \fIMETRIC[:UNIT],...|default|time|all\fP
+.IP
+Select the metrics to measure, in order, with an optional unit for each.
+Default: \fBtime_wall_clock,memory_peak_resident\fR, or \fBtime_wall_clock\fR
+on Windows, where peak resident memory is not yet supported.
+.IP
+Use \fBdefault\fR for the platform defaults, \fBtime\fR for
+\fBtime_wall_clock,time_cpu,time_user,time_system\fR, or \fBall\fR for all available
+metrics in the order listed below.
+.IP
+Time metrics \fBtime_wall_clock\fR, \fBtime_cpu\fR, \fBtime_user\fR, and \fBtime_system\fR
+accept units \fBns\fR, \fBus\fR, \fBms\fR, \fBs\fR, \fBmin\fR, and \fBh\fR.
+Peak memory, \fBmemory_peak_resident\fR, accepts \fBB\fR, \fBkB\fR,
+\fBMB\fR, \fBGB\fR, \fBTB\fR, \fBKiB\fR, \fBMiB\fR, \fBGiB\fR,
+and \fBTiB\fR.
+.IP
+Counter metrics \fBcpu_cycles\fR, \fBinstructions\fR, \fBcache_references\fR,
+\fBcache_misses\fR, and \fBbranch_misses\fR accept \fBcount\fR (unscaled),
+\fBk\fR (thousand), \fBM\fR (million), and \fBB\fR (billion).
+.IP
+If a unit is omitted, terminal and markup output automatically select a suitable
+unit.
+.RS
+Example:
+.RS
+\fBhyperfine\fR \fB\-\-metrics\fR memory_peak_resident:MiB,time_wall_clock:ms,instructions:B './baseline' './candidate'
+.RE
+.RE
+.HP
+\fB\-\-export\-asciidoc\fR \fIFILE\fP 
+.IP
+Export the primary metric's summary statistics as an AsciiDoc table to the given
+\fIFILE\fP. Use its selected unit, or choose a unit automatically when omitted.
+.HP
+\fB\-\-export\-csv\fR \fIFILE\fP
+.IP
+Export summary statistics for all selected metrics as CSV to the given \fIFILE\fP,
+one row per command. Each metric contributes columns for unit, mean, stddev, median,
+min, and max, prefixed with the metric name, in selection order. The command column
+comes first and parameter columns come last. Use the explicitly selected units,
+or base units (seconds, bytes, or unscaled counts) when omitted.
+.HP
+\fB\-\-export\-json\fR \fIFILE\fP
+.IP
+Export summary statistics and individual samples for all collected metrics as
+JSON to the given \fIFILE\fP. Include the primary metric, and always use base
+units (seconds, bytes, or unscaled counts), regardless of display settings.
+.HP
+\fB\-\-export\-markdown\fR \fIFILE\fP
+.IP
+Export the primary metric's summary statistics as a Markdown table to the given
+\fIFILE\fP. Use its selected unit, or choose a unit automatically when omitted.
+.HP
+\fB\-\-export\-orgmode\fR \fIFILE\fP
+.IP
+Export the primary metric's summary statistics as an Emacs org\-mode table to
+the given \fIFILE\fP. Use its selected unit, or choose a unit automatically
+when omitted.
+.HP
+\fB\-\-show\-output\fR
+.IP
+Print the stdout and stderr of the benchmark instead of suppressing it. This
+will increase the time it takes for benchmarks to run, so it should only be
+used for debugging purposes or when trying to benchmark output speed.
+.HP
+\fB\-\-output\fR \fIWHERE\fP
+.IP
+Control where the output of the benchmark is redirected. Note that
+some programs like 'grep' detect when standard output is \fI\,/dev/null\/\fP and
+apply certain optimizations. To avoid that, consider using
+\-\-output=pipe.
+.IP
+\fIWHERE\fP can be:
+.RS
+.IP null
+Redirect output to \fI\,/dev/null\/\fP (the default).
+.IP pipe
+Feed the output through a pipe before discarding it.
+.IP inherit
+Don't redirect the output at all (same as \&'\-\-show\-output').
+.IP "<FILE>"
+Write the output to the given file.
+.RE
+.IP
+This option can be specified once for all commands or multiple times,
+once for each command. Note: If you want to log the output of each and
+every iteration, you can use a shell redirection and the $HYPERFINE_ITERATION
+environment variable (requires \fB\-S\fR / \fB\-\-shell=default\fR):
+'my-command > output-${HYPERFINE_ITERATION}.log'
+.HP
+\fB\-\-input\fR \fIWHERE\fP
+.IP
+Control where the input of the benchmark comes from.
+.IP
+\fIWHERE\fP can be:
+.RS
+.IP null
+Read from \fI\,/dev/null\/\fP (the default).
+.IP "<FILE>"
+Read the input from the given file.
+.RE
+.HP
+\fB\-n\fR, \fB\-\-command\-name\fR \fINAME\fP
+.IP
+Give a meaningful \fINAME\fP to a command. This can be specified multiple times
+if several commands are benchmarked.
+.HP
+\fB\-h\fR, \fB\-\-help\fR
+.IP
+Print help
+.HP
+\fB\-V\fR, \fB\-\-version\fR
+.IP
+Print version
+.SH EXAMPLES
+.LP
+Basic benchmark of 'find . -name todo.txt':
+.RS
+.nf
+\fBhyperfine\fR 'find . -name todo.txt'
+.fi
+.RE
+.LP
+Perform benchmarks for 'sleep 0.2' and 'sleep 3.2' with a minimum 5 runs each:
+.RS
+.nf
+\fBhyperfine\fR \fB\-\-min\-runs\fR 5 'sleep 0.2' 'sleep 3.2'
+.fi
+.RE
+.LP
+Perform a benchmark of 'grep' with a warm disk cache by executing 3 runs up front that are not part
+of the measurement: 
+.RS
+.nf
+\fBhyperfine\fR \fB\-S\fR \fB\-\-warmup\fR 3 'grep -R TODO *'
+.fi
+.RE
+.LP
+Export the results of a parameter scan benchmark to a markdown table: 
+.RS
+.nf
+\fBhyperfine\fR \fB\-\-export\-markdown\fR output.md \fB\-\-parameter-scan\fR time 1 5 'sleep {time}'
+.fi
+.RE
+.LP
+Demonstrate when each of \fB\-\-setup\fR, \fB\-\-prepare\fR, \fB\-\-conclude\fR, \fIcmd\fP and \fB\-\-cleanup\fR will run:
+.RS
+.nf
+\fBhyperfine\fR \fB\-L\fR n 1,2 \fB\-r\fR 2 \fB\-\-show-output\fR \\
+	\fB\-\-setup\fR 'echo setup n={n}' \\
+	\fB\-\-prepare\fR 'echo prepare={n}' \\
+	\fB\-\-conclude\fR 'echo conclude={n}' \\
+	\fB\-\-cleanup\fR 'echo cleanup n={n}' \\
+	'echo command n={n}'
+.fi
+.RE
+.SH AUTHOR
+.LP
+David Peter <mail@david-peter.de>
+.LP
+Source, bug tracker, and additional information can be found on GitHub:
+.I https://github.com/sharkdp/hyperfine

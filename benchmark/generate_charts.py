@@ -11,9 +11,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-WORKSPACE = "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw"
-BENCH_DIR = os.path.join(WORKSPACE, "benchmark")
-FIG_DIR = os.path.join(WORKSPACE, "figures")
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
+FIG_DIR = os.path.join(REPO_DIR, "figures")
+DATA_DIR = os.path.join(REPO_DIR, "data")
 os.makedirs(FIG_DIR, exist_ok=True)
 
 plt.rcParams.update({

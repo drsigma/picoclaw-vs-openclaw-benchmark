@@ -8,7 +8,8 @@ import os
 import random
 import numpy as np
 
-BASE_DIR = "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/workload_data"
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.join(REPO_DIR, "data", "workload_data")
 MOCK_DIR = os.path.join(BASE_DIR, "mock_files")
 LOG_FILE = os.path.join(BASE_DIR, "system_logs.jsonl")
 EMBED_FILE = os.path.join(BASE_DIR, "embedding_head_100k.npz")

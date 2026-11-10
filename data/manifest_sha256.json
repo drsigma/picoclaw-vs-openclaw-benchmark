@@ -1,59 +1,63 @@
 {
+  ".gitignore": {
+    "bytes": 191,
+    "sha256": "11ec4b7d094d71d3b8478c5a07d9c33b43d6992ec734e7c8d02d23f7317a6761"
+  },
   "README.md": {
-    "bytes": 19067,
-    "sha256": "822b8ba49027dadc28d51f36eea2dade459fda960262bc1f0e3cc636c3f6421f"
+    "bytes": 20171,
+    "sha256": "380ec0cef9be945474dced3577a4f33932c5be4484573c89fe0b9943781cfa22"
   },
   "benchmark/build_layperson_guide.py": {
-    "bytes": 20499,
-    "sha256": "5ac592f7b4dbf92f65b155fd018abc23ecb3a9c6f7835baa16d23a9febf8011c"
+    "bytes": 20502,
+    "sha256": "af5d250bcc578ed9b79a91465138746655c6643858988c3d888001c1aea3f8c7"
   },
   "benchmark/build_reports.py": {
-    "bytes": 61652,
-    "sha256": "d0e39b201b4c2939a570bb80641b96a0da91db9d30d44d9b4336517f31fe7653"
+    "bytes": 61653,
+    "sha256": "4dbaf6202731c1f5cc98fefcd248ba4134663a496e4dca294d7ce5fddb786c0d"
   },
   "benchmark/compare_campaigns.py": {
-    "bytes": 15999,
-    "sha256": "2087db7fda6074b786644c0a51b56d4d796d2e924d12b6243e4428476546aeb5"
+    "bytes": 15984,
+    "sha256": "955ba8c98a240cfff9b652c3104851775f574f88796e152e0d0ddd4d842ab7bf"
   },
   "benchmark/generate_charts.py": {
-    "bytes": 22280,
-    "sha256": "e24c2f1996057ac49fd849a6257ceb3da4511f483d15f4d5561bed8bf401b081"
+    "bytes": 22314,
+    "sha256": "9661472d655600e2ad52656abbe61656f8fed72b71a5afdaae0d5c9191ddb6ed"
   },
   "benchmark/generate_datasets.py": {
-    "bytes": 4021,
-    "sha256": "1b30905e16ed0f3abe0655f775577ad66a16280a58f7acd9679ce6645b654be8"
+    "bytes": 4061,
+    "sha256": "27811c3fbe578b0ba4e1b921122d30639da905a937479aa0c8b2f55eeb73e043"
   },
   "benchmark/generate_screenshots.py": {
-    "bytes": 14743,
-    "sha256": "7d4f462f6d01d151ca663d0ab813aed279e66b46a326a2583794481c8b300017"
+    "bytes": 14728,
+    "sha256": "b961e96d85cd284e2c450c0b4ce1f4ae35d858665ecc215148cc858d683dacdd"
   },
   "benchmark/openclaw_orch.mjs": {
-    "bytes": 10196,
-    "sha256": "dc03200241f7e0895f26e7425f29b82adb65d134ee4f5e513d4ac7b7ea0ecd1f"
+    "bytes": 10565,
+    "sha256": "6f8f5a52f1255659ff753228efa3d52be5fc833704ac0be7d3463e25b3cdddd1"
   },
   "benchmark/picoclaw_orch": {
-    "bytes": 8276322,
-    "sha256": "086cc0d4bccf9070a779d01c8d6abbf4e575850ba0c799d63999f1a132875e5f"
+    "bytes": 8292882,
+    "sha256": "7e152462fe8a4d0c7c09adf008803c788f947d9a82214f0b38f7d6407637d445"
   },
   "benchmark/picoclaw_orch.go": {
-    "bytes": 11257,
-    "sha256": "1c4ffe5ac6c02e4941b235e3630cd672daf915d084327355a8d9364bd220d0a7"
+    "bytes": 11776,
+    "sha256": "9141770870d8fe1f46d9da24fd3e9efaa515d2169e78637c939f692e2b40a1f1"
   },
   "benchmark/poisson_sampling_validation.py": {
-    "bytes": 12605,
-    "sha256": "5132c77bbba01d28e59a002bd9b92004c593a699fdbb2ab1dec369e84188fc67"
+    "bytes": 12512,
+    "sha256": "b0570d7c94cb5143618dc5de5e7db1540607725c8971737a33272f1a06af3a02"
   },
   "benchmark/run_all_experiments.py": {
-    "bytes": 22758,
-    "sha256": "7b320f02e0229679ca213e18ec97ab903778c0f3ba936ad99f9bcf25d26363d6"
+    "bytes": 22655,
+    "sha256": "e7dd506bef28478879ac14cbd87e0b7f8b49c03bc2136ae9d5a9167d016d872a"
   },
   "benchmark/run_full_campaign.sh": {
     "bytes": 5200,
     "sha256": "35c9bbc78eba49c98cb2275bb85e0ac21788857626a31e66341c2c5fc54c1576"
   },
   "benchmark/run_live_campaign.py": {
-    "bytes": 11498,
-    "sha256": "602b428a61809471ac56aa45a490c88c7110791ef85bb359983ca8522f9bcde0"
+    "bytes": 11644,
+    "sha256": "148157f31f36fd5a1f904009e30029ffb2323988c20349d37a6b2feda884b1e8"
   },
   "benchmark/setup_environment.sh": {
     "bytes": 5478,
@@ -90,6 +94,322 @@
   "campaign_run_4/summary_campaign_run_4.json": {
     "bytes": 43481,
     "sha256": "46f964fa950ce17ff6185b341e2758c66cffde8feb3bb707e0af248f96e0f799"
+  },
+  "tools/openclaw-package.json": {
+    "bytes": 146246,
+    "sha256": "50f15c94adb967759861663441df3f897cad6dbe799d81e8739b5392ff672daf"
+  },
+  "tools/setup_environment.sh": {
+    "bytes": 3383,
+    "sha256": "70177c615ad93bb7ad3eadebdc12eb7a52d12806b85c1e7eb02d904db9b87808"
+  },
+  "tools/hyperfine/CHANGELOG.md": {
+    "bytes": 22149,
+    "sha256": "5c1925202625be1922ee611d7b3cd1b83e62be0461dc4e9e8569e8e6dcb3165c"
+  },
+  "tools/hyperfine/LICENSE-APACHE": {
+    "bytes": 11357,
+    "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+  },
+  "tools/hyperfine/LICENSE-MIT": {
+    "bytes": 1105,
+    "sha256": "1dfee18c2ff07ce551de4d6a1d2db158c0380746b488a7f0d08c8e0d3568b7c3"
+  },
+  "tools/hyperfine/README.md": {
+    "bytes": 17214,
+    "sha256": "03e31b51fd816c72b12c0f4d7ce9db3245b6a11647a34bea6803caa6b5180353"
+  },
+  "tools/hyperfine/hyperfine": {
+    "bytes": 1183232,
+    "sha256": "dc9f035feaa4f5e25985c0d36a9c1b60985ebd159652908f0ba65a31645ac8dc"
+  },
+  "tools/hyperfine/hyperfine.1": {
+    "bytes": 13052,
+    "sha256": "f812ceb51d386db6a8f8455d2fdc6539c037af42b7b653918edb59340ab3e0dc"
+  },
+  "tools/hyperfine/autocomplete/_hyperfine": {
+    "bytes": 14380,
+    "sha256": "241dce754ea948fbe8b8b46d123c0af7eae2a2045487f8fd90ce882c3304f1ed"
+  },
+  "tools/hyperfine/autocomplete/_hyperfine.ps1": {
+    "bytes": 17245,
+    "sha256": "da6b656f7cf1cf80d2d8b480787ef9b762fe77b85be129350735a65e7a3922db"
+  },
+  "tools/hyperfine/autocomplete/hyperfine.bash": {
+    "bytes": 8874,
+    "sha256": "066c1541fa9fcb4e1a0f1f99e6e0b27837ac70fd97d9d82252934172568959a4"
+  },
+  "tools/hyperfine/autocomplete/hyperfine.fish": {
+    "bytes": 10012,
+    "sha256": "0fcd75cf9da49edf3217e0baab61a2c34c9914b4654984671ef49b6c0b6ce1a4"
+  },
+  "tools/uv/uv": {
+    "bytes": 27897472,
+    "sha256": "7dad6047467a9d6b081c033cb3efed9ba39a4799c698d09e6cd598f3a6a32338"
+  },
+  "tools/uv/uvx": {
+    "bytes": 334512,
+    "sha256": "e34502e6f7204735483527b722dbff2a505fc28a19d8026d2eb3d179fa4a8ad9"
+  },
+  "tools/picoclaw/LICENSE": {
+    "bytes": 1078,
+    "sha256": "c9c1a0955ab365663dce7d5911c1d9e5aa13a1f497cebd5bbacc15bb353a1beb"
+  },
+  "tools/picoclaw/README.md": {
+    "bytes": 31672,
+    "sha256": "97f323708fdde04eb4d7900f7a18ef55db5bc18fa247d0344e5b2952bded6d6c"
+  },
+  "tools/picoclaw/picoclaw": {
+    "bytes": 36110929,
+    "sha256": "21eea14198031fa86811c3d8d86957c0d07ff975fed61c99aa56ada6815c42c1"
+  },
+  "tools/picoclaw/picoclaw-launcher": {
+    "bytes": 23224567,
+    "sha256": "f3e28860311cd90f3ca436877759387fb0b7f632d89410598fbc1846e3f9c131"
+  },
+  "tools/llama_cpp/llama-b11887/LICENSE": {
+    "bytes": 1078,
+    "sha256": "94f29bbed6a22c35b992c5c6ebf0e7c92f13b836b90f36f461c9cf2f0f1d010d"
+  },
+  "tools/llama_cpp/llama-b11887/ggml-metal-tuning": {
+    "bytes": 87696,
+    "sha256": "72162323fcee7d7889190899ca69ddbc1423c29e5f1f502e9bfd6dad003d8317"
+  },
+  "tools/llama_cpp/llama-b11887/ggml-rpc-server": {
+    "bytes": 133136,
+    "sha256": "e5e80be949739e616bd11ec7bee841e80d22c11af0e5945bf987cff6e8e6daff"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-base.0.27.0.dylib": {
+    "bytes": 751928,
+    "sha256": "82237db85ac803c42493de7e960f5c0362524fe17588f16892f3e21b70991744"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-base.0.dylib": {
+    "bytes": 751928,
+    "sha256": "82237db85ac803c42493de7e960f5c0362524fe17588f16892f3e21b70991744"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-base.dylib": {
+    "bytes": 751928,
+    "sha256": "82237db85ac803c42493de7e960f5c0362524fe17588f16892f3e21b70991744"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-blas.0.27.0.dylib": {
+    "bytes": 58776,
+    "sha256": "12aefdc8dd4873d69554dc85a0dd09fffef9828e1fc9ecf6b48913ef2106b33a"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-blas.0.dylib": {
+    "bytes": 58776,
+    "sha256": "12aefdc8dd4873d69554dc85a0dd09fffef9828e1fc9ecf6b48913ef2106b33a"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-blas.dylib": {
+    "bytes": 58776,
+    "sha256": "12aefdc8dd4873d69554dc85a0dd09fffef9828e1fc9ecf6b48913ef2106b33a"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-cpu.0.27.0.dylib": {
+    "bytes": 941136,
+    "sha256": "6ce8068c5b452fb9ee9aaf0b79593b071c082f8318e40ddf4c80a1dbc3e2769c"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-cpu.0.dylib": {
+    "bytes": 941136,
+    "sha256": "6ce8068c5b452fb9ee9aaf0b79593b071c082f8318e40ddf4c80a1dbc3e2769c"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-cpu.dylib": {
+    "bytes": 941136,
+    "sha256": "6ce8068c5b452fb9ee9aaf0b79593b071c082f8318e40ddf4c80a1dbc3e2769c"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-metal.0.27.0.dylib": {
+    "bytes": 5604280,
+    "sha256": "538d8bde211aafd5e00dc177c5f3b7e1e4acbf43136dbe7e65f9c6fdd0c01c09"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-metal.0.dylib": {
+    "bytes": 5604280,
+    "sha256": "538d8bde211aafd5e00dc177c5f3b7e1e4acbf43136dbe7e65f9c6fdd0c01c09"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-metal.dylib": {
+    "bytes": 5604280,
+    "sha256": "538d8bde211aafd5e00dc177c5f3b7e1e4acbf43136dbe7e65f9c6fdd0c01c09"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-rpc.0.27.0.dylib": {
+    "bytes": 242800,
+    "sha256": "0721927b159bb86b6be6c88bffdac6ee566d31fee6d15f89d31996e4d25ef558"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-rpc.0.dylib": {
+    "bytes": 242800,
+    "sha256": "0721927b159bb86b6be6c88bffdac6ee566d31fee6d15f89d31996e4d25ef558"
+  },
+  "tools/llama_cpp/llama-b11887/libggml-rpc.dylib": {
+    "bytes": 242800,
+    "sha256": "0721927b159bb86b6be6c88bffdac6ee566d31fee6d15f89d31996e4d25ef558"
+  },
+  "tools/llama_cpp/llama-b11887/libggml.0.27.0.dylib": {
+    "bytes": 60016,
+    "sha256": "a97bc40525aea78834fdf28197b5b21f149b6d5ac2d3b615b95b86f775a69477"
+  },
+  "tools/llama_cpp/llama-b11887/libggml.0.dylib": {
+    "bytes": 60016,
+    "sha256": "a97bc40525aea78834fdf28197b5b21f149b6d5ac2d3b615b95b86f775a69477"
+  },
+  "tools/llama_cpp/llama-b11887/libggml.dylib": {
+    "bytes": 60016,
+    "sha256": "a97bc40525aea78834fdf28197b5b21f149b6d5ac2d3b615b95b86f775a69477"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-batched-bench-impl.dylib": {
+    "bytes": 56576,
+    "sha256": "c744b854dc54b7309e691330729346aedcf5158c8d7e72204958cf2991ccc733"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-bench-impl.dylib": {
+    "bytes": 323016,
+    "sha256": "29d28dec19ac4cadff020c8f29d545fa51fcb538226ba92173b350b2254c8cce"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-cli-impl.dylib": {
+    "bytes": 255144,
+    "sha256": "f4e4a1582ab4f418a59235bb5e338babca9287fdc04dcdf06db0756674137db6"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-common.0.7.0.dylib": {
+    "bytes": 7979864,
+    "sha256": "4c1a98ef0ecf46d74646bdd325750e7042f9f55d5058747431bd5543921dee9b"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-common.0.dylib": {
+    "bytes": 7979864,
+    "sha256": "4c1a98ef0ecf46d74646bdd325750e7042f9f55d5058747431bd5543921dee9b"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-common.dylib": {
+    "bytes": 7979864,
+    "sha256": "4c1a98ef0ecf46d74646bdd325750e7042f9f55d5058747431bd5543921dee9b"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-completion-impl.dylib": {
+    "bytes": 121680,
+    "sha256": "5985895f032595021502960961d19a4cdb7d8f95181469ae25abe1078a4506ee"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-fit-params-impl.dylib": {
+    "bytes": 55264,
+    "sha256": "0414b02a71930f61e93ed78ceacdb3b76b6b2403e464adea927d4655bd2751df"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-perplexity-impl.dylib": {
+    "bytes": 156384,
+    "sha256": "208ef689572ac925d4b83a9f8cf9482da29ee7f213517fb9712f713ee49e5596"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-quantize-impl.dylib": {
+    "bytes": 96496,
+    "sha256": "582dadbf515289d7a5dd5aa27be5fdcbe58cad0a2eb4eaa72a15087ad9d26864"
+  },
+  "tools/llama_cpp/llama-b11887/libllama-server-impl.dylib": {
+    "bytes": 9535176,
+    "sha256": "14a7e3fcea9896998f5e4012a294379d91f8c786287d978adab3643f9fb398f7"
+  },
+  "tools/llama_cpp/llama-b11887/libllama.0.7.0.dylib": {
+    "bytes": 3632576,
+    "sha256": "20d5c5f2f4d03704eae74450c01c8719ac01499d65aca09e46ad05800a008137"
+  },
+  "tools/llama_cpp/llama-b11887/libllama.0.dylib": {
+    "bytes": 3632576,
+    "sha256": "20d5c5f2f4d03704eae74450c01c8719ac01499d65aca09e46ad05800a008137"
+  },
+  "tools/llama_cpp/llama-b11887/libllama.dylib": {
+    "bytes": 3632576,
+    "sha256": "20d5c5f2f4d03704eae74450c01c8719ac01499d65aca09e46ad05800a008137"
+  },
+  "tools/llama_cpp/llama-b11887/libmtmd.0.7.0.dylib": {
+    "bytes": 1518304,
+    "sha256": "727613f176a7673c5092feaa62d188966d587d4344d07c000434207e39b4f83e"
+  },
+  "tools/llama_cpp/llama-b11887/libmtmd.0.dylib": {
+    "bytes": 1518304,
+    "sha256": "727613f176a7673c5092feaa62d188966d587d4344d07c000434207e39b4f83e"
+  },
+  "tools/llama_cpp/llama-b11887/libmtmd.dylib": {
+    "bytes": 1518304,
+    "sha256": "727613f176a7673c5092feaa62d188966d587d4344d07c000434207e39b4f83e"
+  },
+  "tools/llama_cpp/llama-b11887/llama": {
+    "bytes": 107320,
+    "sha256": "f87c0b41aec41dc87134ac443fedc0d87b332e69261f71c275a1aebb79731f44"
+  },
+  "tools/llama_cpp/llama-b11887/llama-batched-bench": {
+    "bytes": 33488,
+    "sha256": "64f9f09bd2bf1f9f2e9748e36a4dc802704ce8c3fa20eddfc314c6bebd3006a0"
+  },
+  "tools/llama_cpp/llama-b11887/llama-bench": {
+    "bytes": 33464,
+    "sha256": "8e381bc0e4463985ccf1425e3628566664992230d545d4db0482f58482a4fb45"
+  },
+  "tools/llama_cpp/llama-b11887/llama-cli": {
+    "bytes": 49960,
+    "sha256": "67b08224c590a337389e8b46a8d6e49902b959be9922e572ffd81645bac1b084"
+  },
+  "tools/llama_cpp/llama-b11887/llama-completion": {
+    "bytes": 33472,
+    "sha256": "2b14c5f6bf13aec0118c0917797178d1300d85f8b8321a301fc8fc206c38a934"
+  },
+  "tools/llama_cpp/llama-b11887/llama-connect": {
+    "bytes": 8251536,
+    "sha256": "a2e54e1198276037f05882b5142641cd4c55c7fbdd748fcb10a4a8109c723d59"
+  },
+  "tools/llama_cpp/llama-b11887/llama-cvector-generator": {
+    "bytes": 102296,
+    "sha256": "8ac3d8366b742c959ae07b4697b63fae5ad1fca6dcb0cdf778cb881fcec01555"
+  },
+  "tools/llama_cpp/llama-b11887/llama-export-lora": {
+    "bytes": 99856,
+    "sha256": "dc72d2835da270c6ccf2118006fb8aa52f29db43021a9484c08cbaceb6fc64ea"
+  },
+  "tools/llama_cpp/llama-b11887/llama-fit-params": {
+    "bytes": 33472,
+    "sha256": "ceb4c943e71f731a60cbdb351928999822cd973b261b160c89e245b16fe8ba61"
+  },
+  "tools/llama_cpp/llama-b11887/llama-gemma3-cli": {
+    "bytes": 35344,
+    "sha256": "f7f9126b0881654bdb4c9ceab6de40f42e31998fa0c775505b5979ef7e8e567e"
+  },
+  "tools/llama_cpp/llama-b11887/llama-gguf-split": {
+    "bytes": 59952,
+    "sha256": "2d3a3c644c370a976a36011b5bc49335306fa84bf3194732bfaa053e547b2d7b"
+  },
+  "tools/llama_cpp/llama-b11887/llama-imatrix": {
+    "bytes": 206320,
+    "sha256": "f52f441d70d14c66aa3ab7fdc769150b5c7e38d6fa22cca9593ca9b5925b7792"
+  },
+  "tools/llama_cpp/llama-b11887/llama-llava-cli": {
+    "bytes": 35344,
+    "sha256": "9a77293c34faa94ae6955f9b1da3dca9fa55cf09fcd0fff87c96f5ec44b9d547"
+  },
+  "tools/llama_cpp/llama-b11887/llama-minicpmv-cli": {
+    "bytes": 35344,
+    "sha256": "4baffe08bb410686ee032b1b2ff9a948bbde3fdc014dddf750f36978e3b40589"
+  },
+  "tools/llama_cpp/llama-b11887/llama-mtmd-cli": {
+    "bytes": 103680,
+    "sha256": "bc21c2164785cd1698915f3c1b33bf5d046c51d714eb9b5ffbbb03ae6d9ba63f"
+  },
+  "tools/llama_cpp/llama-b11887/llama-mtmd-debug": {
+    "bytes": 75824,
+    "sha256": "399a322d951dee878983db23b4b7c5d9a87a078d11208fcc9b72f80e79bcbf7e"
+  },
+  "tools/llama_cpp/llama-b11887/llama-perplexity": {
+    "bytes": 33472,
+    "sha256": "2efff38c7c52e14a9d9ba0d34319a572b514c79d1fb5f7804fbf87ae061980c4"
+  },
+  "tools/llama_cpp/llama-b11887/llama-quantize": {
+    "bytes": 33472,
+    "sha256": "88a670a6136af2b1877305ece7e92fe470078a2425986b68ea25f886ddc9685b"
+  },
+  "tools/llama_cpp/llama-b11887/llama-qwen2vl-cli": {
+    "bytes": 35344,
+    "sha256": "9be4a36b2587c0216009b1ed59ac79b1e4dd2e885f326e8aeffac8aa37761d31"
+  },
+  "tools/llama_cpp/llama-b11887/llama-results": {
+    "bytes": 58912,
+    "sha256": "6eb2a8aef2b5a214df88caa0dd3f7cb49dad311e704cb9ed479115c879c79d74"
+  },
+  "tools/llama_cpp/llama-b11887/llama-server": {
+    "bytes": 49984,
+    "sha256": "981b460a278e9a0c880cef32d6fab42785a119084456b16845304cf38c32cf69"
+  },
+  "tools/llama_cpp/llama-b11887/llama-tokenize": {
+    "bytes": 58736,
+    "sha256": "7a7bb77fe0e36e37fb7e3ead2131f2d7d23bcce89f9597de5e8d5cb12aa33cbe"
+  },
+  "tools/llama_cpp/llama-b11887/llama-tts": {
+    "bytes": 57608,
+    "sha256": "ed4cf8c35c3e3fd20418eaaad9debaf9cca227b02c9fa3afd8ebc79e190e0cc6"
   },
   "screenshots/print_screen_01_llama_server.png": {
     "bytes": 66824,
@@ -199,10 +519,6 @@
     "bytes": 133577,
     "sha256": "961c2b1020f38e54cc60dfc6ce1cb87ad18bd2fa0e3f1e3b7e8631b204ffc707"
   },
-  "campaign_run_1/privileged_quiescence.log": {
-    "bytes": 1631,
-    "sha256": "e7884d929e500781fa4d7735223641cf954233e8c80470b7cd04b9ef98a13a81"
-  },
   "campaign_run_1/summary_campaign_run_1.json": {
     "bytes": 93407,
     "sha256": "21b67a18eaf1e0f20573ec7f04717a6d290a50fdfed8730cadf12b51e448220e"
@@ -255,10 +571,6 @@
     "bytes": 323986,
     "sha256": "c74f1d7aa8de95b2ad1533fe178ded76a134695246200d1649c7cb1e20a3afba"
   },
-  "data/llama_server_stdout.log": {
-    "bytes": 854,
-    "sha256": "d85a6b346d862a95726b12a4cd4235a34fc540f08ee8e58b5aad005d57bb83fd"
-  },
   "data/pm_open_run.json": {
     "bytes": 416,
     "sha256": "c32c08f976a3117eda5031c926aff41f53fc927f6a724ae9421d5a5d59b6474f"
@@ -287,13 +599,221 @@
     "bytes": 133577,
     "sha256": "961c2b1020f38e54cc60dfc6ce1cb87ad18bd2fa0e3f1e3b7e8631b204ffc707"
   },
-  "data/privileged_quiescence.log": {
-    "bytes": 1631,
-    "sha256": "e7884d929e500781fa4d7735223641cf954233e8c80470b7cd04b9ef98a13a81"
-  },
   "data/results_all.json": {
     "bytes": 93407,
     "sha256": "21b67a18eaf1e0f20573ec7f04717a6d290a50fdfed8730cadf12b51e448220e"
+  },
+  "data/workload_data/embedding_head_100k.npz": {
+    "bytes": 15755522,
+    "sha256": "fa58192f64d329ed882754c0e0c9fdce1d85e372d98c70cd217c643adb1f2886"
+  },
+  "data/workload_data/rag_chunks_10k.json": {
+    "bytes": 139852,
+    "sha256": "6d7a847fe0030872b614797a6fbda7e5145a5bcc029c73904a4f080259497382"
+  },
+  "data/workload_data/system_logs.jsonl": {
+    "bytes": 150927,
+    "sha256": "b5e688b97c05cd19105d68defaed9169f1919774b3f852817fa62d9456deaf27"
+  },
+  "data/workload_data/mock_files/service_node_00.conf": {
+    "bytes": 95,
+    "sha256": "06ba120449c5f3983cdf7c48f26ae911ab0661bd3f4ecfeb78d3c80b84413ef7"
+  },
+  "data/workload_data/mock_files/service_node_01.conf": {
+    "bytes": 94,
+    "sha256": "e33613f24e0ef61b1caf242b85e6aefb5eb7239dbb9e1b256680f76da747a843"
+  },
+  "data/workload_data/mock_files/service_node_02.conf": {
+    "bytes": 94,
+    "sha256": "8857b6c0b89d87031b8a6d2b7f3d6255514e02fa7935012c799fa5837997ecd2"
+  },
+  "data/workload_data/mock_files/service_node_03.conf": {
+    "bytes": 94,
+    "sha256": "f8afdaa3260f00318e6ab4c98d9a8e87d7dd2f4482615e979bf13c025b04814a"
+  },
+  "data/workload_data/mock_files/service_node_04.conf": {
+    "bytes": 94,
+    "sha256": "f1a59949c602d5a59772600ad64b3804cd14b28fed2d89d2fc0b1815d659f3fd"
+  },
+  "data/workload_data/mock_files/service_node_05.conf": {
+    "bytes": 95,
+    "sha256": "4da0d1b3b2f7ae7e0ea83ccfa3c6974b8c5105bba24f4f88b233ea51bb823d89"
+  },
+  "data/workload_data/mock_files/service_node_06.conf": {
+    "bytes": 94,
+    "sha256": "161ff810143ca480c5ea22db697a53819372142ca143d953b46b4ea55b379d07"
+  },
+  "data/workload_data/mock_files/service_node_07.conf": {
+    "bytes": 94,
+    "sha256": "e6a9efbf1ef29db1c94972941fee81339c9e86b7c381e545338bea5cd027a46b"
+  },
+  "data/workload_data/mock_files/service_node_08.conf": {
+    "bytes": 94,
+    "sha256": "a5a9ac595b516f6512bf1bb7098f18a52f7891decbeeb034352863576d1226ed"
+  },
+  "data/workload_data/mock_files/service_node_09.conf": {
+    "bytes": 94,
+    "sha256": "2cfa47332943aad20f19ca4300bd4459c959c4f51aef1d76531b6429602b6a40"
+  },
+  "data/workload_data/mock_files/service_node_10.conf": {
+    "bytes": 95,
+    "sha256": "76a7f4e42d5165b1bc84ef283e0a68b34c884f5ce90b9d9d02d976d664b972be"
+  },
+  "data/workload_data/mock_files/service_node_11.conf": {
+    "bytes": 94,
+    "sha256": "e9c722fb3adc1befc40b9770b9cde668c1e82b57fb0efd36933829d8b5bbf2cb"
+  },
+  "data/workload_data/mock_files/service_node_12.conf": {
+    "bytes": 94,
+    "sha256": "d1fd9b8b8130b8fd1b1802a282ec72c2b7c4aedb20800453b839b2edafc71e7c"
+  },
+  "data/workload_data/mock_files/service_node_13.conf": {
+    "bytes": 94,
+    "sha256": "83fe044a0c5d3de2c8a1fdac2a6a77a9f3103fb07839748134797444e224260b"
+  },
+  "data/workload_data/mock_files/service_node_14.conf": {
+    "bytes": 94,
+    "sha256": "ffba9e0f40af27dee15a38f4d8c72da4b7b36ac7b8db38b02404659ab8d63ab8"
+  },
+  "data/workload_data/mock_files/service_node_15.conf": {
+    "bytes": 95,
+    "sha256": "aae8fe2c00f7708ed47e431119deda76bdfbe319b637a40b2c2521a7ac5ae80c"
+  },
+  "data/workload_data/mock_files/service_node_16.conf": {
+    "bytes": 94,
+    "sha256": "a7559baa596ceb8a9336a3fd2f9c41f18d12d07be4ad88b1d0fa95093e13855b"
+  },
+  "data/workload_data/mock_files/service_node_17.conf": {
+    "bytes": 94,
+    "sha256": "75ed864cdccdad408b1e56b2bd8efd4385e036c4e6b671a0e89c676fc4ea026e"
+  },
+  "data/workload_data/mock_files/service_node_18.conf": {
+    "bytes": 94,
+    "sha256": "4c367fdfc8374a3831d0194e5028755aae1d650fb97900dffe677756da049d53"
+  },
+  "data/workload_data/mock_files/service_node_19.conf": {
+    "bytes": 94,
+    "sha256": "6551f293f4d78012ca57217b45b0fc4a560573ed78f553c176fc80dfa73f8c67"
+  },
+  "data/workload_data/mock_files/service_node_20.conf": {
+    "bytes": 95,
+    "sha256": "6249e8c75bb57b6f3d22de5f226e6bb6089aea9fce3084cd9cae9deb58ed3ccf"
+  },
+  "data/workload_data/mock_files/service_node_21.conf": {
+    "bytes": 94,
+    "sha256": "8cbfbbdee9fe6577482ae0d6873abe1b632f2e09159b3c3d4e4451acd4192527"
+  },
+  "data/workload_data/mock_files/service_node_22.conf": {
+    "bytes": 94,
+    "sha256": "7ec0c7da196882fcc567f99b702e3195a2223a6df13dfd112caee0f532c4fcb3"
+  },
+  "data/workload_data/mock_files/service_node_23.conf": {
+    "bytes": 94,
+    "sha256": "a569664d858fd4f93fe7e844f454db880de95b158cb8067a35cbe03748794fbe"
+  },
+  "data/workload_data/mock_files/service_node_24.conf": {
+    "bytes": 94,
+    "sha256": "2d5a03f84cdabb726b4f7160538650f970cbf94276f46b91b018b9d1c8e1549b"
+  },
+  "data/workload_data/mock_files/service_node_25.conf": {
+    "bytes": 95,
+    "sha256": "d029496e309e51727da1f4e13e9ac0e99995b8aabf7cda9508c68796e94fea41"
+  },
+  "data/workload_data/mock_files/service_node_26.conf": {
+    "bytes": 94,
+    "sha256": "bf3b1ee82b1a1c1dc5f89b322a44c64a3533c87ff549046d30e542bf8b7b12d1"
+  },
+  "data/workload_data/mock_files/service_node_27.conf": {
+    "bytes": 94,
+    "sha256": "1008dff1b60ee62ef41c8a73612e3b0606c5cbeb7c9b5db8494969988428cb90"
+  },
+  "data/workload_data/mock_files/service_node_28.conf": {
+    "bytes": 94,
+    "sha256": "18e6cf6605e62471916cef5102090f6bb896e7c7624c29ab72cbf7c7e8bbce5a"
+  },
+  "data/workload_data/mock_files/service_node_29.conf": {
+    "bytes": 94,
+    "sha256": "61ed1a6671f71a94f05a927ec03545866c1c0b1e63722e23a5218f6b31ad1982"
+  },
+  "data/workload_data/mock_files/service_node_30.conf": {
+    "bytes": 95,
+    "sha256": "5b49004efdc5c935d1c763e516f19a4421903181cbe233c981601ca45738a9a3"
+  },
+  "data/workload_data/mock_files/service_node_31.conf": {
+    "bytes": 95,
+    "sha256": "d07b576a381d14ebfb5b4d70920676d2166fa204c18e62bc75f69354ceb1f77b"
+  },
+  "data/workload_data/mock_files/service_node_32.conf": {
+    "bytes": 95,
+    "sha256": "ad17756b56c69689dab043c0931b5fcd00fa05d70af02a10947897fa341d9dec"
+  },
+  "data/workload_data/mock_files/service_node_33.conf": {
+    "bytes": 95,
+    "sha256": "86f7c4d38dbb65f80c0192f69adf2c0270b9e1f3229b950b74cb3e67f0dc9b69"
+  },
+  "data/workload_data/mock_files/service_node_34.conf": {
+    "bytes": 95,
+    "sha256": "7bfc5d3143d977ce6038bbafa035c83eaae211c89b57c95d357ca7de47009ea2"
+  },
+  "data/workload_data/mock_files/service_node_35.conf": {
+    "bytes": 96,
+    "sha256": "55e3b84c5fe385c7cf061ea86a55e2c6fc25581ee989670d57e884146a1ade83"
+  },
+  "data/workload_data/mock_files/service_node_36.conf": {
+    "bytes": 95,
+    "sha256": "b0cbee83e95f2c27b258b0540f32156af2b882238c43fff628d260517d7dab39"
+  },
+  "data/workload_data/mock_files/service_node_37.conf": {
+    "bytes": 95,
+    "sha256": "3a47f7ab913ae96d333696fffd774192200089ffb90ee83122cb560acfeb9d68"
+  },
+  "data/workload_data/mock_files/service_node_38.conf": {
+    "bytes": 95,
+    "sha256": "6bec06a7745b65c60722345ce1712b3597a5253cece83e26d7857528412d85d5"
+  },
+  "data/workload_data/mock_files/service_node_39.conf": {
+    "bytes": 95,
+    "sha256": "713443244fe937749301222d784ee33bb0e75dfbd6f1d72d5913902da98954ca"
+  },
+  "data/workload_data/mock_files/service_node_40.conf": {
+    "bytes": 96,
+    "sha256": "a195f8e1cbb508b037acf354c65764d4654b5e69b658d42420482d93c12a8769"
+  },
+  "data/workload_data/mock_files/service_node_41.conf": {
+    "bytes": 95,
+    "sha256": "fece213660a59559ba981e7048073a9acf626205894a7391a94052a8bfe8a234"
+  },
+  "data/workload_data/mock_files/service_node_42.conf": {
+    "bytes": 95,
+    "sha256": "cc6088d232742dee2d1d7db2850cdfa3bd03cf3de4b6874471a90f8cfa0bbd4b"
+  },
+  "data/workload_data/mock_files/service_node_43.conf": {
+    "bytes": 95,
+    "sha256": "acb68d9f590d9126e7be25258bdc1609d8470a8f3916623dc71dbb98307af861"
+  },
+  "data/workload_data/mock_files/service_node_44.conf": {
+    "bytes": 95,
+    "sha256": "bfca9d5b7d7a47840c406563395a52000a36d2b197d35c3aef6acb18e8350625"
+  },
+  "data/workload_data/mock_files/service_node_45.conf": {
+    "bytes": 96,
+    "sha256": "eca7e9de9d18dd99edbfc4bb791d93a083d0e4701e3bee5d4273a3b3365aa1e6"
+  },
+  "data/workload_data/mock_files/service_node_46.conf": {
+    "bytes": 95,
+    "sha256": "6ec015d286dc8e0cfbc8014a230dea3da3425a4750eb380352059c174f504992"
+  },
+  "data/workload_data/mock_files/service_node_47.conf": {
+    "bytes": 95,
+    "sha256": "327a3ec111b68e64736ccd7525e5d5a095af7e0921e4deb9b7ae9daf0fc71347"
+  },
+  "data/workload_data/mock_files/service_node_48.conf": {
+    "bytes": 95,
+    "sha256": "a0cd4737f38b50a2ae6df4ba9f850ca0340973179e906826c6239452549fafec"
+  },
+  "data/workload_data/mock_files/service_node_49.conf": {
+    "bytes": 95,
+    "sha256": "73ebc244cfac9509e99973d769909b54e261a5aa34a2e2aa3ef2b1ba7b9cb11a"
   },
   "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx": {
     "bytes": 548781,
@@ -318,5 +838,9 @@
   "reports/Guia-Explicativo-e-Defesa-Rafael-Paniccia-Cassetta.pdf": {
     "bytes": 195516,
     "sha256": "936184817d1550b1059df48070c6b7e19c0409d6eb47fabd965d40b9fd3c7b77"
+  },
+  "reports/template.docx": {
+    "bytes": 21323,
+    "sha256": "a47f48ae1f33332139b6fb33c9d715823a371579b131621561a5de90af34656a"
   }
 }

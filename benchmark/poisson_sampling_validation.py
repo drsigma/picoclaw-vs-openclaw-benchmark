@@ -12,9 +12,8 @@ import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
 
-WORKSPACE = "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw"
-REPO_DIR = "/Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark"
-BENCH_DIR = os.path.join(WORKSPACE, "benchmark")
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
 DATA_DIR = os.path.join(REPO_DIR, "data")
 FIG_DIR = os.path.join(REPO_DIR, "figures")
 

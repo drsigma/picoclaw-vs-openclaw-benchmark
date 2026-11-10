@@ -45,24 +45,28 @@ Both orchestrators interface with a unified local neural server via **llama.cpp 
 
 #### 2. Como Reproduzir os Testes na Sua Máquina
 ```bash
-# 1. Navegar até o repositório
-cd /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark
+# 1. Clonar e entrar no repositório
+git clone git@github.com:drsigma/picoclaw-vs-openclaw-benchmark.git
+cd picoclaw-vs-openclaw-benchmark
 
-# 2. Verificar integridade criptográfica SHA-256 de todos os 80 arquivos
-/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/.venv/bin/python -c '
+# 2. Configurar o ambiente em 1 clique (provisiona Python, Node.js e ferramentas embarcadas)
+./tools/setup_environment.sh
+
+# 3. Verificar integridade criptográfica SHA-256 de todos os arquivos
+./tools/.venv/bin/python -c '
 import json, hashlib, os
 m = json.load(open("data/manifest_sha256.json"))
 ok = sum(1 for p, meta in m.items() if os.path.exists(p) and hashlib.sha256(open(p, "rb").read()).hexdigest() == meta["sha256"])
 print(f"Verificação Concluída: {ok}/{len(m)} arquivos íntegros (0 falhas).")
 '
 
-# 3. Executar o motor estatístico de Poisson (Assertividade >= 90%)
-/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/.venv/bin/python benchmark/poisson_sampling_validation.py
+# 4. Executar o motor estatístico de Poisson (Assertividade >= 90%)
+./tools/.venv/bin/python benchmark/poisson_sampling_validation.py
 
-# 4. Executar uma nova bateria física completa na GPU Metal
-/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/.venv/bin/python benchmark/run_live_campaign.py campaign_run_6 ./campaign_run_6
+# 5. Executar uma nova bateria física completa na GPU Metal
+./tools/.venv/bin/python benchmark/run_live_campaign.py campaign_run_6 ./campaign_run_6
 
-# 5. Visualizar o gráfico comparativo das 5 campanhas
+# 6. Visualizar o gráfico comparativo das 5 campanhas
 open figures/fig8_three_campaigns_reproducibility.png
 ```
 
@@ -80,20 +84,25 @@ open figures/fig8_three_campaigns_reproducibility.png
 
 #### 2. How to Replicate Locally
 ```bash
-cd /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark
+# 1. Clone and enter repository
+git clone git@github.com:drsigma/picoclaw-vs-openclaw-benchmark.git
+cd picoclaw-vs-openclaw-benchmark
 
-# Validate SHA-256 cryptographic signatures
-/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/.venv/bin/python -c '
+# 2. Automated 1-click testbed setup (provisions Python, Node.js, and embedded tools)
+./tools/setup_environment.sh
+
+# 3. Validate SHA-256 cryptographic signatures
+./tools/.venv/bin/python -c '
 import json, hashlib, os
 m = json.load(open("data/manifest_sha256.json"))
 ok = sum(1 for p, meta in m.items() if os.path.exists(p) and hashlib.sha256(open(p, "rb").read()).hexdigest() == meta["sha256"])
 print(f"Verified {ok}/{len(m)} files matching SHA-256 signatures.")
 '
 
-# Run Poisson validation engine
-/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/.venv/bin/python benchmark/poisson_sampling_validation.py
+# 4. Run Poisson validation engine
+./tools/.venv/bin/python benchmark/poisson_sampling_validation.py
 
-# Open multi-campaign reproducibility chart
+# 5. Open multi-campaign reproducibility chart
 open figures/fig8_three_campaigns_reproducibility.png
 ```
 
@@ -196,6 +205,14 @@ picoclaw-vs-openclaw-benchmark/
 │   ├── 08_ADJUSTMENTS_AND_CORRECTIVE_ACTIONS_EN.md <- Formal record of 9 adjustments (EN)
 │   ├── 09_EQUALIZED_TEST_CONDITIONS_GUARANTEE_PT.md <- Prova formal de condições equalizadas (PT)
 │   └── 09_EQUALIZED_TEST_CONDITIONS_GUARANTEE_EN.md <- Formal guarantee of equalized conditions (EN)
+├── tools/                                     <- Ferramentas embarcadas e provisionador automático
+│   ├── setup_environment.sh                   <- Script de inicialização automática em 1 clique
+│   ├── picoclaw/                              <- Binário oficial Sipeed PicoClaw (Mach-O ARM64)
+│   ├── llama_cpp/                             <- Servidor llama-server com Metal GPU shaders
+│   ├── hyperfine/                             <- Binário hyperfine para medição de cold start
+│   ├── uv/                                    <- Instalador Astral uv standalone
+│   ├── openclaw-package.json                  <- Metadados oficiais de runtime do OpenClaw
+│   └── node/                                  <- Runtime Node.js provisionado (darwin-arm64)
 ├── screenshots/                               <- Capturas reais das ferramentas no terminal
 ├── campaign_run_1/                            <- Campanha 1: Baseline 480 testes + telemetria SMC
 ├── campaign_run_2/                            <- Campanha 2: Segunda bateria física na GPU Metal
@@ -205,6 +222,8 @@ picoclaw-vs-openclaw-benchmark/
 ├── campaign_comparison/                       <- Relatórios e gráficos comparativos das 5 campanhas
 ├── benchmark/                                 <- Orquestradores Go e Node.js e scripts de automação
 ├── data/                                      <- Dados brutos JSONL, powermetrics e manifest SHA-256
+│   ├── workload_data/                         <- Datasets determinísticos (50 mocks, log JSONL e RAG)
+│   └── manifest_sha256.json                   <- Assinatura criptográfica SHA-256 de todos os arquivos
 ├── figures/                                   <- Figuras científicas em 300 DPI (Figuras 1 a 8)
 └── reports/                                   <- Relatórios acadêmicos formatados (.docx e .pdf)
 ```

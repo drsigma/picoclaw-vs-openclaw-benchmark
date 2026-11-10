@@ -371,7 +371,30 @@ func main() {
 	warmth := "Cold"
 	reps := 1
 	apiURL := "http://127.0.0.1:8080/v1/chat/completions"
-	baseDir := "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/workload_data"
+	if envURL := os.Getenv("LLAMA_API_URL"); envURL != "" {
+		apiURL = envURL
+	}
+	baseDir := os.Getenv("WORKLOAD_DATA_DIR")
+	if baseDir == "" {
+		if exe, err := os.Executable(); err == nil {
+			cand := filepath.Join(filepath.Dir(filepath.Dir(exe)), "data", "workload_data")
+			if _, err := os.Stat(cand); err == nil {
+				baseDir = cand
+			}
+		}
+	}
+	if baseDir == "" {
+		candidates := []string{"./data/workload_data", "../data/workload_data"}
+		for _, c := range candidates {
+			if _, err := os.Stat(c); err == nil {
+				baseDir = c
+				break
+			}
+		}
+	}
+	if baseDir == "" {
+		baseDir = "./data/workload_data"
+	}
 	if len(os.Args) > 1 {
 		tier = os.Args[1]
 	}

@@ -9,18 +9,26 @@ import ctypes
 import json
 import math
 import os
+import shutil
 import subprocess
 import sys
 import time
 import numpy as np
 from scipy import stats
 
-REPO_DIR = "/Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark"
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
-NODE_BIN = "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/tools/node-v26.12.1-darwin-arm64/bin/node"
+TOOLS_DIR = os.path.join(REPO_DIR, "tools")
 PICOCLAW_BIN = os.path.join(BENCH_DIR, "picoclaw_orch")
 OPENCLAW_SCRIPT = os.path.join(BENCH_DIR, "openclaw_orch.mjs")
-BASE_DATA_DIR = "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/workload_data"
+BASE_DATA_DIR = os.path.join(REPO_DIR, "data", "workload_data")
+
+# Resolve Node.js binary (embedded in tools/node or from system PATH)
+NODE_CANDIDATES = [
+    os.path.join(TOOLS_DIR, "node", "bin", "node"),
+    shutil.which("node"),
+]
+NODE_BIN = next((n for n in NODE_CANDIDATES if n and os.path.exists(n)), "node")
 
 # Darwin libproc bindings for exact kernel RSS and physical footprint
 libproc = ctypes.CDLL("/usr/lib/libproc.dylib")

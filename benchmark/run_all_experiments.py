@@ -15,13 +15,13 @@ import urllib.request
 import numpy as np
 from scipy import stats
 
-WORKSPACE = "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw"
-DATA_DIR = os.path.join(WORKSPACE, "workload_data")
-BENCH_DIR = os.path.join(WORKSPACE, "benchmark")
-NODE_BIN = os.path.join(WORKSPACE, "tools/node-v26.12.1-darwin-arm64/bin/node")
-NODE22_BIN = os.path.join(WORKSPACE, "tools/node-v22.11.0-darwin-arm64/bin/node")
-OPENCLAW_CLI = os.path.join(WORKSPACE, "tools/openclaw_npm/node_modules/openclaw/openclaw.mjs")
-PICOCLAW_CLI = os.path.join(WORKSPACE, "tools/picoclaw_bin/picoclaw")
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(REPO_DIR, "data", "workload_data")
+BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
+TOOLS_DIR = os.path.join(REPO_DIR, "tools")
+NODE_BIN = os.path.join(TOOLS_DIR, "node", "bin", "node")
+OPENCLAW_CLI = os.path.join(BENCH_DIR, "openclaw_orch.mjs")
+PICOCLAW_CLI = os.path.join(TOOLS_DIR, "picoclaw", "picoclaw")
 PICOCLAW_ORCH = os.path.join(BENCH_DIR, "picoclaw_orch")
 OPENCLAW_ORCH = os.path.join(BENCH_DIR, "openclaw_orch.mjs")
 LLAMA_URL = "http://127.0.0.1:8080/v1/chat/completions"
