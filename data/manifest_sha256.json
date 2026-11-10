@@ -4,8 +4,8 @@
     "sha256": "11ec4b7d094d71d3b8478c5a07d9c33b43d6992ec734e7c8d02d23f7317a6761"
   },
   "README.md": {
-    "bytes": 29465,
-    "sha256": "3367fba5915a4b4a43f3393e26d596e3d8b110b23f503276ebb1b3277c3e39b1"
+    "bytes": 27578,
+    "sha256": "1ad5acec3894e78e331db32e9d0dc7d53393181107f6cfdeb0b61e22ea77db6b"
   },
   "benchmark/build_layperson_guide.py": {
     "bytes": 20502,

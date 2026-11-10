@@ -31,23 +31,13 @@ Both orchestrators interface with a unified local neural server via **llama.cpp 
 
 ---
 
-## ❓ Pergunta Central de Pesquisa / Research Question
+## ❓ Pergunta de Pesquisa / Research Question
 
 ### 🇧🇷 Português (PT-BR)
-> **"Qual é o impacto da arquitetura de software do orquestrador de IA — binário nativo estaticamente compilado em Go (PicoClaw) versus runtime dinâmico interpretado/JIT em TypeScript/Node.js (OpenClaw) — sobre a latência pura de orquestração ($T_{\text{orch}}$), pegada física de memória RAM (RSS), vazão de despacho de ferramentas ($R_{\text{tool}}$) e eficiência energética (Energy-Delay Product - EDP) quando executados sobre a Arquitetura de Memória Unificada (UMA) do Apple Silicon M4, sob um mesmo servidor neural local compartilhado?"**
-
-**Desdobramento da Questão:**
-1. *Latência e Inicialização:* O overhead do compilador JIT V8 e resolução de dependências no Node.js impõe penalidade crítica na inicialização a frio e no despacho de ferramentas em relação ao Go nativo?
-2. *Contenção de Memória UMA:* Como o consumo de memória RAM do agente e as pausas do Garbage Collector geracional disputam os 120 GB/s de largura de banda unificada com a GPU Metal durante a inferência de tensores?
-3. *Energia e Sobrecarga de Prompt:* Em que medida a sobrecarga de esquemas de ferramentas (*Prompt Token Bloat*) induz tempo extra de processamento na GPU, mascarando ou amplificando o consumo energético do chip Apple M4?
+> **"Qual arquitetura de orquestrador de IA — Go nativo (PicoClaw) ou Node.js (OpenClaw) — entrega menor latência, menor consumo de memória RAM e maior eficiência energética no Apple Silicon M4 sob o mesmo modelo neural local?"**
 
 ### 🇺🇸 English (EN-US)
-> **"What is the architectural impact of AI agent runtime design — native statically-compiled Go (PicoClaw) versus dynamic JIT-interpreted TypeScript/Node.js (OpenClaw) — on pure orchestration latency ($T_{\text{orch}}$), physical DRAM footprint (RSS), tool dispatch throughput ($R_{\text{tool}}$), and Energy-Delay Product (EDP) when executing on Apple Silicon M4's Unified Memory Architecture (UMA) under a shared local neural serving engine?"**
-
-**Research Sub-Questions:**
-1. *Latency & Startup:* Does the V8 JIT compilation and module-tree resolution in Node.js impose a critical cold-start and tool dispatch penalty compared to static native Mach-O Go binaries?
-2. *UMA Memory Bus Contention:* How do agent heap allocations and generational garbage collection pauses compete with the Metal GPU for the 120 GB/s shared LPDDR5X DRAM bus during tensor forward passes?
-3. *Energy & Prompt Bloat:* To what extent does unconstrained tool schema injection (*Prompt Token Bloat*) trigger prolonged GPU decoding cycles, altering total package energy dissipation on Apple Silicon M4?
+> **"Which AI agent architecture — native Go (PicoClaw) or Node.js (OpenClaw) — delivers lower latency, minimal RAM footprint, and higher energy efficiency on Apple Silicon M4 under an identical local neural model?"**
 
 ---
 
