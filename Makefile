@@ -7,10 +7,9 @@
 # ==============================================================================
 
 SHELL := /bin/bash
-VENV_PY := tools/.venv/bin/python
-VENV_PYTEST := tools/.venv/bin/pytest
+VENV_PY := $(shell if [ -f tools/.venv/bin/python ]; then echo tools/.venv/bin/python; else echo python3; fi)
 
-.PHONY: help setup check-quiescence test benchmark reproduce-figures clean
+.PHONY: help setup check-quiescence test simulate-campaign benchmark benchmark-full-smc reproduce-figures clean
 
 help:
 	@echo "========================================================================"
@@ -19,17 +18,21 @@ help:
 	@echo " [PT-BR] Comandos disponíveis:"
 	@echo "   make setup              - Configura venv Python, Node.js e ferramentas embarcadas"
 	@echo "   make check-quiescence   - Audita estado térmico, CPU idle e modo anti-sono caffeinate"
-	@echo "   make test               - Executa suíte de testes unitários automatizados (pytest)"
-	@echo "   make benchmark          - Executa a campanha experimental completa com ablação"
-	@echo "   make reproduce-figures  - Regenera todas as 8 figuras científicas em 300 DPI"
+	@echo "   make test               - Executa linter (ruff) e testes unitários automatizados"
+	@echo "   make simulate-campaign  - Verificação rápida portátil para revisores (Sem Sudo / Multi-OS)"
+	@echo "   make benchmark          - Executa campanha experimental completa (espaço de usuário comum)"
+	@echo "   make benchmark-full-smc - Executa com sudo powermetrics para telemetria elétrica completa do SMC"
+	@echo "   make reproduce-figures  - Regenera todas as figuras científicas em 300 DPI"
 	@echo "   make clean              - Remove caches e arquivos temporários de execução"
 	@echo ""
 	@echo " [EN-US] Available targets:"
 	@echo "   make setup              - Provisions isolated Python venv, Node.js, and embedded tools"
 	@echo "   make check-quiescence   - Audits thermal state, CPU idle, and caffeinate anti-sleep"
-	@echo "   make test               - Runs automated unit test suite via pytest"
-	@echo "   make benchmark          - Runs publication-grade benchmark campaign with ablation"
-	@echo "   make reproduce-figures  - Recompiles all 8 publication-ready 300-DPI scientific figures"
+	@echo "   make test               - Runs linter (ruff) and automated unit test suite"
+	@echo "   make simulate-campaign  - Reviewer fast portable verification (No Sudo / Cross-Platform)"
+	@echo "   make benchmark          - Runs publication-grade campaign (standard unprivileged user mode)"
+	@echo "   make benchmark-full-smc - Runs with sudo powermetrics for full hardware electrical SMC telemetry"
+	@echo "   make reproduce-figures  - Recompiles all 300-DPI scientific publication figures"
 	@echo "   make clean              - Purges Python/Node caches and temporary execution files"
 	@echo "========================================================================"
 
@@ -44,13 +47,23 @@ check-quiescence:
 test:
 	@echo "🧪 [PT-BR] Executando linter (ruff) e testes unitários automatizados (pytest)..."
 	@echo "   [EN-US] Running linter (ruff) and automated unit test suite (pytest)..."
-	tools/.venv/bin/ruff check benchmark/ tests/
+	$(VENV_PY) -m ruff check benchmark/ tests/
 	$(VENV_PY) -m pytest -v tests/
 
-benchmark: check-quiescence
-	@echo "⚡ [PT-BR] Disparando campanha física completa com matriz de ablação..."
-	@echo "   [EN-US] Dispatching full physical benchmark campaign with ablation matrix..."
+simulate-campaign:
+	@echo "🧪 [PT-BR] Executando verificação rápida portátil para revisores (Sem Sudo / Multi-OS)..."
+	@echo "   [EN-US] Running reviewer fast portable simulation pipeline (No Sudo / Cross-Platform)..."
+	$(VENV_PY) benchmark/run_unified_benchmark.py --simulate
+
+benchmark:
+	@echo "⚡ [PT-BR] Disparando campanha de benchmark em espaço de usuário comum..."
+	@echo "   [EN-US] Dispatching benchmark campaign in unprivileged user space..."
 	$(VENV_PY) benchmark/run_unified_benchmark.py
+
+benchmark-full-smc: check-quiescence
+	@echo "⚡ [PT-BR] Disparando campanha com telemetria elétrica completa do Apple SMC (requer sudo)..."
+	@echo "   [EN-US] Dispatching full physical benchmark campaign with Apple SMC power telemetry (requires sudo)..."
+	sudo $(VENV_PY) benchmark/run_unified_benchmark.py
 
 reproduce-figures:
 	@echo "📊 [PT-BR] Regenerando figuras científicas em 300 DPI..."

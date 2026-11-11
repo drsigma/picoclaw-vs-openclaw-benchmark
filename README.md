@@ -104,6 +104,8 @@ Os resultados empíricos consolidados da campanha definitiva de publicação no 
 | | **OpenClaw (Node.js Minimal)** | $12175{,}3 \pm 76{,}4$ | $10{,}121 \pm 0{,}39$ | $92{,}6$ | $199{,}68$ | $2431{,}186$ |
 | | **OpenClaw (Node.js Full Ablation)** | $12233{,}1 \pm 71{,}7$ | $12{,}776 \pm 0{,}48$ | $93{,}7$ | $200{,}62$ | $2454{,}313$ |
 
+*Nota sobre o Baseline Neural / Note on Neural Baseline:* O valor de **`0,0 MB` de Pico RAM RSS** no *Neural Baseline* refere-se estritamente à pegada de memória do processo orquestrador (inexistente na invocação HTTP direta via socket), excluindo o consumo de memória unificada (UMA) residente do daemon `llama-server` na GPU Metal. / The **`0.0 MB` Peak RAM RSS** for *Neural Baseline* refers strictly to the orchestrator process memory footprint (non-existent in direct HTTP socket calls), excluding the unified memory (UMA) footprint of the background `llama-server` Metal GPU daemon.
+
 > [!NOTE]
 > **🇧🇷 Diagnóstico Empírico da Variância no Workload W3 (Vector RAG):**
 > No Workload W3, a Latência Total do PicoClaw registrou média de $6423{,}1 \pm 870{,}0\text{ ms}$, contrastando com a sobrecarga de orquestração isolada de apenas $T_{\text{orch}} = 5{,}493 \pm 0{,}84\text{ ms}$. A auditoria dos ensaios brutos em `results/publication_campaign/raw_trials.jsonl` comprova que essa variância se deve **estritamente à dinâmica de inferência do servidor neural local (`llama.cpp`) na GPU Metal e não ao runtime Go**:
@@ -235,26 +237,32 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 
 ## ⚡ Guia Rápido de Reprodução / Quickstart Reproduction
 
-Para reproduzir integralmente os experimentos em qualquer Mac com Apple Silicon:
+### 1. Verificação Rápida para Revisores (Sem Sudo / Multi-OS) / Reviewer Quick-Verification (No Sudo / Cross-Platform)
+Para revisores acadêmicos (*SoftwareX*) testando o repositório em ambientes isolados (ex: Linux x86_64 ou macOS sem modelo GGUF ou privilégios de superusuário), execute o pipeline simulado de ponta a ponta em menos de 10 segundos:
 
 ```bash
-# 1. Clonar repositório e entrar no diretório
-git clone git@github.com:drsigma/picoclaw-vs-openclaw-benchmark.git
-cd picoclaw-vs-openclaw-benchmark
+# Executa simulação determinística portátil, testes estatísticos e renderização gráfica
+make simulate-campaign
+```
 
-# 2. Configurar o ambiente isolado automaticamente (Python venv, Node.js e ferramentas)
+### 2. Modelo de Segurança e Execução Completa no Apple Silicon / Security Model & Full Physical Run
+> [!IMPORTANT]
+> **Privilégios e Segurança:** Os agentes avaliados (`PicoClaw` e `OpenClaw`) e o servidor neural (`llama-server`) **sempre executam estritamente em espaço de usuário comum** (`euid != 0`). A exigência de `sudo` restringe-se exclusivamente à amostragem física de miliwatts dos sensores de corrente do Apple SMC (`powermetrics`), bloqueada pelo kernel Darwin para mitigar ataques de canal lateral de potência. Caso executado sem `sudo`, o harness degrada graciosamente sem bloquear ou solicitar senha.
+
+```bash
+# 1. Configurar o ambiente isolado automaticamente (Python venv, Node.js e ferramentas)
 make setup
 
-# 3. Auditar a quiescência térmica e operacional do sistema
-make check-quiescence
-
-# 4. Executar os testes unitários da suíte
+# 2. Auditar a integridade e executar os testes unitários da suíte
 make test
 
-# 5. Executar a campanha física completa com matriz de ablação
+# 3. Execução em espaço de usuário comum (Sem Sudo / Degradação Graciosa)
 make benchmark
 
-# 6. Gerar tabelas estatísticas e figuras em 300 DPI
+# 4. Execução física com telemetria elétrica completa do Apple SMC (Requer Sudo)
+make benchmark-full-smc
+
+# 5. Regenerar todas as figuras científicas em 300 DPI
 make reproduce-figures
 ```
 

@@ -291,7 +291,9 @@ def plot_exp2_latency_overhead(data):
 
 
 def plot_exp3_energy_edp(data):
-    pm_path = os.path.join(BENCH_DIR, "powermetrics_parsed.json")
+    pm_path = os.path.join(DATA_DIR, "powermetrics_parsed.json")
+    if not os.path.exists(pm_path):
+        pm_path = os.path.join(BENCH_DIR, "powermetrics_parsed.json")
     has_pm = os.path.exists(pm_path)
     if has_pm:
         with open(pm_path, "r") as f:
@@ -486,7 +488,10 @@ def plot_pmc_hardware_counters(data):
 
 
 def main():
-    with open(os.path.join(BENCH_DIR, "results_all.json"), "r") as f:
+    res_path = os.path.join(DATA_DIR, "results_all.json")
+    if not os.path.exists(res_path):
+        res_path = os.path.join(BENCH_DIR, "results_all.json")
+    with open(res_path, "r") as f:
         data = json.load(f)
     f1 = draw_architecture_diagram()
     f2 = plot_exp1_startup_memory(data)

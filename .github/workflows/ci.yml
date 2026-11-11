@@ -8,8 +8,13 @@ on:
 
 jobs:
   test:
-    name: Run Unit Tests and Linter (macOS ARM64)
-    runs-on: macos-latest
+    name: Test & Verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -32,3 +37,11 @@ jobs:
       - name: Run Pytest Suite
         run: |
           pytest -v tests/
+
+      - name: Run Reviewer Simulation Integration Test (make simulate-campaign)
+        run: |
+          make simulate-campaign
+
+      - name: Run Figure Reproduction Pipeline (make reproduce-figures)
+        run: |
+          make reproduce-figures

@@ -8,6 +8,7 @@ Language / Idioma: Bilingual (PT-BR & EN-US comments, English code)
 
 import json
 import os
+import sys
 from typing import Any, Dict, List
 
 import numpy as np
@@ -62,8 +63,14 @@ def garwood_poisson_interval(k: int, confidence: float = 0.95):
     return float(lower), float(upper)
 
 
-def analyze_publication_campaign():
-    input_path = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
+def analyze_publication_campaign(input_path: str = None, output_dir: str = None):
+    if input_path is None:
+        input_path = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
+    if output_dir is None:
+        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+
+    os.makedirs(os.path.join(output_dir, "tables"), exist_ok=True)
+
     if not os.path.exists(input_path):
         print(f"Error: {input_path} not found. Please run benchmark/run_unified_benchmark.py first.")
         return
@@ -156,23 +163,23 @@ def analyze_publication_campaign():
                 }
 
     # Save JSON files
-    stats_out = os.path.join(REPO_DIR, "results", "publication_campaign", "summary_statistics.json")
+    stats_out = os.path.join(output_dir, "summary_statistics.json")
     with open(stats_out, "w", encoding="utf-8") as f:
         json.dump(summary_stats, f, indent=2)
 
-    tests_out = os.path.join(REPO_DIR, "results", "publication_campaign", "statistical_tests.json")
+    tests_out = os.path.join(output_dir, "statistical_tests.json")
     with open(tests_out, "w", encoding="utf-8") as f:
         json.dump(comparisons, f, indent=2)
 
     # Save CSV
-    csv_out = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "metrics_summary.csv")
+    csv_out = os.path.join(output_dir, "tables", "metrics_summary.csv")
     with open(csv_out, "w", encoding="utf-8") as f:
         f.write("\n".join(csv_rows) + "\n")
 
     # Generate LaTeX Table
     latex_table = r"""\begin{table*}[t]
 \centering
-\caption{Empirical Performance Evaluation and Ablation Matrix on Apple Silicon M4 (Mean $\pm$ Std. Dev.)}
+\caption{Empirical Performance Evaluation and Ablation Matrix on Apple Silicon M4 (Mean $\pm$ Std. Dev.). Note: 0.0 MB Peak RAM for Neural Baseline indicates zero orchestrator process footprint (direct HTTP pass-through), excluding the unified memory allocation (UMA) of the daemon \texttt{llama-server}.}
 \label{tab:evaluation_ablation_m4}
 \small
 \begin{tabular}{l l r r r r r}
@@ -202,7 +209,7 @@ def analyze_publication_campaign():
 \end{table*}
 """
 
-    tex_out = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_journal_ablation.tex")
+    tex_out = os.path.join(output_dir, "tables", "table_journal_ablation.tex")
     with open(tex_out, "w", encoding="utf-8") as f:
         f.write(latex_table)
 
@@ -213,4 +220,6 @@ def analyze_publication_campaign():
 
 
 if __name__ == "__main__":
-    analyze_publication_campaign()
+    in_p = sys.argv[1] if len(sys.argv) > 1 else None
+    out_d = sys.argv[2] if len(sys.argv) > 2 else None
+    analyze_publication_campaign(in_p, out_d)
