@@ -17,7 +17,7 @@ BENCH_DIR="$REPO_DIR/benchmark"
 DATA_DIR="$REPO_DIR/data"
 FIG_DIR="$REPO_DIR/figures"
 REPORTS_DIR="$REPO_DIR/reports"
-WORKLOAD_DIR="$REPO_DIR/workload_data"
+WORKLOAD_DIR="$REPO_DIR/data/workload_data"
 
 # Auto-locate Python virtualenv and tools
 if [ -f "$REPO_DIR/tools/.venv/bin/python" ]; then

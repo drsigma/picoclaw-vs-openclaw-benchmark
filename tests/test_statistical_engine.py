@@ -92,11 +92,9 @@ def test_cameron_trivedi_equidispersion_test():
     poisson_samples = np.random.poisson(lam=10.0, size=100)
     mu_hat = np.mean(poisson_samples)
 
-    # Dependent variable in auxiliary regression
+    # Auxiliary test statistic: ((y - mu)^2 - y) / mu
+    # Under true Poisson equidispersion, E[dep] = 0
     dep = ((poisson_samples - mu_hat) ** 2 - poisson_samples) / mu_hat
-    indep = mu_hat * np.ones_like(dep)
+    t_stat, p_val = stats.ttest_1samp(dep, 0.0)
 
-    slope, intercept, r_value, p_value, std_err = stats.linregress(indep, dep)
-    # Under true Poisson, slope should be statistically indistinguishable from 0
-    t_stat = slope / max(std_err, 1e-6)
     assert abs(t_stat) < 1.96, f"t-statistic {t_stat} exceeds critical value 1.96"

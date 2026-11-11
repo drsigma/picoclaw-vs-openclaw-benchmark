@@ -10,7 +10,7 @@ import os
 from PIL import Image, ImageDraw, ImageFont
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SCREENSHOTS_DIR = os.path.join(REPO_DIR, "screenshots")
+SCREENSHOTS_DIR = os.path.join(REPO_DIR, "tutorial", "assets", "screenshots")
 os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
 
 
@@ -112,7 +112,7 @@ def generate_all_screenshots():
             ("HTTP/1.1 200 OK | Content-Type: application/json | Server: llama.cpp", (212, 212, 216)),
             ('{"status":"ok"}', (74, 222, 128)),
         ],
-        "print_screen_01_llama_server.png"
+        "step01_llama_metal_server.png"
     )
 
     # 2. hyperfine Cold Start Benchmark (PicoClaw vs. OpenClaw)
@@ -134,7 +134,7 @@ def generate_all_screenshots():
             ("  './tools/picoclaw_bin/picoclaw agent --help' ran", (45, 212, 191)),
             ("   23.42 ± 4.68 times faster than './tools/openclaw_npm/node_modules/.bin/openclaw agent --help'", (74, 222, 128)),
         ],
-        "print_screen_02_hyperfine.png"
+        "step02_hyperfine_coldstart.png"
     )
 
     # 3. powermetrics Real Apple M4 SMC Shunt Telemetry
@@ -161,7 +161,7 @@ def generate_all_screenshots():
             ("GPU Power: 12659 mW (Peak: 12659 mW) | GPU HW active freq: 1578 MHz (100.0% residency)", (250, 204, 21)),
             ("Combined Power (CPU + GPU + ANE): 16463 mW (~16.46 W active load, Peak: 16463 mW)", (74, 222, 128)),
         ],
-        "print_screen_03_powermetrics.png"
+        "step03_powermetrics_telemetry.png"
     )
 
     # 4. Live Physical Execution (run_live_campaign.py)
@@ -187,7 +187,7 @@ def generate_all_screenshots():
             ("  OpenClaw Live Poisson Rate: 913.79 ops/s (Assertiveness: 90.33%)", (251, 113, 133)),
             ("[SUCCESS] CAMPAIGN campaign_run_2 COMPLETED! Raw trials saved to raw_trials.jsonl", (74, 222, 128)),
         ],
-        "print_screen_04_live_execution.png"
+        "step04_live_execution.png"
     )
 
     # 5. Poisson Validation Engine (poisson_sampling_validation.py)
@@ -213,7 +213,7 @@ def generate_all_screenshots():
             ("[Cameron-Trivedi Overdispersion Test]: z = 0.00, p = 1.00 -> Equidispersion Accepted (Pure Poisson)", (74, 222, 128)),
             ("Saved Poisson results to data/poisson_results.json and rendered figures/fig7_poisson_assertiveness.png", (74, 222, 128)),
         ],
-        "print_screen_05_poisson_engine.png"
+        "step05_poisson_engine.png"
     )
 
     # 6. Sleep Suppression & Quiescence (caffeinate & mdutil)
@@ -236,7 +236,7 @@ def generate_all_screenshots():
             ("$ sudo mdutil -a -i on", (56, 189, 248)),
             ("/: Indexing enabled. | /System/Volumes/Data: Indexing enabled. (Restored after benchmarking)", (74, 222, 128)),
         ],
-        "print_screen_06_caffeinate_quiescence.png"
+        "step06_caffeinate_quiescence.png"
     )
 
     # 7. Workload Datasets Inspection & Verification (W1-W4)
@@ -259,7 +259,7 @@ def generate_all_screenshots():
             ("-rw-r--r--  1 rafael  staff  147K Nov 10 20:26 system_logs.jsonl", (212, 212, 216)),
             ("[OK] Datasets 100% verified and loaded by picoclaw_orch and openclaw_orch.mjs during live testing.", (45, 212, 191)),
         ],
-        "print_screen_07_datasets_workload.png"
+        "step07_workload_datasets.png"
     )
 
 

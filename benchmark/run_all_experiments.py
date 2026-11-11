@@ -8,6 +8,7 @@ import ctypes
 import json
 import math
 import os
+import sys
 import time
 import urllib.request
 
@@ -27,7 +28,13 @@ OPENCLAW_ORCH = os.path.join(BENCH_DIR, "openclaw_orch.mjs")
 LLAMA_URL = "http://127.0.0.1:8080/v1/chat/completions"
 
 # Load Darwin libproc for RUSAGE_INFO_V4 hardware counter polling
-libproc = ctypes.CDLL("/usr/lib/libproc.dylib")
+if sys.platform == "darwin":
+    try:
+        libproc = ctypes.CDLL("/usr/lib/libproc.dylib")
+    except Exception:
+        libproc = None
+else:
+    libproc = None
 
 
 class rusage_info_v4(ctypes.Structure):
@@ -72,6 +79,8 @@ class rusage_info_v4(ctypes.Structure):
 
 
 def get_pid_rusage(pid):
+    if libproc is None:
+        return None
     info = rusage_info_v4()
     res = libproc.proc_pid_rusage(pid, 4, ctypes.byref(info))
     if res == 0:

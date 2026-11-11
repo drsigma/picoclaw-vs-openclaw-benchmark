@@ -31,7 +31,13 @@ NODE_CANDIDATES = [
 NODE_BIN = next((n for n in NODE_CANDIDATES if n and os.path.exists(n)), "node")
 
 # Darwin libproc bindings for exact kernel RSS and physical footprint
-libproc = ctypes.CDLL("/usr/lib/libproc.dylib")
+if sys.platform == "darwin":
+    try:
+        libproc = ctypes.CDLL("/usr/lib/libproc.dylib")
+    except Exception:
+        libproc = None
+else:
+    libproc = None
 
 
 class rusage_info_v4(ctypes.Structure):
@@ -76,6 +82,8 @@ class rusage_info_v4(ctypes.Structure):
 
 
 def get_pid_rusage(pid):
+    if libproc is None:
+        return None
     info = rusage_info_v4()
     if libproc.proc_pid_rusage(pid, 4, ctypes.byref(info)) == 0:
         return {

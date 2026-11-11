@@ -39,7 +39,7 @@ help:
 setup:
 	@echo "📦 [PT-BR] Provisionando ambiente de teste..."
 	@echo "   [EN-US] Provisioning testbed environment..."
-	./tools/setup_environment.sh
+	./scripts/setup_environment.sh
 
 check-quiescence:
 	@./scripts/check_quiescence.sh
