@@ -4,8 +4,8 @@
     "size_bytes": 191
   },
   "README.md": {
-    "sha256": "bea8bc1b29b808c816ef306373bed92c9acc14f90084af8ab9461299af23163e",
-    "size_bytes": 44096
+    "sha256": "adb9531378b4c02f8c743c8aa4613a0df36f3c8a137a5f0306f9d110c3828574",
+    "size_bytes": 50150
   },
   "benchmark/build_layperson_guide.py": {
     "sha256": "af5d250bcc578ed9b79a91465138746655c6643858988c3d888001c1aea3f8c7",
@@ -392,12 +392,12 @@
     "size_bytes": 7705
   },
   "docs/01_GLOSSARIO_PT.md": {
-    "sha256": "b53274991ddbf2bef58f9d510096ccc869c7085c4f074bfc078f86894550186d",
-    "size_bytes": 9526
+    "sha256": "8813265171b724741e9cbdfda66d1cec3de43acd53f017199c92250e9db17aae",
+    "size_bytes": 10009
   },
   "docs/02_GLOSSARY_EN.md": {
-    "sha256": "1a93e3fef5c25ffd25cfede27424ed4286900ba3457b8305ef0c166c3c36f473",
-    "size_bytes": 8305
+    "sha256": "f7f942d5ab98e6e192135fb055890bdee481ac7645c73078705069a070ece8b6",
+    "size_bytes": 8722
   },
   "docs/03_METODOLOGIA_ESTATISTICA_POISSON.md": {
     "sha256": "36736fd24fe73ae980cd16061c96157364b659db602477d8ed9388b437617fd2",

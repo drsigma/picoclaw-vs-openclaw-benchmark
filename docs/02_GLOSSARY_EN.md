@@ -44,6 +44,7 @@
   * **`dulwich` (v0.22.8):** Pure-Python Git protocol client, avoiding Xcode CLT macOS popup shims.
   * **`uv` (Astral):** Rust-powered package manager provisioning `tools/.venv` in seconds with zero host pollution.
 * **Mathematical Formulations & Code Calculations:** For comprehensive derivations of all mathematical equations ($T_{\text{orch}}$ latency decomposition, Apple SMC power integration, EDP, vector cosine similarity in W3, Garwood Poisson fiducial limits, Cameron & Trivedi overdispersion, and One-Way ANOVA), see: [`11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md`](11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md).
+* **Principle of Least Privilege & Kernel Security:** Strict privilege boundaries are enforced across the testbed. Only hardware SMC milliwatt sensor reading (`powermetrics`) and Spotlight disk pausing (`mdutil`) require `sudo`. All other operations (including Darwin XNU `proc_pid_rusage` system calls via `libproc`, Metal GPU neural serving, and Go/Node.js agent execution) run entirely unprivileged in user-space.
 
 ---
 

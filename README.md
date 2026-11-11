@@ -269,6 +269,36 @@ Physical empirical trials confirm that agent runtime architecture is a primary d
 
 ---
 
+## 🔐 Permissões de Kernel, Sistema Operacional e Níveis de Privilégio / OS Kernel Permissions & Privilege Levels
+
+Para garantir rigor metodológico e segurança operacional, o projeto seguiu o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**, isolando estritamente as operações que demandam acesso elevado ao kernel daquelas executadas em espaço de usuário.
+
+### 🇧🇷 Matriz de Permissões e Acesso ao Kernel (Português)
+
+| Componente / Comando | Nível de Privilégio | Subsistema do Kernel / SO Acessado | Por que essa permissão é necessária? |
+| :--- | :---: | :--- | :--- |
+| **`powermetrics`** | **Superusuário (`sudo` / `root`)** | **Apple SMC (*System Management Controller*) & Drivers XNU** | O kernel Darwin restringe o acesso aos registradores de corrente, tensão e potência física em miliwatts (mW) do SoC Apple M4 por questões de segurança (prevenção contra ataques de canal lateral como *Platypus*). Apenas o processo `powermetrics` é disparado com `sudo`. |
+| **`mdutil -a -i off / on`** | **Superusuário (`sudo` / `root`)** | **APFS Filesystem Metadata & Daemons `mds`/`mdworker`** | Necessário para suspender temporariamente a indexação global do Spotlight da Apple nos volumes APFS durante os testes, impedindo ruído de I/O de disco concorrente no Workload W2. |
+| **Darwin `libproc` (`proc_pid_rusage`)** | **Usuário Comum (Não-Root)** | **Chamada de Sistema Darwin XNU (`/usr/lib/libproc.dylib`)** | **Decisão Arquitetural Central:** A coleta de contadores de hardware (instruções de CPU aposentadas `ri_instructions`, ciclos de clock `ri_cycles`, RSS físico e faltas de página via estrutura C `rusage_info_v4`) é feita diretamente via `ctypes` sem privilégios de root, pois o kernel do macOS permite que um processo pai monitore seus próprios processos filhos com total fidelidade. |
+| **`caffeinate -dims`** | **Usuário Comum (Não-Root)** | **IOKit Power Management (`IOPMAssertionCreateWithName`)** | Registra asserções de atividade no subsistema de energia do kernel para impedir que o Mac mini M4 desligue a tela ou entre em repouso térmico/disco durante testes longos, sem necessitar de permissões de administrador. |
+| **`llama-server` (Metal GPU)** | **Usuário Comum (Não-Root)** | **Apple Metal Framework & Driver Gráfico IOGPU** | Aloca tensores e shaders diretamente na memória unificada (UMA) de 24 GB e nos 10 núcleos da GPU Metal em espaço de usuário, sem qualquer privilégio elevado. |
+| **Orquestradores (`picoclaw` e `openclaw`)** | **Usuário Comum (Não-Root)** | **Processos Filhos POSIX & Loopback TCP (`127.0.0.1`)** | Ambos os agentes de IA rodam estritamente como processos de usuário padrão, comunicando-se via loopback de rede local sem privilégios especiais. |
+
+---
+
+### 🇺🇸 Privilege Matrix & Kernel Access Architecture (English)
+
+| Component / Command | Privilege Level | Kernel / OS Subsystem Accessed | Why is this permission required? |
+| :--- | :---: | :--- | :--- |
+| **`powermetrics`** | **Superuser (`sudo` / `root`)** | **Apple SMC (*System Management Controller*) & XNU Drivers** | Darwin kernel restricts low-level access to on-die voltage, current, and milliwatt power sensors across the Apple M4 SoC for security (preventing power side-channel exploits like *Platypus*). Only `powermetrics` sampling runs with `sudo`. |
+| **`mdutil -a -i off / on`** | **Superuser (`sudo` / `root`)** | **APFS Filesystem Metadata & `mds`/`mdworker` Daemons** | Required to temporarily disable system-wide macOS Spotlight background indexing across APFS volumes, eliminating disk I/O interference during Workload W2 filesystem tests. |
+| **Darwin `libproc` (`proc_pid_rusage`)** | **Standard User (Non-Root)** | **Darwin XNU System Call (`/usr/lib/libproc.dylib`)** | **Key Architectural Decision:** Low-level hardware counter sampling (retired CPU instructions `ri_instructions`, clock cycles `ri_cycles`, exact physical RSS, and page faults via C `rusage_info_v4` struct) runs directly via Python `ctypes` without root escalation, as XNU permits parent processes to inspect their own children. |
+| **`caffeinate -dims`** | **Standard User (Non-Root)** | **IOKit Power Management (`IOPMAssertionCreateWithName`)** | Emits user-activity assertions to macOS IOKit, preventing thermal sleep, display sleep, or disk sleep during empirical campaigns without requiring root. |
+| **`llama-server` (Metal GPU)** | **Standard User (Non-Root)** | **Apple Metal Framework & IOGPU Driver** | Allocates neural model tensors and compute shaders directly within 24 GB UMA memory and 10 GPU cores entirely in user-space. |
+| **Orchestrators (`picoclaw` & `openclaw`)** | **Standard User (Non-Root)** | **POSIX Child Processes & TCP Loopback (`127.0.0.1`)** | Both AI agent runtimes execute strictly as unprivileged user-space processes communicating over local loopback sockets. |
+
+---
+
 ## 📁 Descrição Detalhada de Todas as Pastas e Diretórios / Exhaustive Directory Breakdown
 
 Abaixo está o detalhamento completo de cada pasta do repositório, sua finalidade técnica e o papel desempenhado na pesquisa:
@@ -345,6 +375,8 @@ Abaixo está o detalhamento completo de cada pasta do repositório, sua finalida
 | **Normalização Euclidiana e Similaridade de Cosseno** | Operações de álgebra linear vetorial em W3 onde vetores de $384$ dimensões são normalizados via norma $L_2$ e multiplicados escalarmente ($\cos(\theta) = \hat{\mathbf{q}} \cdot \hat{\mathbf{d}}_j$) para ranquear os $5$ textos mais próximos semanticamente. Detalhado em [`docs/11_EXPLICACAO_DOS_CODIGOS_E_CALCULOS_MATEMATICOS_PT.md`](docs/11_EXPLICACAO_DOS_CODIGOS_E_CALCULOS_MATEMATICOS_PT.md). | Linear algebra vector operations in W3 where $384$-dimensional embeddings are normalized by their $L_2$ norm and evaluated via dot-product ($\cos(\theta) = \hat{\mathbf{q}} \cdot \hat{\mathbf{d}}_j$) to rank the top-5 semantic matches. Detailed in [`docs/11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md`](docs/11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md). |
 | **Intervalos Fiduciais Exatos de Garwood ($\chi^2$)** | Formulação matemática analítica baseada na distribuição Qui-Quadrado para cálculo exato de limites de confiança superior e inferior em processos de contagem de Poisson sem aproximações gaussianas. Detalhado em [`docs/11_EXPLICACAO_DOS_CODIGOS_E_CALCULOS_MATEMATICOS_PT.md`](docs/11_EXPLICACAO_DOS_CODIGOS_E_CALCULOS_MATEMATICOS_PT.md). | Exact analytical formulation mapping Poisson cumulative sums to Chi-Square ($\chi^2$) quantiles, generating rigorous confidence intervals without Gaussian approximations. Detailed in [`docs/11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md`](docs/11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md). |
 | **ANOVA One-Way e Coeficiente de Variação (CV%)** | Testes de variância inter-grupos e intra-grupos ($F = \text{MS}_{\text{between}} / \text{MS}_{\text{within}}$) que comprovaram que a diferença entre as 5 campanhas físicas é explicada pelo acaso ($p > 0{,}15, \, \text{CV} < 2{,}5\%$). Detalhado em [`docs/11_EXPLICACAO_DOS_CODIGOS_E_CALCULOS_MATEMATICOS_PT.md`](docs/11_EXPLICACAO_DOS_CODIGOS_E_CALCULOS_MATEMATICOS_PT.md). | Parametric analysis of variance ($F$-test) establishing that variance across all 5 independent physical campaigns is indistinguishable from random noise ($p > 0.15, \, \text{CV} < 2.5\%$). Detailed in [`docs/11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md`](docs/11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md). |
+| **Darwin XNU `libproc` & `rusage_info_v4`** | Interface de baixo nível do kernel do macOS acessada via `ctypes` pelo test harness para capturar instruções de CPU aposentadas (`ri_instructions`), ciclos de clock (`ri_cycles`) e memória física exata sem requerer privilégios de superusuário (`root`), garantindo conformidade com o princípio do menor privilégio. | Low-level Darwin kernel ABI accessed via Python `ctypes` to sample retired CPU instructions (`ri_instructions`), clock cycles (`ri_cycles`), and physical memory without root escalation, adhering to the principle of least privilege. |
+| **Acesso Privilegiado SMC (`powermetrics`)** | Subsistema seguro do Apple System Management Controller onde medições analógicas de tensão, corrente e potência em miliwatts (mW) de CPU, GPU e DRAM são restritas pelo kernel XNU a processos com `sudo`, mitigando ataques de canal lateral baseados em telemetria elétrica. | Secure Apple System Management Controller subsystem where low-level analog voltage, current, and milliwatt telemetry across CPU/GPU/DRAM rails is gated by XNU behind `sudo` to prevent electrical side-channel exploits. |
 
 ---
 
