@@ -1,5 +1,5 @@
 # Practical Introductory Step-by-Step Guide
-## How to Understand, Reproduce, and Explain the Project Without Technical Friction
+## How to Understand, Use Workload Datasets, Reproduce, and Explain the Project Without Technical Friction
 **Project:** PicoClaw (Go) vs. OpenClaw (Node.js/TypeScript) on Apple Silicon M4  
 **Author:** Rafael Paniccia Cassetta (Student ID: 21202520618) — UFABC  
 
@@ -22,9 +22,9 @@ To grasp this entire research project in 30 seconds, imagine a car:
 
 | Tool Name | What is it in plain English? | What did it do in our benchmark? |
 | :--- | :--- | :--- |
-| **PicoClaw** | Ultra-lightweight AI agent written in Go. | The fast, bare-metal native contender. |
+| **PicoClaw** | Ultra-lightweight AI agent written in Go (native ARM64 binary). | The fast, bare-metal native contender. |
 | **OpenClaw** | Popular AI agent written in Node.js/TypeScript. | The modular, plugin-heavy desktop contender. |
-| **llama-server** | High-performance C++ local AI server. | Runs Llama-3.2 on the Apple M4 GPU over localhost (127.0.0.1:8080). |
+| **llama-server** | High-performance C++ local AI server. | Runs Llama-3.2 on the Apple M4 GPU over localhost (`127.0.0.1:8080`). |
 | **hyperfine** | High-precision statistical CLI stopwatch. | Measured the exact launch time (cold start) 30 times in a row. |
 | **powermetrics** | Apple's built-in hardware power sensor tool. | Sampled real wattage (mW) of CPU and GPU every 100 milliseconds. |
 | **caffeinate** | macOS built-in anti-sleep command. | Keeps the Mac mini awake, preventing screen and system sleep. |
@@ -32,45 +32,84 @@ To grasp this entire research project in 30 seconds, imagine a car:
 
 ---
 
-### 3. The 4 Benchmark Tasks Executed by the Agents
+### 3. The Datasets in `data/workload_data/`: Purpose and Utilization
 
-We established 4 standardized workload difficulty tiers (Tiers W1 to W4):
-1. **W1 (Easy — Simple Reflection):** The agent answers a short architectural question about Apple Silicon M4 in two sentences. No external tools are called.
-2. **W2 (Medium — 3-Step Tool Chain):** The agent must:
-   * List 50 mock files in a folder (`list_dir`).
-   * Filter a 750-line log file searching for error keywords (`grep_logs`).
-   * Compute mean, variance, and standard deviation over 500 data points (`calc_stats`).
-3. **W3 (Heavy — Vector RAG Memory Search over 10,000 Documents):** The agent receives a query and performs a 384-dimensional cosine similarity search across 10,000 chunked documents using a 98,688-parameter dense projection head.
-4. **W4 (Stress Test — 10-Turn Autonomous ReAct Loop):** The agent enters a 10-cycle autonomous loop observing, executing tools, inspecting results, and deciding the next action.
+In physical trials, agents do not merely chat in isolation; they execute deterministic, grounded file and data manipulation tasks. These workloads consume standardized datasets in [`data/workload_data/`](../data/workload_data/):
+
+1. **`mock_files/` (50 synthetic files):**
+   * **Used in Workload W2 and W4:** The agent is instructed to invoke `list_dir` to inspect disk files, count entries, and parse filesystem metadata.
+2. **`system_logs.jsonl` (750 structured JSON system log records):**
+   * **Used in Workload W2 and W4:** The agent invokes `grep_logs` to filter severe error records (`CRITICAL`/`ERROR`) and subsequently calls `calc_stats` to compute rolling latency averages and standard deviations.
+3. **`rag_chunks_10k.json` (10,000 document text chunks) & `embedding_head_100k.npz` (384-dimensional dense projection matrix):**
+   * **Used in Workload W3 (Vector RAG):** The agent loads these 10,000 document chunks into memory and computes cosine similarity against query embeddings to rank and retrieve the top-5 relevant chunks.
+
+> **How to inspect datasets via terminal:**
+> ```bash
+> ls -lh data/workload_data/
+> head -n 5 data/workload_data/system_logs.jsonl
+> ```
+> To deterministically regenerate them from scratch:
+> ```bash
+> ./tools/.venv/bin/python benchmark/generate_datasets.py
+> ```
 
 ---
 
-### 4. Step-by-Step: How to Run Everything on Your Machine
+### 4. Step-by-Step Visual Guide with Real Terminal Screenshots
 
-Open the **Terminal** application on your Mac and run:
-
-#### Step 1: Navigate to repository root
+#### Step 1: Launch Local Metal GPU Neural Server (`llama-server`)
+Launch `llama-server` on port 8080 loading Llama-3.2-3B directly onto the Apple Metal GPU:
 ```bash
-cd /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark
+./tools/llama_cpp/llama-b11887/llama-server \
+  -m models/Llama-3.2-3B-Instruct-Q4_K_M.gguf \
+  -c 32768 -np 1 -ngl 99 --host 127.0.0.1 --port 8080 -t 4
 ```
+![Step 1: llama.cpp Metal GPU Neural Server](../screenshots/print_screen_01_llama_server.png)
 
-#### Step 2: Run automated setup (if on a fresh host)
+#### Step 2: Inspect Workload Datasets
+Verify the deterministic input files in `data/workload_data/`:
 ```bash
-./benchmark/setup_environment.sh
+ls -lh data/workload_data/
 ```
-*Automatically provisions isolated Go, Node.js, Python, llama.cpp, and the model weights. No manual dependencies required.*
+![Step 2: Inspecting Workload Datasets](../screenshots/print_screen_07_datasets_workload.png)
 
-#### Step 3: Run live physical campaign
+#### Step 3: Run Live Physical Campaign
+Execute the orchestrator runner across workloads W1 through W4 in real time:
 ```bash
-python3 benchmark/run_live_campaign.py campaign_run_6 ./campaign_run_6
+./tools/.venv/bin/python benchmark/run_live_campaign.py campaign_run_6 ./campaign_run_6
 ```
+![Step 3: Live Campaign Execution](../screenshots/print_screen_04_live_execution.png)
 
-#### Step 4: Inspect generated charts
-Open `figures/` or `screenshots/` to inspect high-resolution outputs:
+#### Step 4: Measure Cold-Start Launch Latency with Hyperfine
+Benchmark process startup times across 30 warmed-up trials:
+```bash
+./tools/hyperfine/hyperfine --warmup 5 --runs 30 \
+  "./tools/picoclaw/picoclaw --version" \
+  "./tools/node/bin/node ./benchmark/openclaw_orch.mjs --version"
+```
+![Step 4: Hyperfine Cold Start Benchmark](../screenshots/print_screen_02_hyperfine.png)
+
+#### Step 5: Validate Poisson Statistical Engine (Assertiveness $\ge 90.3\%$)
+Execute the Poisson engine to confirm Garwood fiducial interval coverage:
+```bash
+./tools/.venv/bin/python benchmark/poisson_sampling_validation.py
+```
+![Step 5: Poisson Sampling Validation](../screenshots/print_screen_05_poisson_engine.png)
+
+#### Step 6: Power Telemetry & System Quiescence Protocol
+Prevent OS sleep via `caffeinate` and sample hardware sensors via `powermetrics`:
+```bash
+/usr/bin/caffeinate -dims &
+sudo powermetrics -i 100 -n 10 --samplers cpu_power,gpu_power
+```
+![Step 6: Power Telemetry & Quiescence](../screenshots/print_screen_03_powermetrics.png)
+
+#### Step 7: Inspect Multi-Campaign Reproducibility Figures
+Open the publication-ready figures proving $< 2.5\%$ cross-campaign variability:
 ```bash
 open figures/fig8_three_campaigns_reproducibility.png
-open screenshots/print_screen_03_powermetrics.png
 ```
+![Step 7: Multi-Campaign Reproducibility](../figures/fig8_three_campaigns_reproducibility.png)
 
 ---
 

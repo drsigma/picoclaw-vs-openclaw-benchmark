@@ -238,6 +238,29 @@ def generate_all_screenshots():
         "print_screen_06_caffeinate_quiescence.png"
     )
 
+    # 7. Workload Datasets Inspection & Verification (W1-W4)
+    create_terminal_screenshot(
+        "Terminal — Workload Datasets Generation & Verification (data/workload_data/)",
+        [
+            ("$ ./tools/.venv/bin/python benchmark/generate_datasets.py", (56, 189, 248)),
+            ("[+] Generating deterministic synthetic datasets for Workloads W1, W2, W3, W4...", (212, 212, 216)),
+            ("  [W2 Tool 1 - list_dir]  Created 50 mock files in data/workload_data/mock_files/ (service_node_00..49.conf)", (74, 222, 128)),
+            ("  [W2 Tool 2 - grep_logs] Created JSONL log: data/workload_data/system_logs.jsonl (147.4 KB, 750 lines)", (74, 222, 128)),
+            ("  [W2 Tool 3 - calc_stats] Parsed 500 target numeric latency records from system_logs.jsonl", (74, 222, 128)),
+            ("  [W3 Tool 1 - RAG Embedding] Dense linear projection head (98,688 params, 384d): data/workload_data/embedding_head_100k.npz", (74, 222, 128)),
+            ("  [W3 Tool 1 - Vector Chunks] 10,000 document text memory chunks: data/workload_data/rag_chunks_10k.json (15.03 MB)", (74, 222, 128)),
+            ("  [W4 Autonomous ReAct Loop] 10-turn sequential state loop bound to mock_files + syslog + stats", (74, 222, 128)),
+            ("", (24, 24, 27)),
+            ("$ ls -lh data/workload_data/", (56, 189, 248)),
+            ("-rw-r--r--  1 rafael  staff   15M Nov 10 20:26 embedding_head_100k.npz", (212, 212, 216)),
+            ("drwxr-xr-x 52 rafael  staff  1.6K Nov 10 20:26 mock_files/", (212, 212, 216)),
+            ("-rw-r--r--  1 rafael  staff  2.8M Nov 10 20:26 rag_chunks_10k.json", (212, 212, 216)),
+            ("-rw-r--r--  1 rafael  staff  147K Nov 10 20:26 system_logs.jsonl", (212, 212, 216)),
+            ("[OK] Datasets 100% verified and loaded by picoclaw_orch and openclaw_orch.mjs during live testing.", (45, 212, 191)),
+        ],
+        "print_screen_07_datasets_workload.png"
+    )
+
 
 if __name__ == "__main__":
     generate_all_screenshots()

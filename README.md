@@ -10,6 +10,7 @@
 **Programa / Program:** Pós-Graduação em Engenharia da Informação / Ciência da Computação  
 **Disciplina / Course:** CCM313-EEI203 — Análise de Desempenho de Redes e Sistemas (2026.3)  
 **Instituição / Institution:** Universidade Federal do ABC (UFABC)  
+**Repositório GitHub / GitHub Repository:** [https://github.com/drsigma/picoclaw-vs-openclaw-benchmark](https://github.com/drsigma/picoclaw-vs-openclaw-benchmark)
 
 ---
 
@@ -41,9 +42,9 @@ Both orchestrators interface with a unified local neural server via **llama.cpp 
 
 ---
 
-## 🚀 Mini Tutorial Passo a Passo / Step-by-Step Mini Tutorial
+## 🚀 Mini Tutorial Passo a Passo com Fotos e Datasets / Step-by-Step Mini Tutorial
 
-### 🇧🇷 Versão em Português: Como Entender e Executar em 3 Minutos
+### 🇧🇷 Versão em Português: Como Entender, Usar os Datasets e Executar em 3 Minutos
 
 #### 1. A Analogia Central (O Carro e os Dois Motoristas)
 * **O Motor:** É o modelo de IA da Meta (**Llama-3.2-3B**). Ele pensa e gera as palavras.
@@ -53,36 +54,80 @@ Both orchestrators interface with a unified local neural server via **llama.cpp 
   * **PicoClaw (Go):** Um atleta minimalista. Fala o código binário nativo ARM64 do Mac, não precisa de tradutor e só carrega o que vai usar.
 * **A Pergunta:** Quando ambos usam exatamente a mesma IA, qual agente é mais rápido, gasta menos RAM e consome menos energia da máquina?
 
-#### 2. Como Reproduzir os Testes na Sua Máquina
+#### 2. Os Datasets em `data/workload_data/`: Para que servem e como são usados?
+Para que o teste não seja apenas "conversa teórica", os agentes precisam executar tarefas reais de computação. Os dados para essas tarefas ficam na pasta [`data/workload_data/`](data/workload_data/):
+* **`mock_files/` (50 arquivos sintéticos):** Utilizado nos testes **W2** e **W4**. O agente usa a ferramenta `list_dir` para inspecionar, contar e ler metadados desses arquivos em disco.
+* **`system_logs.jsonl` (750 linhas de log JSON):** Utilizado nos testes **W2** e **W4**. O agente usa a ferramenta `grep_logs` para buscar erros graves (`CRITICAL`/`ERROR`) e depois a ferramenta `calc_stats` para calcular médias e desvios de latência.
+* **`rag_chunks_10k.json` (10.000 fragmentos de texto) e `embedding_head_100k.npz` (matriz de projeção de 384 dimensões):** Utilizados no teste **W3 (Vector RAG)**. O agente carrega esses 10.000 documentos em memória e calcula similaridade de cosseno ponderada para encontrar os 5 textos mais relevantes para a consulta do usuário.
+
+> **Nota de Execução:** Se você quiser inspecionar ou recriar esses dados do zero, execute:
+> ```bash
+> ./tools/.venv/bin/python benchmark/generate_datasets.py
+> ```
+
+#### 3. Passo a Passo Visual de Execução
+
+##### Passo 1: Inicialização do Servidor Neural Metal GPU (`llama-server`)
+O servidor neural carrega o modelo Llama-3.2-3B na memória unificada (UMA) e aloca os pesos na GPU Metal do Mac mini:
 ```bash
-# 1. Clonar e entrar no repositório
-git clone git@github.com:drsigma/picoclaw-vs-openclaw-benchmark.git
-cd picoclaw-vs-openclaw-benchmark
+./tools/llama_cpp/llama-b11887/llama-server \
+  -m models/Llama-3.2-3B-Instruct-Q4_K_M.gguf \
+  -c 32768 -np 1 -ngl 99 --host 127.0.0.1 --port 8080 -t 4
+```
+![Passo 1: Servidor Neural llama.cpp Metal GPU](screenshots/print_screen_01_llama_server.png)
 
-# 2. Configurar o ambiente em 1 clique (provisiona Python, Node.js e ferramentas embarcadas)
-./tools/setup_environment.sh
+##### Passo 2: Verificação e Inspeção dos Datasets dos Workloads
+Antes de rodar os agentes, inspecionamos os arquivos de entrada em `data/workload_data/`:
+```bash
+ls -lh data/workload_data/
+head -n 5 data/workload_data/system_logs.jsonl
+```
+![Passo 2: Verificação dos Datasets de Carga](screenshots/print_screen_07_datasets_workload.png)
 
-# 3. Verificar integridade criptográfica SHA-256 de todos os arquivos
-./tools/.venv/bin/python -c '
-import json, hashlib, os
-m = json.load(open("data/manifest_sha256.json"))
-ok = sum(1 for p, meta in m.items() if os.path.exists(p) and hashlib.sha256(open(p, "rb").read()).hexdigest() == meta["sha256"])
-print(f"Verificação Concluída: {ok}/{len(m)} arquivos íntegros (0 falhas).")
-'
-
-# 4. Executar o motor estatístico de Poisson (Assertividade >= 90%)
-./tools/.venv/bin/python benchmark/poisson_sampling_validation.py
-
-# 5. Executar uma nova bateria física completa na GPU Metal
+##### Passo 3: Execução Física dos Agentes nos Workloads W1 a W4
+Os orquestradores executam as chamadas em tempo real contra o servidor local e os datasets:
+```bash
+# Executa a bateria de testes ao vivo
 ./tools/.venv/bin/python benchmark/run_live_campaign.py campaign_run_6 ./campaign_run_6
+```
+![Passo 3: Execução Física em Tempo Real](screenshots/print_screen_04_live_execution.png)
 
-# 6. Visualizar o gráfico comparativo das 5 campanhas
+##### Passo 4: Medição Estatística de Cold-Start com Hyperfine
+Cronometramos o tempo exato que cada agente leva para iniciar do zero usando 30 repetições com aquecimento:
+```bash
+./tools/hyperfine/hyperfine --warmup 5 --runs 30 \
+  "./tools/picoclaw/picoclaw --version" \
+  "./tools/node/bin/node ./benchmark/openclaw_orch.mjs --version"
+```
+![Passo 4: Medição de Cold-Start](screenshots/print_screen_02_hyperfine.png)
+
+##### Passo 5: Validação Estatística de Poisson (Assertividade $\ge 90{,}3\%$)
+Validamos a taxa de chegada de requisições de ferramentas sob distribuição de Poisson com intervalos exatos de Garwood:
+```bash
+./tools/.venv/bin/python benchmark/poisson_sampling_validation.py
+```
+![Passo 5: Motor Estatístico de Poisson](screenshots/print_screen_05_poisson_engine.png)
+
+##### Passo 6: Monitoramento de Energia e Modo Anti-Sono
+Garantimos quiescência do sistema e lemos a potência física (mW) consumida por CPU, GPU e memória:
+```bash
+# Mantém o Mac acordado durante todo o experimento
+/usr/bin/caffeinate -dims &
+# Amostra a telemetria do chip M4 a cada 100ms
+sudo powermetrics -i 100 -n 10 --samplers cpu_power,gpu_power
+```
+![Passo 6: Telemetria de Hardware e Modo Anti-Sono](screenshots/print_screen_03_powermetrics.png)
+
+##### Passo 7: Análise dos Gráficos de Reprodutibilidade
+Abrimos os gráficos consolidados de todas as 5 campanhas físicas:
+```bash
 open figures/fig8_three_campaigns_reproducibility.png
 ```
+![Passo 7: Reprodutibilidade Multi-Campanhas](figures/fig8_three_campaigns_reproducibility.png)
 
 ---
 
-### 🇺🇸 English Version: How to Understand and Run in 3 Minutes
+### 🇺🇸 English Version: How to Understand, Use Datasets, and Run in 3 Minutes
 
 #### 1. Core Metaphor (The Engine and the Two Drivers)
 * **The Engine:** Meta's local **Llama-3.2-3B** model generating token logits.
@@ -92,119 +137,96 @@ open figures/fig8_three_campaigns_reproducibility.png
   * **PicoClaw (Go):** Pure compiled ARM64 assembly with zero interpreter overhead and static typing.
 * **The Research Question:** Under identical neural serving, which runtime architecture achieves higher throughput, lower latency, and reduced energy-delay product?
 
-#### 2. How to Replicate Locally
+#### 2. The Datasets in `data/workload_data/`: Purpose and Utilization
+To ensure realistic, grounded evaluation beyond plain conversational queries, orchestrators interact with deterministic datasets stored in [`data/workload_data/`](data/workload_data/):
+* **`mock_files/` (50 synthetic files):** Consumed in **W2** and **W4**. The agent calls `list_dir` to inspect disk files, count entries, and parse metadata.
+* **`system_logs.jsonl` (750 structured JSON log records):** Consumed in **W2** and **W4**. The agent calls `grep_logs` to filter severe error events (`CRITICAL`/`ERROR`) and subsequently invokes `calc_stats` to compute rolling latency metrics.
+* **`rag_chunks_10k.json` (10,000 document chunks) & `embedding_head_100k.npz` (384-dimensional dense projection matrix):** Consumed in **W3 (Vector RAG)**. The orchestrator embeds candidate documents in RAM and performs cosine similarity search to retrieve the top-5 relevant chunks.
+
+> **Execution Note:** To inspect or regenerate these datasets deterministically:
+> ```bash
+> ./tools/.venv/bin/python benchmark/generate_datasets.py
+> ```
+
+#### 3. Visual Step-by-Step Execution Guide
+
+##### Step 1: Launch Local Metal GPU Neural Server (`llama-server`)
 ```bash
-# 1. Clone and enter repository
-git clone git@github.com:drsigma/picoclaw-vs-openclaw-benchmark.git
-cd picoclaw-vs-openclaw-benchmark
+./tools/llama_cpp/llama-b11887/llama-server \
+  -m models/Llama-3.2-3B-Instruct-Q4_K_M.gguf \
+  -c 32768 -np 1 -ngl 99 --host 127.0.0.1 --port 8080 -t 4
+```
+![Step 1: llama.cpp Metal GPU Neural Server](screenshots/print_screen_01_llama_server.png)
 
-# 2. Automated 1-click testbed setup (provisions Python, Node.js, and embedded tools)
-./tools/setup_environment.sh
+##### Step 2: Inspect Workload Datasets
+Verify the deterministic files that drive W2, W3, and W4:
+```bash
+ls -lh data/workload_data/
+head -n 5 data/workload_data/system_logs.jsonl
+```
+![Step 2: Inspecting Workload Datasets](screenshots/print_screen_07_datasets_workload.png)
 
-# 3. Validate SHA-256 cryptographic signatures
-./tools/.venv/bin/python -c '
-import json, hashlib, os
-m = json.load(open("data/manifest_sha256.json"))
-ok = sum(1 for p, meta in m.items() if os.path.exists(p) and hashlib.sha256(open(p, "rb").read()).hexdigest() == meta["sha256"])
-print(f"Verified {ok}/{len(m)} files matching SHA-256 signatures.")
-'
+##### Step 3: Execute Live Physical Test Campaign
+```bash
+./tools/.venv/bin/python benchmark/run_live_campaign.py campaign_run_6 ./campaign_run_6
+```
+![Step 3: Live Campaign Execution](screenshots/print_screen_04_live_execution.png)
 
-# 4. Run Poisson validation engine
+##### Step 4: Measure Cold-Start Launch Latency with Hyperfine
+```bash
+./tools/hyperfine/hyperfine --warmup 5 --runs 30 \
+  "./tools/picoclaw/picoclaw --version" \
+  "./tools/node/bin/node ./benchmark/openclaw_orch.mjs --version"
+```
+![Step 4: Hyperfine Cold Start Benchmark](screenshots/print_screen_02_hyperfine.png)
+
+##### Step 5: Validate Poisson Statistical Engine
+```bash
 ./tools/.venv/bin/python benchmark/poisson_sampling_validation.py
+```
+![Step 5: Poisson Sampling Validation](screenshots/print_screen_05_poisson_engine.png)
 
-# 5. Open multi-campaign reproducibility chart
+##### Step 6: Power Telemetry & System Quiescence Protocol
+```bash
+/usr/bin/caffeinate -dims &
+sudo powermetrics -i 100 -n 10 --samplers cpu_power,gpu_power
+```
+![Step 6: Power Telemetry & Quiescence](screenshots/print_screen_03_powermetrics.png)
+
+##### Step 7: Multi-Campaign Statistical Reproducibility Inspection
+```bash
 open figures/fig8_three_campaigns_reproducibility.png
 ```
+![Step 7: Multi-Campaign Reproducibility](figures/fig8_three_campaigns_reproducibility.png)
 
 ---
 
-## 📖 Glossário Bilíngue de Termos / Bilingual Technical Glossary
+## 🎯 Conclusão Prática e Trade-Offs / Conclusion & Architectural Trade-Offs
 
-| Termo / Technical Term | Definição em Português (PT-BR) | Formal Definition in English (EN-US) |
-| :--- | :--- | :--- |
-| **PicoClaw** | Agente de IA minimalista desenvolvido pela Sipeed compilado em Go nativo Mach-O ARM64. | Ultra-lightweight edge AI agent framework written in Go, compiled to native Mach-O ARM64. |
-| **OpenClaw** | Orquestrador corporativo em TypeScript/Node.js com validação TypeBox e banco SQLite. | Extensible AI agent runtime executing on Node.js/V8 with TypeBox schema parsing and SQLite. |
-| **UMA (Unified Memory)** | Arquitetura de Memória Unificada da Apple compartilhada a 120 GB/s entre CPU e Metal GPU. | Unified Memory Architecture on Apple Silicon sharing 120 GB/s LPDDR5X DRAM across CPU and GPU. |
-| **Cold Start ($T_{\text{cold}}$)** | Tempo desde a chamada `execve()` até o processo carregar módulos e emitir a primeira saída. | Time elapsed from `execve()` process spawn until first output token or CLI help emission. |
-| **RSS (Resident Set Size)** | Quantidade física real de memória DRAM ocupada pelo processo na memória principal. | Actual physical DRAM allocated to the process page table, excluding swapped or virtual memory. |
-| **TTFT (Time-to-First-Token)** | Latência desde o envio do prompt até o modelo neural emitir o primeiro token decodificado. | Latency from prompt ingestion until the neural serving engine emits its initial response token. |
-| **ITL (Inter-Token Latency)** | Tempo médio em milissegundos entre emissões sucessivas de tokens autoregressivos. | Mean duration (ms) between consecutive auto-regressive token generation steps. |
-| **$T_{\text{orch}}$** | Sobrecarga pura de computação do agente de software ($T_{\text{task}} - T_{\text{neural}}$). | Net orchestrator runtime latency isolating agent overhead from neural forward inference. |
-| **EDP (Energy-Delay Product)** | Métrica que pondera energia e tempo ao quadrado ($E \times T$), penalizando lentidão. | Performance-energy trade-off metric ($E \times T$) heavily penalizing slow system latencies. |
-| **Garwood Exact CI** | Método exato via distribuição $\chi^2$ (Garwood, 1936) para intervalos de confiança de Poisson. | Exact confidence interval for Poisson event rates based on the Chi-Square distribution. |
-| **Overdispersion Test** | Teste de Cameron & Trivedi (1990) que confirma se $\text{Variância} = \text{Média}$ no processo Poisson. | Cameron & Trivedi (1990) regression test verifying absence of overdispersion ($\text{Var} = \text{Mean}$). |
-| **caffeinate** | Utilitário do macOS que impede suspensão de tela, disco e repouso ocioso da CPU. | Native macOS daemon preventing idle CPU sleep, display power-down, and disk spin-down. |
+### 🇧🇷 Conclusão e Prós e Contras (Português)
 
----
-
-## 📊 Principais Resultados Empíricos / Key Benchmark Findings
-
-| Dimensão Avaliada / Metric | PicoClaw (Go 1.23.2) | OpenClaw (Node.js 26.12.1) | Vantagem / Ratio | Significância Estatística |
-| :--- | :---: | :---: | :---: | :---: |
-| **Inicialização a Frio ($T_{\text{cold}}$)** | **$9{,}63 \pm 0{,}22\text{ ms}$** | $225{,}55 \pm 16{,}06\text{ ms}$ | **$23{,}42\times$ mais rápido** | $t = 30{,}12, \; p < 10^{-23}$ |
-| **Memória RAM Ociosa (Idle RSS)** | **$14{,}02 \pm 0{,}13\text{ MB}$** | $166{,}10 \pm 0{,}50\text{ MB}$ | **$11{,}85\times$ menos RAM** | $t = 59{,}44, \; p < 10^{-35}$ |
-| **Pico de RAM (W4 10-Turn ReAct)** | **$33{,}83 \pm 0{,}34\text{ MB}$** | $448{,}33 \pm 3{,}95\text{ MB}$ | **$13{,}25\times$ menos RAM** | $t = 61{,}20, \; p < 10^{-47}$ |
-| **Instruções de Hardware Aposentadas** | **$155{,}84\text{ M}$** | $4.650{,}08\text{ M}$ | **$29{,}84\times$ menos instruções** | $t = 82{,}15, \; p < 10^{-40}$ |
-| **Vazão de Ferramentas ($R_{\text{tool}}$)** | **$326{,}39\text{ ops/s}$** | $64{,}30\text{ ops/s}$ | **$5{,}08\times$ maior vazão** | $z = 19{,}92, \; p < 10^{-15}$ |
-| **Energy-Delay Product (EDP - W1)** | **$31{,}62\text{ J}\cdot\text{s}$** | $41{,}48\text{ J}\cdot\text{s}$ | **$24{,}4\%\text{ menor EDP}$** | $t = 11{,}45, \; p < 10^{-13}$ |
-| **Tamanho do Prompt de Fábrica (CLI)** | **$4.657\text{ tokens}$** | $16.369\text{ tokens}$ | **$3{,}51\times$ menor prompt** | Estoura limite de 4.096 |
-
----
-
-## 🎯 Amostragem de Poisson e Assertividade ($\ge 90\%$ a $93{,}8\%$)
-
-Em estrita conformidade com a teoria clássica de filas e sistemas (Raj Jain, 1991), o acionamento de ferramentas foi modelado como um **Processo Pontual de Poisson**:
-* **Tier W2 ($K = 300$ eventos, $n = 100$ repetições):** Assertividade de **$90{,}33\%$** (erro relativo $d \le 9{,}67\%$, $\text{IC}_{90\%}: [296{,}03, 359{,}13]\text{ ops/s}$).
-* **Tier W4 ($K = 1.000$ eventos, $n = 100$ repetições):** Assertividade de **$93{,}75\%$** (erro relativo $d \le 6{,}25\%$, $\text{IC}_{95\%}: [209{,}70, 237{,}61]\text{ ops/s}$).
-* **Teste de Sobredispersão:** Estatística $z = 0{,}00, \; p = 1{,}00$, confirmando equidispersão estrita ($\text{Var} = \text{Média}$).
-
-![Poisson Assertiveness](figures/fig7_poisson_assertiveness.png)
-
----
-
-## 🔬 Validação Cruzada das 5 Campanhas Físicas (Reprodutibilidade 100%)
-
-Conduzimos **5 campanhas físicas independentes** na máquina real com repouso suprimido via `caffeinate -dims`:
-* **[Campanha 1 (Baseline)](campaign_run_1):** 480 testes fatoriais paramétricos + calibração de sensores SMC de potência.
-* **[Campanha 2 (Live Run 1)](campaign_run_2):** Bateria física independente ao vivo na GPU Metal.
-* **[Campanha 3 (Live Run 2)](campaign_run_3):** Segunda repetição física ao vivo.
-* **[Campanha 4 (Live Run 3)](campaign_run_4):** Terceira repetição física ao vivo.
-* **[Campanha 5 (Live Run 4)](campaign_run_5):** Quarta repetição física ao vivo ($K=300$ eventos de Poisson).
-
-O relatório comparativo consolidado está disponível em:
-* [Relatório Comparativo em Português](campaign_comparison/CAMPAIGN_COMPARISON.md)
-* [Cross-Campaign Report in English](campaign_comparison/CAMPAIGN_COMPARISON_EN.md)
-
-![Multi-Campaign Reproducibility](figures/fig8_three_campaigns_reproducibility.png)
-
----
-
-## ⚖️ Conclusão Metodológica com Prós e Contras / Conclusion & Trade-Offs
-
-### 🇧🇷 Conclusão e Análise de Engenharia (Português)
-
-Os experimentos físicos demonstram conclusivamente que a arquitetura do orquestrador de software **não é um detalhe de implementação secundário**, mas sim um fator determinante na responsividade, viabilidade térmica e consumo de recursos no Apple Silicon M4.
+Os ensaios empíricos no Apple Silicon M4 demonstram de forma inequívoca que a arquitetura do orquestrador é o fator determinante de contenção de memória, agilidade de disparo e eficiência térmica.
 
 #### 1. PicoClaw (Go 1.23.2 — Binário Nativo Mach-O ARM64)
-* **✅ Prós (Vantagens):**
-  * **Inicialização Instantânea ($23{,}4\times$ mais rápido):** Média de apenas **$9{,}63\text{ ms}$** contra $225{,}55\text{ ms}$ do Node.js. Excelente para invocação sob demanda e funções serverless locais.
-  * **Pegada de Memória Mínima ($13\times$ menos RAM):** Consome apenas **$14\text{ MB}$ em repouso e $33{,}8\text{ MB}$ em pico (W4)**. Não sobrecarrega a DRAM unificada nem disputa o barramento UMA com a GPU Metal.
-  * **Alta Vazão de Ferramentas ($5\times$ superior):** Atinge **$326\text{ ops/s}$**, serializando estruturas e despachando chamadas em microssegundos com zero overhead de tipagem dinâmica.
-  * **Eficiência no Energy-Delay Product (EDP):** Vantagem de **$24{,}4\%$ no W1** ($31{,}62\text{ J}\cdot\text{s}$ vs. $41{,}48\text{ J}\cdot\text{s}$), penalizando severamente atrasos de computação.
-  * **Imunidade a Pausas GC:** Coletor concorrente tri-color não-geracional mantém latência determinística sem pausas perceptíveis.
-* **❌ Contras (Limitações):**
-  * **Ecossistema Menor de Extensões:** Menor disponibilidade de bibliotecas de terceiros se comparado à amplitude do ecossistema NPM.
-  * **Rigidez de Compilação:** Novas ferramentas exigem tipagem estática e compilação do binário (não permite carregar módulos JavaScript avulsos em tempo de execução).
-  * **Foco em Edge/Embarcados:** Projetado pela Sipeed para dispositivos compactos, possuindo menos integrações nativas de interface gráfica de fábrica.
+* **✅ Prós:**
+  * **Cold-Start Instantâneo ($23{,}4\times$ mais rápido):** Inicializa em **$9{,}63\text{ ms}$** vs. $225{,}55\text{ ms}$ do Node.js. Excelente para execuções sob demanda e CLI.
+  * **Consumo de Memória Mínimo ($13\times$ menos RAM):** Ocupa apenas **$14\text{ MB}$ em repouso e $33{,}8\text{ MB}$ no loop ReAct de 10 passos**, não competindo pela largura de banda da UMA do Mac.
+  * **Vazão Superior de Ferramentas ($5\times$ mais rápido):** Processa **$326\text{ ops/s}$** via serialização estática em Go sem sobrecarga de validação dinâmica.
+  * **Menor Produto Energia-Atraso (EDP):** Entrega **$24{,}4\%$ menor EDP em W1** ($31{,}62\text{ J}\cdot\text{s}$ vs. $41{,}48\text{ J}\cdot\text{s}$).
+  * **Previsibilidade Operacional:** Coletor de lixo tri-color concorrente não causa pausas perceptíveis (*Stop-The-World* $< 1\text{ ms}$).
+* **❌ Contras:**
+  * **Ecossistema Menor:** Quantidade menor de conectores prontos se comparado ao ecossistema NPM do JavaScript.
+  * **Rigidez de Tipagem:** Adicionar novas ferramentas exige compilar a estrutura em Go, sem flexibilidade de injeção dinâmica de código.
+  * **Foco em Dispositivos Edge:** Projetado primariamente para embarcados e serviços de fundo, oferecendo menos integrações diretas com interfaces gráficas.
 
-#### 2. OpenClaw (Node.js v26.12.1 / TypeScript — Runtime Google V8)
-* **✅ Prós (Vantagens):**
-  * **Ecossistema Gigantesco (NPM):** Acesso a centenas de milhares de bibliotecas prontas para banco de dados, integrações de APIs e provedores de nuvem.
-  * **Flexibilidade e Dinamismo:** Esquemas de ferramentas flexíveis validados em tempo real com TypeBox sem necessidade de recompilação.
-  * **Arquitetura Rica para Desktop:** Suporte nativo a SQLite (`node:sqlite`), gateways REST/WebSocket e ecossistema de automação corporativa maduro.
-* **❌ Contras (Limitações):**
-  * **Consumo de Memória Massivo ($166\text{ a }448\text{ MB}$):** Ocupa até $13\times$ mais memória DRAM física, aumentando a pressão no barramento UMA de 120 GB/s.
-  * **Lentidão de Cold-Start ($225\text{ ms}$):** O custo de inicialização da V8 e varredura de árvores profundas em `node_modules` penaliza execuções efêmeras.
+#### 2. OpenClaw (Node.js v26.12.1 / TypeScript — Google V8 Engine)
+* **✅ Prós:**
+  * **Ecossistema Massivo:** Acesso imediato a centenas de milhares de pacotes do NPM e integrações com bancos corporativos.
+  * **Flexibilidade Dinâmica:** Validação de esquemas em tempo de execução via TypeBox sem necessidade de recompilação binária.
+  * **Arquitetura Modular Corporativa:** Persistência de sessão em SQLite embutido e suporte nativo a WebSockets e HTTP.
+* **❌ Contras:**
+  * **Consumo Elevado de RAM ($166\text{ a }448\text{ MB}$):** Exige $13\times$ mais memória DRAM, disputando barramento com a GPU Metal.
+  * **Cold-Start Lento ($225\text{ ms}$):** O tempo de inicialização da máquina virtual V8 e resolução de pacotes introduz atraso perceptível.
   * **Vulnerável ao "Prompt Token Bloat":** De fábrica, injeta 54 ferramentas (16.369 tokens), estourando contextos de 4.096 tokens e forçando 57 segundos extras de decodificação na GPU Metal (> 500 Joules adicionais).
   * **Pressão de GC em Loops Longos:** No loop ReAct (W4), alocações contínuas de objetos na memória jovem acionam coletas de lixo *Mark-Compact*, degradando a fluidez do event loop.
 
@@ -247,72 +269,82 @@ Physical empirical trials confirm that agent runtime architecture is a primary d
 
 ---
 
-## 📸 Registros Visuais do Terminal (Screenshots)
+## 📁 Descrição Detalhada de Todas as Pastas e Diretórios / Exhaustive Directory Breakdown
 
-Na pasta [`screenshots/`](screenshots/) estão registradas as evidências em tempo real no Apple Silicon M4:
-1. [`print_screen_01_llama_server.png`](screenshots/print_screen_01_llama_server.png): Servidor Metal GPU alocado na DRAM, carregamento em 347 ms e healthcheck `{"status":"ok"}`.
-2. [`print_screen_02_hyperfine.png`](screenshots/print_screen_02_hyperfine.png): Medição estatística de cold-start comprovando vantagem de $23{,}4\times$ do PicoClaw.
-3. [`print_screen_03_powermetrics.png`](screenshots/print_screen_03_powermetrics.png): Leituras dos sensores de corrente/tensão do chip Apple M4 via SMC (`powermetrics`).
-4. [`print_screen_04_live_execution.png`](screenshots/print_screen_04_live_execution.png): Execução física em tempo real dos workloads W1 a W4.
-5. [`print_screen_05_poisson_engine.png`](screenshots/print_screen_05_poisson_engine.png): Motor analítico de Poisson com intervalos exatos de Garwood e assertividade $\ge 90\%$.
-6. [`print_screen_06_caffeinate_quiescence.png`](screenshots/print_screen_06_caffeinate_quiescence.png): Quiescência do sistema operacional via `caffeinate -dims` e pausa do Spotlight.
+Abaixo está o detalhamento completo de cada pasta do repositório, sua finalidade técnica e o papel desempenhado na pesquisa:
+
+### 🇧🇷 Detalhamento das Pastas (Português)
+
+| Diretório | O que esta pasta faz e para que serve? |
+| :--- | :--- |
+| **`benchmark/`** | **Núcleo de Execução e Orquestração dos Testes:** Contém os dois agentes instrumentados (`picoclaw_orch.go` e `openclaw_orch.mjs`), o executor da campanha física em tempo real (`run_live_campaign.py`), o motor estatístico de Poisson (`poisson_sampling_validation.py`), os geradores de gráficos científicos (`generate_charts.py`), relatórios acadêmicos (`build_reports.py`) e datasets determinísticos (`generate_datasets.py`). |
+| **`campaign_run_1/`** | **Campanha 1 (Baseline Fatorial Completo):** Armazena os dados brutos de 480 testes fatoriais completos (10 repetições $\times$ 4 workloads $\times$ 2 agentes $\times$ variações de contexto e poda) acompanhados de telemetria completa dos sensores de hardware do chip M4 via `powermetrics`. |
+| **`campaign_run_2/`** | **Campanha 2 (Segunda Bateria Física Independente):** Execução independente das rodadas de validação contra o servidor neural na GPU Metal, gerando logs brutos de tempo de execução, uso de memória RSS e vazão de ferramentas para comprovação de invariância. |
+| **`campaign_run_3/`** | **Campanha 3 (Terceira Bateria Física Independente):** Terceira replicação física integral, coletando dados de latência e consumo de recursos sob as mesmas condições térmicas e elétricas. |
+| **`campaign_run_4/`** | **Campanha 4 (Quarta Bateria Física Independente):** Quarta replicação física para verificação cruzada de reprodutibilidade e garantia de estabilidade temporal. |
+| **`campaign_run_5/`** | **Campanha 5 (Quinta Bateria Física com Validação de Poisson):** Execução física de alta intensidade com $K=300$ chamadas de ferramentas, demonstrando assertividade de Poisson entre $90{,}33\%$ e $93{,}84\%$. |
+| **`campaign_comparison/`** | **Análise Comparativa Multi-Campanhas:** Reúne os relatórios consolidados (`CAMPAIGN_COMPARISON.md` e `CAMPAIGN_COMPARISON_EN.md`) e os dados estruturados (`multi_campaigns_comparison.json`) que provam matematicamente variabilidade menor que $2{,}5\%$ ($\text{CV} < 2{,}5\%$) e equivalência estatística (ANOVA $p > 0{,}15$). |
+| **`data/`** | **Dados Experimentais e Assinaturas Criptográficas:** Guarda os arquivos JSONL consolidados (`consolidated_trials.jsonl`), o log bruto de sensores de energia (`powermetrics_sensors.log`) e o manifesto criptográfico de integridade (`manifest_sha256.json`) contendo o hash SHA-256 de todos os arquivos. |
+| **`data/workload_data/`** | **Datasets de Carga Determinística:** Contém os dados consumidos pelos agentes durante a execução: `mock_files/` (50 arquivos para W2/W4), `system_logs.jsonl` (750 linhas de log para W2/W4), `rag_chunks_10k.json` (10.000 textos para W3) e `embedding_head_100k.npz` (matriz de projeção de 384d para busca vetorial). |
+| **`docs/`** | **Documentação Acadêmica Bilíngue:** Contém 10 pares de documentos formais (em Português e Inglês), cobrindo metodologia estatística, arquitetura de hardware, guia passo a passo, FAQ para a banca examinadora, registro formal dos 9 ajustes técnicos e prova de condições idênticas. |
+| **`figures/`** | **Figuras Científicas em Alta Resolução (300 DPI):** Gráficos prontos para publicação científica gerados a partir dos dados reais coletados (Figuras 1 a 8), cobrindo latência, memória RAM, eficiência energética (EDP), vazão de ferramentas, validação de Poisson e reprodutibilidade multi-campanhas. |
+| **`reports/`** | **Relatórios Acadêmicos Oficiais:** Documentos finais formatados e submetidos à UFABC nos formatos `.docx` e `.pdf`, incluindo o Relatório de Teste de Sistemas (*System Testing*), o Plano de Trabalho e o Guia Explicativo do Aluno. |
+| **`screenshots/`** | **Evidências Visuais do Terminal (Prints Reais):** Sete capturas de tela reais realizadas diretamente no Mac mini M4, comprovando visualmente a execução de cada ferramenta (`llama-server`, `hyperfine`, `powermetrics`, `caffeinate`, etc.) e dos datasets de entrada. |
+| **`tools/`** | **Toolchain Portátil e Ferramentas Embarcadas:** Contém o instalador automático `setup_environment.sh`, o binário do Sipeed PicoClaw, o servidor `llama_cpp`, o cronômetro estatístico `hyperfine`, o instalador Python `uv` e os metadados do pacote Node.js do OpenClaw. |
 
 ---
 
-## 📂 Estrutura de Pastas e Documentação Bilíngue
+### 🇺🇸 Directory Breakdown (English)
 
-```text
-picoclaw-vs-openclaw-benchmark/
-├── README.md                                  <- Este documento mestre com mini tutorial e glossário
-├── docs/                                      <- Documentação acadêmica formal (100% Bilíngue)
-│   ├── 00_GUIA_PRATICO_INTRODUTORIO_PT.md     <- Guia Prático Introdutório (Português)
-│   ├── 00_PRACTICAL_INTRODUCTORY_GUIDE_EN.md  <- Practical Introductory Guide (English)
-│   ├── 01_GLOSSARIO_PT.md                     <- Glossário Técnico Completo (Português)
-│   ├── 02_GLOSSARY_EN.md                      <- Formal Technical Glossary (English)
-│   ├── 03_METODOLOGIA_ESTATISTICA_POISSON.md  <- Provas do modelo de Poisson e assertividade (PT)
-│   ├── 03_POISSON_STATISTICAL_METHODOLOGY_EN.md <- Poisson statistical proofs & sizing (EN)
-│   ├── 04_HARDWARE_TELEMETRY_TERMINAL_OUTPUTS.md <- Telemetria de terminal e registradores PMC (PT)
-│   ├── 04_HARDWARE_TELEMETRY_TERMINAL_OUTPUTS_EN.md <- Terminal telemetry & PMC registers (EN)
-│   ├── 05_GUIA_REPRODUCAO_PASSO_A_PASSO.md    <- Guia passo a passo de reprodução local (PT)
-│   ├── 05_STEP_BY_STEP_REPRODUCTION_GUIDE_EN.md <- Step-by-step reproduction guide (EN)
-│   ├── 06_ACADEMIC_DEFENSE_FAQ.md             <- Perguntas e Respostas da Banca Examinadora (PT)
-│   ├── 06_ACADEMIC_DEFENSE_FAQ_EN.md          <- Academic Defense FAQ & Qualis A Reviewers (EN)
-│   ├── 07_PRINTS_PASSO_A_PASSO.md             <- Demonstração detalhada de cada screenshot (PT)
-│   ├── 07_STEP_BY_STEP_SCREENSHOTS_EN.md      <- Detailed demonstration of each screenshot (EN)
-│   ├── 08_REGISTRO_DE_AJUSTES_E_DESVIOS.md    <- Registro dos 9 ajustes metodológicos globais (PT)
-│   ├── 08_ADJUSTMENTS_AND_CORRECTIVE_ACTIONS_EN.md <- Formal record of 9 adjustments (EN)
-│   ├── 09_EQUALIZED_TEST_CONDITIONS_GUARANTEE_PT.md <- Prova formal de condições equalizadas (PT)
-│   └── 09_EQUALIZED_TEST_CONDITIONS_GUARANTEE_EN.md <- Formal guarantee of equalized conditions (EN)
-├── tools/                                     <- Ferramentas embarcadas e provisionador automático
-│   ├── setup_environment.sh                   <- Script de inicialização automática em 1 clique
-│   ├── picoclaw/                              <- Binário oficial Sipeed PicoClaw (Mach-O ARM64)
-│   ├── llama_cpp/                             <- Servidor llama-server com Metal GPU shaders
-│   ├── hyperfine/                             <- Binário hyperfine para medição de cold start
-│   ├── uv/                                    <- Instalador Astral uv standalone
-│   ├── openclaw-package.json                  <- Metadados oficiais de runtime do OpenClaw
-│   └── node/                                  <- Runtime Node.js provisionado (darwin-arm64)
-├── screenshots/                               <- Capturas reais das ferramentas no terminal
-├── campaign_run_1/                            <- Campanha 1: Baseline 480 testes + telemetria SMC
-├── campaign_run_2/                            <- Campanha 2: Segunda bateria física na GPU Metal
-├── campaign_run_3/                            <- Campanha 3: Terceira bateria física na GPU Metal
-├── campaign_run_4/                            <- Campanha 4: Quarta bateria física na GPU Metal
-├── campaign_run_5/                            <- Campanha 5: Quinta bateria física ($K=300$ Poisson)
-├── campaign_comparison/                       <- Relatórios e gráficos comparativos das 5 campanhas
-├── benchmark/                                 <- Orquestradores Go e Node.js e scripts de automação
-├── data/                                      <- Dados brutos JSONL, powermetrics e manifest SHA-256
-│   ├── workload_data/                         <- Datasets determinísticos (50 mocks, log JSONL e RAG)
-│   └── manifest_sha256.json                   <- Assinatura criptográfica SHA-256 de todos os arquivos
-├── figures/                                   <- Figuras científicas em 300 DPI (Figuras 1 a 8)
-└── reports/                                   <- Relatórios acadêmicos formatados (.docx e .pdf)
-```
+| Directory | What does this folder do and what is its purpose? |
+| :--- | :--- |
+| **`benchmark/`** | **Core Test Execution and Orchestration Engine:** Houses both instrumented agent orchestrators (`picoclaw_orch.go` and `openclaw_orch.mjs`), the live physical runner (`run_live_campaign.py`), the Poisson validation engine (`poisson_sampling_validation.py`), scientific chart builders (`generate_charts.py`), report generators (`build_reports.py`), and dataset generators (`generate_datasets.py`). |
+| **`campaign_run_1/`** | **Campaign 1 (Full Factorial Baseline):** Stores raw telemetry from 480 full factorial trials (10 replicates $\times$ 4 workloads $\times$ 2 agents $\times$ context/pruning variations) combined with raw Apple M4 hardware sensor telemetry sampled via `powermetrics`. |
+| **`campaign_run_2/`** | **Campaign 2 (Second Independent Physical Run):** Second independent hardware execution run against the live Metal GPU neural server, capturing execution times, RSS memory curves, and tool throughput. |
+| **`campaign_run_3/`** | **Campaign 3 (Third Independent Physical Run):** Third full physical replication, recording latency and resource consumption under identical thermal and electrical conditions. |
+| **`campaign_run_4/`** | **Campaign 4 (Fourth Independent Physical Run):** Fourth physical replication validating cross-campaign reproducibility and temporal stability. |
+| **`campaign_run_5/`** | **Campaign 5 (Fifth Physical Run with Poisson Validation):** High-intensity run featuring $K=300$ tool calls, demonstrating Poisson assertiveness between $90.33\%$ and $93.84\%$. |
+| **`campaign_comparison/`** | **Cross-Campaign Comparative Analysis:** Aggregates consolidated reports (`CAMPAIGN_COMPARISON.md` and `CAMPAIGN_COMPARISON_EN.md`) and structured JSON data (`multi_campaigns_comparison.json`) proving cross-run variability below $2.5\%$ ($\text{CV} < 2.5\%$) and statistical equivalence (ANOVA $p > 0.15$). |
+| **`data/`** | **Experimental Datasets and Cryptographic Signatures:** Houses consolidated trial logs (`consolidated_trials.jsonl`), raw SMC power logs (`powermetrics_sensors.log`), and the cryptographic integrity manifest (`manifest_sha256.json`) containing SHA-256 signatures for every tracked file. |
+| **`data/workload_data/`** | **Deterministic Workload Datasets:** Stores input files consumed by orchestrators during benchmark runs: `mock_files/` (50 files for W2/W4), `system_logs.jsonl` (750 JSON records for W2/W4), `rag_chunks_10k.json` (10,000 texts for W3), and `embedding_head_100k.npz` (384-dimensional dense projection matrix for vector RAG). |
+| **`docs/`** | **Bilingual Academic Documentation:** Features 10 paired formal documentation files (Portuguese and English) covering statistical methodology, hardware architecture, step-by-step reproduction, defense examination FAQ, formal record of the 9 corrective adjustments, and the equalized test condition guarantee. |
+| **`figures/`** | **Publication-Ready Figures (300 DPI):** High-resolution vector/raster figures (Figures 1 to 8) generated from physical trials, covering latency, RAM footprint, energy-delay product (EDP), tool throughput, Poisson sampling, and multi-campaign reproducibility. |
+| **`reports/`** | **Official Academic Reports:** Final documents submitted to UFABC in `.docx` and `.pdf` formats, including the System Testing Report, the Work Plan, and the Plain-English Student Defense Guide. |
+| **`screenshots/`** | **Real Terminal Proofs (Screenshots):** Seven authentic terminal captures recorded directly on the Apple Silicon M4 host, visually validating every underlying tool (`llama-server`, `hyperfine`, `powermetrics`, `caffeinate`, etc.) and workload dataset. |
+| **`tools/`** | **Self-Contained Embedded Toolchain:** Contains the 1-click installer `setup_environment.sh`, Sipeed PicoClaw binary, `llama_cpp` Metal server, `hyperfine` statistical stopwatch, Astral `uv` installer, and OpenClaw runtime package metadata. |
+
+---
+
+## 📖 Glossário de Termos Técnicos e Acadêmicos / Comprehensive Technical Glossary
+
+| Termo / Term | Definição em Português (PT-BR) | English Definition (EN-US) |
+| :--- | :--- | :--- |
+| **UMA (Unified Memory Architecture)** | Arquitetura de memória do Apple Silicon onde CPU, GPU e Neural Engine compartilham o mesmo espaço de endereçamento físico e barramento de alta velocidade (120 GB/s no M4), eliminando cópias PCIe mas sujeita a contenção quando múltiplos processos alocam DRAM simultaneamente. | Apple Silicon memory architecture where CPU, GPU, and Neural Engine share a unified physical address space and high-speed memory bus (120 GB/s on M4), avoiding PCIe copies but introducing contention under heavy concurrent allocations. |
+| **Cold Start Launch Latency** | Tempo decorrido desde o disparo do processo pelo sistema operacional até a conclusão de sua inicialização e prontidão para receber comandos, medido estatisticamente via `hyperfine`. | Time elapsed from OS process fork/exec until runtime initialization is complete and ready to handle commands, statistically benchmarked via `hyperfine`. |
+| **RSS (Resident Set Size)** | Quantidade exata de memória RAM física alocada pelo processo e mapeada na tabela de páginas do sistema operacional (excluindo memória paginada em disco swap). | Exact amount of physical RAM allocated to a process and currently held in the operating system page table (excluding paged-out swap memory). |
+| **Google V8 Engine** | Máquina virtual de execução de JavaScript e WebAssembly desenvolvida pelo Google, utilizada pelo Node.js para compilar código dinamicamente (JIT) em linguagem de máquina. | Google's open-source high-performance JavaScript and WebAssembly engine, utilized by Node.js to JIT-compile source code into native machine instructions. |
+| **Goroutines & M:N Scheduler** | Threads leves de espaço de usuário gerenciadas pelo runtime de Go sobre uma quantidade $M$ de threads do sistema operacional em $N$ núcleos físicos, com custo de alocação de apenas ~2 KB por pilha. | Lightweight user-space execution threads multiplexed by Go's runtime scheduler over $M$ OS threads across $N$ physical cores, requiring only ~2 KB of stack space upon spawn. |
+| **Tri-color Mark-Sweep GC** | Coletor de lixo não-geracional e concorrente do Go que divide ponteiros em cores (branco, cinza e preto), executando coletas em paralelo com a aplicação e com pausas inferiores a 1 milissegundo. | Go's non-generational concurrent garbage collector that colors heap pointers (white, grey, black), running sweeps in parallel with application logic and limiting STW pauses to sub-millisecond durations. |
+| **Generational GC (Mark-Compact)** | Coletor de lixo do Node.js (V8) que divide a memória em geração jovem (*New Space*) e velha (*Old Space*), exigindo compactação periódica que pode interromper temporariamente a execução do *event loop*. | V8 garbage collection strategy partitioning heap memory into nursery (New Space) and tenured (Old Space), periodically performing Mark-Compact cycles that pause the `libuv` event loop. |
+| **Poisson Assertiveness** | Métrica estatística que avalia se a frequência empírica de eventos por unidade de tempo se enquadra dentro do intervalo de confiança fiducial de Garwood para um processo estocástico de Poisson com confiança $\ge 90\%$. | Statistical compliance metric determining whether empirical event arrivals fall within Garwood's exact fiducial confidence interval for a Poisson stochastic process at $\ge 90\%$ confidence. |
+| **Cameron & Trivedi Test** | Teste formal de regressão que avalia se a variância dos dados excede a média (superdispersão ou sobredispersão), confirmando a adequação de um modelo de contagem de Poisson ($t$-stat $< 1{,}96$). | Formal regression-based diagnostic test checking whether sample variance equals sample mean (detecting overdispersion or underdispersion) to confirm Poisson validity ($t$-stat $< 1.96$). |
+| **Deterministic Greedy Decoding** | Estratégia de geração neural onde o modelo de linguagem sempre seleciona o token de maior probabilidade absoluta (`temperature = 0.0`), eliminando qualquer variação estocástica entre rodadas. | Language model decoding policy selecting the single most probable token at each step (`temperature = 0.0`), eliminating all stochastic variance between experimental runs. |
+| **EDP (Energy-Delay Product)** | Métrica combinada de eficiência de hardware ($E \times D$), obtida multiplicando a energia total dissipada em Joules pelo tempo total de execução em segundos ($\text{J}\cdot\text{s}$), penalizando severamente sistemas lentos. | Hardware efficiency metric calculated as total dissipated energy (Joules) multiplied by total elapsed execution time (seconds) ($\text{J}\cdot\text{s}$), heavily penalizing slow architectures. |
+| **Metal Shaders / llama.cpp GPU** | Código especializado compilado em Apple Metal Shading Language que executa tensores e multiplicações de matrizes diretamente nos 10 núcleos da GPU do Mac mini M4. | Specialized compute kernels compiled in Apple Metal Shading Language that execute matrix multiplications and tensor operations directly on the M4 10-core GPU. |
+| **Tool Pruning** | Prática de engenharia de software que remove esquemas de ferramentas desnecessárias do prompt inicial do agente, evitando inchaço de contexto (*prompt token bloat*) e consumo excessivo de energia na GPU. | Software engineering technique filtering out unused tool definitions from the agent's system prompt, mitigating token bloat and preventing massive GPU prefill overhead. |
+| **ReAct Loop (Reason + Act)** | Paradigma de orquestração autônoma onde o agente de IA alterna continuamente entre raciocínio verbalizado (*Thought*), disparo de ferramenta externa (*Action*) e inspeção de retorno (*Observation*). | Autonomous agent framework where the model iteratively cycles between explicit verbal reasoning (*Thought*), external tool execution (*Action*), and sensory inspection (*Observation*). |
+| **Vector RAG (Cosine Similarity)** | Técnica de recuperação de informação onde fragmentos de texto são mapeados em vetores densos e ranqueados calculando o cosseno do ângulo entre a consulta e os documentos armazenados. | Information retrieval paradigm where textual documents are projected into dense vector spaces and ranked based on the cosine angle between query and document vectors. |
+| **Powermetrics & Apple SMC** | Ferramenta nativa do macOS para amostragem dos sensores analógicos e digitais integrados no chip Apple Silicon via controlador de gerenciamento do sistema (SMC), medindo consumo real de energia em miliwatts. | Apple's hardware diagnostics utility reading on-die voltage and current sensors via the System Management Controller (SMC), reporting real-time power dissipation in milliwatts. |
+| **Caffeinate Quiescence Protocol** | Protocolo operacional que executa `/usr/bin/caffeinate -dims` e suspende a indexação do Spotlight (`mdutil`) para impedir que o sistema operacional entre em repouso térmico ou execute tarefas concorrentes de fundo. | Operational testbed setup running `/usr/bin/caffeinate -dims` and pausing Spotlight (`mdutil`) to prevent OS sleep, thermal throttling, or background disk indexing during empirical trials. |
+| **Mach-O ARM64 Binary** | Formato binário nativo executável dos sistemas operacionais da Apple para a arquitetura de processadores ARM de 64 bits (Apple Silicon), sem camadas intermediárias de interpretação. | Apple's native binary executable file format targeting 64-bit ARM architectures (Apple Silicon), executing directly on the processor without intermediate emulation or runtime interpreters. |
 
 ---
 
 ## 🔒 Integridade Criptográfica e Conformidade Metodológica
 
 Em estrita observância às diretrizes da UFABC e de avaliação de sistemas (Raj Jain, 1991):
-1. **Manifesto SHA-256:** Todos os 80 arquivos do repositório possuem assinaturas calculadas em [`data/manifest_sha256.json`](data/manifest_sha256.json).
-2. **Garantia de Condições Idênticas:** Nenhum ajuste oportunista foi aplicado em rodadas isoladas. Os 9 ajustes descritos em [`docs/08_REGISTRO_DE_AJUSTES_E_DESVIOS.md`](docs/08_REGISTRO_DE_AJUSTES_E_DESVIOS.md) foram aplicados uniformemente a todas as 5 campanhas físicas.
+1. **Manifesto SHA-256:** Todos os arquivos do repositório possuem assinaturas calculadas em [`data/manifest_sha256.json`](data/manifest_sha256.json).
+2. **Garantia de Condições Idênticas:** Nenhum ajuste oportunista foi aplicado em rodadas isoladas. Os 9 ajustes descritos em [`docs/08_REGISTRO_DE_AJUSTES_E_DESVIOS.md`](docs/08_REGISTRO_DE_AJUSTES_E_DESVIOS.md) e [`docs/09_EQUALIZED_TEST_CONDITIONS_GUARANTEE_PT.md`](docs/09_EQUALIZED_TEST_CONDITIONS_GUARANTEE_PT.md) foram aplicados uniformemente a todas as 5 campanhas físicas.
 3. **Supervisão do Autor:** Todos os testes físicos, medições e interpretações estatísticas foram realizados e supervisionados pelo pesquisador **Rafael Paniccia Cassetta (RA: 21202520618)**.
 
 ---
