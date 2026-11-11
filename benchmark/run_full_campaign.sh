@@ -19,22 +19,27 @@ FIG_DIR="$REPO_DIR/figures"
 REPORTS_DIR="$REPO_DIR/reports"
 WORKLOAD_DIR="$REPO_DIR/workload_data"
 
-# Auto-locate Python virtualenv and tools (either in repo or adjacent workspace)
-if [ -f "$REPO_DIR/.venv/bin/python" ]; then
+# Auto-locate Python virtualenv and tools
+if [ -f "$REPO_DIR/tools/.venv/bin/python" ]; then
+    PY="$REPO_DIR/tools/.venv/bin/python"
+elif [ -f "$REPO_DIR/.venv/bin/python" ]; then
     PY="$REPO_DIR/.venv/bin/python"
-elif [ -f "$REPO_DIR/../picoclaw_vs_openclaw/.venv/bin/python" ]; then
-    PY="$REPO_DIR/../picoclaw_vs_openclaw/.venv/bin/python"
+elif command -v python3 >/dev/null 2>&1; then
+    PY="python3"
 else
-    echo "Error: Python virtual environment not found. Please run ./benchmark/setup_environment.sh first."
+    echo "Error: Python environment not found. Please run make setup first."
     exit 1
 fi
 
-if [ -f "$REPO_DIR/tools/llama_cpp/llama-server" ]; then
+if [ -f "$REPO_DIR/tools/llama_cpp/llama-b11887/llama-server" ]; then
+    LLAMA_BIN="$REPO_DIR/tools/llama_cpp/llama-b11887/llama-server"
+    MODEL_PATH="$REPO_DIR/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+elif [ -f "$REPO_DIR/tools/llama_cpp/llama-server" ]; then
     LLAMA_BIN="$REPO_DIR/tools/llama_cpp/llama-server"
     MODEL_PATH="$REPO_DIR/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
 else
-    LLAMA_BIN="$REPO_DIR/../picoclaw_vs_openclaw/tools/llama_cpp/llama-b11887/llama-server"
-    MODEL_PATH="$REPO_DIR/../picoclaw_vs_openclaw/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+    LLAMA_BIN="llama-server"
+    MODEL_PATH="$REPO_DIR/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"
 fi
 
 echo "========================================================================"

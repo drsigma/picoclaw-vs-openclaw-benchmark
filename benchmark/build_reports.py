@@ -289,8 +289,8 @@ def build_system_testing_report(data):
     add_sec_heading(doc, "2.3 Test Procedure", level=2)
     add_body_p(
         doc,
-        "Testing of OpenClaw proceeded in four reproducible stages inside the isolated workspace "
-        "(/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw): (1) Installing Node.js v22.11.0 and Node.js v26.12.1 "
+        "Testing of OpenClaw proceeded in four reproducible stages inside the isolated workspace: "
+        "(1) Installing Node.js v22.11.0 and Node.js v26.12.1 "
         "(darwin-arm64) and installing openclaw@2026.10.7 via npm; (2) Validating configuration files (~/.openclaw/openclaw.json) "
         "pointing to the local llama-server endpoint (http://127.0.0.1:8080/v1); (3) Benchmarking cold-start CLI launch (--version) "
         "and agent module bootstrap (openclaw agent --help) across n = 30 repetitions using hyperfine v2.0.0 and Darwin libproc "
@@ -301,7 +301,7 @@ def build_system_testing_report(data):
     add_code_box(
         doc,
         """# 1. Provision Node.js v26.12.1 (darwin-arm64) and OpenClaw v2026.10.7
-export PATH="/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/tools/node-v26.12.1-darwin-arm64/bin:$PATH"
+export PATH="./tools/node/bin:$PATH"
 npm install --prefix ./tools/openclaw_npm openclaw@2026.10.7
 
 # 2. Verify CLI version, configuration validation, and cold-start latency (n = 30)

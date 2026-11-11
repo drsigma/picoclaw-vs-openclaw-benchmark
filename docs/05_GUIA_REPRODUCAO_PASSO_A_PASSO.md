@@ -1,15 +1,42 @@
 # Guia Completo de Reprodução Passo a Passo (Reprodutibilidade 100%)
 ## Como Clonar, Executar os Testes e Recriar Todos os Gráficos Localmente
-**Público-Alvo:** Revisores de Periódicos Acadêmicos, Membros de Bancas de Defesa e Pesquisadores  
-**Requisitos Mínimos:** macOS 14.0+ em Apple Silicon (M1/M2/M3/M4) com pelo menos 16 GB de Memória Unificada.
+**Público-Alvo:** Revisores de Periódicos Acadêmicos (*SoftwareX* / *IEEE*), Membros de Bancas e Pesquisadores  
+**Requisitos de Sistema:**
+* **Reprodução Completa com Telemetria Física:** macOS 14.0+ em Apple Silicon (M1/M2/M3/M4) com pelo menos 16 GB de Memória Unificada (UMA).
+* **Reprodução Simulado-Portátil (Qualquer Máquina):** Qualquer distribuição Linux (Ubuntu, Debian, Fedora, Arch), Windows (via WSL2) ou macOS Intel/Apple Silicon, sem exigir sudo, GPU ou modelo neural local.
 
 ---
 
-### Passo 1: Obter o Repositório e Verificar a Integridade dos Arquivos
+### Modo Rápido: Reprodução em Qualquer Máquina (Linux, Windows WSL, macOS)
 
-Navegue até a raiz do repositório:
+Para revisores que desejam validar a lógica do framework, a consistência numérica e a geração de gráficos em qualquer arquitetura em menos de 10 segundos:
+
 ```bash
-cd /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark
+# 1. Clonar o repositório
+git clone https://github.com/drsigma/picoclaw-vs-openclaw-benchmark.git
+cd picoclaw-vs-openclaw-benchmark
+
+# 2. Configurar o ambiente (Python venv e dependências)
+make setup
+
+# 3. Executar a suíte de testes unitários e linter
+make test
+
+# 4. Executar a campanha simulada de ponta a ponta (Sem Sudo / Multi-OS)
+make simulate-campaign
+
+# 5. Regenerar todas as figuras científicas em 300 DPI
+make reproduce-figures
+```
+
+---
+
+### Passo a Passo Detalhado para Execução Física no Apple Silicon
+
+#### Passo 1: Obter o Repositório e Verificar a Integridade dos Arquivos
+```bash
+git clone https://github.com/drsigma/picoclaw-vs-openclaw-benchmark.git
+cd picoclaw-vs-openclaw-benchmark
 ```
 
 Verifique a integridade criptográfica de todos os binários, dados e relatórios contra o manifesto SHA-256:
@@ -32,31 +59,22 @@ print(f"Verificação concluída: {ok} arquivos íntegros, {fail} falhas.")
 
 ---
 
-### Passo 2: Inicializar o Ambiente Python e Compilar os Orquestradores
-
-O projeto é 100% autossuficiente e não requer ferramentas do Xcode instaladas no sistema:
-
+#### Passo 2: Inicializar o Ambiente e Datasets
 ```bash
-# 1. Ativar o interpretador CPython 3.12.3 independente
-VENV_PYTHON="../picoclaw_vs_openclaw/.venv/bin/python"
+# 1. Provisionar o ambiente isolado
+make setup
 
-# 2. Compilar o orquestrador estático Go ARM64 (caso queira recompilar do fonte)
-CGO_ENABLED=0 ../picoclaw_vs_openclaw/tools/go/bin/go build \
-    -o ./benchmark/picoclaw_orch \
-    ./benchmark/picoclaw_orch.go
-
-# 3. Gerar os datasets determinísticos das cargas W1–W4 (50 configs, logs JSONL e projeção RAG 100k)
-$VENV_PYTHON ./benchmark/generate_datasets.py
+# 2. Gerar os datasets determinísticos das cargas W1–W4 (se necessário regenerar)
+./tools/.venv/bin/python ./benchmark/generate_datasets.py
 ```
 
 ---
 
-### Passo 3: Inicializar o Servidor Neural Local `llama.cpp`
-
-Abra uma janela de terminal e inicie o servidor Metal GPU:
+#### Passo 3: Inicializar o Servidor Neural Local `llama.cpp`
+Em uma janela de terminal, inicie o servidor Metal GPU:
 ```bash
-../picoclaw_vs_openclaw/tools/llama_cpp/llama-b11887/llama-server \
-  -m ../picoclaw_vs_openclaw/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf \
+./tools/llama_cpp/llama-b11887/llama-server \
+  -m models/Llama-3.2-3B-Instruct-Q4_K_M.gguf \
   -c 32768 -np 1 -ngl 99 --host 127.0.0.1 --port 8080 -t 4
 ```
 
@@ -68,45 +86,29 @@ curl -s http://127.0.0.1:8080/health
 
 ---
 
-### Passo 4: Executar a Campanha de Validação Estatística de Poisson ($\ge 90\%$ de Assertividade)
-
-Execute o motor analítico de Poisson:
-```bash
-$VENV_PYTHON ./benchmark/poisson_sampling_validation.py
-```
-
-Esse script executa as seguintes etapas automaticamente:
-1. Calcula os limiares amostrais teóricos ($K \ge 271$ eventos para $90\%$ de assertividade; $K \ge 1.537$ para $95\%$).
-2. Processa as amostras empíricas com $n = 100$ repetições ($K = 300$ eventos no W2 e $K = 1.000$ eventos no W4).
-3. Calcula os Intervalos de Confiança Exatos de Garwood (1936) via Qui-Quadrado.
-4. Gera o arquivo de dados consolidado em `data/poisson_results.json`.
-5. Plota o gráfico científico em alta resolução em `figures/fig7_poisson_assertiveness.png`.
+#### Passo 4: Executar a Campanha de Benchmark Mestre
+* **Modo Padrão em Espaço de Usuário (Sem Sudo):**
+  ```bash
+  make benchmark
+  ```
+* **Modo Completo com Telemetria Elétrica Apple SMC (Requer Sudo):**
+  ```bash
+  make benchmark-full-smc
+  ```
 
 ---
 
-### Passo 5: Executar os 480 Testes da Matriz Fatorial Completa (Opcional)
-
-Para reproduzir a bateria inteira de 480 testes fatoriais (16 tratamentos $\times$ 30 repetições):
+#### Passo 5: Validação Estatística de Poisson e Intervalos de Garwood
 ```bash
-$VENV_PYTHON ./benchmark/run_all_experiments.py
+./tools/.venv/bin/python ./benchmark/poisson_sampling_validation.py
 ```
-*Duração estimada: aproximadamente 25 a 35 minutos no Mac mini M4.*  
-Os dados consolidados serão salvos em `data/results_all.json`.
+Esse script calcula os intervalos exatos de Garwood (1936), processa os eventos de Poisson e plota `figures/fig7_poisson_assertiveness.png`.
 
 ---
 
-### Passo 6: Regenerar Todas as Figuras e Relatórios Finais em Word e PDF
-
-Para recriar todas as figuras científicas (Figuras 1 a 6) e compilar os documentos em `.docx` e `.pdf`:
+#### Passo 6: Regenerar Todas as Figuras e Tabelas
 ```bash
-# 1. Regenerar os 6 gráficos originais em 300 DPI
-$VENV_PYTHON ./benchmark/generate_charts.py
-
-# 2. Compilar os relatórios formais da disciplina (System Testing Report e Revised Work Plan)
-$VENV_PYTHON ./benchmark/build_reports.py
-
-# 3. Compilar o Guia Rápido e Defesa
-$VENV_PYTHON ./benchmark/build_layperson_guide.py
+make reproduce-figures
+./tools/.venv/bin/python ./benchmark/analyze_results.py
 ```
-
-Todos os relatórios gerados estarão prontos para submissão na pasta `reports/`.
+Todas as tabelas consolidadas estarão em `results/publication_campaign/tables/` e as figuras em `figures/`.

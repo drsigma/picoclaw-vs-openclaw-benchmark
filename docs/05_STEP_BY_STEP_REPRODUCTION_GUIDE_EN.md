@@ -1,15 +1,42 @@
 # Complete Step-by-Step Reproduction Guide (100% Reproducibility)
 ## How to Clone, Run Tests, and Recreate All Charts Locally
-**Target Audience:** Academic Journal Reviewers, Defense Committee Members, and Researchers  
-**Minimum Requirements:** macOS 14.0+ on Apple Silicon (M1/M2/M3/M4) with at least 16 GB Unified Memory Architecture (UMA).
+**Target Audience:** Academic Journal Reviewers (*SoftwareX* / *IEEE*), Committee Members, and Researchers  
+**System Requirements:**
+* **Full Physical Reproduction with Hardware Telemetry:** macOS 14.0+ on Apple Silicon (M1/M2/M3/M4) with at least 16 GB Unified Memory Architecture (UMA).
+* **Portable Simulation Reproduction (Any Machine):** Any Linux distribution (Ubuntu, Debian, Fedora, Arch), Windows (via WSL2), or Intel/Apple Silicon macOS, requiring zero sudo privileges, no GPU, and no local weights.
 
 ---
 
-### Step 1: Navigate to Repository and Verify File Integrity
+### Fast-Track: Reproduction on Any Machine (Linux, Windows WSL, macOS)
 
-Navigate to the repository root:
+For peer reviewers who wish to validate framework logic, numerical consistency, and figure generation across any hardware architecture in under 10 seconds:
+
 ```bash
-cd /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark
+# 1. Clone the repository
+git clone https://github.com/drsigma/picoclaw-vs-openclaw-benchmark.git
+cd picoclaw-vs-openclaw-benchmark
+
+# 2. Configure environment (Python virtualenv & dependencies)
+make setup
+
+# 3. Run automated unit test suite and code linter
+make test
+
+# 4. Run end-to-end portable simulation (No Sudo / Cross-Platform)
+make simulate-campaign
+
+# 5. Re-render all 300-DPI scientific figures
+make reproduce-figures
+```
+
+---
+
+### Detailed Step-by-Step Guide for Apple Silicon Physical Execution
+
+#### Step 1: Clone Repository and Verify File Integrity
+```bash
+git clone https://github.com/drsigma/picoclaw-vs-openclaw-benchmark.git
+cd picoclaw-vs-openclaw-benchmark
 ```
 
 Verify cryptographic integrity of all binaries, datasets, and reports against the SHA-256 manifest:
@@ -32,85 +59,56 @@ print(f"Verification finished: {ok} files intact, {fail} failures.")
 
 ---
 
-### Step 2: Initialize the Python Environment and Compile Orchestrators
-
-The project is completely self-contained and does not require system-wide Xcode tools:
-
+#### Step 2: Initialize Environment and Datasets
 ```bash
-# 1. Activate isolated CPython 3.12.3 interpreter
-VENV_PYTHON="../picoclaw_vs_openclaw/.venv/bin/python"
+# 1. Provision isolated environment
+make setup
 
-# 2. Compile static Go ARM64 orchestrator (if recompiling from source)
-CGO_ENABLED=0 ../picoclaw_vs_openclaw/tools/go/bin/go build \
-    -o ./benchmark/picoclaw_orch \
-    ./benchmark/picoclaw_orch.go
-
-# 3. Generate deterministic datasets for workloads W1–W4 (50 configs, JSONL logs, and 100k RAG projection)
-$VENV_PYTHON ./benchmark/generate_datasets.py
+# 2. Generate deterministic datasets for workloads W1–W4 (if regeneration needed)
+./tools/.venv/bin/python ./benchmark/generate_datasets.py
 ```
 
 ---
 
-### Step 3: Launch Local Neural Server `llama.cpp`
-
-Open a terminal window and launch the Metal GPU server:
+#### Step 3: Launch Local Neural Server `llama.cpp`
+In a separate terminal window, launch the Metal GPU server:
 ```bash
-../picoclaw_vs_openclaw/tools/llama_cpp/llama-b11887/llama-server \
-  -m ../picoclaw_vs_openclaw/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf \
+./tools/llama_cpp/llama-b11887/llama-server \
+  -m models/Llama-3.2-3B-Instruct-Q4_K_M.gguf \
   -c 32768 -np 1 -ngl 99 --host 127.0.0.1 --port 8080 -t 4
 ```
 
-In a second window, test health check endpoint:
+In another terminal, verify endpoint responsiveness:
 ```bash
 curl -s http://127.0.0.1:8080/health
-# Expected output: {"status":"ok"}
+# Should return: {"status":"ok"}
 ```
 
 ---
 
-### Step 4: Run Poisson Statistical Validation ($\ge 90\%$ Assertiveness)
-
-Execute the Poisson analytical engine:
-```bash
-$VENV_PYTHON ./benchmark/poisson_sampling_validation.py
-```
-
-This script automatically executes:
-1. Calculates theoretical sample bounds ($K \ge 271$ events for $90\%$ assertiveness; $K \ge 1,537$ for $95\%$).
-2. Evaluates physical empirical samples with $n = 100$ repetitions ($K = 300$ tool calls on W2 and $K = 1,000$ tool calls on W4).
-3. Computes exact Garwood (1936) Chi-Square Confidence Intervals.
-4. Generates consolidated dataset in `data/poisson_results.json`.
-5. Plots high-resolution scientific chart in `figures/fig7_poisson_assertiveness.png`.
+#### Step 4: Run Master Benchmark Campaign
+* **Standard User-Space Mode (No Sudo Required):**
+  ```bash
+  make benchmark
+  ```
+* **Full Apple SMC Electrical Telemetry Mode (Requires Sudo):**
+  ```bash
+  make benchmark-full-smc
+  ```
 
 ---
 
-### Step 5: Execute Independent Physical Campaigns (Empirical Reproducibility)
-
-To run a complete live physical campaign executing live queries against the Metal GPU and collecting hardware metrics:
+#### Step 5: Poisson Sampling Validation and Garwood Bounds
 ```bash
-$VENV_PYTHON ./benchmark/run_live_campaign.py campaign_run_6 ./campaign_run_6
+./tools/.venv/bin/python ./benchmark/poisson_sampling_validation.py
 ```
-
-To compare all physical campaigns (`campaign_run_1` through `campaign_run_5`) with ANOVA and CV%:
-```bash
-$VENV_PYTHON ./benchmark/compare_campaigns.py
-```
-This generates the cross-campaign reproducibility chart `figures/fig8_three_campaigns_reproducibility.png` and documentation in `campaign_comparison/CAMPAIGN_COMPARISON.md` and `CAMPAIGN_COMPARISON_EN.md`.
+This script computes exact Garwood (1936) fiducial bounds, audits Poisson arrival events, and plots `figures/fig7_poisson_assertiveness.png`.
 
 ---
 
-### Step 6: Regenerate All Figures and Reports in Word and PDF
-
-To recreate all scientific figures (Figures 1 to 8) and compile `.docx` and `.pdf` reports:
+#### Step 6: Re-render All Figures and Tables
 ```bash
-# 1. Regenerate original charts at 300 DPI
-$VENV_PYTHON ./benchmark/generate_charts.py
-
-# 2. Compile formal course reports (System Testing Report and Revised Work Plan)
-$VENV_PYTHON ./benchmark/build_reports.py
-
-# 3. Compile Layperson Defense Guide
-$VENV_PYTHON ./benchmark/build_layperson_guide.py
+make reproduce-figures
+./tools/.venv/bin/python ./benchmark/analyze_results.py
 ```
-
-All compiled reports will be ready in the `reports/` directory.
+All consolidated tables will be saved in `results/publication_campaign/tables/` and figures in `figures/`.

@@ -31,18 +31,17 @@ chmod +x "$REPO_DIR/benchmark/picoclaw_orch" 2>/dev/null || true
 
 # 3. Provisionar Node.js v26.12.1 (caso não exista em tools/node)
 if [ ! -x "$TOOLS_DIR/node/bin/node" ]; then
-    echo "---> Provisioning Node.js v26.12.1 (darwin-arm64)..."
+    echo "---> Provisioning Node.js (darwin-arm64)..."
     mkdir -p "$TOOLS_DIR/node"
-    if [ -f "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/tools/node-v26.12.1-darwin-arm64/bin/node" ]; then
-        cp -R /Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/tools/node-v26.12.1-darwin-arm64/* "$TOOLS_DIR/node/"
+    if command -v node >/dev/null 2>&1; then
+        echo "Using system node binary..."
     else
         NODE_TAR="node-v26.12.1-darwin-arm64.tar.gz"
         curl -fsSL -o "$TOOLS_DIR/$NODE_TAR" "https://nodejs.org/dist/v26.12.1/$NODE_TAR"
         tar -xzf "$TOOLS_DIR/$NODE_TAR" -C "$TOOLS_DIR/node" --strip-components=1
         rm -f "$TOOLS_DIR/$NODE_TAR"
     fi
-    chmod +x "$TOOLS_DIR/node/bin/node"
-    echo "[OK] Node.js provisioned at: $TOOLS_DIR/node/bin/node"
+    chmod +x "$TOOLS_DIR/node/bin/node" 2>/dev/null || true
 fi
 
 # 4. Provisionar Python Virtualenv via uv embarcado
@@ -52,7 +51,8 @@ if [ ! -d "$TOOLS_DIR/.venv" ]; then
     export UV_CACHE_DIR="$TOOLS_DIR/uv_cache"
     "$TOOLS_DIR/uv/uv" venv "$TOOLS_DIR/.venv" --python 3.12
     "$TOOLS_DIR/uv/uv" pip install --python "$TOOLS_DIR/.venv/bin/python" \
-        numpy scipy matplotlib python-docx dulwich
+        numpy scipy matplotlib python-docx dulwich pytest ruff
+fi
     echo "[OK] Python virtual environment ready at: $TOOLS_DIR/.venv/bin/python"
 fi
 

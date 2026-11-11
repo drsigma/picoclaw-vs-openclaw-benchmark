@@ -12,6 +12,34 @@ Este guia didático foi elaborado para estudantes, pesquisadores e engenheiros q
 
 ---
 
+### 0. Como Reproduzir em Qualquer Máquina (Linux, Windows WSL, macOS)
+
+Você **NÃO precisa de um Mac com Apple Silicon nem de GPU dedicada** para reproduzir e auditar este trabalho científico! Qualquer estudante ou revisor em Linux (Ubuntu, Debian, Fedora), Windows (via WSL2) ou macOS Intel pode executar o pipeline completo:
+
+```bash
+# 1. Clonar e entrar na pasta do projeto
+git clone https://github.com/drsigma/picoclaw-vs-openclaw-benchmark.git
+cd picoclaw-vs-openclaw-benchmark
+
+# 2. Configurar o ambiente isolado com 1 comando
+make setup
+
+# 3. Executar a Verificação Rápida Portátil (< 5 segundos, sem GPU, sem Sudo)
+make simulate-campaign
+
+# 4. Executar os 13 testes unitários automatizados (pytest e linter)
+make test
+
+# 5. Regenerar todas as 8 figuras científicas em 300 DPI
+make reproduce-figures
+```
+
+*Caso você possua um Mac com Apple Silicon (M1/M2/M3/M4):*
+* Execute `make benchmark` para rodar a campanha física real em espaço de usuário comum;
+* Execute `make benchmark-full-smc` caso queira amostragem física de miliwatts com privilégios de superusuário via Apple SMC.
+
+---
+
 ### 1. A Analogia Central: O Carro e os Dois Motoristas
 
 Para compreender este experimento em 30 segundos, imagine um veículo de corrida:
@@ -114,6 +142,34 @@ sudo powermetrics -i 100 -n 10 --samplers cpu_power,gpu_power
 ## 🇺🇸 English (EN-US): How to Understand and Reproduce in 3 Minutes
 
 This walkthrough is tailored for students, researchers, and engineers seeking an intuitive yet technically precise understanding of the benchmark, supported by authentic terminal screenshots recorded on Apple Silicon M4.
+
+---
+
+### 0. How to Reproduce on Any Machine (Linux, Windows WSL, macOS)
+
+You **DO NOT need an Apple Silicon Mac or a dedicated GPU** to reproduce and audit this research! Any reviewer, student, or researcher on Linux (Ubuntu, Debian, Fedora), Windows (via WSL2), or Intel/Apple Silicon macOS can run the entire pipeline:
+
+```bash
+# 1. Clone repository and enter project directory
+git clone https://github.com/drsigma/picoclaw-vs-openclaw-benchmark.git
+cd picoclaw-vs-openclaw-benchmark
+
+# 2. Setup isolated environment with a single command
+make setup
+
+# 3. Run Instant Portable Simulation (< 5 seconds, No GPU, No Sudo)
+make simulate-campaign
+
+# 4. Run the 13 automated unit tests (pytest and ruff linter)
+make test
+
+# 5. Re-render all 8 publication figures in 300 DPI
+make reproduce-figures
+```
+
+*If you are running on an Apple Silicon Mac (M1/M2/M3/M4):*
+* Run `make benchmark` for physical execution in standard user space (no sudo required);
+* Run `make benchmark-full-smc` for complete physical hardware electrical telemetry via Apple SMC shunts.
 
 ---
 
