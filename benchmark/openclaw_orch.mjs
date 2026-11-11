@@ -20,10 +20,13 @@ function getRSSMB() {
   return process.memoryUsage().rss / (1024.0 * 1024.0);
 }
 
-// Simulate OpenClaw's 54-tool TypeBox/JSON-Schema catalog & prompt context builder overhead
+// Simulate OpenClaw's TypeBox/JSON-Schema catalog & prompt context builder overhead
+// Supports ablation modes: "full" (54 tools stock enterprise) vs "minimal" (equalized 3 tools)
 function buildOpenClawToolCatalog() {
+  const mode = process.env.OPENCLAW_MODE || "minimal";
+  const toolCount = mode === "full" ? 54 : 3;
   const catalog = [];
-  for (let i = 0; i < 54; i++) {
+  for (let i = 0; i < toolCount; i++) {
     catalog.push({
       id: `openclaw_tool_${i}`,
       name: `tool_${i}`,
@@ -264,7 +267,7 @@ async function runWorkload(tier, warmth, rssIdle) {
   const rssPeak = Math.max(rssIdle, getRSSMB());
 
   return {
-    architecture: "OpenClaw (Node.js/TS)",
+    architecture: process.env.OPENCLAW_MODE === "full" ? "OpenClaw (Node.js/TS Full)" : "OpenClaw (Node.js/TS Minimal)",
     workload: tier,
     warmth,
     t_task_ms: tTaskMs,

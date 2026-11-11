@@ -1,0 +1,202 @@
+{
+  "picoclaw": {
+    "W1": {
+      "t_task_mean_ms": 1444.6743419999998,
+      "t_task_std_ms": 13.132642486111234,
+      "t_task_p50_ms": 1441.608375,
+      "t_task_p95_ms": 1462.3969418,
+      "t_orch_mean_ms": 0.38617540000004735,
+      "rss_peak_mb": 11.134375,
+      "energy_mean_j": 23.6926592088,
+      "edp_mean_js": 34.23043961054191,
+      "joules_per_token": 0.3701978001375,
+      "sample_count": 5
+    },
+    "W2": {
+      "t_task_mean_ms": 2979.1243832,
+      "t_task_std_ms": 172.09097762773118,
+      "t_task_p50_ms": 2913.312,
+      "t_task_p95_ms": 3211.9794748,
+      "t_orch_mean_ms": 4.736300000000028,
+      "rss_peak_mb": 12.3625,
+      "energy_mean_j": 48.85763988448,
+      "edp_mean_js": 145.94153908156017,
+      "joules_per_token": 0.3817003115975,
+      "sample_count": 5
+    },
+    "W3": {
+      "t_task_mean_ms": 6423.133616800001,
+      "t_task_std_ms": 869.9918728191631,
+      "t_task_p50_ms": 6035.559792,
+      "t_task_p95_ms": 7591.2159918,
+      "t_orch_mean_ms": 5.493083400000069,
+      "rss_peak_mb": 12.15625,
+      "energy_mean_j": 105.33939131551999,
+      "edp_mean_js": 686.5393279990473,
+      "joules_per_token": 0.41148199732624996,
+      "sample_count": 5
+    },
+    "W4": {
+      "t_task_mean_ms": 11071.344341600001,
+      "t_task_std_ms": 98.72742191780243,
+      "t_task_p50_ms": 11026.857708,
+      "t_task_p95_ms": 11206.419875000001,
+      "t_orch_mean_ms": 22.467716400000064,
+      "rss_peak_mb": 16.6625,
+      "energy_mean_j": 181.57004720224,
+      "edp_mean_js": 2010.3523966989262,
+      "joules_per_token": 0.42127621160612516,
+      "sample_count": 5
+    }
+  },
+  "openclaw_minimal": {
+    "W1": {
+      "t_task_mean_ms": 1446.4348082000001,
+      "t_task_std_ms": 12.425891757300704,
+      "t_task_p50_ms": 1443.969291,
+      "t_task_p95_ms": 1463.206175,
+      "t_orch_mean_ms": 0.3184916000000612,
+      "rss_peak_mb": 85.98125,
+      "energy_mean_j": 23.721530854479997,
+      "edp_mean_js": 34.313673696262,
+      "joules_per_token": 0.37064891960124996,
+      "sample_count": 5
+    },
+    "W2": {
+      "t_task_mean_ms": 2899.0850836,
+      "t_task_std_ms": 55.32312188594834,
+      "t_task_p50_ms": 2876.7933749999997,
+      "t_task_p95_ms": 2973.818659,
+      "t_orch_mean_ms": 4.352525399999922,
+      "rss_peak_mb": 88.071875,
+      "energy_mean_j": 47.54499537104,
+      "edp_mean_js": 137.8771425793486,
+      "joules_per_token": 0.37144527633625,
+      "sample_count": 5
+    },
+    "W3": {
+      "t_task_mean_ms": 5998.203516400001,
+      "t_task_std_ms": 10.580205682925184,
+      "t_task_p50_ms": 6003.844916,
+      "t_task_p95_ms": 6007.7390497999995,
+      "t_orch_mean_ms": 10.21646660000024,
+      "rss_peak_mb": 91.459375,
+      "energy_mean_j": 98.37053766896,
+      "edp_mean_js": 590.0479736187847,
+      "joules_per_token": 0.384259912769375,
+      "sample_count": 5
+    },
+    "W4": {
+      "t_task_mean_ms": 12175.3196914,
+      "t_task_std_ms": 76.39631671508668,
+      "t_task_p50_ms": 12141.671,
+      "t_task_p95_ms": 12274.9842166,
+      "t_orch_mean_ms": 10.120841399999335,
+      "rss_peak_mb": 92.63125,
+      "energy_mean_j": 199.67524293896,
+      "edp_mean_js": 2431.186490771163,
+      "joules_per_token": 0.41685854475774525,
+      "sample_count": 5
+    }
+  },
+  "openclaw_full": {
+    "W1": {
+      "t_task_mean_ms": 1444.7042499999998,
+      "t_task_std_ms": 7.092797804174051,
+      "t_task_p50_ms": 1447.1205,
+      "t_task_p95_ms": 1451.2484087999999,
+      "t_orch_mean_ms": 0.33941659999995866,
+      "rss_peak_mb": 86.01875,
+      "energy_mean_j": 23.6931497,
+      "edp_mean_js": 34.230254105558885,
+      "joules_per_token": 0.3702054640625,
+      "sample_count": 5
+    },
+    "W2": {
+      "t_task_mean_ms": 2885.5788668,
+      "t_task_std_ms": 11.751651099165812,
+      "t_task_p50_ms": 2884.107958,
+      "t_task_p95_ms": 2901.3096584,
+      "t_orch_mean_ms": 4.472425000000112,
+      "rss_peak_mb": 88.071875,
+      "energy_mean_j": 47.32349341551999,
+      "edp_mean_js": 136.5574843920761,
+      "joules_per_token": 0.36971479230874993,
+      "sample_count": 5
+    },
+    "W3": {
+      "t_task_mean_ms": 6016.937025000001,
+      "t_task_std_ms": 9.887406564252608,
+      "t_task_p50_ms": 6014.0788330000005,
+      "t_task_p95_ms": 6029.6064248,
+      "t_orch_mean_ms": 9.840883199999917,
+      "rss_peak_mb": 91.553125,
+      "energy_mean_j": 98.67776720999998,
+      "edp_mean_js": 593.7391936919882,
+      "joules_per_token": 0.38546002816406244,
+      "sample_count": 5
+    },
+    "W4": {
+      "t_task_mean_ms": 12233.116133,
+      "t_task_std_ms": 71.66956560824865,
+      "t_task_p50_ms": 12195.208166,
+      "t_task_p95_ms": 12330.092341,
+      "t_orch_mean_ms": 12.775675000000774,
+      "rss_peak_mb": 93.746875,
+      "energy_mean_j": 200.6231045812,
+      "edp_mean_js": 2454.313128534269,
+      "joules_per_token": 0.4188373790839249,
+      "sample_count": 5
+    }
+  },
+  "neural_baseline": {
+    "W1": {
+      "t_task_mean_ms": 1518.6628498,
+      "t_task_std_ms": 162.08743685948025,
+      "t_task_p50_ms": 1445.129208,
+      "t_task_p95_ms": 1740.2539998,
+      "t_orch_mean_ms": 0.0,
+      "rss_peak_mb": 0.0,
+      "energy_mean_j": 24.90607073672,
+      "edp_mean_js": 38.16861742624989,
+      "joules_per_token": 0.38915735526125,
+      "sample_count": 5
+    },
+    "W2": {
+      "t_task_mean_ms": 2879.019025,
+      "t_task_std_ms": 49.76602265609698,
+      "t_task_p50_ms": 2853.888583,
+      "t_task_p95_ms": 2947.4676414,
+      "t_orch_mean_ms": 0.0,
+      "rss_peak_mb": 0.0,
+      "energy_mean_j": 47.21591201,
+      "edp_mean_js": 135.96800269950037,
+      "joules_per_token": 0.368874312578125,
+      "sample_count": 5
+    },
+    "W3": {
+      "t_task_mean_ms": 5748.9586500000005,
+      "t_task_std_ms": 21.945760670418437,
+      "t_task_p50_ms": 5744.562959,
+      "t_task_p95_ms": 5778.5510332,
+      "t_orch_mean_ms": 0.0,
+      "rss_peak_mb": 0.0,
+      "energy_mean_j": 94.28292186,
+      "edp_mean_js": 542.0349379816387,
+      "joules_per_token": 0.368292663515625,
+      "sample_count": 5
+    },
+    "W4": {
+      "t_task_mean_ms": 5783.36475,
+      "t_task_std_ms": 95.43951198671763,
+      "t_task_p50_ms": 5745.30025,
+      "t_task_p95_ms": 5912.5358164,
+      "t_orch_mean_ms": 0.0,
+      "rss_peak_mb": 0.0,
+      "energy_mean_j": 94.8471819,
+      "edp_mean_js": 548.6553545871791,
+      "joules_per_token": 0.370496804296875,
+      "sample_count": 5
+    }
+  }
+}

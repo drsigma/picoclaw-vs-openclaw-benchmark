@@ -1,0 +1,31 @@
+\begin{table*}[t]
+\centering
+\caption{Empirical Performance Evaluation and Ablation Matrix on Apple Silicon M4 (Mean $\pm$ Std. Dev.)}
+\label{tab:evaluation_ablation_m4}
+\small
+\begin{tabular}{l l r r r r r}
+\hline
+\textbf{Workload Tier} & \textbf{Configuration} & \textbf{Task Time (ms)} & \textbf{Orch. Delay (ms)} & \textbf{Peak RAM (MB)} & \textbf{Energy (J)} & \textbf{EDP (J$\cdot$s)} \\
+\hline
+W1 & Neural Baseline (Direct) & 1518.7 $\pm$ 162.1 & 0.000 & 0.0 & 24.91 & 38.169 \\
+W1 & PicoClaw (Go Native) & 1444.7 $\pm$ 13.1 & 0.386 & 11.1 & 23.69 & 34.230 \\
+W1 & OpenClaw (Node.js Minimal) & 1446.4 $\pm$ 12.4 & 0.318 & 86.0 & 23.72 & 34.314 \\
+W1 & OpenClaw (Node.js Full Ablation) & 1444.7 $\pm$ 7.1 & 0.339 & 86.0 & 23.69 & 34.230 \\
+\hline
+W2 & Neural Baseline (Direct) & 2879.0 $\pm$ 49.8 & 0.000 & 0.0 & 47.22 & 135.968 \\
+W2 & PicoClaw (Go Native) & 2979.1 $\pm$ 172.1 & 4.736 & 12.4 & 48.86 & 145.942 \\
+W2 & OpenClaw (Node.js Minimal) & 2899.1 $\pm$ 55.3 & 4.353 & 88.1 & 47.54 & 137.877 \\
+W2 & OpenClaw (Node.js Full Ablation) & 2885.6 $\pm$ 11.8 & 4.472 & 88.1 & 47.32 & 136.557 \\
+\hline
+W3 & Neural Baseline (Direct) & 5749.0 $\pm$ 21.9 & 0.000 & 0.0 & 94.28 & 542.035 \\
+W3 & PicoClaw (Go Native) & 6423.1 $\pm$ 870.0 & 5.493 & 12.2 & 105.34 & 686.539 \\
+W3 & OpenClaw (Node.js Minimal) & 5998.2 $\pm$ 10.6 & 10.216 & 91.5 & 98.37 & 590.048 \\
+W3 & OpenClaw (Node.js Full Ablation) & 6016.9 $\pm$ 9.9 & 9.841 & 91.6 & 98.68 & 593.739 \\
+\hline
+W4 & Neural Baseline (Direct) & 5783.4 $\pm$ 95.4 & 0.000 & 0.0 & 94.85 & 548.655 \\
+W4 & PicoClaw (Go Native) & 11071.3 $\pm$ 98.7 & 22.468 & 16.7 & 181.57 & 2010.352 \\
+W4 & OpenClaw (Node.js Minimal) & 12175.3 $\pm$ 76.4 & 10.121 & 92.6 & 199.68 & 2431.186 \\
+W4 & OpenClaw (Node.js Full Ablation) & 12233.1 $\pm$ 71.7 & 12.776 & 93.7 & 200.62 & 2454.313 \\
+\hline
+\end{tabular}
+\end{table*}

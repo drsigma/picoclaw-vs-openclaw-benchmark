@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this benchmark suite, datasets, or experimental findings in your research, please cite it as below."
+title: "PicoClaw vs. OpenClaw: Performance Evaluation of Go and TypeScript AI Agent Architectures on Apple Silicon M4"
+authors:
+  - family-names: "Paniccia Cassetta"
+    given-names: "Rafael"
+    affiliation: "Universidade Federal do ABC (UFABC)"
+    country: "BR"
+keywords:
+  - "AI Agents"
+  - "Autonomous Agent Benchmarking"
+  - "Apple Silicon M4"
+  - "Go Architecture"
+  - "TypeScript V8 Runtime"
+  - "Energy-Delay Product"
+  - "Poisson Point Process"
+  - "llama.cpp"
+license: "MIT"
+repository-code: "https://github.com/drsigma/picoclaw-vs-openclaw-benchmark"
+version: "1.0.0"
+date-released: "2026-11-11"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.placeholder"
+    description: "Zenodo Archive DOI"
