@@ -6,6 +6,7 @@ Course: CCM313-EEI203 - Performance Analysis of Networks and Systems (UFABC)
 import json
 import os
 import random
+
 import numpy as np
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

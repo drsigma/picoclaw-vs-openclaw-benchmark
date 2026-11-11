@@ -5,13 +5,13 @@ and the Revised Project Work Plan (.docx) adhering strictly to the course templa
 """
 import json
 import os
-import docx
+
 from docx import Document
-from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
-from docx.oxml import OxmlElement, parse_xml
-from docx.oxml.ns import nsdecls, qn
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.oxml import parse_xml
+from docx.oxml.ns import nsdecls
+from docx.shared import Inches, Pt, RGBColor
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_PATH = os.path.join(REPO_DIR, "reports", "template.docx")

@@ -1,10 +1,11 @@
 import os
+
 from docx import Document
-from docx.shared import Inches, Pt, RGBColor
-from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import parse_xml
 from docx.oxml.ns import nsdecls
+from docx.shared import Pt, RGBColor
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_PATH = os.path.join(REPO_DIR, "reports", "template.docx")

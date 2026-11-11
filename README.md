@@ -45,41 +45,39 @@ Both orchestrators interface via local loopback (`127.0.0.1:8080`) with a unifie
 
 ```mermaid
 flowchart TD
-    subgraph Host["Apple Mac mini M4 (10-Core CPU, 10-Core Metal GPU, 24 GB UMA)"]
-        subgraph WorkloadGen["Deterministic Workload Generator (Tiers W1 - W4)"]
-            W1["W1: Simple Reflection (Pure In-Memory)"]
-            W2["W2: 3-Step Tool Chain (APFS Disk I/O)"]
-            W3["W3: Vector RAG (384d Cosine Similarity)"]
-            W4["W4: 10-Turn Autonomous ReAct Loop"]
-        end
-
-        subgraph AdapterLayer["Agent Orchestrator Adapter Layer (Strategy Pattern)"]
-            NB["Neural Baseline (Direct HTTP)"]
-            PC["PicoClaw Adapter (Go Native Mach-O)"]
-            OC_Min["OpenClaw Minimal (Node.js / 3 Tools)"]
-            OC_Full["OpenClaw Full Ablation (Node.js / 54 Tools + SQLite)"]
-        end
-
-        subgraph LocalNeural["Local Neural Inference Server"]
-            LLAMA["llama-server b11887 (Apple Metal GPU Compute Shaders)\nMeta Llama-3.2-3B-Instruct (GGUF Q4_K_M)\nGreedy Decoding: temp=0.0, seed=42, port=8080"]
-        end
-
-        subgraph Telemetry["Hardware & Kernel Telemetry Engine"]
-            SMC["Apple SMC powermetrics (100ms Shunt Sampling: mW)"]
-            LIBPROC["Darwin XNU libproc proc_pid_rusage (ri_instructions, cycles, RSS)"]
-            HYPER["hyperfine (30-run Cold Start Timing)"]
-            CAFF["caffeinate -dims (System Quiescence & Anti-Sleep)"]
-        end
-
-        WorkloadGen --> AdapterLayer
-        AdapterLayer -- "HTTP Loopback 127.0.0.1:8080" --> LocalNeural
-        Telemetry -. "Non-intrusive Asynchronous Monitoring" .-> AdapterLayer
+    subgraph WG["Deterministic Workload Generator"]
+        W1["W1: Simple Reflection (Pure In-Memory)"]
+        W2["W2: 3-Step Tool Chain (APFS Disk I/O)"]
+        W3["W3: Vector RAG (384d Cosine Similarity)"]
+        W4["W4: 10-Turn Autonomous ReAct Loop"]
     end
+
+    subgraph ADAPTER["Agent Adapter Interface Layer (Strategy Pattern)"]
+        PC["PicoClaw Go Native Mach-O"]
+        OC_MIN["OpenClaw Minimal (Node.js V8, 3 Tools)"]
+        OC_FULL["OpenClaw Full (Node.js V8, 54 Tools and SQLite)"]
+        NB["Neural Baseline (Direct HTTP Pass-Through)"]
+    end
+
+    subgraph LLM["Local Neural Server (Apple Silicon M4)"]
+        SERVER["llama.cpp b11887 Metal GPU (Llama-3.2-3B-Instruct Q4_K_M, temp=0.0, seed=42)"]
+    end
+
+    subgraph TELEM["Asynchronous Telemetry Suite (Parallel)"]
+        SMC["Apple SMC powermetrics (100ms Shunt Sampling: mW)"]
+        LIBPROC["Darwin XNU libproc (ri_instructions, cycles, max_rss)"]
+        HYPER["Hyperfine (30-run Cold-Start Timing)"]
+        CAFF["caffeinate -dims (System Quiescence & Anti-Sleep)"]
+    end
+
+    WG --> ADAPTER
+    ADAPTER -->|"Loopback TCP 127.0.0.1:8080"| SERVER
+    TELEM -.->|"Non-Intrusive Hardware Telemetry"| ADAPTER
 ```
 
 ### Explicação do Fluxo / Architecture Description:
-* **🇧🇷 PT-BR:** O gerador de carga submete os 4 níveis de dificuldade padronizados (W1–W4) através da camada de adaptação (*Adapter Pattern*). Os agentes executam suas ferramentas e se comunicam exclusivamente via loopback local com o servidor `llama.cpp` na GPU Metal, eliminando latências de rede externa. Paralelamente, daemons independentes de telemetria coletam miliwatts do SoC M4 via SMC e contadores de ciclo do kernel Darwin via `libproc`.
-* **🇺🇸 EN-US:** The workload generator dispatches standardized tasks (W1–W4) through an extensible Adapter layer. Agent orchestrators execute file/vector tools and communicate via localhost loopback with `llama.cpp` running on the Metal GPU, strictly isolating runtime overhead from network jitter. Concurrently, asynchronous telemetry daemons sample SMC electrical power and Darwin XNU performance counters.
+* **🇧🇷 PT-BR:** O gerador de carga submete os 4 níveis de dificuldade padronizados (W1–W4) através da camada de adaptação (*Adapter Pattern*). Os agentes executam suas ferramentas e se comunicam exclusivamente via loopback TCP local com o servidor `llama.cpp` na GPU Metal, eliminando latências de rede externa. Paralelamente, daemons independentes de telemetria coletam miliwatts do SoC M4 via SMC e contadores de ciclo do kernel Darwin via `libproc`.
+* **🇺🇸 EN-US:** The workload generator dispatches standardized tasks (W1–W4) through an extensible Adapter layer. Agent orchestrators execute file/vector tools and communicate via localhost loopback TCP with `llama.cpp` running on the Metal GPU, strictly isolating runtime overhead from network jitter. Concurrently, asynchronous telemetry daemons sample SMC electrical power and Darwin XNU performance counters.
 
 ---
 
@@ -106,11 +104,32 @@ Os resultados empíricos consolidados da campanha definitiva de publicação no 
 | | **OpenClaw (Node.js Minimal)** | $12175{,}3 \pm 76{,}4$ | $10{,}121 \pm 0{,}39$ | $92{,}6$ | $199{,}68$ | $2431{,}186$ |
 | | **OpenClaw (Node.js Full Ablation)** | $12233{,}1 \pm 71{,}7$ | $12{,}776 \pm 0{,}48$ | $93{,}7$ | $200{,}62$ | $2454{,}313$ |
 
+> [!NOTE]
+> **🇧🇷 Diagnóstico Empírico da Variância no Workload W3 (Vector RAG):**
+> No Workload W3, a Latência Total do PicoClaw registrou média de $6423{,}1 \pm 870{,}0\text{ ms}$, contrastando com a sobrecarga de orquestração isolada de apenas $T_{\text{orch}} = 5{,}493 \pm 0{,}84\text{ ms}$. A auditoria dos ensaios brutos em `results/publication_campaign/raw_trials.jsonl` comprova que essa variância se deve **estritamente à dinâmica de inferência do servidor neural local (`llama.cpp`) na GPU Metal e não ao runtime Go**:
+> 1. **Cold Prefill Stall no Ensaio 1:** No primeiro ensaio do W3 (primeira ingestão do contexto vetorial de 10k chunks na GPU Metal), o Time-To-First-Token ($\text{TTFT}$) atingiu $1955{,}62\text{ ms}$ devido à avaliação de prompt e alocação inicial de tensores sem cache de prefixo prévio.
+> 2. **Convergência Warm nos Ensaios 2 a 5:** Uma vez residente o prefixo de contexto no cache KV do `llama-server`, os ensaios subsequentes registraram $\text{TTFT}$ médio de apenas $26{,}7\text{ ms}$ ($26{,}76$, $26{,}36$, $26{,}29$ e $27{,}39\text{ ms}$), estabilizando as latências totais entre $6031\text{ ms}$ e $6038\text{ ms}$.
+> 3. **Robustez Não-Paramétrica (Mediana e IQR):** Sob métricas robustas a outliers (Jain, 1991), o PicoClaw no W3 exibe **Mediana de $6035{,}6\text{ ms}$** e **Intervalo Interquartil ($\text{IQR} = Q_3 - Q_1$) de apenas $7{,}3\text{ ms}$** ($0{,}12\%$ de dispersão relativa), demonstrando determinismo absoluto do runtime PicoClaw ($T_{\text{orch}}$ sempre $< 6{,}0\text{ ms}$).
+>
+> **🇺🇸 Empirical Diagnosis of Variance in Workload W3 (Vector RAG):**
+> In Workload W3, PicoClaw's Total Latency averaged $6423.1 \pm 870.0\text{ ms}$, in sharp contrast to an isolated orchestration overhead of only $T_{\text{orch}} = 5.493 \pm 0.84\text{ ms}$. Audit of raw trial observations in `results/publication_campaign/raw_trials.jsonl` confirms that this variance stems **entirely from local neural inference dynamics (`llama.cpp`) on the Metal GPU rather than the Go runtime**:
+> 1. **Cold Prefill Stall in Trial 1:** During the first trial of W3 (the very first submission of the 10k vector context to the Metal GPU), the Time-To-First-Token ($\text{TTFT}$) surged to $1955.62\text{ ms}$ due to unprimed prompt ingestion and memory allocation without KV cache.
+> 2. **Warm State Convergence in Trials 2–5:** Once the context prefix was resident in the KV cache of `llama-server`, subsequent runs showed an average $\text{TTFT}$ of only $26.7\text{ ms}$ ($26.76$, $26.36$, $26.29$, and $27.39\text{ ms}$), stabilizing total execution latency between $6031\text{ ms}$ and $6038\text{ ms}$.
+> 3. **Non-Parametric Robustness (Median & IQR):** Under outlier-resistant metrics (Jain, 1991), PicoClaw in W3 yields a **Median of $6035.6\text{ ms}$** and an **Interquartile Range ($\text{IQR} = Q_3 - Q_1$) of only $7.3\text{ ms}$** ($0.12\%$ relative dispersion), proving strict orchestrator determinism ($T_{\text{orch}} < 6.0\text{ ms}$ across all trials).
+
 ### 🎯 Principais Conclusões de Engenharia / Key Findings:
-1. **Cold-Start Launch:** PicoClaw inicializa em **$9{,}63\text{ ms}$** vs. $225{,}55\text{ ms}$ do OpenClaw (**$23{,}4\times$ mais rápido**).
-2. **Eficiência de Memória RAM:** O PicoClaw consome de **$11{,}1\text{ a }16{,}7\text{ MB}$**, enquanto o OpenClaw consome de **$86{,}0\text{ a }93{,}7\text{ MB}$** (**$5{,}6\times\text{ a }7{,}7\times$ menor footprint**), reduzindo a contenção no barramento compartilhado LPDDR5X (120 GB/s UMA).
-3. **Escalabilidade em Loops Longos (W4):** No ciclo autônomo ReAct de 10 passos, o PicoClaw completou a tarefa em **$11{,}07\text{ s}$** contra **$12{,}23\text{ s}$** do OpenClaw, entregando **$18{,}1\%$ menor Produto Energia-Atraso ($\text{EDP}$ de $2010$ vs $2454\text{ J}\cdot\text{s}$)** com significância estatística estrita (Mann-Whitney $p < 0{,}01$, Cliff's Delta $d = -1{,}0$).
-4. **Estudo de Ablação:** A injeção dinâmica de 54 ferramentas corporativas no OpenClaw Full adiciona sobrecarga mensurável de serialização de contexto e validação TypeBox, elevando a latência e o consumo de memória em relação à versão Minimal.
+
+* **🇧🇷 PT-BR:**
+  1. **Cold-Start Launch:** PicoClaw inicializa em **$9{,}63\text{ ms}$** vs. $225{,}55\text{ ms}$ do OpenClaw (**$23{,}4\times$ mais rápido**).
+  2. **Eficiência de Memória RAM:** O PicoClaw consome de **$11{,}1\text{ a }16{,}7\text{ MB}$**, enquanto o OpenClaw consome de **$86{,}0\text{ a }93{,}7\text{ MB}$** (**$5{,}6\times\text{ a }7{,}7\times$ menor footprint**), reduzindo a contenção no barramento compartilhado LPDDR5X (120 GB/s UMA).
+  3. **Escalabilidade em Loops Longos (W4):** No ciclo autônomo ReAct de 10 passos, o PicoClaw completou a tarefa em **$11{,}07\text{ s}$** contra **$12{,}23\text{ s}$** do OpenClaw, entregando **$18{,}1\%$ menor Produto Energia-Atraso ($\text{EDP}$ de $2010$ vs $2454\text{ J}\cdot\text{s}$)** com significância estatística estrita: Cliff's Delta $d = -1{,}0$ (indicando dominância estocástica estrita: PicoClaw < OpenClaw em 100% dos ensaios pareados / indicating strict stochastic dominance: PicoClaw < OpenClaw across 100% of paired trials) e teste U de Mann-Whitney com $p < 0{,}01$ ($\hat{A}_{12} = 0{,}0$).
+  4. **Estudo de Ablação:** A injeção dinâmica de 54 ferramentas corporativas no OpenClaw Full adiciona sobrecarga mensurável de serialização de contexto e validação TypeBox, elevando a latência e o consumo de memória em relação à versão Minimal.
+
+* **🇺🇸 EN-US:**
+  1. **Cold-Start Launch:** PicoClaw cold-starts in **$9.63\text{ ms}$** vs. $225.55\text{ ms}$ for OpenClaw (**$23.4\times$ faster**).
+  2. **RAM Memory Efficiency:** PicoClaw allocates between **$11.1\text{ and }16.7\text{ MB}$**, whereas OpenClaw requires **$86.0\text{ to }93.7\text{ MB}$** (**$5.6\times\text{ to }7.7\times$ leaner footprint**), substantially reducing bus contention on the shared LPDDR5X memory (120 GB/s UMA).
+  3. **Long ReAct Loops Scalability (W4):** In the 10-turn autonomous ReAct loop, PicoClaw finished the workload in **$11.07\text{ s}$** vs. **$12.23\text{ s}$** for OpenClaw, achieving **$18.1\%$ lower Energy-Delay Product ($\text{EDP}$ of $2010$ vs $2454\text{ J}\cdot\text{s}$)** with strict statistical significance: Cliff's Delta $d = -1.0$ (indicating strict stochastic dominance: PicoClaw < OpenClaw across 100% of paired trials) and Mann-Whitney U test with $p < 0.01$ ($\hat{A}_{12} = 0.0$).
+  4. **Ablation Findings:** Dynamic schema injection of 54 corporate tools in OpenClaw Full imposes measurable TypeBox validation and prompt serialization overhead, increasing total execution time and memory footprint relative to OpenClaw Minimal.
 
 ---
 

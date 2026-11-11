@@ -5,7 +5,6 @@ Testes Unitários para Motor de Inferência Estatística e Métricas
 Author / Autor: Rafael Paniccia Cassetta (UFABC)
 """
 
-import math
 import numpy as np
 import pytest
 from scipy import stats
@@ -92,11 +91,11 @@ def test_cameron_trivedi_equidispersion_test():
     # Generate authentic Poisson data
     poisson_samples = np.random.poisson(lam=10.0, size=100)
     mu_hat = np.mean(poisson_samples)
-    
+
     # Dependent variable in auxiliary regression
     dep = ((poisson_samples - mu_hat) ** 2 - poisson_samples) / mu_hat
     indep = mu_hat * np.ones_like(dep)
-    
+
     slope, intercept, r_value, p_value, std_err = stats.linregress(indep, dep)
     # Under true Poisson, slope should be statistically indistinguishable from 0
     t_stat = slope / max(std_err, 1e-6)

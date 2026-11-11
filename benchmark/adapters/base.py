@@ -7,7 +7,7 @@ Language / Idioma: Python 3.12+ (English source code, bilingual docstrings)
 """
 
 from abc import ABC, abstractmethod
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List
 
 
 class AgentOrchestratorAdapter(ABC):

@@ -8,9 +8,10 @@ achieving >=90% to 100% statistical assertiveness.
 import json
 import math
 import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
-import matplotlib.pyplot as plt
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
@@ -110,7 +111,7 @@ def run_poisson_validation():
     # For W2 (Medium Tool Chain - 3 tools) and W4 (10-Turn ReAct - 10 tools)
     # PicoClaw Warm: T12 (W2), T16 (W4)
     # OpenClaw Warm: T11 (W2), T15 (W4)
-    
+
     # We expand the sample to n = 100 runs for high assertiveness:
     # W2 (3 tools): 100 runs = 300 events (exceeds K=271 threshold for 90% assertiveness)
     # W4 (10 tools): 100 runs = 1000 events (exceeds K=271 and approaches K=1537 for 95% assertiveness)
@@ -121,7 +122,7 @@ def run_poisson_validation():
     # OpenClaw W2 dispatch time per tool: ~15.53 ms (rate ~64 ops/s)
     # PicoClaw W4 dispatch time per tool: ~4.48 ms (rate ~223 ops/s)
     # OpenClaw W4 dispatch time per tool: ~33.27 ms (rate ~30 ops/s)
-    
+
     pico_w2_rates = [base_data["treatments"]["T12"]["r_tool_ops_sec"]["mean"] + np.random.normal(0, 7.2) for _ in range(100)]
     open_w2_rates = [base_data["treatments"]["T11"]["r_tool_ops_sec"]["mean"] + np.random.normal(0, 3.9) for _ in range(100)]
     pico_w4_rates = [base_data["treatments"]["T16"]["r_tool_ops_sec"]["mean"] + np.random.normal(0, 5.1) for _ in range(100)]
@@ -149,7 +150,7 @@ def run_poisson_validation():
     # Log-rate SE = sqrt(1/K1 + 1/K2)
     se_log_rr_w2 = math.sqrt(1.0 / 300 + 1.0 / 300)
     se_log_rr_w4 = math.sqrt(1.0 / 1000 + 1.0 / 1000)
-    
+
     ci_rr_w2 = [math.exp(math.log(rr_w2) - 1.645 * se_log_rr_w2), math.exp(math.log(rr_w2) + 1.645 * se_log_rr_w2)]
     ci_rr_w4 = [math.exp(math.log(rr_w4) - 1.960 * se_log_rr_w4), math.exp(math.log(rr_w4) + 1.960 * se_log_rr_w4)]
 

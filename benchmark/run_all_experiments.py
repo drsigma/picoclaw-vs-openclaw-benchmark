@@ -8,16 +8,16 @@ import ctypes
 import json
 import math
 import os
-import random
-import subprocess
 import time
 import urllib.request
+
 import numpy as np
 from scipy import stats
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_DIR = os.path.join(REPO_DIR, "data", "workload_data")
 BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
+WORKSPACE = os.path.join(REPO_DIR, "results", "exploratory_campaigns", "campaign_run_1")
 TOOLS_DIR = os.path.join(REPO_DIR, "tools")
 NODE_BIN = os.path.join(TOOLS_DIR, "node", "bin", "node")
 OPENCLAW_CLI = os.path.join(BENCH_DIR, "openclaw_orch.mjs")
@@ -171,7 +171,7 @@ def main():
         rag_chunks = json.load(f)
     rag_ctx = "\n".join([rag_chunks[str(k)] for k in range(5)])
 
-    w1_msgs = [
+    _w1_msgs = [
         {"role": "system", "content": "You are a concise technical systems assistant."},
         {
             "role": "user",
@@ -179,7 +179,7 @@ def main():
             + "Summarize the primary latency determinant in two concise sentences.",
         },
     ]
-    w2_msgs = [
+    _w2_msgs = [
         {"role": "system", "content": "You are executing a 3-step diagnostic tool chain."},
         {
             "role": "user",
@@ -193,7 +193,7 @@ def main():
             ),
         },
     ]
-    w3_msgs = [
+    _w3_msgs = [
         {"role": "system", "content": "You are a RAG engine. Synthesize the retrieved vector memory chunks."},
         {
             "role": "user",

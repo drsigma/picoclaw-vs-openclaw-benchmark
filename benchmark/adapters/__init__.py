@@ -6,11 +6,11 @@ Author / Autor: Rafael Paniccia Cassetta (UFABC)
 """
 
 from typing import Dict, Type
-from benchmark.adapters.base import AgentOrchestratorAdapter
-from benchmark.adapters.picoclaw_adapter import PicoClawAdapter
-from benchmark.adapters.openclaw_adapter import OpenClawAdapter
-from benchmark.adapters.neural_baseline_adapter import NeuralBaselineAdapter
 
+from benchmark.adapters.base import AgentOrchestratorAdapter
+from benchmark.adapters.neural_baseline_adapter import NeuralBaselineAdapter
+from benchmark.adapters.openclaw_adapter import OpenClawAdapter
+from benchmark.adapters.picoclaw_adapter import PicoClawAdapter
 
 ADAPTER_REGISTRY: Dict[str, Type[AgentOrchestratorAdapter]] = {
     "picoclaw": PicoClawAdapter,

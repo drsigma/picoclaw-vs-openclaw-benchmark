@@ -8,16 +8,26 @@ Language / Idioma: Bilingual (PT-BR & EN-US comments, English code)
 
 import json
 import os
-import sys
+from typing import Any, Dict, List
+
 import numpy as np
 from scipy import stats
-from typing import Dict, Any, List
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def cliffs_delta(lst1: List[float], lst2: List[float]) -> float:
-    """Compute Cliff's Delta non-parametric effect size d in [-1, 1]."""
+    """
+    Compute Cliff's Delta non-parametric effect size d in [-1, 1].
+
+    Sign Convention / Convenção de Sinal:
+    - d = +1.0: lst1 is strictly greater than lst2 in all pairwise comparisons.
+    - d = -1.0: lst1 is strictly smaller than lst2 in all pairwise comparisons
+      (e.g., PicoClaw < OpenClaw in 100% of paired trials for latency, EDP, and RAM).
+    - d = 0.0: No stochastic dominance.
+    Thresholds: |d| < 0.147 (negligible), < 0.33 (small), < 0.474 (medium), >= 0.474 (large)
+    (Cliff, 1993; Romano et al., 2006).
+    """
     n1, n2 = len(lst1), len(lst2)
     if n1 == 0 or n2 == 0:
         return 0.0
@@ -27,7 +37,16 @@ def cliffs_delta(lst1: List[float], lst2: List[float]) -> float:
 
 
 def vargha_delaney_a12(lst1: List[float], lst2: List[float]) -> float:
-    """Compute Vargha-Delaney A12 effect size statistic in [0, 1]."""
+    """
+    Compute Vargha-Delaney A12 effect size statistic in [0, 1].
+
+    Direction Convention / Convenção de Direção:
+    - A12 = P(X > Y) + 0.5 * P(X == Y) = (d + 1) / 2
+    - A12 = 0.0: X (PicoClaw) is strictly smaller than Y (OpenClaw) across all trials.
+    - A12 = 0.5: Stochastic equality between distributions.
+    - A12 = 1.0: X is strictly greater than Y across all trials.
+    (Vargha & Delaney, 2000).
+    """
     d = cliffs_delta(lst1, lst2)
     return (d + 1.0) / 2.0
 

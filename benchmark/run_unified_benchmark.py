@@ -10,12 +10,12 @@ import json
 import os
 import sys
 import time
-from typing import Dict, Any, List
+from typing import Any, Dict, List
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_DIR)
 
-from benchmark.adapters import get_adapter
+from benchmark.adapters import get_adapter  # noqa: E402
 
 
 def run_campaign(reps_per_condition: int = 5):
@@ -45,7 +45,7 @@ def run_campaign(reps_per_condition: int = 5):
     # Apple M4 SoC power calibration constants (from SMC powermetrics physical runs)
     # GPU active: 12.6W; CPU active: 2.8W; DRAM active: 1.0W; Total ~16.4W; Idle baseline ~1.25W
     POWER_ACTIVE_W = 16.4
-    POWER_IDLE_W = 1.25
+    _POWER_IDLE_W = 1.25
 
     total_trials = len(agents) * len(workloads) * reps_per_condition
     trial_count = 0
@@ -62,7 +62,7 @@ def run_campaign(reps_per_condition: int = 5):
             for rep in range(1, reps_per_condition + 1):
                 trial_count += 1
                 t0_ns = time.perf_counter_ns()
-                
+
                 try:
                     res = adapter.run_workload(w_id)
                 except Exception as e:

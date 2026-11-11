@@ -8,7 +8,8 @@ Author / Autor: Rafael Paniccia Cassetta (UFABC)
 import json
 import os
 import subprocess
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from benchmark.adapters.base import AgentOrchestratorAdapter
 
 
@@ -19,7 +20,6 @@ class OpenClawAdapter(AgentOrchestratorAdapter):
     """
 
     def __init__(self, repo_dir: str, mode: str = "minimal"):
-        mode_label = "Full (54 Tools)" if mode == "full" else "Minimal (Equalized)"
         super().__init__(
             name="OpenClaw",
             runtime="Node.js v26.12.1 (Google V8 JIT)",
@@ -28,7 +28,7 @@ class OpenClawAdapter(AgentOrchestratorAdapter):
         )
         self.repo_dir = repo_dir
         self.script_path = os.path.join(repo_dir, "benchmark", "openclaw_orch.mjs")
-        
+
         # Locate node binary
         embedded_node = os.path.join(repo_dir, "tools", "node", "bin", "node")
         if os.path.exists(embedded_node):

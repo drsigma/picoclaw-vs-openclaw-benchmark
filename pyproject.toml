@@ -1,0 +1,27 @@
+[project]
+name = "picoclaw-vs-openclaw-benchmark"
+version = "1.0.0"
+description = "Performance Evaluation of Go and TypeScript AI Agent Architectures on Apple Silicon M4"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26.0",
+    "scipy>=1.11.0",
+    "matplotlib>=3.8.0",
+    "pytest>=8.0.0",
+    "ruff>=0.3.0",
+    "dulwich>=0.21.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+cache-dir = "/tmp/ruff_cache"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]

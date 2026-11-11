@@ -44,3 +44,8 @@ A tabela abaixo resume todos os 9 ajustes implementados durante o *System Testin
 * **Problema Encontrado:** O Mac mini M4, por padrão, desliga a tela e suspende os discos após períodos de inatividade, o que distorceria os tempos de latência e causaria interrupções nas campanhas longas.
 * **Ajuste Adotado:**
   Ativamos o daemon persistente `/usr/bin/caffeinate -dims` (PID 3454), que mantém a máquina ativa continuamente durante todos os testes.
+
+#### 2.4. Diagnóstico Empírico da Variância no Workload W3 (Vector RAG)
+* **Fenômeno Identificado:** No Workload W3 da campanha de publicação, a Latência Total do PicoClaw registrou $6423{,}1 \pm 870{,}0\text{ ms}$, enquanto a sobrecarga do orquestrador foi de apenas $T_{\text{orch}} = 5{,}493 \pm 0{,}84\text{ ms}$.
+* **Causa Raiz Empírica:** A auditoria em `results/publication_campaign/raw_trials.jsonl` revelou que no Ensaio 1, o Time-To-First-Token ($\text{TTFT}$) foi de $1955{,}62\text{ ms}$ devido ao stall de prefill e alocação de tensores na GPU Metal no primeiro contato com o prompt de RAG. Nos Ensaios 2 a 5, com o prefixo residente no cache KV do `llama-server`, o $\text{TTFT}$ caiu para média de $26{,}7\text{ ms}$ e a latência convergiu para ~ $6035\text{ ms}$.
+* **Evidência Metodológica:** A Mediana do PicoClaw no W3 é de $6035{,}6\text{ ms}$ e o Intervalo Interquartil ($\text{IQR}$) é de apenas $7{,}3\text{ ms}$ ($0{,}12\%$), comprovando que 100% da dispersão originou-se no prefill neural e 0% no runtime Go.

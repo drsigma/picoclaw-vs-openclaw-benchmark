@@ -7,12 +7,12 @@ Records live timestamps, memory footprints, and raw outputs for reproducibility.
 """
 import ctypes
 import json
-import math
 import os
 import shutil
 import subprocess
 import sys
 import time
+
 import numpy as np
 from scipy import stats
 
@@ -106,10 +106,10 @@ def execute_campaign(campaign_name, target_dir):
     os.makedirs(target_dir, exist_ok=True)
     raw_log_path = os.path.join(target_dir, "raw_trials.jsonl")
     summary_path = os.path.join(target_dir, f"summary_{campaign_name}.json")
-    print(f"\n========================================================================")
+    print("\n========================================================================")
     print(f" STARTING 100% REAL PHYSICAL BENCHMARK CAMPAIGN: {campaign_name}")
     print(f" Target Directory: {target_dir}")
-    print(f"========================================================================")
+    print("========================================================================")
 
     trials_log = open(raw_log_path, "w", buffering=1)
     results_by_treatment = {}
@@ -192,12 +192,12 @@ def execute_campaign(campaign_name, target_dir):
     t0_pico = time.perf_counter_ns()
     pico_tool_out, _ = run_live_subprocess(pico_tool_cmd)
     t1_pico = time.perf_counter_ns()
-    pico_total_sec = (t1_pico - t0_pico) / 1e9
+    _pico_total_sec = (t1_pico - t0_pico) / 1e9
 
     t0_open = time.perf_counter_ns()
     open_tool_out, _ = run_live_subprocess(open_tool_cmd)
     t1_open = time.perf_counter_ns()
-    open_total_sec = (t1_open - t0_open) / 1e9
+    _open_total_sec = (t1_open - t0_open) / 1e9
 
     # W2 has 3 tool calls per run: 100 runs = 300 tool invocations!
     pico_k = 300
@@ -248,11 +248,11 @@ def execute_campaign(campaign_name, target_dir):
         json.dump(summary_data, fp, indent=2)
 
     trials_log.close()
-    print(f"\n========================================================================")
+    print("\n========================================================================")
     print(f" CAMPAIGN {campaign_name} SUCCESSFULLY COMPLETED!")
     print(f" Raw Trials: {raw_log_path}")
     print(f" Summary JSON: {summary_path}")
-    print(f"========================================================================")
+    print("========================================================================")
     return summary_data
 
 

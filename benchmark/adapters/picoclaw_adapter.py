@@ -8,7 +8,8 @@ Author / Autor: Rafael Paniccia Cassetta (UFABC)
 import json
 import os
 import subprocess
-from typing import Dict, Any, List
+from typing import Any, Dict, List
+
 from benchmark.adapters.base import AgentOrchestratorAdapter
 
 

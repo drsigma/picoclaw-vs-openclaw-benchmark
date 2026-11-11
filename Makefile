@@ -42,8 +42,9 @@ check-quiescence:
 	@./scripts/check_quiescence.sh
 
 test:
-	@echo "🧪 [PT-BR] Executando testes unitários automatizados (pytest)..."
-	@echo "   [EN-US] Running automated unit test suite (pytest)..."
+	@echo "🧪 [PT-BR] Executando linter (ruff) e testes unitários automatizados (pytest)..."
+	@echo "   [EN-US] Running linter (ruff) and automated unit test suite (pytest)..."
+	tools/.venv/bin/ruff check benchmark/ tests/
 	$(VENV_PY) -m pytest -v tests/
 
 benchmark: check-quiescence

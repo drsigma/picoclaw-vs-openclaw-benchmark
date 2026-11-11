@@ -6,6 +6,7 @@ macOS traffic light buttons, colored shell prompts, and exact live terminal outp
 for peer-reviewed academic submission.
 """
 import os
+
 from PIL import Image, ImageDraw, ImageFont
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

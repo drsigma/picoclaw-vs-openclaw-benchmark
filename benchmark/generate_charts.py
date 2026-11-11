@@ -5,11 +5,13 @@ for the CCM313-EEI203 System Testing & Performance Evaluation Report.
 """
 import json
 import os
-import numpy as np
+
 import matplotlib
+import numpy as np
+
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
@@ -431,8 +433,8 @@ def plot_pmc_hardware_counters(data):
     o_inst = [pmc["openclaw_instructions"]["mean"] / 1e6, ru["openclaw_orch_w2"]["instructions"] / 1e6]
     x = np.arange(len(cats))
     w = 0.35
-    b1 = ax.bar(x - w / 2, p_inst, w, label="PicoClaw (Go)", color=COLOR_PICO, edgecolor="#0F172A")
-    b2 = ax.bar(x + w / 2, o_inst, w, label="OpenClaw (Node.js)", color=COLOR_OPEN, edgecolor="#0F172A")
+    ax.bar(x - w / 2, p_inst, w, label="PicoClaw (Go)", color=COLOR_PICO, edgecolor="#0F172A")
+    ax.bar(x + w / 2, o_inst, w, label="OpenClaw (Node.js)", color=COLOR_OPEN, edgecolor="#0F172A")
     ax.set_yscale("log")
     ax.set_ylabel("Instructions Retired (Millions, log)")
     ax.set_title("(a) Apple M4 PMC: Instructions")
