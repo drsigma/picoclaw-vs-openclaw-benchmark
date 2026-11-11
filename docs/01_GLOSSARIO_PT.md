@@ -44,6 +44,7 @@
   * **`python-docx` (v1.1.2):** Compilação dos relatórios formais nos padrões ABNT/UFABC diretamente dos logs.
   * **`dulwich` (v0.22.8):** Protocolo Git em Python puro, eliminando dependências dos stubs do Xcode CLT no macOS.
   * **`uv` (Astral):** Gerenciador de ambientes em Rust que provisiona o virtualenv `tools/.venv` em segundos.
+* **Formulação Matemática e Métodos Analíticos dos Códigos:** Para o detalhamento completo de todas as fórmulas matemáticas (decomposição aditiva de latência $T_{\text{orch}}$, integral de energia do Apple SMC, EDP, cosseno de vetores em W3, limites fiduciais de Garwood, equidispersão de Cameron & Trivedi e ANOVA One-Way), consulte o documento oficial: [`11_EXPLICACAO_DOS_CODIGOS_E_CALCULOS_MATEMATICOS_PT.md`](11_EXPLICACAO_DOS_CODIGOS_E_CALCULOS_MATEMATICOS_PT.md).
 
 ---
 

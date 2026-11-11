@@ -43,6 +43,7 @@
   * **`python-docx` (v1.1.2):** Programmatic compilation of formal ABNT/UFABC academic reports directly from measurement traces.
   * **`dulwich` (v0.22.8):** Pure-Python Git protocol client, avoiding Xcode CLT macOS popup shims.
   * **`uv` (Astral):** Rust-powered package manager provisioning `tools/.venv` in seconds with zero host pollution.
+* **Mathematical Formulations & Code Calculations:** For comprehensive derivations of all mathematical equations ($T_{\text{orch}}$ latency decomposition, Apple SMC power integration, EDP, vector cosine similarity in W3, Garwood Poisson fiducial limits, Cameron & Trivedi overdispersion, and One-Way ANOVA), see: [`11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md`](11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md).
 
 ---
 
