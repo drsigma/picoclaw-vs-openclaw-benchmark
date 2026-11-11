@@ -37,6 +37,13 @@
 * **Darwin libproc (`RUSAGE_INFO_V4`):** Interface binária de programação (ABI) do kernel XNU do macOS acessada via `ctypes` no Python para coletar contadores de desempenho de baixo nível sem necessidade de privilégios de administrador (`root`).
 * **powermetrics (Apple macOS SMC Telemetry):** Ferramenta utilitária privilegiada da Apple que lê os sensores físicos de corrente e tensão dos barramentos do SoC M4 (`cpu_power`, `gpu_power`, `ane_power`) a intervalos de amostragem de 100 ms.
 * **caffeinate & mdutil:** Utilitários do sistema operacional macOS empregados para garantir estabilidade e quiescência experimental: o `caffeinate -dims` previne o sono e hibernação de tela, disco e CPU, enquanto o `mdutil -a -i off` pausa a indexação do Spotlight.
+* **Bibliotecas Científicas do Test Harness Python:** Para detalhes aprofundados sobre a arquitetura e justificativa técnica de cada biblioteca utilizada na suíte de testes (`scipy`, `numpy`, `matplotlib`, `python-docx`, `dulwich`, `uv`), consulte o documento oficial: [`10_TECNOLOGIAS_BIBLIOTECAS_E_FERRAMENTAS_PT.md`](10_TECNOLOGIAS_BIBLIOTECAS_E_FERRAMENTAS_PT.md).
+  * **`scipy` (v1.15.2):** Funções analíticas Qui-Quadrado (`chi2.ppf`), limites de Poisson de Garwood, dispersão de Cameron & Trivedi e ANOVA One-Way.
+  * **`numpy` (v2.2.3):** Vetorização de matrizes e similaridade de cosseno em 384 dimensões no Workload W3 (Vector RAG).
+  * **`matplotlib` (v3.10.1):** Geração das 8 figuras científicas em 300 DPI com notação matemática LaTeX.
+  * **`python-docx` (v1.1.2):** Compilação dos relatórios formais nos padrões ABNT/UFABC diretamente dos logs.
+  * **`dulwich` (v0.22.8):** Protocolo Git em Python puro, eliminando dependências dos stubs do Xcode CLT no macOS.
+  * **`uv` (Astral):** Gerenciador de ambientes em Rust que provisiona o virtualenv `tools/.venv` em segundos.
 
 ---
 

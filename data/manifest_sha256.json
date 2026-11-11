@@ -4,8 +4,8 @@
     "size_bytes": 191
   },
   "README.md": {
-    "sha256": "c99f7a0af548005cb65bc548a3a05dcb0fe02922f9dd5866ad8e58e4845ec0eb",
-    "size_bytes": 37265
+    "sha256": "12a80710bafc01cf30fc0315543d15a068a65a536c52c7c04c1b8cb42d6b3328",
+    "size_bytes": 40140
   },
   "benchmark/build_layperson_guide.py": {
     "sha256": "af5d250bcc578ed9b79a91465138746655c6643858988c3d888001c1aea3f8c7",
@@ -392,12 +392,12 @@
     "size_bytes": 7705
   },
   "docs/01_GLOSSARIO_PT.md": {
-    "sha256": "bf5d3bc105cffd2edb413ac5518c040e4dd00cdc86d761a51249d1b456002ec7",
-    "size_bytes": 7934
+    "sha256": "fc84cf30f0cb458aa9c61e6de8b5e67dd06e76cf1d1abedb5408672c48a97c7f",
+    "size_bytes": 9043
   },
   "docs/02_GLOSSARY_EN.md": {
-    "sha256": "1541b91658823a3373a06d32717762ee30c520c4116463d2ff9dede6ef0abbe1",
-    "size_bytes": 6746
+    "sha256": "dfa0a547a2b5c606a56d9e654f07f62d0bcc93bb180d2d0c791732ac5c430833",
+    "size_bytes": 7874
   },
   "docs/03_METODOLOGIA_ESTATISTICA_POISSON.md": {
     "sha256": "36736fd24fe73ae980cd16061c96157364b659db602477d8ed9388b437617fd2",
@@ -454,6 +454,14 @@
   "docs/09_EQUALIZED_TEST_CONDITIONS_GUARANTEE_PT.md": {
     "sha256": "bfe19003bfda4daecdc667842c942b229c8d1a2021e37a5927b3b71a9fe05fd6",
     "size_bytes": 4444
+  },
+  "docs/10_TECHNOLOGIES_LIBRARIES_AND_TOOLS_EN.md": {
+    "sha256": "027091f9300cd50c1643e8ca8a75bc767adb15c64012fd2e7b933ef87f5808af",
+    "size_bytes": 10965
+  },
+  "docs/10_TECNOLOGIAS_BIBLIOTECAS_E_FERRAMENTAS_PT.md": {
+    "sha256": "4a2bf4bb13f44995c77ee676af1754854afc11d63360cfffb3eeb5a412db9a7e",
+    "size_bytes": 12114
   },
   "figures/fig1_architecture_topology.png": {
     "sha256": "8a3ddecb07cd0cdf0dfb91ad5679f8f59203ba83bb26a653d3758e522fe27834",

@@ -36,6 +36,13 @@
 * **hyperfine v2.0.0:** Statistical CLI benchmarking harness providing warm-up isolation, high-resolution monotonic timing, statistical outlier rejection, and parametric confidence interval computation.
 * **Darwin libproc (`RUSAGE_INFO_V4`):** macOS kernel Application Binary Interface (ABI) invoked via Python `ctypes` to read per-process hardware counters, physical footprints, and kernel-billed energy without requiring superuser escalation.
 * **Apple powermetrics:** High-privilege macOS System Management Controller (SMC) profiler polling physical hardware current/voltage shunt sensors at 100 ms cadence across `cpu_power`, `gpu_power`, and `ane_power`.
+* **Python Test Harness Scientific Libraries:** For deep architectural justifications and technical breakdowns of each Python library utilized across benchmark orchestration and analysis (`scipy`, `numpy`, `matplotlib`, `python-docx`, `dulwich`, `uv`), consult the formal documentation: [`10_TECHNOLOGIES_LIBRARIES_AND_TOOLS_EN.md`](10_TECHNOLOGIES_LIBRARIES_AND_TOOLS_EN.md).
+  * **`scipy` (v1.15.2):** Analytical Chi-Square (`chi2.ppf`), Garwood Poisson fiducial limits, Cameron & Trivedi overdispersion regression, and One-Way ANOVA.
+  * **`numpy` (v2.2.3):** 384-dimensional dense projection head management and dot-product cosine similarity in Workload W3 (Vector RAG).
+  * **`matplotlib` (v3.10.1):** 300-DPI vector/raster figure rendering with LaTeX mathematical typesetting.
+  * **`python-docx` (v1.1.2):** Programmatic compilation of formal ABNT/UFABC academic reports directly from measurement traces.
+  * **`dulwich` (v0.22.8):** Pure-Python Git protocol client, avoiding Xcode CLT macOS popup shims.
+  * **`uv` (Astral):** Rust-powered package manager provisioning `tools/.venv` in seconds with zero host pollution.
 
 ---
 
