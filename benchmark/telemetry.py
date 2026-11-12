@@ -280,7 +280,10 @@ def integrate_energy_trapezoidal(samples: list[dict[str, Any]], idle_package_mw:
 class SMCPowerMonitor:
     """
     Apple SMC Hardware Power Rail Monitor using sudo powermetrics.
-    Samples at 50 ms resolution. If non-root or on non-macOS platforms,
+    Maintains a single continuous powermetrics background process across the campaign
+    sampling at 50 ms resolution. Slices energy integration across trial time windows
+    [t_start_ns, t_end_ns] without restarting powermetrics between trials.
+    If non-root and sudo is unavailable or on non-macOS platforms,
     degrades gracefully without synthetic estimation, returning None for energy metrics.
     """
 
@@ -297,6 +300,8 @@ class SMCPowerMonitor:
         self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
         self._samples: list[dict[str, Any]] = []
+        self._lock = threading.Lock()
+        self._current_start_ns: int = 0
 
     def _check_sudo(self) -> bool:
         """Check if sudo is available without password prompt."""
@@ -318,6 +323,7 @@ class SMCPowerMonitor:
         sample_count = max(2, int((duration_sec * 1000.0) / self.sample_interval_ms))
         cmd = [
             "sudo",
+            "-n",
             "powermetrics",
             "-i",
             str(self.sample_interval_ms),
@@ -326,6 +332,8 @@ class SMCPowerMonitor:
             "--samplers",
             "cpu_power,gpu_power,ane_power",
         ]
+        if self.is_root:
+            cmd = cmd[2:]  # Remove 'sudo', '-n'
         try:
             res = subprocess.run(cmd, capture_output=True, text=True, timeout=duration_sec + 5.0)
             blocks = res.stdout.split("*** Sampled system activity")
@@ -342,22 +350,27 @@ class SMCPowerMonitor:
 
         return self.idle_package_mw
 
-    def start(self, agent_key: str = "picoclaw") -> None:
-        """Starts asynchronous continuous powermetrics background sampling."""
-        if not self.active:
+    def start_campaign(self) -> None:
+        """Starts a SINGLE continuous background powermetrics sampling process for the entire campaign."""
+        if not self.active or self._proc is not None:
             return
 
-        self._samples = []
+        with self._lock:
+            self._samples = []
         self._stop_event.clear()
 
         cmd = [
             "sudo",
+            "-n",
             "powermetrics",
             "-i",
             str(self.sample_interval_ms),
             "--samplers",
             "cpu_power,gpu_power,ane_power",
         ]
+        if self.is_root:
+            cmd = cmd[2:]
+
         try:
             self._proc = subprocess.Popen(
                 cmd,
@@ -373,32 +386,10 @@ class SMCPowerMonitor:
             self.active = False
             self.telemetry_backend = "unprivileged_no_smc"
 
-    def _reader_loop(self) -> None:
-        if self._proc is None or self._proc.stdout is None:
+    def stop_campaign(self) -> None:
+        """Terminates the continuous powermetrics background sampling process."""
+        if self._proc is None:
             return
-        buffer = []
-        for line in self._proc.stdout:
-            if self._stop_event.is_set():
-                break
-            if "*** Sampled system activity" in line:
-                if buffer:
-                    block = "".join(buffer)
-                    self._samples.append(parse_powermetrics_sample(block, time.monotonic_ns()))
-                    buffer = [line]
-                else:
-                    buffer.append(line)
-            else:
-                buffer.append(line)
-
-    def stop(self, agent_key: str | None = None) -> dict[str, float] | None:
-        """
-        Stops background sampling, terminates the powermetrics daemon,
-        and returns the trapezoidal energy integration result.
-        Returns None strictly if not running in privileged SMC mode.
-        """
-        if not self.active or self._proc is None:
-            return None
-
         self._stop_event.set()
         try:
             self._proc.terminate()
@@ -415,7 +406,71 @@ class SMCPowerMonitor:
             self._thread.join(timeout=1.0)
             self._thread = None
 
-        return integrate_energy_trapezoidal(self._samples, self.idle_package_mw)
+    def start(self, agent_key: str = "picoclaw") -> None:
+        """Trial-level start: ensures campaign process is active and marks trial start timestamp."""
+        if not self.active:
+            return
+        if self._proc is None:
+            self.start_campaign()
+        self._current_start_ns = time.monotonic_ns()
+
+    def stop(self, agent_key: str | None = None) -> dict[str, float] | None:
+        """Trial-level stop: slices energy from trial start timestamp to current time."""
+        if not self.active:
+            return None
+        t_end_ns = time.monotonic_ns()
+        return self.slice_energy(self._current_start_ns, t_end_ns)
+
+    def slice_energy(self, t_start_ns: int, t_end_ns: int) -> dict[str, float] | None:
+        """
+        Integrates exactly the power samples contained within [t_start_ns, t_end_ns].
+        Thread-safe slicing from continuous memory buffer.
+        """
+        if not self.active:
+            return None
+
+        # Short sleep to allow reader loop to buffer trailing sample
+        time.sleep(0.06)
+
+        with self._lock:
+            if not self._samples:
+                return None
+            sub_samples = [s for s in self._samples if t_start_ns <= s["timestamp_ns"] <= t_end_ns]
+            if not sub_samples:
+                before = [s for s in self._samples if s["timestamp_ns"] < t_start_ns]
+                after = [s for s in self._samples if s["timestamp_ns"] > t_end_ns]
+                candidate = []
+                if before:
+                    candidate.append(before[-1])
+                if after:
+                    candidate.append(after[0])
+                sub_samples = candidate
+
+        if not sub_samples:
+            return None
+
+        return integrate_energy_trapezoidal(sub_samples, self.idle_package_mw)
+
+    def _reader_loop(self) -> None:
+        if self._proc is None or self._proc.stdout is None:
+            return
+        buffer = []
+        for line in self._proc.stdout:
+            if self._stop_event.is_set():
+                break
+            if "*** Sampled system activity" in line:
+                if buffer:
+                    block = "".join(buffer)
+                    s = parse_powermetrics_sample(block, time.monotonic_ns())
+                    with self._lock:
+                        self._samples.append(s)
+                        if len(self._samples) > 10000:
+                            self._samples = self._samples[-5000:]
+                    buffer = [line]
+                else:
+                    buffer.append(line)
+            else:
+                buffer.append(line)
 
 
 class LinuxRAPLMonitor:

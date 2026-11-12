@@ -192,7 +192,7 @@ def run_campaign(
             )
 
     if output_dir is None:
-        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+        output_dir = os.path.join(REPO_DIR, "results", "simulated_check" if dry_run else "publication_campaign")
 
     os.makedirs(output_dir, exist_ok=True)
     raw_trials_path = os.path.join(output_dir, "raw_trials.jsonl")
@@ -211,6 +211,9 @@ def run_campaign(
     smc_monitor = SMCPowerMonitor(sample_interval_ms=50)
     rapl_monitor = LinuxRAPLMonitor()
 
+    if hasattr(os, "geteuid") and os.geteuid() == 0:
+        print("ℹ️  [NOTICE] Running as root. Standard user execution with 'sudo -n' is supported.")
+
     telemetry_backend = "unprivileged_no_smc"
     if not dry_run:
         if smc_monitor.active:
@@ -219,6 +222,8 @@ def run_campaign(
             idle_mw = smc_monitor.measure_idle_baseline(5.0)
             print(f"         Quiescent idle baseline package power: {idle_mw:.2f} mW.")
             telemetry_backend = smc_monitor.telemetry_backend
+            print("         Starting continuous Apple SMC powermetrics sampler daemon...")
+            smc_monitor.start_campaign()
         elif rapl_monitor.active:
             print("⚡ [INFO] Linux RAPL hardware energy counters active (/sys/class/powercap).")
             telemetry_backend = rapl_monitor.telemetry_backend
@@ -246,138 +251,157 @@ def run_campaign(
     trials_written = 0
     rng = random.Random(42)
 
-    with open(raw_trials_path, "w", encoding="utf-8") as out_f:
-        # Phase A: Warmup rounds (3 per condition, discarded from statistics)
-        if not dry_run:
-            print("\n🔥 Executing warmup rounds (3 per condition, marked with is_warmup=True)...")
-            for w in workloads:
-                for ak in agents:
-                    for w_rep in range(3):
-                        ad = adapter_instances[ak]
-                        res = ad.run_workload(w, iterations=1)
-                        record = {
-                            "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                            "agent_key": ak,
-                            "architecture": ad.name,
-                            "runtime": ad.runtime,
-                            "workload": w,
-                            "rep": w_rep + 1,
-                            "is_warmup": True,
-                            "is_simulated": False,
-                            "data_source": "measured_hardware_warmup",
-                            "t_task_ms": res.get("t_task_ms", 0.0),
-                            "t_neural_ms": res.get("t_neural_ms", 0.0),
-                            "t_orch_ms": res.get("t_orch_ms", 0.0),
-                            "rss_peak_mb": res.get("rss_peak_mb", 0.0),
-                            "proc_instructions": res.get("proc_instructions", 0),
-                            "proc_cycles": res.get("proc_cycles", 0),
-                            "proc_billed_energy": res.get("proc_billed_energy", 0),
-                            "proc_peak_phys_mb": round(res.get("proc_peak_phys_mb", 0.0), 2),
-                            "output_tokens": res.get("output_tokens", 0),
-                            "tool_calls": res.get("tool_calls", 0),
-                            "energy_total_j": None,
-                            "energy_net_above_idle_j": None,
-                            "edp_js": None,
-                        }
-                        out_f.write(json.dumps(record) + "\n")
-                        out_f.flush()
+    try:
+        with open(raw_trials_path, "w", encoding="utf-8") as out_f:
+            # Phase A: Warmup rounds (3 per condition, discarded from statistics)
+            if not dry_run:
+                print("\n🔥 Executing warmup rounds (3 per condition, marked with is_warmup=True)...")
+                for w in workloads:
+                    for ak in agents:
+                        for w_rep in range(3):
+                            ad = adapter_instances[ak]
+                            res = ad.run_workload(w, iterations=1)
+                            record = {
+                                "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                                "agent_key": ak,
+                                "architecture": ad.name,
+                                "runtime": ad.runtime,
+                                "workload": w,
+                                "rep": w_rep + 1,
+                                "is_warmup": True,
+                                "is_simulated": False,
+                                "data_source": "measured_hardware_warmup",
+                                "t_task_ms": res.get("t_task_ms", 0.0),
+                                "t_neural_ms": res.get("t_neural_ms", 0.0),
+                                "t_orch_ms": res.get("t_orch_ms", 0.0),
+                                "t_dispatch_ms": res.get("t_dispatch_ms", 0.0),
+                                "t_http_ms": res.get("t_http_ms", 0.0),
+                                "rss_peak_mb": res.get("rss_peak_mb", 0.0),
+                                "proc_rss_mb": res.get("proc_rss_mb", res.get("rss_peak_mb", 0.0)),
+                                "proc_instructions": res.get("proc_instructions", 0),
+                                "proc_cycles": res.get("proc_cycles", 0),
+                                "proc_billed_energy": res.get("proc_billed_energy", 0),
+                                "proc_peak_phys_mb": round(res.get("proc_peak_phys_mb", 0.0), 2),
+                                "prompt_tokens": res.get("prompt_tokens", 0),
+                                "completion_tokens": res.get("completion_tokens", res.get("output_tokens", 0)),
+                                "output_tokens": res.get("output_tokens", 0),
+                                "tool_calls": res.get("tool_calls", 0),
+                                "http_status": res.get("http_status", 200),
+                                "finish_reason": res.get("finish_reason", "stop"),
+                                "energy_total_j": None,
+                                "energy_net_above_idle_j": None,
+                                "edp_js": None,
+                            }
+                            out_f.write(json.dumps(record) + "\n")
+                            out_f.flush()
 
-        # Phase B: Main Evaluation Trials (Block-Interleaved Randomization)
-        print("\n▶️  Dispatching randomized evaluation blocks...")
-        for rep in range(1, reps_per_condition + 1):
-            # Create block of all (agent, workload) conditions and shuffle
-            block = [(ak, w) for ak in agents for w in workloads]
-            rng.shuffle(block)
+            # Phase B: Main Evaluation Trials (Block-Interleaved Randomization)
+            print("\n▶️  Dispatching randomized evaluation blocks...")
+            for rep in range(1, reps_per_condition + 1):
+                # Create block of all (agent, workload) conditions and shuffle
+                block = [(ak, w) for ak in agents for w in workloads]
+                rng.shuffle(block)
 
-            for ak, w in block:
-                trials_written += 1
-                ad = adapter_instances[ak]
+                for ak, w in block:
+                    trials_written += 1
+                    ad = adapter_instances[ak]
 
-                # Telemetry capture
-                if smc_monitor.active:
-                    smc_monitor.start(ak)
-                elif rapl_monitor.active:
-                    rapl_monitor.start()
+                    # Telemetry capture
+                    t_start_ns = time.monotonic_ns()
+                    if rapl_monitor.active:
+                        rapl_monitor.start()
 
-                t0_trial = time.monotonic()
-                res = ad.run_workload(w, iterations=1)
-                t_elapsed_s = time.monotonic() - t0_trial
+                    t0_trial = time.monotonic()
+                    res = ad.run_workload(w, iterations=1)
+                    t_elapsed_s = time.monotonic() - t0_trial
+                    t_end_ns = time.monotonic_ns()
 
-                energy_dict = None
-                if smc_monitor.active:
-                    energy_dict = smc_monitor.stop(ak)
-                elif rapl_monitor.active:
-                    energy_dict = rapl_monitor.stop()
+                    energy_dict = None
+                    if smc_monitor.active:
+                        energy_dict = smc_monitor.slice_energy(t_start_ns, t_end_ns)
+                    elif rapl_monitor.active:
+                        energy_dict = rapl_monitor.stop()
 
-                t_task_ms = res.get("t_task_ms", t_elapsed_s * 1000.0)
-                t_neural_ms = res.get("t_neural_ms", 0.0)
-                t_orch_ms = max(0.0, res.get("t_orch_ms", t_task_ms - t_neural_ms))
-                rss_peak = res.get("rss_peak_mb", 0.0)
-                tokens = res.get("output_tokens", 0)
+                    t_task_ms = res.get("t_task_ms", t_elapsed_s * 1000.0)
+                    t_neural_ms = res.get("t_neural_ms", 0.0)
+                    t_orch_ms = max(0.0, res.get("t_orch_ms", t_task_ms - t_neural_ms))
+                    t_dispatch_ms = res.get("t_dispatch_ms", 0.0)
+                    t_http_ms = res.get("t_http_ms", max(0.0, t_task_ms - t_neural_ms - t_dispatch_ms))
+                    rss_peak = res.get("rss_peak_mb", 0.0)
+                    tokens = res.get("output_tokens", 0)
+                    prompt_tokens = res.get("prompt_tokens", 0)
+                    completion_tokens = res.get("completion_tokens", tokens)
 
-                energy_total_j = None
-                energy_net_j = None
-                edp_js = None
-                j_per_token = None
+                    energy_total_j = None
+                    energy_net_j = None
+                    edp_js = None
+                    j_per_token = None
 
-                if energy_dict is not None and energy_dict.get("energy_total_j") is not None:
-                    energy_total_j = energy_dict["energy_total_j"]
-                    energy_net_j = energy_dict["energy_net_above_idle_j"]
-                    edp_js = round(energy_total_j * (t_task_ms / 1000.0), 4)
-                    if tokens > 0:
-                        j_per_token = round(energy_total_j / tokens, 4)
-                    ds = "measured_hardware"
-                else:
-                    ds = "dry_run_mock" if dry_run else "unprivileged_user_space"
+                    if energy_dict is not None and energy_dict.get("energy_total_j") is not None:
+                        energy_total_j = energy_dict["energy_total_j"]
+                        energy_net_j = energy_dict["energy_net_above_idle_j"]
+                        edp_js = round(energy_total_j * (t_task_ms / 1000.0), 4)
+                        if tokens > 0:
+                            j_per_token = round(energy_total_j / tokens, 4)
+                        ds = "measured_hardware"
+                    else:
+                        ds = "dry_run_mock" if dry_run else "unprivileged_user_space"
 
-                trial_record = {
-                    "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                    "agent_key": ak,
-                    "architecture": ad.name,
-                    "runtime": ad.runtime,
-                    "mode": ad.mode,
-                    "workload": w,
-                    "rep": rep,
-                    "is_warmup": False,
-                    "is_simulated": dry_run,
-                    "data_source": ds,
-                    "telemetry_backend": telemetry_backend,
-                    "t_task_ms": round(t_task_ms, 2),
-                    "t_neural_ms": round(t_neural_ms, 2),
-                    "t_orch_ms": round(t_orch_ms, 3),
-                    "phi_orch_pct": round((t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0, 3),
-                    "ttft_ms": round(res.get("ttft_ms", 0.0), 2),
-                    "itl_ms": round(res.get("itl_ms", 0.0), 2),
-                    "t_dispatch_ms": round(res.get("t_dispatch_ms", 0.0), 3),
-                    "r_tool_ops_sec": round(res.get("r_tool_ops_sec", 0.0), 2),
-                    "rss_idle_mb": round(res.get("rss_idle_mb", 0.0), 2),
-                    "rss_peak_mb": round(rss_peak, 2),
-                    "proc_instructions": res.get("proc_instructions", 0),
-                    "proc_cycles": res.get("proc_cycles", 0),
-                    "proc_billed_energy": res.get("proc_billed_energy", 0),
-                    "proc_peak_phys_mb": round(res.get("proc_peak_phys_mb", 0.0), 2),
-                    "output_tokens": tokens,
-                    "tool_calls": res.get("tool_calls", 0),
-                    "energy_total_j": energy_total_j,
-                    "energy_net_above_idle_j": energy_net_j,
-                    "edp_js": edp_js,
-                    "joules_per_token": j_per_token,
-                    "host_metadata": host_meta,
-                }
+                    trial_record = {
+                        "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                        "agent_key": ak,
+                        "architecture": ad.name,
+                        "runtime": ad.runtime,
+                        "mode": ad.mode,
+                        "workload": w,
+                        "rep": rep,
+                        "is_warmup": False,
+                        "is_simulated": dry_run,
+                        "data_source": ds,
+                        "telemetry_backend": telemetry_backend,
+                        "t_task_ms": round(t_task_ms, 2),
+                        "t_neural_ms": round(t_neural_ms, 2),
+                        "t_orch_ms": round(t_orch_ms, 3),
+                        "phi_orch_pct": round((t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0, 3),
+                        "ttft_ms": round(res.get("ttft_ms", 0.0), 2),
+                        "itl_ms": round(res.get("itl_ms", 0.0), 2),
+                        "t_dispatch_ms": round(t_dispatch_ms, 3),
+                        "t_http_ms": round(t_http_ms, 3),
+                        "r_tool_ops_sec": round(res.get("r_tool_ops_sec", 0.0), 2),
+                        "rss_idle_mb": round(res.get("rss_idle_mb", 0.0), 2),
+                        "rss_peak_mb": round(rss_peak, 2),
+                        "proc_rss_mb": round(res.get("proc_rss_mb", rss_peak), 2),
+                        "proc_instructions": res.get("proc_instructions", 0),
+                        "proc_cycles": res.get("proc_cycles", 0),
+                        "proc_billed_energy": res.get("proc_billed_energy", 0),
+                        "proc_peak_phys_mb": round(res.get("proc_peak_phys_mb", 0.0), 2),
+                        "prompt_tokens": prompt_tokens,
+                        "completion_tokens": completion_tokens,
+                        "output_tokens": tokens,
+                        "tool_calls": res.get("tool_calls", 0),
+                        "http_status": res.get("http_status", 200),
+                        "finish_reason": res.get("finish_reason", "stop"),
+                        "energy_total_j": energy_total_j,
+                        "energy_net_above_idle_j": energy_net_j,
+                        "edp_js": edp_js,
+                        "joules_per_token": j_per_token,
+                        "host_metadata": host_meta,
+                    }
 
-                out_f.write(json.dumps(trial_record) + "\n")
-                out_f.flush()
+                    out_f.write(json.dumps(trial_record) + "\n")
+                    out_f.flush()
 
-                edp_disp = f"{edp_js:.3f}J·s" if edp_js is not None else "N/A"
-                print(
-                    f"   [{trials_written:03d}/{total_eval_trials:03d}] {ak:16s} {w} Rep {rep}: "
-                    f"Task={t_task_ms:.1f}ms, Orch={t_orch_ms:.3f}ms, RAM={rss_peak:.1f}MB, EDP={edp_disp}"
-                )
+                    edp_disp = f"{edp_js:.3f}J·s" if edp_js is not None else "N/A"
+                    print(
+                        f"   [{trials_written:03d}/{total_eval_trials:03d}] {ak:16s} {w} Rep {rep}: "
+                        f"Task={t_task_ms:.1f}ms, Orch={t_orch_ms:.3f}ms, RAM={rss_peak:.1f}MB, EDP={edp_disp}"
+                    )
 
-                if cooldown_sec > 0:
-                    time.sleep(cooldown_sec)
-
-    print(f"\n✅ Recorded {trials_written} evaluated trials to {raw_trials_path}")
+                    if cooldown_sec > 0:
+                        time.sleep(cooldown_sec)
+    finally:
+        if smc_monitor.active:
+            smc_monitor.stop_campaign()
 
     # Generate analytical tables and statistical tests
     print("\n📈 Executing non-parametric statistical analysis...")

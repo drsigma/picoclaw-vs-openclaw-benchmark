@@ -54,14 +54,14 @@ fi
 PYTHON_BIN="$VENV_DIR/bin/python"
 
 # 3. Instalar dependências científicas
-echo "---> [2/4] Installing Python dependencies (numpy, scipy, matplotlib, pytest, ruff, python-docx, Pillow)..."
+echo "---> [2/4] Installing Python dependencies (numpy, scipy, matplotlib, pytest, ruff, python-docx, Pillow, psutil)..."
 if [ -x "$TOOLS_DIR/uv/uv" ] && [ "$OS" = "Darwin" ] && [ "$ARCH" = "arm64" ]; then
     "$TOOLS_DIR/uv/uv" pip install --python "$PYTHON_BIN" \
-        numpy scipy matplotlib pytest ruff python-docx Pillow dulwich
+        numpy scipy matplotlib pytest ruff python-docx Pillow dulwich psutil
 else
     "$PYTHON_BIN" -m pip install --upgrade pip
     "$PYTHON_BIN" -m pip install \
-        numpy scipy matplotlib pytest ruff python-docx Pillow dulwich
+        numpy scipy matplotlib pytest ruff python-docx Pillow dulwich psutil
 fi
 
 # 4. Compilar orquestrador Go nativo se go estiver disponível

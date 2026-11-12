@@ -232,7 +232,7 @@ def build_system_testing_report(data):
         "This document verifies that the experimental setup defined in the Project Work Plan is installed, configured, "
         "calibrated, and validated on the target Apple Silicon M4 testbed. In addition to individual component verification "
         "(Sections 2–4), this report documents the end-to-end integration and full factorial experimental execution across "
-        "all 16 treatments (n = 30 repetitions per treatment, 480 total benchmark runs; Section 5), details the empirical "
+        "all 20 evaluation cells (5 configurations × 4 workloads, n = 30 repetitions per condition, 600 total evaluated benchmark runs; Section 5), details the empirical "
         "constraints and tests that could not be executed in their original form along with user-space corrective actions "
         "(Sections 2.5, 3.5, 4.3.5, and 6), and reports the AI tools utilized (Section 7).",
         italic=True,
@@ -537,8 +537,8 @@ $ curl -i -s http://127.0.0.1:8080/health -> HTTP/1.1 200 OK | {"status":"ok"}""
         "Role in the Project: ",
         "Generates the deterministic synthetic datasets for Tiers W1–W4 (50 mock config files, 147.4 KB JSONL system log with 750 "
         "entries and 500 target latency points, and a 15.03 MB 100k-parameter [256×384 + bias = 98,688 parameters] projection head "
-        "with 10,000 normalized 384-dimensional document vectors), orchestrates the 480 randomized trials, and computes statistical "
-        "summaries (95% Student's t CIs and Welch's t-tests).",
+        "with 10,000 normalized 384-dimensional document vectors), orchestrates the 600 randomized trials, and computes statistical "
+        "summaries (non-parametric tests and 95% bootstrap CIs).",
     )
     add_bullet_p(
         doc,
@@ -573,7 +573,7 @@ $ curl -i -s http://127.0.0.1:8080/health -> HTTP/1.1 200 OK | {"status":"ok"}""
         "(1) Via macOS SecurityAgent administrator authorization (osascript with administrator privileges), we temporarily disabled "
         "Spotlight background indexing across all APFS volumes (mdutil -a -i off), captured 100 ms hardware power traces using "
         "/usr/bin/powermetrics -i 100 --samplers cpu_power,gpu_power,ane_power across Idle, PicoClaw W2, and OpenClaw W2 workloads, "
-        "and restored Spotlight indexing (mdutil -a -i on) immediately afterward; (2) For the 480 automated factorial runs, we coupled "
+        "and restored Spotlight indexing (mdutil -a -i on) immediately afterward; (2) For the 600 automated evaluation runs, we coupled "
         "Darwin's /usr/lib/libproc.dylib (RUSAGE_INFO_V4 hardware PMCs: ri_instructions, ri_cycles, ri_phys_footprint, ri_billed_energy) "
         "with the empirical powermetrics rail measurements, while keeping /usr/bin/caffeinate -dims active to prevent sleep/hibernation without disabling Wi-Fi (which would sever the active control session).",
     )
@@ -602,9 +602,9 @@ OpenClaw CLI: {'peak_rss_mb': 164.55, 'peak_phys_mb': 115.56, 'instructions': 47
         doc,
         "Following individual component verification, all subsystems were integrated into the unified loopback topology on the "
         "Apple Mac mini M4 (24 GB UMA) shown in Figure 3. We then executed the complete Full Factorial Design Matrix defined in "
-        "the Project Work Plan: 2 Architectures (OpenClaw vs. PicoClaw) × 4 Workload Tiers (W1: Single-Turn Reflection, W2: 3-Step "
-        "Tool Chain, W3: 10k-Doc Vector RAG, W4: 10-Turn Autonomous ReAct Loop) × 2 Warmth States (Cold Start vs. Warm Steady-State) "
-        "= 16 Treatments (T1–T16), with n = 30 repetitions per treatment (480 total executions).",
+        "the Project Work Plan: 5 Configurations (NeuralBaseline, PicoClaw, OpenClaw Minimal, OpenClaw Full, PythonNative) × 4 Workload Tiers "
+        "(W1: Single-Turn Reflection, W2: 3-Step Tool Chain, W3: 10k-Doc Vector RAG, W4: 10-Turn Autonomous ReAct Loop), "
+        "with n = 30 repetitions per condition (600 total evaluated executions).",
         indent=True,
     )
 
@@ -886,7 +886,7 @@ OpenClaw CLI: {'peak_rss_mb': 164.55, 'peak_phys_mb': 115.56, 'instructions': 47
                 "7. SoC Energy & Hardware Telemetry (Secs. 5, 7 & 9)",
                 "macOS powermetrics @ 100 ms intervals + psutil",
                 "Real sudo powermetrics (100 ms SMC) + Darwin libproc RUSAGE_INFO_V4 PMCs",
-                "Captured 100 ms CPU/GPU/ANE SMC rails via root authorization + per-process PMCs (instructions, cycles, RAM) on all 480 runs.",
+                "Captured 50 ms CPU/GPU/ANE SMC rails via root authorization + per-process PMCs (instructions, cycles, RAM) on all 600 runs.",
             ],
             [
                 "8. Host OS & System Quiescence (Sec. 9)",
@@ -951,7 +951,7 @@ OpenClaw CLI: {'peak_rss_mb': 164.55, 'peak_phys_mb': 115.56, 'instructions': 47
         "Adjustment 7 — Dual-Layer Hardware Telemetry (Superuser powermetrics + Darwin libproc RUSAGE_INFO_V4): ",
         "We combined real superuser /usr/bin/powermetrics sampling (100 ms intervals across CPU, GPU, and ANE power rails via macOS "
         "SecurityAgent administrator privileges) with unprivileged per-process Darwin kernel RUSAGE_INFO_V4 hardware Performance Monitoring "
-        "Counters (ri_instructions, ri_cycles, ri_phys_footprint, ri_resident_size, ri_billed_energy) across all 480 factorial trials.",
+        "Counters (ri_instructions, ri_cycles, ri_phys_footprint, ri_resident_size, ri_billed_energy) across all 600 evaluation trials.",
     )
     add_bullet_p(
         doc,
@@ -1121,13 +1121,13 @@ def build_revised_workplan():
     add_sec_heading(doc, "10. Experiments", level=1)
     add_styled_table(
         doc,
-        "Table 4: Experimental Execution Plan and Statistical Design (480 Total Observations)",
+        "Table 4: Experimental Execution Plan and Statistical Design (600 Total Observations)",
         ["Experiment", "Primary Metrics", "Treatments Evaluated", "Repetitions", "Statistical Evaluation"],
         [
-            ["Exp 1: Startup & Footprint", "T_cold, RSS_idle, RSS_peak, PMCs", "T1, T2, T9, T10", "30 per treatment (120)", "Welch's t-test, 95% CI"],
-            ["Exp 2: Latency & Overhead", "T_task, TTFT, ITL, Φ_orch", "T1 through T16", "30 per treatment (480)", "Two-way ANOVA, Pairwise t-test"],
-            ["Exp 3: Energy & Power", "E_pkg, P_avg, EDP", "T1 through T16", "30 per treatment (480)", "95% Confidence Intervals, EDP"],
-            ["Exp 4: Tool Throughput", "T_dispatch, R_tool, α_mem", "T3, T4, T7, T8, T11, T12, T15, T16", "30 per treatment (240)", "Throughput scaling & ratio"],
+            ["Exp 1: Startup & Footprint", "T_cold, RSS_idle, RSS_peak, PMCs", "T1, T2, T9, T10", "30 per condition (120)", "Welch's t-test, 95% CI"],
+            ["Exp 2: Latency & Overhead", "T_task, TTFT, ITL, Φ_orch", "All 5 Configurations", "30 per condition (600)", "Non-parametric tests, Holm-Bonferroni"],
+            ["Exp 3: Energy & Power", "E_pkg, P_avg, EDP", "All 5 Configurations", "30 per condition (600)", "95% Bootstrap CIs, Cliff's Delta, A12"],
+            ["Exp 4: Tool Throughput", "T_dispatch, R_tool, α_mem", "W2, W3, W4", "30 per condition (360)", "Throughput scaling & ratio"],
         ],
     )
 
@@ -1154,9 +1154,12 @@ def main():
     results_all_path = os.path.join(REPO_DIR, "data", "results_all.json")
     if not os.path.exists(results_all_path):
         results_all_path = os.path.join(BENCH_DIR, "results_all.json")
-    with open(results_all_path, "r") as f:
-        data = json.load(f)
-    build_system_testing_report(data)
+    if os.path.exists(results_all_path):
+        with open(results_all_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        build_system_testing_report(data)
+    else:
+        print(f"Note: {results_all_path} not found. build_system_testing_report requires results_all.json.")
     build_revised_workplan()
 
 

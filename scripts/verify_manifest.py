@@ -47,14 +47,19 @@ def verify_manifest() -> int:
     missing = []
     verified_count = 0
 
-    for rel_path, expected_hash in manifest.items():
+    for rel_path, exp_val in manifest.items():
         abs_path = os.path.join(REPO_DIR, rel_path)
         if not os.path.exists(abs_path):
             missing.append(rel_path)
             continue
 
+        if isinstance(exp_val, dict):
+            expected_hash = exp_val.get("sha256", "")
+        else:
+            expected_hash = str(exp_val)
+
         actual_hash = compute_sha256(abs_path)
-        if actual_hash != expected_hash:
+        if actual_hash.lower() != expected_hash.lower():
             mismatches.append((rel_path, expected_hash, actual_hash))
         else:
             verified_count += 1

@@ -73,3 +73,26 @@ def test_figures_exist_and_non_empty():
         fig_path = os.path.join(figures_dir, fig_name)
         assert os.path.exists(fig_path), f"Figure {fig_name} missing from {figures_dir}"
         assert os.path.getsize(fig_path) > 1000, f"Figure {fig_name} is too small or empty"
+
+
+def test_macros_empirical_consistent_with_summary_statistics():
+    """Verify that macros_empirical.tex exists and matches summary_statistics.json."""
+    macros_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "macros_empirical.tex")
+    summary_path = os.path.join(REPO_DIR, "results", "publication_campaign", "summary_statistics.json")
+
+    assert os.path.exists(macros_path), f"Missing {macros_path}"
+    assert os.path.exists(summary_path), f"Missing {summary_path}"
+
+    with open(summary_path, "r", encoding="utf-8") as f:
+        summary = json.load(f)
+
+    with open(macros_path, "r", encoding="utf-8") as f:
+        macros_content = f.read()
+
+    # Check that key values in summary appear in macros
+    w3_pico_median = f"{summary['picoclaw']['W3']['t_task_median_ms']:.1f}"
+    assert f"\\newcommand{{\\WThreePicoMedian}}{{{w3_pico_median}}}" in macros_content
+
+    w2_open_median = f"{summary['openclaw_minimal']['W2']['t_task_median_ms']:.1f}"
+    assert f"\\newcommand{{\\WTwoOpenMinMedian}}{{{w2_open_median}}}" in macros_content
+

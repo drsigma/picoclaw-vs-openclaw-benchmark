@@ -101,30 +101,17 @@ function executeVectorRAG(baseDir) {
   const bFile = path.join(baseDir, "b_proj.bin");
   const docsBinFile = path.join(baseDir, "doc_embeddings.bin");
 
-  let wProj, bProj, docMatrix;
-  let loaded = false;
+  const wBuf = fs.readFileSync(wFile);
+  const bBuf = fs.readFileSync(bFile);
+  const docBuf = fs.readFileSync(docsBinFile);
 
-  try {
-    const wBuf = fs.readFileSync(wFile);
-    const bBuf = fs.readFileSync(bFile);
-    const docBuf = fs.readFileSync(docsBinFile);
-
-    if (wBuf.length === inDim * outDim * 4 && bBuf.length === outDim * 4 && docBuf.length === nDocs * outDim * 4) {
-      wProj = new Float32Array(wBuf.buffer, wBuf.byteOffset, inDim * outDim);
-      bProj = new Float32Array(bBuf.buffer, bBuf.byteOffset, outDim);
-      docMatrix = new Float32Array(docBuf.buffer, docBuf.byteOffset, nDocs * outDim);
-      loaded = true;
-    }
-  } catch {}
-
-  if (!loaded) {
-    wProj = new Float32Array(inDim * outDim);
-    bProj = new Float32Array(outDim);
-    docMatrix = new Float32Array(nDocs * outDim);
-    for (let i = 0; i < inDim * outDim; i++) wProj[i] = Math.sin(i * 0.01) * 0.05;
-    for (let i = 0; i < outDim; i++) bProj[i] = Math.cos(i * 0.02) * 0.01;
-    for (let i = 0; i < nDocs * outDim; i++) docMatrix[i] = ((i * 31 + 17) % 100) * 0.01;
+  if (wBuf.length !== inDim * outDim * 4 || bBuf.length !== outDim * 4 || docBuf.length !== nDocs * outDim * 4) {
+    throw new Error(`FATAL: Required RAG binary datasets corrupted or incomplete in ${baseDir}`);
   }
+
+  const wProj = new Float32Array(wBuf.buffer, wBuf.byteOffset, inDim * outDim);
+  const bProj = new Float32Array(bBuf.buffer, bBuf.byteOffset, outDim);
+  const docMatrix = new Float32Array(docBuf.buffer, docBuf.byteOffset, nDocs * outDim);
 
   // 1. Query vector initialization and linear projection (256 -> 384)
   const qRaw = new Float32Array(inDim);
@@ -165,10 +152,8 @@ function executeVectorRAG(baseDir) {
   // 4. Descending sort to select Top-5 chunks
   scores.sort((a, b) => b.score - a.score);
 
-  let chunks = {};
-  try {
-    chunks = JSON.parse(fs.readFileSync(path.join(baseDir, "rag_chunks_10k.json"), "utf-8"));
-  } catch {}
+  const chunksRaw = fs.readFileSync(path.join(baseDir, "rag_chunks_10k.json"), "utf-8");
+  const chunks = JSON.parse(chunksRaw);
 
   let out = "";
   for (let k = 0; k < 5; k++) {
@@ -186,7 +171,8 @@ async function callLlamaStream(messages, tools, maxTokens) {
     max_tokens: maxTokens,
     temperature: 0.0,
     seed: 42,
-    stream: true
+    stream: true,
+    cache_prompt: false
   });
   const t0 = performance.now();
   const resp = await fetch(API_URL, {
@@ -194,12 +180,21 @@ async function callLlamaStream(messages, tools, maxTokens) {
     headers: { "Content-Type": "application/json" },
     body: payload
   });
+
+  if (resp.status !== 200) {
+    const errText = await resp.text();
+    throw new Error(`FATAL: llama-server returned HTTP ${resp.status}: ${errText}`);
+  }
+
   let ttftMs = 0.0;
   let promptMs = 0.0;
   let predictedMs = 0.0;
   let hasServerTimings = false;
   let firstChunk = true;
   let tokenCount = 0;
+  let promptTokens = 0;
+  let completionTokens = 0;
+  let finishReason = "";
   let outText = "";
   const decoder = new TextDecoder();
   let buf = "";
@@ -229,22 +224,42 @@ async function callLlamaStream(messages, tools, maxTokens) {
               predictedMs = parsed.timings.predicted_ms;
               hasServerTimings = true;
             }
+            if (typeof parsed.timings.prompt_n === "number") {
+              promptTokens = parsed.timings.prompt_n;
+            }
+            if (typeof parsed.timings.predicted_n === "number") {
+              completionTokens = parsed.timings.predicted_n;
+            }
           }
-          const delta = parsed.choices?.[0]?.delta;
-          if (delta) {
-            let hasData = false;
-            if (delta.content && delta.content.length > 0) {
-              hasData = true;
-              tokenCount++;
-              outText += delta.content;
+          if (parsed.usage) {
+            if (typeof parsed.usage.prompt_tokens === "number") {
+              promptTokens = parsed.usage.prompt_tokens;
             }
-            if (delta.tool_calls && delta.tool_calls.length > 0) {
-              hasData = true;
-              tokenCount += delta.tool_calls.length;
+            if (typeof parsed.usage.completion_tokens === "number") {
+              completionTokens = parsed.usage.completion_tokens;
             }
-            if (hasData && firstChunk) {
-              ttftMs = performance.now() - t0;
-              firstChunk = false;
+          }
+          const c0 = parsed.choices?.[0];
+          if (c0) {
+            if (c0.finish_reason && typeof c0.finish_reason === "string") {
+              finishReason = c0.finish_reason;
+            }
+            const delta = c0.delta;
+            if (delta) {
+              let hasData = false;
+              if (delta.content && delta.content.length > 0) {
+                hasData = true;
+                tokenCount++;
+                outText += delta.content;
+              }
+              if (delta.tool_calls && delta.tool_calls.length > 0) {
+                hasData = true;
+                tokenCount += delta.tool_calls.length;
+              }
+              if (hasData && firstChunk) {
+                ttftMs = performance.now() - t0;
+                firstChunk = false;
+              }
             }
           }
         } catch {}
@@ -253,8 +268,19 @@ async function callLlamaStream(messages, tools, maxTokens) {
   }
 
   const totalNeuralMs = hasServerTimings ? (promptMs + predictedMs) : (performance.now() - t0);
-  const itlMs = tokenCount > 1 ? (totalNeuralMs - ttftMs) / (tokenCount - 1) : 0.0;
-  return { totalNeuralMs, ttftMs, itlMs, tokenCount, outText };
+  if (completionTokens === 0) completionTokens = tokenCount;
+  if (!finishReason) finishReason = "stop";
+  const itlMs = completionTokens > 1 ? (totalNeuralMs - ttftMs) / (completionTokens - 1) : 0.0;
+  return {
+    totalNeuralMs,
+    ttftMs,
+    itlMs,
+    promptTokens,
+    completionTokens,
+    finishReason,
+    httpStatus: resp.status,
+    outText
+  };
 }
 
 async function runWorkload(tier, warmth, rssIdle) {
@@ -263,15 +289,21 @@ async function runWorkload(tier, warmth, rssIdle) {
   let ttftFirst = 0.0;
   let itlAvg = 0.0;
   let tDispatchTotal = 0.0;
-  let totalTokens = 0;
+  let totalPromptTokens = 0;
+  let totalCompletionTokens = 0;
   let toolCalls = 0;
+  let lastFinishReason = "";
+  let lastHttpStatus = 200;
 
+  const tCatalog0 = performance.now();
   const toolCatalog = buildOpenClawToolCatalog();
+  const tCatalogMs = performance.now() - tCatalog0;
 
   const mockDir = path.join(BASE_DIR, "mock_files");
   const logFile = path.join(BASE_DIR, "system_logs.jsonl");
 
   if (tier === "W1") {
+    tDispatchTotal = tCatalogMs;
     const prompt =
       "Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. ".repeat(8) +
       "Summarize the primary latency determinant in two concise sentences.";
@@ -283,14 +315,17 @@ async function runWorkload(tier, warmth, rssIdle) {
     tNeuralTotal = r.totalNeuralMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
-    totalTokens = r.tokenCount;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    lastFinishReason = r.finishReason;
+    lastHttpStatus = r.httpStatus;
     toolCalls = 0;
   } else if (tier === "W2") {
     const tTool0 = performance.now();
     const res1 = executeToolListDir(mockDir);
     const { vals, summary: res2 } = executeToolGrepLogs(logFile);
     const res3 = executeToolCalcStats(vals);
-    tDispatchTotal = performance.now() - tTool0;
+    tDispatchTotal = tCatalogMs + (performance.now() - tTool0);
     toolCalls = 3;
 
     const prompt = `System Tool Chain Results:\n1. list_dir: ${res1}\n2. grep_logs: ${res2}\n3. calc_stats: ${res3}\nProvide a concise technical diagnostic summary of the bus latency metrics.`;
@@ -302,11 +337,14 @@ async function runWorkload(tier, warmth, rssIdle) {
     tNeuralTotal = r.totalNeuralMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
-    totalTokens = r.tokenCount;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    lastFinishReason = r.finishReason;
+    lastHttpStatus = r.httpStatus;
   } else if (tier === "W3") {
     const tTool0 = performance.now();
     const ragContext = executeVectorRAG(BASE_DIR);
-    tDispatchTotal = performance.now() - tTool0;
+    tDispatchTotal = tCatalogMs + (performance.now() - tTool0);
     toolCalls = 1;
 
     const msgs = [
@@ -317,19 +355,23 @@ async function runWorkload(tier, warmth, rssIdle) {
     tNeuralTotal = r.totalNeuralMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
-    totalTokens = r.tokenCount;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    lastFinishReason = r.finishReason;
+    lastHttpStatus = r.httpStatus;
   } else if (tier === "W4") {
     toolCalls = 10;
     let itlSum = 0.0;
     const history = [
       { role: "system", content: "You are a concise technical systems assistant." }
     ];
+    tDispatchTotal = tCatalogMs;
     for (let step = 1; step <= 10; step++) {
       const tTool0 = performance.now();
       executeToolListDir(mockDir);
       const { vals } = executeToolGrepLogs(logFile);
       const statStr = executeToolCalcStats(vals);
-      tDispatchTotal += performance.now() - tTool0;
+      tDispatchTotal += (performance.now() - tTool0);
 
       history.push({
         role: "user",
@@ -339,13 +381,17 @@ async function runWorkload(tier, warmth, rssIdle) {
       tNeuralTotal += r.totalNeuralMs;
       if (step === 1) ttftFirst = r.ttftMs;
       itlSum += r.itlMs;
-      totalTokens += r.tokenCount;
+      totalPromptTokens += r.promptTokens;
+      totalCompletionTokens += r.completionTokens;
+      lastFinishReason = r.finishReason;
+      lastHttpStatus = r.httpStatus;
       history.push({ role: "assistant", content: r.outText });
     }
     itlAvg = itlSum / 10.0;
   }
 
   const tTaskMs = performance.now() - tStart;
+  const tHttpMs = Math.max(0.0, tTaskMs - tNeuralTotal - tDispatchTotal);
   const tOrchMs = Math.max(0.0, tTaskMs - tNeuralTotal);
   const phiOrch = tTaskMs > 0 ? (tOrchMs / tTaskMs) * 100.0 : 0.0;
   const rTool = toolCalls > 0 && tDispatchTotal > 0 ? toolCalls / (tDispatchTotal / 1000.0) : 0.0;
@@ -364,12 +410,17 @@ async function runWorkload(tier, warmth, rssIdle) {
     ttft_ms: ttftFirst,
     itl_ms: itlAvg,
     t_dispatch_ms: tDispatchTotal,
+    t_http_ms: tHttpMs,
     r_tool_ops_sec: rTool,
     rss_idle_mb: rssIdle,
     rss_peak_mb: rssPeak,
     alpha_mem: alphaMem,
-    output_tokens: totalTokens,
-    tool_calls: toolCalls
+    prompt_tokens: totalPromptTokens,
+    completion_tokens: totalCompletionTokens,
+    output_tokens: totalCompletionTokens,
+    tool_calls: toolCalls,
+    http_status: lastHttpStatus,
+    finish_reason: lastFinishReason
   };
 }
 

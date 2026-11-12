@@ -31,6 +31,12 @@ Both orchestrators interface via local loopback (`127.0.0.1:8080`) with a unifie
 
 ---
 
+### ⚖️ Aviso de Escopo e Marcas Registradas / Trademark & Scope Disclaimer
+* **🇧🇷 PT-BR:** Este benchmark avalia implementações de referência isomórficas *clean-room* em Go (`picoclaw_orch.go`), Node.js/TypeScript (`openclaw_orch.mjs`) e Python (`python_orch.py`), projetadas para mensurar o impacto microarquitetural e de runtime (compilado nativo vs. JIT/interpretado) sob esquemas e prompts idênticos. PicoClaw e OpenClaw são marcas de seus respectivos criadores; este projeto é um benchmark acadêmico independente não afiliado ou endossado pelos mantenedores originais.
+* **🇺🇸 EN-US:** This benchmark evaluates clean-room, isomorphic reference implementations in Go (`picoclaw_orch.go`), Node.js/TypeScript (`openclaw_orch.mjs`), and Python (`python_orch.py`) designed to isolate systems runtime overhead (native compiled vs. JIT/interpreted) under strictly identical prompts and tool schemas. PicoClaw and OpenClaw are trademarks of their respective owners; this software is an independent academic performance benchmark not affiliated with or endorsed by upstream project maintainers.
+
+---
+
 ## ❓ Pergunta de Pesquisa / Research Question
 
 ### 🇧🇷 Português (PT-BR)

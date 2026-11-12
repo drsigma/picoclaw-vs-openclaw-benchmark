@@ -101,16 +101,12 @@ def execute_vector_rag(base_dir: str) -> str:
     b_file = os.path.join(base_dir, "b_proj.bin")
     docs_bin = os.path.join(base_dir, "doc_embeddings.bin")
 
-    if os.path.exists(w_file) and os.path.exists(b_file) and os.path.exists(docs_bin):
-        w_proj = np.fromfile(w_file, dtype=np.float32).reshape(in_dim, out_dim)
-        b_proj = np.fromfile(b_file, dtype=np.float32)
-        doc_matrix = np.fromfile(docs_bin, dtype=np.float32).reshape(n_docs, out_dim)
-    else:
-        rng = np.random.default_rng(42)
-        w_proj = rng.standard_normal((in_dim, out_dim), dtype=np.float32) * 0.05
-        b_proj = rng.standard_normal((out_dim,), dtype=np.float32) * 0.01
-        doc_matrix = rng.standard_normal((n_docs, out_dim), dtype=np.float32)
-        doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True) + 1e-8
+    if not (os.path.exists(w_file) and os.path.exists(b_file) and os.path.exists(docs_bin)):
+        raise FileNotFoundError(f"FATAL: Required RAG binary datasets missing in {base_dir}")
+
+    w_proj = np.fromfile(w_file, dtype=np.float32).reshape(in_dim, out_dim)
+    b_proj = np.fromfile(b_file, dtype=np.float32)
+    doc_matrix = np.fromfile(docs_bin, dtype=np.float32).reshape(n_docs, out_dim)
 
     # 1. Query vector initialization & linear projection
     d_idx = np.arange(in_dim, dtype=np.float32)
@@ -127,13 +123,11 @@ def execute_vector_rag(base_dir: str) -> str:
     top5_indices = np.argsort(scores)[::-1][:5]
 
     chunks_file = os.path.join(base_dir, "rag_chunks_10k.json")
-    chunks = {}
-    if os.path.exists(chunks_file):
-        try:
-            with open(chunks_file, "r", encoding="utf-8") as f:
-                chunks = json.load(f)
-        except Exception:
-            pass
+    if not os.path.exists(chunks_file):
+        raise FileNotFoundError(f"FATAL: rag_chunks_10k.json missing in {base_dir}")
+
+    with open(chunks_file, "r", encoding="utf-8") as f:
+        chunks = json.load(f)
 
     out_lines = []
     for idx in top5_indices:
@@ -142,7 +136,7 @@ def execute_vector_rag(base_dir: str) -> str:
     return "\n".join(out_lines) + "\n"
 
 
-def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) -> tuple[float, float, float, int, str]:
+def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) -> tuple[float, float, float, int, int, str, int, str]:
     payload = json.dumps({
         "model": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
         "messages": messages,
@@ -151,6 +145,7 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
         "temperature": 0.0,
         "seed": 42,
         "stream": True,
+        "cache_prompt": False,
     }).encode("utf-8")
 
     t0 = time.monotonic()
@@ -161,9 +156,16 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
     ttft_ms = 0.0
     first_chunk = True
     token_count = 0
+    prompt_tokens = 0
+    completion_tokens = 0
+    finish_reason = ""
     out_text = []
 
     with urllib.request.urlopen(req, timeout=120) as resp:
+        if resp.status != 200:
+            raise RuntimeError(f"FATAL: llama-server returned HTTP {resp.status}")
+        http_status = resp.status
+
         for raw_line in resp:
             line = raw_line.decode("utf-8").strip()
             if not line.startswith("data: "):
@@ -181,10 +183,25 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
                     if "predicted_ms" in timings:
                         predicted_ms = float(timings["predicted_ms"])
                         has_server_timings = True
+                    if "prompt_n" in timings:
+                        prompt_tokens = int(timings["prompt_n"])
+                    if "predicted_n" in timings:
+                        completion_tokens = int(timings["predicted_n"])
+
+                usage = chunk.get("usage")
+                if isinstance(usage, dict):
+                    if "prompt_tokens" in usage:
+                        prompt_tokens = int(usage["prompt_tokens"])
+                    if "completion_tokens" in usage:
+                        completion_tokens = int(usage["completion_tokens"])
 
                 choices = chunk.get("choices")
                 if choices and len(choices) > 0:
-                    delta = choices[0].get("delta", {})
+                    c0 = choices[0]
+                    fr = c0.get("finish_reason")
+                    if fr:
+                        finish_reason = str(fr)
+                    delta = c0.get("delta", {})
                     has_data = False
                     content = delta.get("content")
                     if content:
@@ -206,8 +223,13 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
     else:
         total_neural_ms = (time.monotonic() - t0) * 1000.0
 
-    itl_ms = (total_neural_ms - ttft_ms) / float(token_count - 1) if token_count > 1 else 0.0
-    return total_neural_ms, ttft_ms, itl_ms, token_count, "".join(out_text)
+    if completion_tokens == 0:
+        completion_tokens = token_count
+    if not finish_reason:
+        finish_reason = "stop"
+
+    itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
+    return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, finish_reason, http_status, "".join(out_text)
 
 
 def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
@@ -216,14 +238,21 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
     ttft_first = 0.0
     itl_avg = 0.0
     t_dispatch_total = 0.0
-    total_tokens = 0
+    total_prompt_tokens = 0
+    total_completion_tokens = 0
     tool_calls = 0
+    last_finish_reason = ""
+    last_http_status = 200
 
+    t_cat0 = time.monotonic()
     tool_catalog = build_tool_catalog(15)
+    t_cat_ms = (time.monotonic() - t_cat0) * 1000.0
+
     mock_dir = os.path.join(BASE_DIR, "mock_files")
     log_file = os.path.join(BASE_DIR, "system_logs.jsonl")
 
     if tier == "W1":
+        t_dispatch_total = t_cat_ms
         prompt = (
             "Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. " * 8
             + "Summarize the primary latency determinant in two concise sentences."
@@ -232,11 +261,14 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": prompt},
         ]
-        tn, ttft, itl, ntok, _ = call_llama_stream(msgs, tool_catalog, 64)
+        tn, ttft, itl, ptok, ctok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 64)
         t_neural_total = tn
         ttft_first = ttft
         itl_avg = itl
-        total_tokens = ntok
+        total_prompt_tokens = ptok
+        total_completion_tokens = ctok
+        last_finish_reason = fr
+        last_http_status = hstatus
         tool_calls = 0
 
     elif tier == "W2":
@@ -244,7 +276,7 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         res1 = execute_tool_list_dir(mock_dir)
         vals, res2 = execute_tool_grep_logs(log_file)
         res3 = execute_tool_calc_stats(vals)
-        t_dispatch_total = (time.monotonic() - t0_tool) * 1000.0
+        t_dispatch_total = t_cat_ms + (time.monotonic() - t0_tool) * 1000.0
         tool_calls = 3
 
         prompt = f"System Tool Chain Results:\n1. list_dir: {res1}\n2. grep_logs: {res2}\n3. calc_stats: {res3}\nProvide a concise technical diagnostic summary of the bus latency metrics."
@@ -252,27 +284,33 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": prompt},
         ]
-        tn, ttft, itl, ntok, _ = call_llama_stream(msgs, tool_catalog, 128)
+        tn, ttft, itl, ptok, ctok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 128)
         t_neural_total = tn
         ttft_first = ttft
         itl_avg = itl
-        total_tokens = ntok
+        total_prompt_tokens = ptok
+        total_completion_tokens = ctok
+        last_finish_reason = fr
+        last_http_status = hstatus
 
     elif tier == "W3":
         t0_tool = time.monotonic()
         rag_context = execute_vector_rag(BASE_DIR)
-        t_dispatch_total = (time.monotonic() - t0_tool) * 1000.0
+        t_dispatch_total = t_cat_ms + (time.monotonic() - t0_tool) * 1000.0
         tool_calls = 1
 
         msgs = [
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": "Retrieved Context:\n" + rag_context + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
         ]
-        tn, ttft, itl, ntok, _ = call_llama_stream(msgs, tool_catalog, 256)
+        tn, ttft, itl, ptok, ctok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
         t_neural_total = tn
         ttft_first = ttft
         itl_avg = itl
-        total_tokens = ntok
+        total_prompt_tokens = ptok
+        total_completion_tokens = ctok
+        last_finish_reason = fr
+        last_http_status = hstatus
 
     elif tier == "W4":
         tool_calls = 10
@@ -280,6 +318,7 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         history = [
             {"role": "system", "content": "You are a concise technical systems assistant."},
         ]
+        t_dispatch_total = t_cat_ms
         for step in range(1, 11):
             t0_tool = time.monotonic()
             execute_tool_list_dir(mock_dir)
@@ -291,16 +330,20 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
                 "role": "user",
                 "content": f"Turn {step} Observation: {stat_str}. State next brief diagnostic action.",
             })
-            tn, ttft, itl, ntok, reply = call_llama_stream(history, tool_catalog, 64)
+            tn, ttft, itl, ptok, ctok, fr, hstatus, reply = call_llama_stream(history, tool_catalog, 64)
             t_neural_total += tn
             if step == 1:
                 ttft_first = ttft
             itl_sum += itl
-            total_tokens += ntok
+            total_prompt_tokens += ptok
+            total_completion_tokens += ctok
+            last_finish_reason = fr
+            last_http_status = hstatus
             history.append({"role": "assistant", "content": reply})
         itl_avg = itl_sum / 10.0
 
     t_task_ms = (time.monotonic() - t_start) * 1000.0
+    t_http_ms = max(0.0, t_task_ms - t_neural_total - t_dispatch_total)
     t_orch_ms = max(0.0, t_task_ms - t_neural_total)
     phi_orch = (t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0
     r_tool = (tool_calls / (t_dispatch_total / 1000.0)) if (tool_calls > 0 and t_dispatch_total > 0) else 0.0
@@ -318,12 +361,17 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         "ttft_ms": ttft_first,
         "itl_ms": itl_avg,
         "t_dispatch_ms": t_dispatch_total,
+        "t_http_ms": t_http_ms,
         "r_tool_ops_sec": r_tool,
         "rss_idle_mb": rss_idle,
         "rss_peak_mb": rss_peak,
         "alpha_mem": alpha_mem,
-        "output_tokens": total_tokens,
+        "prompt_tokens": total_prompt_tokens,
+        "completion_tokens": total_completion_tokens,
+        "output_tokens": total_completion_tokens,
         "tool_calls": tool_calls,
+        "http_status": last_http_status,
+        "finish_reason": last_finish_reason,
     }
 
 

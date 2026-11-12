@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"os"
@@ -53,25 +54,31 @@ type ChatRequest struct {
 	Temperature float64          `json:"temperature"`
 	Seed        int              `json:"seed"`
 	Stream      bool             `json:"stream"`
+	CachePrompt bool             `json:"cache_prompt"`
 }
 
 type TrialResult struct {
-	Architecture string  `json:"architecture"`
-	Workload     string  `json:"workload"`
-	Warmth       string  `json:"warmth"`
-	TTaskMs      float64 `json:"t_task_ms"`
-	TNeuralMs    float64 `json:"t_neural_ms"`
-	TOrchMs      float64 `json:"t_orch_ms"`
-	PhiOrchPct   float64 `json:"phi_orch_pct"`
-	TTFTMs       float64 `json:"ttft_ms"`
-	ITLMs        float64 `json:"itl_ms"`
-	TDispatchMs  float64 `json:"t_dispatch_ms"`
-	RToolOpsSec  float64 `json:"r_tool_ops_sec"`
-	RSSIdleMB    float64 `json:"rss_idle_mb"`
-	RSSPeakMB    float64 `json:"rss_peak_mb"`
-	AlphaMem     float64 `json:"alpha_mem"`
-	OutputTokens int     `json:"output_tokens"`
-	ToolCalls    int     `json:"tool_calls"`
+	Architecture     string  `json:"architecture"`
+	Workload         string  `json:"workload"`
+	Warmth           string  `json:"warmth"`
+	TTaskMs          float64 `json:"t_task_ms"`
+	TNeuralMs        float64 `json:"t_neural_ms"`
+	TOrchMs          float64 `json:"t_orch_ms"`
+	PhiOrchPct       float64 `json:"phi_orch_pct"`
+	TTFTMs           float64 `json:"ttft_ms"`
+	ITLMs            float64 `json:"itl_ms"`
+	TDispatchMs      float64 `json:"t_dispatch_ms"`
+	THttpMs          float64 `json:"t_http_ms"`
+	RToolOpsSec      float64 `json:"r_tool_ops_sec"`
+	RSSIdleMB        float64 `json:"rss_idle_mb"`
+	RSSPeakMB        float64 `json:"rss_peak_mb"`
+	AlphaMem         float64 `json:"alpha_mem"`
+	PromptTokens     int     `json:"prompt_tokens"`
+	CompletionTokens int     `json:"completion_tokens"`
+	OutputTokens     int     `json:"output_tokens"`
+	ToolCalls        int     `json:"tool_calls"`
+	HttpStatus       int     `json:"http_status"`
+	FinishReason     string  `json:"finish_reason"`
 }
 
 func minInt(a, b int) int {
@@ -84,7 +91,10 @@ func minInt(a, b int) int {
 func getRSSMB() float64 {
 	var rusage syscall.Rusage
 	if err := syscall.Getrusage(syscall.RUSAGE_SELF, &rusage); err == nil {
-		return float64(rusage.Maxrss) / (1024.0 * 1024.0)
+		if runtime.GOOS == "darwin" {
+			return float64(rusage.Maxrss) / (1024.0 * 1024.0)
+		}
+		return float64(rusage.Maxrss) / 1024.0
 	}
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
@@ -200,6 +210,17 @@ type docScore struct {
 	score float32
 }
 
+type StreamResult struct {
+	TotalNeuralMs    float64
+	TTFTMs           float64
+	ITLMs            float64
+	PromptTokens     int
+	CompletionTokens int
+	FinishReason     string
+	HttpStatus       int
+	OutputText       string
+}
+
 func executeVectorRAG(baseDir string) string {
 	const inDim = 256
 	const outDim = 384
@@ -213,34 +234,22 @@ func executeVectorRAG(baseDir string) string {
 	bFile := filepath.Join(baseDir, "b_proj.bin")
 	docsBinFile := filepath.Join(baseDir, "doc_embeddings.bin")
 
-	loaded := false
-	if wBytes, err := os.ReadFile(wFile); err == nil && len(wBytes) == inDim*outDim*4 {
-		if bBytes, err := os.ReadFile(bFile); err == nil && len(bBytes) == outDim*4 {
-			if docBytes, err := os.ReadFile(docsBinFile); err == nil && len(docBytes) == nDocs*outDim*4 {
-				for i := 0; i < inDim*outDim; i++ {
-					wProj[i] = math.Float32frombits(binary.LittleEndian.Uint32(wBytes[i*4 : (i+1)*4]))
-				}
-				for i := 0; i < outDim; i++ {
-					bProj[i] = math.Float32frombits(binary.LittleEndian.Uint32(bBytes[i*4 : (i+1)*4]))
-				}
-				for i := 0; i < nDocs*outDim; i++ {
-					docMatrix[i] = math.Float32frombits(binary.LittleEndian.Uint32(docBytes[i*4 : (i+1)*4]))
-				}
-				loaded = true
-			}
-		}
+	wBytes, errW := os.ReadFile(wFile)
+	bBytes, errB := os.ReadFile(bFile)
+	docBytes, errDoc := os.ReadFile(docsBinFile)
+	if errW != nil || errB != nil || errDoc != nil ||
+		len(wBytes) != inDim*outDim*4 || len(bBytes) != outDim*4 || len(docBytes) != nDocs*outDim*4 {
+		panic(fmt.Sprintf("FATAL: Required RAG binary datasets missing or corrupted in %s (w_proj.bin, b_proj.bin, doc_embeddings.bin)", baseDir))
 	}
 
-	if !loaded {
-		for i := 0; i < inDim*outDim; i++ {
-			wProj[i] = float32(math.Sin(float64(i)*0.01)) * 0.05
-		}
-		for i := 0; i < outDim; i++ {
-			bProj[i] = float32(math.Cos(float64(i)*0.02)) * 0.01
-		}
-		for i := 0; i < nDocs*outDim; i++ {
-			docMatrix[i] = float32(((i*31 + 17) % 100)) * 0.01
-		}
+	for i := 0; i < inDim*outDim; i++ {
+		wProj[i] = math.Float32frombits(binary.LittleEndian.Uint32(wBytes[i*4 : (i+1)*4]))
+	}
+	for i := 0; i < outDim; i++ {
+		bProj[i] = math.Float32frombits(binary.LittleEndian.Uint32(bBytes[i*4 : (i+1)*4]))
+	}
+	for i := 0; i < nDocs*outDim; i++ {
+		docMatrix[i] = math.Float32frombits(binary.LittleEndian.Uint32(docBytes[i*4 : (i+1)*4]))
 	}
 
 	// 1. Query vector initialization and linear projection (256 -> 384)
@@ -285,7 +294,10 @@ func executeVectorRAG(baseDir string) string {
 	})
 
 	docsFile := filepath.Join(baseDir, "rag_chunks_10k.json")
-	raw, _ := os.ReadFile(docsFile)
+	raw, errChunks := os.ReadFile(docsFile)
+	if errChunks != nil {
+		panic(fmt.Sprintf("FATAL: rag_chunks_10k.json missing in %s: %v", baseDir, errChunks))
+	}
 	var chunks map[string]string
 	_ = json.Unmarshal(raw, &chunks)
 
@@ -302,7 +314,7 @@ func executeVectorRAG(baseDir string) string {
 	return sb.String()
 }
 
-func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage, tools []ToolDefinition, maxTokens int) (float64, float64, float64, int, string) {
+func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage, tools []ToolDefinition, maxTokens int) StreamResult {
 	reqBody := ChatRequest{
 		Model:       "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
 		Messages:    messages,
@@ -311,6 +323,7 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 		Temperature: 0.0,
 		Seed:        42,
 		Stream:      true,
+		CachePrompt: false,
 	}
 	payload, _ := json.Marshal(reqBody)
 	t0 := time.Now()
@@ -318,15 +331,22 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
-		return 0, 0, 0, 0, ""
+		panic(fmt.Sprintf("FATAL: HTTP request to llama-server failed: %v", err))
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		panic(fmt.Sprintf("FATAL: llama-server returned HTTP %d: %s", resp.StatusCode, string(bodyBytes)))
+	}
 
 	var ttftMs float64
 	var promptMs, predictedMs float64
 	hasServerTimings := false
 	firstChunk := true
 	tokenCount := 0
+	var promptTokens, completionTokens int
+	var finishReason string
 	var outText strings.Builder
 	reader := bufio.NewReader(resp.Body)
 
@@ -352,9 +372,26 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 						predictedMs = predMs
 						hasServerTimings = true
 					}
+					if pn, ok := timings["prompt_n"].(float64); ok {
+						promptTokens = int(pn)
+					}
+					if predN, ok := timings["predicted_n"].(float64); ok {
+						completionTokens = int(predN)
+					}
+				}
+				if usage, ok := chunk["usage"].(map[string]interface{}); ok {
+					if pt, ok := usage["prompt_tokens"].(float64); ok {
+						promptTokens = int(pt)
+					}
+					if ct, ok := usage["completion_tokens"].(float64); ok {
+						completionTokens = int(ct)
+					}
 				}
 				if choices, ok := chunk["choices"].([]interface{}); ok && len(choices) > 0 {
 					if c0, ok := choices[0].(map[string]interface{}); ok {
+						if fr, ok := c0["finish_reason"].(string); ok && fr != "" {
+							finishReason = fr
+						}
 						if delta, ok := c0["delta"].(map[string]interface{}); ok {
 							hasData := false
 							if content, ok := delta["content"].(string); ok && len(content) > 0 {
@@ -384,45 +421,76 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 		totalNeuralMs = float64(time.Since(t0).Nanoseconds()) / 1e6
 	}
 
-	itlMs := 0.0
-	if tokenCount > 1 {
-		itlMs = (totalNeuralMs - ttftMs) / float64(tokenCount-1)
+	if completionTokens == 0 {
+		completionTokens = tokenCount
 	}
-	return totalNeuralMs, ttftMs, itlMs, tokenCount, outText.String()
+	if finishReason == "" {
+		finishReason = "stop"
+	}
+
+	itlMs := 0.0
+	if completionTokens > 1 {
+		itlMs = (totalNeuralMs - ttftMs) / float64(completionTokens-1)
+	}
+
+	return StreamResult{
+		TotalNeuralMs:    totalNeuralMs,
+		TTFTMs:           ttftMs,
+		ITLMs:            itlMs,
+		PromptTokens:     promptTokens,
+		CompletionTokens: completionTokens,
+		FinishReason:     finishReason,
+		HttpStatus:       resp.StatusCode,
+		OutputText:       outText.String(),
+	}
 }
 
 func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssIdle float64) TrialResult {
 	tStart := time.Now()
 	var tNeuralTotal, ttftFirst, itlAvg, tDispatchTotal float64
-	var totalTokens, toolCalls int
+	var totalPromptTokens, totalCompletionTokens, toolCalls int
+	var lastFinishReason string
+	lastHttpStatus := 200
 
 	// Equalized tool definitions sent in request (15 tools for minimal/picoclaw parity)
+	tToolCatalog0 := time.Now()
 	toolCatalog := buildStandardToolCatalog(15)
+	tCatalogMs := float64(time.Since(tToolCatalog0).Nanoseconds()) / 1e6
 
 	mockDir := filepath.Join(baseDir, "mock_files")
 	logFile := filepath.Join(baseDir, "system_logs.jsonl")
 
 	switch tier {
 	case "W1":
+		tDispatchTotal = tCatalogMs
 		prompt := strings.Repeat("Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. ", 8) +
 			"Summarize the primary latency determinant in two concise sentences."
 		msgs := []ChatMessage{
 			{Role: "system", Content: "You are a concise technical systems assistant."},
 			{Role: "user", Content: prompt},
 		}
-		tn, ttft, itl, ntok, _ := callLlamaStream(client, apiURL, msgs, toolCatalog, 64)
-		tNeuralTotal = tn
-		ttftFirst = ttft
-		itlAvg = itl
-		totalTokens = ntok
+		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 64)
+		tNeuralTotal = sr.TotalNeuralMs
+		ttftFirst = sr.TTFTMs
+		itlAvg = sr.ITLMs
+		totalPromptTokens = sr.PromptTokens
+		totalCompletionTokens = sr.CompletionTokens
+		lastFinishReason = sr.FinishReason
+		lastHttpStatus = sr.HttpStatus
 		toolCalls = 0
 
 	case "W2":
 		tTool0 := time.Now()
-		res1, _ := executeToolListDir(mockDir)
-		vals, res2, _ := executeToolGrepLogs(logFile)
+		res1, err1 := executeToolListDir(mockDir)
+		if err1 != nil {
+			panic(fmt.Sprintf("W2 executeToolListDir failed: %v", err1))
+		}
+		vals, res2, err2 := executeToolGrepLogs(logFile)
+		if err2 != nil {
+			panic(fmt.Sprintf("W2 executeToolGrepLogs failed: %v", err2))
+		}
 		res3 := executeToolCalcStats(vals)
-		tDispatchTotal = float64(time.Since(tTool0).Nanoseconds()) / 1e6
+		tDispatchTotal = tCatalogMs + float64(time.Since(tTool0).Nanoseconds())/1e6
 		toolCalls = 3
 
 		prompt := fmt.Sprintf("System Tool Chain Results:\n1. list_dir: %s\n2. grep_logs: %s\n3. calc_stats: %s\nProvide a concise technical diagnostic summary of the bus latency metrics.", res1, res2, res3)
@@ -430,27 +498,33 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 			{Role: "system", Content: "You are a concise technical systems assistant."},
 			{Role: "user", Content: prompt},
 		}
-		tn, ttft, itl, ntok, _ := callLlamaStream(client, apiURL, msgs, toolCatalog, 128)
-		tNeuralTotal = tn
-		ttftFirst = ttft
-		itlAvg = itl
-		totalTokens = ntok
+		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 128)
+		tNeuralTotal = sr.TotalNeuralMs
+		ttftFirst = sr.TTFTMs
+		itlAvg = sr.ITLMs
+		totalPromptTokens = sr.PromptTokens
+		totalCompletionTokens = sr.CompletionTokens
+		lastFinishReason = sr.FinishReason
+		lastHttpStatus = sr.HttpStatus
 
 	case "W3":
 		tTool0 := time.Now()
 		ragContext := executeVectorRAG(baseDir)
-		tDispatchTotal = float64(time.Since(tTool0).Nanoseconds()) / 1e6
+		tDispatchTotal = tCatalogMs + float64(time.Since(tTool0).Nanoseconds())/1e6
 		toolCalls = 1
 
 		msgs := []ChatMessage{
 			{Role: "system", Content: "You are a concise technical systems assistant."},
 			{Role: "user", Content: "Retrieved Context:\n" + ragContext + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
 		}
-		tn, ttft, itl, ntok, _ := callLlamaStream(client, apiURL, msgs, toolCatalog, 256)
-		tNeuralTotal = tn
-		ttftFirst = ttft
-		itlAvg = itl
-		totalTokens = ntok
+		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 256)
+		tNeuralTotal = sr.TotalNeuralMs
+		ttftFirst = sr.TTFTMs
+		itlAvg = sr.ITLMs
+		totalPromptTokens = sr.PromptTokens
+		totalCompletionTokens = sr.CompletionTokens
+		lastFinishReason = sr.FinishReason
+		lastHttpStatus = sr.HttpStatus
 
 	case "W4":
 		toolCalls = 10
@@ -458,6 +532,7 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		history := []ChatMessage{
 			{Role: "system", Content: "You are a concise technical systems assistant."},
 		}
+		tDispatchTotal = tCatalogMs
 		for step := 1; step <= 10; step++ {
 			tTool0 := time.Now()
 			_, _ = executeToolListDir(mockDir)
@@ -469,19 +544,23 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 				Role:    "user",
 				Content: fmt.Sprintf("Turn %d Observation: %s. State next brief diagnostic action.", step, statStr),
 			})
-			tn, ttft, itl, ntok, reply := callLlamaStream(client, apiURL, history, toolCatalog, 64)
-			tNeuralTotal += tn
+			sr := callLlamaStream(client, apiURL, history, toolCatalog, 64)
+			tNeuralTotal += sr.TotalNeuralMs
 			if step == 1 {
-				ttftFirst = ttft
+				ttftFirst = sr.TTFTMs
 			}
-			itlSum += itl
-			totalTokens += ntok
-			history = append(history, ChatMessage{Role: "assistant", Content: reply})
+			itlSum += sr.ITLMs
+			totalPromptTokens += sr.PromptTokens
+			totalCompletionTokens += sr.CompletionTokens
+			lastFinishReason = sr.FinishReason
+			lastHttpStatus = sr.HttpStatus
+			history = append(history, ChatMessage{Role: "assistant", Content: sr.OutputText})
 		}
 		itlAvg = itlSum / 10.0
 	}
 
 	tTaskMs := float64(time.Since(tStart).Nanoseconds()) / 1e6
+	tHttpMs := math.Max(0.0, tTaskMs-tNeuralTotal-tDispatchTotal)
 	tOrchMs := math.Max(0.0, tTaskMs-tNeuralTotal)
 	phiOrch := 0.0
 	if tTaskMs > 0 {
@@ -496,22 +575,27 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		rssPeak = rssIdle
 	}
 	return TrialResult{
-		Architecture: "PicoClaw (Go 1.23)",
-		Workload:     tier,
-		Warmth:       warmth,
-		TTaskMs:      tTaskMs,
-		TNeuralMs:    tNeuralTotal,
-		TOrchMs:      tOrchMs,
-		PhiOrchPct:   phiOrch,
-		TTFTMs:       ttftFirst,
-		ITLMs:        itlAvg,
-		TDispatchMs:  tDispatchTotal,
-		RToolOpsSec:  rTool,
-		RSSIdleMB:    rssIdle,
-		RSSPeakMB:    rssPeak,
-		AlphaMem:     rssPeak / math.Max(1.0, rssIdle),
-		OutputTokens: totalTokens,
-		ToolCalls:    toolCalls,
+		Architecture:     "PicoClaw (Go 1.23)",
+		Workload:         tier,
+		Warmth:           warmth,
+		TTaskMs:          tTaskMs,
+		TNeuralMs:        tNeuralTotal,
+		TOrchMs:          tOrchMs,
+		PhiOrchPct:       phiOrch,
+		TTFTMs:           ttftFirst,
+		ITLMs:            itlAvg,
+		TDispatchMs:      tDispatchTotal,
+		THttpMs:          tHttpMs,
+		RToolOpsSec:      rTool,
+		RSSIdleMB:        rssIdle,
+		RSSPeakMB:        rssPeak,
+		AlphaMem:         rssPeak / math.Max(1.0, rssIdle),
+		PromptTokens:     totalPromptTokens,
+		CompletionTokens: totalCompletionTokens,
+		OutputTokens:     totalCompletionTokens,
+		ToolCalls:        toolCalls,
+		HttpStatus:       lastHttpStatus,
+		FinishReason:     lastFinishReason,
 	}
 }
 

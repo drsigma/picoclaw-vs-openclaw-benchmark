@@ -22,7 +22,7 @@
 
 \begin{frontmatter}
 
-\title{PicoClaw vs. OpenClaw: An Extensible, Multi-Platform Benchmark Suite for Autonomous AI Agent Orchestration Architectures on Apple Silicon}
+\title{PicoClaw vs. OpenClaw: An Extensible Benchmark Suite for Isomorphic AI Agent Orchestration Architectures on Apple Silicon}
 
 \author[ufabc]{Rafael Paniccia Cassetta\corref{cor1}}
 \ead{rafael.paniccia@aluno.ufabc.edu.br}
@@ -92,8 +92,32 @@ To bridge this gap, we developed \texttt{picoclaw-vs-openclaw-benchmark}, an ope
     \item Multi-platform reviewer reproducibility with zero external dependencies and graceful unprivileged non-root fallback.
 \end{enumerate}
 
+\paragraph{Notice of Scope and Trademarks}
+This benchmarking suite evaluates clean-room, isomorphic reference implementations in Go (\texttt{picoclaw\_orch.go}), Node.js/TypeScript (\texttt{openclaw\_orch.mjs}), and Python (\texttt{python\_orch.py}) designed to evaluate the systems-level trade-offs of compiled native versus JIT-compiled/interpreted agent architectures under identical prompts and tool schemas. PicoClaw and OpenClaw are trademarks of their respective creators; this software is an independent academic performance benchmark and is not affiliated with or endorsed by upstream project maintainers.
+
 \section{Software Description}
 \label{sec:software_description}
+
+\subsection{Comparison with Related Benchmarking Suites}
+Prior benchmarking tools primarily address deep learning model inference throughput, distributed cloud LLM serving, or GPU training power, leaving client-side agent orchestration uninstrumented. Table~\ref{tab:related_tools} compares our framework with representative performance evaluation tools.
+
+\begin{table}[h!]
+\small
+\centering
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Benchmark / Suite} & \textbf{Primary Domain} & \textbf{Orchestrator Isolation ($T_{\text{orch}}$)} & \textbf{Physical Telemetry} & \textbf{Runtimes} \\
+\midrule
+MLPerf Inference \cite{reddi2020mlperf} & Neural model throughput & No ($T_{\text{model}}$ only) & External meter only & C++ / Python \\
+LLMPerf \cite{llmperf2023} & Cloud LLM serving/TTFT & No (Network HTTP only) & No (Cloud API) & Python only \\
+Zeus \cite{you2023zeus} & GPU energy (DNN training) & No & NVML / Linux RAPL & Python / PyTorch \\
+AgentBench \cite{yao2023react} & Agent reasoning accuracy & No (Aggregate task time) & No & Python only \\
+\textbf{This Work} & \textbf{Agent runtime overhead} & \textbf{Yes ($T_{\text{orch}} = T_{\text{task}} - T_{\text{neural}}$)} & \textbf{Apple SMC + Linux RAPL} & \textbf{Go, Node.js V8, Python} \\
+\bottomrule
+\end{tabular}
+\caption{Comparative analysis of \texttt{picoclaw-vs-openclaw-benchmark} against related systems benchmarking tools.}
+\label{tab:related_tools}
+\end{table}
 
 \subsection{Software Architecture}
 The framework is designed around an extensible Object-Oriented Adapter pattern (\texttt{benchmark/adapters/}), decoupling experimental workload generation from specific orchestrator runtime implementations:
@@ -128,10 +152,12 @@ In unified-memory System-on-Chip (SoC) architectures such as Apple Silicon M4, p
 
 Direct access to Apple SMC hardware sensors via \texttt{powermetrics} requires elevated \texttt{root} privileges due to Darwin XNU kernel protections against microarchitectural power side-channel vulnerabilities. Crucially, the benchmark runner enforces privilege isolation: all evaluated agent runtimes, orchestrator subprocesses, and the \texttt{llama-server} neural daemon execute strictly in unprivileged user space. When administrative privileges are absent, the telemetry layer degrades gracefully without synthetic estimation, recording latency, memory footprint, and \texttt{libproc} counters while marking electrical energy fields as unavailable (\texttt{N/A}).
 
-All benchmarked software components are governed by permissive open-source licenses: \texttt{llama.cpp} is licensed under the MIT License; \texttt{PicoClaw} is distributed under the MIT License; and \texttt{OpenClaw} is provided under the MIT License. The benchmark harness itself is released under the MIT License, ensuring unconstrained reproducibility and extensibility.
+All benchmarked software components are governed by permissive open-source licenses: \texttt{llama.cpp} is licensed under the MIT License \cite{llamacpp2024}; \texttt{PicoClaw} reference implementation is distributed under the MIT License \cite{picoclaw2026}; \texttt{OpenClaw} reference implementation is provided under the MIT License \cite{openclaw2026}; the neural model weights (Llama-3.2-3B-Instruct) are governed by the Meta Llama 3.2 Community License; and the benchmark harness itself is released under the MIT License, ensuring unconstrained academic reproducibility and extensibility.
 
 \section{Illustrative Examples and Empirical Results}
 \label{sec:examples}
+
+\input{../results/publication_campaign/tables/macros_empirical.tex}
 
 \subsection{Consolidated Experimental Matrix}
 Table~\ref{tab:evaluation_ablation_m4} is dynamically generated from \texttt{raw\_trials.jsonl} via the statistical pipeline (\texttt{benchmark/analyze\_results.py}), reflecting all five evaluated configurations across workloads W1--W4. The table is directly synchronized when executing the full physical campaign of $n=30$ repetitions.
@@ -139,19 +165,19 @@ Table~\ref{tab:evaluation_ablation_m4} is dynamically generated from \texttt{raw
 \input{../results/publication_campaign/tables/table_journal_ablation.tex}
 
 \subsection{Analytical Finding: Cold Prefill Stall in W3 and Dispersion Dynamics}
-Analysis of the 600 evaluated trial records ($n=30$ per condition) in \texttt{raw\_trials.jsonl} demonstrates the necessity of non-parametric statistics on unified memory architectures. In vector similarity ranking (W3), PicoClaw exhibits an empirical median task latency of $1766.7\text{ ms}$ with an Interquartile Range ($\text{IQR}$) of $49.7\text{ ms}$ (mean $1683.4 \pm 310.6\text{ ms}$), compared to $1990.1\text{ ms}$ ($\text{IQR} = 934.6\text{ ms}$) for OpenClaw Minimal and $2611.7\text{ ms}$ ($\text{IQR} = 241.8\text{ ms}$) for OpenClaw Full. Stochastic dominance testing confirms PicoClaw significantly outperforms OpenClaw Minimal (Cliff's Delta $d = -0.400$, $\hat{A}_{12} = 0.300$, Holm-Bonferroni adjusted $p = 0.048$) and OpenClaw Full ($d = -0.700$, $\hat{A}_{12} = 0.150$, $p = 3.3 \times 10^{-5}$). Isolated orchestrator delay in W3 confirms Go runtime efficiency: PicoClaw incurs a median $T_{\text{orch}}$ of only $47.61\text{ ms}$ vs. $67.58\text{ ms}$ for OpenClaw Minimal and $77.39\text{ ms}$ for OpenClaw Full.
+Analysis of the 600 evaluated trial records ($n=30$ per condition) in \texttt{raw\_trials.jsonl} demonstrates the necessity of non-parametric statistics on unified memory architectures. In vector similarity ranking (W3), PicoClaw exhibits an empirical median task latency of $\WThreePicoMedian\text{ ms}$ with an Interquartile Range ($\text{IQR}$) of $\WThreePicoIQR\text{ ms}$ (mean $\WThreePicoMean \pm \WThreePicoSD\text{ ms}$), compared to $\WThreeOpenMinMedian\text{ ms}$ ($\text{IQR} = \WThreeOpenMinIQR\text{ ms}$) for OpenClaw Minimal and $\WThreeOpenFullMedian\text{ ms}$ ($\text{IQR} = \WThreeOpenFullIQR\text{ ms}$) for OpenClaw Full. Stochastic dominance testing confirms PicoClaw significantly outperforms OpenClaw Minimal (Cliff's Delta $d = \WThreeCliffsDeltaMin$, $\hat{A}_{12} = \WThreeAOneTwoMin$, Holm-Bonferroni adjusted $p = \WThreeAdjPMin$) and OpenClaw Full ($d = \WThreeCliffsDeltaFull$, $\hat{A}_{12} = \WThreeAOneTwoFull$, $p = \WThreeAdjPFull$). Isolated orchestrator delay in W3 confirms Go runtime efficiency: PicoClaw incurs a median $T_{\text{orch}}$ of only $\WThreePicoOrchMedian\text{ ms}$ vs. $\WThreeOpenMinOrchMedian\text{ ms}$ for OpenClaw Minimal and $\WThreeOpenFullOrchMedian\text{ ms}$ for OpenClaw Full.
 
 \subsection{Token-Normalized Energy Efficiency and Tool-Call Generation Dynamics in W2}
-In the three-step tool chain workload (W2), aggregate physical task metrics reveal an apparent inversion: OpenClaw Minimal recorded a lower median task latency ($1263.9\text{ ms}$, mean $1165.8\text{ ms}$, $18.23\text{ J}$) than PicoClaw ($3471.8\text{ ms}$, mean $3490.1\text{ ms}$, $36.22\text{ J}$) and NeuralBaseline ($3646.6\text{ ms}$, mean $3634.6\text{ ms}$, $28.71\text{ J}$). Granular inspection of \texttt{raw\_trials.jsonl} demonstrates that under greedy autoregressive decoding with 15 schema definitions, the underlying LLaMA-3.2-3B model emitted a more concise tool-invocation sequence for OpenClaw's prompt serialization (exactly $16.0$ output tokens across all 30 trials) compared to PicoClaw and NeuralBaseline (exactly $18.0$ output tokens across all 30 trials). Because token generation on the Metal GPU consumes significant execution time under continuous batching, this two-token variance reduced neural inference latency ($T_{\text{neural}}$) from $3487.1\text{ ms}$ in PicoClaw to $1096.3\text{ ms}$ in OpenClaw Minimal.
+In the three-step tool chain workload (W2), aggregate physical task metrics reveal an apparent inversion: OpenClaw Minimal recorded a lower median task latency ($\WTwoOpenMinMedian\text{ ms}$, mean $\WTwoOpenMinMean\text{ ms}$, $\WTwoOpenMinEnergy\text{ J}$) than PicoClaw ($\WTwoPicoMedian\text{ ms}$, mean $\WTwoPicoMean\text{ ms}$, $\WTwoPicoEnergy\text{ J}$) and NeuralBaseline ($\WTwoNeuralMedian\text{ ms}$, mean $\WTwoNeuralMean\text{ ms}$, $\WTwoNeuralEnergy\text{ J}$). Granular inspection of \texttt{raw\_trials.jsonl} demonstrates that under greedy autoregressive decoding with 15 schema definitions, the underlying LLaMA-3.2-3B model emitted a more concise tool-invocation sequence for OpenClaw's prompt serialization (exactly $\WTwoOpenMinTokens$ output tokens across all 30 trials) compared to PicoClaw and NeuralBaseline (exactly $\WTwoPicoTokens$ output tokens across all 30 trials). Because token generation on the Metal GPU consumes significant execution time under continuous batching, this two-token variance reduced neural inference latency ($T_{\text{neural}}$) from $\WTwoNeuralPico\text{ ms}$ in PicoClaw to $\WTwoNeuralOpenMin\text{ ms}$ in OpenClaw Minimal.
 
-Crucially, when isolating runtime orchestrator overhead ($T_{\text{orch}}$) and physical memory consumption via Darwin kernel \texttt{libproc}, the architectural superiority of compiled Go remains unequivocal: PicoClaw incurred a median orchestrator delay of only $T_{\text{orch}} = 2.72\text{ ms}$ (mean $3.02\text{ ms}$) compared to $64.72\text{ ms}$ (mean $69.42\text{ ms}$) for OpenClaw Minimal---a $23\times$ reduction in orchestration overhead. Furthermore, PicoClaw operated with a peak resident set size of merely $12.17\text{ MB}$ versus $85.52\text{ MB}$ for the Node.js V8 runtime ($7.0\times$ lower DRAM footprint). Token-normalized metrics from \texttt{metrics\_summary.csv} confirm that OpenClaw Minimal consumed $1.14\text{ J/token}$ while PicoClaw required $2.01\text{ J/token}$, proving that the observed task duration disparity in W2 stems strictly from language model autoregressive generation dynamics rather than orchestrator runtime inefficiency.
+Crucially, when isolating runtime orchestrator overhead ($T_{\text{orch}}$) and physical memory consumption via Darwin kernel \texttt{libproc}, the architectural efficiency of compiled Go remains clear: PicoClaw incurred a median orchestrator delay of only $T_{\text{orch}} = \WTwoPicoOrchMedian\text{ ms}$ (mean $\WTwoPicoOrchMean\text{ ms}$) compared to $\WTwoOpenMinOrchMedian\text{ ms}$ (mean $\WTwoOpenMinOrchMean\text{ ms}$) for OpenClaw Minimal---a $\WTwoOrchSpeedup\times$ reduction in orchestration overhead. Furthermore, PicoClaw operated with a peak resident set size of merely $\WTwoPicoRSS\text{ MB}$ versus $\WTwoOpenMinRSS\text{ MB}$ for the Node.js V8 runtime ($\WTwoRAMReduction\times$ lower DRAM footprint). Token-normalized metrics from \texttt{metrics\_summary.csv} confirm that OpenClaw Minimal consumed $\WTwoOpenMinJoulePerToken\text{ J/token}$ while PicoClaw required $\WTwoPicoJoulePerToken\text{ J/token}$, proving that the observed task duration disparity in W2 stems strictly from language model autoregressive generation dynamics rather than orchestrator runtime inefficiency.
 
 \subsection{Key Findings, Hardware Microarchitecture, and Effect Sizes}
 Across all 600 physical trials on the Apple Silicon M4 testbed, three core empirical conclusions emerge:
 \begin{enumerate}
-    \item \textbf{Microarchitectural Efficiency:} Hardware performance counters captured via Darwin XNU kernel \texttt{libproc} reveal that PicoClaw executes an average of $244.2 \times 10^6$ retired CPU instructions and $83.8 \times 10^6$ CPU cycles, compared to $923.8 \times 10^6$ instructions ($3.78\times$ overhead) and $378.2 \times 10^6$ cycles ($4.51\times$ overhead) for OpenClaw Minimal.
-    \item \textbf{Physical DRAM Footprint Reduction:} PicoClaw maintains a peak resident set size (RSS) between $11.23\text{ MB}$ (W1) and $16.71\text{ MB}$ (W4) (rising to $51.70\text{ MB}$ during W3 10,000-vector cosine dot products), averaging $22.95\text{ MB}$ overall. In contrast, OpenClaw demands $85.52\text{ MB}$ to $117.01\text{ MB}$ (averaging $95.19\text{ MB}$, a $4.15\times$ to $7.62\times$ memory reduction for PicoClaw). Lifetime peak physical footprint (\texttt{proc\_peak\_phys\_mb}) confirms PicoClaw requires only $15.82\text{ MB}$ vs. $45.88\text{ MB}$ for Node.js V8 ($2.90\times$ leaner).
-    \item \textbf{Tool Catalog Ablation and EDP Stochastic Dominance:} Evaluating 54 enterprise schemas (OpenClaw Full) against 15 schemas (Minimal) reveals severe prompt bloat: W1 mean latency balloons from $1415.9\text{ ms}$ to $6604.1\text{ ms}$, while mean energy escalates from $22.33\text{ J}$ to $58.81\text{ J}$ ($2.63\times$). In the 10-turn autonomous ReAct loop (W4), OpenClaw Full expends $107.75\text{ J}$ with an $\text{EDP}$ of $1688.00\text{ J}\cdot\text{s}$ ($11229.9\text{ ms}$ median), whereas PicoClaw completes W4 in $8494.9\text{ ms}$ median with an $\text{EDP}$ of $827.50\text{ J}\cdot\text{s}$ ($50.98\%$ lower EDP), demonstrating complete stochastic dominance ($d = -1.0$, $\hat{A}_{12} = 0.0$, adjusted $p < 10^{-5}$).
+    \item \textbf{Microarchitectural Efficiency:} Hardware performance counters captured via Darwin XNU kernel \texttt{libproc} reveal that PicoClaw executes an average of $\PicoInstructionsMeanM \times 10^6$ retired CPU instructions and $\PicoCyclesMeanM \times 10^6$ CPU cycles, compared to $\OpenMinInstructionsMeanM \times 10^6$ instructions ($\InstructionOverheadRatio\times$ overhead) and $\OpenMinCyclesMeanM \times 10^6$ cycles ($\CyclesOverheadRatio\times$ overhead) for OpenClaw Minimal.
+    \item \textbf{Physical DRAM Footprint Reduction:} PicoClaw maintains a peak resident set size (RSS) between $\PicoRSSMin\text{ MB}$ (W1) and $16.71\text{ MB}$ (W4) (rising to $\PicoRSSWThree\text{ MB}$ during W3 10,000-vector cosine dot products), averaging $\PicoRSSOverallMean\text{ MB}$ overall. In contrast, OpenClaw demands $\OpenRSSMin\text{ MB}$ to $\OpenRSSMax\text{ MB}$ (averaging $\OpenRSSOverallMean\text{ MB}$, a $\RAMReductionMaxRatio\times$ to $\RAMReductionMinRatio\times$ memory reduction for PicoClaw). Lifetime peak physical footprint (\texttt{proc\_peak\_phys\_mb}) confirms PicoClaw requires only $\PicoPeakPhysMean\text{ MB}$ vs. $\OpenMinPeakPhysMean\text{ MB}$ for Node.js V8 ($\PeakPhysLeanerRatio\times$ leaner).
+    \item \textbf{Tool Catalog Ablation and EDP Stochastic Dominance:} Evaluating 54 enterprise schemas (OpenClaw Full) against 15 schemas (Minimal) reveals severe prompt bloat: W1 mean latency balloons from $\WOneOpenMinMean\text{ ms}$ to $\WOneOpenFullMean\text{ ms}$, while mean energy escalates from $\WOneOpenMinEnergy\text{ J}$ to $\WOneOpenFullEnergy\text{ J}$ ($\WOneEnergyBloatRatio\times$). In the 10-turn autonomous ReAct loop (W4), OpenClaw Full expends $\WFourOpenFullEnergy\text{ J}$ with an $\text{EDP}$ of $\WFourOpenFullEDP\text{ J}\cdot\text{s}$ ($\WFourOpenFullMedian\text{ ms}$ median), whereas PicoClaw completes W4 in $\WFourPicoMedian\text{ ms}$ median with an $\text{EDP}$ of $\WFourPicoEDP\text{ J}\cdot\text{s}$ ($\WFourEDPReductionPct\%$ lower EDP), demonstrating complete stochastic dominance ($d = \WFourCliffsDelta$, $\hat{A}_{12} = \WFourAOneTwo$, adjusted $p \WFourAdjP$).
 \end{enumerate}
 
 \subsection{Execution Instructions}
@@ -169,11 +195,11 @@ make benchmark
 
 \section{Impact}
 \label{sec:impact}
-This benchmark suite provides the research and software engineering communities with a reproducible, open methodology to evaluate AI agent orchestrators on unified memory edge devices. By demonstrating that compiled Go runtimes reduce memory pressure by over $5\times$ and deliver superior energy-delay efficiency under long ReAct loops, our findings guide architectural decisions for edge LLM deployments, robotics, and battery-constrained computing.
+This benchmark suite provides the research and software engineering communities with a reproducible, modular testbed to isolate and quantify AI agent orchestration runtime overhead. By decoupling orchestrator dispatch and schema validation delays from neural model latency, the suite enables systems researchers to systematically evaluate language runtime trade-offs (compiled Go, JIT Node.js, and CPython) under realistic tool-use loops. The framework's modular adapter architecture facilitates adding new agent runtimes or language environments with fewer than 50 lines of code. Furthermore, the dual-tier telemetry approach---combining unprivileged kernel performance counters with non-intrusive electrical shunt sampling---provides an extensible blueprint for benchmarking edge AI systems under strict power and thermal budgets.
 
 \section{Conclusions}
 \label{sec:conclusions}
-The \texttt{picoclaw-vs-openclaw-benchmark} establishes an extensible, peer-reviewed standard for systems-level evaluation of AI agent orchestrators. Through modular adapters, hardware-level power telemetry, and non-parametric statistical guarantees, the framework enables fair, reproducible comparisons between emerging agent runtimes.
+The \texttt{picoclaw-vs-openclaw-benchmark} framework delivers an open, extensible methodology for systems-level evaluation of AI agent orchestrators. Through modular adapters, hardware-level power telemetry, and non-parametric statistical inference, the software enables reproducible comparisons across emerging agent runtimes.
 
 \section*{Acknowledgements}
 This work was conducted at the Center for Engineering, Modeling and Applied Social Sciences (CECS) of the Federal University of ABC (UFABC), Brazil, under the course CCM313-EEI203 (Computer Networks and Systems Performance Evaluation).

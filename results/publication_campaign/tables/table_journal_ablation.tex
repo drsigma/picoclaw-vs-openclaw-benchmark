@@ -1,35 +1,38 @@
 \begin{table*}[t]
 \centering
-\caption{Empirical Performance Evaluation and Runtime Ablation Matrix (Median, IQR, and Mean $\pm$ SD). Note: 0.0 MB Peak RAM for Neural Baseline indicates zero orchestrator process footprint (direct HTTP pass-through), excluding the unified memory allocation (UMA) of the background \texttt{llama-server} daemon. Energy values are computed via composite trapezoidal integration from Apple Silicon SMC hardware telemetry.}
+\caption{Empirical Performance Evaluation and Runtime Ablation Matrix on Apple Silicon M4. Peak Phys RAM denotes lifetime maximum resident physical footprint recorded via Darwin kernel \texttt{libproc}. Net Energy is integrated above quiescent idle baseline ($1.46\text{ W}$) via Apple SMC hardware shunts at 50~ms resolution. Billed Energy and CPU Cycles are captured via \texttt{RUSAGE\_INFO\_V4}.}
 \label{tab:evaluation_ablation_m4}
 \small
-\begin{tabular}{l l r r r r r}
+\begin{tabular}{l l r r r r r r}
 \hline
-\textbf{Workload} & \textbf{Configuration} & \textbf{Median (IQR) [ms]} & \textbf{Mean $\pm$ SD [ms]} & \textbf{Orch Delay [ms]} & \textbf{Peak RAM [MB]} & \textbf{Energy [J]} \\
+\textbf{Workload} & \textbf{Configuration} & \textbf{Median (IQR) [ms]} & \textbf{Orch / Disp [ms]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{Billed Energy / Cycles} \\
 \hline
-W1 & Neural Baseline (Direct) & 1422.1 (24.9) & 1348.9 $\pm$ 163.1 & 0.000 & 0.0 & 20.78 \\
-W1 & PicoClaw (Go Native) & 1453.7 (60.7) & 1437.4 $\pm$ 135.2 & 44.311 & 11.2 & 21.91 \\
-W1 & OpenClaw (Node.js Minimal) & 1498.5 (280.1) & 1415.9 $\pm$ 186.1 & 52.369 & 85.5 & 22.33 \\
-W1 & OpenClaw (Node.js Full 54-Tool) & 2524.4 (13797.2) & 6604.1 $\pm$ 6496.4 & 64.414 & 85.6 & 58.81 \\
-W1 & PythonNative (CPython Reference) & 1453.6 (26.3) & 1400.3 $\pm$ 145.8 & 30.745 & 38.0 & 22.28 \\
+W1 & Neural Baseline (Direct) & 5489.6 (31.9) & 0.00 & 0.0 & 88.11 & 514.70 & N/A \\
+W1 & PicoClaw (Go Native) & 5497.0 (91.6) & 29.73 / 0.02 & 4.2 & 88.97 & 522.66 & 5465 / 29.3M \\
+W1 & OpenClaw (Node.js Minimal) & 5847.5 (60.4) & 51.28 / 0.10 & 37.5 & 94.06 & 586.03 & 6140 / 310.3M \\
+W1 & OpenClaw (Node.js Full 54-Tool) & 20674.1 (73.8) & 66.44 / 0.17 & 37.5 & 329.50 & 7258.76 & 5808 / 326.7M \\
+W1 & PythonNative (CPython Reference) & 5485.6 (78.2) & 10.41 / 0.07 & 23.6 & 89.44 & 523.77 & 85107 / 261.7M \\
 \hline
-W2 & Neural Baseline (Direct) & 3646.6 (42.9) & 3634.6 $\pm$ 99.2 & 0.000 & 0.0 & 28.71 \\
-W2 & PicoClaw (Go Native) & 3471.8 (63.9) & 3490.1 $\pm$ 104.0 & 3.015 & 12.2 & 36.22 \\
-W2 & OpenClaw (Node.js Minimal) & 1263.9 (42.3) & 1165.8 $\pm$ 205.9 & 69.422 & 85.5 & 18.23 \\
-W2 & OpenClaw (Node.js Full 54-Tool) & 1652.9 (13815.2) & 6147.1 $\pm$ 6658.8 & 74.365 & 85.8 & 55.25 \\
-W2 & PythonNative (CPython Reference) & 3646.1 (59.9) & 3637.9 $\pm$ 130.5 & 1.094 & 38.1 & 28.88 \\
+W2 & Neural Baseline (Direct) & 7014.5 (39.6) & 0.00 & 0.0 & 109.98 & 821.86 & N/A \\
+W2 & PicoClaw (Go Native) & 7510.5 (40.5) & 3.05 / 2.76 & 5.0 & 117.61 & 942.94 & 6354 / 35.1M \\
+W2 & OpenClaw (Node.js Minimal) & 5551.6 (77.3) & 85.88 / 1.39 & 37.5 & 89.99 & 532.89 & 6421 / 305.7M \\
+W2 & OpenClaw (Node.js Full 54-Tool) & 19758.8 (68.0) & 71.81 / 1.50 & 38.0 & 318.12 & 6694.66 & 5783 / 305.5M \\
+W2 & PythonNative (CPython Reference) & 7019.7 (122.6) & 1.07 / 1.02 & 23.7 & 111.07 & 833.88 & 124592 / 265.6M \\
 \hline
-W3 & Neural Baseline (Direct) & 1708.4 (33.3) & 1617.2 $\pm$ 297.9 & 0.000 & 0.0 & 24.52 \\
-W3 & PicoClaw (Go Native) & 1766.7 (49.7) & 1683.4 $\pm$ 310.6 & 67.596 & 51.7 & 25.90 \\
-W3 & OpenClaw (Node.js Minimal) & 1990.1 (934.6) & 1707.8 $\pm$ 462.5 & 84.034 & 117.0 & 23.24 \\
-W3 & OpenClaw (Node.js Full 54-Tool) & 2611.7 (241.8) & 5621.1 $\pm$ 6082.8 & 88.813 & 117.7 & 51.05 \\
-W3 & PythonNative (CPython Reference) & 1728.6 (607.8) & 1489.9 $\pm$ 423.6 & 43.701 & 69.6 & 22.69 \\
+W3 & Neural Baseline (Direct) & 5752.9 (30.7) & 0.00 & 0.0 & 94.07 & 576.21 & N/A \\
+W3 & PicoClaw (Go Native) & 5816.9 (59.7) & 46.11 / 35.63 & 45.5 & 94.13 & 585.61 & 5326 / 138.7M \\
+W3 & OpenClaw (Node.js Minimal) & 6343.5 (89.0) & 67.62 / 16.35 & 65.8 & 102.91 & 701.52 & 6488 / 404.4M \\
+W3 & OpenClaw (Node.js Full 54-Tool) & 20786.4 (80.1) & 88.95 / 15.92 & 64.1 & 333.52 & 7389.35 & 6062 / 414.7M \\
+W3 & PythonNative (CPython Reference) & 5801.5 (61.6) & 21.65 / 9.88 & 55.1 & 94.83 & 586.54 & 121600 / 304.9M \\
 \hline
-W4 & Neural Baseline (Direct) & 8407.7 (55.4) & 8421.5 $\pm$ 112.7 & 0.000 & 0.0 & 70.48 \\
-W4 & PicoClaw (Go Native) & 8494.9 (66.5) & 8519.6 $\pm$ 94.9 & 92.302 & 16.7 & 97.11 \\
-W4 & OpenClaw (Node.js Minimal) & 8469.7 (69.5) & 8479.6 $\pm$ 109.7 & 133.708 & 92.7 & 71.07 \\
-W4 & OpenClaw (Node.js Full 54-Tool) & 11229.9 (91.8) & 13555.8 $\pm$ 5300.4 & 179.786 & 92.3 & 107.75 \\
-W4 & PythonNative (CPython Reference) & 8485.6 (51.7) & 8490.7 $\pm$ 44.4 & 71.767 & 38.2 & 72.08 \\
+W4 & Neural Baseline (Direct) & 55924.9 (134.7) & 0.00 & 0.0 & 883.24 & 52615.44 & N/A \\
+W4 & PicoClaw (Go Native) & 55354.8 (202.8) & 66.03 / 19.89 & 9.5 & 876.64 & 51723.07 & 7050 / 139.2M \\
+W4 & OpenClaw (Node.js Minimal) & 58201.2 (137.0) & 143.36 / 9.24 & 40.3 & 919.40 & 57034.43 & 6597 / 567.1M \\
+W4 & OpenClaw (Node.js Full 54-Tool) & 201797.0 (215.8) & 199.33 / 10.12 & 39.8 & 3219.72 & 691911.31 & 6455 / 623.7M \\
+W4 & PythonNative (CPython Reference) & 55934.8 (154.7) & 64.72 / 13.63 & 23.8 & 886.19 & 52820.37 & 84819 / 355.9M \\
+\hline
+\multicolumn{8}{l}{\footnotesize $n = 30$ independent physical evaluations per condition (600 total evaluations, 60 warmups excluded).} \\
+\multicolumn{8}{l}{\footnotesize Telemetry Backend: Apple Silicon SMC (\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \texttt{libproc}. Data Source: \texttt{measured\_hardware}.} \\
 \hline
 \end{tabular}
 \end{table*}

@@ -11,6 +11,7 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATE_PATH = os.path.join(REPO_DIR, "reports", "template.docx")
 REPORTS_DIR = os.path.join(REPO_DIR, "reports")
 OUT_DOCX = os.path.join(REPORTS_DIR, "Guia-Explicativo-e-Defesa-Rafael-Paniccia-Cassetta.docx")
+SUMMARY_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "summary_statistics.json")
 
 
 def set_cell_shading(cell, color_hex):
@@ -212,7 +213,7 @@ def main():
             ["llama.cpp (b11887)", "O servidor que roda o cérebro de IA usando a placa de vídeo (Metal GPU) do Mac M4.", "Garante que os dois agentes usem exatamente a mesma IA local."],
             ["hyperfine (v2.0.0)", "Um 'cronômetro olímpico' de altíssima precisão.", "Mediu o tempo exato de abertura (Cold Start) 30 vezes seguidas."],
             ["powermetrics + libproc", "Sensores oficiais da Apple dentro do chip M4 (exigem senha de administrador/root).", "Mediram quantos Watts (energia), ciclos de CPU e memória RAM cada agente gastou."],
-            ["Python 3.12 + uv", "Linguagem que automatizou a bateria de testes e gerou os gráficos.", "Rodou os 480 testes sorteados e calculou a estatística (t-test)."],
+            ["Python 3.12 + uv", "Linguagem que automatizou a bateria de testes e gerou os gráficos.", "Rodou os 600 testes avaliados sorteados (660 com warmups) e calculou a estatística não-paramétrica."],
             ["caffeinate + mdutil", "Utilitários do macOS para bloquear hibernação e pausar buscas do Spotlight.", "Garantiram que o Mac não dormisse nem fizesse tarefas em segundo plano durante o teste."],
         ],
     )
@@ -235,9 +236,9 @@ def main():
     )
     add_bullet(
         doc,
-        "Passo 3 (Frio vs. Quente — 480 Testes no Total): ",
-        "Testamos os 2 agentes × 4 tarefas × 2 estados ('Cold Start', abrindo o programa do zero, e 'Warm', com o programa já aberto). "
-        "Isso dá 16 combinações (T1 a T16). Repetimos cada uma 30 vezes em ordem sorteada = 480 testes no total!",
+        "Passo 3 (Campanha Física Completa — 600 Ensaios Avaliados): ",
+        "Testamos 5 configurações de agentes (PicoClaw Go, OpenClaw Minimal, OpenClaw Full 54-ferramentas, PythonNative e NeuralBaseline) "
+        "ao longo das 4 cargas (W1 a W4). Repetimos cada condição 30 vezes em ordem estocástica sorteada = 600 ensaios avaliados (+60 de aquecimento)!",
     )
 
     # 4. TODOS OS CÁLCULOS MATEMÁTICOS USADOS PARA GERAR OS GRÁFICOS
@@ -343,7 +344,7 @@ def main():
         "Professor, durante o System Testing encontramos 3 barreiras reais que todo teste empírico encontra: "
         "(1) A versão atual do OpenClaw (v2026.10.7) usa o banco nativo node:sqlite e exige Node.js 26.12+, bloqueando o Node 22 LTS; "
         "(2) O OpenClaw injeta por padrão 54 ferramentas (16.369 tokens) no prompt, o que estourava o limite de 4.096 tokens do Work Plan. "
-        "Por isso aumentamos a janela do servidor para 32.768 tokens para testar a CLI padrão e criamos workers equalizados para os 480 testes; "
+        "Por isso aumentamos a janela do servidor para 32.768 tokens para testar a CLI padrão e criamos workers equalizados para os 600 testes avaliados; "
         "(3) Usamos permissão de superusuário (root) para capturar as curvas reais de potência no powermetrics e pausar o Spotlight (mdutil), "
         "combinando com os contadores de hardware RUSAGE_INFO_V4 do kernel Darwin.",
     )

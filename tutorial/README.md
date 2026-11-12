@@ -92,9 +92,9 @@ data/workload_data/
 ├── mock_files/ (50 arquivos sintéticos determinísticos)
 ├── system_logs.jsonl (750 linhas estruturadas de log APFS)
 ├── rag_chunks_10k.json (10.000 fragmentos textuais para busca vetorial)
-├── doc_embeddings.bin (matriz binária float32 de embeddings 10.000 x 64)
-├── w_proj.bin (matriz de projeção float32 64 x 64)
-└── b_proj.bin (vetor de bias float32 de 64 dimensões)
+├── doc_embeddings.bin (matriz binária float32 de embeddings 10.000 x 384)
+├── w_proj.bin (matriz de projeção float32 256 x 384)
+└── b_proj.bin (vetor de bias float32 de 384 dimensões)
 ```
 *Legenda Técnica:* Inspeção dos 50 arquivos sintéticos, do log estruturado de 750 linhas APFS e dos pesos de projeção vetorial em float32 (`doc_embeddings.bin`, `w_proj.bin`).
 
@@ -137,20 +137,45 @@ Summary:
 
 ---
 
-#### Passo 5: Validação Estatística de Poisson e Intervalos de Garwood
-Validação da distribuição estocástica de chegadas de ferramentas ($K=300$):
+#### Passo 5: Verificação de Integridade Criptográfica (SHA-256)
+Auditoria automática dos 176 arquivos do repositório contra a assinatura digital:
 ```bash
-./tools/.venv/bin/python scripts/legacy/poisson_sampling_validation.py
+make verify
 ```
 ```text
-=== Poisson Sampling & Garwood Fiducial Interval Validation ===
-Sample count (k): 300 arrivals
-Garwood 95% Confidence Interval: [266.92, 336.01]
-Empirical assertiveness: 93.3% >= 90.3% target
-Cameron-Trivedi Equidispersion Diagnostic: t = 0.42 (p = 0.67 > 0.05)
-Conclusion: True Poisson equidispersion validated (no overdispersion).
+========================================================================
+ 🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
+    [EN-US] Cryptographic Artifact Integrity Verification (176 files)
+========================================================================
+✅ [SUCCESS] All 176/176 tracked files match their cryptographic SHA-256 signature!
+   [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
+========================================================================
 ```
-*Legenda Técnica:* Cálculo dos limites fiduciais exatos de Garwood (1936) via distribuição Qui-Quadrado ($\chi^2$), alcançando assertividade nominal $\ge 90{,}33\%$ e aceitação da hipótese de equidispersão de Cameron & Trivedi ($t < 1{,}96$).
+*Legenda Técnica:* Verificação matemática estrita garantindo que nenhum dataset binário, código-fonte ou tabela LaTeX foi alterado silenciosamente.
+
+---
+
+#### Passo 6: Verificação Rápida Portátil de Revisores (Modo Dry-Run)
+Execução do ciclo completo em qualquer sistema operacional (< 5 segundos, sem GPU Metal):
+```bash
+make dry-run
+```
+```text
+========================================================================
+ 🧪 [PT-BR] Modo Dry-Run / Mock Rápido (Verificação Portátil de Pipeline)
+    [EN-US] Dry-Run / Fast Mock Mode (Portable Pipeline Verification)
+========================================================================
+🌐 [INFO] Local loopback mock server listening on 127.0.0.1:8088.
+📊 Matrix: 5 agents x 4 workloads x 2 reps = 40 evaluation trials.
+▶️  Dispatching randomized evaluation blocks...
+📈 Executing non-parametric statistical analysis...
+Loaded 40 evaluated trial records.
+✅ Generated LaTeX macros: results/simulated_check/tables/macros_empirical.tex
+✅ Generated summary JSON: results/simulated_check/summary_statistics.json
+✅ Generated CSV table: results/simulated_check/tables/metrics_summary.csv
+🎨 Generating publication charts...
+```
+*Legenda Técnica:* Mock determinístico que simula todas as chamadas SSE e valida a pipeline estatística e de geração gráfica em ambientes de integração contínua (CI).
 
 ---
 
@@ -270,9 +295,9 @@ data/workload_data/
 ├── mock_files/ (50 synthetic deterministic text files)
 ├── system_logs.jsonl (750 APFS structured JSON log lines)
 ├── rag_chunks_10k.json (10,000 vector chunks)
-├── doc_embeddings.bin (10,000 x 64 float32 embeddings)
-├── w_proj.bin (64 x 64 float32 projection head)
-└── b_proj.bin (64 float32 bias vector)
+├── doc_embeddings.bin (10,000 x 384 float32 embeddings)
+├── w_proj.bin (256 x 384 float32 projection head)
+└── b_proj.bin (384 float32 bias vector)
 ```
 *Technical Caption:* Inspection of 50 mock files, 750 APFS structured JSON log lines, and dense float32 projection matrix (`doc_embeddings.bin`, `w_proj.bin`).
 
@@ -313,19 +338,45 @@ Summary:
 
 ---
 
-#### Step 5: Poisson Sampling Engine & Garwood Fiducial Intervals
+#### Step 5: Cryptographic Integrity Verification (SHA-256)
+Automated audit of all 176 tracked repository files against their cryptographic hashes:
 ```bash
-./tools/.venv/bin/python scripts/legacy/poisson_sampling_validation.py
+make verify
 ```
 ```text
-=== Poisson Sampling & Garwood Fiducial Interval Validation ===
-Sample count (k): 300 arrivals
-Garwood 95% Confidence Interval: [266.92, 336.01]
-Empirical assertiveness: 93.3% >= 90.3% target
-Cameron-Trivedi Equidispersion Diagnostic: t = 0.42 (p = 0.67 > 0.05)
-Conclusion: True Poisson equidispersion validated (no overdispersion).
+========================================================================
+ 🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
+    [EN-US] Cryptographic Artifact Integrity Verification (176 files)
+========================================================================
+✅ [SUCCESS] All 176/176 tracked files match their cryptographic SHA-256 signature!
+   [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
+========================================================================
 ```
-*Technical Caption:* Exact Garwood (1936) Chi-Square fiducial limits confirming $\ge 90.33\%$ Poisson empirical assertiveness and Cameron & Trivedi equidispersion ($t < 1.96$).
+*Technical Caption:* Strict mathematical integrity validation ensuring no dataset binaries, source files, or LaTeX tables were silently modified.
+
+---
+
+#### Step 6: Reviewer Fast Portable Dry-Run Mode
+Execute full pipeline validation on any platform (< 5 seconds, no GPU required):
+```bash
+make dry-run
+```
+```text
+========================================================================
+ 🧪 [PT-BR] Modo Dry-Run / Mock Rápido (Verificação Portátil de Pipeline)
+    [EN-US] Dry-Run / Fast Mock Mode (Portable Pipeline Verification)
+========================================================================
+🌐 [INFO] Local loopback mock server listening on 127.0.0.1:8088.
+📊 Matrix: 5 agents x 4 workloads x 2 reps = 40 evaluation trials.
+▶️  Dispatching randomized evaluation blocks...
+📈 Executing non-parametric statistical analysis...
+Loaded 40 evaluated trial records.
+✅ Generated LaTeX macros: results/simulated_check/tables/macros_empirical.tex
+✅ Generated summary JSON: results/simulated_check/summary_statistics.json
+✅ Generated CSV table: results/simulated_check/tables/metrics_summary.csv
+🎨 Generating publication charts...
+```
+*Technical Caption:* Deterministic loopback mock server simulating SSE tool chunks to validate statistical inference and publication chart rendering in headless CI environments.
 
 ---
 

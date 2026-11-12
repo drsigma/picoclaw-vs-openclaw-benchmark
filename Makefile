@@ -68,9 +68,12 @@ benchmark:
 	$(VENV_PY) benchmark/run_unified_benchmark.py
 
 benchmark-full-smc: check-quiescence
-	@echo "⚡ [PT-BR] Disparando campanha com telemetria elétrica completa do Apple SMC (requer sudo)..."
-	@echo "   [EN-US] Dispatching full physical benchmark campaign with Apple SMC power telemetry (requires sudo)..."
-	sudo $(VENV_PY) benchmark/run_unified_benchmark.py
+	@echo "⚡ [PT-BR] Validando privilégios sudo para o leitor de sensores SMC..."
+	@echo "   [EN-US] Validating sudo credentials for SMC powermetrics reader..."
+	@sudo -n powermetrics -i 50 -n 1 >/dev/null 2>&1 || sudo -v
+	@echo "⚡ [PT-BR] Disparando campanha com telemetria elétrica do Apple SMC em espaço de usuário comum..."
+	@echo "   [EN-US] Dispatching full physical benchmark campaign in unprivileged user space..."
+	$(VENV_PY) benchmark/run_unified_benchmark.py --reps 30
 
 reproduce-figures:
 	@echo "📊 [PT-BR] Regenerando figuras científicas em 300 DPI..."
