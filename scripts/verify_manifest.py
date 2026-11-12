@@ -52,6 +52,9 @@ def update_manifest() -> int:
         "results/publication_campaign/warm_cache_summary.json",
         "results/publication_campaign/warm_cache_statistical_tests.json",
         "results/publication_campaign/campaign_metadata.json",
+        "results/publication_campaign/spearman_correlation_matrix.json",
+        "results/publication_campaign/tables/table_spearman_correlation.tex",
+        "results/publication_campaign/prefill_ablation.jsonl",
     ]
     for rel_path in additional:
         abs_path = os.path.join(REPO_DIR, rel_path)

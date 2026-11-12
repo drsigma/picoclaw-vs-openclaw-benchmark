@@ -21,7 +21,7 @@ from benchmark.run_unified_benchmark import (
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-def test_adapter_registry_contains_all_five_agents():
+def test_adapter_registry_contains_all_registered_agents():
     """Verify all 6 evaluation targets including bun_minimal are registered in ADAPTER_REGISTRY."""
     expected_agents = {
         "picoclaw",
@@ -33,6 +33,16 @@ def test_adapter_registry_contains_all_five_agents():
     }
     registered = set(ADAPTER_REGISTRY.keys())
     assert expected_agents.issubset(registered), f"Missing agents: {expected_agents - registered}"
+
+
+def test_bun_minimal_adapter_metadata_and_execution():
+    """Verify bun_minimal adapter properly exposes runner metadata and conforms to interface."""
+    adapter = get_adapter("bun_minimal", REPO_DIR)
+    meta = adapter.metadata()
+    assert "runner_binary_used" in meta
+    assert "is_fallback_node" in meta
+    assert isinstance(meta["is_fallback_node"], bool)
+    assert meta["mode"] == "minimal"
 
 
 def test_adapter_instances_subclass_base_adapter():

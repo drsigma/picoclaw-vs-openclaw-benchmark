@@ -121,9 +121,10 @@ def generate_warm_cache_latex_table(
         if "smc" in telemetry_backend.lower()
         else telemetry_backend
     )
+    safe_data_source = data_source.replace("_", r"\_")
     latex_table += (
         f"\\multicolumn{{10}}{{l}}{{\\footnotesize Telemetry Backend: {backend_desc}. "
-        f"Data Source: \\texttt{{{data_source}}}.}} \\\\\n"
+        f"Data Source: \\texttt{{{safe_data_source}}}.}} \\\\\n"
     )
     latex_table += "\\hline\n"
     latex_table += "\\end{tabular}\n\\end{table*}\n"

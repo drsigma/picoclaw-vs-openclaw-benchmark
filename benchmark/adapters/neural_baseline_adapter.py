@@ -66,7 +66,7 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             "seed": 42,
             "stream": True,
             "cache_prompt": os.environ.get("BENCH_CACHE_PROMPT", "false").lower() == "true",
-        }).encode("utf-8")
+        }, separators=(",", ":")).encode("utf-8")
 
         t0 = time.monotonic()
         req = urllib.request.Request(self.api_url, data=payload, headers={"Content-Type": "application/json"})

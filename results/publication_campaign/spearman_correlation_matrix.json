@@ -1,0 +1,1525 @@
+{
+  "description": "Pairwise Spearman Rank Correlation Matrix across 12 Systems Dimensions",
+  "n_evaluations_regime_a": 600,
+  "n_evaluations_regime_b": 600,
+  "metrics": [
+    "t_task_ms",
+    "t_neural_ms",
+    "t_orch_ms",
+    "t_dispatch_ms",
+    "t_http_ms",
+    "rss_peak_mb",
+    "proc_peak_phys_mb",
+    "proc_instructions",
+    "proc_cycles",
+    "prompt_tokens",
+    "energy_net_above_idle_j",
+    "edp_js"
+  ],
+  "metric_labels": {
+    "t_task_ms": "Task Latency",
+    "t_neural_ms": "Neural Latency",
+    "t_orch_ms": "Orch Overhead",
+    "t_dispatch_ms": "Dispatch Latency",
+    "t_http_ms": "HTTP Latency",
+    "rss_peak_mb": "Peak RSS",
+    "proc_peak_phys_mb": "Peak Phys RAM",
+    "proc_instructions": "Retired Instructions",
+    "proc_cycles": "CPU Cycles",
+    "prompt_tokens": "Prompt Tokens",
+    "energy_net_above_idle_j": "Net Energy",
+    "edp_js": "Energy-Delay Product"
+  },
+  "regime_a_cold_prefill": {
+    "t_task_ms": {
+      "t_task_ms": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.9905,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.5967,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.4701,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.571,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.459,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.3935,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.5384,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.5772,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.9476,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.93,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.9664,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "t_neural_ms": {
+      "t_task_ms": {
+        "rho": 0.9905,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.5237,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.4453,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.4978,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.442,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.368,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.5198,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.5555,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.9551,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.9177,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.9496,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "t_orch_ms": {
+      "t_task_ms": {
+        "rho": 0.5967,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.5237,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.7115,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.9771,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.7114,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.6963,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.7479,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.7832,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.4684,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.58,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.6162,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "t_dispatch_ms": {
+      "t_task_ms": {
+        "rho": 0.4701,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.4453,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.7115,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.6124,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.6367,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.7569,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.6449,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.6276,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.4828,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.4233,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.4542,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "t_http_ms": {
+      "t_task_ms": {
+        "rho": 0.571,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.4978,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.9771,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.6124,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.7064,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.6441,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.7598,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.7991,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.4318,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.5599,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.5958,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "rss_peak_mb": {
+      "t_task_ms": {
+        "rho": 0.459,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.442,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.7114,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.6367,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.7064,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.9205,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.9379,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.9124,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.398,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.4209,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.453,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "proc_peak_phys_mb": {
+      "t_task_ms": {
+        "rho": 0.3935,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.368,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.6963,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.7569,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.6441,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.9205,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.8369,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.8229,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.3522,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.3654,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.3947,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "proc_instructions": {
+      "t_task_ms": {
+        "rho": 0.5384,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.5198,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.7479,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.6449,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.7598,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.9379,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.8369,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.9801,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.486,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.513,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.5431,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "proc_cycles": {
+      "t_task_ms": {
+        "rho": 0.5772,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.5555,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.7832,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.6276,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.7991,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.9124,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.8229,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.9801,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.5098,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.5614,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.5905,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "prompt_tokens": {
+      "t_task_ms": {
+        "rho": 0.9476,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.9551,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.4684,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.4828,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.4318,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.398,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.3522,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.486,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.5098,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.8849,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.9063,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "energy_net_above_idle_j": {
+      "t_task_ms": {
+        "rho": 0.93,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.9177,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.58,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.4233,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.5599,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.4209,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.3654,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.513,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.5614,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.8849,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.985,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "edp_js": {
+      "t_task_ms": {
+        "rho": 0.9664,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.9496,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.6162,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.4542,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.5958,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.453,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.3947,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.5431,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.5905,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.9063,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.985,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    }
+  },
+  "regime_b_warm_kv_cache": {
+    "t_task_ms": {
+      "t_task_ms": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.9827,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.544,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.2152,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.5942,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.2792,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.1606,
+        "p_value": 7.8e-05,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.3357,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.4242,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.5864,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.9602,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.9743,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "t_neural_ms": {
+      "t_task_ms": {
+        "rho": 0.9827,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.4577,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.1228,
+        "p_value": 0.002592,
+        "significant_001": false
+      },
+      "t_http_ms": {
+        "rho": 0.527,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.1769,
+        "p_value": 1.3e-05,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.0602,
+        "p_value": 0.140896,
+        "significant_001": false
+      },
+      "proc_instructions": {
+        "rho": 0.237,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.3353,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.5837,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.9567,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.9661,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "t_orch_ms": {
+      "t_task_ms": {
+        "rho": 0.544,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.4577,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.8445,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.9099,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.7841,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.7473,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.824,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.8444,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.6202,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.4842,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.506,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "t_dispatch_ms": {
+      "t_task_ms": {
+        "rho": 0.2152,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.1228,
+        "p_value": 0.002592,
+        "significant_001": false
+      },
+      "t_orch_ms": {
+        "rho": 0.8445,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.6295,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.634,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.7491,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.6426,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.6193,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.4661,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.1602,
+        "p_value": 8.1e-05,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.1822,
+        "p_value": 7e-06,
+        "significant_001": true
+      }
+    },
+    "t_http_ms": {
+      "t_task_ms": {
+        "rho": 0.5942,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.527,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.9099,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.6295,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.7601,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.6201,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.8327,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.8721,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.5573,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.5689,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.5783,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "rss_peak_mb": {
+      "t_task_ms": {
+        "rho": 0.2792,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.1769,
+        "p_value": 1.3e-05,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.7841,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.634,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.7601,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.9291,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.9513,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.9226,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.3212,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.2061,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.2343,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "proc_peak_phys_mb": {
+      "t_task_ms": {
+        "rho": 0.1606,
+        "p_value": 7.8e-05,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.0602,
+        "p_value": 0.140896,
+        "significant_001": false
+      },
+      "t_orch_ms": {
+        "rho": 0.7473,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.7491,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.6201,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.9291,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.8575,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.835,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.2927,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.0847,
+        "p_value": 0.038101,
+        "significant_001": false
+      },
+      "edp_js": {
+        "rho": 0.1166,
+        "p_value": 0.004237,
+        "significant_001": false
+      }
+    },
+    "proc_instructions": {
+      "t_task_ms": {
+        "rho": 0.3357,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.237,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.824,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.6426,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.8327,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.9513,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.8575,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.9694,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.4008,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.296,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.3189,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "proc_cycles": {
+      "t_task_ms": {
+        "rho": 0.4242,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.3353,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.8444,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.6193,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.8721,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.9226,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.835,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.9694,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.4305,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.3873,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.4068,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "prompt_tokens": {
+      "t_task_ms": {
+        "rho": 0.5864,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.5837,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.6202,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.4661,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.5573,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.3212,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.2927,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_instructions": {
+        "rho": 0.4008,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.4305,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.5764,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.5867,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "energy_net_above_idle_j": {
+      "t_task_ms": {
+        "rho": 0.9602,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.9567,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.4842,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.1602,
+        "p_value": 8.1e-05,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.5689,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.2061,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.0847,
+        "p_value": 0.038101,
+        "significant_001": false
+      },
+      "proc_instructions": {
+        "rho": 0.296,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.3873,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.5764,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 0.997,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    },
+    "edp_js": {
+      "t_task_ms": {
+        "rho": 0.9743,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_neural_ms": {
+        "rho": 0.9661,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_orch_ms": {
+        "rho": 0.506,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "t_dispatch_ms": {
+        "rho": 0.1822,
+        "p_value": 7e-06,
+        "significant_001": true
+      },
+      "t_http_ms": {
+        "rho": 0.5783,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "rss_peak_mb": {
+        "rho": 0.2343,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_peak_phys_mb": {
+        "rho": 0.1166,
+        "p_value": 0.004237,
+        "significant_001": false
+      },
+      "proc_instructions": {
+        "rho": 0.3189,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "proc_cycles": {
+        "rho": 0.4068,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "prompt_tokens": {
+        "rho": 0.5867,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "energy_net_above_idle_j": {
+        "rho": 0.997,
+        "p_value": 0.0,
+        "significant_001": true
+      },
+      "edp_js": {
+        "rho": 1.0,
+        "p_value": 0.0,
+        "significant_001": true
+      }
+    }
+  }
+}

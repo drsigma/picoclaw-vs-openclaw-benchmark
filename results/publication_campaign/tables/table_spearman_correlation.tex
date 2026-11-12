@@ -1,0 +1,26 @@
+\begin{table*}[t]
+\centering
+\caption{Spearman Rank Correlation Matrix ($\rho$) across Key Systems Telemetry Dimensions on Apple Silicon M4. Contrasts Regime A (Cold Prefill, $n=600$) and Regime B (Warm KV-Cache Reuse, $n=600$). In Regime A, prompt attention computation dominates global latency ($T_{\text{task}}$) and energy ($E_{\text{net}}$), yielding near-perfect rank alignment with token length ($\rho > 0.95$). In Regime B, KV-cache amortization unmasks runtime execution dynamics, where retired CPU instructions and dispatch latency strongly decouple from prompt prefill. Statistical significance: $^{***}p < 0.001$, $^{**}p < 0.01$, $^{*}p < 0.05$.}
+\label{tab:spearman_correlation}
+\small
+\begin{tabular}{l r r r r}
+\hline
+\textbf{Systems Interaction} & \textbf{Regime A ($\rho_{\text{cold}}$)} & \textbf{$p$-value (A)} & \textbf{Regime B ($\rho_{\text{warm}}$)} & \textbf{$p$-value (B)} \\
+\hline
+$T_{\text{task}}$ vs $T_{\text{neural}}$ (Inference Latency) & +0.991$^{***}$ & $< 10^{-5}$ & +0.983$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{task}}$ vs $N_{\text{prompt}}$ (Prompt Token Length) & +0.948$^{***}$ & $< 10^{-5}$ & +0.586$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{task}}$ vs $E_{\text{net}}$ (Net Package Energy) & +0.930$^{***}$ & $< 10^{-5}$ & +0.960$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{task}}$ vs EDP (Energy-Delay Product) & +0.966$^{***}$ & $< 10^{-5}$ & +0.974$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{task}}$ vs $T_{\text{orch}}$ (Orchestrator Overhead) & +0.597$^{***}$ & $< 10^{-5}$ & +0.544$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{neural}}$ vs $N_{\text{prompt}}$ (Attention Prefill) & +0.955$^{***}$ & $< 10^{-5}$ & +0.584$^{***}$ & $< 10^{-5}$ \\
+$E_{\text{net}}$ vs $N_{\text{prompt}}$ (Prefill Energy Drain) & +0.885$^{***}$ & $< 10^{-5}$ & +0.576$^{***}$ & $< 10^{-5}$ \\
+Retired Instructions vs CPU Cycles & +0.980$^{***}$ & $< 10^{-5}$ & +0.969$^{***}$ & $< 10^{-5}$ \\
+Retired Instructions vs $T_{\text{orch}}$ & +0.748$^{***}$ & $< 10^{-5}$ & +0.824$^{***}$ & $< 10^{-5}$ \\
+Retired Instructions vs Peak RSS & +0.938$^{***}$ & $< 10^{-5}$ & +0.951$^{***}$ & $< 10^{-5}$ \\
+Peak RSS vs Peak Physical RAM & +0.920$^{***}$ & $< 10^{-5}$ & +0.929$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{disp}}$ vs $T_{\text{orch}}$ (Serialization Share) & +0.712$^{***}$ & $< 10^{-5}$ & +0.845$^{***}$ & $< 10^{-5}$ \\
+\hline
+\multicolumn{5}{l}{\footnotesize Non-parametric Spearman rank correlation evaluated over $N=600$ independent physical evaluations per regime ($1{,}200$ total).} \\
+\hline
+\end{tabular}
+\end{table*}

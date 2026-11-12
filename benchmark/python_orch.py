@@ -63,7 +63,7 @@ def execute_tool_list_dir(mock_dir: str) -> str:
             files.append(f"{name}:{sz}")
         except Exception:
             files.append(f"{name}:0")
-    return json.dumps({"count": len(files), "files": files[:10]})
+    return json.dumps({"count": len(files), "files": files[:10]}, separators=(",", ":"))
 
 
 def execute_tool_grep_logs(log_file: str) -> tuple[list[float], str]:
@@ -79,7 +79,7 @@ def execute_tool_grep_logs(log_file: str) -> tuple[list[float], str]:
                         vals.append(float(lat))
                 except Exception:
                     pass
-    summary = json.dumps({"matched_records": len(vals), "sample": vals[:5]})
+    summary = json.dumps({"matched_records": len(vals), "sample": vals[:5]}, separators=(",", ":"))
     return vals, summary
 
 
@@ -89,7 +89,7 @@ def execute_tool_calc_stats(vals: list[float]) -> str:
         return "{}"
     mean = sum(vals) / float(n)
     var = sum((v - mean) ** 2 for v in vals) / float(n - 1) if n > 1 else 0.0
-    return json.dumps({"n": n, "mean": mean, "variance": var, "stddev": math.sqrt(var)})
+    return json.dumps({"n": n, "mean": mean, "variance": var, "stddev": math.sqrt(var)}, separators=(",", ":"))
 
 
 def execute_vector_rag(base_dir: str) -> str:
@@ -146,7 +146,7 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
         "seed": 42,
         "stream": True,
         "cache_prompt": os.environ.get("BENCH_CACHE_PROMPT", "false").lower() == "true",
-    }).encode("utf-8")
+    }, separators=(",", ":")).encode("utf-8")
 
     t0 = time.monotonic()
     req = urllib.request.Request(API_URL, data=payload, headers={"Content-Type": "application/json"})

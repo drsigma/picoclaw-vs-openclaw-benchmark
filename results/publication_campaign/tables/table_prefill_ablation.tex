@@ -1,16 +1,20 @@
 \begin{table*}[t]
 \centering
-\caption{Controlled Tool Catalog Schema Prefill and KV-Cache Reuse Characterization on \texttt{llama.cpp} Metal GPU Server. Evaluates prompt token length ($N_{\text{prompt}}$), Time-to-First-Token (TTFT), and Prefill duration ($T_{\text{prefill}}$) across catalog sizes ($T \in \{0, 15, 54, 100\}$) under Cold Prefill ($\texttt{cache\_prompt} = \text{false}$) versus Warm KV-Cache Reuse ($\texttt{cache\_prompt} = \text{true}$). Values denote empirical median ($n=10$).}
+\caption{Controlled Tool Catalog Schema Prefill and KV-Cache Reuse Characterization on \texttt{llama.cpp} Metal GPU Server. Evaluates prompt token length ($N_{\text{prompt}}$), Time-to-First-Token (TTFT), and Prefill duration ($T_{\text{prefill}}$) across 8 catalog sizes ($T \in \{0, 5, 10, 15, 25, 40, 54, 100\}$) under Cold Prefill ($\texttt{cache\_prompt} = \text{false}$) versus Warm KV-Cache Reuse ($\texttt{cache\_prompt} = \text{true}$). Values denote empirical median ($n=30$ evaluations per condition following 3 priming warmups).}
 \label{tab:prefill_ablation}
 \small
 \begin{tabular}{r r r r r r r r}
 \hline
 \textbf{Tools} & \textbf{Prompt Tokens} & \textbf{Cached Tokens (Warm)} & \textbf{Cold TTFT [ms]} & \textbf{Warm TTFT [ms]} & \textbf{Cold Prefill [ms]} & \textbf{Warm Prefill [ms]} & \textbf{Speedup} \\
 \hline
-0 & 60 & 0 & 129.4 & 24.5 & 128.2 & 23.5 & 5.5$\times$ \\
-15 & 2081 & 0 & 4442.6 & 231.3 & 4233.5 & 26.0 & 162.9$\times$ \\
-54 & 7190 & 0 & 18167.3 & 293.9 & 17903.5 & 32.6 & 548.9$\times$ \\
-100 & 13216 & 0 & 39262.7 & 369.9 & 38936.3 & 40.9 & 952.3$\times$ \\
+0 & 60 & 59 & 129.2 & 24.4 & 128.1 & 23.4 & 5.5$\times$ \\
+5 & 771 & 770 & 1576.6 & 96.6 & 1501.3 & 24.4 & 61.5$\times$ \\
+10 & 1426 & 1425 & 2979.0 & 101.5 & 2900.0 & 25.6 & 113.4$\times$ \\
+15 & 2081 & 2080 & 4516.4 & 105.1 & 4434.4 & 26.1 & 169.6$\times$ \\
+25 & 3391 & 3390 & 7547.4 & 113.2 & 7455.1 & 28.3 & 263.6$\times$ \\
+40 & 5356 & 5355 & 12653.2 & 124.5 & 12552.1 & 30.5 & 411.1$\times$ \\
+54 & 7190 & 7189 & 17988.9 & 135.1 & 17877.3 & 32.6 & 548.9$\times$ \\
+100 & 13216 & 13215 & 39325.8 & 173.3 & 39190.5 & 41.4 & 946.5$\times$ \\
 \hline
 \multicolumn{8}{l}{\footnotesize Decoded via Apple Silicon M4 Metal GPU; llama.cpp b11887; -c 32768 -np 1 -ngl 99 -t 4; temperature = 0.0, seed = 42.} \\
 \hline

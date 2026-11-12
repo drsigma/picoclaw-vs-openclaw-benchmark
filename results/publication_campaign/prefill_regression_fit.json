@@ -1,19 +1,58 @@
 {
   "dataset": "results/publication_campaign/prefill_ablation.jsonl",
-  "n_samples": 120,
+  "n_levels": 8,
+  "n_total_eval_samples": 240,
   "target_variable": "prompt_ms (T_prefill in milliseconds)",
   "predictor_variable": "prompt_tokens (N)",
+  "bootstrap_resamples": 2000,
   "linear_fit": {
     "formula": "T_prefill = beta_1 * N + beta_0",
-    "beta_1": 2.961249,
-    "beta_0": -1389.7314,
-    "r_squared": 0.9918
+    "beta_1": 2.950676,
+    "beta_0": -1597.7807,
+    "beta_1_ci95": [
+      2.947463,
+      2.952927
+    ],
+    "beta_0_ci95": [
+      -1608.590385,
+      -1588.800139
+    ],
+    "r_squared": 0.98887,
+    "aicc": 120.84
   },
   "quadratic_fit": {
     "formula": "T_prefill = beta_2 * N^2 + beta_1 * N + beta_0",
-    "beta_2": 7.605e-05,
-    "beta_1": 1.941847,
-    "beta_0": -29.7202,
-    "r_squared": 0.9999
+    "beta_2": 7.895e-05,
+    "beta_1": 1.920145,
+    "beta_0": 17.3645,
+    "beta_2_ci95": [
+      7.8e-05,
+      8e-05
+    ],
+    "beta_1_ci95": [
+      1.909931,
+      1.929474
+    ],
+    "beta_0_ci95": [
+      2.981931,
+      30.031131
+    ],
+    "r_squared": 0.99999,
+    "aicc": 68.88
+  },
+  "power_law_fit": {
+    "formula": "T_prefill = a * N^alpha",
+    "a": 0.3197,
+    "alpha": 1.2342,
+    "a_ci95": [
+      0.314339,
+      0.325036
+    ],
+    "alpha_ci95": [
+      1.232394,
+      1.235961
+    ],
+    "r_squared": 0.99925,
+    "aicc": 99.25
   }
 }
