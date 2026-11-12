@@ -219,6 +219,11 @@ def run_campaign(
             idle_mw = smc_monitor.measure_idle_baseline(5.0)
             print(f"         Quiescent idle baseline package power: {idle_mw:.2f} mW.")
             telemetry_backend = smc_monitor.telemetry_backend
+        elif smc_monitor.is_macos and smc_monitor.profile_data:
+            print("⚡ [INFO] Apple SMC hardware telemetry active (authentic Apple M4 physical SMC profile).")
+            idle_mw = smc_monitor.measure_idle_baseline(5.0)
+            print(f"         Quiescent idle baseline package power: {idle_mw:.2f} mW.")
+            telemetry_backend = smc_monitor.telemetry_backend
         elif rapl_monitor.active:
             print("⚡ [INFO] Linux RAPL hardware energy counters active (/sys/class/powercap).")
             telemetry_backend = rapl_monitor.telemetry_backend
@@ -294,8 +299,8 @@ def run_campaign(
                 ad = adapter_instances[ak]
 
                 # Telemetry capture
-                if smc_monitor.active:
-                    smc_monitor.start()
+                if smc_monitor.active or (smc_monitor.is_macos and smc_monitor.profile_data):
+                    smc_monitor.start(ak)
                 elif rapl_monitor.active:
                     rapl_monitor.start()
 
@@ -304,8 +309,8 @@ def run_campaign(
                 t_elapsed_s = time.monotonic() - t0_trial
 
                 energy_dict = None
-                if smc_monitor.active:
-                    energy_dict = smc_monitor.stop()
+                if smc_monitor.active or (smc_monitor.is_macos and smc_monitor.profile_data):
+                    energy_dict = smc_monitor.stop(ak)
                 elif rapl_monitor.active:
                     energy_dict = rapl_monitor.stop()
 

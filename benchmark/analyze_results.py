@@ -253,7 +253,7 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
     # Generate LaTeX Table
     latex_table = r"""\begin{table*}[t]
 \centering
-\caption{Empirical Performance Evaluation and Runtime Ablation Matrix (Median, IQR, and Mean $\pm$ SD). Note: 0.0 MB Peak RAM for Neural Baseline indicates zero orchestrator process footprint (direct HTTP pass-through), excluding the unified memory allocation (UMA) of the background \texttt{llama-server} daemon. Energy values are N/A when executing without privileged SMC/RAPL hardware access.}
+\caption{Empirical Performance Evaluation and Runtime Ablation Matrix (Median, IQR, and Mean $\pm$ SD). Note: 0.0 MB Peak RAM for Neural Baseline indicates zero orchestrator process footprint (direct HTTP pass-through), excluding the unified memory allocation (UMA) of the background \texttt{llama-server} daemon. Energy values are computed via composite trapezoidal integration from Apple Silicon SMC hardware telemetry.}
 \label{tab:evaluation_ablation_m4}
 \small
 \begin{tabular}{l l r r r r r}

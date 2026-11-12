@@ -1,172 +1,172 @@
 {
   "PicoClaw_vs_OpenClawMinimal": {
     "W1": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
+      "u_statistic": 341.0,
+      "raw_p_value": 0.1086897732144474,
+      "cliffs_delta": -0.2422,
+      "vargha_delaney_a12": 0.3789,
+      "holm_bonferroni_p_value": 0.326069,
       "significant_alpha_0_05": false
     },
     "W2": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 900.0,
+      "raw_p_value": 3.0198593591621564e-11,
+      "cliffs_delta": 1.0,
+      "vargha_delaney_a12": 1.0,
+      "holm_bonferroni_p_value": 0.0,
+      "significant_alpha_0_05": true
     },
     "W3": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 270.0,
+      "raw_p_value": 0.00795899566104557,
+      "cliffs_delta": -0.4,
+      "vargha_delaney_a12": 0.3,
+      "holm_bonferroni_p_value": 0.047754,
+      "significant_alpha_0_05": true
     },
     "W4": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
+      "u_statistic": 569.0,
+      "raw_p_value": 0.07978164712498094,
+      "cliffs_delta": 0.2644,
+      "vargha_delaney_a12": 0.6322,
+      "holm_bonferroni_p_value": 0.319127,
       "significant_alpha_0_05": false
     }
   },
   "PicoClaw_vs_OpenClawFull": {
     "W1": {
       "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
+      "raw_p_value": 3.0198593591621564e-11,
       "cliffs_delta": -1.0,
       "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "holm_bonferroni_p_value": 0.0,
+      "significant_alpha_0_05": true
     },
     "W2": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
+      "u_statistic": 600.0,
+      "raw_p_value": 0.02708631838829594,
+      "cliffs_delta": 0.3333,
+      "vargha_delaney_a12": 0.6667,
+      "holm_bonferroni_p_value": 0.135432,
       "significant_alpha_0_05": false
     },
     "W3": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 135.0,
+      "raw_p_value": 3.3241530490778975e-06,
+      "cliffs_delta": -0.7,
+      "vargha_delaney_a12": 0.15,
+      "holm_bonferroni_p_value": 3.3e-05,
+      "significant_alpha_0_05": true
     },
     "W4": {
       "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
+      "raw_p_value": 3.0198593591621564e-11,
       "cliffs_delta": -1.0,
       "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "holm_bonferroni_p_value": 0.0,
+      "significant_alpha_0_05": true
     }
   },
   "PicoClaw_vs_PythonNative": {
     "W1": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
+      "u_statistic": 478.0,
+      "raw_p_value": 0.6843225867624494,
+      "cliffs_delta": 0.0622,
+      "vargha_delaney_a12": 0.5311,
+      "holm_bonferroni_p_value": 0.684323,
       "significant_alpha_0_05": false
     },
     "W2": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 88.0,
+      "raw_p_value": 9.063205240555397e-08,
+      "cliffs_delta": -0.8044,
+      "vargha_delaney_a12": 0.0978,
+      "holm_bonferroni_p_value": 1e-06,
+      "significant_alpha_0_05": true
     },
     "W3": {
-      "u_statistic": 4.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": 1.0,
-      "vargha_delaney_a12": 1.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 746.0,
+      "raw_p_value": 1.2493242098147682e-05,
+      "cliffs_delta": 0.6578,
+      "vargha_delaney_a12": 0.8289,
+      "holm_bonferroni_p_value": 0.0001,
+      "significant_alpha_0_05": true
     },
     "W4": {
-      "u_statistic": 2.0,
-      "raw_p_value": 1.0,
-      "cliffs_delta": 0.0,
-      "vargha_delaney_a12": 0.5,
-      "holm_bonferroni_p_value": 1.0,
+      "u_statistic": 520.0,
+      "raw_p_value": 0.30417681801970364,
+      "cliffs_delta": 0.1556,
+      "vargha_delaney_a12": 0.5778,
+      "holm_bonferroni_p_value": 0.608354,
       "significant_alpha_0_05": false
     }
   },
   "OpenClawAblation_Minimal_vs_Full": {
     "W1": {
-      "u_statistic": 1.0,
-      "raw_p_value": 0.6666666666666666,
-      "cliffs_delta": -0.5,
-      "vargha_delaney_a12": 0.25,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 0.0,
+      "raw_p_value": 3.0198593591621564e-11,
+      "cliffs_delta": -1.0,
+      "vargha_delaney_a12": 0.0,
+      "holm_bonferroni_p_value": 0.0,
+      "significant_alpha_0_05": true
     },
     "W2": {
-      "u_statistic": 2.0,
-      "raw_p_value": 1.0,
-      "cliffs_delta": 0.0,
-      "vargha_delaney_a12": 0.5,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 69.0,
+      "raw_p_value": 1.8499940794912877e-08,
+      "cliffs_delta": -0.8467,
+      "vargha_delaney_a12": 0.0767,
+      "holm_bonferroni_p_value": 0.0,
+      "significant_alpha_0_05": true
     },
     "W3": {
-      "u_statistic": 3.0,
-      "raw_p_value": 0.6666666666666666,
-      "cliffs_delta": 0.5,
-      "vargha_delaney_a12": 0.75,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 100.0,
+      "raw_p_value": 2.3768200504545053e-07,
+      "cliffs_delta": -0.7778,
+      "vargha_delaney_a12": 0.1111,
+      "holm_bonferroni_p_value": 3e-06,
+      "significant_alpha_0_05": true
     },
     "W4": {
       "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
+      "raw_p_value": 3.0198593591621564e-11,
       "cliffs_delta": -1.0,
       "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "holm_bonferroni_p_value": 0.0,
+      "significant_alpha_0_05": true
     }
   },
   "NeuralBaseline_vs_PicoClaw": {
     "W1": {
-      "u_statistic": 4.0,
-      "raw_p_value": 0.22067136191984682,
-      "cliffs_delta": 1.0,
-      "vargha_delaney_a12": 1.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 215.0,
+      "raw_p_value": 0.0005264041831877982,
+      "cliffs_delta": -0.5222,
+      "vargha_delaney_a12": 0.2389,
+      "holm_bonferroni_p_value": 0.003685,
+      "significant_alpha_0_05": true
     },
     "W2": {
-      "u_statistic": 4.0,
-      "raw_p_value": 0.22067136191984682,
-      "cliffs_delta": 1.0,
-      "vargha_delaney_a12": 1.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 841.0,
+      "raw_p_value": 7.772549509742646e-09,
+      "cliffs_delta": 0.8689,
+      "vargha_delaney_a12": 0.9344,
+      "holm_bonferroni_p_value": 0.0,
+      "significant_alpha_0_05": true
     },
     "W3": {
-      "u_statistic": 4.0,
-      "raw_p_value": 0.22067136191984682,
-      "cliffs_delta": 1.0,
-      "vargha_delaney_a12": 1.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 96.0,
+      "raw_p_value": 1.7294093690511444e-07,
+      "cliffs_delta": -0.7867,
+      "vargha_delaney_a12": 0.1067,
+      "holm_bonferroni_p_value": 2e-06,
+      "significant_alpha_0_05": true
     },
     "W4": {
-      "u_statistic": 4.0,
-      "raw_p_value": 0.22067136191984682,
-      "cliffs_delta": 1.0,
-      "vargha_delaney_a12": 1.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
+      "u_statistic": 144.5,
+      "raw_p_value": 6.503807765357721e-06,
+      "cliffs_delta": -0.6789,
+      "vargha_delaney_a12": 0.1606,
+      "holm_bonferroni_p_value": 5.9e-05,
+      "significant_alpha_0_05": true
     }
   }
 }
