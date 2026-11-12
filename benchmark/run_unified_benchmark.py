@@ -77,7 +77,7 @@ class MockLlamaServerHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(c2)
 
             # SSE chunk 3: final timing
-            c3 = b'data: {"choices":[{"finish_reason":"stop","index":0,"delta":{}}],"timings":{"prompt_ms":12.5,"predicted_ms":18.2}}\n\n'
+            c3 = b'data: {"choices":[{"finish_reason":"stop","index":0,"delta":{}}],"timings":{"prompt_ms":12.5,"predicted_ms":18.2,"prompt_n":128,"predicted_n":16},"usage":{"prompt_tokens":128,"completion_tokens":16}}\n\n'
             self.wfile.write(c3)
 
             self.wfile.write(b"data: [DONE]\n\n")

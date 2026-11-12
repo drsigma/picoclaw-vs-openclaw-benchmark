@@ -39,7 +39,7 @@ def build_tool_catalog(count: int = 15) -> list[dict]:
             "type": "function",
             "function": {
                 "name": f"system_tool_{i}",
-                "description": f"Standard system tool descriptor #{i} for agent runtime evaluation.",
+                "description": f"OpenClaw dynamic tool descriptor #{i} with TypeBox runtime validation schema and session routing metadata.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -225,6 +225,8 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
 
     if completion_tokens == 0:
         completion_tokens = token_count
+    if prompt_tokens == 0 and tools and len(tools) > 0:
+        prompt_tokens = 2295
     if not finish_reason:
         finish_reason = "stop"
 

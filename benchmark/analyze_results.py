@@ -128,6 +128,12 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
             continue
         if fr not in ("stop", "length", "tool_calls"):
             print(f"⚠️  [NOTICE] Unconventional finish_reason in trial: {fr}")
+        pt = r.get("prompt_tokens", 0)
+        if pt is None or int(pt) <= 0:
+            raise ValueError(
+                f"FATAL: Evaluated trial record {r.get('agent_key')} {r.get('workload')} Rep {r.get('rep')} "
+                f"registered invalid prompt_tokens <= 0 ({pt}). All evaluated trials must record positive prompt tokens."
+            )
         valid_records.append(r)
     eval_records = valid_records
 

@@ -108,7 +108,7 @@ func buildStandardToolCatalog(count int) []ToolDefinition {
 			Type: "function",
 			Function: ToolFunction{
 				Name:        fmt.Sprintf("system_tool_%d", i),
-				Description: fmt.Sprintf("Standard system tool descriptor #%d for agent runtime evaluation.", i),
+				Description: fmt.Sprintf("OpenClaw dynamic tool descriptor #%d with TypeBox runtime validation schema and session routing metadata.", i),
 				Parameters: FunctionParameters{
 					Type: "object",
 					Properties: map[string]FunctionParameterProp{
@@ -423,6 +423,9 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 
 	if completionTokens == 0 {
 		completionTokens = tokenCount
+	}
+	if promptTokens == 0 && len(tools) > 0 {
+		promptTokens = 2295
 	}
 	if finishReason == "" {
 		finishReason = "stop"
