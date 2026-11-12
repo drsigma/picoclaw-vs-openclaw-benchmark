@@ -12,7 +12,7 @@ A suíte experimental é dividida em quatro camadas interdependentes:
 1. **Camada de Orquestração dos Agentes:** [`benchmark/picoclaw_orch.go`](../benchmark/picoclaw_orch.go) (Go) e [`benchmark/openclaw_orch.mjs`](../benchmark/openclaw_orch.mjs) (Node.js), que implementam as 4 cargas de trabalho padronizadas (W1 a W4) e interagem com o servidor neural local e os datasets em disco.
 2. **Camada de Execução e Telemetria em Tempo Real:** [`benchmark/run_live_campaign.py`](../benchmark/run_live_campaign.py), responsável pela amostragem síncrona dos sensores do SoC Apple M4, cronometragem de alta resolução e registro em JSON Lines.
 3. **Camada de Validação Matemática e Estatística:** [`benchmark/poisson_sampling_validation.py`](../benchmark/poisson_sampling_validation.py) e [`benchmark/compare_campaigns.py`](../benchmark/compare_campaigns.py), que executam testes analíticos de Poisson, intervalos fiduciais de Garwood, testes de dispersão de Cameron & Trivedi e Análise de Variância (ANOVA One-Way).
-4. **Camada de Síntese e Publicação Científica:** [`benchmark/generate_charts.py`](../benchmark/generate_charts.py) e [`benchmark/build_reports.py`](../benchmark/build_reports.py), responsáveis por gerar figuras em 300 DPI e relatórios acadêmicos formatados segundo as normas ABNT.
+4. **Camada de Síntese e Publicação Científica:** [`benchmark/generate_charts.py`](../benchmark/generate_charts.py), responsável por gerar figuras em 300 DPI e tabelas estatísticas em LaTeX.
 
 ---
 
@@ -68,10 +68,6 @@ A suíte experimental é dividida em quatro camadas interdependentes:
 ### 2.7. `benchmark/generate_charts.py`
 * **Linguagem:** Python 3.12+ (`matplotlib`).
 * **Propósito:** Converte os dados brutos de telemetria nas 8 figuras científicas oficiais do projeto em 300 DPI, aplicando formatação LaTeX e barras de erro empíricas.
-
-### 2.8. `benchmark/build_reports.py`
-* **Linguagem:** Python 3.12+ (`python-docx`).
-* **Propósito:** Constrói os relatórios formais da disciplina (Testes de Sistemas e Plano de Trabalho) formatados conforme as normas da UFABC e ABNT diretamente a partir dos logs JSONL.
 
 ---
 

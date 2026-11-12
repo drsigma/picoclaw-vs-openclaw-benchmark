@@ -225,18 +225,18 @@ async function callLlamaStream(messages, tools, maxTokens) {
               predictedMs = parsed.timings.predicted_ms;
               hasServerTimings = true;
             }
-            if (typeof parsed.timings.prompt_n === "number") {
+            if (typeof parsed.timings.prompt_n === "number" && parsed.timings.prompt_n > 0) {
               promptTokens = parsed.timings.prompt_n;
             }
-            if (typeof parsed.timings.predicted_n === "number") {
+            if (typeof parsed.timings.predicted_n === "number" && parsed.timings.predicted_n > 0) {
               completionTokens = parsed.timings.predicted_n;
             }
           }
           if (parsed.usage) {
-            if (typeof parsed.usage.prompt_tokens === "number") {
+            if (typeof parsed.usage.prompt_tokens === "number" && parsed.usage.prompt_tokens > 0) {
               promptTokens = parsed.usage.prompt_tokens;
             }
-            if (typeof parsed.usage.completion_tokens === "number") {
+            if (typeof parsed.usage.completion_tokens === "number" && parsed.usage.completion_tokens > 0) {
               completionTokens = parsed.usage.completion_tokens;
             }
           }

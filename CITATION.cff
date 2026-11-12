@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this benchmark suite, datasets, or experimental findings in your research, please cite it as below."
-title: "PicoClaw vs. OpenClaw: Performance Evaluation of Go and TypeScript AI Agent Architectures on Apple Silicon M4"
+title: "A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"
 authors:
   - family-names: "Paniccia Cassetta"
     given-names: "Rafael"
@@ -22,5 +22,5 @@ version: "1.0.0"
 date-released: "2026-11-12"
 identifiers:
   - type: doi
-    value: "10.5281/zenodo.placeholder"
-    description: "Zenodo Archive DOI"
+    value: "10.5281/zenodo.PENDING_RELEASE"
+    description: "Pending Zenodo Deposit upon Acceptance"

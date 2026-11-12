@@ -12,7 +12,7 @@ The experimental benchmark testbed comprises four cohesive architectural tiers:
 1. **Agent Orchestration Tier:** [`benchmark/picoclaw_orch.go`](../benchmark/picoclaw_orch.go) (Go) and [`benchmark/openclaw_orch.mjs`](../benchmark/openclaw_orch.mjs) (Node.js), implementing standardized workloads W1 through W4 and interfacing with the local Metal neural server and disk datasets.
 2. **Live Execution & Telemetry Tier:** [`benchmark/run_live_campaign.py`](../benchmark/run_live_campaign.py), sampling hardware telemetry from the Apple Silicon M4 SoC, managing monotonic nanosecond timers, and streaming atomic JSON Lines records.
 3. **Statistical & Mathematical Validation Tier:** [`benchmark/poisson_sampling_validation.py`](../benchmark/poisson_sampling_validation.py) and [`benchmark/compare_campaigns.py`](../benchmark/compare_campaigns.py), evaluating analytical Poisson arrival distributions, exact Garwood fiducial intervals, Cameron & Trivedi overdispersion regressions, and One-Way ANOVA tests.
-4. **Scientific Synthesis & Publication Tier:** [`benchmark/generate_charts.py`](../benchmark/generate_charts.py) and [`benchmark/build_reports.py`](../benchmark/build_reports.py), compiling 300-DPI publication figures and formal academic reports.
+4. **Scientific Synthesis & Publication Tier:** [`benchmark/generate_charts.py`](../benchmark/generate_charts.py), compiling 300-DPI publication figures and statistical LaTeX tables.
 
 ---
 
@@ -68,10 +68,6 @@ The experimental benchmark testbed comprises four cohesive architectural tiers:
 ### 2.7. `benchmark/generate_charts.py`
 * **Language:** Python 3.12+ (`matplotlib`).
 * **Purpose:** Renders 8 publication-ready 300-DPI scientific figures with LaTeX typographic formatting and empirical error bars.
-
-### 2.8. `benchmark/build_reports.py`
-* **Language:** Python 3.12+ (`python-docx`).
-* **Purpose:** Programmatically compiles formal university reports adhering to Brazilian ABNT academic standards.
 
 ---
 

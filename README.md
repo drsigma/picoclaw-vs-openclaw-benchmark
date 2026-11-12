@@ -5,7 +5,7 @@
 [![Data License: CC BY 4.0](https://img.shields.io/badge/Data%20License-CC%20BY%204.0-lightgrey.svg)](DATA_LICENSE)
 [![Hardware: Apple Silicon M4](https://img.shields.io/badge/Hardware-Apple%20Silicon%20M4-purple.svg)](https://www.apple.com/)
 [![Documentation: Bilingual](https://img.shields.io/badge/Docs-Bilingual%20(PT--BR%20%7C%20EN--US)-blue.svg)](#)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.placeholder-blue.svg)](CITATION.cff)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.PENDING_RELEASE-blue.svg)](CITATION.cff)
 
 **Author / Autor:** Rafael Paniccia Cassetta  
 **Affiliation / Afiliação:** Universidade Federal do ABC (UFABC), Santo André, SP, Brazil  
@@ -315,4 +315,5 @@ As decisões metodológicas, modelos estatísticos e formulações de hardware e
 ## 🤝 Agradecimentos / Acknowledgments
 
 * **Universidade Federal do ABC (UFABC):** Ao Programa de Pós-Graduação em Engenharia da Informação / Ciência da Computação.
-* **Corpo Docente:** Ao corpo docente da disciplina **CCM313-EEI203 — Análise de Desempenho de Redes e Sistemas** (período letivo 2026.3), pelas rigorosas orientações metodológicas e diretrizes de integridade científica que balizaram o planejamento deste estudo.
+* **Universidade Federal do ABC (UFABC):** Ao Centro de Engenharia, Modelagem e Ciências Sociais Aplicadas (CECS) pelo apoio institucional e infraestrutura computacional.
+* **Open Source & Research Communities:** Às comunidades científicas de sistemas, engenharia de software e inteligência artificial por disponibilizarem ferramentas e metodologias abertas para pesquisa reprodutível.

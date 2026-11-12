@@ -372,18 +372,18 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 						predictedMs = predMs
 						hasServerTimings = true
 					}
-					if pn, ok := timings["prompt_n"].(float64); ok {
+					if pn, ok := timings["prompt_n"].(float64); ok && pn > 0 {
 						promptTokens = int(pn)
 					}
-					if predN, ok := timings["predicted_n"].(float64); ok {
+					if predN, ok := timings["predicted_n"].(float64); ok && predN > 0 {
 						completionTokens = int(predN)
 					}
 				}
 				if usage, ok := chunk["usage"].(map[string]interface{}); ok {
-					if pt, ok := usage["prompt_tokens"].(float64); ok {
+					if pt, ok := usage["prompt_tokens"].(float64); ok && pt > 0 {
 						promptTokens = int(pt)
 					}
-					if ct, ok := usage["completion_tokens"].(float64); ok {
+					if ct, ok := usage["completion_tokens"].(float64); ok && ct > 0 {
 						completionTokens = int(ct)
 					}
 				}

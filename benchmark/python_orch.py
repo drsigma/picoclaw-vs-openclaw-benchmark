@@ -183,16 +183,16 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
                     if "predicted_ms" in timings:
                         predicted_ms = float(timings["predicted_ms"])
                         has_server_timings = True
-                    if "prompt_n" in timings:
+                    if "prompt_n" in timings and int(timings["prompt_n"]) > 0:
                         prompt_tokens = int(timings["prompt_n"])
-                    if "predicted_n" in timings:
+                    if "predicted_n" in timings and int(timings["predicted_n"]) > 0:
                         completion_tokens = int(timings["predicted_n"])
 
                 usage = chunk.get("usage")
                 if isinstance(usage, dict):
-                    if "prompt_tokens" in usage:
+                    if "prompt_tokens" in usage and int(usage["prompt_tokens"]) > 0:
                         prompt_tokens = int(usage["prompt_tokens"])
-                    if "completion_tokens" in usage:
+                    if "completion_tokens" in usage and int(usage["completion_tokens"]) > 0:
                         completion_tokens = int(usage["completion_tokens"])
 
                 choices = chunk.get("choices")

@@ -86,13 +86,7 @@ echo "========================================================================"
 $PY "$BENCH_DIR/generate_charts.py"
 
 echo "========================================================================"
-echo " [Phase 5/6] Compiling Academic System Testing Reports (.docx & .pdf)"
-echo "========================================================================"
-$PY "$BENCH_DIR/build_reports.py"
-$PY "$BENCH_DIR/build_layperson_guide.py"
-
-echo "========================================================================"
-echo " [Phase 6/6] Computing SHA-256 Cryptographic Integrity Manifest"
+echo " [Phase 5/5] Computing SHA-256 Cryptographic Integrity Manifest"
 echo "========================================================================"
 $PY -c '
 import hashlib, os, json
