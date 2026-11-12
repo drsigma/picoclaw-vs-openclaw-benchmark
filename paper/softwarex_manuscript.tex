@@ -33,7 +33,7 @@
             country={Brazil}}
 
 \begin{abstract}
-As autonomous AI agents shift from remote cloud endpoints to local edge deployment, software execution runtime overhead becomes a critical bottleneck competing with neural weights for unified memory and compute bandwidth. We introduce the \texttt{picoclaw-vs-openclaw-benchmark} suite, an extensible, journal-grade benchmarking framework designed to isolate orchestrator delay ($T_{\text{orch}}$) from neural inference latency ($T_{\text{neural}}$) on Apple Silicon SoC microarchitectures. The framework implements the Strategy pattern to evaluate native compiled binaries (Go Mach-O ARM64) against JIT-compiled runtimes (TypeScript/Node.js V8) across four standardized workload tiers (W1--W4), featuring unconstrained feature ablation (54 tools vs. minimal equalized tools). Experimental telemetry combines non-intrusive Darwin XNU \texttt{libproc} performance counters, Apple System Management Controller (SMC) electrical current sampling, exact Garwood Poisson fiducial limits, and non-parametric effect sizes (Mann-Whitney $U$, Cliff's Delta, Vargha-Delaney $\hat{A}_{12}$). Furthermore, the software provides a reviewer-friendly portable simulation mode (\texttt{make simulate-campaign}) executing in under ten seconds across macOS and Linux without superuser privileges or local weights.
+As autonomous AI agents shift from remote cloud endpoints to local edge deployment, software execution runtime overhead becomes a critical bottleneck competing with neural weights for unified memory and compute bandwidth. We introduce the \texttt{picoclaw-vs-openclaw-benchmark} suite, an extensible, journal-grade benchmarking framework designed to isolate orchestrator delay ($T_{\text{orch}}$) from neural inference latency ($T_{\text{neural}}$) on Apple Silicon SoC microarchitectures. The framework implements the Strategy pattern to evaluate native compiled binaries (Go Mach-O ARM64) against JIT-compiled runtimes (TypeScript/Node.js V8) and interpreted baselines (Python 3.12) across four standardized workload tiers (W1--W4), featuring unconstrained feature ablation (54 tools vs. minimal equalized tools). Experimental telemetry combines non-intrusive Darwin XNU \texttt{libproc} performance counters, Apple System Management Controller (SMC) electrical current sampling, and robust non-parametric statistical inference (median and interquartile range, two-sided Mann-Whitney $U$ test with Holm-Bonferroni correction, Cliff's Delta $d$, and Vargha-Delaney $\hat{A}_{12}$ with 95\% bootstrap confidence intervals). Furthermore, the software provides a reviewer-friendly portable simulation mode (\texttt{make simulate-campaign} or \texttt{make dry-run}) executing in under ten seconds across macOS and Linux without superuser privileges or local weights.
 \end{abstract}
 
 \begin{keyword}
@@ -81,7 +81,7 @@ C10 & Support email for questions & \texttt{rafael.paniccia@aluno.ufabc.edu.br} 
 \label{sec:motivation}
 Autonomous agentic workflows employing the ReAct (Reasoning and Acting) paradigm \cite{yao2023react} require orchestrators to iteratively parse tool schemas, validate arguments, dispatch operating system operations, and format prompts for Large Language Model (LLM) inference \cite{schick2023toolformer}. On unified memory microarchitectures such as Apple Silicon (UMA @ 120 GB/s), agent orchestrators share physical LPDDR5X DRAM channels with GPU compute shaders running quantized neural inference (\texttt{llama.cpp}) \cite{reddi2020mlperf}. 
 
-Prior benchmarks predominantly evaluate LLM reasoning accuracy on cloud APIs \cite{reddi2020mlperf,llmperf2023,agentsysbench2024}, obscuring client-side runtime bottlenecks. Software runtime overhead (e.g., V8 garbage collection, context serialization, dynamic schema validation) directly impairs execution latency and increases the Energy-Delay Product ($\text{EDP} = E \times T$) \cite{horowitz1994low,gonzalez1996energy,barroso2007case,pereira2021ranking,georgiou2022energy,you2023zeus,alems2024,greenbench2024}. 
+Prior benchmarks predominantly evaluate LLM reasoning accuracy on cloud APIs \cite{reddi2020mlperf,llmperf2023}, obscuring client-side runtime bottlenecks. Software runtime overhead (e.g., V8 garbage collection, context serialization, dynamic schema validation) directly impairs execution latency and increases the Energy-Delay Product ($\text{EDP} = E \times T$) \cite{horowitz1994low,gonzalez1996energy,barroso2007case,pereira2021ranking,georgiou2022energy,you2023zeus}. 
 
 To bridge this gap, we developed \texttt{picoclaw-vs-openclaw-benchmark}, an open-source, extensible framework providing:
 \begin{enumerate}
@@ -118,13 +118,9 @@ The framework is designed around an extensible Object-Oriented Adapter pattern (
 \subsection{Software Functionalities}
 The analysis engine (\texttt{benchmark/analyze\_results.py}) computes formal computer systems metrics and publication-ready LaTeX tables:
 \begin{itemize}
-    \item \textbf{Energy-Delay Product (EDP):} Computes total energy $E = \int P(t) dt \approx P_{\text{active}} \times T_{\text{task}}$, yielding $\text{EDP} = E \times T_{\text{task}}$ ($\text{J}\cdot\text{s}$), alongside Joules per generated token.
-    \item \textbf{Garwood Exact Poisson Fiducial Limits:} Implements the exact Poisson distribution limits (Garwood, 1936) \cite{garwood1936fiducial}:
-    \begin{equation}
-        \lambda_L = \frac{1}{2}\chi^2_{2k}(\alpha/2), \quad \lambda_U = \frac{1}{2}\chi^2_{2(k+1)}(1 - \alpha/2)
-    \end{equation}
-    tested for equidispersion via Cameron-Trivedi regression \cite{cameron1990regression}.
-    \item \textbf{Non-Parametric Effect Sizes:} Computes the two-sided Mann-Whitney $U$ test \cite{mann1947test}, Cliff's Delta $d \in [-1, 1]$ \cite{cliff1993dominance}, and Vargha-Delaney $\hat{A}_{12} \in [0, 1]$ \cite{vargha2000critique}, establishing stochastic dominance without assuming normality.
+    \item \textbf{Energy-Delay Product (EDP):} Computes total energy $E = \int P(t) dt$ and active energy above quiescent baseline, yielding $\text{EDP} = E \times T_{\text{task}}$ ($\text{J}\cdot\text{s}$) \cite{gonzalez1996energy}, alongside Joules per generated token.
+    \item \textbf{Non-Parametric Central Tendency and Dispersion:} Reports median and Interquartile Range ($\text{IQR} = Q_3 - Q_1$) to prevent outlier distortion from GPU prefill and garbage collection events, supplemented by empirical mean $\pm$ standard deviation and 95th percentile ($p_{95}$) tail latency.
+    \item \textbf{Statistical Hypothesis Testing and Effect Sizes:} Conducts two-sided Mann-Whitney $U$ tests \cite{mann1947test} adjusted for multiple comparisons via the Holm-Bonferroni step-down procedure, Cliff's Delta $d \in [-1, 1]$ \cite{cliff1993dominance}, and Vargha-Delaney $\hat{A}_{12} \in [0, 1]$ \cite{vargha2000critique} with 95\% bootstrap confidence intervals (2,000 resamples), establishing stochastic dominance without assuming Gaussian distributions.
 \end{itemize}
 
 \subsection{Hardware Constraints, Permissions, and Third-Party Licenses}
@@ -136,39 +132,9 @@ All benchmarked software components are governed by permissive open-source licen
 \label{sec:examples}
 
 \subsection{Consolidated Experimental Matrix}
-Table~\ref{tab:ablation_results} summarizes empirical measurements from the definitive publication campaign on an Apple Mac mini M4 (10-Core CPU, 10-Core GPU, 24 GB UMA) serving Meta Llama-3.2-3B-Instruct (GGUF Q4\_K\_M, $\text{temp}=0.0$, $\text{seed}=42$).
+Table~\ref{tab:evaluation_ablation_m4} is dynamically generated from \texttt{raw\_trials.jsonl} via the statistical pipeline (\texttt{benchmark/analyze\_results.py}), reflecting all five evaluated configurations across workloads W1--W4. The table is directly synchronized when executing the full physical campaign of $n=30$ repetitions.
 
-\begin{table*}[t]
-\centering
-\small
-\begin{tabular}{llrrrrr}
-\toprule
-\textbf{Workload Tier} & \textbf{Runtime Configuration} & \textbf{Task Time (ms)} & \textbf{$T_{\text{orch}}$ (ms)} & \textbf{Peak RAM (MB)} & \textbf{Energy (J)} & \textbf{EDP (J$\cdot$s)} \\
-\midrule
-\textbf{W1 (Reflection)} & Neural Baseline (Direct) & $1518.7 \pm 162.1$ & $0.000$ & $0.0^*$ & $24.91$ & $38.169$ \\
-& PicoClaw (Go Native) & $1444.7 \pm 13.1$ & $0.386 \pm 0.02$ & \textbf{11.1} & \textbf{23.69} & \textbf{34.230} \\
-& OpenClaw (Node.js Minimal) & $1446.4 \pm 12.4$ & $0.318 \pm 0.03$ & $86.0$ & $23.72$ & $34.314$ \\
-& OpenClaw (Node.js Full) & $1444.7 \pm 7.1$ & $0.339 \pm 0.02$ & $86.0$ & $23.69$ & $34.230$ \\
-\midrule
-\textbf{W2 (3 Tools)} & Neural Baseline (Direct) & $2879.0 \pm 49.8$ & $0.000$ & $0.0^*$ & $47.22$ & $135.968$ \\
-& PicoClaw (Go Native) & $2979.1 \pm 172.1$ & $4.736 \pm 0.28$ & \textbf{12.4} & $48.86$ & $145.942$ \\
-& OpenClaw (Node.js Minimal) & $2899.1 \pm 55.3$ & $4.353 \pm 0.47$ & $88.1$ & $47.54$ & $137.877$ \\
-& OpenClaw (Node.js Full) & $2885.6 \pm 11.8$ & $4.472 \pm 0.27$ & $88.1$ & $47.32$ & $136.557$ \\
-\midrule
-\textbf{W3 (Vector RAG)} & Neural Baseline (Direct) & $5749.0 \pm 21.9$ & $0.000$ & $0.0^*$ & $94.28$ & $542.035$ \\
-& PicoClaw (Go Native) & $6423.1 \pm 870.0$ & \textbf{5.493 $\pm$ 0.84} & \textbf{12.2} & $105.34$ & $686.539$ \\
-& OpenClaw (Node.js Minimal) & $5998.2 \pm 10.6$ & $10.216 \pm 1.95$ & $91.5$ & $98.37$ & $590.048$ \\
-& OpenClaw (Node.js Full) & $6016.9 \pm 9.9$ & $9.841 \pm 0.24$ & $91.6$ & $98.68$ & $593.739$ \\
-\midrule
-\textbf{W4 (10-Turn ReAct)} & Neural Baseline (Direct) & $5783.4 \pm 95.4$ & $0.000$ & $0.0^*$ & $94.85$ & $548.655$ \\
-& PicoClaw (Go Native) & \textbf{11071.3 $\pm$ 98.7} & $22.468 \pm 0.55$ & \textbf{16.7} & \textbf{181.57} & \textbf{2010.352} \\
-& OpenClaw (Node.js Minimal) & $12175.3 \pm 76.4$ & $10.121 \pm 0.39$ & $92.6$ & $199.68$ & $2431.186$ \\
-& OpenClaw (Node.js Full) & $12233.1 \pm 71.7$ & $12.776 \pm 0.48$ & $93.7$ & $200.62$ & $2454.313$ \\
-\bottomrule
-\end{tabular}
-\caption{Empirical Performance Evaluation and Ablation Matrix on Apple Silicon M4 (Mean $\pm$ Std. Dev.). $^*$Note: 0.0 MB Peak RAM for Neural Baseline indicates zero orchestrator process footprint (direct HTTP pass-through), excluding the unified memory allocation (UMA) of the daemon \texttt{llama-server}.}
-\label{tab:ablation_results}
-\end{table*}
+\input{../results/publication_campaign/tables/table_journal_ablation.tex}
 
 \subsection{Analytical Finding: Cold Prefill Stall in W3}
 The sample standard deviation in PicoClaw W3 ($\pm 870.0\text{ ms}$) was audited in \texttt{raw\_trials.jsonl}. In Trial 1, Time-To-First-Token ($\text{TTFT}$) reached $1955.62\text{ ms}$ due to unprimed prompt ingestion on the Metal GPU. Once resident in the KV cache, Trials 2--5 converged to a warm $\text{TTFT}$ of $26.7\text{ ms}$ (total task latency ~ $6035\text{ ms}$). Non-parametric analysis confirms strict determinism: PicoClaw exhibits a Median of $6035.6\text{ ms}$ and an Interquartile Range ($\text{IQR}$) of only $7.3\text{ ms}$ (0.12\% relative dispersion), proving the variance is 100\% attributable to GPU prefill dynamics and 0\% to the Go runtime.

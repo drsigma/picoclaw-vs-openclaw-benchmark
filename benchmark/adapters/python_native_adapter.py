@@ -8,11 +8,11 @@ from __future__ import annotations
 
 import json
 import os
-import subprocess
 import sys
 from typing import Any
 
 from benchmark.adapters.base import AgentOrchestratorAdapter
+from benchmark.telemetry import run_subprocess_with_rusage
 
 
 class PythonNativeAdapter(AgentOrchestratorAdapter):
@@ -44,18 +44,22 @@ class PythonNativeAdapter(AgentOrchestratorAdapter):
 
     def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> dict[str, Any]:
         cmd = [self.py_bin, self.script_path, workload_id, "Warm", str(iterations)]
-        res = subprocess.run(
-            cmd,
-            cwd=self.repo_dir,
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        raw_output = res.stdout.strip()
+        stdout, stderr, rc, hw_stats = run_subprocess_with_rusage(cmd, cwd=self.repo_dir)
+        if rc != 0:
+            raise RuntimeError(f"PythonNative execution failed (code {rc}): {stderr}")
+        raw_output = stdout.strip()
         data = json.loads(raw_output)
         if isinstance(data, list) and len(data) > 0:
-            return data[0]
-        return data
+            res = data[0]
+        else:
+            res = data
+        res["proc_instructions"] = hw_stats.get("proc_instructions", 0)
+        res["proc_cycles"] = hw_stats.get("proc_cycles", 0)
+        res["proc_billed_energy"] = hw_stats.get("proc_billed_energy", 0)
+        res["proc_peak_phys_mb"] = hw_stats.get("proc_peak_phys_mb", 0.0)
+        if res.get("rss_peak_mb", 0.0) == 0.0 and hw_stats.get("proc_rss_mb", 0.0) > 0.0:
+            res["rss_peak_mb"] = hw_stats["proc_rss_mb"]
+        return res
 
     def teardown(self) -> None:
         pass

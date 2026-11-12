@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Live Physical Benchmark Campaign Runner
-Executes 100% real, physical trials against llama-server (Metal GPU on port 8080)
-and the native Go and Node.js agent orchestrator binaries.
-Records live timestamps, memory footprints, and raw outputs for reproducibility.
+[LEGACY / ARQUIVADO] - Live Physical Benchmark Campaign Runner
+AVISO: Este script pertence a campanhas experimentais exploratórias anteriores e
+foi substituído por benchmark/run_unified_benchmark.py na versão definitiva.
+WARNING: This script is an archived legacy runner replaced by benchmark/run_unified_benchmark.py.
 """
 import ctypes
 import json

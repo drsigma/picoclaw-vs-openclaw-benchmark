@@ -107,6 +107,60 @@ def get_process_rusage_v4(pid: int | None = None) -> dict[str, Any] | None:
         return None
 
 
+def run_subprocess_with_rusage(
+    cmd: list[str],
+    cwd: str | None = None,
+    env: dict[str, str] | None = None,
+    timeout: float | None = None,
+) -> tuple[str, str, int, dict[str, Any]]:
+    """
+    Executes a child process via subprocess.Popen and monitors hardware performance
+    counters via Darwin XNU libproc (RUSAGE_INFO_V4) or Linux psutil.
+    Returns (stdout, stderr, returncode, hardware_metrics_dict).
+    """
+    proc = subprocess.Popen(
+        cmd,
+        cwd=cwd,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    hw_stats = {
+        "proc_instructions": 0,
+        "proc_cycles": 0,
+        "proc_billed_energy": 0,
+        "proc_peak_phys_mb": 0.0,
+        "proc_rss_mb": 0.0,
+    }
+    stop_event = threading.Event()
+
+    def sampler():
+        while not stop_event.is_set():
+            if proc.poll() is not None:
+                break
+            st = get_process_rusage_v4(proc.pid)
+            if st:
+                for k in hw_stats:
+                    if k in st and st[k] > hw_stats[k]:
+                        hw_stats[k] = st[k]
+            time.sleep(0.002)
+
+    th = threading.Thread(target=sampler, daemon=True)
+    th.start()
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        stdout, stderr = proc.communicate()
+        raise
+    finally:
+        stop_event.set()
+        th.join(timeout=0.1)
+
+    return stdout, stderr, proc.returncode, hw_stats
+
+
 def parse_powermetrics_sample(sample_text: str, default_timestamp_ns: int | None = None) -> dict[str, Any]:
     """
     Parses a single Apple SMC powermetrics text block.

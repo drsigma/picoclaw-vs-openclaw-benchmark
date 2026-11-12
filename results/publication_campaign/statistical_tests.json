@@ -93,16 +93,32 @@
       "significant_alpha_0_05": false
     },
     "W4": {
-      "u_statistic": 1.0,
-      "raw_p_value": 0.6666666666666666,
-      "cliffs_delta": -0.5,
-      "vargha_delaney_a12": 0.25,
+      "u_statistic": 2.0,
+      "raw_p_value": 1.0,
+      "cliffs_delta": 0.0,
+      "vargha_delaney_a12": 0.5,
       "holm_bonferroni_p_value": 1.0,
       "significant_alpha_0_05": false
     }
   },
   "OpenClawAblation_Minimal_vs_Full": {
     "W1": {
+      "u_statistic": 1.0,
+      "raw_p_value": 0.6666666666666666,
+      "cliffs_delta": -0.5,
+      "vargha_delaney_a12": 0.25,
+      "holm_bonferroni_p_value": 1.0,
+      "significant_alpha_0_05": false
+    },
+    "W2": {
+      "u_statistic": 2.0,
+      "raw_p_value": 1.0,
+      "cliffs_delta": 0.0,
+      "vargha_delaney_a12": 0.5,
+      "holm_bonferroni_p_value": 1.0,
+      "significant_alpha_0_05": false
+    },
+    "W3": {
       "u_statistic": 3.0,
       "raw_p_value": 0.6666666666666666,
       "cliffs_delta": 0.5,
@@ -110,61 +126,45 @@
       "holm_bonferroni_p_value": 1.0,
       "significant_alpha_0_05": false
     },
-    "W2": {
-      "u_statistic": 2.0,
-      "raw_p_value": 1.0,
-      "cliffs_delta": 0.0,
-      "vargha_delaney_a12": 0.5,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
-    },
-    "W3": {
-      "u_statistic": 4.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": 1.0,
-      "vargha_delaney_a12": 1.0,
-      "holm_bonferroni_p_value": 1.0,
-      "significant_alpha_0_05": false
-    },
     "W4": {
-      "u_statistic": 1.0,
-      "raw_p_value": 0.6666666666666666,
-      "cliffs_delta": -0.5,
-      "vargha_delaney_a12": 0.25,
+      "u_statistic": 0.0,
+      "raw_p_value": 0.3333333333333333,
+      "cliffs_delta": -1.0,
+      "vargha_delaney_a12": 0.0,
       "holm_bonferroni_p_value": 1.0,
       "significant_alpha_0_05": false
     }
   },
   "NeuralBaseline_vs_PicoClaw": {
     "W1": {
-      "u_statistic": 2.0,
-      "raw_p_value": 1.0,
-      "cliffs_delta": 0.0,
-      "vargha_delaney_a12": 0.5,
+      "u_statistic": 4.0,
+      "raw_p_value": 0.22067136191984682,
+      "cliffs_delta": 1.0,
+      "vargha_delaney_a12": 1.0,
       "holm_bonferroni_p_value": 1.0,
       "significant_alpha_0_05": false
     },
     "W2": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
+      "u_statistic": 4.0,
+      "raw_p_value": 0.22067136191984682,
+      "cliffs_delta": 1.0,
+      "vargha_delaney_a12": 1.0,
       "holm_bonferroni_p_value": 1.0,
       "significant_alpha_0_05": false
     },
     "W3": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
+      "u_statistic": 4.0,
+      "raw_p_value": 0.22067136191984682,
+      "cliffs_delta": 1.0,
+      "vargha_delaney_a12": 1.0,
       "holm_bonferroni_p_value": 1.0,
       "significant_alpha_0_05": false
     },
     "W4": {
-      "u_statistic": 0.0,
-      "raw_p_value": 0.3333333333333333,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
+      "u_statistic": 4.0,
+      "raw_p_value": 0.22067136191984682,
+      "cliffs_delta": 1.0,
+      "vargha_delaney_a12": 1.0,
       "holm_bonferroni_p_value": 1.0,
       "significant_alpha_0_05": false
     }

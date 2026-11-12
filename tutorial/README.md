@@ -25,12 +25,12 @@ cd picoclaw-vs-openclaw-benchmark
 make setup
 
 # 3. Executar a Verificação Rápida Portátil (< 5 segundos, sem GPU, sem Sudo)
-make simulate-campaign
+make dry-run
 
-# 4. Executar os 13 testes unitários automatizados (pytest e linter)
+# 4. Executar os 24 testes unitários automatizados (pytest e linter ruff)
 make test
 
-# 5. Regenerar todas as 8 figuras científicas em 300 DPI
+# 5. Regenerar todas as 6 figuras científicas em 300 DPI
 make reproduce-figures
 ```
 
@@ -204,13 +204,13 @@ cd picoclaw-vs-openclaw-benchmark
 # 2. Setup isolated environment with a single command
 make setup
 
-# 3. Run Instant Portable Simulation (< 5 seconds, No GPU, No Sudo)
-make simulate-campaign
+# 3. Run Instant Portable Dry-Run Verification (< 5 seconds, No GPU, No Sudo)
+make dry-run
 
-# 4. Run the 13 automated unit tests (pytest and ruff linter)
+# 4. Run the 24 automated unit tests (pytest and ruff linter)
 make test
 
-# 5. Re-render all 8 publication figures in 300 DPI
+# 5. Re-render all 6 publication figures in 300 DPI
 make reproduce-figures
 ```
 

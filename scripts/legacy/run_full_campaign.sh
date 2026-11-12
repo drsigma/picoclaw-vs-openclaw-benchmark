@@ -1,18 +1,13 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Master Experimental Campaign Execution Script
-# Executes the entire end-to-end benchmark suite:
-# 1. Starts llama-server (Metal GPU on 127.0.0.1:8080)
-# 2. Generates deterministic workload datasets (Tiers W1-W4)
-# 3. Runs 480-observation Full Factorial Matrix (T1-T16)
-# 4. Executes High-Assertiveness Poisson Engine (>=90% to 100% assertiveness)
-# 5. Renders 7 Publication Figures (300 DPI)
-# 6. Compiles Academic System Testing Reports (.docx & .pdf)
-# 7. Computes SHA-256 Manifest
+# [LEGACY / ARQUIVADO] - Master Experimental Campaign Execution Script
+# AVISO: Script arquivado de campanhas anteriores.
+# Substituído pelo target 'make benchmark' e 'benchmark/run_unified_benchmark.py'.
+# WARNING: Archived legacy script. Use 'make benchmark' instead.
 # ==============================================================================
 set -euo pipefail
 
-REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 BENCH_DIR="$REPO_DIR/benchmark"
 DATA_DIR="$REPO_DIR/data"
 FIG_DIR="$REPO_DIR/figures"
