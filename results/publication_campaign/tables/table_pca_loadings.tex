@@ -1,0 +1,33 @@
+\begin{table*}[t]
+\centering
+\caption{Principal Component Analysis (PCA) Variance Decomposition and Factor Loadings across Telemetry Dimensions on Apple Silicon M4. Evaluates $N=480$ trials per regime across compiled and interpreted agent runtimes (\texttt{picoclaw}, \texttt{openclaw\_minimal}, \texttt{openclaw\_full}, \texttt{python\_native}). $\text{PC}_1$ captures prompt prefill scale and energy dissipation; $\text{PC}_2$ isolates host runtime microarchitectural footprint (RAM, CPU cycles, instructions); $\text{PC}_3$ isolates tool dispatch and I/O execution. Values in parentheses denote relative variable contribution (\%).}
+\label{tab:pca_loadings}
+\small
+\begin{tabular}{l c r r r r r r}
+\hline
+ & & \multicolumn{3}{c}{\textbf{Regime A: Cold Prefill}} & \multicolumn{3}{c}{\textbf{Regime B: Warm KV-Cache}} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-8}
+\textbf{Systems Dimension} & \textbf{Symbol} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} \\
+\hline
+Prompt Tokens & $N_{\text{prompt}}$ & +0.358 (12.8\%) & -0.222 ( 4.9\%) & -0.092 ( 0.8\%) & +0.343 (11.8\%) & -0.086 ( 0.7\%) & -0.092 ( 0.8\%) \\
+Neural Latency & $T_{\text{neural}}$ & +0.359 (12.9\%) & -0.218 ( 4.8\%) & -0.102 ( 1.0\%) & +0.346 (11.9\%) & -0.180 ( 3.2\%) & +0.021 ( 0.0\%) \\
+Task Latency & $T_{\text{task}}$ & +0.360 (12.9\%) & -0.218 ( 4.8\%) & -0.101 ( 1.0\%) & +0.346 (12.0\%) & -0.178 ( 3.2\%) & +0.022 ( 0.1\%) \\
+Net Energy & $E_{\text{net}}$ & +0.360 (12.9\%) & -0.218 ( 4.7\%) & -0.102 ( 1.0\%) & +0.343 (11.8\%) & -0.185 ( 3.4\%) & +0.028 ( 0.1\%) \\
+Energy-Delay Product & EDP & +0.345 (11.9\%) & -0.212 ( 4.5\%) & -0.146 ( 2.1\%) & +0.351 (12.3\%) & -0.168 ( 2.8\%) & +0.003 ( 0.0\%) \\
+Orchestrator Overhead & $T_{\text{orch}}$ & +0.264 ( 7.0\%) & +0.068 ( 0.5\%) & +0.587 (34.5\%) & +0.363 (13.2\%) & +0.008 ( 0.0\%) & +0.096 ( 0.9\%) \\
+HTTP Latency & $T_{\text{http}}$ & +0.262 ( 6.8\%) & +0.050 ( 0.2\%) & +0.552 (30.5\%) & +0.359 (12.9\%) & -0.004 ( 0.0\%) & -0.164 ( 2.7\%) \\
+Dispatch Latency & $T_{\text{disp}}$ & +0.094 ( 0.9\%) & +0.151 ( 2.3\%) & +0.425 (18.1\%) & +0.115 ( 1.3\%) & +0.043 ( 0.2\%) & +0.911 (83.0\%) \\
+Peak RSS & RSS & +0.182 ( 3.3\%) & +0.474 (22.5\%) & -0.216 ( 4.7\%) & +0.112 ( 1.3\%) & +0.515 (26.5\%) & -0.085 ( 0.7\%) \\
+Peak Phys RAM & PhysRAM & +0.134 ( 1.8\%) & +0.521 (27.1\%) & -0.072 ( 0.5\%) & +0.060 ( 0.4\%) & +0.527 (27.8\%) & +0.233 ( 5.4\%) \\
+Retired Instructions & Instr & +0.253 ( 6.4\%) & +0.416 (17.3\%) & -0.151 ( 2.3\%) & +0.195 ( 3.8\%) & +0.458 (21.0\%) & -0.077 ( 0.6\%) \\
+CPU Cycles & Cycles & +0.320 (10.2\%) & +0.253 ( 6.4\%) & -0.186 ( 3.5\%) & +0.272 ( 7.4\%) & +0.334 (11.1\%) & -0.236 ( 5.6\%) \\
+\hline
+\multicolumn{2}{l}{\textbf{Eigenvalue ($\lambda_k$)}} & 6.50 & 2.88 & 1.38 & 7.33 & 3.22 & 1.08 \\
+\multicolumn{2}{l}{\textbf{Explained Variance [\%]}} & 54.2\% & 24.0\% & 11.5\% & 61.1\% & 26.9\% & 9.0\% \\
+\multicolumn{2}{l}{\textbf{Cumulative Variance [\%]}} & 54.2\% & 78.2\% & 89.7\% & 61.1\% & 87.9\% & 96.9\% \\
+\hline
+\multicolumn{8}{l}{\footnotesize Principal component analysis via SVD on Z-score standardized observations ($N=480$ per regime across 4 agent runtimes).} \\
+\multicolumn{8}{l}{\footnotesize Values denote factor loadings (eigenvector entries) and relative contribution percentages: $\text{contrib}_j = v_{jk}^2 \times 100\%$.} \\
+\hline
+\end{tabular}
+\end{table*}

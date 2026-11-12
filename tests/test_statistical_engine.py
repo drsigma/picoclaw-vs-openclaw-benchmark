@@ -12,6 +12,7 @@ from scipy import stats
 from benchmark.analyze_results import (
     bootstrap_ci,
     cliffs_delta,
+    compute_pca_variance_decomposition,
     holm_bonferroni_adjust,
     vargha_delaney_a12,
 )
@@ -96,3 +97,27 @@ def test_mann_whitney_significance():
     assert p_val < 0.01
     d = cliffs_delta(sample_fast, sample_slow)
     assert d == -1.0
+
+
+def test_pca_variance_decomposition_orthogonality_and_sum():
+    """Verify that PCA variance decomposition explains 100% variance and maintains orthogonality."""
+    pca_res = compute_pca_variance_decomposition()
+    assert "regime_a_cold_prefill" in pca_res
+    assert "regime_b_warm_kv_cache" in pca_res
+
+    for regime_key in ["regime_a_cold_prefill", "regime_b_warm_kv_cache"]:
+        data = pca_res[regime_key]
+        assert data["n_trials"] == 480
+        assert data["n_variables"] == 12
+
+        # 1. Verify sum of explained variance is 100%
+        assert np.isclose(data["sum_explained_variance_pct"], 100.0, atol=1e-5)
+
+        # 2. Verify maximum orthogonality deviation is negligible (V.T @ V == I)
+        assert data["orthogonality_max_error"] < 1e-10
+
+        # 3. Verify that for each component, variable contributions sum to 100%
+        for comp in data["components"]:
+            contribs = list(comp["contributions_pct"].values())
+            assert np.isclose(sum(contribs), 100.0, atol=0.2)
+

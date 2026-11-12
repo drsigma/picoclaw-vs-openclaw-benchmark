@@ -383,6 +383,13 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
         output_dir=output_dir,
     )
 
+    # Compute Principal Component Analysis (PCA) variance decomposition across regimes
+    compute_pca_variance_decomposition(
+        regime_a_path=input_path,
+        regime_b_path=os.path.join(output_dir, "warm_cache_trials.jsonl"),
+        output_dir=output_dir,
+    )
+
     print(f"✅ Generated summary JSON: {stats_out}")
     print(f"✅ Generated statistical tests JSON: {tests_out}")
     print(f"✅ Generated CSV table: {csv_out}")
@@ -717,6 +724,213 @@ def compute_spearman_correlation_matrix(
     with open(tex_path, "w", encoding="utf-8") as f:
         f.write(latex)
     print(f"✅ Generated Spearman correlation LaTeX table: {tex_path}")
+    return full_output
+
+
+def compute_pca_variance_decomposition(
+    regime_a_path: str | None = None,
+    regime_b_path: str | None = None,
+    output_dir: str | None = None,
+) -> dict[str, Any]:
+    """
+    Computes Principal Component Analysis (PCA) variance decomposition and factor loadings
+    via Singular Value Decomposition (np.linalg.svd) on Z-score standardized observations
+    across evaluated agent runtimes (picoclaw, openclaw_minimal, openclaw_full, python_native).
+
+    Outputs results/publication_campaign/pca_variance_decomposition.json
+    and results/publication_campaign/tables/table_pca_loadings.tex.
+    """
+    if regime_a_path is None:
+        regime_a_path = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
+    if regime_b_path is None:
+        regime_b_path = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
+    if output_dir is None:
+        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+
+    target_agents = ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native"]
+    metric_defs = [
+        ("prompt_tokens", "Prompt Tokens", "$N_{\\text{prompt}}$"),
+        ("t_neural_ms", "Neural Latency", "$T_{\\text{neural}}$"),
+        ("t_task_ms", "Task Latency", "$T_{\\text{task}}$"),
+        ("energy_net_above_idle_j", "Net Energy", "$E_{\\text{net}}$"),
+        ("edp_js", "Energy-Delay Product", "EDP"),
+        ("t_orch_ms", "Orchestrator Overhead", "$T_{\\text{orch}}$"),
+        ("t_http_ms", "HTTP Latency", "$T_{\\text{http}}$"),
+        ("t_dispatch_ms", "Dispatch Latency", "$T_{\\text{disp}}$"),
+        ("rss_peak_mb", "Peak RSS", "RSS"),
+        ("proc_peak_phys_mb", "Peak Phys RAM", "PhysRAM"),
+        ("proc_instructions", "Retired Instructions", "Instr"),
+        ("proc_cycles", "CPU Cycles", "Cycles"),
+    ]
+    metrics = [m[0] for m in metric_defs]
+
+    def load_clean_trials(p: str) -> list[dict]:
+        if not os.path.exists(p):
+            return []
+        with open(p, "r", encoding="utf-8") as f:
+            records = []
+            for line in f:
+                if not line.strip():
+                    continue
+                d = json.loads(line)
+                if d.get("is_warmup", False):
+                    continue
+                if d.get("agent_key") not in target_agents:
+                    continue
+                if any(d.get(m) is None for m in metrics):
+                    continue
+                records.append(d)
+            return records
+
+    def run_pca_on_records(records: list[dict]):
+        if not records or len(records) < len(metrics):
+            return {}
+        n = len(records)
+        p = len(metrics)
+        X = np.array([[float(r[m]) for m in metrics] for r in records], dtype=np.float64)
+        mean = np.mean(X, axis=0)
+        std = np.std(X, axis=0, ddof=1)
+        std[std == 0.0] = 1.0
+        Z = (X - mean) / std
+
+        U, S, Vt = np.linalg.svd(Z, full_matrices=False)
+        V = Vt.T  # shape (p, p), columns are principal axes
+
+        # Standardize signs for deterministic, intuitive presentation:
+        # PC1: prompt_tokens positive
+        if V[0, 0] < 0:
+            V[:, 0] = -V[:, 0]
+        # PC2: proc_instructions positive
+        if V[10, 1] < 0:
+            V[:, 1] = -V[:, 1]
+        # PC3: t_dispatch_ms positive
+        if V[7, 2] < 0:
+            V[:, 2] = -V[:, 2]
+
+        lambdas = (S ** 2) / (n - 1)
+        total_var = float(np.sum(lambdas))
+        var_exp_ratio = lambdas / total_var
+        var_exp_pct = var_exp_ratio * 100.0
+        cum_var_pct = np.cumsum(var_exp_pct)
+
+        components = []
+        for k in range(p):
+            c_dict = {
+                "component": f"PC{k+1}",
+                "eigenvalue": round(float(lambdas[k]), 4),
+                "explained_variance_pct": round(float(var_exp_pct[k]), 2),
+                "cumulative_variance_pct": round(float(cum_var_pct[k]), 2),
+                "loadings": {},
+                "contributions_pct": {},
+            }
+            for j, m in enumerate(metrics):
+                load_val = float(V[j, k])
+                contrib_val = float((V[j, k] ** 2) * 100.0)
+                c_dict["loadings"][m] = round(load_val, 4)
+                c_dict["contributions_pct"][m] = round(contrib_val, 2)
+            components.append(c_dict)
+
+        return {
+            "n_trials": n,
+            "n_variables": p,
+            "eigenvalues": [round(float(x), 4) for x in lambdas],
+            "explained_variance_pct": [round(float(x), 2) for x in var_exp_pct],
+            "cumulative_variance_pct": [round(float(x), 2) for x in cum_var_pct],
+            "components": components,
+            "orthogonality_max_error": float(np.max(np.abs(np.dot(V.T, V) - np.eye(p)))),
+            "sum_explained_variance_pct": float(np.sum(var_exp_pct)),
+        }
+
+    recs_a = load_clean_trials(regime_a_path)
+    recs_b = load_clean_trials(regime_b_path)
+
+    pca_a = run_pca_on_records(recs_a)
+    pca_b = run_pca_on_records(recs_b)
+
+    out_json_path = os.path.join(output_dir, "pca_variance_decomposition.json")
+    full_output = {
+        "description": "Principal Component Analysis (PCA) Variance Decomposition on Apple Silicon M4 across 12 Telemetry Dimensions",
+        "method": "SVD on Z-score standardized observation matrix Z = (X - mu) / sigma",
+        "evaluated_agents": target_agents,
+        "metrics": metrics,
+        "regime_a_cold_prefill": pca_a,
+        "regime_b_warm_kv_cache": pca_b,
+    }
+    with open(out_json_path, "w", encoding="utf-8") as f:
+        json.dump(full_output, f, indent=2)
+    print(f"✅ Generated PCA variance decomposition JSON: {out_json_path}")
+
+    # Generate LaTeX Table
+    tex_path = os.path.join(output_dir, "tables", "table_pca_loadings.tex")
+    latex = r"""\begin{table*}[t]
+\centering
+\caption{Principal Component Analysis (PCA) Variance Decomposition and Factor Loadings across Telemetry Dimensions on Apple Silicon M4. Evaluates $N=480$ trials per regime across compiled and interpreted agent runtimes (\texttt{picoclaw}, \texttt{openclaw\_minimal}, \texttt{openclaw\_full}, \texttt{python\_native}). $\text{PC}_1$ captures prompt prefill scale and energy dissipation; $\text{PC}_2$ isolates host runtime microarchitectural footprint (RAM, CPU cycles, instructions); $\text{PC}_3$ isolates tool dispatch and I/O execution. Values in parentheses denote relative variable contribution (\%).}
+\label{tab:pca_loadings}
+\small
+\begin{tabular}{l c r r r r r r}
+\hline
+ & & \multicolumn{3}{c}{\textbf{Regime A: Cold Prefill}} & \multicolumn{3}{c}{\textbf{Regime B: Warm KV-Cache}} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-8}
+\textbf{Systems Dimension} & \textbf{Symbol} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} \\
+\hline
+"""
+
+    def get_comp(pca_res, idx):
+        if not pca_res or "components" not in pca_res or len(pca_res["components"]) <= idx:
+            return None
+        return pca_res["components"][idx]
+
+    c1_a = get_comp(pca_a, 0)
+    c2_a = get_comp(pca_a, 1)
+    c3_a = get_comp(pca_a, 2)
+    c1_b = get_comp(pca_b, 0)
+    c2_b = get_comp(pca_b, 1)
+    c3_b = get_comp(pca_b, 2)
+
+    def fmt_cell(comp, m):
+        if not comp:
+            return "N/A"
+        loading_val = comp["loadings"].get(m, 0.0)
+        c = comp["contributions_pct"].get(m, 0.0)
+        return f"{loading_val:+.3f} ({c:4.1f}\\%)"
+
+    for m, name, sym in metric_defs:
+        row_str = f"{name} & {sym} & "
+        row_str += f"{fmt_cell(c1_a, m)} & {fmt_cell(c2_a, m)} & {fmt_cell(c3_a, m)} & "
+        row_str += f"{fmt_cell(c1_b, m)} & {fmt_cell(c2_b, m)} & {fmt_cell(c3_b, m)} \\\\\n"
+        latex += row_str
+
+    latex += r"""\hline
+"""
+    # Summary rows
+    def fmt_stat(pca_res, key, fmt_spec):
+        if not pca_res or key not in pca_res:
+            return ["N/A", "N/A", "N/A"]
+        vals = pca_res[key][:3]
+        return [fmt_spec.format(v) for v in vals]
+
+    ev_a = fmt_stat(pca_a, "eigenvalues", "{:.2f}")
+    ev_b = fmt_stat(pca_b, "eigenvalues", "{:.2f}")
+    latex += f"\\multicolumn{{2}}{{l}}{{\\textbf{{Eigenvalue ($\\lambda_k$)}}}} & {ev_a[0]} & {ev_a[1]} & {ev_a[2]} & {ev_b[0]} & {ev_b[1]} & {ev_b[2]} \\\\\n"
+
+    var_a = fmt_stat(pca_a, "explained_variance_pct", "{:.1f}\\%")
+    var_b = fmt_stat(pca_b, "explained_variance_pct", "{:.1f}\\%")
+    latex += f"\\multicolumn{{2}}{{l}}{{\\textbf{{Explained Variance [\\%]}}}} & {var_a[0]} & {var_a[1]} & {var_a[2]} & {var_b[0]} & {var_b[1]} & {var_b[2]} \\\\\n"
+
+    cum_a = fmt_stat(pca_a, "cumulative_variance_pct", "{:.1f}\\%")
+    cum_b = fmt_stat(pca_b, "cumulative_variance_pct", "{:.1f}\\%")
+    latex += f"\\multicolumn{{2}}{{l}}{{\\textbf{{Cumulative Variance [\\%]}}}} & {cum_a[0]} & {cum_a[1]} & {cum_a[2]} & {cum_b[0]} & {cum_b[1]} & {cum_b[2]} \\\\\n"
+
+    latex += r"""\hline
+\multicolumn{8}{l}{\footnotesize Principal component analysis via SVD on Z-score standardized observations ($N=480$ per regime across 4 agent runtimes).} \\
+\multicolumn{8}{l}{\footnotesize Values denote factor loadings (eigenvector entries) and relative contribution percentages: $\text{contrib}_j = v_{jk}^2 \times 100\%$.} \\
+\hline
+\end{tabular}
+\end{table*}
+"""
+    with open(tex_path, "w", encoding="utf-8") as f:
+        f.write(latex)
+    print(f"✅ Generated PCA loadings LaTeX table: {tex_path}")
     return full_output
 
 

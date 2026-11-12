@@ -2,8 +2,8 @@
 PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA - REVISAO 6
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-12T20:46:15.554499+00:00
-Git HEAD: ae66971a69d74e4236e0845084c97f5a6ca671c7
+Data de Geracao (UTC): 2026-11-12T20:56:37.644633+00:00
+Git HEAD: 4c49e1d0a074db784b997cf32bae1815674c7430
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
@@ -20,7 +20,7 @@ SECAO 1: MANUSCRITO CIENTIFICO, REFERENCIAS, CITACAO, GOVERNANCA E LICENCAS
 
 ================================================================================
 FILE: paper/softwarex_manuscript.tex
-SHA-256: 0dec9a261802a235a4a758aac72a5c6d2545971b35e50e50973bfca7182df2eb
+SHA-256: a0ba160752aaf3295a243276ffc28f68e9781b42a95264a5358d9de99e4af610
 ================================================================================
 \documentclass[preprint,12pt,3p]{elsarticle}
 
@@ -279,6 +279,19 @@ To systematically evaluate the coupling between execution dimensions, Table~\ref
 
 In Regime A (Cold Prefill), prompt attention computation strictly dominates global latency ($T_{\text{task}}$) and active net energy ($E_{\text{net}}$), yielding near-perfect rank alignment with prompt token length ($\rho = +0.948$, $p < 10^{-5}$ for $T_{\text{task}}$ vs. $N_{\text{prompt}}$; $\rho = +0.930$, $p < 10^{-5}$ for $T_{\text{task}}$ vs. $E_{\text{net}}$). In contrast, in Regime B (Warm KV-Cache Reuse), KV-cache amortization significantly decouples task latency from prompt tokens ($\rho = +0.586$, $p < 10^{-5}$), unmasking runtime execution dynamics: retired CPU instructions strongly govern orchestrator delay ($\rho = +0.824$, $p < 10^{-5}$), while client-side dispatch latency accounts for high rank agreement ($\rho = +0.845$, $p < 10^{-5}$). Furthermore, orchestrator overhead share ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) spans $0.37\%$ to $4.65\%$ across workloads under warm cache, with measurement noise bounded within sub-millisecond precision via unprivileged Darwin kernel \texttt{libproc} telemetry.
 
+\subsection{Principal Component Analysis (PCA) Variance Decomposition}
+To orthogonalize performance metrics and isolate the latent dimensions governing agent orchestration, Table~\ref{tab:pca_loadings} presents the Principal Component Analysis (PCA) variance decomposition across 12 systems telemetry dimensions for both execution regimes ($N=480$ trials per regime across \texttt{picoclaw}, \texttt{openclaw\_minimal}, \texttt{openclaw\_full}, and \texttt{python\_native}).
+
+\input{../results/publication_campaign/tables/table_pca_loadings.tex}
+
+Across both regimes, the first three principal components ($\text{PC}_1$, $\text{PC}_2$, and $\text{PC}_3$) account for more than $90\%$ of total system variance ($89.7\%$ in Regime A and $96.9\%$ in Regime B):
+\begin{itemize}
+    \item \textbf{$\text{PC}_1$ (Neural Attention Prefill and Energy Dissipation):} Explains $54.2\%$ of variance in Regime A and $61.1\%$ in Regime B, grouping prompt token length ($N_{\text{prompt}}$), inference latency ($T_{\text{neural}}$), task duration ($T_{\text{task}}$), net energy ($E_{\text{net}}$), and EDP with nearly identical positive factor loadings ($+0.34$ to $+0.36$, each contributing $11.8\%$ to $12.9\%$). This axis strictly quantifies the dominant cost of neural matrix evaluation on the Metal GPU.
+    \item \textbf{$\text{PC}_2$ (Host Runtime Microarchitectural Footprint):} Explains $24.0\%$ of variance in Regime A and $26.9\%$ in Regime B, isolating the client-side execution cost. The dominant contributors are physical DRAM resident footprint ($\text{PhysRAM}$, $27.1\%\text{--}27.8\%$), virtual memory ($\text{RSS}$, $22.5\%\text{--}26.5\%$), retired CPU instructions ($\text{Instr}$, $17.3\%\text{--}21.0\%$), and CPU cycles ($6.4\%\text{--}11.1\%$), all showing strong positive loadings ($+0.25$ to $+0.53$) while neural latency and energy contribute negligible or negative loadings. This demonstrates that host memory and instruction retirement decouple orthogonally from GPU prompt prefill.
+    \item \textbf{$\text{PC}_3$ (Tool Dispatch and I/O Serialization):} Explains $11.5\%$ of variance in Regime A and $9.0\%$ in Regime B. In Regime B, where prompt prefill latency is neutralized by deterministic KV-cache retention, tool dispatch latency ($T_{\text{disp}}$) accounts for $83.0\%$ of $\text{PC}_3$ with a loading of $+0.911$, isolating the compute and serialization efficiency of client-side tool execution routines (e.g., in-process cosine similarity in W3).
+\end{itemize}
+Crucially, comparing factor loadings between regimes illustrates how KV-cache amortization alters systems dynamics: under cold prefill (Regime A), orchestrator overhead ($T_{\text{orch}}$) and HTTP round-trip ($T_{\text{http}}$) project onto $\text{PC}_3$ ($34.5\%$ and $30.5\%$ contribution) because they are masked by GPU prefill stalls; under warm KV-cache (Regime B), HTTP and multi-turn orchestration scale directly with dialogue turn count, shifting into $\text{PC}_1$ ($13.2\%$ and $12.9\%$), while pure tool computation ($T_{\text{disp}}$) becomes the sole discriminative factor in $\text{PC}_3$.
+
 \subsection{Key Findings, Hardware Microarchitecture, and Effect Sizes}
 Across all 600 physical trials on the Apple Silicon M4 testbed, three core empirical conclusions emerge:
 \begin{enumerate}
@@ -303,6 +316,15 @@ make benchmark
 \section{Impact}
 \label{sec:impact}
 This benchmark suite provides the research and software engineering communities with a reproducible, modular testbed to isolate and quantify AI agent orchestration runtime overhead. By decoupling orchestrator dispatch and schema validation delays from neural model latency, the suite enables systems researchers to systematically evaluate language runtime trade-offs (compiled Go, JIT Node.js, and CPython) under realistic tool-use loops \cite{yao2023react,schick2023toolformer,lewis2020retrieval}. The framework's modular adapter architecture facilitates adding new agent runtimes or language environments (e.g., Rust, Zig, or Julia) with fewer than 40 lines of code. Furthermore, the dual-tier telemetry approach---combining unprivileged kernel performance counters with non-intrusive Apple SMC and Linux RAPL electrical shunt sampling---provides an extensible blueprint for benchmarking edge AI systems under strict power and thermal budgets \cite{georgiou2022energy,you2023zeus,barroso2007case}.
+
+\subsection{Empirical Architectural Decision Rules}
+Based on our multi-regime empirical benchmarks across compiled, JIT-interpreted, and bytecode runtimes on Apple Silicon Unified Memory Architecture (UMA), we synthesize four objective architectural decision rules for edge agent deployment:
+\begin{enumerate}
+    \item \textbf{Ephemeral CLI / Cold-Start Invocation:} For short-lived CLI utilities, serverless functions, or bursty edge triggers, native compiled binaries (Go Mach-O) provide a $23.4\times$ reduction in startup latency ($9.63\text{ ms}$ vs. $225.55\text{ ms}$ for Node.js V8), eliminating runtime interpreter bootstrap penalties.
+    \item \textbf{Memory-Constrained Unified Memory (UMA) / Multi-Agent Edge:} On embedded devices and shared UMA SoCs where CPU and GPU contend for the same physical memory bus, Go native reduces maximum resident physical footprint by $2.8\times$ to $8.9\times$ ($4.2\text{--}45.5\text{ MB}$ Peak Phys vs. $37.5\text{--}67.2\text{ MB}$ for Node.js V8). This safeguards vital DRAM capacity for model weights and KV-cache page tables.
+    \item \textbf{Persistent Daemons with Warm KV-Cache and Compact Schemas ($\le 15$ tools):} When running persistent services with verified prefix caching ($\text{Cache Hit} \ge 97.6\%$) and lean schemas, compiled Go, Python, and Node.js differ by less than $-1.5\%$ to $+5.8\%$ from the direct neural baseline ($\Phi_{\text{orch}} \in [0.37\%, 4.65\%]$). Under these conditions, runtime language selection can be guided primarily by ecosystem maturity and developer velocity rather than orchestration latency.
+    \item \textbf{Large Enterprise Tool Catalogs ($\ge 50$ tools):} When scaling to broad enterprise tool sets, the primary performance bottleneck shifts entirely to super-linear attention prefill on the GPU ($\alpha \approx 1.23$) rather than host orchestration. Mitigating this bottleneck strictly requires deterministic KV-cache slot isolation (yielding up to $21.6\times$ latency reduction) or dynamic tool retrieval (Tool RAG) to prune inactive schemas prior to model invocation.
+\end{enumerate}
 
 \section{Conclusions}
 \label{sec:conclusions}
@@ -763,7 +785,7 @@ jobs:
 
 ================================================================================
 FILE: README.md
-SHA-256: ad8cd3cb47cf35b3e3d7dc2f081f356b354f9231f5fabba8b42c81b9badec600
+SHA-256: 6c7bf8cdc5c60cdf3560b5e69dc6c7583bb2cb26f52424ab0ae87dafd8d96900
 ================================================================================
 # A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon
 
@@ -913,6 +935,20 @@ $^*$*Nota sobre o Baseline Neural / Note on Neural Baseline:* O valor de **`0,0 
   8. **Operational Dual-Regime Trade-offs (Regime A Cold Prefill vs. Regime B Warm Cache):** The testbed characterizes two full campaigns ($n=30$ each, 660 physical trials per regime):
      * *Regime A (`cache_prompt=false`):* Cold attention prefill on the Metal GPU accounts for $>75\%$ of total execution duration and saturates package power at $\approx 16\text{ W}$, producing near-parity in wall-clock duration between host runtimes.
      * *Regime B (`cache_prompt=true`):* When prompt prefill is amortized via block-isolated KV-cache retention in `llama-server` (verified `Cache Hit` rates of **$99.9\%$ to $100.0\%$** across W1–W3 and **$97.6\%$ to $99.3\%$** in W4), overall task duration drops dramatically: in W2, runtime plunges from $5556.1\text{ ms}$ to sub-second levels (**$725.9\text{ ms}$** for PicoClaw, **$752.3\text{ ms}$** for OpenClaw Minimal, and **$913.5\text{ ms}$** for OpenClaw Full — a **$21.6\times$** latency reduction for the 54-tool catalog under block-isolated caching). Under amortized prefill, orchestrator overhead share ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) spans **$0.37\%$ to $4.65\%$** depending on I/O and vector intensity, while end-to-end latency for Go, Python, and Node-Minimal remains within $\pm 1.7\%$ to $4.2\%$ of the direct neural baseline.
+
+### 📐 Regras Práticas de Decisão Arquitetural / Empirical Architectural Decision Rules
+
+* **🇧🇷 PT-BR:**
+  1. **Disparo Efêmero em CLI / Cold-Start:** Para utilitários de linha de comando efêmeros ou gatilhos curtos em edge, binários nativos compilados (Go Mach-O) reduzem a latência de inicialização em **$23{,}4\times$** ($9{,}63\text{ ms}$ vs. $225{,}55\text{ ms}$ no Node.js V8), eliminando o bootstrap do interpretador.
+  2. **Borda com Memória Compartilhada Limitada (UMA / Multi-Agente):** Em nós embarcados e SoCs de memória unificada onde GPU e CPU compartilham o mesmo barramento de DRAM, Go nativo reduz a pegada física máxima de memória em **$2{,}8\times\text{ a }8{,}9\times$** ($4{,}2\text{--}45{,}5\text{ MB}$ Peak Phys vs. $37{,}5\text{--}67{,}2\text{ MB}$ no Node.js V8), preservando DRAM crítica para as tabelas de páginas do KV-Cache e pesos do modelo.
+  3. **Daemons Persistentes com Cache Quente e Esquemas Compactos ($\le 15$ ferramentas):** Com retenção de prefixo de KV-cache ativa ($\text{Cache Hit} \ge 97{,}6\%$), Go, Python e Node.js diferem em menos de $-1{,}5\%$ a $+5{,}8\%$ do baseline neural direto ($\Phi_{\text{orch}} \in [0{,}37\%, 4{,}65\%]$). Sob esse regime, a escolha da linguagem pode priorizar maturidade de ecossistema e velocidade de desenvolvimento.
+  4. **Grandes Catálogos Corporativos ($\ge 50$ ferramentas):** O gargalo dominante decorre do pré-processamento de atenção super-linear na GPU ($\alpha \approx 1{,}23$) e não da linguagem do host. A mitigação mandatória exige isolamento determinístico de slot de KV-cache (redução de até $21{,}6\times$ no tempo de execução) ou recuperação dinâmica de ferramentas (Tool RAG) para expor apenas ferramentas relevantes ao prompt.
+
+* **🇺🇸 EN-US:**
+  1. **Ephemeral CLI / Cold-Start Invocation:** For short-lived CLI utilities, serverless functions, or bursty edge triggers, native compiled binaries (Go Mach-O) reduce startup latency by **$23.4\times$** ($9.63\text{ ms}$ vs. $225.55\text{ ms}$ in Node.js V8), eliminating runtime interpreter bootstrap overhead.
+  2. **Memory-Constrained Unified Memory (UMA) / Multi-Agent Edge:** On embedded edge nodes and unified memory SoCs where CPU and GPU share physical DRAM, Go native reduces peak physical resident footprint by **$2.8\times\text{ to }8.9\times$** ($4.2\text{--}45.5\text{ MB}$ Peak Phys vs. $37.5\text{--}67.2\text{ MB}$ in Node.js V8), safeguarding DRAM capacity for KV-cache page tables and model weights.
+  3. **Persistent Daemons with Warm KV-Cache and Compact Schemas ($\le 15$ tools):** When running persistent services with verified prefix caching ($\text{Cache Hit} \ge 97.6\%$) and lean schemas, compiled Go, Python, and Node.js differ by less than $-1.5\%$ to $+5.8\%$ from the direct neural baseline ($\Phi_{\text{orch}} \in [0.37\%, 4.65\%]$). Under these conditions, runtime selection can be driven primarily by library ecosystem maturity and developer velocity.
+  4. **Large Enterprise Tool Catalogs ($\ge 50$ tools):** The primary performance bottleneck shifts entirely to super-linear attention prefill on the GPU ($\alpha \approx 1.23$) rather than host orchestration. Mitigating this bottleneck strictly requires deterministic KV-cache slot isolation (yielding up to $21.6\times$ latency reduction) or dynamic tool retrieval (Tool RAG) to prune schemas prior to model invocation.
 
 ---
 
@@ -1793,6 +1829,46 @@ $T_{\text{disp}}$ vs $T_{\text{orch}}$ (Serialization Share) & +0.712$^{***}$ & 
 
 
 ================================================================================
+FILE: results/publication_campaign/tables/table_pca_loadings.tex
+SHA-256: 4aade71f6411e38005027a6ea50451d57cb4f6b8653b69073f6274d3c57dd2e4
+================================================================================
+\begin{table*}[t]
+\centering
+\caption{Principal Component Analysis (PCA) Variance Decomposition and Factor Loadings across Telemetry Dimensions on Apple Silicon M4. Evaluates $N=480$ trials per regime across compiled and interpreted agent runtimes (\texttt{picoclaw}, \texttt{openclaw\_minimal}, \texttt{openclaw\_full}, \texttt{python\_native}). $\text{PC}_1$ captures prompt prefill scale and energy dissipation; $\text{PC}_2$ isolates host runtime microarchitectural footprint (RAM, CPU cycles, instructions); $\text{PC}_3$ isolates tool dispatch and I/O execution. Values in parentheses denote relative variable contribution (\%).}
+\label{tab:pca_loadings}
+\small
+\begin{tabular}{l c r r r r r r}
+\hline
+ & & \multicolumn{3}{c}{\textbf{Regime A: Cold Prefill}} & \multicolumn{3}{c}{\textbf{Regime B: Warm KV-Cache}} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-8}
+\textbf{Systems Dimension} & \textbf{Symbol} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} \\
+\hline
+Prompt Tokens & $N_{\text{prompt}}$ & +0.358 (12.8\%) & -0.222 ( 4.9\%) & -0.092 ( 0.8\%) & +0.343 (11.8\%) & -0.086 ( 0.7\%) & -0.092 ( 0.8\%) \\
+Neural Latency & $T_{\text{neural}}$ & +0.359 (12.9\%) & -0.218 ( 4.8\%) & -0.102 ( 1.0\%) & +0.346 (11.9\%) & -0.180 ( 3.2\%) & +0.021 ( 0.0\%) \\
+Task Latency & $T_{\text{task}}$ & +0.360 (12.9\%) & -0.218 ( 4.8\%) & -0.101 ( 1.0\%) & +0.346 (12.0\%) & -0.178 ( 3.2\%) & +0.022 ( 0.1\%) \\
+Net Energy & $E_{\text{net}}$ & +0.360 (12.9\%) & -0.218 ( 4.7\%) & -0.102 ( 1.0\%) & +0.343 (11.8\%) & -0.185 ( 3.4\%) & +0.028 ( 0.1\%) \\
+Energy-Delay Product & EDP & +0.345 (11.9\%) & -0.212 ( 4.5\%) & -0.146 ( 2.1\%) & +0.351 (12.3\%) & -0.168 ( 2.8\%) & +0.003 ( 0.0\%) \\
+Orchestrator Overhead & $T_{\text{orch}}$ & +0.264 ( 7.0\%) & +0.068 ( 0.5\%) & +0.587 (34.5\%) & +0.363 (13.2\%) & +0.008 ( 0.0\%) & +0.096 ( 0.9\%) \\
+HTTP Latency & $T_{\text{http}}$ & +0.262 ( 6.8\%) & +0.050 ( 0.2\%) & +0.552 (30.5\%) & +0.359 (12.9\%) & -0.004 ( 0.0\%) & -0.164 ( 2.7\%) \\
+Dispatch Latency & $T_{\text{disp}}$ & +0.094 ( 0.9\%) & +0.151 ( 2.3\%) & +0.425 (18.1\%) & +0.115 ( 1.3\%) & +0.043 ( 0.2\%) & +0.911 (83.0\%) \\
+Peak RSS & RSS & +0.182 ( 3.3\%) & +0.474 (22.5\%) & -0.216 ( 4.7\%) & +0.112 ( 1.3\%) & +0.515 (26.5\%) & -0.085 ( 0.7\%) \\
+Peak Phys RAM & PhysRAM & +0.134 ( 1.8\%) & +0.521 (27.1\%) & -0.072 ( 0.5\%) & +0.060 ( 0.4\%) & +0.527 (27.8\%) & +0.233 ( 5.4\%) \\
+Retired Instructions & Instr & +0.253 ( 6.4\%) & +0.416 (17.3\%) & -0.151 ( 2.3\%) & +0.195 ( 3.8\%) & +0.458 (21.0\%) & -0.077 ( 0.6\%) \\
+CPU Cycles & Cycles & +0.320 (10.2\%) & +0.253 ( 6.4\%) & -0.186 ( 3.5\%) & +0.272 ( 7.4\%) & +0.334 (11.1\%) & -0.236 ( 5.6\%) \\
+\hline
+\multicolumn{2}{l}{\textbf{Eigenvalue ($\lambda_k$)}} & 6.50 & 2.88 & 1.38 & 7.33 & 3.22 & 1.08 \\
+\multicolumn{2}{l}{\textbf{Explained Variance [\%]}} & 54.2\% & 24.0\% & 11.5\% & 61.1\% & 26.9\% & 9.0\% \\
+\multicolumn{2}{l}{\textbf{Cumulative Variance [\%]}} & 54.2\% & 78.2\% & 89.7\% & 61.1\% & 87.9\% & 96.9\% \\
+\hline
+\multicolumn{8}{l}{\footnotesize Principal component analysis via SVD on Z-score standardized observations ($N=480$ per regime across 4 agent runtimes).} \\
+\multicolumn{8}{l}{\footnotesize Values denote factor loadings (eigenvector entries) and relative contribution percentages: $\text{contrib}_j = v_{jk}^2 \times 100\%$.} \\
+\hline
+\end{tabular}
+\end{table*}
+
+
+
+================================================================================
 FILE: results/publication_campaign/tables/macros_empirical.tex
 SHA-256: cf20e8fd93fa96cb96c5ddd647bf14f1fb089cf2b6f2ce8ab86bdccb4a5bdca7
 ================================================================================
@@ -1883,7 +1959,7 @@ SHA-256: cf20e8fd93fa96cb96c5ddd647bf14f1fb089cf2b6f2ce8ab86bdccb4a5bdca7
 
 ================================================================================
 FILE: results/publication_campaign/campaign_metadata.json
-SHA-256: ff71634b5057f09f5e9374995929aa4edc768630180a406dd27125634bdb04aa
+SHA-256: 4a7facfba44753997863975c2a802eddcd4c5ce7ebd51f7f291e52375e454783
 ================================================================================
 {
   "model": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
@@ -1928,7 +2004,7 @@ SHA-256: ff71634b5057f09f5e9374995929aa4edc768630180a406dd27125634bdb04aa
     "reason": "Corrected SSE streaming parser for prompt_tokens under tool_calls responses to ensure full prompt length (>2290 tokens) was captured without dropping to 1 token.",
     "trials_resampled": 150,
     "warmups_resampled": 15,
-    "backup_preserved": "results/exploratory_campaigns/raw_trials_pre_w2_fix.jsonl"
+    "auditability": "Auditably distinguished within raw_trials.jsonl via ISO-8601 timestamps: W1/W3/W4 baseline (2026-11-12T03:38:57Z to 05:15:00Z, 495 trials) vs W2 resampling (2026-11-12T14:20:00Z to 14:34:54Z, 165 trials)."
   },
   "total_campaign_net_energy_joules": 289201.34,
   "hardware": {
@@ -3538,6 +3614,952 @@ SHA-256: a975a2ccf978635101c847a08d6d8cbf40ac050350b7db550bab5c2733e25aa2
 
 
 ================================================================================
+FILE: results/publication_campaign/pca_variance_decomposition.json
+SHA-256: 4bb4206339d506d5a9644b5dd551cb4c85ce1d0689d4edefa2b97a6d27e01b11
+================================================================================
+{
+  "description": "Principal Component Analysis (PCA) Variance Decomposition on Apple Silicon M4 across 12 Telemetry Dimensions",
+  "method": "SVD on Z-score standardized observation matrix Z = (X - mu) / sigma",
+  "evaluated_agents": [
+    "picoclaw",
+    "openclaw_minimal",
+    "openclaw_full",
+    "python_native"
+  ],
+  "metrics": [
+    "prompt_tokens",
+    "t_neural_ms",
+    "t_task_ms",
+    "energy_net_above_idle_j",
+    "edp_js",
+    "t_orch_ms",
+    "t_http_ms",
+    "t_dispatch_ms",
+    "rss_peak_mb",
+    "proc_peak_phys_mb",
+    "proc_instructions",
+    "proc_cycles"
+  ],
+  "regime_a_cold_prefill": {
+    "n_trials": 480,
+    "n_variables": 12,
+    "eigenvalues": [
+      6.5045,
+      2.8787,
+      1.3791,
+      0.8951,
+      0.236,
+      0.0618,
+      0.0312,
+      0.0134,
+      0.0002,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "explained_variance_pct": [
+      54.2,
+      23.99,
+      11.49,
+      7.46,
+      1.97,
+      0.51,
+      0.26,
+      0.11,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "cumulative_variance_pct": [
+      54.2,
+      78.19,
+      89.69,
+      97.15,
+      99.11,
+      99.63,
+      99.89,
+      100.0,
+      100.0,
+      100.0,
+      100.0,
+      100.0
+    ],
+    "components": [
+      {
+        "component": "PC1",
+        "eigenvalue": 6.5045,
+        "explained_variance_pct": 54.2,
+        "cumulative_variance_pct": 54.2,
+        "loadings": {
+          "prompt_tokens": 0.3584,
+          "t_neural_ms": 0.3595,
+          "t_task_ms": 0.3597,
+          "energy_net_above_idle_j": 0.3597,
+          "edp_js": 0.345,
+          "t_orch_ms": 0.2641,
+          "t_http_ms": 0.2616,
+          "t_dispatch_ms": 0.0937,
+          "rss_peak_mb": 0.182,
+          "proc_peak_phys_mb": 0.1344,
+          "proc_instructions": 0.2529,
+          "proc_cycles": 0.3201
+        },
+        "contributions_pct": {
+          "prompt_tokens": 12.84,
+          "t_neural_ms": 12.92,
+          "t_task_ms": 12.94,
+          "energy_net_above_idle_j": 12.94,
+          "edp_js": 11.9,
+          "t_orch_ms": 6.97,
+          "t_http_ms": 6.84,
+          "t_dispatch_ms": 0.88,
+          "rss_peak_mb": 3.31,
+          "proc_peak_phys_mb": 1.81,
+          "proc_instructions": 6.39,
+          "proc_cycles": 10.25
+        }
+      },
+      {
+        "component": "PC2",
+        "eigenvalue": 2.8787,
+        "explained_variance_pct": 23.99,
+        "cumulative_variance_pct": 78.19,
+        "loadings": {
+          "prompt_tokens": -0.2217,
+          "t_neural_ms": -0.2184,
+          "t_task_ms": -0.2181,
+          "energy_net_above_idle_j": -0.2176,
+          "edp_js": -0.2122,
+          "t_orch_ms": 0.0682,
+          "t_http_ms": 0.0504,
+          "t_dispatch_ms": 0.1508,
+          "rss_peak_mb": 0.4744,
+          "proc_peak_phys_mb": 0.5206,
+          "proc_instructions": 0.416,
+          "proc_cycles": 0.2532
+        },
+        "contributions_pct": {
+          "prompt_tokens": 4.91,
+          "t_neural_ms": 4.77,
+          "t_task_ms": 4.76,
+          "energy_net_above_idle_j": 4.74,
+          "edp_js": 4.5,
+          "t_orch_ms": 0.47,
+          "t_http_ms": 0.25,
+          "t_dispatch_ms": 2.27,
+          "rss_peak_mb": 22.51,
+          "proc_peak_phys_mb": 27.1,
+          "proc_instructions": 17.31,
+          "proc_cycles": 6.41
+        }
+      },
+      {
+        "component": "PC3",
+        "eigenvalue": 1.3791,
+        "explained_variance_pct": 11.49,
+        "cumulative_variance_pct": 89.69,
+        "loadings": {
+          "prompt_tokens": -0.0922,
+          "t_neural_ms": -0.1019,
+          "t_task_ms": -0.1008,
+          "energy_net_above_idle_j": -0.1015,
+          "edp_js": -0.1458,
+          "t_orch_ms": 0.5871,
+          "t_http_ms": 0.5522,
+          "t_dispatch_ms": 0.425,
+          "rss_peak_mb": -0.2159,
+          "proc_peak_phys_mb": -0.0719,
+          "proc_instructions": -0.1508,
+          "proc_cycles": -0.1859
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.85,
+          "t_neural_ms": 1.04,
+          "t_task_ms": 1.02,
+          "energy_net_above_idle_j": 1.03,
+          "edp_js": 2.13,
+          "t_orch_ms": 34.47,
+          "t_http_ms": 30.5,
+          "t_dispatch_ms": 18.06,
+          "rss_peak_mb": 4.66,
+          "proc_peak_phys_mb": 0.52,
+          "proc_instructions": 2.27,
+          "proc_cycles": 3.46
+        }
+      },
+      {
+        "component": "PC4",
+        "eigenvalue": 0.8951,
+        "explained_variance_pct": 7.46,
+        "cumulative_variance_pct": 97.15,
+        "loadings": {
+          "prompt_tokens": 0.0862,
+          "t_neural_ms": 0.0805,
+          "t_task_ms": 0.0801,
+          "energy_net_above_idle_j": 0.0812,
+          "edp_js": 0.0641,
+          "t_orch_ms": -0.2521,
+          "t_http_ms": -0.3745,
+          "t_dispatch_ms": 0.8328,
+          "rss_peak_mb": -0.0939,
+          "proc_peak_phys_mb": 0.1876,
+          "proc_instructions": -0.0391,
+          "proc_cycles": -0.1616
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.74,
+          "t_neural_ms": 0.65,
+          "t_task_ms": 0.64,
+          "energy_net_above_idle_j": 0.66,
+          "edp_js": 0.41,
+          "t_orch_ms": 6.35,
+          "t_http_ms": 14.03,
+          "t_dispatch_ms": 69.35,
+          "rss_peak_mb": 0.88,
+          "proc_peak_phys_mb": 3.52,
+          "proc_instructions": 0.15,
+          "proc_cycles": 2.61
+        }
+      },
+      {
+        "component": "PC5",
+        "eigenvalue": 0.236,
+        "explained_variance_pct": 1.97,
+        "cumulative_variance_pct": 99.11,
+        "loadings": {
+          "prompt_tokens": 0.0439,
+          "t_neural_ms": -0.0139,
+          "t_task_ms": -0.014,
+          "energy_net_above_idle_j": -0.0185,
+          "edp_js": -0.3806,
+          "t_orch_ms": -0.0535,
+          "t_http_ms": -0.0768,
+          "t_dispatch_ms": 0.1569,
+          "rss_peak_mb": -0.3942,
+          "proc_peak_phys_mb": -0.4325,
+          "proc_instructions": 0.4266,
+          "proc_cycles": 0.5428
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.19,
+          "t_neural_ms": 0.02,
+          "t_task_ms": 0.02,
+          "energy_net_above_idle_j": 0.03,
+          "edp_js": 14.49,
+          "t_orch_ms": 0.29,
+          "t_http_ms": 0.59,
+          "t_dispatch_ms": 2.46,
+          "rss_peak_mb": 15.54,
+          "proc_peak_phys_mb": 18.71,
+          "proc_instructions": 18.2,
+          "proc_cycles": 29.47
+        }
+      },
+      {
+        "component": "PC6",
+        "eigenvalue": 0.0618,
+        "explained_variance_pct": 0.51,
+        "cumulative_variance_pct": 99.63,
+        "loadings": {
+          "prompt_tokens": -0.1969,
+          "t_neural_ms": -0.1353,
+          "t_task_ms": -0.1351,
+          "energy_net_above_idle_j": -0.1243,
+          "edp_js": 0.5525,
+          "t_orch_ms": 0.0004,
+          "t_http_ms": 0.0133,
+          "t_dispatch_ms": -0.0951,
+          "rss_peak_mb": -0.6275,
+          "proc_peak_phys_mb": 0.391,
+          "proc_instructions": 0.1158,
+          "proc_cycles": 0.1863
+        },
+        "contributions_pct": {
+          "prompt_tokens": 3.88,
+          "t_neural_ms": 1.83,
+          "t_task_ms": 1.83,
+          "energy_net_above_idle_j": 1.54,
+          "edp_js": 30.52,
+          "t_orch_ms": 0.0,
+          "t_http_ms": 0.02,
+          "t_dispatch_ms": 0.9,
+          "rss_peak_mb": 39.38,
+          "proc_peak_phys_mb": 15.28,
+          "proc_instructions": 1.34,
+          "proc_cycles": 3.47
+        }
+      },
+      {
+        "component": "PC7",
+        "eigenvalue": 0.0312,
+        "explained_variance_pct": 0.26,
+        "cumulative_variance_pct": 99.89,
+        "loadings": {
+          "prompt_tokens": 0.2347,
+          "t_neural_ms": 0.1346,
+          "t_task_ms": 0.1345,
+          "energy_net_above_idle_j": 0.1302,
+          "edp_js": -0.5634,
+          "t_orch_ms": -0.0095,
+          "t_http_ms": 0.0124,
+          "t_dispatch_ms": -0.1642,
+          "rss_peak_mb": -0.2981,
+          "proc_peak_phys_mb": 0.5616,
+          "proc_instructions": -0.3472,
+          "proc_cycles": 0.1495
+        },
+        "contributions_pct": {
+          "prompt_tokens": 5.51,
+          "t_neural_ms": 1.81,
+          "t_task_ms": 1.81,
+          "energy_net_above_idle_j": 1.7,
+          "edp_js": 31.74,
+          "t_orch_ms": 0.01,
+          "t_http_ms": 0.02,
+          "t_dispatch_ms": 2.7,
+          "rss_peak_mb": 8.89,
+          "proc_peak_phys_mb": 31.54,
+          "proc_instructions": 12.06,
+          "proc_cycles": 2.24
+        }
+      },
+      {
+        "component": "PC8",
+        "eigenvalue": 0.0134,
+        "explained_variance_pct": 0.11,
+        "cumulative_variance_pct": 100.0,
+        "loadings": {
+          "prompt_tokens": -0.0814,
+          "t_neural_ms": -0.0996,
+          "t_task_ms": -0.0996,
+          "energy_net_above_idle_j": -0.0982,
+          "edp_js": 0.1824,
+          "t_orch_ms": -0.0046,
+          "t_http_ms": -0.0261,
+          "t_dispatch_ms": 0.1578,
+          "rss_peak_mb": 0.2195,
+          "proc_peak_phys_mb": -0.1235,
+          "proc_instructions": -0.6496,
+          "proc_cycles": 0.6478
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.66,
+          "t_neural_ms": 0.99,
+          "t_task_ms": 0.99,
+          "energy_net_above_idle_j": 0.96,
+          "edp_js": 3.33,
+          "t_orch_ms": 0.0,
+          "t_http_ms": 0.07,
+          "t_dispatch_ms": 2.49,
+          "rss_peak_mb": 4.82,
+          "proc_peak_phys_mb": 1.52,
+          "proc_instructions": 42.2,
+          "proc_cycles": 41.97
+        }
+      },
+      {
+        "component": "PC9",
+        "eigenvalue": 0.0002,
+        "explained_variance_pct": 0.0,
+        "cumulative_variance_pct": 100.0,
+        "loadings": {
+          "prompt_tokens": 0.8338,
+          "t_neural_ms": -0.2613,
+          "t_task_ms": -0.2611,
+          "energy_net_above_idle_j": -0.3952,
+          "edp_js": 0.0992,
+          "t_orch_ms": 0.0007,
+          "t_http_ms": 0.0018,
+          "t_dispatch_ms": -0.0083,
+          "rss_peak_mb": 0.0112,
+          "proc_peak_phys_mb": -0.0014,
+          "proc_instructions": 0.0282,
+          "proc_cycles": -0.0371
+        },
+        "contributions_pct": {
+          "prompt_tokens": 69.52,
+          "t_neural_ms": 6.83,
+          "t_task_ms": 6.82,
+          "energy_net_above_idle_j": 15.62,
+          "edp_js": 0.98,
+          "t_orch_ms": 0.0,
+          "t_http_ms": 0.0,
+          "t_dispatch_ms": 0.01,
+          "rss_peak_mb": 0.01,
+          "proc_peak_phys_mb": 0.0,
+          "proc_instructions": 0.08,
+          "proc_cycles": 0.14
+        }
+      },
+      {
+        "component": "PC10",
+        "eigenvalue": 0.0,
+        "explained_variance_pct": 0.0,
+        "cumulative_variance_pct": 100.0,
+        "loadings": {
+          "prompt_tokens": -0.0946,
+          "t_neural_ms": 0.4379,
+          "t_task_ms": 0.4376,
+          "energy_net_above_idle_j": -0.7796,
+          "edp_js": -0.0023,
+          "t_orch_ms": -0.0001,
+          "t_http_ms": -0.0001,
+          "t_dispatch_ms": 0.0009,
+          "rss_peak_mb": -0.0038,
+          "proc_peak_phys_mb": 0.0036,
+          "proc_instructions": -0.003,
+          "proc_cycles": 0.004
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.9,
+          "t_neural_ms": 19.18,
+          "t_task_ms": 19.15,
+          "energy_net_above_idle_j": 60.78,
+          "edp_js": 0.0,
+          "t_orch_ms": 0.0,
+          "t_http_ms": 0.0,
+          "t_dispatch_ms": 0.0,
+          "rss_peak_mb": 0.0,
+          "proc_peak_phys_mb": 0.0,
+          "proc_instructions": 0.0,
+          "proc_cycles": 0.0
+        }
+      },
+      {
+        "component": "PC11",
+        "eigenvalue": 0.0,
+        "explained_variance_pct": 0.0,
+        "cumulative_variance_pct": 100.0,
+        "loadings": {
+          "prompt_tokens": -0.0,
+          "t_neural_ms": -0.0002,
+          "t_task_ms": 0.0002,
+          "energy_net_above_idle_j": -0.0001,
+          "edp_js": 0.0,
+          "t_orch_ms": 0.7172,
+          "t_http_ms": -0.6906,
+          "t_dispatch_ms": -0.0935,
+          "rss_peak_mb": -0.0,
+          "proc_peak_phys_mb": 0.0,
+          "proc_instructions": 0.0,
+          "proc_cycles": -0.0
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.0,
+          "t_neural_ms": 0.0,
+          "t_task_ms": 0.0,
+          "energy_net_above_idle_j": 0.0,
+          "edp_js": 0.0,
+          "t_orch_ms": 51.44,
+          "t_http_ms": 47.69,
+          "t_dispatch_ms": 0.87,
+          "rss_peak_mb": 0.0,
+          "proc_peak_phys_mb": 0.0,
+          "proc_instructions": 0.0,
+          "proc_cycles": 0.0
+        }
+      },
+      {
+        "component": "PC12",
+        "eigenvalue": 0.0,
+        "explained_variance_pct": 0.0,
+        "cumulative_variance_pct": 100.0,
+        "loadings": {
+          "prompt_tokens": -0.0,
+          "t_neural_ms": -0.7068,
+          "t_task_ms": 0.7074,
+          "energy_net_above_idle_j": -0.0,
+          "edp_js": 0.0,
+          "t_orch_ms": -0.0008,
+          "t_http_ms": -0.0004,
+          "t_dispatch_ms": -0.0001,
+          "rss_peak_mb": 0.0,
+          "proc_peak_phys_mb": -0.0,
+          "proc_instructions": -0.0,
+          "proc_cycles": 0.0
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.0,
+          "t_neural_ms": 49.96,
+          "t_task_ms": 50.04,
+          "energy_net_above_idle_j": 0.0,
+          "edp_js": 0.0,
+          "t_orch_ms": 0.0,
+          "t_http_ms": 0.0,
+          "t_dispatch_ms": 0.0,
+          "rss_peak_mb": 0.0,
+          "proc_peak_phys_mb": 0.0,
+          "proc_instructions": 0.0,
+          "proc_cycles": 0.0
+        }
+      }
+    ],
+    "orthogonality_max_error": 8.881784197001252e-16,
+    "sum_explained_variance_pct": 100.0
+  },
+  "regime_b_warm_kv_cache": {
+    "n_trials": 480,
+    "n_variables": 12,
+    "eigenvalues": [
+      7.3287,
+      3.2224,
+      1.0771,
+      0.2483,
+      0.0684,
+      0.0291,
+      0.02,
+      0.0037,
+      0.0015,
+      0.0007,
+      0.0,
+      0.0
+    ],
+    "explained_variance_pct": [
+      61.07,
+      26.85,
+      8.98,
+      2.07,
+      0.57,
+      0.24,
+      0.17,
+      0.03,
+      0.01,
+      0.01,
+      0.0,
+      0.0
+    ],
+    "cumulative_variance_pct": [
+      61.07,
+      87.93,
+      96.9,
+      98.97,
+      99.54,
+      99.78,
+      99.95,
+      99.98,
+      99.99,
+      100.0,
+      100.0,
+      100.0
+    ],
+    "components": [
+      {
+        "component": "PC1",
+        "eigenvalue": 7.3287,
+        "explained_variance_pct": 61.07,
+        "cumulative_variance_pct": 61.07,
+        "loadings": {
+          "prompt_tokens": 0.3429,
+          "t_neural_ms": 0.3457,
+          "t_task_ms": 0.3461,
+          "energy_net_above_idle_j": 0.3429,
+          "edp_js": 0.3512,
+          "t_orch_ms": 0.3635,
+          "t_http_ms": 0.3593,
+          "t_dispatch_ms": 0.1152,
+          "rss_peak_mb": 0.1122,
+          "proc_peak_phys_mb": 0.0598,
+          "proc_instructions": 0.1945,
+          "proc_cycles": 0.2715
+        },
+        "contributions_pct": {
+          "prompt_tokens": 11.76,
+          "t_neural_ms": 11.95,
+          "t_task_ms": 11.98,
+          "energy_net_above_idle_j": 11.76,
+          "edp_js": 12.33,
+          "t_orch_ms": 13.21,
+          "t_http_ms": 12.91,
+          "t_dispatch_ms": 1.33,
+          "rss_peak_mb": 1.26,
+          "proc_peak_phys_mb": 0.36,
+          "proc_instructions": 3.78,
+          "proc_cycles": 7.37
+        }
+      },
+      {
+        "component": "PC2",
+        "eigenvalue": 3.2224,
+        "explained_variance_pct": 26.85,
+        "cumulative_variance_pct": 87.93,
+        "loadings": {
+          "prompt_tokens": -0.0862,
+          "t_neural_ms": -0.1796,
+          "t_task_ms": -0.178,
+          "energy_net_above_idle_j": -0.1846,
+          "edp_js": -0.1682,
+          "t_orch_ms": 0.0083,
+          "t_http_ms": -0.0036,
+          "t_dispatch_ms": 0.0428,
+          "rss_peak_mb": 0.5148,
+          "proc_peak_phys_mb": 0.5275,
+          "proc_instructions": 0.458,
+          "proc_cycles": 0.3336
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.74,
+          "t_neural_ms": 3.22,
+          "t_task_ms": 3.17,
+          "energy_net_above_idle_j": 3.41,
+          "edp_js": 2.83,
+          "t_orch_ms": 0.01,
+          "t_http_ms": 0.0,
+          "t_dispatch_ms": 0.18,
+          "rss_peak_mb": 26.5,
+          "proc_peak_phys_mb": 27.83,
+          "proc_instructions": 20.98,
+          "proc_cycles": 11.13
+        }
+      },
+      {
+        "component": "PC3",
+        "eigenvalue": 1.0771,
+        "explained_variance_pct": 8.98,
+        "cumulative_variance_pct": 96.9,
+        "loadings": {
+          "prompt_tokens": -0.0922,
+          "t_neural_ms": 0.0212,
+          "t_task_ms": 0.0219,
+          "energy_net_above_idle_j": 0.0276,
+          "edp_js": 0.0026,
+          "t_orch_ms": 0.0964,
+          "t_http_ms": -0.164,
+          "t_dispatch_ms": 0.9113,
+          "rss_peak_mb": -0.0851,
+          "proc_peak_phys_mb": 0.2328,
+          "proc_instructions": -0.0772,
+          "proc_cycles": -0.2361
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.85,
+          "t_neural_ms": 0.04,
+          "t_task_ms": 0.05,
+          "energy_net_above_idle_j": 0.08,
+          "edp_js": 0.0,
+          "t_orch_ms": 0.93,
+          "t_http_ms": 2.69,
+          "t_dispatch_ms": 83.05,
+          "rss_peak_mb": 0.72,
+          "proc_peak_phys_mb": 5.42,
+          "proc_instructions": 0.6,
+          "proc_cycles": 5.58
+        }
+      },
+      {
+        "component": "PC4",
+        "eigenvalue": 0.2483,
+        "explained_variance_pct": 2.07,
+        "cumulative_variance_pct": 98.97,
+        "loadings": {
+          "prompt_tokens": 0.6093,
+          "t_neural_ms": -0.2483,
+          "t_task_ms": -0.2438,
+          "energy_net_above_idle_j": -0.3018,
+          "edp_js": -0.0621,
+          "t_orch_ms": 0.2741,
+          "t_http_ms": 0.2969,
+          "t_dispatch_ms": -0.0012,
+          "rss_peak_mb": 0.2109,
+          "proc_peak_phys_mb": 0.0725,
+          "proc_instructions": -0.312,
+          "proc_cycles": -0.3199
+        },
+        "contributions_pct": {
+          "prompt_tokens": 37.13,
+          "t_neural_ms": 6.17,
+          "t_task_ms": 5.94,
+          "energy_net_above_idle_j": 9.11,
+          "edp_js": 0.39,
+          "t_orch_ms": 7.51,
+          "t_http_ms": 8.81,
+          "t_dispatch_ms": 0.0,
+          "rss_peak_mb": 4.45,
+          "proc_peak_phys_mb": 0.53,
+          "proc_instructions": 9.74,
+          "proc_cycles": 10.24
+        }
+      },
+      {
+        "component": "PC5",
+        "eigenvalue": 0.0684,
+        "explained_variance_pct": 0.57,
+        "cumulative_variance_pct": 99.54,
+        "loadings": {
+          "prompt_tokens": -0.3904,
+          "t_neural_ms": 0.2203,
+          "t_task_ms": 0.219,
+          "energy_net_above_idle_j": 0.125,
+          "edp_js": -0.08,
+          "t_orch_ms": 0.0613,
+          "t_http_ms": 0.0851,
+          "t_dispatch_ms": -0.064,
+          "rss_peak_mb": 0.7047,
+          "proc_peak_phys_mb": -0.1271,
+          "proc_instructions": -0.2498,
+          "proc_cycles": -0.3726
+        },
+        "contributions_pct": {
+          "prompt_tokens": 15.24,
+          "t_neural_ms": 4.85,
+          "t_task_ms": 4.8,
+          "energy_net_above_idle_j": 1.56,
+          "edp_js": 0.64,
+          "t_orch_ms": 0.38,
+          "t_http_ms": 0.72,
+          "t_dispatch_ms": 0.41,
+          "rss_peak_mb": 49.66,
+          "proc_peak_phys_mb": 1.62,
+          "proc_instructions": 6.24,
+          "proc_cycles": 13.88
+        }
+      },
+      {
+        "component": "PC6",
+        "eigenvalue": 0.0291,
+        "explained_variance_pct": 0.24,
+        "cumulative_variance_pct": 99.78,
+        "loadings": {
+          "prompt_tokens": -0.0495,
+          "t_neural_ms": 0.1418,
+          "t_task_ms": 0.1397,
+          "energy_net_above_idle_j": 0.0726,
+          "edp_js": 0.0782,
+          "t_orch_ms": -0.1016,
+          "t_http_ms": -0.0425,
+          "t_dispatch_ms": -0.229,
+          "rss_peak_mb": -0.1408,
+          "proc_peak_phys_mb": 0.7229,
+          "proc_instructions": -0.5725,
+          "proc_cycles": 0.1093
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.24,
+          "t_neural_ms": 2.01,
+          "t_task_ms": 1.95,
+          "energy_net_above_idle_j": 0.53,
+          "edp_js": 0.61,
+          "t_orch_ms": 1.03,
+          "t_http_ms": 0.18,
+          "t_dispatch_ms": 5.24,
+          "rss_peak_mb": 1.98,
+          "proc_peak_phys_mb": 52.25,
+          "proc_instructions": 32.77,
+          "proc_cycles": 1.19
+        }
+      },
+      {
+        "component": "PC7",
+        "eigenvalue": 0.02,
+        "explained_variance_pct": 0.17,
+        "cumulative_variance_pct": 99.95,
+        "loadings": {
+          "prompt_tokens": -0.2994,
+          "t_neural_ms": 0.0599,
+          "t_task_ms": 0.0623,
+          "energy_net_above_idle_j": -0.3844,
+          "edp_js": -0.3132,
+          "t_orch_ms": 0.3257,
+          "t_http_ms": 0.3072,
+          "t_dispatch_ms": 0.1537,
+          "rss_peak_mb": -0.0985,
+          "proc_peak_phys_mb": -0.2128,
+          "proc_instructions": -0.3221,
+          "proc_cycles": 0.5236
+        },
+        "contributions_pct": {
+          "prompt_tokens": 8.96,
+          "t_neural_ms": 0.36,
+          "t_task_ms": 0.39,
+          "energy_net_above_idle_j": 14.78,
+          "edp_js": 9.81,
+          "t_orch_ms": 10.61,
+          "t_http_ms": 9.43,
+          "t_dispatch_ms": 2.36,
+          "rss_peak_mb": 0.97,
+          "proc_peak_phys_mb": 4.53,
+          "proc_instructions": 10.38,
+          "proc_cycles": 27.42
+        }
+      },
+      {
+        "component": "PC8",
+        "eigenvalue": 0.0037,
+        "explained_variance_pct": 0.03,
+        "cumulative_variance_pct": 99.98,
+        "loadings": {
+          "prompt_tokens": -0.3109,
+          "t_neural_ms": -0.429,
+          "t_task_ms": -0.4244,
+          "energy_net_above_idle_j": 0.261,
+          "edp_js": 0.5946,
+          "t_orch_ms": 0.1231,
+          "t_http_ms": 0.1208,
+          "t_dispatch_ms": 0.0423,
+          "rss_peak_mb": 0.0934,
+          "proc_peak_phys_mb": -0.0795,
+          "proc_instructions": -0.208,
+          "proc_cycles": 0.1665
+        },
+        "contributions_pct": {
+          "prompt_tokens": 9.67,
+          "t_neural_ms": 18.4,
+          "t_task_ms": 18.01,
+          "energy_net_above_idle_j": 6.81,
+          "edp_js": 35.35,
+          "t_orch_ms": 1.52,
+          "t_http_ms": 1.46,
+          "t_dispatch_ms": 0.18,
+          "rss_peak_mb": 0.87,
+          "proc_peak_phys_mb": 0.63,
+          "proc_instructions": 4.33,
+          "proc_cycles": 2.77
+        }
+      },
+      {
+        "component": "PC9",
+        "eigenvalue": 0.0015,
+        "explained_variance_pct": 0.01,
+        "cumulative_variance_pct": 99.99,
+        "loadings": {
+          "prompt_tokens": 0.3806,
+          "t_neural_ms": 0.0371,
+          "t_task_ms": 0.0336,
+          "energy_net_above_idle_j": 0.0058,
+          "edp_js": 0.0675,
+          "t_orch_ms": -0.3526,
+          "t_http_ms": -0.4355,
+          "t_dispatch_ms": 0.1835,
+          "rss_peak_mb": 0.3675,
+          "proc_peak_phys_mb": -0.2615,
+          "proc_instructions": -0.3205,
+          "proc_cycles": 0.4406
+        },
+        "contributions_pct": {
+          "prompt_tokens": 14.48,
+          "t_neural_ms": 0.14,
+          "t_task_ms": 0.11,
+          "energy_net_above_idle_j": 0.0,
+          "edp_js": 0.46,
+          "t_orch_ms": 12.43,
+          "t_http_ms": 18.97,
+          "t_dispatch_ms": 3.37,
+          "rss_peak_mb": 13.51,
+          "proc_peak_phys_mb": 6.84,
+          "proc_instructions": 10.27,
+          "proc_cycles": 19.42
+        }
+      },
+      {
+        "component": "PC10",
+        "eigenvalue": 0.0007,
+        "explained_variance_pct": 0.01,
+        "cumulative_variance_pct": 100.0,
+        "loadings": {
+          "prompt_tokens": -0.0959,
+          "t_neural_ms": 0.1807,
+          "t_task_ms": 0.1786,
+          "energy_net_above_idle_j": -0.7209,
+          "edp_js": 0.6131,
+          "t_orch_ms": -0.0718,
+          "t_http_ms": -0.0718,
+          "t_dispatch_ms": -0.0201,
+          "rss_peak_mb": 0.0272,
+          "proc_peak_phys_mb": 0.0053,
+          "proc_instructions": 0.0958,
+          "proc_cycles": -0.1004
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.92,
+          "t_neural_ms": 3.27,
+          "t_task_ms": 3.19,
+          "energy_net_above_idle_j": 51.97,
+          "edp_js": 37.58,
+          "t_orch_ms": 0.52,
+          "t_http_ms": 0.51,
+          "t_dispatch_ms": 0.04,
+          "rss_peak_mb": 0.07,
+          "proc_peak_phys_mb": 0.0,
+          "proc_instructions": 0.92,
+          "proc_cycles": 1.01
+        }
+      },
+      {
+        "component": "PC11",
+        "eigenvalue": 0.0,
+        "explained_variance_pct": 0.0,
+        "cumulative_variance_pct": 100.0,
+        "loadings": {
+          "prompt_tokens": -0.0,
+          "t_neural_ms": 0.0013,
+          "t_task_ms": -0.0013,
+          "energy_net_above_idle_j": 0.0,
+          "edp_js": 0.0,
+          "t_orch_ms": 0.7201,
+          "t_http_ms": -0.6656,
+          "t_dispatch_ms": -0.196,
+          "rss_peak_mb": 0.0,
+          "proc_peak_phys_mb": -0.0,
+          "proc_instructions": -0.0,
+          "proc_cycles": 0.0
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.0,
+          "t_neural_ms": 0.0,
+          "t_task_ms": 0.0,
+          "energy_net_above_idle_j": 0.0,
+          "edp_js": 0.0,
+          "t_orch_ms": 51.86,
+          "t_http_ms": 44.3,
+          "t_dispatch_ms": 3.84,
+          "rss_peak_mb": 0.0,
+          "proc_peak_phys_mb": 0.0,
+          "proc_instructions": 0.0,
+          "proc_cycles": 0.0
+        }
+      },
+      {
+        "component": "PC12",
+        "eigenvalue": 0.0,
+        "explained_variance_pct": 0.0,
+        "cumulative_variance_pct": 100.0,
+        "loadings": {
+          "prompt_tokens": 0.0,
+          "t_neural_ms": 0.7042,
+          "t_task_ms": -0.71,
+          "energy_net_above_idle_j": 0.0,
+          "edp_js": -0.0,
+          "t_orch_ms": 0.0018,
+          "t_http_ms": 0.0043,
+          "t_dispatch_ms": 0.0013,
+          "rss_peak_mb": -0.0,
+          "proc_peak_phys_mb": -0.0,
+          "proc_instructions": -0.0,
+          "proc_cycles": 0.0
+        },
+        "contributions_pct": {
+          "prompt_tokens": 0.0,
+          "t_neural_ms": 49.59,
+          "t_task_ms": 50.41,
+          "energy_net_above_idle_j": 0.0,
+          "edp_js": 0.0,
+          "t_orch_ms": 0.0,
+          "t_http_ms": 0.0,
+          "t_dispatch_ms": 0.0,
+          "rss_peak_mb": 0.0,
+          "proc_peak_phys_mb": 0.0,
+          "proc_instructions": 0.0,
+          "proc_cycles": 0.0
+        }
+      }
+    ],
+    "orthogonality_max_error": 1.3322676295501878e-15,
+    "sum_explained_variance_pct": 100.0
+  }
+}
+
+
+================================================================================
 FILE: results/publication_campaign/summary_statistics.json
 SHA-256: 8e4ac7592e5cacf4b142cb5e4a94e1d656f60ea42707e68fcf43e8a2c1fa2c55
 ================================================================================
@@ -4867,7 +5889,7 @@ SHA-256: cbb0d1cbc0ded19c0d0c9383d7828d2bdbc48759127632002dced236762ccc5a
 
 ================================================================================
 FILE: data/manifest_sha256.json
-SHA-256: 6ec6ce8712e089f3ae21b510f532fe380785d635733efa5dc8265bfd5e48778a
+SHA-256: 3389740cb4a0b7c5a66d75cefa1d3d66507f2705eed8713afdef1c2f6e089e52
 ================================================================================
 {
   ".gitignore": "e8f77378c0791a2fa72c9068e6023417399531d6938bc781524d8b352060138f",
@@ -4876,7 +5898,7 @@ SHA-256: 6ec6ce8712e089f3ae21b510f532fe380785d635733efa5dc8265bfd5e48778a
   "DATA_LICENSE": "28c5c1ca68684f48dd4b4333657bcdbfd9f2222ddcd1e15a1ea40ba543117492",
   "LICENSE": "4c391846d226468fc7c446e8e962f9bca63dfef0096fb88dd29243987d4892b1",
   "Makefile": "6ab2186272578a5912f96e00eff35d8baa31c988ec4fbe119a84edc1f79839d2",
-  "README.md": "ad8cd3cb47cf35b3e3d7dc2f081f356b354f9231f5fabba8b42c81b9badec600",
+  "README.md": "6c7bf8cdc5c60cdf3560b5e69dc6c7583bb2cb26f52424ab0ae87dafd8d96900",
   "benchmark/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "benchmark/adapters/__init__.py": "5aedd44265f63dd7d4f0504bb7bfccd0b05c843925029699137cca738f9ec2e7",
   "benchmark/adapters/base.py": "65a4f485692ead175d82a48631f69051ed2caff44fa844a7c871db0ed4092098",
@@ -4885,7 +5907,7 @@ SHA-256: 6ec6ce8712e089f3ae21b510f532fe380785d635733efa5dc8265bfd5e48778a
   "benchmark/adapters/openclaw_adapter.py": "336c38edb449a86a05ebf46a9be35e59f985e437daa11efb008a460be6854ff4",
   "benchmark/adapters/picoclaw_adapter.py": "b36463e8057a4d50e06d4dee45500db32578751acbc0c0395aa480f2298b2ebd",
   "benchmark/adapters/python_native_adapter.py": "3b9478209f3d808d70ad61fba8da27b7baa1fe7795355da84be7f188c544a3a6",
-  "benchmark/analyze_results.py": "41f9c9abab17f4150124ffd2a12b1ef85a4f695b9ca8b38264da3aecb7a8509a",
+  "benchmark/analyze_results.py": "21f3750577cf8ebf90a481abe9c55fad631becca0c799b3a691e473b78eea622",
   "benchmark/generate_charts.py": "3c7d853242fa1ad3d843adc26ece12f2495ae2fad97ca7fdb6313019d7e671ea",
   "benchmark/generate_datasets.py": "a91276cf27b13e81cf08ecf1e775c569ca2525d048671c9ab01024ffe912e14f",
   "benchmark/openclaw_orch.mjs": "4ef05bc03f9f0e4e3e9042618264e7440daeb95d8e5791de30c80e37a33a542b",
@@ -4992,7 +6014,7 @@ SHA-256: 6ec6ce8712e089f3ae21b510f532fe380785d635733efa5dc8265bfd5e48778a
   "figures/fig8_three_campaigns_reproducibility.png": "c74f1d7aa8de95b2ad1533fe178ded76a134695246200d1649c7cb1e20a3afba",
   "paper/COVER_LETTER.md": "a42177fb8261b16199c4653ec89a3809a33edeed513215118370ac2a9a559d44",
   "paper/HIGHLIGHTS.md": "ae43c79d7840d8c7658f5caf34bd9e5c6ce90745aa0faecf68d7774b8c243c49",
-  "paper/softwarex_manuscript.tex": "0dec9a261802a235a4a758aac72a5c6d2545971b35e50e50973bfca7182df2eb",
+  "paper/softwarex_manuscript.tex": "a0ba160752aaf3295a243276ffc28f68e9781b42a95264a5358d9de99e4af610",
   "pyproject.toml": "968c81a365bf5b593749ba710f8a42918045462c763f7717bed4584bd8efc9cd",
   "references.bib": "98e8b495ea96acd5164013a910293f0cfaaccf5d8a2268263ae783b4f738615c",
   "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx": "588fc20fba5098d0c2e45aaf5a5582d6a44b29a4021de8801e2957e349323b12",
@@ -5020,7 +6042,8 @@ SHA-256: 6ec6ce8712e089f3ae21b510f532fe380785d635733efa5dc8265bfd5e48778a
   "results/exploratory_campaigns/campaign_run_4/summary_campaign_run_4.json": "46f964fa950ce17ff6185b341e2758c66cffde8feb3bb707e0af248f96e0f799",
   "results/exploratory_campaigns/campaign_run_5/raw_trials.jsonl": "2c80c90b54b7a56c3efcbc4853f4d44abb8510fa110b2fa668afe05554b73e32",
   "results/exploratory_campaigns/campaign_run_5/summary_campaign_run_5.json": "45209e119870d80b7cd9929c254427c7b8e89c66041790db906d71874f0130c0",
-  "results/publication_campaign/campaign_metadata.json": "ff71634b5057f09f5e9374995929aa4edc768630180a406dd27125634bdb04aa",
+  "results/publication_campaign/campaign_metadata.json": "4a7facfba44753997863975c2a802eddcd4c5ce7ebd51f7f291e52375e454783",
+  "results/publication_campaign/pca_variance_decomposition.json": "4bb4206339d506d5a9644b5dd551cb4c85ce1d0689d4edefa2b97a6d27e01b11",
   "results/publication_campaign/prefill_ablation.jsonl": "47ae7fb085cacbba6f76cd166fe8cdda931287f5561466820338c65bed9ad456",
   "results/publication_campaign/prefill_regression_fit.json": "7d8df2472d97b53a07843f104e0c9ed2c6b5a75bb07c63ebd90cd51f3183b8fc",
   "results/publication_campaign/raw_trials.jsonl": "90283dae7af0429e562cfb9d347ef5241b7feb50072a3fa2bc74f9a22ba92405",
@@ -5030,6 +6053,7 @@ SHA-256: 6ec6ce8712e089f3ae21b510f532fe380785d635733efa5dc8265bfd5e48778a
   "results/publication_campaign/tables/macros_empirical.tex": "cf20e8fd93fa96cb96c5ddd647bf14f1fb089cf2b6f2ce8ab86bdccb4a5bdca7",
   "results/publication_campaign/tables/metrics_summary.csv": "3db814331d665fd761eea3e441522f80f7a5522bea3e4b781247e05abf0824c9",
   "results/publication_campaign/tables/table_journal_ablation.tex": "9392515d488a5c7e3aaedae00edc8fcbffa33d750a91ea5bb20940a00b901919",
+  "results/publication_campaign/tables/table_pca_loadings.tex": "4aade71f6411e38005027a6ea50451d57cb4f6b8653b69073f6274d3c57dd2e4",
   "results/publication_campaign/tables/table_prefill_ablation.tex": "5d493233f483dde2345cdd0626955afa08161adee70f2230b094fdabac8ab181",
   "results/publication_campaign/tables/table_spearman_correlation.tex": "ac1ed46ddf75898e89a98f659739279b26ad6e6a3fb1530309718d05a3b530f7",
   "results/publication_campaign/tables/table_warm_cache.tex": "e655207c164f3cae881d02d6767a83c3a3ef6cf4e933198982088e92b1bf95c6",
@@ -5046,11 +6070,11 @@ SHA-256: 6ec6ce8712e089f3ae21b510f532fe380785d635733efa5dc8265bfd5e48778a
   "scripts/run_w2_resample.py": "04ad8b5f7ec07e4757b2f0990c881badc698324040165879d6f18d2f996f6eb2",
   "scripts/run_warm_cache_campaign.py": "f6f04798282f72290be37fbc89d7ad826e84888bb2782491b1d8db32e70fa825",
   "scripts/setup_environment.sh": "7d06320f77c70dd34ac8659fd0079d840e68eea804d008f1e041973c6dbe4920",
-  "scripts/verify_manifest.py": "e891ef4fbd3dede77a1c9fadd528e2b662eefb7f7c34ef4429508cb116959779",
+  "scripts/verify_manifest.py": "c5d0994d235db26d4a9b2bfd1d83ffb69e6de2f36fac9499232d121b373ec4fa",
   "tests/test_adapters_and_failfast.py": "d5a7ecc9da35c8118f03a0e8784f9c66bb8a0a7235b5444126b1fcfbf820b2d9",
   "tests/test_artifact_consistency.py": "ba81e9963d99c3db0a1dae1457f93ef7fa6c18acca96237acf4f47bf762b3e78",
   "tests/test_dataset_generator.py": "66a08eaed0f641aaad41aadfbcd241aa09a157549884fdf6dfe89f914dae5bf9",
-  "tests/test_statistical_engine.py": "357fb87f55273026224efc79a446fa2c25edaca8ddc133a7fc7544e6bb832e74",
+  "tests/test_statistical_engine.py": "8cf49681a89f19291f734545795072da8d1e97407830de8ed6dc39d8032d1b3a",
   "tests/test_telemetry_parser.py": "ea835745da8b243370f60f7a36a8a87290fda156768e1328381bb7d8f79e1b2d",
   "tutorial/README.md": "bdcb4f8d8bab3b3cce7d5422c7b3602a9531eb3dcc1f570a32e0a29342a83a59"
 }
@@ -8464,7 +9488,7 @@ if __name__ == "__main__":
 
 ================================================================================
 FILE: benchmark/analyze_results.py
-SHA-256: 41f9c9abab17f4150124ffd2a12b1ef85a4f695b9ca8b38264da3aecb7a8509a
+SHA-256: 21f3750577cf8ebf90a481abe9c55fad631becca0c799b3a691e473b78eea622
 ================================================================================
 """
 benchmark/analyze_results.py - Rigorous Non-Parametric Statistical Analysis
@@ -8851,6 +9875,13 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
         output_dir=output_dir,
     )
 
+    # Compute Principal Component Analysis (PCA) variance decomposition across regimes
+    compute_pca_variance_decomposition(
+        regime_a_path=input_path,
+        regime_b_path=os.path.join(output_dir, "warm_cache_trials.jsonl"),
+        output_dir=output_dir,
+    )
+
     print(f"✅ Generated summary JSON: {stats_out}")
     print(f"✅ Generated statistical tests JSON: {tests_out}")
     print(f"✅ Generated CSV table: {csv_out}")
@@ -9185,6 +10216,213 @@ def compute_spearman_correlation_matrix(
     with open(tex_path, "w", encoding="utf-8") as f:
         f.write(latex)
     print(f"✅ Generated Spearman correlation LaTeX table: {tex_path}")
+    return full_output
+
+
+def compute_pca_variance_decomposition(
+    regime_a_path: str | None = None,
+    regime_b_path: str | None = None,
+    output_dir: str | None = None,
+) -> dict[str, Any]:
+    """
+    Computes Principal Component Analysis (PCA) variance decomposition and factor loadings
+    via Singular Value Decomposition (np.linalg.svd) on Z-score standardized observations
+    across evaluated agent runtimes (picoclaw, openclaw_minimal, openclaw_full, python_native).
+
+    Outputs results/publication_campaign/pca_variance_decomposition.json
+    and results/publication_campaign/tables/table_pca_loadings.tex.
+    """
+    if regime_a_path is None:
+        regime_a_path = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
+    if regime_b_path is None:
+        regime_b_path = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
+    if output_dir is None:
+        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+
+    target_agents = ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native"]
+    metric_defs = [
+        ("prompt_tokens", "Prompt Tokens", "$N_{\\text{prompt}}$"),
+        ("t_neural_ms", "Neural Latency", "$T_{\\text{neural}}$"),
+        ("t_task_ms", "Task Latency", "$T_{\\text{task}}$"),
+        ("energy_net_above_idle_j", "Net Energy", "$E_{\\text{net}}$"),
+        ("edp_js", "Energy-Delay Product", "EDP"),
+        ("t_orch_ms", "Orchestrator Overhead", "$T_{\\text{orch}}$"),
+        ("t_http_ms", "HTTP Latency", "$T_{\\text{http}}$"),
+        ("t_dispatch_ms", "Dispatch Latency", "$T_{\\text{disp}}$"),
+        ("rss_peak_mb", "Peak RSS", "RSS"),
+        ("proc_peak_phys_mb", "Peak Phys RAM", "PhysRAM"),
+        ("proc_instructions", "Retired Instructions", "Instr"),
+        ("proc_cycles", "CPU Cycles", "Cycles"),
+    ]
+    metrics = [m[0] for m in metric_defs]
+
+    def load_clean_trials(p: str) -> list[dict]:
+        if not os.path.exists(p):
+            return []
+        with open(p, "r", encoding="utf-8") as f:
+            records = []
+            for line in f:
+                if not line.strip():
+                    continue
+                d = json.loads(line)
+                if d.get("is_warmup", False):
+                    continue
+                if d.get("agent_key") not in target_agents:
+                    continue
+                if any(d.get(m) is None for m in metrics):
+                    continue
+                records.append(d)
+            return records
+
+    def run_pca_on_records(records: list[dict]):
+        if not records or len(records) < len(metrics):
+            return {}
+        n = len(records)
+        p = len(metrics)
+        X = np.array([[float(r[m]) for m in metrics] for r in records], dtype=np.float64)
+        mean = np.mean(X, axis=0)
+        std = np.std(X, axis=0, ddof=1)
+        std[std == 0.0] = 1.0
+        Z = (X - mean) / std
+
+        U, S, Vt = np.linalg.svd(Z, full_matrices=False)
+        V = Vt.T  # shape (p, p), columns are principal axes
+
+        # Standardize signs for deterministic, intuitive presentation:
+        # PC1: prompt_tokens positive
+        if V[0, 0] < 0:
+            V[:, 0] = -V[:, 0]
+        # PC2: proc_instructions positive
+        if V[10, 1] < 0:
+            V[:, 1] = -V[:, 1]
+        # PC3: t_dispatch_ms positive
+        if V[7, 2] < 0:
+            V[:, 2] = -V[:, 2]
+
+        lambdas = (S ** 2) / (n - 1)
+        total_var = float(np.sum(lambdas))
+        var_exp_ratio = lambdas / total_var
+        var_exp_pct = var_exp_ratio * 100.0
+        cum_var_pct = np.cumsum(var_exp_pct)
+
+        components = []
+        for k in range(p):
+            c_dict = {
+                "component": f"PC{k+1}",
+                "eigenvalue": round(float(lambdas[k]), 4),
+                "explained_variance_pct": round(float(var_exp_pct[k]), 2),
+                "cumulative_variance_pct": round(float(cum_var_pct[k]), 2),
+                "loadings": {},
+                "contributions_pct": {},
+            }
+            for j, m in enumerate(metrics):
+                load_val = float(V[j, k])
+                contrib_val = float((V[j, k] ** 2) * 100.0)
+                c_dict["loadings"][m] = round(load_val, 4)
+                c_dict["contributions_pct"][m] = round(contrib_val, 2)
+            components.append(c_dict)
+
+        return {
+            "n_trials": n,
+            "n_variables": p,
+            "eigenvalues": [round(float(x), 4) for x in lambdas],
+            "explained_variance_pct": [round(float(x), 2) for x in var_exp_pct],
+            "cumulative_variance_pct": [round(float(x), 2) for x in cum_var_pct],
+            "components": components,
+            "orthogonality_max_error": float(np.max(np.abs(np.dot(V.T, V) - np.eye(p)))),
+            "sum_explained_variance_pct": float(np.sum(var_exp_pct)),
+        }
+
+    recs_a = load_clean_trials(regime_a_path)
+    recs_b = load_clean_trials(regime_b_path)
+
+    pca_a = run_pca_on_records(recs_a)
+    pca_b = run_pca_on_records(recs_b)
+
+    out_json_path = os.path.join(output_dir, "pca_variance_decomposition.json")
+    full_output = {
+        "description": "Principal Component Analysis (PCA) Variance Decomposition on Apple Silicon M4 across 12 Telemetry Dimensions",
+        "method": "SVD on Z-score standardized observation matrix Z = (X - mu) / sigma",
+        "evaluated_agents": target_agents,
+        "metrics": metrics,
+        "regime_a_cold_prefill": pca_a,
+        "regime_b_warm_kv_cache": pca_b,
+    }
+    with open(out_json_path, "w", encoding="utf-8") as f:
+        json.dump(full_output, f, indent=2)
+    print(f"✅ Generated PCA variance decomposition JSON: {out_json_path}")
+
+    # Generate LaTeX Table
+    tex_path = os.path.join(output_dir, "tables", "table_pca_loadings.tex")
+    latex = r"""\begin{table*}[t]
+\centering
+\caption{Principal Component Analysis (PCA) Variance Decomposition and Factor Loadings across Telemetry Dimensions on Apple Silicon M4. Evaluates $N=480$ trials per regime across compiled and interpreted agent runtimes (\texttt{picoclaw}, \texttt{openclaw\_minimal}, \texttt{openclaw\_full}, \texttt{python\_native}). $\text{PC}_1$ captures prompt prefill scale and energy dissipation; $\text{PC}_2$ isolates host runtime microarchitectural footprint (RAM, CPU cycles, instructions); $\text{PC}_3$ isolates tool dispatch and I/O execution. Values in parentheses denote relative variable contribution (\%).}
+\label{tab:pca_loadings}
+\small
+\begin{tabular}{l c r r r r r r}
+\hline
+ & & \multicolumn{3}{c}{\textbf{Regime A: Cold Prefill}} & \multicolumn{3}{c}{\textbf{Regime B: Warm KV-Cache}} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-8}
+\textbf{Systems Dimension} & \textbf{Symbol} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} \\
+\hline
+"""
+
+    def get_comp(pca_res, idx):
+        if not pca_res or "components" not in pca_res or len(pca_res["components"]) <= idx:
+            return None
+        return pca_res["components"][idx]
+
+    c1_a = get_comp(pca_a, 0)
+    c2_a = get_comp(pca_a, 1)
+    c3_a = get_comp(pca_a, 2)
+    c1_b = get_comp(pca_b, 0)
+    c2_b = get_comp(pca_b, 1)
+    c3_b = get_comp(pca_b, 2)
+
+    def fmt_cell(comp, m):
+        if not comp:
+            return "N/A"
+        loading_val = comp["loadings"].get(m, 0.0)
+        c = comp["contributions_pct"].get(m, 0.0)
+        return f"{loading_val:+.3f} ({c:4.1f}\\%)"
+
+    for m, name, sym in metric_defs:
+        row_str = f"{name} & {sym} & "
+        row_str += f"{fmt_cell(c1_a, m)} & {fmt_cell(c2_a, m)} & {fmt_cell(c3_a, m)} & "
+        row_str += f"{fmt_cell(c1_b, m)} & {fmt_cell(c2_b, m)} & {fmt_cell(c3_b, m)} \\\\\n"
+        latex += row_str
+
+    latex += r"""\hline
+"""
+    # Summary rows
+    def fmt_stat(pca_res, key, fmt_spec):
+        if not pca_res or key not in pca_res:
+            return ["N/A", "N/A", "N/A"]
+        vals = pca_res[key][:3]
+        return [fmt_spec.format(v) for v in vals]
+
+    ev_a = fmt_stat(pca_a, "eigenvalues", "{:.2f}")
+    ev_b = fmt_stat(pca_b, "eigenvalues", "{:.2f}")
+    latex += f"\\multicolumn{{2}}{{l}}{{\\textbf{{Eigenvalue ($\\lambda_k$)}}}} & {ev_a[0]} & {ev_a[1]} & {ev_a[2]} & {ev_b[0]} & {ev_b[1]} & {ev_b[2]} \\\\\n"
+
+    var_a = fmt_stat(pca_a, "explained_variance_pct", "{:.1f}\\%")
+    var_b = fmt_stat(pca_b, "explained_variance_pct", "{:.1f}\\%")
+    latex += f"\\multicolumn{{2}}{{l}}{{\\textbf{{Explained Variance [\\%]}}}} & {var_a[0]} & {var_a[1]} & {var_a[2]} & {var_b[0]} & {var_b[1]} & {var_b[2]} \\\\\n"
+
+    cum_a = fmt_stat(pca_a, "cumulative_variance_pct", "{:.1f}\\%")
+    cum_b = fmt_stat(pca_b, "cumulative_variance_pct", "{:.1f}\\%")
+    latex += f"\\multicolumn{{2}}{{l}}{{\\textbf{{Cumulative Variance [\\%]}}}} & {cum_a[0]} & {cum_a[1]} & {cum_a[2]} & {cum_b[0]} & {cum_b[1]} & {cum_b[2]} \\\\\n"
+
+    latex += r"""\hline
+\multicolumn{8}{l}{\footnotesize Principal component analysis via SVD on Z-score standardized observations ($N=480$ per regime across 4 agent runtimes).} \\
+\multicolumn{8}{l}{\footnotesize Values denote factor loadings (eigenvector entries) and relative contribution percentages: $\text{contrib}_j = v_{jk}^2 \times 100\%$.} \\
+\hline
+\end{tabular}
+\end{table*}
+"""
+    with open(tex_path, "w", encoding="utf-8") as f:
+        f.write(latex)
+    print(f"✅ Generated PCA loadings LaTeX table: {tex_path}")
     return full_output
 
 
@@ -10209,7 +11447,7 @@ if __name__ == "__main__":
 
 ================================================================================
 FILE: scripts/verify_manifest.py
-SHA-256: e891ef4fbd3dede77a1c9fadd528e2b662eefb7f7c34ef4429508cb116959779
+SHA-256: c5d0994d235db26d4a9b2bfd1d83ffb69e6de2f36fac9499232d121b373ec4fa
 ================================================================================
 #!/usr/bin/env python3
 """
@@ -10266,6 +11504,8 @@ def update_manifest() -> int:
         "results/publication_campaign/campaign_metadata.json",
         "results/publication_campaign/spearman_correlation_matrix.json",
         "results/publication_campaign/tables/table_spearman_correlation.tex",
+        "results/publication_campaign/pca_variance_decomposition.json",
+        "results/publication_campaign/tables/table_pca_loadings.tex",
         "results/publication_campaign/prefill_ablation.jsonl",
     ]
     for rel_path in additional:
@@ -10868,7 +12108,7 @@ def test_prompt_token_parity_across_equalized_arms(monkeypatch):
 
 ================================================================================
 FILE: tests/test_statistical_engine.py
-SHA-256: 357fb87f55273026224efc79a446fa2c25edaca8ddc133a7fc7544e6bb832e74
+SHA-256: 8cf49681a89f19291f734545795072da8d1e97407830de8ed6dc39d8032d1b3a
 ================================================================================
 """
 Unit Tests for Statistical Inference Engine & Metrics
@@ -10884,6 +12124,7 @@ from scipy import stats
 from benchmark.analyze_results import (
     bootstrap_ci,
     cliffs_delta,
+    compute_pca_variance_decomposition,
     holm_bonferroni_adjust,
     vargha_delaney_a12,
 )
@@ -10968,6 +12209,30 @@ def test_mann_whitney_significance():
     assert p_val < 0.01
     d = cliffs_delta(sample_fast, sample_slow)
     assert d == -1.0
+
+
+def test_pca_variance_decomposition_orthogonality_and_sum():
+    """Verify that PCA variance decomposition explains 100% variance and maintains orthogonality."""
+    pca_res = compute_pca_variance_decomposition()
+    assert "regime_a_cold_prefill" in pca_res
+    assert "regime_b_warm_kv_cache" in pca_res
+
+    for regime_key in ["regime_a_cold_prefill", "regime_b_warm_kv_cache"]:
+        data = pca_res[regime_key]
+        assert data["n_trials"] == 480
+        assert data["n_variables"] == 12
+
+        # 1. Verify sum of explained variance is 100%
+        assert np.isclose(data["sum_explained_variance_pct"], 100.0, atol=1e-5)
+
+        # 2. Verify maximum orthogonality deviation is negligible (V.T @ V == I)
+        assert data["orthogonality_max_error"] < 1e-10
+
+        # 3. Verify that for each component, variable contributions sum to 100%
+        for comp in data["components"]:
+            contribs = list(comp["contributions_pct"].values())
+            assert np.isclose(sum(contribs), 100.0, atol=0.2)
+
 
 
 

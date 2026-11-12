@@ -53,6 +53,8 @@ def update_manifest() -> int:
         "results/publication_campaign/campaign_metadata.json",
         "results/publication_campaign/spearman_correlation_matrix.json",
         "results/publication_campaign/tables/table_spearman_correlation.tex",
+        "results/publication_campaign/pca_variance_decomposition.json",
+        "results/publication_campaign/tables/table_pca_loadings.tex",
         "results/publication_campaign/prefill_ablation.jsonl",
     ]
     for rel_path in additional:
