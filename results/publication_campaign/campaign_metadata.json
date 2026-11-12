@@ -1,0 +1,46 @@
+{
+  "model": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+  "model_architecture": "Llama-3.2 (3B parameters, GGUF Q4_K_M)",
+  "server": {
+    "engine": "llama.cpp b11887",
+    "cli_arguments": "-c 32768 -np 1 -ngl 99 -t 4",
+    "context_window_tokens": 32768,
+    "gpu_layers": 99,
+    "cpu_threads": 4,
+    "parallel_slots": 1
+  },
+  "hyperparameters": {
+    "temperature": 0.0,
+    "seed": 42
+  },
+  "regimes": {
+    "regime_a_cold_prefill": {
+      "description": "Cold prompt prefill baseline without KV-cache reuse",
+      "cache_prompt": false,
+      "reps_per_condition": 30,
+      "total_evaluations": 600,
+      "warmups_per_condition": 3,
+      "total_warmups": 60,
+      "raw_file": "results/publication_campaign/raw_trials.jsonl",
+      "table_file": "results/publication_campaign/tables/table_journal_ablation.tex"
+    },
+    "regime_b_warm_cache": {
+      "description": "Realistic KV-cache prefix retention regime",
+      "cache_prompt": true,
+      "reps_per_condition": 30,
+      "total_evaluations": 600,
+      "warmups_per_condition": 3,
+      "total_warmups": 60,
+      "raw_file": "results/publication_campaign/warm_cache_trials.jsonl",
+      "table_file": "results/publication_campaign/tables/table_warm_cache.tex"
+    }
+  },
+  "hardware": {
+    "platform": "Apple Mac mini M4 (Mac16,10)",
+    "soc": "Apple M4 (10-Core CPU: 4 Performance + 6 Efficiency)",
+    "gpu": "10-Core Apple Metal GPU",
+    "memory": "24 GB Unified LPDDR5X UMA @ 120 GB/s bandwidth",
+    "os": "macOS 15.x (darwin-arm64)",
+    "telemetry": "Apple Silicon SMC (powermetrics 50 ms current shunts) + Darwin XNU libproc (RUSAGE_INFO_V4)"
+  }
+}

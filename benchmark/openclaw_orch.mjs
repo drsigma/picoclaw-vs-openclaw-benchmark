@@ -173,7 +173,7 @@ async function callLlamaStream(messages, tools, maxTokens) {
     temperature: 0.0,
     seed: 42,
     stream: true,
-    cache_prompt: false
+    cache_prompt: process.env.BENCH_CACHE_PROMPT === "true"
   });
   const t0 = performance.now();
   const resp = await fetch(API_URL, {

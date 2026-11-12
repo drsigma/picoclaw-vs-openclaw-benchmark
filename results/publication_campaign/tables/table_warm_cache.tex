@@ -1,0 +1,38 @@
+\begin{table*}[t]
+\centering
+\caption{Controlled Performance Evaluation under Realistic KV-Cache Reuse Regime (\texttt{cache\_prompt=true}) on Apple Silicon M4. When prompt prefill is amortized via KV-cache retention, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) becomes discriminative between compiled native and interpreted runtimes. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution. Peak Phys RAM denotes lifetime maximum resident physical footprint via Darwin kernel \texttt{libproc}.}
+\label{tab:evaluation_warm_cache_m4}
+\small
+\begin{tabular}{l l c r r r r r r}
+\hline
+\textbf{Workload} & \textbf{Configuration} & \textbf{Prompt/Comp} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Orch Share $\Phi_{\text{orch}}$ [\%]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} \\
+\hline
+W1 & Neural Baseline (Direct) & 152 / 42 & 1453.6 (18.2) & 0.00 / 0.00 & 0.00\% & 0.0 & 19.89 & 28.40 \\
+W1 & PicoClaw (Go Native) & 163 / 42 & 1455.5 (17.3) & 0.03 / 4.16 & 0.29\% & 4.2 & 20.30 & 29.41 \\
+W1 & OpenClaw (Node.js Minimal) & 135 / 42 & 1464.7 (22.7) & 0.09 / 20.65 & 1.51\% & 37.4 & 19.75 & 27.97 \\
+W1 & OpenClaw (Node.js Full 54-Tool) & 4524 / 60 & 16260.5 (126.0) & 0.18 / 24.99 & 0.29\% & 37.8 & 221.53 & 3530.41 \\
+W1 & PythonNative (CPython Reference) & 147 / 42 & 1459.5 (20.4) & 0.07 / 10.19 & 0.73\% & 23.6 & 20.53 & 29.30 \\
+\hline
+W2 & Neural Baseline (Direct) & 208 / 29 & 1208.9 (16.3) & 0.00 / 0.00 & 0.00\% & 0.0 & 17.10 & 20.53 \\
+W2 & PicoClaw (Go Native) & 172 / 29 & 1194.2 (70.1) & 2.04 / 4.05 & 0.54\% & 5.0 & 16.12 & 18.67 \\
+W2 & OpenClaw (Node.js Minimal) & 187 / 29 & 1209.8 (28.4) & 1.39 / 20.48 & 1.84\% & 37.8 & 17.48 & 20.96 \\
+W2 & OpenClaw (Node.js Full 54-Tool) & 4548 / 28 & 15350.9 (84.3) & 1.46 / 24.09 & 0.41\% & 37.8 & 210.26 & 3182.37 \\
+W2 & PythonNative (CPython Reference) & 208 / 29 & 1218.6 (11.5) & 1.02 / 10.09 & 0.93\% & 23.7 & 17.86 & 21.58 \\
+\hline
+W3 & Neural Baseline (Direct) & 369 / 38 & 1945.8 (26.7) & 0.00 / 0.00 & 0.00\% & 0.0 & 26.59 & 50.34 \\
+W3 & PicoClaw (Go Native) & 384 / 38 & 1979.3 (26.9) & 33.24 / 3.70 & 2.04\% & 44.8 & 27.61 & 53.51 \\
+W3 & OpenClaw (Node.js Minimal) & 341 / 38 & 1975.6 (27.9) & 16.84 / 20.17 & 2.21\% & 67.0 & 26.47 & 49.88 \\
+W3 & OpenClaw (Node.js Full 54-Tool) & 4781 / 37 & 16371.3 (85.6) & 15.93 / 24.45 & 0.47\% & 63.0 & 225.68 & 3614.75 \\
+W3 & PythonNative (CPython Reference) & 341 / 38 & 1961.1 (37.1) & 10.04 / 10.73 & 1.26\% & 55.1 & 26.49 & 49.49 \\
+\hline
+W4 & Neural Baseline (Direct) & 616 / 279 & 8384.0 (99.7) & 0.00 / 0.00 & 0.00\% & 0.0 & 124.81 & 1043.96 \\
+W4 & PicoClaw (Go Native) & 573 / 281 & 8477.0 (92.8) & 18.99 / 42.80 & 0.73\% & 9.5 & 125.54 & 1062.88 \\
+W4 & OpenClaw (Node.js Minimal) & 574 / 279 & 8449.8 (96.2) & 8.90 / 70.66 & 0.94\% & 40.3 & 126.08 & 1063.94 \\
+W4 & OpenClaw (Node.js Full 54-Tool) & 5104 / 292 & 25048.7 (220.0) & 9.24 / 123.86 & 0.62\% & 40.0 & 353.83 & 8558.90 \\
+W4 & PythonNative (CPython Reference) & 625 / 279 & 8453.1 (101.4) & 12.98 / 50.02 & 0.75\% & 23.8 & 126.17 & 1065.44 \\
+\hline
+\multicolumn{9}{l}{\footnotesize $n = 30$ independent physical evaluations per condition (600 total evaluations, 60 warmups excluded).} \\
+\multicolumn{9}{l}{\footnotesize Telemetry Backend: apple_smc_powermetrics. Data Source: \texttt{measured\_hardware\_warm\_cache}.}} \\\\
+\hline
+\end{tabular}
+\end{table*}

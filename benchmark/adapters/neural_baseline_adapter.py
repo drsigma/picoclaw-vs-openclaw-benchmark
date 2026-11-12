@@ -65,7 +65,7 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             "temperature": 0.0,
             "seed": 42,
             "stream": True,
-            "cache_prompt": False,
+            "cache_prompt": os.environ.get("BENCH_CACHE_PROMPT", "false").lower() == "true",
         }).encode("utf-8")
 
         t0 = time.monotonic()

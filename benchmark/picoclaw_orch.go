@@ -323,7 +323,7 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 		Temperature: 0.0,
 		Seed:        42,
 		Stream:      true,
-		CachePrompt: false,
+		CachePrompt: os.Getenv("BENCH_CACHE_PROMPT") == "true",
 	}
 	payload, _ := json.Marshal(reqBody)
 	t0 := time.Now()

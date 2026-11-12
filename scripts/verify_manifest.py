@@ -42,7 +42,13 @@ def update_manifest() -> int:
     additional = [
         "scripts/run_prefill_ablation.py",
         "scripts/run_w2_resample.py",
+        "scripts/run_warm_cache_campaign.py",
         "results/publication_campaign/tables/table_prefill_ablation.tex",
+        "results/publication_campaign/tables/table_warm_cache.tex",
+        "results/publication_campaign/warm_cache_trials.jsonl",
+        "results/publication_campaign/warm_cache_summary.json",
+        "results/publication_campaign/warm_cache_statistical_tests.json",
+        "results/publication_campaign/campaign_metadata.json",
     ]
     for rel_path in additional:
         abs_path = os.path.join(REPO_DIR, rel_path)
