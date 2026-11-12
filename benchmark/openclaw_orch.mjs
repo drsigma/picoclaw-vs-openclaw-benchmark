@@ -31,7 +31,7 @@ function buildOpenClawToolCatalog() {
       type: "function",
       function: {
         name: `system_tool_${i}`,
-        description: `OpenClaw dynamic tool descriptor #${i} with TypeBox runtime validation schema and session routing metadata.`,
+        description: `Standard system tool descriptor #${i} for agent runtime evaluation.`,
         parameters: {
           type: "object",
           properties: {
@@ -193,7 +193,9 @@ async function callLlamaStream(messages, tools, maxTokens) {
   let hasServerTimings = false;
   let firstChunk = true;
   let tokenCount = 0;
-  let promptTokens = 0;
+  let cachedTokens = 0;
+  let uncachedPromptTokens = 0;
+  let usagePromptTokens = 0;
   let completionTokens = 0;
   let finishReason = "";
   let outText = "";
@@ -225,8 +227,11 @@ async function callLlamaStream(messages, tools, maxTokens) {
               predictedMs = parsed.timings.predicted_ms;
               hasServerTimings = true;
             }
-            if (typeof parsed.timings.prompt_n === "number" && parsed.timings.prompt_n > 0) {
-              promptTokens = parsed.timings.prompt_n;
+            if (typeof parsed.timings.cache_n === "number" && parsed.timings.cache_n >= 0) {
+              cachedTokens = parsed.timings.cache_n;
+            }
+            if (typeof parsed.timings.prompt_n === "number" && parsed.timings.prompt_n >= 0) {
+              uncachedPromptTokens = parsed.timings.prompt_n;
             }
             if (typeof parsed.timings.predicted_n === "number" && parsed.timings.predicted_n > 0) {
               completionTokens = parsed.timings.predicted_n;
@@ -234,7 +239,7 @@ async function callLlamaStream(messages, tools, maxTokens) {
           }
           if (parsed.usage) {
             if (typeof parsed.usage.prompt_tokens === "number" && parsed.usage.prompt_tokens > 0) {
-              promptTokens = parsed.usage.prompt_tokens;
+              usagePromptTokens = parsed.usage.prompt_tokens;
             }
             if (typeof parsed.usage.completion_tokens === "number" && parsed.usage.completion_tokens > 0) {
               completionTokens = parsed.usage.completion_tokens;
@@ -268,6 +273,7 @@ async function callLlamaStream(messages, tools, maxTokens) {
     }
   }
 
+  const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedPromptTokens);
   const totalNeuralMs = hasServerTimings ? (promptMs + predictedMs) : (performance.now() - t0);
   if (completionTokens === 0) completionTokens = tokenCount;
   if (!finishReason) finishReason = "stop";
@@ -278,6 +284,8 @@ async function callLlamaStream(messages, tools, maxTokens) {
     itlMs,
     promptTokens,
     completionTokens,
+    cachedTokens,
+    uncachedPromptTokens,
     finishReason,
     httpStatus: resp.status,
     outText
@@ -292,6 +300,8 @@ async function runWorkload(tier, warmth, rssIdle) {
   let tDispatchTotal = 0.0;
   let totalPromptTokens = 0;
   let totalCompletionTokens = 0;
+  let totalCachedTokens = 0;
+  let totalUncachedPromptTokens = 0;
   let toolCalls = 0;
   let lastFinishReason = "";
   let lastHttpStatus = 200;
@@ -318,6 +328,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
     totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedPromptTokens = r.uncachedPromptTokens;
     lastFinishReason = r.finishReason;
     lastHttpStatus = r.httpStatus;
     toolCalls = 0;
@@ -329,7 +341,7 @@ async function runWorkload(tier, warmth, rssIdle) {
     tDispatchTotal = tCatalogMs + (performance.now() - tTool0);
     toolCalls = 3;
 
-    const prompt = `System Tool Chain Results:\n1. list_dir: ${res1}\n2. grep_logs: ${res2}\n3. calc_stats: ${res3}\nProvide a concise technical diagnostic summary of the bus latency metrics.`;
+    const prompt = `System Tool Chain Results:\n1. list_dir: ${res1}\n2. grep_logs: ${res2}\n3. calc_stats: ${res3}\nEvaluate the bus latency metrics and execute the next diagnostic step.`;
     const msgs = [
       { role: "system", content: "You are a concise technical systems assistant." },
       { role: "user", content: prompt }
@@ -340,6 +352,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
     totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedPromptTokens = r.uncachedPromptTokens;
     lastFinishReason = r.finishReason;
     lastHttpStatus = r.httpStatus;
   } else if (tier === "W3") {
@@ -358,6 +372,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
     totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedPromptTokens = r.uncachedPromptTokens;
     lastFinishReason = r.finishReason;
     lastHttpStatus = r.httpStatus;
   } else if (tier === "W4") {
@@ -384,11 +400,17 @@ async function runWorkload(tier, warmth, rssIdle) {
       itlSum += r.itlMs;
       totalPromptTokens += r.promptTokens;
       totalCompletionTokens += r.completionTokens;
+      totalCachedTokens += r.cachedTokens;
+      totalUncachedPromptTokens += r.uncachedPromptTokens;
       lastFinishReason = r.finishReason;
       lastHttpStatus = r.httpStatus;
       history.push({ role: "assistant", content: r.outText });
     }
     itlAvg = itlSum / 10.0;
+  }
+
+  if (totalPromptTokens <= 0 || totalCompletionTokens <= 0) {
+    throw new Error(`FATAL: Validation failed - prompt_tokens (${totalPromptTokens}) <= 0 or completion_tokens (${totalCompletionTokens}) <= 0`);
   }
 
   const tTaskMs = performance.now() - tStart;
@@ -400,6 +422,7 @@ async function runWorkload(tier, warmth, rssIdle) {
   const alphaMem = rssPeak / Math.max(1.0, rssIdle);
   const v8UsedHeapMb = v8.getHeapStatistics().used_heap_size / (1024.0 * 1024.0);
   const mode = process.env.OPENCLAW_MODE || "minimal";
+  const cacheHitPct = totalPromptTokens > 0 ? (totalCachedTokens / totalPromptTokens) * 100.0 : 0.0;
 
   return {
     architecture: `OpenClaw [${mode}] (Node.js v26.12)`,
@@ -421,6 +444,9 @@ async function runWorkload(tier, warmth, rssIdle) {
     prompt_tokens: totalPromptTokens,
     completion_tokens: totalCompletionTokens,
     output_tokens: totalCompletionTokens,
+    cached_tokens: totalCachedTokens,
+    uncached_prompt_tokens: totalUncachedPromptTokens,
+    cache_hit_pct: cacheHitPct,
     tool_calls: toolCalls,
     http_status: lastHttpStatus,
     finish_reason: lastFinishReason

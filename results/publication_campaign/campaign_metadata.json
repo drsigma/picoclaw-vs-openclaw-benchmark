@@ -25,16 +25,25 @@
       "table_file": "results/publication_campaign/tables/table_journal_ablation.tex"
     },
     "regime_b_warm_cache": {
-      "description": "Realistic KV-cache prefix retention regime",
+      "description": "Realistic KV-cache prefix retention regime with block-isolation cache protocol",
       "cache_prompt": true,
       "reps_per_condition": 30,
       "total_evaluations": 600,
       "warmups_per_condition": 3,
       "total_warmups": 60,
+      "caching_protocol": "Block-isolation cache evaluation (-np 1, 3 primings per condition block, 30 consecutive evaluations)",
       "raw_file": "results/publication_campaign/warm_cache_trials.jsonl",
       "table_file": "results/publication_campaign/tables/table_warm_cache.tex"
     }
   },
+  "w2_resampling_documentation": {
+    "session": "Revision 5 Physical Resampling",
+    "reason": "Corrected SSE streaming parser for prompt_tokens under tool_calls responses to ensure full prompt length (>2290 tokens) was captured without dropping to 1 token.",
+    "trials_resampled": 150,
+    "warmups_resampled": 15,
+    "backup_preserved": "results/exploratory_campaigns/raw_trials_pre_w2_fix.jsonl"
+  },
+  "total_campaign_net_energy_joules": 288908.76,
   "hardware": {
     "platform": "Apple Mac mini M4 (Mac16,10)",
     "soc": "Apple M4 (10-Core CPU: 4 Performance + 6 Efficiency)",

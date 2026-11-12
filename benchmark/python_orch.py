@@ -39,7 +39,7 @@ def build_tool_catalog(count: int = 15) -> list[dict]:
             "type": "function",
             "function": {
                 "name": f"system_tool_{i}",
-                "description": f"OpenClaw dynamic tool descriptor #{i} with TypeBox runtime validation schema and session routing metadata.",
+                "description": f"Standard system tool descriptor #{i} for agent runtime evaluation.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -156,7 +156,9 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
     ttft_ms = 0.0
     first_chunk = True
     token_count = 0
-    prompt_tokens = 0
+    cached_tokens = 0
+    uncached_prompt_tokens = 0
+    usage_prompt_tokens = 0
     completion_tokens = 0
     finish_reason = ""
     out_text = []
@@ -183,15 +185,17 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
                     if "predicted_ms" in timings:
                         predicted_ms = float(timings["predicted_ms"])
                         has_server_timings = True
-                    if "prompt_n" in timings and int(timings["prompt_n"]) > 0:
-                        prompt_tokens = int(timings["prompt_n"])
+                    if "cache_n" in timings and int(timings["cache_n"]) >= 0:
+                        cached_tokens = int(timings["cache_n"])
+                    if "prompt_n" in timings and int(timings["prompt_n"]) >= 0:
+                        uncached_prompt_tokens = int(timings["prompt_n"])
                     if "predicted_n" in timings and int(timings["predicted_n"]) > 0:
                         completion_tokens = int(timings["predicted_n"])
 
                 usage = chunk.get("usage")
                 if isinstance(usage, dict):
                     if "prompt_tokens" in usage and int(usage["prompt_tokens"]) > 0:
-                        prompt_tokens = int(usage["prompt_tokens"])
+                        usage_prompt_tokens = int(usage["prompt_tokens"])
                     if "completion_tokens" in usage and int(usage["completion_tokens"]) > 0:
                         completion_tokens = int(usage["completion_tokens"])
 
@@ -218,6 +222,7 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
             except Exception:
                 pass
 
+    prompt_tokens = usage_prompt_tokens if usage_prompt_tokens > 0 else (cached_tokens + uncached_prompt_tokens)
     if has_server_timings:
         total_neural_ms = prompt_ms + predicted_ms
     else:
@@ -229,7 +234,7 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
         finish_reason = "stop"
 
     itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
-    return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, finish_reason, http_status, "".join(out_text)
+    return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
 
 
 def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
@@ -240,6 +245,8 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
     t_dispatch_total = 0.0
     total_prompt_tokens = 0
     total_completion_tokens = 0
+    total_cached_tokens = 0
+    total_uncached_prompt_tokens = 0
     tool_calls = 0
     last_finish_reason = ""
     last_http_status = 200
@@ -261,12 +268,14 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": prompt},
         ]
-        tn, ttft, itl, ptok, ctok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 64)
+        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 64)
         t_neural_total = tn
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
         total_completion_tokens = ctok
+        total_cached_tokens = c_tok
+        total_uncached_prompt_tokens = unc_tok
         last_finish_reason = fr
         last_http_status = hstatus
         tool_calls = 0
@@ -279,17 +288,19 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         t_dispatch_total = t_cat_ms + (time.monotonic() - t0_tool) * 1000.0
         tool_calls = 3
 
-        prompt = f"System Tool Chain Results:\n1. list_dir: {res1}\n2. grep_logs: {res2}\n3. calc_stats: {res3}\nProvide a concise technical diagnostic summary of the bus latency metrics."
+        prompt = f"System Tool Chain Results:\n1. list_dir: {res1}\n2. grep_logs: {res2}\n3. calc_stats: {res3}\nEvaluate the bus latency metrics and execute the next diagnostic step."
         msgs = [
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": prompt},
         ]
-        tn, ttft, itl, ptok, ctok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 128)
+        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 128)
         t_neural_total = tn
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
         total_completion_tokens = ctok
+        total_cached_tokens = c_tok
+        total_uncached_prompt_tokens = unc_tok
         last_finish_reason = fr
         last_http_status = hstatus
 
@@ -303,12 +314,14 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": "Retrieved Context:\n" + rag_context + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
         ]
-        tn, ttft, itl, ptok, ctok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
+        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
         t_neural_total = tn
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
         total_completion_tokens = ctok
+        total_cached_tokens = c_tok
+        total_uncached_prompt_tokens = unc_tok
         last_finish_reason = fr
         last_http_status = hstatus
 
@@ -330,17 +343,22 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
                 "role": "user",
                 "content": f"Turn {step} Observation: {stat_str}. State next brief diagnostic action.",
             })
-            tn, ttft, itl, ptok, ctok, fr, hstatus, reply = call_llama_stream(history, tool_catalog, 64)
+            tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, reply = call_llama_stream(history, tool_catalog, 64)
             t_neural_total += tn
             if step == 1:
                 ttft_first = ttft
             itl_sum += itl
             total_prompt_tokens += ptok
             total_completion_tokens += ctok
+            total_cached_tokens += c_tok
+            total_uncached_prompt_tokens += unc_tok
             last_finish_reason = fr
             last_http_status = hstatus
             history.append({"role": "assistant", "content": reply})
         itl_avg = itl_sum / 10.0
+
+    if total_prompt_tokens <= 0 or total_completion_tokens <= 0:
+        raise RuntimeError(f"FATAL: Validation failed - prompt_tokens ({total_prompt_tokens}) <= 0 or completion_tokens ({total_completion_tokens}) <= 0")
 
     t_task_ms = (time.monotonic() - t_start) * 1000.0
     t_http_ms = max(0.0, t_task_ms - t_neural_total - t_dispatch_total)
@@ -349,6 +367,7 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
     r_tool = (tool_calls / (t_dispatch_total / 1000.0)) if (tool_calls > 0 and t_dispatch_total > 0) else 0.0
     rss_peak = max(rss_idle, get_rss_mb())
     alpha_mem = rss_peak / max(1.0, rss_idle)
+    cache_hit_pct = (total_cached_tokens / total_prompt_tokens * 100.0) if total_prompt_tokens > 0 else 0.0
 
     return {
         "architecture": "PythonNative (CPython 3.12)",
@@ -369,6 +388,9 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         "prompt_tokens": total_prompt_tokens,
         "completion_tokens": total_completion_tokens,
         "output_tokens": total_completion_tokens,
+        "cached_tokens": total_cached_tokens,
+        "uncached_prompt_tokens": total_uncached_prompt_tokens,
+        "cache_hit_pct": cache_hit_pct,
         "tool_calls": tool_calls,
         "http_status": last_http_status,
         "finish_reason": last_finish_reason,

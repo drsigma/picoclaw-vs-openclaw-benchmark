@@ -76,6 +76,9 @@ type TrialResult struct {
 	PromptTokens     int     `json:"prompt_tokens"`
 	CompletionTokens int     `json:"completion_tokens"`
 	OutputTokens     int     `json:"output_tokens"`
+	CachedTokens     int     `json:"cached_tokens"`
+	UncachedPromptTokens int `json:"uncached_prompt_tokens"`
+	CacheHitPct      float64 `json:"cache_hit_pct"`
 	ToolCalls        int     `json:"tool_calls"`
 	HttpStatus       int     `json:"http_status"`
 	FinishReason     string  `json:"finish_reason"`
@@ -108,7 +111,7 @@ func buildStandardToolCatalog(count int) []ToolDefinition {
 			Type: "function",
 			Function: ToolFunction{
 				Name:        fmt.Sprintf("system_tool_%d", i),
-				Description: fmt.Sprintf("OpenClaw dynamic tool descriptor #%d with TypeBox runtime validation schema and session routing metadata.", i),
+				Description: fmt.Sprintf("Standard system tool descriptor #%d for agent runtime evaluation.", i),
 				Parameters: FunctionParameters{
 					Type: "object",
 					Properties: map[string]FunctionParameterProp{
@@ -211,14 +214,16 @@ type docScore struct {
 }
 
 type StreamResult struct {
-	TotalNeuralMs    float64
-	TTFTMs           float64
-	ITLMs            float64
-	PromptTokens     int
-	CompletionTokens int
-	FinishReason     string
-	HttpStatus       int
-	OutputText       string
+	TotalNeuralMs        float64
+	TTFTMs               float64
+	ITLMs                float64
+	PromptTokens         int
+	CompletionTokens     int
+	CachedTokens         int
+	UncachedPromptTokens int
+	FinishReason         string
+	HttpStatus           int
+	OutputText           string
 }
 
 func executeVectorRAG(baseDir string) string {
@@ -345,7 +350,7 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 	hasServerTimings := false
 	firstChunk := true
 	tokenCount := 0
-	var promptTokens, completionTokens int
+	var cachedTokens, uncachedPromptTokens, usagePromptTokens, completionTokens int
 	var finishReason string
 	var outText strings.Builder
 	reader := bufio.NewReader(resp.Body)
@@ -372,8 +377,11 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 						predictedMs = predMs
 						hasServerTimings = true
 					}
-					if pn, ok := timings["prompt_n"].(float64); ok && pn > 0 {
-						promptTokens = int(pn)
+					if cn, ok := timings["cache_n"].(float64); ok && cn >= 0 {
+						cachedTokens = int(cn)
+					}
+					if pn, ok := timings["prompt_n"].(float64); ok && pn >= 0 {
+						uncachedPromptTokens = int(pn)
 					}
 					if predN, ok := timings["predicted_n"].(float64); ok && predN > 0 {
 						completionTokens = int(predN)
@@ -381,7 +389,7 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 				}
 				if usage, ok := chunk["usage"].(map[string]interface{}); ok {
 					if pt, ok := usage["prompt_tokens"].(float64); ok && pt > 0 {
-						promptTokens = int(pt)
+						usagePromptTokens = int(pt)
 					}
 					if ct, ok := usage["completion_tokens"].(float64); ok && ct > 0 {
 						completionTokens = int(ct)
@@ -421,6 +429,13 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 		totalNeuralMs = float64(time.Since(t0).Nanoseconds()) / 1e6
 	}
 
+	promptTokens := 0
+	if usagePromptTokens > 0 {
+		promptTokens = usagePromptTokens
+	} else {
+		promptTokens = cachedTokens + uncachedPromptTokens
+	}
+
 	if completionTokens == 0 {
 		completionTokens = tokenCount
 	}
@@ -434,21 +449,23 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 	}
 
 	return StreamResult{
-		TotalNeuralMs:    totalNeuralMs,
-		TTFTMs:           ttftMs,
-		ITLMs:            itlMs,
-		PromptTokens:     promptTokens,
-		CompletionTokens: completionTokens,
-		FinishReason:     finishReason,
-		HttpStatus:       resp.StatusCode,
-		OutputText:       outText.String(),
+		TotalNeuralMs:        totalNeuralMs,
+		TTFTMs:               ttftMs,
+		ITLMs:                itlMs,
+		PromptTokens:         promptTokens,
+		CompletionTokens:     completionTokens,
+		CachedTokens:         cachedTokens,
+		UncachedPromptTokens: uncachedPromptTokens,
+		FinishReason:         finishReason,
+		HttpStatus:           resp.StatusCode,
+		OutputText:           outText.String(),
 	}
 }
 
 func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssIdle float64) TrialResult {
 	tStart := time.Now()
 	var tNeuralTotal, ttftFirst, itlAvg, tDispatchTotal float64
-	var totalPromptTokens, totalCompletionTokens, toolCalls int
+	var totalPromptTokens, totalCompletionTokens, totalCachedTokens, totalUncachedPromptTokens, toolCalls int
 	var lastFinishReason string
 	lastHttpStatus := 200
 
@@ -475,6 +492,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
 		totalCompletionTokens = sr.CompletionTokens
+		totalCachedTokens = sr.CachedTokens
+		totalUncachedPromptTokens = sr.UncachedPromptTokens
 		lastFinishReason = sr.FinishReason
 		lastHttpStatus = sr.HttpStatus
 		toolCalls = 0
@@ -493,7 +512,7 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		tDispatchTotal = tCatalogMs + float64(time.Since(tTool0).Nanoseconds())/1e6
 		toolCalls = 3
 
-		prompt := fmt.Sprintf("System Tool Chain Results:\n1. list_dir: %s\n2. grep_logs: %s\n3. calc_stats: %s\nProvide a concise technical diagnostic summary of the bus latency metrics.", res1, res2, res3)
+		prompt := fmt.Sprintf("System Tool Chain Results:\n1. list_dir: %s\n2. grep_logs: %s\n3. calc_stats: %s\nEvaluate the bus latency metrics and execute the next diagnostic step.", res1, res2, res3)
 		msgs := []ChatMessage{
 			{Role: "system", Content: "You are a concise technical systems assistant."},
 			{Role: "user", Content: prompt},
@@ -504,6 +523,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
 		totalCompletionTokens = sr.CompletionTokens
+		totalCachedTokens = sr.CachedTokens
+		totalUncachedPromptTokens = sr.UncachedPromptTokens
 		lastFinishReason = sr.FinishReason
 		lastHttpStatus = sr.HttpStatus
 
@@ -523,6 +544,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
 		totalCompletionTokens = sr.CompletionTokens
+		totalCachedTokens = sr.CachedTokens
+		totalUncachedPromptTokens = sr.UncachedPromptTokens
 		lastFinishReason = sr.FinishReason
 		lastHttpStatus = sr.HttpStatus
 
@@ -552,11 +575,17 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 			itlSum += sr.ITLMs
 			totalPromptTokens += sr.PromptTokens
 			totalCompletionTokens += sr.CompletionTokens
+			totalCachedTokens += sr.CachedTokens
+			totalUncachedPromptTokens += sr.UncachedPromptTokens
 			lastFinishReason = sr.FinishReason
 			lastHttpStatus = sr.HttpStatus
 			history = append(history, ChatMessage{Role: "assistant", Content: sr.OutputText})
 		}
 		itlAvg = itlSum / 10.0
+	}
+
+	if totalPromptTokens <= 0 || totalCompletionTokens <= 0 {
+		panic(fmt.Sprintf("FATAL: Validation failed - prompt_tokens (%d) <= 0 or completion_tokens (%d) <= 0", totalPromptTokens, totalCompletionTokens))
 	}
 
 	tTaskMs := float64(time.Since(tStart).Nanoseconds()) / 1e6
@@ -574,28 +603,37 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 	if rssPeak < rssIdle {
 		rssPeak = rssIdle
 	}
+
+	cacheHitPct := 0.0
+	if totalPromptTokens > 0 {
+		cacheHitPct = (float64(totalCachedTokens) / float64(totalPromptTokens)) * 100.0
+	}
+
 	return TrialResult{
-		Architecture:     "PicoClaw (Go 1.23)",
-		Workload:         tier,
-		Warmth:           warmth,
-		TTaskMs:          tTaskMs,
-		TNeuralMs:        tNeuralTotal,
-		TOrchMs:          tOrchMs,
-		PhiOrchPct:       phiOrch,
-		TTFTMs:           ttftFirst,
-		ITLMs:            itlAvg,
-		TDispatchMs:      tDispatchTotal,
-		THttpMs:          tHttpMs,
-		RToolOpsSec:      rTool,
-		RSSIdleMB:        rssIdle,
-		RSSPeakMB:        rssPeak,
-		AlphaMem:         rssPeak / math.Max(1.0, rssIdle),
-		PromptTokens:     totalPromptTokens,
-		CompletionTokens: totalCompletionTokens,
-		OutputTokens:     totalCompletionTokens,
-		ToolCalls:        toolCalls,
-		HttpStatus:       lastHttpStatus,
-		FinishReason:     lastFinishReason,
+		Architecture:         "PicoClaw (Go 1.23)",
+		Workload:             tier,
+		Warmth:               warmth,
+		TTaskMs:              tTaskMs,
+		TNeuralMs:            tNeuralTotal,
+		TOrchMs:              tOrchMs,
+		PhiOrchPct:           phiOrch,
+		TTFTMs:               ttftFirst,
+		ITLMs:                itlAvg,
+		TDispatchMs:          tDispatchTotal,
+		THttpMs:              tHttpMs,
+		RToolOpsSec:          rTool,
+		RSSIdleMB:            rssIdle,
+		RSSPeakMB:            rssPeak,
+		AlphaMem:             rssPeak / math.Max(1.0, rssIdle),
+		PromptTokens:         totalPromptTokens,
+		CompletionTokens:     totalCompletionTokens,
+		OutputTokens:         totalCompletionTokens,
+		CachedTokens:         totalCachedTokens,
+		UncachedPromptTokens: totalUncachedPromptTokens,
+		CacheHitPct:          cacheHitPct,
+		ToolCalls:            toolCalls,
+		HttpStatus:           lastHttpStatus,
+		FinishReason:         lastFinishReason,
 	}
 }
 

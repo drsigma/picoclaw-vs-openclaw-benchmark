@@ -76,7 +76,9 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
         ttft_ms = 0.0
         first_chunk = True
         token_count = 0
-        prompt_tokens = 0
+        cached_tokens = 0
+        uncached_prompt_tokens = 0
+        usage_prompt_tokens = 0
         completion_tokens = 0
         finish_reason = ""
         out_text = []
@@ -103,15 +105,17 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
                         if "predicted_ms" in timings:
                             predicted_ms = float(timings["predicted_ms"])
                             has_server_timings = True
-                        if "prompt_n" in timings and int(timings["prompt_n"]) > 0:
-                            prompt_tokens = int(timings["prompt_n"])
+                        if "cache_n" in timings and int(timings["cache_n"]) >= 0:
+                            cached_tokens = int(timings["cache_n"])
+                        if "prompt_n" in timings and int(timings["prompt_n"]) >= 0:
+                            uncached_prompt_tokens = int(timings["prompt_n"])
                         if "predicted_n" in timings and int(timings["predicted_n"]) > 0:
                             completion_tokens = int(timings["predicted_n"])
 
                     usage = chunk.get("usage")
                     if isinstance(usage, dict):
                         if "prompt_tokens" in usage and int(usage["prompt_tokens"]) > 0:
-                            prompt_tokens = int(usage["prompt_tokens"])
+                            usage_prompt_tokens = int(usage["prompt_tokens"])
                         if "completion_tokens" in usage and int(usage["completion_tokens"]) > 0:
                             completion_tokens = int(usage["completion_tokens"])
 
@@ -138,6 +142,7 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
                 except Exception:
                     pass
 
+        prompt_tokens = usage_prompt_tokens if usage_prompt_tokens > 0 else (cached_tokens + uncached_prompt_tokens)
         if has_server_timings:
             total_neural_ms = prompt_ms + predicted_ms
         else:
@@ -149,7 +154,7 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             finish_reason = "stop"
 
         itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
-        return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, finish_reason, http_status, "".join(out_text)
+        return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
 
     def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> dict[str, Any]:
         t_neural_total = 0.0
@@ -157,6 +162,8 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
         itl_avg = 0.0
         total_prompt_tokens = 0
         total_completion_tokens = 0
+        total_cached_tokens = 0
+        total_uncached_prompt_tokens = 0
         last_finish_reason = ""
         last_http_status = 200
 
@@ -172,12 +179,14 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
                 {"role": "system", "content": "You are a concise technical systems assistant."},
                 {"role": "user", "content": p},
             ]
-            tn, ttft, itl, ptok, ctok, fr, hstatus, _ = self._call_stream(msgs, self.tools, 64)
+            tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = self._call_stream(msgs, self.tools, 64)
             t_neural_total = tn
             ttft_first = ttft
             itl_avg = itl
             total_prompt_tokens = ptok
             total_completion_tokens = ctok
+            total_cached_tokens = c_tok
+            total_uncached_prompt_tokens = unc_tok
             last_finish_reason = fr
             last_http_status = hstatus
 
@@ -185,17 +194,19 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             res1 = execute_tool_list_dir(mock_dir)
             vals, res2 = execute_tool_grep_logs(log_file)
             res3 = execute_tool_calc_stats(vals)
-            p = f"System Tool Chain Results:\n1. list_dir: {res1}\n2. grep_logs: {res2}\n3. calc_stats: {res3}\nProvide a concise technical diagnostic summary of the bus latency metrics."
+            p = f"System Tool Chain Results:\n1. list_dir: {res1}\n2. grep_logs: {res2}\n3. calc_stats: {res3}\nEvaluate the bus latency metrics and execute the next diagnostic step."
             msgs = [
                 {"role": "system", "content": "You are a concise technical systems assistant."},
                 {"role": "user", "content": p},
             ]
-            tn, ttft, itl, ptok, ctok, fr, hstatus, _ = self._call_stream(msgs, self.tools, 128)
+            tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = self._call_stream(msgs, self.tools, 128)
             t_neural_total = tn
             ttft_first = ttft
             itl_avg = itl
             total_prompt_tokens = ptok
             total_completion_tokens = ctok
+            total_cached_tokens = c_tok
+            total_uncached_prompt_tokens = unc_tok
             last_finish_reason = fr
             last_http_status = hstatus
 
@@ -205,12 +216,14 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
                 {"role": "system", "content": "You are a concise technical systems assistant."},
                 {"role": "user", "content": "Retrieved Context:\n" + rag_context + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
             ]
-            tn, ttft, itl, ptok, ctok, fr, hstatus, _ = self._call_stream(msgs, self.tools, 256)
+            tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = self._call_stream(msgs, self.tools, 256)
             t_neural_total = tn
             ttft_first = ttft
             itl_avg = itl
             total_prompt_tokens = ptok
             total_completion_tokens = ctok
+            total_cached_tokens = c_tok
+            total_uncached_prompt_tokens = unc_tok
             last_finish_reason = fr
             last_http_status = hstatus
 
@@ -226,20 +239,26 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
                     "role": "user",
                     "content": f"Turn {step} Observation: {stat_str}. State next brief diagnostic action.",
                 })
-                tn, ttft, itl, ptok, ctok, fr, hstatus, reply = self._call_stream(history, self.tools, 64)
+                tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, reply = self._call_stream(history, self.tools, 64)
                 t_neural_total += tn
                 if step == 1:
                     ttft_first = ttft
                 itl_sum += itl
                 total_prompt_tokens += ptok
                 total_completion_tokens += ctok
+                total_cached_tokens += c_tok
+                total_uncached_prompt_tokens += unc_tok
                 last_finish_reason = fr
                 last_http_status = hstatus
                 history.append({"role": "assistant", "content": reply})
             itl_avg = itl_sum / 10.0
 
+        if total_prompt_tokens <= 0 or total_completion_tokens <= 0:
+            raise RuntimeError(f"FATAL: Validation failed - prompt_tokens ({total_prompt_tokens}) <= 0 or completion_tokens ({total_completion_tokens}) <= 0")
+
         # For Neural Baseline, task time is exactly neural inference time with 0 orchestrator overhead
         t_task_ms = t_neural_total
+        cache_hit_pct = (total_cached_tokens / total_prompt_tokens * 100.0) if total_prompt_tokens > 0 else 0.0
 
         return {
             "architecture": "Neural Baseline (Direct llama.cpp)",
@@ -264,6 +283,9 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             "prompt_tokens": total_prompt_tokens,
             "completion_tokens": total_completion_tokens,
             "output_tokens": total_completion_tokens,
+            "cached_tokens": total_cached_tokens,
+            "uncached_prompt_tokens": total_uncached_prompt_tokens,
+            "cache_hit_pct": cache_hit_pct,
             "tool_calls": 0,
             "http_status": last_http_status,
             "finish_reason": last_finish_reason,

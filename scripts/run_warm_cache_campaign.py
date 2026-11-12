@@ -54,6 +54,7 @@ def generate_warm_cache_latex_table(
     total_evals: int = 600,
     warmups_count: int = 60,
     telemetry_backend: str = "Apple Silicon SMC (50 ms)",
+    data_source: str = "measured_hardware_warm_cache",
 ) -> str:
     workloads = ["W1", "W2", "W3", "W4"]
     configs = [
@@ -66,12 +67,12 @@ def generate_warm_cache_latex_table(
 
     latex_table = r"""\begin{table*}[t]
 \centering
-\caption{Controlled Performance Evaluation under Realistic KV-Cache Reuse Regime (\texttt{cache\_prompt=true}) on Apple Silicon M4. When prompt prefill is amortized via KV-cache retention, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) becomes discriminative between compiled native and interpreted runtimes. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution. Peak Phys RAM denotes lifetime maximum resident physical footprint via Darwin kernel \texttt{libproc}.}
+\caption{Controlled Performance Evaluation under Realistic KV-Cache Reuse Regime (\texttt{cache\_prompt=true}) on Apple Silicon M4. When prompt prefill is amortized via deterministic block-isolated KV-cache retention, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) becomes discriminative between compiled native and interpreted runtimes. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution. Peak Phys RAM denotes lifetime maximum resident physical footprint via Darwin kernel \texttt{libproc}.}
 \label{tab:evaluation_warm_cache_m4}
 \small
-\begin{tabular}{l l c r r r r r r}
+\begin{tabular}{l l c r r r r r r r}
 \hline
-\textbf{Workload} & \textbf{Configuration} & \textbf{Prompt/Comp} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Orch Share $\Phi_{\text{orch}}$ [\%]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} \\
+\textbf{Workload} & \textbf{Configuration} & \textbf{Prompt (Tot/Cache)} & \textbf{Cache Hit [\%]} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Orch Share $\Phi_{\text{orch}}$ [\%]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} \\
 \hline
 """
 
@@ -79,8 +80,11 @@ def generate_warm_cache_latex_table(
         for ak, label in configs:
             s = summary_stats.get(ak, {}).get(w, {})
             pt = int(round(s.get("prompt_tokens_mean", 0)))
-            ct = int(round(s.get("completion_tokens_mean", 0)))
-            tokens_str = f"{pt} / {ct}"
+            cached_t = int(round(s.get("cached_tokens_mean", 0)))
+            tokens_str = f"{pt} / {cached_t}"
+
+            cache_hit = s.get("cache_hit_pct_mean", 0.0)
+            cache_hit_str = f"{cache_hit:.1f}\\%"
 
             task_med = s.get("t_task_median_ms", 0.0)
             task_iqr = s.get("t_task_iqr_ms", 0.0)
@@ -102,20 +106,24 @@ def generate_warm_cache_latex_table(
             edp = s.get("edp_net_mean_js")
             edp_str = f"{edp:.2f}" if edp is not None else r"\textbf{N/A}"
 
-            latex_table += f"{w} & {label} & {tokens_str} & {lat_str} & {disp_http_str} & {phi_str} & {phys_str} & {e_str} & {edp_str} \\\\\n"
+            latex_table += f"{w} & {label} & {tokens_str} & {cache_hit_str} & {lat_str} & {disp_http_str} & {phi_str} & {phys_str} & {e_str} & {edp_str} \\\\\n"
 
         if w_idx < len(workloads) - 1:
             latex_table += "\\hline\n"
 
     latex_table += "\\hline\n"
     latex_table += (
-        f"\\multicolumn{{9}}{{l}}{{\\footnotesize $n = {n_per_cond}$ independent physical evaluations per condition "
-        f"({total_evals} total evaluations, {warmups_count} warmups excluded).}} \\\\\n"
+        f"\\multicolumn{{10}}{{l}}{{\\footnotesize $n = {n_per_cond}$ independent physical evaluations per condition "
+        f"({total_evals} total evaluations, {warmups_count} priming warmups excluded).}} \\\\\n"
     )
-    backend_desc = r"Apple Silicon SMC (\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \texttt{libproc}"
+    backend_desc = (
+        r"Apple Silicon SMC (\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \texttt{libproc}"
+        if "smc" in telemetry_backend.lower()
+        else telemetry_backend
+    )
     latex_table += (
-        f"\\multicolumn{{9}}{{l}}{{\\footnotesize Telemetry Backend: {backend_desc}. "
-        r"Data Source: \texttt{measured\_hardware\_warm\_cache}.}} \\" + "\n"
+        f"\\multicolumn{{10}}{{l}}{{\\footnotesize Telemetry Backend: {backend_desc}. "
+        f"Data Source: \\texttt{{{data_source}}}.}} \\\\\n"
     )
     latex_table += "\\hline\n"
     latex_table += "\\end{tabular}\n\\end{table*}\n"
@@ -190,61 +198,67 @@ def main():
         eval_records = []
         rng = random.Random(42)
 
+        conditions = [(ak, w) for ak in agents for w in workloads]
+        rng.shuffle(conditions)
+        warmups_count = len(conditions) * 3
+        trial_idx = 0
+
+        print(f"\n▶️  Dispatching 20 randomized blocks ({reps_per_condition} evaluations + 3 primings per block = {total_evals} evals, {warmups_count} primings)...")
+
         try:
-            # Phase 1: Warmups (3 per condition = 60 warmups)
-            print("\n🔥 Executing warmup rounds (3 per condition, 60 total)...")
-            for w in workloads:
-                for ak in agents:
-                    ad = adapter_instances[ak]
-                    for w_rep in range(3):
-                        res = ad.run_workload(w, iterations=1)
-                        rec = {
-                            "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                            "agent_key": ak,
-                            "architecture": ad.name,
-                            "runtime": ad.runtime,
-                            "workload": w,
-                            "rep": w_rep + 1,
-                            "is_warmup": True,
-                            "is_simulated": False,
-                            "data_source": "measured_hardware_warm_cache_warmup",
-                            "t_task_ms": round(res.get("t_task_ms", 0.0), 2),
-                            "t_neural_ms": round(res.get("t_neural_ms", 0.0), 2),
-                            "t_orch_ms": round(res.get("t_orch_ms", 0.0), 3),
-                            "t_dispatch_ms": round(res.get("t_dispatch_ms", 0.0), 3),
-                            "t_http_ms": round(res.get("t_http_ms", 0.0), 3),
-                            "rss_peak_mb": round(res.get("rss_peak_mb", 0.0), 2),
-                            "proc_rss_mb": round(res.get("proc_rss_mb", res.get("rss_peak_mb", 0.0)), 2),
-                            "proc_instructions": res.get("proc_instructions", 0),
-                            "proc_cycles": res.get("proc_cycles", 0),
-                            "proc_billed_energy": res.get("proc_billed_energy", 0),
-                            "proc_peak_phys_mb": round(res.get("proc_peak_phys_mb", 0.0), 2),
-                            "prompt_tokens": res.get("prompt_tokens", 0),
-                            "completion_tokens": res.get("completion_tokens", res.get("output_tokens", 0)),
-                            "output_tokens": res.get("output_tokens", 0),
-                            "tool_calls": res.get("tool_calls", 0),
-                            "http_status": res.get("http_status", 200),
-                            "finish_reason": res.get("finish_reason", "stop"),
-                            "energy_total_j": None,
-                            "energy_net_above_idle_j": None,
-                            "edp_js": None,
-                        }
-                        warmup_records.append(rec)
-                        print(
-                            f"   [Warmup] {ak:16s} {w} Rep {w_rep+1}: Task={rec['t_task_ms']}ms, PromptTok={rec['prompt_tokens']}"
-                        )
+            for block_idx, (ak, w) in enumerate(conditions, start=1):
+                ad = adapter_instances[ak]
+                print(f"\n📦 [Block {block_idx:02d}/20] Condition: {ak} on {w} (3 Priming Warmups + {reps_per_condition} Evaluations)")
 
-            # Phase 2: Main Evaluation Trials (30 reps x 20 conditions = 600 trials)
-            print("\n▶️  Dispatching randomized evaluation blocks (30 reps x 20 conditions = 600 trials)...")
-            trial_idx = 0
+                # Priming warmups for this block
+                for w_rep in range(1, 4):
+                    res = ad.run_workload(w, iterations=1)
+                    cached_tokens = res.get("cached_tokens", 0)
+                    uncached_prompt_tokens = res.get("uncached_prompt_tokens", 0)
+                    prompt_tokens = res.get("prompt_tokens", 0)
+                    cache_hit_pct = (cached_tokens / prompt_tokens * 100.0) if prompt_tokens > 0 else 0.0
 
-            for rep in range(1, reps_per_condition + 1):
-                block = [(ak, w) for ak in agents for w in workloads]
-                rng.shuffle(block)
-                for ak, w in block:
+                    rec = {
+                        "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                        "agent_key": ak,
+                        "architecture": ad.name,
+                        "runtime": ad.runtime,
+                        "mode": getattr(ad, "mode", "standard"),
+                        "workload": w,
+                        "rep": w_rep,
+                        "is_warmup": True,
+                        "is_simulated": False,
+                        "data_source": "measured_hardware_warm_cache_warmup",
+                        "t_task_ms": round(res.get("t_task_ms", 0.0), 2),
+                        "t_neural_ms": round(res.get("t_neural_ms", 0.0), 2),
+                        "t_orch_ms": round(res.get("t_orch_ms", 0.0), 3),
+                        "t_dispatch_ms": round(res.get("t_dispatch_ms", 0.0), 3),
+                        "t_http_ms": round(res.get("t_http_ms", 0.0), 3),
+                        "rss_peak_mb": round(res.get("rss_peak_mb", 0.0), 2),
+                        "proc_rss_mb": round(res.get("proc_rss_mb", res.get("rss_peak_mb", 0.0)), 2),
+                        "proc_instructions": res.get("proc_instructions", 0),
+                        "proc_cycles": res.get("proc_cycles", 0),
+                        "proc_billed_energy": res.get("proc_billed_energy", 0),
+                        "proc_peak_phys_mb": round(res.get("proc_peak_phys_mb", 0.0), 2),
+                        "prompt_tokens": prompt_tokens,
+                        "completion_tokens": res.get("completion_tokens", res.get("output_tokens", 0)),
+                        "output_tokens": res.get("output_tokens", 0),
+                        "cached_tokens": cached_tokens,
+                        "uncached_prompt_tokens": uncached_prompt_tokens,
+                        "cache_hit_pct": round(cache_hit_pct, 2),
+                        "tool_calls": res.get("tool_calls", 0),
+                        "http_status": res.get("http_status", 200),
+                        "finish_reason": res.get("finish_reason", "stop"),
+                        "energy_total_j": None,
+                        "energy_net_above_idle_j": None,
+                        "edp_js": None,
+                    }
+                    warmup_records.append(rec)
+                    print(f"   [Priming {w_rep}/3] {ak:16s} {w}: Task={rec['t_task_ms']}ms, Prompt={prompt_tokens}, Cached={cached_tokens} ({cache_hit_pct:.1f}%)")
+
+                # 30 consecutive evaluated repetitions for this condition
+                for eval_rep in range(1, reps_per_condition + 1):
                     trial_idx += 1
-                    ad = adapter_instances[ak]
-
                     t_start_ns = time.monotonic_ns()
                     t0_trial = time.monotonic()
                     res = ad.run_workload(w, iterations=1)
@@ -264,6 +278,9 @@ def main():
                     tokens = res.get("output_tokens", 0)
                     prompt_tokens = res.get("prompt_tokens", 0)
                     completion_tokens = res.get("completion_tokens", tokens)
+                    cached_tokens = res.get("cached_tokens", 0)
+                    uncached_prompt_tokens = res.get("uncached_prompt_tokens", 0)
+                    cache_hit_pct = (cached_tokens / prompt_tokens * 100.0) if prompt_tokens > 0 else 0.0
 
                     energy_total_j = None
                     energy_net_j = None
@@ -281,9 +298,9 @@ def main():
                         "agent_key": ak,
                         "architecture": ad.name,
                         "runtime": ad.runtime,
-                        "mode": ad.mode,
+                        "mode": getattr(ad, "mode", "standard"),
                         "workload": w,
-                        "rep": rep,
+                        "rep": eval_rep,
                         "is_warmup": False,
                         "is_simulated": False,
                         "data_source": "measured_hardware_warm_cache",
@@ -307,6 +324,9 @@ def main():
                         "prompt_tokens": prompt_tokens,
                         "completion_tokens": completion_tokens,
                         "output_tokens": tokens,
+                        "cached_tokens": cached_tokens,
+                        "uncached_prompt_tokens": uncached_prompt_tokens,
+                        "cache_hit_pct": round(cache_hit_pct, 2),
                         "tool_calls": res.get("tool_calls", 0),
                         "http_status": res.get("http_status", 200),
                         "finish_reason": res.get("finish_reason", "stop"),
@@ -317,16 +337,15 @@ def main():
                     }
                     eval_records.append(trial_record)
 
-                    if trial_idx % 10 == 0 or trial_idx == total_evals:
+                    if eval_rep % 10 == 0 or eval_rep == reps_per_condition:
                         e_disp = f"{energy_net_j:.2f}J" if energy_net_j is not None else "N/A"
                         print(
-                            f"   [{trial_idx:03d}/{total_evals:03d}] {ak:16s} {w} Rep {rep}: "
+                            f"   [{trial_idx:03d}/{total_evals:03d}] {ak:16s} {w} Rep {eval_rep:02d}: "
                             f"Task={trial_record['t_task_ms']:6.1f}ms, Orch={trial_record['t_orch_ms']:5.2f}ms, "
-                            f"Φ_orch={phi_orch_pct:4.1f}%, NetE={e_disp}"
+                            f"CacheHit={cache_hit_pct:5.1f}%, Φ_orch={phi_orch_pct:4.1f}%, NetE={e_disp}"
                         )
 
-                    # Small quiescence cooldown
-                    time.sleep(0.05)
+                    time.sleep(0.02)
 
         finally:
             if smc_monitor.active:
@@ -358,6 +377,9 @@ def main():
             rsss = [r["rss_peak_mb"] for r in subset]
             pts = [r["prompt_tokens"] for r in subset]
             cts = [r["completion_tokens"] for r in subset]
+            cached_toks = [r.get("cached_tokens", 0) for r in subset]
+            uncached_toks = [r.get("uncached_prompt_tokens", 0) for r in subset]
+            cache_hits = [r.get("cache_hit_pct", 0.0) for r in subset]
 
             q25, q50, q75 = np.percentile(tasks, [25, 50, 75])
             iqr = q75 - q25
@@ -383,6 +405,9 @@ def main():
                 "rss_peak_mb": float(np.mean(rsss)),
                 "prompt_tokens_mean": float(np.mean(pts)),
                 "completion_tokens_mean": float(np.mean(cts)),
+                "cached_tokens_mean": float(np.mean(cached_toks)),
+                "uncached_prompt_tokens_mean": float(np.mean(uncached_toks)),
+                "cache_hit_pct_mean": float(np.mean(cache_hits)),
                 "energy_net_mean_j": float(np.mean(energies_net)) if energies_net else None,
                 "energy_net_std_j": float(np.std(energies_net, ddof=1)) if len(energies_net) > 1 else None,
                 "edp_net_mean_js": float(np.mean(edps)) if edps else None,
@@ -441,14 +466,28 @@ def main():
         summary_stats,
         tex_path,
         n_per_cond=reps_per_condition,
-        total_evals=total_evals,
+        total_evals=len(eval_records),
         warmups_count=len(warmup_records),
         telemetry_backend=telemetry_backend,
+        data_source=eval_records[0].get("data_source", "measured_hardware_warm_cache") if eval_records else "measured_hardware_warm_cache",
     )
     print(f"✅ Generated LaTeX table: {tex_path}")
 
     # Phase 4: Create campaign_metadata.json
     meta_path = os.path.join(output_dir, "campaign_metadata.json")
+
+    # Calculate total net energy consumed across campaigns
+    total_net_energy_j = 0.0
+    for p in [os.path.join(output_dir, "raw_trials.jsonl"), warm_cache_trials_path]:
+        if os.path.exists(p):
+            with open(p, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        t_rec = json.loads(line)
+                        e_val = t_rec.get("energy_net_above_idle_j")
+                        if e_val is not None:
+                            total_net_energy_j += float(e_val)
+
     metadata = {
         "model": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
         "model_architecture": "Llama-3.2 (3B parameters, GGUF Q4_K_M)",
@@ -476,16 +515,25 @@ def main():
                 "table_file": "results/publication_campaign/tables/table_journal_ablation.tex",
             },
             "regime_b_warm_cache": {
-                "description": "Realistic KV-cache prefix retention regime",
+                "description": "Realistic KV-cache prefix retention regime with block-isolation cache protocol",
                 "cache_prompt": True,
                 "reps_per_condition": 30,
                 "total_evaluations": 600,
                 "warmups_per_condition": 3,
                 "total_warmups": 60,
+                "caching_protocol": "Block-isolation cache evaluation (-np 1, 3 primings per condition block, 30 consecutive evaluations)",
                 "raw_file": "results/publication_campaign/warm_cache_trials.jsonl",
                 "table_file": "results/publication_campaign/tables/table_warm_cache.tex",
             },
         },
+        "w2_resampling_documentation": {
+            "session": "Revision 5 Physical Resampling",
+            "reason": "Corrected SSE streaming parser for prompt_tokens under tool_calls responses to ensure full prompt length (>2290 tokens) was captured without dropping to 1 token.",
+            "trials_resampled": 150,
+            "warmups_resampled": 15,
+            "backup_preserved": "results/exploratory_campaigns/raw_trials_pre_w2_fix.jsonl",
+        },
+        "total_campaign_net_energy_joules": round(total_net_energy_j, 2),
         "hardware": {
             "platform": "Apple Mac mini M4 (Mac16,10)",
             "soc": "Apple M4 (10-Core CPU: 4 Performance + 6 Efficiency)",

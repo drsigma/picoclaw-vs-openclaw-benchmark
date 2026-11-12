@@ -145,12 +145,14 @@ def main():
                 if energy_dict is not None and energy_dict.get("energy_total_j") is not None:
                     energy_total_j = energy_dict["energy_total_j"]
                     energy_net_j = energy_dict["energy_net_above_idle_j"]
-                    edp_js = round(energy_total_j * (t_task_ms / 1000.0), 4)
-                    if tokens > 0:
+                    edp_js = round(energy_net_j * (t_task_ms / 1000.0), 4) if energy_net_j is not None else None
+                    if tokens > 0 and energy_total_j is not None:
                         j_per_token = round(energy_total_j / tokens, 4)
                     ds = "measured_hardware"
                 else:
                     ds = "unprivileged_user_space"
+
+                assert prompt_tokens > 2290, f"FATAL: Workload W2 prompt_tokens ({prompt_tokens}) <= 2290"
 
                 trial_record = {
                     "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -206,6 +208,12 @@ def main():
 
     # 3. Splice new W2 records into raw_trials.jsonl
     raw_trials_path = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
+    backup_path = os.path.join(REPO_DIR, "results", "exploratory_campaigns", "raw_trials_pre_w2_fix.jsonl")
+    if not os.path.exists(backup_path) and os.path.exists(raw_trials_path):
+        import shutil
+        shutil.copyfile(raw_trials_path, backup_path)
+        print(f"📦 Preserved backup of original trials to {backup_path}")
+
     with open(raw_trials_path, "r", encoding="utf-8") as f:
         existing_trials = [json.loads(line) for line in f if line.strip()]
 
@@ -231,8 +239,10 @@ def main():
         for t in final_trials:
             f.write(json.dumps(t) + "\n")
 
+    preserved_count = len(non_w2_warmups) + len(non_w2_evals)
+    spliced_count = len(w2_warmup_records) + len(w2_eval_records)
     print(f"\n✅ Successfully updated {len(final_trials)} total physical trials in {raw_trials_path}")
-    print("   (Preserved 495 W1/W3/W4 trials, spliced 165 newly sampled W2 trials with SMC telemetry)")
+    print(f"   (Preserved {preserved_count} W1/W3/W4 trials, spliced {spliced_count} newly sampled W2 trials with SMC telemetry)")
 
 
 if __name__ == "__main__":

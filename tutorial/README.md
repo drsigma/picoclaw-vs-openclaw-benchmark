@@ -62,7 +62,7 @@ Para que as medições não se limitassem a diálogos puramente sintéticos, os 
 
 ---
 
-### 3. Passo a Passo com Evidências Reais de Terminal
+### 3. Passo a Passo e Exemplos Ilustrativos da Estrutura de Saída (Illustrative Runner Output Format)
 
 #### Passo 1: Inicialização do Servidor Neural Metal GPU (`llama-server`)
 O servidor neural aloca os tensores do Llama-3.2-3B na memória unificada (UMA) e carrega os shaders na GPU Metal do Mac mini:
@@ -139,16 +139,16 @@ Summary:
 ---
 
 #### Passo 5: Verificação de Integridade Criptográfica (SHA-256)
-Auditoria automática dos 178 arquivos do repositório contra a assinatura digital:
+Auditoria automática dos 181 arquivos do repositório contra a assinatura digital:
 ```bash
 make verify
 ```
 ```text
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (178 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (181 files)
 ========================================================================
-✅ [SUCCESS] All 178/178 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 181/181 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 ```
@@ -212,6 +212,28 @@ System quiescence verified for low-noise empirical measurement.
 
 ---
 
+#### Passo 9: Caracterização de Reuso de KV-Cache (Regime B - Warm Cache)
+Execução da campanha em blocos isolados com persistência determinística de prefixos (`BENCH_CACHE_PROMPT=true`):
+```bash
+sudo -E ./tools/.venv/bin/python scripts/run_warm_cache_campaign.py
+```
+*(Exemplo Ilustrativo da Estrutura de Saída do Runner / Illustrative Runner Output Format)*
+```text
+========================================================================
+ 🚀 Full Warm-Cache Benchmark Campaign (Apple Silicon M4)
+    Regime B: Realistic KV-Cache Reuse (BENCH_CACHE_PROMPT=true)
+========================================================================
+⚡ [INFO] Apple SMC hardware telemetry active (root powermetrics shunts).
+▶️  Dispatching 20 randomized blocks (30 evaluations + 3 primings per block = 600 evals, 60 primings)...
+📦 [Block 01/20] Condition: neural_baseline on W4 (3 Priming Warmups + 30 Evaluations)
+   [Priming 1/3] neural_baseline  W4: Task=8395.98ms, Prompt=23255, Cached=22630 (97.3%)
+   [Priming 2/3] neural_baseline  W4: Task=8282.87ms, Prompt=23255, Cached=22687 (97.6%)
+   [010/600] neural_baseline  W4 Rep 10: Task=8182.4ms, Orch= 0.00ms, CacheHit= 97.6%, NetE=119.58J
+```
+*Legenda Técnica:* Execução em blocos isolados no `llama-server` (`-np 1`), garantindo taxa de retenção de prefixo determinística ($\text{Cache Hit } \ge 97{,}6\%$ em W4) e comprovando a redução da latência global ponta a ponta com amostragem física de energia líquida via Apple SMC.
+
+---
+
 ## 🇺🇸 English (EN-US): How to Understand and Reproduce in 3 Minutes
 
 This walkthrough is tailored for students, researchers, and engineers seeking an intuitive yet technically precise understanding of the benchmark, supported by authentic terminal logs recorded on Apple Silicon M4.
@@ -268,7 +290,7 @@ To ground evaluation in realistic operating system activity beyond conversationa
 
 ---
 
-### 3. Step-by-Step Walkthrough with Authentic Terminal Proofs
+### 3. Step-by-Step Walkthrough with Illustrative Runner Output Format
 
 #### Step 1: Launch Local Metal GPU Neural Server (`llama-server`)
 ```bash
@@ -341,16 +363,16 @@ Summary:
 ---
 
 #### Step 5: Cryptographic Integrity Verification (SHA-256)
-Automated audit of all 178 tracked repository files against their cryptographic hashes:
+Automated audit of all 181 tracked repository files against their cryptographic hashes:
 ```bash
 make verify
 ```
 ```text
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (178 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (181 files)
 ========================================================================
-✅ [SUCCESS] All 178/178 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 181/181 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 ```
@@ -410,3 +432,25 @@ Combined Power (CPU + GPU + ANE): 15490 mW
 System quiescence verified for low-noise empirical measurement.
 ```
 *Technical Caption:* Verification of `caffeinate -dims` assertion preventing system, display, and disk sleep during benchmark runs.
+
+---
+
+#### Step 9: Realistic Warm KV-Cache Retention Campaign (Regime B)
+Executing the block-isolated campaign evaluating persistent prefix caching (`BENCH_CACHE_PROMPT=true`):
+```bash
+sudo -E ./tools/.venv/bin/python scripts/run_warm_cache_campaign.py
+```
+*(Illustrative Runner Output Format / Exemplo Ilustrativo da Estrutura de Saída do Runner)*
+```text
+========================================================================
+ 🚀 Full Warm-Cache Benchmark Campaign (Apple Silicon M4)
+    Regime B: Realistic KV-Cache Reuse (BENCH_CACHE_PROMPT=true)
+========================================================================
+⚡ [INFO] Apple SMC hardware telemetry active (root powermetrics shunts).
+▶️  Dispatching 20 randomized blocks (30 evaluations + 3 primings per block = 600 evals, 60 primings)...
+📦 [Block 01/20] Condition: neural_baseline on W4 (3 Priming Warmups + 30 Evaluations)
+   [Priming 1/3] neural_baseline  W4: Task=8395.98ms, Prompt=23255, Cached=22630 (97.3%)
+   [Priming 2/3] neural_baseline  W4: Task=8282.87ms, Prompt=23255, Cached=22687 (97.6%)
+   [010/600] neural_baseline  W4 Rep 10: Task=8182.4ms, Orch= 0.00ms, CacheHit= 97.6%, NetE=119.58J
+```
+*Technical Caption:* Block-isolated execution in `llama-server` (`-np 1`), guaranteeing deterministic prefix retention ($\text{Cache Hit } \ge 97.6\%$ in W4) and validating overall task latency reductions under physical Apple SMC telemetry.

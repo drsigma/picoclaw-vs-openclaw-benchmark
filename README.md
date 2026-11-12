@@ -133,7 +133,7 @@ $^*$*Nota sobre o Baseline Neural / Note on Neural Baseline:* O valor de **`0,0 
   7. **Caracterização de Prefill de Catálogo e Reuso de KV-Cache:** Conforme atestado no estudo de caracterização de catálogos ($0, 15, 54, 100$ ferramentas no llama.cpp / Metal GPU), o inchaço de esquemas corporativos satura o pré-processamento de atenção na GPU Metal ($T_{\text{prefill}}$ cresce de $128\text{ ms}$ para $>4000\text{ ms}$ e $>38000\text{ ms}$), exibindo escalabilidade super-linear compatível com a complexidade de atenção do transformer (*super-linear scaling compatible with transformer attention complexity*), enquanto o reuso do KV-cache elimina essa sobrecarga redundante ($5{,}4\times\text{ a }956\times$ speedup de prefill), confirmando que o gargalo de catálogos volumosos reside na atenção do modelo e não no despacho do orquestrador.
   8. **Dualidade de Regimes Operacionais (Regime A Cold Prefill vs. Regime B Warm Cache):** O repositório avalia dois regimes completos ($n=30$ cada, 660 ensaios por campanha):
      * *Regime A (`cache_prompt=false`):* O prefill frio na GPU Metal domina $>75\%$ do tempo total de execução e satura a potência do encapsulamento em $\approx 16\text{ W}$, provocando quase-paridade ponta a ponta entre os runtimes.
-     * *Regime B (`cache_prompt=true`):* Com o prefill amortizado pelo reuso do KV-cache no `llama-server`, a latência global despenca (ex: W2 cai de $5556\text{ ms}$ para patamares sub-segundo), tornando a fração de sobrecarga do orquestrador ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) visível e altamente discriminante entre o binário Go nativo e runtimes interpretados/JIT.
+     * *Regime B (`cache_prompt=true`):* Com o prefill amortizado pelo reuso do KV-cache no `llama-server` (retenção de prefixo isolada por bloco com $\text{Cache Hit } \ge 97{,}6\%$), a latência global despenca (ex: W2 cai de $5556\text{ ms}$ para patamares próximos a 1,2 s (~4,6× mais rápido)), tornando a fração de sobrecarga do orquestrador ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) claramente mensurável ($\Phi_{\text{orch}}$ de $0{,}29\%$ a $2{,}21\%$) entre o binário Go nativo e runtimes interpretados/JIT.
 
 * **🇺🇸 EN-US:**
   1. **Cold-Start Launch:** PicoClaw cold-starts in **$9.63\text{ ms}$** vs. $225.55\text{ ms}$ for OpenClaw (**$23.4\times$ faster**).
@@ -145,13 +145,13 @@ $^*$*Nota sobre o Baseline Neural / Note on Neural Baseline:* O valor de **`0,0 
   7. **Schema Prefill Characterization & KV-Cache Reuse:** Across catalog sizes ($0, 15, 54, 100$ tools on llama.cpp / Metal GPU), enterprise schema injection escalates GPU prefill duration exhibiting super-linear scaling compatible with transformer attention complexity, while KV-cache activation avoids redundant attention computation ($5.4\times\text{ to }956\times$ prefill speedup), confirming that enterprise schema bloat bottlenecks agent execution via transformer attention costs rather than host orchestrator delay.
   8. **Operational Dual-Regime Trade-offs (Regime A Cold Prefill vs. Regime B Warm Cache):** The testbed characterizes two full campaigns ($n=30$ each, 660 physical trials per regime):
      * *Regime A (`cache_prompt=false`):* Cold attention prefill on the Metal GPU accounts for $>75\%$ of total execution duration and saturates package power at $\approx 16\text{ W}$, producing near-parity in wall-clock duration between host runtimes.
-     * *Regime B (`cache_prompt=true`):* When prompt prefill is amortized via KV-cache slot retention in `llama-server`, overall task duration drops dramatically (e.g. W2 latency drops to sub-second levels), causing orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) to become clearly visible and discriminative across runtimes.
+     * *Regime B (`cache_prompt=true`):* When prompt prefill is amortized via block-isolated KV-cache retention in `llama-server` (verified $\text{Cache Hit } \ge 97.6\%$), overall task duration drops dramatically (e.g. W2 latency drops to near 1.2 s, ~4.6x faster), causing orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) to become clearly measurable ($\Phi_{\text{orch}}$ between $0.29\%$ and $2.21\%$) across runtimes.
 
 ---
 
 ## 🛠️ Guia Didático e Provas de Execução / Beginner's Walkthrough
 
-Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tutorial de 3 minutos e todos os **8 passos com evidências reais de terminal no Apple Silicon M4**, consulte o guia dedicado:
+Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tutorial de 3 minutos e todos os **9 passos com exemplos ilustrativos da estrutura de saída no Apple Silicon M4**, consulte o guia dedicado:
 
 👉 **[Acessar o Guia Didático e Logs em `tutorial/README.md`](tutorial/README.md)**
 
@@ -161,10 +161,11 @@ Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tut
 | **Passo 2** | Inspeção física dos datasets determinísticos em `data/workload_data/`. |
 | **Passo 3** | Execução ao vivo dos traces W1 a W4 com cálculo de $\Delta\text{RSS}$ e latência. |
 | **Passo 4** | Medição estatística de cold-start via `hyperfine` com vantagem de $23{,}4\times$ para o Go. |
-| **Passo 5** | Verificação de integridade criptográfica SHA-256 de todos os 176 arquivos (`make verify`). |
+| **Passo 5** | Verificação de integridade criptográfica SHA-256 de todos os 181 arquivos (`make verify`). |
 | **Passo 6** | Modo Dry-Run portátil de validação completa do pipeline (`make dry-run`). |
 | **Passo 7** | Leitura dos shunts elétricos do chip M4 via Apple SMC (`powermetrics -i 50`). |
 | **Passo 8** | Protocolo de quiescência operacional do macOS (`caffeinate -dims`). |
+| **Passo 9** | Campanha de reuso de KV-cache (Regime B) com taxa de retenção determinística $\ge 97{,}6\%$ via `scripts/run_warm_cache_campaign.py`. |
 
 ---
 

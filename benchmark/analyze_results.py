@@ -161,6 +161,12 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
     for ak, w_dict in groups.items():
         summary_stats[ak] = {}
         for w, items in w_dict.items():
+            for item in items:
+                pt_val = item.get("prompt_tokens", 0)
+                ct_val = item.get("completion_tokens") or item.get("output_tokens", 0)
+                assert pt_val is not None and int(pt_val) > 0, f"Invariant violation: prompt_tokens <= 0 in {ak} {w}"
+                assert ct_val is not None and int(ct_val) > 0, f"Invariant violation: completion_tokens <= 0 in {ak} {w}"
+
             t_tasks = [float(x["t_task_ms"]) for x in items if x.get("t_task_ms") is not None]
             t_orchs = [float(x["t_orch_ms"]) for x in items if x.get("t_orch_ms") is not None]
             t_dispatches = [float(x.get("t_dispatch_ms", 0.0)) for x in items if x.get("t_dispatch_ms") is not None]
@@ -169,6 +175,9 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
             proc_inst = [float(x.get("proc_instructions", 0.0)) for x in items if x.get("proc_instructions") is not None]
             proc_cyc = [float(x.get("proc_cycles", 0.0)) for x in items if x.get("proc_cycles") is not None]
             proc_billed = [float(x.get("proc_billed_energy", 0.0)) for x in items if x.get("proc_billed_energy") is not None]
+            pts = [int(x.get("prompt_tokens", 0)) for x in items]
+            cts = [int(x.get("completion_tokens") or x.get("output_tokens", 0)) for x in items]
+            frs = [str(x.get("finish_reason", "stop")) for x in items]
 
             # Collect energy metrics (handling None for unprivileged runs)
             energies_total = [float(x["energy_total_j"]) for x in items if x.get("energy_total_j") is not None]
@@ -225,6 +234,9 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
                 "proc_instructions": mean_inst,
                 "proc_cycles": mean_cyc,
                 "proc_billed_energy": mean_billed,
+                "prompt_tokens_mean": round(float(np.mean(pts)), 2) if pts else 0,
+                "completion_tokens_mean": round(float(np.mean(cts)), 2) if cts else 0,
+                "finish_reason": frs[0] if frs else "stop",
                 "energy_total_mean_j": round(mean_e_total, 3) if mean_e_total is not None else None,
                 "energy_net_mean_j": round(mean_e_net, 3) if mean_e_net is not None else None,
                 "edp_mean_js": round(mean_edp, 3) if mean_edp is not None else None,

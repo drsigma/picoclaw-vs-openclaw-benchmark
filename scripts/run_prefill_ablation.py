@@ -151,10 +151,18 @@ def call_llama_streaming(messages: list[dict], tools: list[dict], cache_prompt: 
 
 
 def run_prefill_ablation():
+    os.makedirs(os.path.join(OUTPUT_DIR, "tables"), exist_ok=True)
+
+    if "--analyze-only" in sys.argv:
+        print(f"📊 Running analysis and table generation on existing {JSONL_OUT}...")
+        with open(JSONL_OUT, "r", encoding="utf-8") as f:
+            all_records = [json.loads(line) for line in f if line.strip()]
+        generate_latex_table(all_records)
+        compute_prefill_regression_fit(all_records)
+        return
+
     if not check_server_health():
         sys.exit(1)
-
-    os.makedirs(os.path.join(OUTPUT_DIR, "tables"), exist_ok=True)
 
     runtimes = ["picoclaw", "openclaw", "python_native"]
     tool_counts = [0, 15, 54, 100]
@@ -216,45 +224,93 @@ def run_prefill_ablation():
 
     print(f"\n✅ Completed ablation trials! Output written to {JSONL_OUT}")
 
-    # Generate LaTeX Summary Table
+    # Generate LaTeX Summary Table and compute polynomial regression fit
     generate_latex_table(all_records)
+    compute_prefill_regression_fit(all_records)
+
+
+def compute_prefill_regression_fit(records: list[dict]):
+    # Compute polynomial fit on cold prefill trials (prompt_ms vs prompt_tokens)
+    cold_trials = [r for r in records if not r.get("cache_prompt", False)]
+    if not cold_trials:
+        cold_trials = records
+
+    N = np.array([float(r["prompt_tokens"]) for r in cold_trials])
+    y = np.array([float(r["prompt_ms"]) for r in cold_trials])
+
+    # Linear fit: y = beta_1 * N + beta_0
+    lin_coeffs = np.polyfit(N, y, 1)
+    beta_1 = float(lin_coeffs[0])
+    beta_0 = float(lin_coeffs[1])
+    y_pred_lin = beta_1 * N + beta_0
+    ss_tot = float(np.sum((y - np.mean(y)) ** 2))
+    ss_res_lin = float(np.sum((y - y_pred_lin) ** 2))
+    r2_lin = 1.0 - (ss_res_lin / ss_tot) if ss_tot > 0 else 1.0
+
+    # Quadratic fit: y = beta_2 * N^2 + beta_1 * N + beta_0
+    quad_coeffs = np.polyfit(N, y, 2)
+    beta_2_q = float(quad_coeffs[0])
+    beta_1_q = float(quad_coeffs[1])
+    beta_0_q = float(quad_coeffs[2])
+    y_pred_quad = beta_2_q * (N ** 2) + beta_1_q * N + beta_0_q
+    ss_res_quad = float(np.sum((y - y_pred_quad) ** 2))
+    r2_quad = 1.0 - (ss_res_quad / ss_tot) if ss_tot > 0 else 1.0
+
+    fit_results = {
+        "dataset": "results/publication_campaign/prefill_ablation.jsonl",
+        "n_samples": len(cold_trials),
+        "target_variable": "prompt_ms (T_prefill in milliseconds)",
+        "predictor_variable": "prompt_tokens (N)",
+        "linear_fit": {
+            "formula": "T_prefill = beta_1 * N + beta_0",
+            "beta_1": round(beta_1, 6),
+            "beta_0": round(beta_0, 4),
+            "r_squared": round(r2_lin, 4),
+        },
+        "quadratic_fit": {
+            "formula": "T_prefill = beta_2 * N^2 + beta_1 * N + beta_0",
+            "beta_2": round(beta_2_q, 8),
+            "beta_1": round(beta_1_q, 6),
+            "beta_0": round(beta_0_q, 4),
+            "r_squared": round(r2_quad, 4),
+        },
+    }
+
+    out_json = os.path.join(OUTPUT_DIR, "prefill_regression_fit.json")
+    with open(out_json, "w", encoding="utf-8") as f:
+        json.dump(fit_results, f, indent=2)
+    print(f"✅ Generated prefill regression fit: {out_json}")
+    return fit_results
 
 
 def generate_latex_table(records: list[dict]):
-    runtime_labels = {
-        "picoclaw": "PicoClaw (Go Native)",
-        "openclaw": "OpenClaw (Node.js V8)",
-        "python_native": "PythonNative (CPython Reference)",
-    }
-
     latex = r"""\begin{table*}[t]
 \centering
-\caption{Controlled Tool Catalog Schema Prefill and KV-Cache Reuse Characterization (\texttt{llama.cpp} / Metal GPU). Evaluates prompt token length ($N_{\text{prompt}}$), Time-to-First-Token (TTFT), and Prefill duration ($T_{\text{prefill}}$) on the underlying local inference server across catalog sizes ($T \in \{0, 15, 54, 100\}$) under Cold Prefill ($\texttt{cache\_prompt} = \text{false}$) versus Warm KV-Cache Reuse ($\texttt{cache\_prompt} = \text{true}$). Values denote empirical median ($n=10$).}
+\caption{Controlled Tool Catalog Schema Prefill and KV-Cache Reuse Characterization on \texttt{llama.cpp} Metal GPU Server. Evaluates prompt token length ($N_{\text{prompt}}$), Time-to-First-Token (TTFT), and Prefill duration ($T_{\text{prefill}}$) across catalog sizes ($T \in \{0, 15, 54, 100\}$) under Cold Prefill ($\texttt{cache\_prompt} = \text{false}$) versus Warm KV-Cache Reuse ($\texttt{cache\_prompt} = \text{true}$). Values denote empirical median ($n=10$).}
 \label{tab:prefill_ablation}
 \small
-\begin{tabular}{l r r r r r r r}
+\begin{tabular}{r r r r r r r r}
 \hline
-\textbf{Runtime} & \textbf{Tools} & \textbf{$N_{\text{prompt}}$} & \textbf{Cold TTFT [ms]} & \textbf{Warm TTFT [ms]} & \textbf{Cold Prefill [ms]} & \textbf{Warm Prefill [ms]} & \textbf{Speedup} \\
+\textbf{Tools} & \textbf{Prompt Tokens} & \textbf{Cached Tokens (Warm)} & \textbf{Cold TTFT [ms]} & \textbf{Warm TTFT [ms]} & \textbf{Cold Prefill [ms]} & \textbf{Warm Prefill [ms]} & \textbf{Speedup} \\
 \hline
 """
 
-    for rt in ["picoclaw", "openclaw", "python_native"]:
-        label = runtime_labels[rt]
-        for tc in [0, 15, 54, 100]:
-            cold_recs = [r for r in records if r["runtime"] == rt and r["tool_count"] == tc and not r["cache_prompt"]]
-            warm_recs = [r for r in records if r["runtime"] == rt and r["tool_count"] == tc and r["cache_prompt"]]
+    for tc in [0, 15, 54, 100]:
+        cold_recs = [r for r in records if r["tool_count"] == tc and not r["cache_prompt"]]
+        warm_recs = [r for r in records if r["tool_count"] == tc and r["cache_prompt"]]
 
-            n_p = int(np.mean([r["prompt_tokens"] for r in cold_recs])) if cold_recs else 0
-            cold_ttft = float(np.median([r["ttft_ms"] for r in cold_recs])) if cold_recs else 0.0
-            warm_ttft = float(np.median([r["ttft_ms"] for r in warm_recs])) if warm_recs else 0.0
-            cold_prefill = float(np.median([r["prompt_ms"] for r in cold_recs])) if cold_recs else 0.0
-            warm_prefill = float(np.median([r["prompt_ms"] for r in warm_recs])) if warm_recs else 0.0
+        n_p = int(round(np.mean([r["prompt_tokens"] for r in cold_recs]))) if cold_recs else 0
+        cached_warm = int(round(np.mean([r.get("cached_tokens", max(0, r.get("prompt_tokens", 0) - 1)) for r in warm_recs]))) if warm_recs else 0
+        cold_ttft = float(np.median([r["ttft_ms"] for r in cold_recs])) if cold_recs else 0.0
+        warm_ttft = float(np.median([r["ttft_ms"] for r in warm_recs])) if warm_recs else 0.0
+        cold_prefill = float(np.median([r["prompt_ms"] for r in cold_recs])) if cold_recs else 0.0
+        warm_prefill = float(np.median([r["prompt_ms"] for r in warm_recs])) if warm_recs else 0.0
 
-            speedup = (cold_prefill / warm_prefill) if warm_prefill > 0 else (cold_ttft / warm_ttft if warm_ttft > 0 else 1.0)
-            latex += f"{label} & {tc} & {n_p} & {cold_ttft:.1f} & {warm_ttft:.1f} & {cold_prefill:.1f} & {warm_prefill:.1f} & {speedup:.1f}$\\times$ \\\\\n"
-        latex += r"\hline" + "\n"
+        speedup = (cold_prefill / warm_prefill) if warm_prefill > 0 else (cold_ttft / warm_ttft if warm_ttft > 0 else 1.0)
+        latex += f"{tc} & {n_p} & {cached_warm} & {cold_ttft:.1f} & {warm_ttft:.1f} & {cold_prefill:.1f} & {warm_prefill:.1f} & {speedup:.1f}$\\times$ \\\\\n"
 
-    latex += r"""\multicolumn{8}{l}{\footnotesize Decoded via Apple Silicon M4 GPU (Metal Shaders, $4\times$ unified execution threads). Deterministic sampling ($\text{temperature} = 0.0$, $\text{seed} = 42$).} \\
+    latex += r"""\hline
+\multicolumn{8}{l}{\footnotesize Decoded via Apple Silicon M4 Metal GPU; llama.cpp b11887; -c 32768 -np 1 -ngl 99 -t 4; temperature = 0.0, seed = 42.} \\
 \hline
 \end{tabular}
 \end{table*}
@@ -262,7 +318,7 @@ def generate_latex_table(records: list[dict]):
 
     with open(TEX_OUT, "w", encoding="utf-8") as f:
         f.write(latex)
-    print(f"✅ Generated LaTeX ablation table: {TEX_OUT}")
+    print(f"✅ Generated consolidated LaTeX ablation table: {TEX_OUT}")
 
 
 if __name__ == "__main__":

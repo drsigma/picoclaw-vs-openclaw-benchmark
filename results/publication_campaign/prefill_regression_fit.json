@@ -1,0 +1,19 @@
+{
+  "dataset": "results/publication_campaign/prefill_ablation.jsonl",
+  "n_samples": 120,
+  "target_variable": "prompt_ms (T_prefill in milliseconds)",
+  "predictor_variable": "prompt_tokens (N)",
+  "linear_fit": {
+    "formula": "T_prefill = beta_1 * N + beta_0",
+    "beta_1": 2.961249,
+    "beta_0": -1389.7314,
+    "r_squared": 0.9918
+  },
+  "quadratic_fit": {
+    "formula": "T_prefill = beta_2 * N^2 + beta_1 * N + beta_0",
+    "beta_2": 7.605e-05,
+    "beta_1": 1.941847,
+    "beta_0": -29.7202,
+    "r_squared": 0.9999
+  }
+}

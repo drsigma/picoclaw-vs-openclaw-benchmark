@@ -22,13 +22,14 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def test_adapter_registry_contains_all_five_agents():
-    """Verify all 5 evaluation targets are registered in ADAPTER_REGISTRY."""
+    """Verify all 6 evaluation targets including bun_minimal are registered in ADAPTER_REGISTRY."""
     expected_agents = {
         "picoclaw",
         "openclaw_minimal",
         "openclaw_full",
         "python_native",
         "neural_baseline",
+        "bun_minimal",
     }
     registered = set(ADAPTER_REGISTRY.keys())
     assert expected_agents.issubset(registered), f"Missing agents: {expected_agents - registered}"

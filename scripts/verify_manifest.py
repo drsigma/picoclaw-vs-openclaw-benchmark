@@ -40,9 +40,12 @@ def update_manifest() -> int:
 
     # Also track additional core files if present
     additional = [
+        "benchmark/adapters/bun_minimal_adapter.py",
         "scripts/run_prefill_ablation.py",
         "scripts/run_w2_resample.py",
         "scripts/run_warm_cache_campaign.py",
+        "results/exploratory_campaigns/raw_trials_pre_w2_fix.jsonl",
+        "results/publication_campaign/prefill_regression_fit.json",
         "results/publication_campaign/tables/table_prefill_ablation.tex",
         "results/publication_campaign/tables/table_warm_cache.tex",
         "results/publication_campaign/warm_cache_trials.jsonl",

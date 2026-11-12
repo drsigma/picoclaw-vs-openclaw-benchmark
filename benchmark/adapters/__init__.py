@@ -7,6 +7,7 @@ Author / Autor: Rafael Paniccia Cassetta (UFABC)
 from typing import Callable, Dict
 
 from benchmark.adapters.base import AgentOrchestratorAdapter
+from benchmark.adapters.bun_minimal_adapter import BunMinimalAdapter
 from benchmark.adapters.neural_baseline_adapter import NeuralBaselineAdapter
 from benchmark.adapters.openclaw_adapter import OpenClawAdapter
 from benchmark.adapters.picoclaw_adapter import PicoClawAdapter
@@ -18,6 +19,7 @@ ADAPTER_REGISTRY: Dict[str, Callable[[str], AgentOrchestratorAdapter]] = {
     "openclaw_full": lambda repo_dir: OpenClawAdapter(repo_dir, mode="full"),
     "python_native": lambda repo_dir: PythonNativeAdapter(repo_dir),
     "neural_baseline": lambda repo_dir: NeuralBaselineAdapter(),
+    "bun_minimal": lambda repo_dir: BunMinimalAdapter(repo_dir),
 }
 
 
@@ -39,6 +41,7 @@ __all__ = [
     "OpenClawAdapter",
     "PythonNativeAdapter",
     "NeuralBaselineAdapter",
+    "BunMinimalAdapter",
     "get_adapter",
     "ADAPTER_REGISTRY",
 ]
