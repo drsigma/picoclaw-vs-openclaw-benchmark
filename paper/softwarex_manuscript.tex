@@ -124,7 +124,9 @@ The analysis engine (\texttt{benchmark/analyze\_results.py}) computes formal com
 \end{itemize}
 
 \subsection{Hardware Constraints, Permissions, and Third-Party Licenses}
-Direct access to Apple SMC hardware sensors via \texttt{powermetrics} requires elevated \texttt{root} privileges due to Apple Darwin XNU kernel protections against microarchitectural power side-channel vulnerabilities. Crucially, the benchmark runner enforces privilege isolation: all evaluated agent runtimes, orchestrator subprocesses, and the \texttt{llama-server} neural daemon execute strictly in unprivileged user space. When administrative privileges are absent (e.g., standard continuous integration runners or non-root reviewer environments), the telemetry layer degrades gracefully: latency, memory footprint, and POSIX \texttt{libproc} instruction counters are captured continuously, while energy and power dissipation fields are safely flagged as unavailable (\texttt{N/A}).
+In unified-memory System-on-Chip (SoC) architectures such as Apple Silicon M4, physical electrical shunt sensors managed by the System Management Controller (SMC) instrument aggregate hardware power rails (CPU clusters, Metal GPU, and ANE) at the package level rather than individual operating system processes \cite{barroso2007case,you2023zeus}. Consequently, isolating exclusive analog Joules for a single POSIX process during concurrent CPU--GPU execution is physically unobservable at the hardware shunt layer. Following established energy-benchmarking methodology for machine learning systems \cite{you2023zeus,georgiou2022energy}, our harness resolves this architectural constraint via two-layer telemetry: (i) system-wide package energy ($E_{\text{total}}$ and net active energy above quiescent idle baseline) integrated via the composite trapezoidal rule from \texttt{powermetrics} at 50~ms intervals, and (ii) per-process microarchitectural attribution (\texttt{ri\_instructions}, \texttt{ri\_cycles}, \texttt{ri\_billed\_energy}, and \texttt{ri\_lifetime\_max\_phys\_footprint}) polled from the Darwin XNU kernel via \texttt{libproc} (\texttt{proc\_pid\_rusage} with \texttt{RUSAGE\_INFO\_V4}).
+
+Direct access to Apple SMC hardware sensors via \texttt{powermetrics} requires elevated \texttt{root} privileges due to Darwin XNU kernel protections against microarchitectural power side-channel vulnerabilities. Crucially, the benchmark runner enforces privilege isolation: all evaluated agent runtimes, orchestrator subprocesses, and the \texttt{llama-server} neural daemon execute strictly in unprivileged user space. When administrative privileges are absent, the telemetry layer degrades gracefully without synthetic estimation, recording latency, memory footprint, and \texttt{libproc} counters while marking electrical energy fields as unavailable (\texttt{N/A}).
 
 All benchmarked software components are governed by permissive open-source licenses: \texttt{llama.cpp} is licensed under the MIT License; \texttt{PicoClaw} is distributed under the MIT License; and \texttt{OpenClaw} is provided under the MIT License. The benchmark harness itself is released under the MIT License, ensuring unconstrained reproducibility and extensibility.
 
@@ -150,8 +152,8 @@ Across all 600 physical trials on the Apple Silicon M4 testbed, three core empir
 \subsection{Execution Instructions}
 Reviewers can reproduce the entire analysis without local model weights or superuser privileges via:
 \begin{lstlisting}[language=bash]
-# Fast reviewer portable simulation (multi-OS, under 10 seconds):
-make simulate-campaign
+# Fast reviewer portable dry-run (multi-OS, under 5 seconds):
+make dry-run
 
 # Automated unit testing and linting:
 make test

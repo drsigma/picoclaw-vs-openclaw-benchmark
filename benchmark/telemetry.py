@@ -280,9 +280,8 @@ def integrate_energy_trapezoidal(samples: list[dict[str, Any]], idle_package_mw:
 class SMCPowerMonitor:
     """
     Apple SMC Hardware Power Rail Monitor using sudo powermetrics.
-    Samples at 50 ms resolution. If non-root on macOS, utilizes the authentic
-    physical Apple Silicon M4 SMC power trace dataset (powermetrics_parsed.json)
-    to compute numerical trapezoidal energy integration across the live trial duration.
+    Samples at 50 ms resolution. If non-root or on non-macOS platforms,
+    degrades gracefully without synthetic estimation, returning None for energy metrics.
     """
 
     def __init__(self, sample_interval_ms: int = 50):
@@ -291,34 +290,13 @@ class SMCPowerMonitor:
         self.is_root = os.geteuid() == 0 if hasattr(os, "geteuid") else False
         self.has_powermetrics = bool(shutil.which("powermetrics"))
         self.active = self.is_macos and (self.is_root or self._check_sudo()) and self.has_powermetrics
+        self.telemetry_backend = "apple_smc_powermetrics" if self.active else "unprivileged_no_smc"
         self.idle_package_mw = 0.0
-
-        # Load authentic empirical SMC profile for unprivileged macOS execution
-        repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        self.profile_path = os.path.join(repo_dir, "data", "powermetrics_parsed.json")
-        self.profile_data: dict[str, Any] | None = None
-        if os.path.exists(self.profile_path):
-            try:
-                import json
-                with open(self.profile_path, "r", encoding="utf-8") as pf:
-                    self.profile_data = json.load(pf)
-                self.idle_package_mw = float(self.profile_data.get("idle", {}).get("mean_combined_mw", 1662.3))
-            except Exception:
-                self.profile_data = None
-
-        if self.active:
-            self.telemetry_backend = "apple_smc_powermetrics"
-        elif self.is_macos and self.profile_data:
-            self.telemetry_backend = "apple_smc_physical_profile"
-        else:
-            self.telemetry_backend = "unprivileged_no_smc"
 
         self._proc: subprocess.Popen | None = None
         self._thread: threading.Thread | None = None
         self._stop_event = threading.Event()
         self._samples: list[dict[str, Any]] = []
-        self._start_time_ns: int = 0
-        self._current_agent: str = "picoclaw"
 
     def _check_sudo(self) -> bool:
         """Check if sudo is available without password prompt."""
@@ -334,7 +312,8 @@ class SMCPowerMonitor:
         Returns average idle package milliwatts.
         """
         if not self.active:
-            return self.idle_package_mw
+            self.idle_package_mw = 0.0
+            return 0.0
 
         sample_count = max(2, int((duration_sec * 1000.0) / self.sample_interval_ms))
         cmd = [
@@ -356,23 +335,15 @@ class SMCPowerMonitor:
                     samples.append(parse_powermetrics_sample(b))
             if samples:
                 self.idle_package_mw = sum(s["package_mw"] for s in samples) / len(samples)
-            elif self.profile_data:
-                self.idle_package_mw = float(self.profile_data.get("idle", {}).get("mean_combined_mw", 1662.3))
             else:
                 self.idle_package_mw = 0.0
         except Exception:
-            if self.profile_data:
-                self.idle_package_mw = float(self.profile_data.get("idle", {}).get("mean_combined_mw", 1662.3))
-            else:
-                self.idle_package_mw = 0.0
+            self.idle_package_mw = 0.0
 
         return self.idle_package_mw
 
     def start(self, agent_key: str = "picoclaw") -> None:
-        """Starts continuous powermetrics background sampling or records monotonic trial start."""
-        self._start_time_ns = time.monotonic_ns()
-        self._current_agent = agent_key
-
+        """Starts asynchronous continuous powermetrics background sampling."""
         if not self.active:
             return
 
@@ -394,12 +365,13 @@ class SMCPowerMonitor:
                 stderr=subprocess.DEVNULL,
                 text=True,
                 bufsize=1,
+                cwd=None,
             )
             self._thread = threading.Thread(target=self._reader_loop, daemon=True)
             self._thread.start()
         except Exception:
             self.active = False
-            self.telemetry_backend = "apple_smc_physical_profile" if (self.is_macos and self.profile_data) else "unprivileged_no_smc"
+            self.telemetry_backend = "unprivileged_no_smc"
 
     def _reader_loop(self) -> None:
         if self._proc is None or self._proc.stdout is None:
@@ -420,74 +392,30 @@ class SMCPowerMonitor:
 
     def stop(self, agent_key: str | None = None) -> dict[str, float] | None:
         """
-        Stops sampling and returns numerical trapezoidal energy integration.
-        Uses active powermetrics daemon or authentic Apple M4 physical SMC profile.
+        Stops background sampling, terminates the powermetrics daemon,
+        and returns the trapezoidal energy integration result.
+        Returns None strictly if not running in privileged SMC mode.
         """
-        if self.active and self._proc is not None:
-            self._stop_event.set()
+        if not self.active or self._proc is None:
+            return None
+
+        self._stop_event.set()
+        try:
+            self._proc.terminate()
+            self._proc.wait(timeout=2.0)
+        except Exception:
             try:
-                self._proc.terminate()
-                self._proc.wait(timeout=2.0)
+                self._proc.kill()
             except Exception:
-                try:
-                    self._proc.kill()
-                except Exception:
-                    pass
-            finally:
-                self._proc = None
+                pass
+        finally:
+            self._proc = None
 
-            if self._thread is not None:
-                self._thread.join(timeout=1.0)
-                self._thread = None
+        if self._thread is not None:
+            self._thread.join(timeout=1.0)
+            self._thread = None
 
-            return integrate_energy_trapezoidal(self._samples, self.idle_package_mw)
-
-        # Fallback to physical empirical SMC profile collected on Apple Silicon M4
-        if self.is_macos and self.profile_data is not None:
-            t_end_ns = time.monotonic_ns()
-            ak = agent_key or getattr(self, "_current_agent", "picoclaw")
-            trace_key = "picoclaw" if "picoclaw" in ak else "openclaw"
-            base_samples = self.profile_data.get(trace_key, {}).get("samples", [])
-            if not base_samples:
-                return None
-
-            t_start_ns = getattr(self, "_start_time_ns", t_end_ns - 100_000_000)
-            duration_ns = max(1_000_000, t_end_ns - t_start_ns)
-
-            # Reconstruct power sample timeline using the authentic physical samples
-            samples = []
-            curr_ns = t_start_ns
-            idx = 0
-            while curr_ns <= t_end_ns:
-                s_proto = base_samples[idx % len(base_samples)]
-                dt_ns = int(s_proto.get("elapsed_ms", 50.0) * 1e6)
-                samples.append({
-                    "timestamp_ns": curr_ns,
-                    "elapsed_ms": s_proto.get("elapsed_ms", 50.0),
-                    "cpu_mw": float(s_proto["cpu_mw"]),
-                    "gpu_mw": float(s_proto["gpu_mw"]),
-                    "ane_mw": float(s_proto.get("ane_mw", 0.0)),
-                    "package_mw": float(s_proto["combined_mw"]),
-                })
-                curr_ns += dt_ns
-                idx += 1
-                if len(samples) > 20000:
-                    break
-
-            if len(samples) < 2:
-                s_proto = base_samples[0]
-                samples.append({
-                    "timestamp_ns": t_end_ns,
-                    "elapsed_ms": duration_ns / 1e6,
-                    "cpu_mw": float(s_proto["cpu_mw"]),
-                    "gpu_mw": float(s_proto["gpu_mw"]),
-                    "ane_mw": float(s_proto.get("ane_mw", 0.0)),
-                    "package_mw": float(s_proto["combined_mw"]),
-                })
-
-            return integrate_energy_trapezoidal(samples, self.idle_package_mw)
-
-        return None
+        return integrate_energy_trapezoidal(self._samples, self.idle_package_mw)
 
 
 class LinuxRAPLMonitor:
