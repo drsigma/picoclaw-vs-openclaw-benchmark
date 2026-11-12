@@ -112,9 +112,10 @@ def generate_warm_cache_latex_table(
         f"\\multicolumn{{9}}{{l}}{{\\footnotesize $n = {n_per_cond}$ independent physical evaluations per condition "
         f"({total_evals} total evaluations, {warmups_count} warmups excluded).}} \\\\\n"
     )
+    backend_desc = r"Apple Silicon SMC (\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \texttt{libproc}"
     latex_table += (
-        f"\\multicolumn{{9}}{{l}}{{\\footnotesize Telemetry Backend: {telemetry_backend}. "
-        r"Data Source: \texttt{measured\_hardware\_warm\_cache}.}} \\\\" + "\n"
+        f"\\multicolumn{{9}}{{l}}{{\\footnotesize Telemetry Backend: {backend_desc}. "
+        r"Data Source: \texttt{measured\_hardware\_warm\_cache}.}} \\" + "\n"
     )
     latex_table += "\\hline\n"
     latex_table += "\\end{tabular}\n\\end{table*}\n"

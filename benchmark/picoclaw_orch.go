@@ -424,9 +424,6 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 	if completionTokens == 0 {
 		completionTokens = tokenCount
 	}
-	if promptTokens == 0 && len(tools) > 0 {
-		promptTokens = 2295
-	}
 	if finishReason == "" {
 		finishReason = "stop"
 	}

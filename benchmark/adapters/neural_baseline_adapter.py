@@ -145,8 +145,6 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
 
         if completion_tokens == 0:
             completion_tokens = token_count
-        if prompt_tokens == 0 and tools and len(tools) > 0:
-            prompt_tokens = 2295
         if not finish_reason:
             finish_reason = "stop"
 

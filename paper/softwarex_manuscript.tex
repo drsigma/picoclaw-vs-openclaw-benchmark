@@ -112,7 +112,7 @@ Prior benchmarking tools primarily address deep learning model inference through
 MLPerf Inference \cite{reddi2020mlperf} & Neural model throughput & No ($T_{\text{model}}$ only) & External meter only & C++ / Python \\
 LLMPerf \cite{llmperf2023} & Cloud LLM serving/TTFT & No (Network HTTP only) & No (Cloud API) & Python only \\
 Zeus \cite{you2023zeus} & GPU energy (DNN training) & No & NVML / Linux RAPL & Python / PyTorch \\
-AgentBench \cite{yao2023react} & Agent reasoning accuracy & No (Aggregate task time) & No & Python only \\
+AgentBench \cite{liu2023agentbench} & Agent reasoning accuracy & No (Aggregate task time) & No & Python only \\
 \textbf{This Work} & \textbf{Agent runtime overhead} & \textbf{Yes ($T_{\text{orch}} = T_{\text{task}} - T_{\text{neural}}$)} & \textbf{Apple SMC + Linux RAPL} & \textbf{Go, Node.js V8, Python} \\
 \bottomrule
 \end{tabular}
@@ -237,7 +237,7 @@ To evaluate runtime performance under production deployment scenarios where comm
 Contrasting the cold prefill regime (Regime A, Table~\ref{tab:evaluation_ablation_m4}) and the warm cache regime (Regime B, Table~\ref{tab:evaluation_warm_cache_m4}) reveals the operational trade-offs of edge agent execution:
 \begin{itemize}
     \item \textbf{Regime A (\texttt{cache\_prompt=false}):} Cold prompt attention prefill on the Metal GPU accounts for $>75\%$ of end-to-end task latency across all configurations. Because the GPU saturates package power at $\approx 16\text{ W}$ during attention computation, total latency and active energy remain dominated by neural matrix evaluation, producing near-parity in wall-clock duration between host runtimes.
-    \item \textbf{Regime B (\texttt{cache\_prompt=true}):} When prompt prefill is amortized through KV-cache prefix retention in \texttt{llama-server}, overall task duration drops dramatically (e.g., W2 latency drops from $\approx 5556\text{ ms}$ to sub-second durations). In this amortized regime, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) is no longer masked by GPU prefill stalls, emerging as a clear discriminative factor between compiled native and interpreted runtimes.
+    \item \textbf{Regime B (\texttt{cache\_prompt=true}):} When prompt prefill is amortized through KV-cache prefix retention in \texttt{llama-server}, overall task duration drops dramatically: in W2, median task latency drops to $1194.2\text{ ms}$ for PicoClaw (Go Native) and $1209.8\text{ ms}$ for OpenClaw Minimal. Crucially, under this amortized prefill regime, host orchestrator overhead is no longer masked by GPU attention stalls, elevating the relative orchestration share ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) to $1.84\%$ in OpenClaw Minimal versus only $0.54\%$ in PicoClaw, demonstrating that runtime efficiency becomes discriminative when inference stalls are eliminated.
 \end{itemize}
 
 \subsection{Key Findings, Hardware Microarchitecture, and Effect Sizes}
