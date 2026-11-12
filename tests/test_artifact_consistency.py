@@ -8,6 +8,7 @@ Language / Idioma: Bilingual (PT-BR & EN-US comments, English code)
 
 import csv
 import json
+import math
 import os
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -277,6 +278,51 @@ def test_prompt_token_parity_across_equalized_arms(monkeypatch):
                         assert trial.get("prompt_tokens") == expected_tokens[w], (
                             f"{jsonl_rel} mismatch: {a} {w} has {trial.get('prompt_tokens')} != {expected_tokens[w]}"
                         )
+
+
+def test_uma_energy_bandwidth_attribution_artifacts():
+    """Validates existence, numeric integrity, and absence of NaN in UMA attribution artifacts."""
+    trials_path = os.path.join(REPO_DIR, "results", "publication_campaign", "uma_energy_bandwidth_trials.jsonl")
+    json_path = os.path.join(REPO_DIR, "results", "publication_campaign", "uma_energy_bandwidth_attribution.json")
+    table_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_energy_bandwidth_deconvolution.tex")
+
+    assert os.path.exists(trials_path), f"Missing {trials_path}"
+    assert os.path.exists(json_path), f"Missing {json_path}"
+    assert os.path.exists(table_path), f"Missing {table_path}"
+
+    with open(trials_path, "r", encoding="utf-8") as f:
+        trials = [json.loads(line) for line in f if line.strip()]
+
+    assert len(trials) == 120, f"Expected 120 trials, found {len(trials)}"
+    for t in trials:
+        assert not math.isnan(t["energy_cpu_j"]), "Found NaN in energy_cpu_j"
+        assert not math.isnan(t["mj_per_op"]), "Found NaN in mj_per_op"
+        assert t["energy_cpu_j"] >= 0.0, "Negative energy_cpu_j"
+        assert t["proc_billed_energy"] > 0, "Non-positive proc_billed_energy"
+        assert t["total_ops"] in (50, 600), f"Unexpected total_ops: {t['total_ops']}"
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        summary = json.load(f)
+
+    calib = summary["calibration_m4"]
+    assert calib["kappa_mj_per_unit"] > 0, "Invalid kappa_mj_per_unit"
+    assert not math.isnan(calib["kappa_mj_per_unit"]), "NaN in kappa"
+    assert len(calib["ci_95_bootstrap_mj"]) == 2, "Invalid bootstrap CI"
+    assert calib["ci_95_bootstrap_mj"][0] < calib["ci_95_bootstrap_mj"][1], "Inverted bootstrap CI"
+
+    bw = summary["bandwidth_attribution"]
+    assert "host_rag_memory_bandwidth" in bw
+    assert "metal_gpu_lpddr5x_bandwidth" in bw
+    assert bw["metal_gpu_lpddr5x_bandwidth"]["overall"]["mean_gb_s"] > 50.0, "Unexpected low GPU bandwidth"
+
+    with open(table_path, "r", encoding="utf-8") as f:
+        tex = f.read()
+
+    assert "\\begin{table}" in tex
+    assert "tab:energy_bandwidth_deconvolution" in tex
+    assert "NaN" not in tex
+    assert "\\hat{\\kappa}_{\\text{M4}}" in tex
+
 
 
 

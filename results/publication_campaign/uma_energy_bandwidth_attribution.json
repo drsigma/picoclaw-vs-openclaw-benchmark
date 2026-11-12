@@ -1,0 +1,363 @@
+{
+  "metadata": {
+    "timestamp_utc": "2026-11-12T22:12:29.547606+00:00",
+    "hardware": "Apple Mac mini M4 (Mac16,10, 10-core GPU, darwin-arm64)",
+    "telemetry_source": "Apple SMC powermetrics 50ms + Darwin XNU libproc RUSAGE_INFO_V4",
+    "integrity_rule": "100% Physical Telemetry (Zero synthetic or mock data)"
+  },
+  "calibration_m4": {
+    "n_samples": 120,
+    "kappa_joules_per_unit": 5.7274109470319556e-05,
+    "kappa_mj_per_unit": 0.057274,
+    "ci_95_bootstrap_mj": [
+      0.022554,
+      0.48926
+    ],
+    "r_squared": 0.0538,
+    "se_kappa_joules": 2.2022320203348998e-05
+  },
+  "deconvolution_campaigns": {
+    "regime_a": {
+      "W3_python_native": {
+        "workload": "W3",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 94.8272,
+        "e_proc_hat_mean_j": 6.9646,
+        "phi_energy_orch_pct": 7.32,
+        "delta_e_net_vs_baseline_j": 0.7589
+      },
+      "W1_openclaw_minimal": {
+        "workload": "W1",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 94.0638,
+        "e_proc_hat_mean_j": 0.3517,
+        "phi_energy_orch_pct": 0.37,
+        "delta_e_net_vs_baseline_j": 5.9517
+      },
+      "W4_python_native": {
+        "workload": "W4",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 886.1878,
+        "e_proc_hat_mean_j": 4.858,
+        "phi_energy_orch_pct": 0.55,
+        "delta_e_net_vs_baseline_j": 2.9532
+      },
+      "W3_openclaw_minimal": {
+        "workload": "W3",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 102.9058,
+        "e_proc_hat_mean_j": 0.3716,
+        "phi_energy_orch_pct": 0.36,
+        "delta_e_net_vs_baseline_j": 8.8375
+      },
+      "W1_python_native": {
+        "workload": "W1",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 89.4366,
+        "e_proc_hat_mean_j": 4.8744,
+        "phi_energy_orch_pct": 5.46,
+        "delta_e_net_vs_baseline_j": 1.3245
+      },
+      "W3_openclaw_full": {
+        "workload": "W3",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 333.5243,
+        "e_proc_hat_mean_j": 0.3472,
+        "phi_energy_orch_pct": 0.1,
+        "delta_e_net_vs_baseline_j": 239.4559
+      },
+      "W4_openclaw_full": {
+        "workload": "W4",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 3219.7145,
+        "e_proc_hat_mean_j": 0.3697,
+        "phi_energy_orch_pct": 0.01,
+        "delta_e_net_vs_baseline_j": 2336.48
+      },
+      "W3_picoclaw": {
+        "workload": "W3",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 94.1305,
+        "e_proc_hat_mean_j": 0.3051,
+        "phi_energy_orch_pct": 0.32,
+        "delta_e_net_vs_baseline_j": 0.0622
+      },
+      "W4_openclaw_minimal": {
+        "workload": "W4",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 919.4037,
+        "e_proc_hat_mean_j": 0.3778,
+        "phi_energy_orch_pct": 0.04,
+        "delta_e_net_vs_baseline_j": 36.1691
+      },
+      "W1_openclaw_full": {
+        "workload": "W1",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 329.5006,
+        "e_proc_hat_mean_j": 0.3327,
+        "phi_energy_orch_pct": 0.1,
+        "delta_e_net_vs_baseline_j": 241.3885
+      },
+      "W1_picoclaw": {
+        "workload": "W1",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 88.9645,
+        "e_proc_hat_mean_j": 0.3131,
+        "phi_energy_orch_pct": 0.35,
+        "delta_e_net_vs_baseline_j": 0.8524
+      },
+      "W4_picoclaw": {
+        "workload": "W4",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 876.6387,
+        "e_proc_hat_mean_j": 0.4038,
+        "phi_energy_orch_pct": 0.05,
+        "delta_e_net_vs_baseline_j": -6.5959
+      },
+      "W2_python_native": {
+        "workload": "W2",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 86.2878,
+        "e_proc_hat_mean_j": 9.6737,
+        "phi_energy_orch_pct": 11.28,
+        "delta_e_net_vs_baseline_j": 1.4412
+      },
+      "W2_openclaw_minimal": {
+        "workload": "W2",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 85.04,
+        "e_proc_hat_mean_j": 0.2719,
+        "phi_energy_orch_pct": 0.32,
+        "delta_e_net_vs_baseline_j": 0.1934
+      },
+      "W2_openclaw_full": {
+        "workload": "W2",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 308.5554,
+        "e_proc_hat_mean_j": 0.3043,
+        "phi_energy_orch_pct": 0.1,
+        "delta_e_net_vs_baseline_j": 223.7088
+      },
+      "W2_picoclaw": {
+        "workload": "W2",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 84.8063,
+        "e_proc_hat_mean_j": 0.2658,
+        "phi_energy_orch_pct": 0.31,
+        "delta_e_net_vs_baseline_j": -0.0403
+      }
+    },
+    "regime_b": {
+      "W2_openclaw_minimal": {
+        "workload": "W2",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 9.9489,
+        "e_proc_hat_mean_j": 0.2537,
+        "phi_energy_orch_pct": 2.57,
+        "delta_e_net_vs_baseline_j": 0.5949
+      },
+      "W3_python_native": {
+        "workload": "W3",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 9.9247,
+        "e_proc_hat_mean_j": 7.3084,
+        "phi_energy_orch_pct": 71.13,
+        "delta_e_net_vs_baseline_j": 0.8774
+      },
+      "W1_openclaw_minimal": {
+        "workload": "W1",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 13.5788,
+        "e_proc_hat_mean_j": 0.1975,
+        "phi_energy_orch_pct": 1.46,
+        "delta_e_net_vs_baseline_j": -0.1953
+      },
+      "W2_openclaw_full": {
+        "workload": "W2",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 11.0032,
+        "e_proc_hat_mean_j": 0.1985,
+        "phi_energy_orch_pct": 1.81,
+        "delta_e_net_vs_baseline_j": 1.6492
+      },
+      "W3_openclaw_minimal": {
+        "workload": "W3",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 9.3819,
+        "e_proc_hat_mean_j": 0.2408,
+        "phi_energy_orch_pct": 2.56,
+        "delta_e_net_vs_baseline_j": 0.3347
+      },
+      "W1_python_native": {
+        "workload": "W1",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 13.7486,
+        "e_proc_hat_mean_j": 3.9919,
+        "phi_energy_orch_pct": 29.56,
+        "delta_e_net_vs_baseline_j": -0.0255
+      },
+      "W3_openclaw_full": {
+        "workload": "W3",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 14.7401,
+        "e_proc_hat_mean_j": 0.2152,
+        "phi_energy_orch_pct": 1.46,
+        "delta_e_net_vs_baseline_j": 5.6929
+      },
+      "W2_picoclaw": {
+        "workload": "W2",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 8.8625,
+        "e_proc_hat_mean_j": 0.2628,
+        "phi_energy_orch_pct": 2.96,
+        "delta_e_net_vs_baseline_j": -0.4915
+      },
+      "W4_openclaw_full": {
+        "workload": "W4",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 150.7134,
+        "e_proc_hat_mean_j": 0.295,
+        "phi_energy_orch_pct": 0.2,
+        "delta_e_net_vs_baseline_j": 33.0143
+      },
+      "W3_picoclaw": {
+        "workload": "W3",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 9.64,
+        "e_proc_hat_mean_j": 0.2136,
+        "phi_energy_orch_pct": 2.22,
+        "delta_e_net_vs_baseline_j": 0.5927
+      },
+      "W4_openclaw_minimal": {
+        "workload": "W4",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 110.7843,
+        "e_proc_hat_mean_j": 0.3849,
+        "phi_energy_orch_pct": 0.35,
+        "delta_e_net_vs_baseline_j": -6.9147
+      },
+      "W1_openclaw_full": {
+        "workload": "W1",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 17.2382,
+        "e_proc_hat_mean_j": 0.2353,
+        "phi_energy_orch_pct": 1.36,
+        "delta_e_net_vs_baseline_j": 3.464
+      },
+      "W1_picoclaw": {
+        "workload": "W1",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 13.4154,
+        "e_proc_hat_mean_j": 0.2346,
+        "phi_energy_orch_pct": 1.75,
+        "delta_e_net_vs_baseline_j": -0.3587
+      },
+      "W4_picoclaw": {
+        "workload": "W4",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 113.1374,
+        "e_proc_hat_mean_j": 0.2984,
+        "phi_energy_orch_pct": 0.26,
+        "delta_e_net_vs_baseline_j": -4.5617
+      },
+      "W2_python_native": {
+        "workload": "W2",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 9.7031,
+        "e_proc_hat_mean_j": 2.5021,
+        "phi_energy_orch_pct": 25.87,
+        "delta_e_net_vs_baseline_j": 0.3491
+      },
+      "W4_python_native": {
+        "workload": "W4",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 130.1007,
+        "e_proc_hat_mean_j": 7.1963,
+        "phi_energy_orch_pct": 5.56,
+        "delta_e_net_vs_baseline_j": 12.4017
+      }
+    }
+  },
+  "bandwidth_attribution": {
+    "host_rag_memory_bandwidth": {
+      "picoclaw": {
+        "avg_exec_50_reps_ms": 1171.46,
+        "t_per_rag_op_ms": 23.429,
+        "effective_bw_gb_s": 0.67
+      },
+      "openclaw_minimal": {
+        "avg_exec_50_reps_ms": 436.63,
+        "t_per_rag_op_ms": 8.733,
+        "effective_bw_gb_s": 1.8
+      },
+      "openclaw_full": {
+        "avg_exec_50_reps_ms": 433.87,
+        "t_per_rag_op_ms": 8.677,
+        "effective_bw_gb_s": 1.82
+      },
+      "python_native": {
+        "avg_exec_50_reps_ms": 385.86,
+        "t_per_rag_op_ms": 7.717,
+        "effective_bw_gb_s": 2.04
+      }
+    },
+    "metal_gpu_lpddr5x_bandwidth": {
+      "weights_bytes": 2019377696,
+      "bytes_per_kv_token": 114688,
+      "nominal_uma_bw_gb_s": 120.0,
+      "regime_a_cold": {
+        "mean_gb_s": 179.52,
+        "median_gb_s": 135.79,
+        "p05_gb_s": 112.97,
+        "p95_gb_s": 463.96,
+        "util_pct_nominal_120": 149.6
+      },
+      "regime_b_warm": {
+        "mean_gb_s": 164.94,
+        "median_gb_s": 131.87,
+        "p05_gb_s": 112.53,
+        "p95_gb_s": 467.76,
+        "util_pct_nominal_120": 137.4
+      },
+      "overall": {
+        "mean_gb_s": 173.03,
+        "median_gb_s": 134.81,
+        "p05_gb_s": 112.58,
+        "p95_gb_s": 466.49,
+        "util_pct_nominal_120": 144.2
+      }
+    }
+  }
+}

@@ -403,7 +403,41 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
     }
 
 
+def run_local_tools_benchmark(tier: str, iterations: int) -> dict:
+    mock_dir = os.path.join(BASE_DIR, "mock_files")
+    log_file = os.path.join(BASE_DIR, "system_logs.jsonl")
+    total_ops = 0
+    t0 = time.monotonic()
+    if tier == "W2":
+        for _ in range(iterations):
+            build_tool_catalog(15)
+            execute_tool_list_dir(mock_dir)
+            vals, _ = execute_tool_grep_logs(log_file)
+            execute_tool_calc_stats(vals)
+            total_ops += 3
+    elif tier == "W3":
+        for _ in range(iterations):
+            build_tool_catalog(15)
+            execute_vector_rag(BASE_DIR)
+            total_ops += 1
+    else:
+        raise ValueError(f"Unsupported tier for local tools: {tier}")
+    elapsed_ms = (time.monotonic() - t0) * 1000.0
+    return {
+        "workload": tier,
+        "iterations": iterations,
+        "total_ops": total_ops,
+        "t_exec_ms": round(elapsed_ms, 3),
+    }
+
+
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] == "--local-tools":
+        tier = sys.argv[2] if len(sys.argv) > 2 else "W2"
+        iterations = int(sys.argv[3]) if len(sys.argv) > 3 else 200
+        res = run_local_tools_benchmark(tier, iterations)
+        print(json.dumps([res]))
+        return
     tier = sys.argv[1] if len(sys.argv) > 1 else "W1"
     warmth = sys.argv[2] if len(sys.argv) > 2 else "Cold"
     reps = int(sys.argv[3]) if len(sys.argv) > 3 else 1

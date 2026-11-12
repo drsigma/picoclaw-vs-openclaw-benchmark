@@ -64,6 +64,10 @@ def update_manifest() -> int:
         "results/publication_campaign/hyperfine_agent_init.json",
         "results/publication_campaign/llama_server_publication.log",
         "results/publication_campaign/powermetrics_publication_sample.txt",
+        "scripts/run_uma_energy_and_bandwidth_attribution.py",
+        "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
+        "results/publication_campaign/uma_energy_bandwidth_attribution.json",
+        "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex",
     ]
     for rel_path in additional:
         abs_path = os.path.join(REPO_DIR, rel_path)

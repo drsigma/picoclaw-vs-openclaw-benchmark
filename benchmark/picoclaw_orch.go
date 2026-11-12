@@ -637,6 +637,44 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 	}
 }
 
+type LocalToolResult struct {
+	Workload   string  `json:"workload"`
+	Iterations int     `json:"iterations"`
+	TotalOps   int     `json:"total_ops"`
+	TExecMs    float64 `json:"t_exec_ms"`
+}
+
+func runLocalToolsBenchmark(baseDir, tier string, iterations int) LocalToolResult {
+	mockDir := filepath.Join(baseDir, "mock_files")
+	logFile := filepath.Join(baseDir, "system_logs.jsonl")
+	t0 := time.Now()
+	totalOps := 0
+	if tier == "W2" {
+		for i := 0; i < iterations; i++ {
+			buildStandardToolCatalog(15)
+			executeToolListDir(mockDir)
+			vals, _, _ := executeToolGrepLogs(logFile)
+			executeToolCalcStats(vals)
+			totalOps += 3
+		}
+	} else if tier == "W3" {
+		for i := 0; i < iterations; i++ {
+			buildStandardToolCatalog(15)
+			executeVectorRAG(baseDir)
+			totalOps += 1
+		}
+	} else {
+		panic(fmt.Sprintf("Unsupported tier for local tools: %s", tier))
+	}
+	elapsedMs := float64(time.Since(t0).Microseconds()) / 1000.0
+	return LocalToolResult{
+		Workload:   tier,
+		Iterations: iterations,
+		TotalOps:   totalOps,
+		TExecMs:    elapsedMs,
+	}
+}
+
 func main() {
 	tier := "W1"
 	warmth := "Cold"
@@ -660,6 +698,20 @@ func main() {
 	}
 	if baseDir == "" {
 		baseDir = "./data/workload_data"
+	}
+	if len(os.Args) > 1 && os.Args[1] == "--local-tools" {
+		localTier := "W2"
+		localIter := 200
+		if len(os.Args) > 2 {
+			localTier = os.Args[2]
+		}
+		if len(os.Args) > 3 {
+			fmt.Sscanf(os.Args[3], "%d", &localIter)
+		}
+		res := runLocalToolsBenchmark(baseDir, localTier, localIter)
+		out, _ := json.Marshal([]LocalToolResult{res})
+		fmt.Println(string(out))
+		return
 	}
 	if len(os.Args) > 1 {
 		tier = os.Args[1]

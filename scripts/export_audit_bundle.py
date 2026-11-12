@@ -144,6 +144,8 @@ Status Git:
         "results/publication_campaign/hyperfine_agent_init.json",
         "results/publication_campaign/llama_server_publication.log",
         "results/publication_campaign/powermetrics_publication_sample.txt",
+        "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex",
+        "results/publication_campaign/uma_energy_bandwidth_attribution.json",
         "data/manifest_sha256.json",
     ]
     for mf in meta_files:
@@ -155,6 +157,7 @@ Status Git:
         "results/publication_campaign/raw_trials.jsonl",
         "results/publication_campaign/warm_cache_trials.jsonl",
         "results/publication_campaign/prefill_ablation.jsonl",
+        "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
     ]
     for jf in jsonl_files:
         sections.append(get_jsonl_summary(jf))
@@ -179,6 +182,7 @@ Status Git:
         "scripts/run_warm_cache_campaign.py",
         "scripts/run_regime_a_equalized_update.py",
         "scripts/run_inter_session_replication.py",
+        "scripts/run_uma_energy_and_bandwidth_attribution.py",
         "scripts/export_audit_bundle.py",
         "scripts/verify_manifest.py",
         "Makefile",
@@ -215,6 +219,7 @@ def export_raw_jsonl_dataset():
         "results/publication_campaign/raw_trials.jsonl",
         "results/publication_campaign/warm_cache_trials.jsonl",
         "results/publication_campaign/prefill_ablation.jsonl",
+        "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
     ]
     parts = [
         "================================================================================",

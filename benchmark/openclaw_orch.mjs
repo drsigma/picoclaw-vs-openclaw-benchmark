@@ -453,8 +453,46 @@ async function runWorkload(tier, warmth, rssIdle) {
   };
 }
 
+function runLocalToolsBenchmark(tier, iterations) {
+  const mockDir = path.join(BASE_DIR, "mock_files");
+  const logFile = path.join(BASE_DIR, "system_logs.jsonl");
+  const t0 = performance.now();
+  let totalOps = 0;
+  if (tier === "W2") {
+    for (let i = 0; i < iterations; i++) {
+      buildOpenClawToolCatalog();
+      executeToolListDir(mockDir);
+      const { vals } = executeToolGrepLogs(logFile);
+      executeToolCalcStats(vals);
+      totalOps += 3;
+    }
+  } else if (tier === "W3") {
+    for (let i = 0; i < iterations; i++) {
+      buildOpenClawToolCatalog();
+      executeVectorRAG(BASE_DIR);
+      totalOps += 1;
+    }
+  } else {
+    throw new Error(`Unsupported tier for local tools: ${tier}`);
+  }
+  const elapsedMs = performance.now() - t0;
+  return {
+    workload: tier,
+    iterations: iterations,
+    total_ops: totalOps,
+    t_exec_ms: Math.round(elapsedMs * 1000) / 1000,
+  };
+}
+
 async function main() {
   const args = process.argv.slice(2);
+  if (args[0] === "--local-tools") {
+    const tier = args[1] || "W2";
+    const iterations = parseInt(args[2] || "200", 10);
+    const res = runLocalToolsBenchmark(tier, iterations);
+    console.log(JSON.stringify([res]));
+    return;
+  }
   const tier = args[0] || "W1";
   const warmth = args[1] || "Cold";
   const reps = parseInt(args[2] || "1", 10);

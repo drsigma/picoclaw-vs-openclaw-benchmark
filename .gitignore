@@ -13,4 +13,6 @@ __pycache__/
 .DS_Store
 *.log
 results/simulated_check/
+models
+models/
 

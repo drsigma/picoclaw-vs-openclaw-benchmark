@@ -295,6 +295,8 @@ class SMCPowerMonitor:
         self.active = self.is_macos and (self.is_root or self._check_sudo()) and self.has_powermetrics
         self.telemetry_backend = "apple_smc_powermetrics" if self.active else "unprivileged_no_smc"
         self.idle_package_mw = 0.0
+        self.idle_cpu_mw = 0.0
+        self.idle_gpu_mw = 0.0
 
         self._proc: subprocess.Popen | None = None
         self._thread: threading.Thread | None = None
@@ -343,10 +345,16 @@ class SMCPowerMonitor:
                     samples.append(parse_powermetrics_sample(b))
             if samples:
                 self.idle_package_mw = sum(s["package_mw"] for s in samples) / len(samples)
+                self.idle_cpu_mw = sum(s["cpu_mw"] for s in samples) / len(samples)
+                self.idle_gpu_mw = sum(s["gpu_mw"] for s in samples) / len(samples)
             else:
                 self.idle_package_mw = 0.0
+                self.idle_cpu_mw = 0.0
+                self.idle_gpu_mw = 0.0
         except Exception:
             self.idle_package_mw = 0.0
+            self.idle_cpu_mw = 0.0
+            self.idle_gpu_mw = 0.0
 
         return self.idle_package_mw
 
