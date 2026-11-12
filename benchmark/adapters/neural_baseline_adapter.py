@@ -233,6 +233,7 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             ]
             itl_sum = 0.0
             for step in range(1, 11):
+                execute_tool_list_dir(mock_dir)
                 vals, _ = execute_tool_grep_logs(log_file)
                 stat_str = execute_tool_calc_stats(vals)
                 history.append({

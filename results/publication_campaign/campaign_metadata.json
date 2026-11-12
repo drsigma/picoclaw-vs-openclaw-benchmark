@@ -41,7 +41,7 @@
     "reason": "Corrected SSE streaming parser for prompt_tokens under tool_calls responses to ensure full prompt length (>2290 tokens) was captured without dropping to 1 token.",
     "trials_resampled": 150,
     "warmups_resampled": 15,
-    "auditability": "Auditably distinguished within raw_trials.jsonl via ISO-8601 timestamps: W1/W3/W4 baseline (2026-11-12T03:38:57Z to 05:15:00Z, 495 trials) vs W2 resampling (2026-11-12T14:20:00Z to 14:34:54Z, 165 trials)."
+    "backup_preserved": "results/exploratory_campaigns/raw_trials_pre_w2_fix.jsonl"
   },
   "total_campaign_net_energy_joules": 289201.34,
   "hardware": {

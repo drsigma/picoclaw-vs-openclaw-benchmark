@@ -640,10 +640,12 @@ def compute_spearman_correlation_matrix(
         matrix = {}
         for m1, name1, sym1 in metric_defs:
             matrix[m1] = {}
-            vals1 = [float(r[m1]) for r in records if r.get(m1) is not None]
             for m2, name2, sym2 in metric_defs:
-                vals2 = [float(r[m2]) for r in records if r.get(m2) is not None]
-                if len(vals1) == len(vals2) and len(vals1) > 2:
+                # Strict record-level pairwise extraction
+                pairs = [(float(r[m1]), float(r[m2])) for r in records if r.get(m1) is not None and r.get(m2) is not None]
+                if len(pairs) > 2:
+                    vals1 = [p[0] for p in pairs]
+                    vals2 = [p[1] for p in pairs]
                     rho, p_val = stats.spearmanr(vals1, vals2)
                     matrix[m1][m2] = {
                         "rho": round(float(rho), 4),
@@ -657,9 +659,92 @@ def compute_spearman_correlation_matrix(
     mat_a = build_matrix(recs_a) if recs_a else {}
     mat_b = build_matrix(recs_b) if recs_b else {}
 
+    # Define analytical non-tautological pairs for publication table (M4, X6)
+    analytical_pairs = [
+        ("t_task_ms", "prompt_tokens", "$T_{\\text{task}}$ vs $N_{\\text{prompt}}$ (Prompt Token Length)"),
+        ("t_task_ms", "energy_net_above_idle_j", "$T_{\\text{task}}$ vs $E_{\\text{net}}$ (Active Package Energy)"),
+        ("t_task_ms", "t_orch_ms", "$T_{\\text{task}}$ vs $T_{\\text{orch}}$ (Orchestrator Overhead Share)"),
+        ("t_neural_ms", "prompt_tokens", "$T_{\\text{neural}}$ vs $N_{\\text{prompt}}$ (Attention Prefill Duration)"),
+        ("energy_net_above_idle_j", "prompt_tokens", "$E_{\\text{net}}$ vs $N_{\\text{prompt}}$ (Prefill Energy Drain)"),
+        ("proc_instructions", "proc_cycles", "Retired Instructions vs CPU Cycles"),
+        ("proc_instructions", "t_orch_ms", "Retired Instructions vs $T_{\\text{orch}}$"),
+        ("proc_instructions", "rss_peak_mb", "Retired Instructions vs Peak RSS"),
+        ("proc_peak_phys_mb", "t_orch_ms", "Peak Phys RAM vs $T_{\\text{orch}}$"),
+        ("t_dispatch_ms", "t_orch_ms", "$T_{\\text{disp}}$ vs $T_{\\text{orch}}$ (Dispatch Dominance)"),
+        ("cond_means", "task_tokens", "Condition Means ($n=20$): $T_{\\text{task}}$ vs $N_{\\text{prompt}}$"),
+        ("intra_w2", "orch_instr", "Intra-Workload W2 (Fixed $N_{\\text{prompt}}$): $T_{\\text{orch}}$ vs Instr"),
+        ("intra_w3", "disp_task", "Intra-Workload W3 (Vector I/O): $T_{\\text{disp}}$ vs $T_{\\text{task}}$"),
+    ]
+
+    def evaluate_pair(records: list[dict], p_type: str, m1: str, m2: str):
+        if not records:
+            return 0.0, 1.0
+        if p_type == "standard":
+            pairs = [(float(r[m1]), float(r[m2])) for r in records if r.get(m1) is not None and r.get(m2) is not None]
+            if len(pairs) < 3:
+                return 0.0, 1.0
+            r, p = stats.spearmanr([x[0] for x in pairs], [x[1] for x in pairs])
+            return float(r), float(p)
+        elif p_type == "cond_means":
+            conds = {}
+            for r in records:
+                k = (r.get("workload"), r.get("agent_key"))
+                if k not in conds:
+                    conds[k] = {"tasks": [], "tokens": []}
+                if r.get("t_task_ms") is not None and r.get("prompt_tokens") is not None:
+                    conds[k]["tasks"].append(float(r["t_task_ms"]))
+                    conds[k]["tokens"].append(float(r["prompt_tokens"]))
+            mean_tasks = [sum(v["tasks"]) / len(v["tasks"]) for v in conds.values() if v["tasks"]]
+            mean_tokens = [sum(v["tokens"]) / len(v["tokens"]) for v in conds.values() if v["tokens"]]
+            if len(mean_tasks) < 3:
+                return 0.0, 1.0
+            r, p = stats.spearmanr(mean_tasks, mean_tokens)
+            return float(r), float(p)
+        elif p_type == "intra_w2":
+            w2_recs = [r for r in records if r.get("workload") == "W2"]
+            pairs = [(float(r["t_orch_ms"]), float(r["proc_instructions"])) for r in w2_recs if r.get("t_orch_ms") is not None and r.get("proc_instructions") is not None]
+            if len(pairs) < 3:
+                return 0.0, 1.0
+            r, p = stats.spearmanr([x[0] for x in pairs], [x[1] for x in pairs])
+            return float(r), float(p)
+        elif p_type == "intra_w3":
+            w3_recs = [r for r in records if r.get("workload") == "W3"]
+            pairs = [(float(r["t_dispatch_ms"]), float(r["t_task_ms"])) for r in w3_recs if r.get("t_dispatch_ms") is not None and r.get("t_task_ms") is not None]
+            if len(pairs) < 3:
+                return 0.0, 1.0
+            r, p = stats.spearmanr([x[0] for x in pairs], [x[1] for x in pairs])
+            return float(r), float(p)
+        return 0.0, 1.0
+
+    table_data = []
+    p_vals_a = []
+    p_vals_b = []
+
+    for item in analytical_pairs:
+        k1, k2, label = item
+        if k1 == "cond_means":
+            ra, pa = evaluate_pair(recs_a, "cond_means", "", "")
+            rb, pb = evaluate_pair(recs_b, "cond_means", "", "")
+        elif k1 == "intra_w2":
+            ra, pa = evaluate_pair(recs_a, "intra_w2", "", "")
+            rb, pb = evaluate_pair(recs_b, "intra_w2", "", "")
+        elif k1 == "intra_w3":
+            ra, pa = evaluate_pair(recs_a, "intra_w3", "", "")
+            rb, pb = evaluate_pair(recs_b, "intra_w3", "", "")
+        else:
+            ra, pa = evaluate_pair(recs_a, "standard", k1, k2)
+            rb, pb = evaluate_pair(recs_b, "standard", k1, k2)
+
+        table_data.append((label, ra, pa, rb, pb))
+        p_vals_a.append(pa)
+        p_vals_b.append(pb)
+
+    adj_p_a = holm_bonferroni_adjust(p_vals_a)
+    adj_p_b = holm_bonferroni_adjust(p_vals_b)
+
     out_json_path = os.path.join(output_dir, "spearman_correlation_matrix.json")
     full_output = {
-        "description": "Pairwise Spearman Rank Correlation Matrix across 12 Systems Dimensions",
+        "description": "Pairwise Spearman Rank Correlation Matrix across 12 Systems Dimensions with Holm-Bonferroni Adjustment",
         "n_evaluations_regime_a": len(recs_a),
         "n_evaluations_regime_b": len(recs_b),
         "metrics": [m[0] for m in metric_defs],
@@ -675,48 +760,27 @@ def compute_spearman_correlation_matrix(
     tex_path = os.path.join(output_dir, "tables", "table_spearman_correlation.tex")
     latex = r"""\begin{table*}[t]
 \centering
-\caption{Spearman Rank Correlation Matrix ($\rho$) across Key Systems Telemetry Dimensions on Apple Silicon M4. Contrasts Regime A (Cold Prefill, $n=600$) and Regime B (Warm KV-Cache Reuse, $n=600$). In Regime A, prompt attention computation dominates global latency ($T_{\text{task}}$) and energy ($E_{\text{net}}$), yielding near-perfect rank alignment with token length ($\rho > 0.95$). In Regime B, KV-cache amortization unmasks runtime execution dynamics, where retired CPU instructions and dispatch latency strongly decouple from prompt prefill. Statistical significance: $^{***}p < 0.001$, $^{**}p < 0.01$, $^{*}p < 0.05$.}
+\caption{Non-Parametric Spearman Rank Correlation Matrix ($\rho$) across Critical Systems Telemetry Dimensions on Apple Silicon M4. Contrasts Regime A (Cold Prefill, $n=600$) and Regime B (Warm KV-Cache Reuse, $n=600$). Tautological identities ($T_{\text{task}}$ vs $T_{\text{neural}}$, $T_{\text{task}}$ vs EDP, RSS vs PhysRAM) are excluded in favor of non-trivial architectural interactions, condition-level aggregation ($n=20$), and intra-workload controls. $p$-values are adjusted for family-wise error rate control via step-down Holm-Bonferroni: $^{***}p_{\text{adj}} < 0.001$, $^{**}p_{\text{adj}} < 0.01$, $^{*}p_{\text{adj}} < 0.05$.}
 \label{tab:spearman_correlation}
 \small
 \begin{tabular}{l r r r r}
 \hline
-\textbf{Systems Interaction} & \textbf{Regime A ($\rho_{\text{cold}}$)} & \textbf{$p$-value (A)} & \textbf{Regime B ($\rho_{\text{warm}}$)} & \textbf{$p$-value (B)} \\
+\textbf{Systems Interaction} & \textbf{Regime A ($\rho_{\text{cold}}$)} & \textbf{Holm-adj. $p$ (A)} & \textbf{Regime B ($\rho_{\text{warm}}$)} & \textbf{Holm-adj. $p$ (B)} \\
 \hline
 """
-    key_pairs = [
-        ("t_task_ms", "t_neural_ms", "$T_{\\text{task}}$ vs $T_{\\text{neural}}$ (Inference Latency)"),
-        ("t_task_ms", "prompt_tokens", "$T_{\\text{task}}$ vs $N_{\\text{prompt}}$ (Prompt Token Length)"),
-        ("t_task_ms", "energy_net_above_idle_j", "$T_{\\text{task}}$ vs $E_{\\text{net}}$ (Net Package Energy)"),
-        ("t_task_ms", "edp_js", "$T_{\\text{task}}$ vs EDP (Energy-Delay Product)"),
-        ("t_task_ms", "t_orch_ms", "$T_{\\text{task}}$ vs $T_{\\text{orch}}$ (Orchestrator Overhead)"),
-        ("t_neural_ms", "prompt_tokens", "$T_{\\text{neural}}$ vs $N_{\\text{prompt}}$ (Attention Prefill)"),
-        ("energy_net_above_idle_j", "prompt_tokens", "$E_{\\text{net}}$ vs $N_{\\text{prompt}}$ (Prefill Energy Drain)"),
-        ("proc_instructions", "proc_cycles", "Retired Instructions vs CPU Cycles"),
-        ("proc_instructions", "t_orch_ms", "Retired Instructions vs $T_{\\text{orch}}$"),
-        ("proc_instructions", "rss_peak_mb", "Retired Instructions vs Peak RSS"),
-        ("rss_peak_mb", "proc_peak_phys_mb", "Peak RSS vs Peak Physical RAM"),
-        ("t_dispatch_ms", "t_orch_ms", "$T_{\\text{disp}}$ vs $T_{\\text{orch}}$ (Serialization Share)"),
-    ]
 
-    def fmt_rho(mat, m1, m2):
-        if not mat or m1 not in mat or m2 not in mat[m1]:
-            return "N/A", "N/A"
-        cell = mat[m1][m2]
-        r = cell.get("rho")
-        p = cell.get("p_value")
-        if r is None or p is None:
-            return "N/A", "N/A"
-        stars = "***" if p < 0.001 else ("**" if p < 0.01 else ("*" if p < 0.05 else ""))
-        p_str = "$< 10^{-5}$" if p < 0.00001 else f"{p:.4f}"
+    def fmt_cell(r, p_adj):
+        stars = "***" if p_adj < 0.001 else ("**" if p_adj < 0.01 else ("*" if p_adj < 0.05 else ""))
+        p_str = "$< 10^{-5}$" if p_adj < 0.00001 else f"{p_adj:.4f}"
         return f"{r:+.3f}$^{{{stars}}}$", p_str
 
-    for m1, m2, label in key_pairs:
-        rho_a, p_a = fmt_rho(mat_a, m1, m2)
-        rho_b, p_b = fmt_rho(mat_b, m1, m2)
-        latex += f"{label} & {rho_a} & {p_a} & {rho_b} & {p_b} \\\\\n"
+    for idx, (label, ra, pa, rb, pb) in enumerate(table_data):
+        str_ra, str_pa = fmt_cell(ra, adj_p_a[idx])
+        str_rb, str_pb = fmt_cell(rb, adj_p_b[idx])
+        latex += f"{label} & {str_ra} & {str_pa} & {str_rb} & {str_pb} \\\\\n"
 
     latex += r"""\hline
-\multicolumn{5}{l}{\footnotesize Non-parametric Spearman rank correlation evaluated over $N=600$ independent physical evaluations per regime ($1{,}200$ total).} \\
+\multicolumn{5}{l}{\footnotesize Non-parametric Spearman rank correlation with step-down Holm-Bonferroni family-wise error adjustment ($1{,}200$ total physical evaluations).} \\
 \hline
 \end{tabular}
 \end{table*}
@@ -847,14 +911,84 @@ def compute_pca_variance_decomposition(
     pca_a = run_pca_on_records(recs_a)
     pca_b = run_pca_on_records(recs_b)
 
+    def run_within_workload_pca(records: list[dict]):
+        if not records or len(records) < len(metrics):
+            return {}
+        workload_groups = {}
+        for r in records:
+            w = r.get("workload")
+            if w not in workload_groups:
+                workload_groups[w] = []
+            workload_groups[w].append(r)
+
+        z_blocks = []
+        for w, w_recs in sorted(workload_groups.items()):
+            X_w = np.array([[float(r[m]) for m in metrics] for r in w_recs], dtype=np.float64)
+            mean_w = np.mean(X_w, axis=0)
+            std_w = np.std(X_w, axis=0, ddof=1)
+            std_w[std_w == 0.0] = 1.0
+            Z_w = (X_w - mean_w) / std_w
+            z_blocks.append(Z_w)
+
+        Z_within = np.vstack(z_blocks)
+        n = Z_within.shape[0]
+        p = len(metrics)
+
+        U, S, Vt = np.linalg.svd(Z_within, full_matrices=False)
+        V = Vt.T
+
+        if V[10, 0] < 0:
+            V[:, 0] = -V[:, 0]
+        if V[7, 1] < 0:
+            V[:, 1] = -V[:, 1]
+        if V[8, 2] < 0:
+            V[:, 2] = -V[:, 2]
+
+        lambdas = (S ** 2) / (n - 1)
+        total_var = float(np.sum(lambdas))
+        var_exp_pct = (lambdas / total_var) * 100.0
+        cum_var_pct = np.cumsum(var_exp_pct)
+
+        components = []
+        for k in range(min(p, 5)):
+            c_dict = {
+                "component": f"Within_PC{k+1}",
+                "eigenvalue": round(float(lambdas[k]), 4),
+                "explained_variance_pct": round(float(var_exp_pct[k]), 2),
+                "cumulative_variance_pct": round(float(cum_var_pct[k]), 2),
+                "loadings": {},
+                "contributions_pct": {},
+            }
+            for j, m in enumerate(metrics):
+                c_dict["loadings"][m] = round(float(V[j, k]), 4)
+                c_dict["contributions_pct"][m] = round(float((V[j, k] ** 2) * 100.0), 2)
+            components.append(c_dict)
+
+        return {
+            "description": "Within-workload Z-score normalized PCA removing cross-tier scaling effects",
+            "n_trials": n,
+            "eigenvalues": [round(float(x), 4) for x in lambdas[:5]],
+            "explained_variance_pct": [round(float(x), 2) for x in var_exp_pct[:5]],
+            "cumulative_variance_pct": [round(float(x), 2) for x in cum_var_pct[:5]],
+            "components": components,
+        }
+
+    within_pca_a = run_within_workload_pca(recs_a)
+    within_pca_b = run_within_workload_pca(recs_b)
+
     out_json_path = os.path.join(output_dir, "pca_variance_decomposition.json")
     full_output = {
         "description": "Principal Component Analysis (PCA) Variance Decomposition on Apple Silicon M4 across 12 Telemetry Dimensions",
         "method": "SVD on Z-score standardized observation matrix Z = (X - mu) / sigma",
         "evaluated_agents": target_agents,
+        "n_trials_explanation": "Evaluates N=480 trials per regime across 4 agent runtimes. The neural_baseline (120 trials) is omitted from PCA due to structural zeros in host orchestration metrics (T_orch=0, RSS=0, Instructions=0, Cycles=0).",
         "metrics": metrics,
         "regime_a_cold_prefill": pca_a,
         "regime_b_warm_kv_cache": pca_b,
+        "within_workload_normalized_pca": {
+            "regime_a_cold_prefill": within_pca_a,
+            "regime_b_warm_kv_cache": within_pca_b,
+        },
     }
     with open(out_json_path, "w", encoding="utf-8") as f:
         json.dump(full_output, f, indent=2)

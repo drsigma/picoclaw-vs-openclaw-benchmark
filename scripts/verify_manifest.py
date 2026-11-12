@@ -44,6 +44,9 @@ def update_manifest() -> int:
         "scripts/run_prefill_ablation.py",
         "scripts/run_w2_resample.py",
         "scripts/run_warm_cache_campaign.py",
+        "scripts/run_regime_a_equalized_update.py",
+        "scripts/run_inter_session_replication.py",
+        "scripts/export_audit_bundle.py",
         "results/publication_campaign/prefill_regression_fit.json",
         "results/publication_campaign/tables/table_prefill_ablation.tex",
         "results/publication_campaign/tables/table_warm_cache.tex",
@@ -56,6 +59,11 @@ def update_manifest() -> int:
         "results/publication_campaign/pca_variance_decomposition.json",
         "results/publication_campaign/tables/table_pca_loadings.tex",
         "results/publication_campaign/prefill_ablation.jsonl",
+        "results/publication_campaign/inter_session_replication.json",
+        "results/publication_campaign/hyperfine_cold_start.json",
+        "results/publication_campaign/hyperfine_agent_init.json",
+        "results/publication_campaign/llama_server_publication.log",
+        "results/publication_campaign/powermetrics_publication_sample.txt",
     ]
     for rel_path in additional:
         abs_path = os.path.join(REPO_DIR, rel_path)
@@ -64,7 +72,12 @@ def update_manifest() -> int:
 
     updated = {}
     for rel_path in sorted(manifest.keys()):
-        if rel_path.startswith("results/simulated_check/"):
+        if (
+            rel_path.startswith("results/simulated_check/")
+            or "poisson" in rel_path.lower()
+            or "fig7" in rel_path
+            or "fig8" in rel_path
+        ):
             continue
         abs_path = os.path.join(REPO_DIR, rel_path)
         if os.path.exists(abs_path):

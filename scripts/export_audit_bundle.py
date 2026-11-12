@@ -18,6 +18,7 @@ import sys
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_FILE = os.path.join(REPO_DIR, "repo_texto_auditoria_6.txt")
+OUTPUT_RAW_JSONL = os.path.join(REPO_DIR, "repo_dados_brutos_jsonl_completos.txt")
 
 
 def compute_sha256(filepath: str) -> str:
@@ -138,6 +139,11 @@ Status Git:
         "results/publication_campaign/summary_statistics.json",
         "results/publication_campaign/warm_cache_summary.json",
         "results/publication_campaign/warm_cache_statistical_tests.json",
+        "results/publication_campaign/inter_session_replication.json",
+        "results/publication_campaign/hyperfine_cold_start.json",
+        "results/publication_campaign/hyperfine_agent_init.json",
+        "results/publication_campaign/llama_server_publication.log",
+        "results/publication_campaign/powermetrics_publication_sample.txt",
         "data/manifest_sha256.json",
     ]
     for mf in meta_files:
@@ -171,6 +177,9 @@ Status Git:
         "benchmark/analyze_results.py",
         "scripts/run_prefill_ablation.py",
         "scripts/run_warm_cache_campaign.py",
+        "scripts/run_regime_a_equalized_update.py",
+        "scripts/run_inter_session_replication.py",
+        "scripts/export_audit_bundle.py",
         "scripts/verify_manifest.py",
         "Makefile",
         "pyproject.toml",
@@ -195,6 +204,42 @@ Status Git:
         f.write(bundle_content)
 
     print(f"✅ Generated prioritized audit bundle: {OUTPUT_FILE} ({len(bundle_content)} characters, {os.path.getsize(OUTPUT_FILE)} bytes)")
+
+    # Export complete raw JSONL dataset dump without truncation
+    export_raw_jsonl_dataset()
+
+
+def export_raw_jsonl_dataset():
+    print(f"📦 Generating full untruncated JSONL dataset dump: {OUTPUT_RAW_JSONL}...")
+    jsonl_files = [
+        "results/publication_campaign/raw_trials.jsonl",
+        "results/publication_campaign/warm_cache_trials.jsonl",
+        "results/publication_campaign/prefill_ablation.jsonl",
+    ]
+    parts = [
+        "================================================================================",
+        "DADOS BRUTOS COMPLETOS (100% REGISTROS JSONL) - REVISAO 6",
+        "Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark",
+        "================================================================================\n",
+    ]
+    for rel_path in jsonl_files:
+        abs_path = os.path.join(REPO_DIR, rel_path)
+        if not os.path.exists(abs_path):
+            continue
+        sha = compute_sha256(abs_path)
+        with open(abs_path, "r", encoding="utf-8") as f:
+            lines = [line.strip() for line in f if line.strip()]
+        parts.append("=" * 80)
+        parts.append(f"DATASET: {rel_path} | SHA-256: {sha} | Total Records: {len(lines)}")
+        parts.append("=" * 80)
+        for line in lines:
+            parts.append(line)
+        parts.append("")
+
+    content = "\n".join(parts)
+    with open(OUTPUT_RAW_JSONL, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"✅ Generated complete raw JSONL dump: {OUTPUT_RAW_JSONL} ({len(parts)} lines, {os.path.getsize(OUTPUT_RAW_JSONL)} bytes)")
 
 
 if __name__ == "__main__":

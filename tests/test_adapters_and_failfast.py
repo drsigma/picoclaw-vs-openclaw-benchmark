@@ -35,14 +35,24 @@ def test_adapter_registry_contains_all_registered_agents():
     assert expected_agents.issubset(registered), f"Missing agents: {expected_agents - registered}"
 
 
-def test_bun_minimal_adapter_metadata_and_execution():
-    """Verify bun_minimal adapter properly exposes runner metadata and conforms to interface."""
+def test_bun_minimal_adapter_metadata_and_execution(monkeypatch):
+    """Verify bun_minimal adapter properly exposes runner metadata, executes against mock server, and conforms to interface."""
+    mock_port = 8088
+    start_mock_server_if_needed(mock_port)
+    monkeypatch.setenv("LLAMA_API_URL", f"http://127.0.0.1:{mock_port}/v1/chat/completions")
+
     adapter = get_adapter("bun_minimal", REPO_DIR)
     meta = adapter.metadata()
     assert "runner_binary_used" in meta
     assert "is_fallback_node" in meta
     assert isinstance(meta["is_fallback_node"], bool)
     assert meta["mode"] == "minimal"
+    assert meta["runner_binary_used"] in ("bun", "node")
+
+    res = adapter.run_workload("W1")
+    assert res.get("prompt_tokens", 0) > 0
+    assert res.get("completion_tokens", 0) > 0
+    assert res.get("t_task_ms", 0.0) > 0.0
 
 
 def test_adapter_instances_subclass_base_adapter():

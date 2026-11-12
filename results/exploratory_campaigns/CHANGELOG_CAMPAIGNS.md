@@ -1,5 +1,8 @@
 # Registro Histórico das Campanhas Exploratórias / Changelog of Exploratory Campaigns
 
+> [!WARNING]
+> **Provenance Notice / Aviso de Proveniência:** All empirical findings, statistical analyses, and publication tables in the *SoftwareX* manuscript derive strictly from physical, hardware-instrumented trials in `results/publication_campaign/` (1,320 trials across Regime A and Regime B, plus 528 prefill ablation trials on Apple Silicon M4). The legacy exploratory files documented below (including early calibration runs, Poisson synthetic checks in `poisson_results.json`, and exploratory figures `fig7_poisson_arrival_timeline.png`, `fig8_poisson_energy_dispersion.png`) represent historical engineering milestones prior to full protocol standardization and are preserved strictly for chronological auditability; they are excluded from publication claims, canonical manifests, and peer-reviewed summary tables.
+
 ---
 
 ## 🇧🇷 Português (PT-BR)

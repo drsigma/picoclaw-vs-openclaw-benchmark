@@ -1,0 +1,190 @@
+{
+  "description": "Inter-Session Replication (Session 2, seed=99, n=10) and BunMinimalAdapter Physical Benchmark",
+  "caching_protocol": "Deterministic block-isolation (-np 1, 3 primings, BENCH_CACHE_PROMPT=true)",
+  "hardware": "Apple Mac mini M4 (Mac16,10, 10-core Metal GPU)",
+  "inter_session_comparisons": {
+    "W1": {
+      "picoclaw": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 1032.08,
+        "session_1_std_task_ms": 10.8,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 1029.44,
+        "session_2_std_task_ms": 11.23,
+        "inter_session_drift_pct": 0.26
+      },
+      "openclaw_minimal": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 1033.86,
+        "session_1_std_task_ms": 6.07,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 1086.31,
+        "session_2_std_task_ms": 25.67,
+        "inter_session_drift_pct": 4.95
+      },
+      "python_native": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 1024.98,
+        "session_1_std_task_ms": 6.87,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 1100.36,
+        "session_2_std_task_ms": 28.8,
+        "inter_session_drift_pct": 7.09
+      },
+      "neural_baseline": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 1036.79,
+        "session_1_std_task_ms": 7.37,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 1126.92,
+        "session_2_std_task_ms": 26.9,
+        "inter_session_drift_pct": 8.33
+      }
+    },
+    "W2": {
+      "picoclaw": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 726.23,
+        "session_1_std_task_ms": 4.65,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 841.23,
+        "session_2_std_task_ms": 20.48,
+        "inter_session_drift_pct": 14.67
+      },
+      "openclaw_minimal": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 754.57,
+        "session_1_std_task_ms": 11.05,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 883.81,
+        "session_2_std_task_ms": 22.54,
+        "inter_session_drift_pct": 15.78
+      },
+      "python_native": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 739.44,
+        "session_1_std_task_ms": 9.79,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 867.8,
+        "session_2_std_task_ms": 44.08,
+        "inter_session_drift_pct": 15.97
+      },
+      "neural_baseline": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 731.71,
+        "session_1_std_task_ms": 8.7,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 813.11,
+        "session_2_std_task_ms": 21.46,
+        "inter_session_drift_pct": 10.54
+      }
+    },
+    "W3": {
+      "picoclaw": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 772.24,
+        "session_1_std_task_ms": 11.17,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 867.29,
+        "session_2_std_task_ms": 18.77,
+        "inter_session_drift_pct": 11.59
+      },
+      "openclaw_minimal": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 761.21,
+        "session_1_std_task_ms": 7.23,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 892.26,
+        "session_2_std_task_ms": 7.61,
+        "inter_session_drift_pct": 15.85
+      },
+      "python_native": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 755.38,
+        "session_1_std_task_ms": 5.91,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 864.99,
+        "session_2_std_task_ms": 24.99,
+        "inter_session_drift_pct": 13.53
+      },
+      "neural_baseline": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 729.57,
+        "session_1_std_task_ms": 4.72,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 821.32,
+        "session_2_std_task_ms": 26.87,
+        "inter_session_drift_pct": 11.83
+      }
+    },
+    "W4": {
+      "picoclaw": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 8349.91,
+        "session_1_std_task_ms": 54.19,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 9172.08,
+        "session_2_std_task_ms": 55.54,
+        "inter_session_drift_pct": 9.38
+      },
+      "openclaw_minimal": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 8516.11,
+        "session_1_std_task_ms": 29.02,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 9276.75,
+        "session_2_std_task_ms": 47.79,
+        "inter_session_drift_pct": 8.55
+      },
+      "python_native": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 8456.51,
+        "session_1_std_task_ms": 70.95,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 9210.81,
+        "session_2_std_task_ms": 62.15,
+        "inter_session_drift_pct": 8.54
+      },
+      "neural_baseline": {
+        "session_1_n": 30,
+        "session_1_mean_task_ms": 8482.91,
+        "session_1_std_task_ms": 38.51,
+        "session_2_n": 10,
+        "session_2_mean_task_ms": 9131.83,
+        "session_2_std_task_ms": 59.14,
+        "inter_session_drift_pct": 7.37
+      }
+    }
+  },
+  "overall_mean_inter_session_cv_pct": 10.26,
+  "bun_minimal_evaluation": {
+    "W1": {
+      "n_evaluations": 10,
+      "mean_task_ms": 1192.72,
+      "mean_orch_ms": 39.91,
+      "orch_share_pct": 3.35,
+      "runner_binary": "node"
+    },
+    "W2": {
+      "n_evaluations": 10,
+      "mean_task_ms": 854.88,
+      "mean_orch_ms": 41.26,
+      "orch_share_pct": 4.83,
+      "runner_binary": "node"
+    },
+    "W3": {
+      "n_evaluations": 10,
+      "mean_task_ms": 900.02,
+      "mean_orch_ms": 72.86,
+      "orch_share_pct": 8.1,
+      "runner_binary": "node"
+    },
+    "W4": {
+      "n_evaluations": 10,
+      "mean_task_ms": 9271.71,
+      "mean_orch_ms": 156.45,
+      "orch_share_pct": 1.69,
+      "runner_binary": "node"
+    }
+  }
+}

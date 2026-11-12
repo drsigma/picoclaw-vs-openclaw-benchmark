@@ -58,6 +58,7 @@ class MockLlamaServerHandler(http.server.BaseHTTPRequestHandler):
     def do_POST(self):
         length = int(self.headers.get("Content-Length", 0))
         raw_body = self.rfile.read(length).decode("utf-8", errors="ignore") if length > 0 else ""
+        dynamic_tokens = max(1, len(raw_body.encode("utf-8")))
 
         is_streaming = '"stream":true' in raw_body.replace(" ", "")
 
@@ -76,8 +77,8 @@ class MockLlamaServerHandler(http.server.BaseHTTPRequestHandler):
             c2 = b'data: {"choices":[{"finish_reason":null,"index":0,"delta":{"content":"Analysis complete."}}]}\n\n'
             self.wfile.write(c2)
 
-            # SSE chunk 3: final timing
-            c3 = b'data: {"choices":[{"finish_reason":"stop","index":0,"delta":{}}],"timings":{"prompt_ms":12.5,"predicted_ms":18.2,"prompt_n":128,"predicted_n":16},"usage":{"prompt_tokens":128,"completion_tokens":16}}\n\n'
+            # SSE chunk 3: final timing with dynamic tokens
+            c3 = f'data: {{"choices":[{{"finish_reason":"stop","index":0,"delta":{{}}}}],"timings":{{"prompt_ms":12.5,"predicted_ms":18.2,"prompt_n":{dynamic_tokens},"predicted_n":16}},"usage":{{"prompt_tokens":{dynamic_tokens},"completion_tokens":16}}}}\n\n'.encode("utf-8")
             self.wfile.write(c3)
 
             self.wfile.write(b"data: [DONE]\n\n")
@@ -96,8 +97,8 @@ class MockLlamaServerHandler(http.server.BaseHTTPRequestHandler):
                         "finish_reason": "stop",
                     }
                 ],
-                "timings": {"prompt_ms": 12.5, "predicted_ms": 18.2},
-                "usage": {"prompt_tokens": 128, "completion_tokens": 16, "total_tokens": 144},
+                "timings": {"prompt_ms": 12.5, "predicted_ms": 18.2, "prompt_n": dynamic_tokens},
+                "usage": {"prompt_tokens": dynamic_tokens, "completion_tokens": 16, "total_tokens": dynamic_tokens + 16},
             }
             body = json.dumps(resp_payload).encode("utf-8")
             self.send_response(200)
