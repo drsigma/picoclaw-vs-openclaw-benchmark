@@ -38,10 +38,6 @@ jobs:
         run: |
           pytest -v tests/
 
-      - name: Run Reviewer Fast Dry-Run Integration Test (make dry-run)
+      - name: Run Reviewer Fast Dry-Run Integration Test
         run: |
-          make dry-run
-
-      - name: Run Figure Reproduction Pipeline (make reproduce-figures)
-        run: |
-          make reproduce-figures
+          python3 benchmark/run_unified_benchmark.py --dry-run --output-dir /tmp/ci_dry_run

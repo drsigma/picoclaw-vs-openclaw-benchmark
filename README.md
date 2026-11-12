@@ -54,7 +54,7 @@ flowchart TD
 
     subgraph ADAPTER["Agent Adapter Interface Layer (Strategy Pattern)"]
         PC["PicoClaw Go Native Mach-O"]
-        OC_MIN["OpenClaw Minimal (Node.js V8, 3 Tools)"]
+        OC_MIN["OpenClaw Minimal (Node.js V8, 15 Tools)"]
         OC_FULL["OpenClaw Full (Node.js V8, 54 Tools and SQLite)"]
         NB["Neural Baseline (Direct HTTP Pass-Through)"]
     end
@@ -64,7 +64,7 @@ flowchart TD
     end
 
     subgraph TELEM["Asynchronous Telemetry Suite (Parallel)"]
-        SMC["Apple SMC powermetrics (100ms Shunt Sampling: mW)"]
+        SMC["Apple SMC powermetrics (50ms Shunt Sampling: mW)"]
         LIBPROC["Darwin XNU libproc (ri_instructions, cycles, max_rss)"]
         HYPER["Hyperfine (30-run Cold-Start Timing)"]
         CAFF["caffeinate -dims (System Quiescence & Anti-Sleep)"]

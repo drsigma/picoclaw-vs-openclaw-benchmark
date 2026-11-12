@@ -9,7 +9,7 @@
 SHELL := /bin/bash
 VENV_PY := $(shell if [ -f tools/.venv/bin/python ]; then echo tools/.venv/bin/python; else echo python3; fi)
 
-.PHONY: help setup check-quiescence test dry-run simulate-campaign benchmark benchmark-full-smc reproduce-figures clean
+.PHONY: help setup check-quiescence test verify dry-run simulate-campaign benchmark benchmark-full-smc reproduce-figures clean
 
 help:
 	@echo "========================================================================"
@@ -19,6 +19,7 @@ help:
 	@echo "   make setup              - Configura venv Python, Node.js e ferramentas embarcadas"
 	@echo "   make check-quiescence   - Audita estado térmico, CPU idle e modo anti-sono caffeinate"
 	@echo "   make test               - Executa linter (ruff) e testes unitários automatizados"
+	@echo "   make verify             - Valida integridade criptográfica dos artefatos (SHA-256)"
 	@echo "   make dry-run            - Verificação rápida portátil para revisores (Modo Dry-Run / CI)"
 	@echo "   make benchmark          - Executa campanha experimental completa (espaço de usuário comum)"
 	@echo "   make benchmark-full-smc - Executa com sudo powermetrics para telemetria elétrica completa do SMC"
@@ -29,6 +30,7 @@ help:
 	@echo "   make setup              - Provisions isolated Python venv, Node.js, and embedded tools"
 	@echo "   make check-quiescence   - Audits thermal state, CPU idle, and caffeinate anti-sleep"
 	@echo "   make test               - Runs linter (ruff) and automated unit test suite"
+	@echo "   make verify             - Validates cryptographic artifact integrity (SHA-256)"
 	@echo "   make dry-run            - Reviewer fast portable dry-run verification (No Sudo / CI)"
 	@echo "   make benchmark          - Runs publication-grade campaign (standard unprivileged user mode)"
 	@echo "   make benchmark-full-smc - Runs with sudo powermetrics for full hardware electrical SMC telemetry"
@@ -47,8 +49,11 @@ check-quiescence:
 test:
 	@echo "🧪 [PT-BR] Executando linter (ruff) e testes unitários automatizados (pytest)..."
 	@echo "   [EN-US] Running linter (ruff) and automated unit test suite (pytest)..."
-	$(VENV_PY) -m ruff check benchmark/ tests/
+	$(VENV_PY) -m ruff check benchmark/ tests/ scripts/
 	$(VENV_PY) -m pytest -v tests/
+
+verify:
+	@$(VENV_PY) scripts/verify_manifest.py
 
 dry-run:
 	@echo "🧪 [PT-BR] Executando verificação rápida portátil para revisores (Modo Dry-Run)..."
