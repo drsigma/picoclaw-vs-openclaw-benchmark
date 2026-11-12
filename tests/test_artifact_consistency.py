@@ -96,3 +96,135 @@ def test_macros_empirical_consistent_with_summary_statistics():
     w2_open_median = f"{summary['openclaw_minimal']['W2']['t_task_median_ms']:.1f}"
     assert f"\\newcommand{{\\WTwoOpenMinMedian}}{{{w2_open_median}}}" in macros_content
 
+
+def test_all_macros_exist_and_match_summary():
+    """Verify all empirical macros are present, non-empty, and match statistical outputs."""
+    macros_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "macros_empirical.tex")
+    summary_path = os.path.join(REPO_DIR, "results", "publication_campaign", "summary_statistics.json")
+    tests_path = os.path.join(REPO_DIR, "results", "publication_campaign", "statistical_tests.json")
+
+    with open(macros_path, "r", encoding="utf-8") as f:
+        macros = f.read()
+    with open(summary_path, "r", encoding="utf-8") as f:
+        _ = json.load(f)
+    with open(tests_path, "r", encoding="utf-8") as f:
+        _ = json.load(f)
+
+    required_macros = [
+        "WThreePicoMedian", "WThreePicoIQR", "WThreeOpenMinMedian", "WThreeOpenMinIQR",
+        "WThreeOpenFullMedian", "WThreeOpenFullIQR", "WThreeAdjPMin", "WThreeAdjPFull",
+        "WTwoOpenMinMedian", "WTwoPicoMedian", "WTwoNeuralMedian", "WTwoOpenMinTokens",
+        "WTwoPicoTokens", "WTwoOrchSpeedup", "WTwoRAMReduction", "WTwoOpenMinJoulePerToken",
+        "WTwoPicoJoulePerToken", "RAMReductionMinRatio", "RAMReductionMaxRatio",
+        "WOneOpenMinEnergy", "WOneOpenFullEnergy", "WOneEnergyBloatRatio",
+        "WFourOpenFullEnergy", "WFourOpenFullEDP", "WFourPicoEDP", "WFourEDPReductionPct",
+        "WFourAdjP"
+    ]
+    for m in required_macros:
+        assert f"\\newcommand{{\\{m}}}" in macros, f"Macro \\{m} is missing in macros_empirical.tex"
+
+
+def test_analyze_publication_campaign_handles_none_energy(tmp_path):
+    """Verify generate_empirical_macros cleanly emits \\textbf{N/A} when energy metrics are None (e.g. dry-run)."""
+    from benchmark.analyze_results import generate_empirical_macros
+
+    # Synthetic summary with None for all energy values
+    summary_stats = {
+        "picoclaw": {
+            f"W{i}": {
+                "t_task_median_ms": 100.0, "t_task_iqr_ms": 5.0, "t_task_mean_ms": 100.0,
+                "t_task_std_ms": 2.0, "t_orch_median_ms": 1.0, "t_orch_mean_ms": 1.0,
+                "rss_peak_mb": 10.0, "proc_peak_phys_mb": 5.0,
+                "energy_total_mean_j": None, "energy_net_mean_j": None,
+                "edp_mean_js": None, "joules_per_token": None,
+            }
+            for i in range(1, 5)
+        },
+        "openclaw_minimal": {
+            f"W{i}": {
+                "t_task_median_ms": 150.0, "t_task_iqr_ms": 6.0, "t_task_mean_ms": 150.0,
+                "t_task_std_ms": 3.0, "t_orch_median_ms": 20.0, "t_orch_mean_ms": 20.0,
+                "rss_peak_mb": 40.0, "proc_peak_phys_mb": 20.0,
+                "energy_total_mean_j": None, "energy_net_mean_j": None,
+                "edp_mean_js": None, "joules_per_token": None,
+            }
+            for i in range(1, 5)
+        },
+        "openclaw_full": {
+            f"W{i}": {
+                "t_task_median_ms": 500.0, "t_task_iqr_ms": 10.0, "t_task_mean_ms": 500.0,
+                "t_task_std_ms": 5.0, "t_orch_median_ms": 30.0, "t_orch_mean_ms": 30.0,
+                "rss_peak_mb": 50.0, "proc_peak_phys_mb": 25.0,
+                "energy_total_mean_j": None, "energy_net_mean_j": None,
+                "edp_mean_js": None, "joules_per_token": None,
+            }
+            for i in range(1, 5)
+        },
+        "neural_baseline": {
+            f"W{i}": {
+                "t_task_median_ms": 90.0, "t_task_iqr_ms": 4.0, "t_task_mean_ms": 90.0,
+                "t_task_std_ms": 2.0, "t_orch_median_ms": 0.0, "t_orch_mean_ms": 0.0,
+                "rss_peak_mb": 0.0, "proc_peak_phys_mb": 0.0,
+                "energy_total_mean_j": None, "energy_net_mean_j": None,
+                "edp_mean_js": None, "joules_per_token": None,
+            }
+            for i in range(1, 5)
+        },
+    }
+    comparisons = {
+        "PicoClaw_vs_OpenClawMinimal": {"W3": {"cliffs_delta": -0.8, "vargha_delaney_a12": 0.1, "holm_bonferroni_p_value": 0.0001}},
+        "PicoClaw_vs_OpenClawFull": {
+            "W3": {"cliffs_delta": -1.0, "vargha_delaney_a12": 0.0, "holm_bonferroni_p_value": 1e-6},
+            "W4": {"cliffs_delta": -1.0, "vargha_delaney_a12": 0.0, "holm_bonferroni_p_value": 1e-6},
+        },
+    }
+    eval_records = [
+        {"agent_key": "picoclaw", "workload": "W2", "completion_tokens": 18, "t_neural_ms": 100.0, "proc_instructions": 1000000, "proc_cycles": 500000, "proc_peak_phys_mb": 5.0},
+        {"agent_key": "openclaw_minimal", "workload": "W2", "completion_tokens": 29, "t_neural_ms": 150.0, "proc_instructions": 4000000, "proc_cycles": 2000000, "proc_peak_phys_mb": 20.0},
+    ]
+
+    out_tables = str(tmp_path)
+    os.makedirs(os.path.join(out_tables, "tables"), exist_ok=True)
+    out_file = generate_empirical_macros(summary_stats, comparisons, eval_records, out_tables)
+
+    assert os.path.exists(out_file)
+    with open(out_file, "r", encoding="utf-8") as f:
+        content = f.read()
+    assert r"\newcommand{\WTwoOpenMinEnergy}{\textbf{N/A}}" in content
+    assert r"\newcommand{\WFourEDPReductionPct}{\textbf{N/A}}" in content
+
+
+def test_smc_power_monitor_slice_energy_synthetic():
+    """Verify SMCPowerMonitor.slice_energy correctly calculates trapezoidal integration for synthetic samples."""
+    from benchmark.telemetry import SMCPowerMonitor
+
+    monitor = SMCPowerMonitor(sample_interval_ms=50)
+    monitor.idle_package_mw = 1500.0
+    monitor.active = True
+
+    # 1. Test single sample fallback with elapsed_ms from timestamp interval
+    t0 = 1000000000  # 1.0s in ns
+    t1 = 2000000000  # 2.0s in ns (1000 ms elapsed)
+    monitor._samples = [{"timestamp_ns": 1500000000, "elapsed_ms": 50.0, "package_mw": 5000.0, "cpu_mw": 3000.0, "gpu_mw": 1000.0, "ane_mw": 0.0}]
+
+    res_single = monitor.slice_energy(t0, t1)
+    assert res_single is not None
+    # 5000 mW total for 1.0s = 5.0 J
+    assert abs(res_single["energy_total_j"] - 5.0) < 0.1
+    # 3500 mW net above 1500 mW idle for 1.0s = 3.5 J
+    assert abs(res_single["energy_net_above_idle_j"] - 3.5) < 0.1
+
+    # 2. Test multi-sample trapezoidal integration
+    t_start = 0
+    t_end = 300000000
+    monitor._samples = [
+        {"timestamp_ns": 50000000, "elapsed_ms": 50.0, "package_mw": 4000.0, "cpu_mw": 2000.0, "gpu_mw": 1000.0, "ane_mw": 0.0},
+        {"timestamp_ns": 150000000, "elapsed_ms": 100.0, "package_mw": 6000.0, "cpu_mw": 3000.0, "gpu_mw": 2000.0, "ane_mw": 0.0},
+        {"timestamp_ns": 250000000, "elapsed_ms": 100.0, "package_mw": 8000.0, "cpu_mw": 4000.0, "gpu_mw": 3000.0, "ane_mw": 0.0},
+    ]
+    res_multi = monitor.slice_energy(t_start, t_end)
+    assert res_multi is not None
+    assert res_multi["energy_total_j"] > 0.0
+    assert res_multi["energy_net_above_idle_j"] > 0.0
+
+

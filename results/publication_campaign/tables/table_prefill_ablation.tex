@@ -1,0 +1,28 @@
+\begin{table*}[t]
+\centering
+\caption{Controlled Tool Catalog Schema Prefill and KV-Cache Reuse Ablation on Apple Silicon M4. Evaluates prompt token length ($N_{\text{prompt}}$), Time-to-First-Token (TTFT), and Prefill duration ($T_{\text{prefill}}$) across catalog sizes ($T \in \{0, 15, 54, 100\}$) under Cold Prefill ($\texttt{cache\_prompt} = \text{false}$) versus Warm KV-Cache Reuse ($\texttt{cache\_prompt} = \text{true}$). Values denote empirical median ($n=10$).}
+\label{tab:prefill_ablation}
+\small
+\begin{tabular}{l r r r r r r r}
+\hline
+\textbf{Runtime} & \textbf{Tools} & \textbf{$N_{\text{prompt}}$} & \textbf{Cold TTFT [ms]} & \textbf{Warm TTFT [ms]} & \textbf{Cold Prefill [ms]} & \textbf{Warm Prefill [ms]} & \textbf{Speedup} \\
+\hline
+PicoClaw (Go Native) & 0 & 60 & 129.6 & 24.8 & 128.4 & 23.7 & 5.4$\times$ \\
+PicoClaw (Go Native) & 15 & 2081 & 4346.0 & 231.1 & 4139.5 & 26.0 & 159.5$\times$ \\
+PicoClaw (Go Native) & 54 & 7190 & 18203.3 & 293.5 & 17940.7 & 32.9 & 544.7$\times$ \\
+PicoClaw (Go Native) & 100 & 13216 & 39255.5 & 369.1 & 38919.6 & 40.9 & 952.3$\times$ \\
+\hline
+OpenClaw (Node.js V8) & 0 & 60 & 129.4 & 24.4 & 128.3 & 23.3 & 5.5$\times$ \\
+OpenClaw (Node.js V8) & 15 & 2081 & 4442.6 & 231.4 & 4233.5 & 26.1 & 162.0$\times$ \\
+OpenClaw (Node.js V8) & 54 & 7190 & 18170.2 & 294.0 & 17901.3 & 32.6 & 548.3$\times$ \\
+OpenClaw (Node.js V8) & 100 & 13216 & 39153.2 & 370.2 & 38819.4 & 41.5 & 935.5$\times$ \\
+\hline
+PythonNative (CPython Reference) & 0 & 60 & 129.4 & 24.6 & 128.1 & 23.5 & 5.5$\times$ \\
+PythonNative (CPython Reference) & 15 & 2081 & 4602.9 & 230.6 & 4396.0 & 26.0 & 169.3$\times$ \\
+PythonNative (CPython Reference) & 54 & 7190 & 18141.2 & 293.2 & 17879.7 & 32.4 & 551.2$\times$ \\
+PythonNative (CPython Reference) & 100 & 13216 & 39396.4 & 370.7 & 39064.1 & 40.8 & 956.3$\times$ \\
+\hline
+\multicolumn{8}{l}{\footnotesize Decoded via Apple Silicon M4 GPU (Metal Shaders, $4\times$ unified execution threads). Deterministic sampling ($\text{temperature} = 0.0$, $\text{seed} = 42$).} \\
+\hline
+\end{tabular}
+\end{table*}

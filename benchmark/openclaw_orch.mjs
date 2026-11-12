@@ -8,6 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
+import v8 from "node:v8";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -397,6 +398,7 @@ async function runWorkload(tier, warmth, rssIdle) {
   const rTool = toolCalls > 0 && tDispatchTotal > 0 ? toolCalls / (tDispatchTotal / 1000.0) : 0.0;
   const rssPeak = Math.max(rssIdle, getRSSMB());
   const alphaMem = rssPeak / Math.max(1.0, rssIdle);
+  const v8UsedHeapMb = v8.getHeapStatistics().used_heap_size / (1024.0 * 1024.0);
   const mode = process.env.OPENCLAW_MODE || "minimal";
 
   return {
@@ -414,6 +416,7 @@ async function runWorkload(tier, warmth, rssIdle) {
     r_tool_ops_sec: rTool,
     rss_idle_mb: rssIdle,
     rss_peak_mb: rssPeak,
+    v8_used_heap_mb: v8UsedHeapMb,
     alpha_mem: alphaMem,
     prompt_tokens: totalPromptTokens,
     completion_tokens: totalCompletionTokens,

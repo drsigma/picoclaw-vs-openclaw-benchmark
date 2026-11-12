@@ -425,6 +425,8 @@ class SMCPowerMonitor:
         """
         Integrates exactly the power samples contained within [t_start_ns, t_end_ns].
         Thread-safe slicing from continuous memory buffer.
+        Note: The powermetrics sampling period is 50 ms (-i 50), introducing a synchronization
+        latency bounded by <= 50 ms.
         """
         if not self.active:
             return None
@@ -448,6 +450,9 @@ class SMCPowerMonitor:
 
         if not sub_samples:
             return None
+
+        if len(sub_samples) == 1:
+            sub_samples = [dict(sub_samples[0], elapsed_ms=max(1.0, (t_end_ns - t_start_ns) / 1e6))]
 
         return integrate_energy_trapezoidal(sub_samples, self.idle_package_mw)
 

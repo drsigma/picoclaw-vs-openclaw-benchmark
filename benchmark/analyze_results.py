@@ -161,8 +161,16 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
             # Collect energy metrics (handling None for unprivileged runs)
             energies_total = [float(x["energy_total_j"]) for x in items if x.get("energy_total_j") is not None]
             energies_net = [float(x["energy_net_above_idle_j"]) for x in items if x.get("energy_net_above_idle_j") is not None]
-            edps = [float(x["edp_js"]) for x in items if x.get("edp_js") is not None]
-            j_tokens = [float(x["joules_per_token"]) for x in items if x.get("joules_per_token") is not None]
+            edps_net = [
+                float(x["energy_net_above_idle_j"]) * (float(x["t_task_ms"]) / 1000.0)
+                for x in items
+                if x.get("energy_net_above_idle_j") is not None and x.get("t_task_ms") is not None
+            ]
+            j_tokens_net = [
+                float(x["energy_net_above_idle_j"]) / float(x.get("completion_tokens") or x.get("output_tokens") or 1)
+                for x in items
+                if x.get("energy_net_above_idle_j") is not None and (x.get("completion_tokens") or x.get("output_tokens", 0)) > 0
+            ]
 
             # Primary non-parametric metrics
             p50_t = float(np.percentile(t_tasks, 50)) if t_tasks else 0.0
@@ -184,8 +192,8 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
 
             mean_e_total = float(np.mean(energies_total)) if energies_total else None
             mean_e_net = float(np.mean(energies_net)) if energies_net else None
-            mean_edp = float(np.mean(edps)) if edps else None
-            mean_jtok = float(np.mean(j_tokens)) if j_tokens else None
+            mean_edp = float(np.mean(edps_net)) if edps_net else None
+            mean_jtok = float(np.mean(j_tokens_net)) if j_tokens_net else None
 
             ci_low, ci_high = bootstrap_ci(t_tasks)
 
@@ -278,15 +286,15 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
     with open(csv_out, "w", encoding="utf-8") as f:
         f.write("\n".join(csv_rows) + "\n")
 
-    # Generate LaTeX Table (table_journal_ablation.tex) with complete 8 columns and footer metadata
+    # Generate LaTeX Table (table_journal_ablation.tex) with complete 9 columns and dynamic footer metadata
     latex_table = r"""\begin{table*}[t]
 \centering
-\caption{Empirical Performance Evaluation and Runtime Ablation Matrix on Apple Silicon M4. Peak Phys RAM denotes lifetime maximum resident physical footprint recorded via Darwin kernel \texttt{libproc}. Net Energy is integrated above quiescent idle baseline (measured quiescent idle baseline) via Apple SMC hardware shunts at 50~ms resolution. Billed Energy and CPU Cycles are captured via \texttt{RUSAGE\_INFO\_V4}.}
+\caption{Empirical Performance Evaluation and Runtime Ablation Matrix on Apple Silicon M4. Peak Phys RAM denotes lifetime maximum resident physical footprint recorded via Darwin kernel \texttt{libproc}. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution. Dispatch and HTTP latency isolate tool-execution and network overhead ($T_{\text{orch}} \approx T_{\text{dispatch}} + T_{\text{http}}$). Prompt and Completion token counts reflect tokenizer throughput.}
 \label{tab:evaluation_ablation_m4}
 \small
-\begin{tabular}{l l r r r r r r}
+\begin{tabular}{l l c r r r r r r}
 \hline
-\textbf{Workload} & \textbf{Configuration} & \textbf{Median (IQR) [ms]} & \textbf{Orch / Disp [ms]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{Billed Energy / Cycles} \\
+\textbf{Workload} & \textbf{Configuration} & \textbf{Prompt/Comp} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{Billed / Cycles} \\
 \hline
 """
     agents_order = [
@@ -301,11 +309,14 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
         for ak, label in agents_order:
             entry = summary_stats.get(ak, {}).get(w)
             if entry:
+                items = groups.get(ak, {}).get(w, [])
+                p_tok = int(round(np.mean([float(x.get("prompt_tokens", 0)) for x in items]))) if items else 0
+                c_tok = int(round(np.mean([float(x.get("completion_tokens") or x.get("output_tokens", 0)) for x in items]))) if items else 0
                 p50 = entry["t_task_median_ms"]
                 iqr = entry["t_task_iqr_ms"]
-                o_m = entry["t_orch_median_ms"]
                 d_m = entry.get("t_dispatch_median_ms", 0.0)
-                orch_disp = f"{o_m:.2f} / {d_m:.2f}" if d_m > 0 else f"{o_m:.2f}"
+                h_m = float(np.percentile([float(x.get("t_http_ms", 0.0)) for x in items if x.get("t_http_ms") is not None], 50)) if items else 0.0
+                disp_http = f"{d_m:.2f} / {h_m:.2f}"
                 ram = entry.get("proc_peak_phys_mb", entry["rss_peak_mb"])
                 enet_val = entry.get("energy_net_mean_j")
                 enet_str = f"{enet_val:.2f}" if enet_val is not None else "N/A"
@@ -315,14 +326,23 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
                 cyc = entry.get("proc_cycles", 0)
                 cyc_str = f"{cyc/1e6:.1f}M" if cyc > 0 else "0"
                 billed_cyc_str = f"{billed} / {cyc_str}" if billed > 0 or cyc > 0 else "N/A"
-                latex_table += f"{w} & {label} & {p50:.1f} ({iqr:.1f}) & {orch_disp} & {ram:.1f} & {enet_str} & {edp_str} & {billed_cyc_str} \\\\\n"
+                latex_table += f"{w} & {label} & {p_tok} / {c_tok} & {p50:.1f} ({iqr:.1f}) & {disp_http} & {ram:.1f} & {enet_str} & {edp_str} & {billed_cyc_str} \\\\\n"
         latex_table += r"\hline" + "\n"
 
-    latex_table += r"""\multicolumn{8}{l}{\footnotesize $n = 30$ independent physical evaluations per condition (600 total evaluations, 60 warmups excluded).} \\
-\multicolumn{8}{l}{\footnotesize Telemetry Backend: Apple Silicon SMC (\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \texttt{libproc}. Data Source: \texttt{measured\_hardware}.} \\
-\hline
-\end{tabular}
-\end{table*}
+    total_evals = len(eval_records)
+    warmups_count = len(records) - len(eval_records)
+    cond_count = len(groups) * 4 if groups else 1
+    n_per_cond = int(total_evals / cond_count) if cond_count > 0 else 0
+    backends = sorted(list({str(r.get("telemetry_backend", "apple_smc_powermetrics")) for r in eval_records}))
+    backend_str = "Apple Silicon SMC (\\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \\texttt{libproc}" if "apple_smc_powermetrics" in backends else ", ".join(backends)
+    datasources = sorted(list({str(r.get("data_source", "measured_hardware")) for r in eval_records}))
+    datasource_str = ", ".join(datasources).replace("_", r"\_")
+
+    latex_table += f"""\\multicolumn{{9}}{{l}}{{\\footnotesize $n = {n_per_cond}$ independent physical evaluations per condition ({total_evals} total evaluations, {warmups_count} warmups excluded).}} \\\\
+\\multicolumn{{9}}{{l}}{{\\footnotesize Telemetry Backend: {backend_str}. Data Source: \\texttt{{{datasource_str}}}.}} \\\\
+\\hline
+\\end{{tabular}}
+\\end{{table*}}
 """
 
     tex_out = os.path.join(output_dir, "tables", "table_journal_ablation.tex")
@@ -344,78 +364,100 @@ def generate_empirical_macros(
     eval_records: list[dict[str, Any]],
     output_dir: str,
 ) -> str:
-    pico_w3 = summary_stats["picoclaw"]["W3"]
-    open_min_w3 = summary_stats["openclaw_minimal"]["W3"]
-    open_full_w3 = summary_stats["openclaw_full"]["W3"]
-    def _val(d, key, default):
-        v = d.get(key)
-        return default if v is None else v
-
-    cmp_w3_min = comparisons.get("PicoClaw_vs_OpenClawMinimal", {}).get("W3", {})
-    cmp_w3_full = comparisons.get("PicoClaw_vs_OpenClawFull", {}).get("W3", {})
+    # Mandatory agent and workload validation
+    for ak in ["picoclaw", "openclaw_minimal", "openclaw_full", "neural_baseline"]:
+        if ak not in summary_stats:
+            raise KeyError(f"Missing mandatory agent in summary_statistics: {ak}")
+        for w in ["W1", "W2", "W3", "W4"]:
+            if w not in summary_stats[ak]:
+                raise KeyError(f"Missing mandatory workload '{w}' for agent '{ak}' in summary_statistics")
 
     pico_w2 = summary_stats["picoclaw"]["W2"]
-    open_min_w2 = summary_stats["openclaw_minimal"]["W2"]
-    neural_w2 = summary_stats["neural_baseline"]["W2"]
+    pico_w3 = summary_stats["picoclaw"]["W3"]
+    pico_w4 = summary_stats["picoclaw"]["W4"]
 
     open_min_w1 = summary_stats["openclaw_minimal"]["W1"]
+    open_min_w2 = summary_stats["openclaw_minimal"]["W2"]
+    open_min_w3 = summary_stats["openclaw_minimal"]["W3"]
+
     open_full_w1 = summary_stats["openclaw_full"]["W1"]
-    pico_w4 = summary_stats["picoclaw"]["W4"]
+    open_full_w3 = summary_stats["openclaw_full"]["W3"]
     open_full_w4 = summary_stats["openclaw_full"]["W4"]
-    cmp_w4 = comparisons.get("PicoClaw_vs_OpenClawFull", {}).get("W4", {})
+
+    neural_w2 = summary_stats["neural_baseline"]["W2"]
+
+    cmp_w3_min = comparisons.get("PicoClaw_vs_OpenClawMinimal", {}).get("W3")
+    cmp_w3_full = comparisons.get("PicoClaw_vs_OpenClawFull", {}).get("W3")
+    cmp_w4 = comparisons.get("PicoClaw_vs_OpenClawFull", {}).get("W4")
+
+    if cmp_w3_min is None or cmp_w3_full is None or cmp_w4 is None:
+        raise KeyError("Missing mandatory statistical comparison in comparisons")
 
     pico_trials = [r for r in eval_records if r.get("agent_key") == "picoclaw"]
     open_min_trials = [r for r in eval_records if r.get("agent_key") == "openclaw_minimal"]
 
-    pico_w2_trials = [r for r in eval_records if r.get("agent_key") == "picoclaw" and r.get("workload") == "W2"]
-    open_min_w2_trials = [r for r in eval_records if r.get("agent_key") == "openclaw_minimal" and r.get("workload") == "W2"]
+    if not pico_trials or not open_min_trials:
+        raise ValueError("Missing trial records for picoclaw or openclaw_minimal in eval_records")
 
-    pico_w2_tokens = float(np.mean([r.get("completion_tokens", 0) for r in pico_w2_trials])) if pico_w2_trials else 18.0
-    open_min_w2_tokens = float(np.mean([r.get("completion_tokens", 0) for r in open_min_w2_trials])) if open_min_w2_trials else 29.0
-    pico_w2_neural_mean = float(np.mean([r.get("t_neural_ms", 0.0) for r in pico_w2_trials])) if pico_w2_trials else 7517.6
-    open_min_w2_neural_mean = float(np.mean([r.get("t_neural_ms", 0.0) for r in open_min_w2_trials])) if open_min_w2_trials else 5470.2
+    pico_w2_trials = [r for r in pico_trials if r.get("workload") == "W2"]
+    open_min_w2_trials = [r for r in open_min_trials if r.get("workload") == "W2"]
 
-    pico_inst_m = float(np.mean([r.get("proc_instructions", 0) for r in pico_trials])) / 1e6 if pico_trials else 244.2
-    pico_cyc_m = float(np.mean([r.get("proc_cycles", 0) for r in pico_trials])) / 1e6 if pico_trials else 83.8
-    open_min_inst_m = float(np.mean([r.get("proc_instructions", 0) for r in open_min_trials])) / 1e6 if open_min_trials else 923.8
-    open_min_cyc_m = float(np.mean([r.get("proc_cycles", 0) for r in open_min_trials])) / 1e6 if open_min_trials else 378.2
+    if not pico_w2_trials or not open_min_w2_trials:
+        raise ValueError("Missing W2 trial records for picoclaw or openclaw_minimal")
 
-    inst_ratio = open_min_inst_m / pico_inst_m if pico_inst_m > 0 else 3.78
-    cyc_ratio = open_min_cyc_m / pico_cyc_m if pico_cyc_m > 0 else 4.51
+    pico_w2_tokens = float(np.mean([r["completion_tokens"] for r in pico_w2_trials]))
+    open_min_w2_tokens = float(np.mean([r["completion_tokens"] for r in open_min_w2_trials]))
+    pico_w2_neural_mean = float(np.mean([r["t_neural_ms"] for r in pico_w2_trials]))
+    open_min_w2_neural_mean = float(np.mean([r["t_neural_ms"] for r in open_min_w2_trials]))
+
+    pico_inst_m = float(np.mean([r.get("proc_instructions", 0) for r in pico_trials])) / 1e6
+    pico_cyc_m = float(np.mean([r.get("proc_cycles", 0) for r in pico_trials])) / 1e6
+    open_min_inst_m = float(np.mean([r.get("proc_instructions", 0) for r in open_min_trials])) / 1e6
+    open_min_cyc_m = float(np.mean([r.get("proc_cycles", 0) for r in open_min_trials])) / 1e6
+
+    inst_ratio = open_min_inst_m / pico_inst_m if pico_inst_m > 0 else 0.0
+    cyc_ratio = open_min_cyc_m / pico_cyc_m if pico_cyc_m > 0 else 0.0
 
     pico_rss_all = [summary_stats["picoclaw"][w]["rss_peak_mb"] for w in ["W1", "W2", "W3", "W4"]]
     open_rss_all = [summary_stats["openclaw_minimal"][w]["rss_peak_mb"] for w in ["W1", "W2", "W3", "W4"]]
 
-    pico_phys_m = float(np.mean([r.get("proc_peak_phys_mb", 0) for r in pico_trials])) if pico_trials else 15.82
-    open_min_phys_m = float(np.mean([r.get("proc_peak_phys_mb", 0) for r in open_min_trials])) if open_min_trials else 45.88
-    phys_ratio = open_min_phys_m / pico_phys_m if pico_phys_m > 0 else 2.90
+    pico_phys_all = [summary_stats["picoclaw"][w].get("proc_peak_phys_mb", summary_stats["picoclaw"][w]["rss_peak_mb"]) for w in ["W1", "W2", "W3", "W4"]]
+    open_phys_all = [summary_stats["openclaw_minimal"][w].get("proc_peak_phys_mb", summary_stats["openclaw_minimal"][w]["rss_peak_mb"]) for w in ["W1", "W2", "W3", "W4"]]
 
-    w2_orch_speedup = (
-        open_min_w2["t_orch_median_ms"] / pico_w2["t_orch_median_ms"]
-        if pico_w2["t_orch_median_ms"] > 0
-        else 23.0
-    )
-    w2_ram_reduction = (
-        open_min_w2["rss_peak_mb"] / pico_w2["rss_peak_mb"]
-        if pico_w2["rss_peak_mb"] > 0
-        else 7.0
-    )
+    ram_ratios = [open_rss_all[i] / pico_rss_all[i] for i in range(4)]
+    phys_ratios = [open_phys_all[i] / pico_phys_all[i] for i in range(4)]
 
-    edp_open_w4 = _val(open_full_w4, "edp_mean_js", 1688.00)
-    edp_pico_w4 = _val(pico_w4, "edp_mean_js", 827.50)
-    w4_edp_red = ((edp_open_w4 - edp_pico_w4) / edp_open_w4 * 100.0) if edp_open_w4 > 0 else 50.98
+    pico_phys_m = float(np.mean([r.get("proc_peak_phys_mb", 0) for r in pico_trials]))
+    open_min_phys_m = float(np.mean([r.get("proc_peak_phys_mb", 0) for r in open_min_trials]))
+    phys_ratio = open_min_phys_m / pico_phys_m if pico_phys_m > 0 else 0.0
+
+    w2_orch_speedup = open_min_w2["t_orch_median_ms"] / pico_w2["t_orch_median_ms"] if pico_w2["t_orch_median_ms"] > 0 else 1.0
+    w2_ram_reduction = open_min_w2["rss_peak_mb"] / pico_w2["rss_peak_mb"] if pico_w2["rss_peak_mb"] > 0 else 1.0
+
+    def _fmt_energy(val: float | None) -> str:
+        if val is None:
+            return r"\textbf{N/A}"
+        return f"{val:.2f}"
+
+    def _fmt_ratio(num: float | None, den: float | None) -> str:
+        if num is None or den is None or den == 0.0:
+            return r"\textbf{N/A}"
+        return f"{(num / den):.2f}"
+
+    def _fmt_pct(num: float | None, den: float | None) -> str:
+        if num is None or den is None or den == 0.0:
+            return r"\textbf{N/A}"
+        return f"{((den - num) / den * 100.0):.2f}"
 
     def _format_p_val(p_val: float) -> str:
-        if p_val == 0.0 or p_val < 1e-4:
+        if p_val < 1e-5:
             return r"< 10^{-5}"
         else:
-            return f"{p_val:.4f}"
+            return f"= {p_val:.4f}"
 
-    p_w3_full = _val(cmp_w3_full, "holm_bonferroni_p_value", 3.3e-5)
-    p_w3_full_str = _format_p_val(p_w3_full)
-
-    p_w3_min = _val(cmp_w3_min, "holm_bonferroni_p_value", 0.048)
-    p_w3_min_str = _format_p_val(p_w3_min)
+    p_w3_full_str = _format_p_val(cmp_w3_full["holm_bonferroni_p_value"])
+    p_w3_min_str = _format_p_val(cmp_w3_min["holm_bonferroni_p_value"])
+    p_w4_str = _format_p_val(cmp_w4["holm_bonferroni_p_value"])
 
     macros_path = os.path.join(output_dir, "tables", "macros_empirical.tex")
     lines = [
@@ -429,11 +471,11 @@ def generate_empirical_macros(
         f"\\newcommand{{\\WThreeOpenMinIQR}}{{{open_min_w3['t_task_iqr_ms']:.1f}}}",
         f"\\newcommand{{\\WThreeOpenFullMedian}}{{{open_full_w3['t_task_median_ms']:.1f}}}",
         f"\\newcommand{{\\WThreeOpenFullIQR}}{{{open_full_w3['t_task_iqr_ms']:.1f}}}",
-        f"\\newcommand{{\\WThreeCliffsDeltaMin}}{{{_val(cmp_w3_min, 'cliffs_delta', -0.4):.3f}}}",
-        f"\\newcommand{{\\WThreeAOneTwoMin}}{{{_val(cmp_w3_min, 'vargha_delaney_a12', 0.3):.3f}}}",
+        f"\\newcommand{{\\WThreeCliffsDeltaMin}}{{{cmp_w3_min['cliffs_delta']:.3f}}}",
+        f"\\newcommand{{\\WThreeAOneTwoMin}}{{{cmp_w3_min['vargha_delaney_a12']:.3f}}}",
         f"\\newcommand{{\\WThreeAdjPMin}}{{{p_w3_min_str}}}",
-        f"\\newcommand{{\\WThreeCliffsDeltaFull}}{{{_val(cmp_w3_full, 'cliffs_delta', -0.7):.3f}}}",
-        f"\\newcommand{{\\WThreeAOneTwoFull}}{{{_val(cmp_w3_full, 'vargha_delaney_a12', 0.15):.3f}}}",
+        f"\\newcommand{{\\WThreeCliffsDeltaFull}}{{{cmp_w3_full['cliffs_delta']:.3f}}}",
+        f"\\newcommand{{\\WThreeAOneTwoFull}}{{{cmp_w3_full['vargha_delaney_a12']:.3f}}}",
         f"\\newcommand{{\\WThreeAdjPFull}}{{{p_w3_full_str}}}",
         f"\\newcommand{{\\WThreePicoOrchMedian}}{{{pico_w3['t_orch_median_ms']:.2f}}}",
         f"\\newcommand{{\\WThreeOpenMinOrchMedian}}{{{open_min_w3['t_orch_median_ms']:.2f}}}",
@@ -441,13 +483,13 @@ def generate_empirical_macros(
         "",
         f"\\newcommand{{\\WTwoOpenMinMedian}}{{{open_min_w2['t_task_median_ms']:.1f}}}",
         f"\\newcommand{{\\WTwoOpenMinMean}}{{{open_min_w2['t_task_mean_ms']:.1f}}}",
-        f"\\newcommand{{\\WTwoOpenMinEnergy}}{{{_val(open_min_w2, 'energy_total_mean_j', 18.23):.2f}}}",
+        f"\\newcommand{{\\WTwoOpenMinEnergy}}{{{_fmt_energy(open_min_w2.get('energy_net_mean_j'))}}}",
         f"\\newcommand{{\\WTwoPicoMedian}}{{{pico_w2['t_task_median_ms']:.1f}}}",
         f"\\newcommand{{\\WTwoPicoMean}}{{{pico_w2['t_task_mean_ms']:.1f}}}",
-        f"\\newcommand{{\\WTwoPicoEnergy}}{{{_val(pico_w2, 'energy_total_mean_j', 36.22):.2f}}}",
+        f"\\newcommand{{\\WTwoPicoEnergy}}{{{_fmt_energy(pico_w2.get('energy_net_mean_j'))}}}",
         f"\\newcommand{{\\WTwoNeuralMedian}}{{{neural_w2['t_task_median_ms']:.1f}}}",
         f"\\newcommand{{\\WTwoNeuralMean}}{{{neural_w2['t_task_mean_ms']:.1f}}}",
-        f"\\newcommand{{\\WTwoNeuralEnergy}}{{{_val(neural_w2, 'energy_total_mean_j', 28.71):.2f}}}",
+        f"\\newcommand{{\\WTwoNeuralEnergy}}{{{_fmt_energy(neural_w2.get('energy_net_mean_j'))}}}",
         f"\\newcommand{{\\WTwoOpenMinTokens}}{{{open_min_w2_tokens:.1f}}}",
         f"\\newcommand{{\\WTwoPicoTokens}}{{{pico_w2_tokens:.1f}}}",
         f"\\newcommand{{\\WTwoNeuralPico}}{{{pico_w2_neural_mean:.1f}}}",
@@ -460,8 +502,8 @@ def generate_empirical_macros(
         f"\\newcommand{{\\WTwoPicoRSS}}{{{pico_w2['rss_peak_mb']:.2f}}}",
         f"\\newcommand{{\\WTwoOpenMinRSS}}{{{open_min_w2['rss_peak_mb']:.2f}}}",
         f"\\newcommand{{\\WTwoRAMReduction}}{{{w2_ram_reduction:.1f}}}",
-        f"\\newcommand{{\\WTwoOpenMinJoulePerToken}}{{{_val(open_min_w2, 'joules_per_token', 1.14):.2f}}}",
-        f"\\newcommand{{\\WTwoPicoJoulePerToken}}{{{_val(pico_w2, 'joules_per_token', 2.01):.2f}}}",
+        f"\\newcommand{{\\WTwoOpenMinJoulePerToken}}{{{_fmt_energy(open_min_w2.get('joules_per_token'))}}}",
+        f"\\newcommand{{\\WTwoPicoJoulePerToken}}{{{_fmt_energy(pico_w2.get('joules_per_token'))}}}",
         "",
         f"\\newcommand{{\\PicoInstructionsMeanM}}{{{pico_inst_m:.1f}}}",
         f"\\newcommand{{\\PicoCyclesMeanM}}{{{pico_cyc_m:.1f}}}",
@@ -478,26 +520,28 @@ def generate_empirical_macros(
         f"\\newcommand{{\\OpenRSSMin}}{{{min(open_rss_all):.2f}}}",
         f"\\newcommand{{\\OpenRSSMax}}{{{max(open_rss_all):.2f}}}",
         f"\\newcommand{{\\OpenRSSOverallMean}}{{{float(np.mean(open_rss_all)):.2f}}}",
-        f"\\newcommand{{\\RAMReductionMinRatio}}{{{open_rss_all[0] / pico_rss_all[0]:.2f}}}",
-        f"\\newcommand{{\\RAMReductionMaxRatio}}{{{open_rss_all[1] / pico_rss_all[1]:.2f}}}",
+        f"\\newcommand{{\\RAMReductionMinRatio}}{{{min(ram_ratios):.2f}}}",
+        f"\\newcommand{{\\RAMReductionMaxRatio}}{{{max(ram_ratios):.2f}}}",
+        f"\\newcommand{{\\PeakPhysReductionMinRatio}}{{{min(phys_ratios):.2f}}}",
+        f"\\newcommand{{\\PeakPhysReductionMaxRatio}}{{{max(phys_ratios):.2f}}}",
         f"\\newcommand{{\\PicoPeakPhysMean}}{{{pico_phys_m:.2f}}}",
         f"\\newcommand{{\\OpenMinPeakPhysMean}}{{{open_min_phys_m:.2f}}}",
         f"\\newcommand{{\\PeakPhysLeanerRatio}}{{{phys_ratio:.2f}}}",
         "",
         f"\\newcommand{{\\WOneOpenMinMean}}{{{open_min_w1['t_task_mean_ms']:.1f}}}",
         f"\\newcommand{{\\WOneOpenFullMean}}{{{open_full_w1['t_task_mean_ms']:.1f}}}",
-        f"\\newcommand{{\\WOneOpenMinEnergy}}{{{_val(open_min_w1, 'energy_total_mean_j', 22.33):.2f}}}",
-        f"\\newcommand{{\\WOneOpenFullEnergy}}{{{_val(open_full_w1, 'energy_total_mean_j', 58.81):.2f}}}",
-        f"\\newcommand{{\\WOneEnergyBloatRatio}}{{{(_val(open_full_w1, 'energy_total_mean_j', 58.81) / _val(open_min_w1, 'energy_total_mean_j', 22.33)):.2f}}}",
-        f"\\newcommand{{\\WFourOpenFullEnergy}}{{{_val(open_full_w4, 'energy_total_mean_j', 107.75):.2f}}}",
-        f"\\newcommand{{\\WFourOpenFullEDP}}{{{_val(open_full_w4, 'edp_mean_js', 1688.00):.2f}}}",
+        f"\\newcommand{{\\WOneOpenMinEnergy}}{{{_fmt_energy(open_min_w1.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WOneOpenFullEnergy}}{{{_fmt_energy(open_full_w1.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WOneEnergyBloatRatio}}{{{_fmt_ratio(open_full_w1.get('energy_net_mean_j'), open_min_w1.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WFourOpenFullEnergy}}{{{_fmt_energy(open_full_w4.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WFourOpenFullEDP}}{{{_fmt_energy(open_full_w4.get('edp_mean_js'))}}}",
         f"\\newcommand{{\\WFourOpenFullMedian}}{{{open_full_w4['t_task_median_ms']:.1f}}}",
         f"\\newcommand{{\\WFourPicoMedian}}{{{pico_w4['t_task_median_ms']:.1f}}}",
-        f"\\newcommand{{\\WFourPicoEDP}}{{{_val(pico_w4, 'edp_mean_js', 827.50):.2f}}}",
-        f"\\newcommand{{\\WFourEDPReductionPct}}{{{w4_edp_red:.2f}}}",
-        f"\\newcommand{{\\WFourCliffsDelta}}{{{_val(cmp_w4, 'cliffs_delta', -1.0):.1f}}}",
-        f"\\newcommand{{\\WFourAOneTwo}}{{{_val(cmp_w4, 'vargha_delaney_a12', 0.0):.1f}}}",
-        "\\newcommand{\\WFourAdjP}{< 10^{-5}}",
+        f"\\newcommand{{\\WFourPicoEDP}}{{{_fmt_energy(pico_w4.get('edp_mean_js'))}}}",
+        f"\\newcommand{{\\WFourEDPReductionPct}}{{{_fmt_pct(pico_w4.get('edp_mean_js'), open_full_w4.get('edp_mean_js'))}}}",
+        f"\\newcommand{{\\WFourCliffsDelta}}{{{cmp_w4['cliffs_delta']:.1f}}}",
+        f"\\newcommand{{\\WFourAOneTwo}}{{{cmp_w4['vargha_delaney_a12']:.1f}}}",
+        f"\\newcommand{{\\WFourAdjP}}{{{p_w4_str}}}",
         "",
     ]
 

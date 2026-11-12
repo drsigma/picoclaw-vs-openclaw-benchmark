@@ -27,7 +27,7 @@ make setup
 # 3. Executar a Verificação Rápida Portátil (< 5 segundos, sem GPU, sem Sudo)
 make dry-run
 
-# 4. Executar os 24 testes unitários automatizados (pytest e linter ruff)
+# 4. Executar os 28 testes unitários automatizados (pytest e linter ruff)
 make test
 
 # 5. Regenerar todas as 6 figuras científicas em 300 DPI
@@ -232,7 +232,7 @@ make setup
 # 3. Run Instant Portable Dry-Run Verification (< 5 seconds, No GPU, No Sudo)
 make dry-run
 
-# 4. Run the 24 automated unit tests (pytest and ruff linter)
+# 4. Run the 28 automated unit tests (pytest and ruff linter)
 make test
 
 # 5. Re-render all 6 publication figures in 300 DPI

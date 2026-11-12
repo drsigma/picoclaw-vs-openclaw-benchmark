@@ -29,7 +29,45 @@ def compute_sha256(filepath: str) -> str:
     return h.hexdigest()
 
 
+def update_manifest() -> int:
+    """Recomputes SHA-256 for all tracked files and updates data/manifest_sha256.json."""
+    if not os.path.exists(MANIFEST_PATH):
+        print(f"❌ [ERROR] Manifest file not found: {MANIFEST_PATH}")
+        return 1
+
+    with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
+        manifest = json.load(f)
+
+    # Also track additional core files if present
+    additional = [
+        "scripts/run_prefill_ablation.py",
+        "results/publication_campaign/tables/table_prefill_ablation.tex",
+    ]
+    for rel_path in additional:
+        abs_path = os.path.join(REPO_DIR, rel_path)
+        if os.path.exists(abs_path) and rel_path not in manifest:
+            manifest[rel_path] = ""
+
+    updated = {}
+    for rel_path in sorted(manifest.keys()):
+        abs_path = os.path.join(REPO_DIR, rel_path)
+        if os.path.exists(abs_path):
+            updated[rel_path] = compute_sha256(abs_path)
+        else:
+            print(f"⚠️  [SKIP] File missing on disk, omitting from updated manifest: {rel_path}")
+
+    with open(MANIFEST_PATH, "w", encoding="utf-8") as f:
+        json.dump(updated, f, indent=2)
+        f.write("\n")
+
+    print(f"✅ [SUCCESS] Updated {len(updated)} tracked file signatures in {MANIFEST_PATH}")
+    return 0
+
+
 def verify_manifest() -> int:
+    if "--update" in sys.argv:
+        return update_manifest()
+
     if not os.path.exists(MANIFEST_PATH):
         print(f"❌ [ERROR] Manifest file not found: {MANIFEST_PATH}")
         return 1

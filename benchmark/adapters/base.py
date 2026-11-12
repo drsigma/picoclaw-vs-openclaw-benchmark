@@ -39,7 +39,7 @@ class AgentOrchestratorAdapter(ABC):
         pass
 
     @abstractmethod
-    def run_workload(self, workload_id: str, prompt: str, iterations: int = 1) -> Dict[str, Any]:
+    def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> Dict[str, Any]:
         """
         Execute a standardized workload (W1-W4) and return structured telemetry.
         Executa uma carga de trabalho padronizada (W1-W4) e retorna telemetria estruturada.

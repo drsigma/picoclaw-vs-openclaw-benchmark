@@ -21,8 +21,8 @@
       "proc_billed_energy": 0,
       "energy_total_mean_j": 941.278,
       "energy_net_mean_j": 883.235,
-      "edp_mean_js": 52615.445,
-      "joules_per_token": 3.3379
+      "edp_mean_js": 49370.904,
+      "joules_per_token": 3.132
     },
     "W3": {
       "sample_count": 30,
@@ -45,8 +45,8 @@
       "proc_billed_energy": 0,
       "energy_total_mean_j": 100.059,
       "energy_net_mean_j": 94.068,
-      "edp_mean_js": 576.206,
-      "joules_per_token": 3.4503
+      "edp_mean_js": 541.705,
+      "joules_per_token": 3.2437
     },
     "W2": {
       "sample_count": 30,
@@ -69,8 +69,8 @@
       "proc_billed_energy": 0,
       "energy_total_mean_j": 117.19,
       "energy_net_mean_j": 109.978,
-      "edp_mean_js": 821.86,
-      "joules_per_token": 6.5106
+      "edp_mean_js": 771.28,
+      "joules_per_token": 6.1099
     },
     "W1": {
       "sample_count": 30,
@@ -93,8 +93,8 @@
       "proc_billed_energy": 0,
       "energy_total_mean_j": 93.785,
       "energy_net_mean_j": 88.112,
-      "edp_mean_js": 514.7,
-      "joules_per_token": 2.2874
+      "edp_mean_js": 483.567,
+      "joules_per_token": 2.1491
     }
   },
   "openclaw_minimal": {
@@ -119,8 +119,8 @@
       "proc_billed_energy": 6421,
       "energy_total_mean_j": 95.759,
       "energy_net_mean_j": 89.986,
-      "edp_mean_js": 532.893,
-      "joules_per_token": 3.302
+      "edp_mean_js": 500.766,
+      "joules_per_token": 3.103
     },
     "W1": {
       "sample_count": 30,
@@ -143,8 +143,8 @@
       "proc_billed_energy": 6140,
       "energy_total_mean_j": 100.132,
       "energy_net_mean_j": 94.064,
-      "edp_mean_js": 586.029,
-      "joules_per_token": 2.3841
+      "edp_mean_js": 550.511,
+      "joules_per_token": 2.2396
     },
     "W3": {
       "sample_count": 30,
@@ -167,8 +167,8 @@
       "proc_billed_energy": 6488,
       "energy_total_mean_j": 109.545,
       "energy_net_mean_j": 102.906,
-      "edp_mean_js": 701.518,
-      "joules_per_token": 2.8828
+      "edp_mean_js": 658.985,
+      "joules_per_token": 2.708
     },
     "W4": {
       "sample_count": 30,
@@ -191,8 +191,8 @@
       "proc_billed_energy": 6597,
       "energy_total_mean_j": 979.809,
       "energy_net_mean_j": 919.404,
-      "edp_mean_js": 57034.43,
-      "joules_per_token": 3.5119
+      "edp_mean_js": 53518.244,
+      "joules_per_token": 3.2954
     }
   },
   "python_native": {
@@ -217,8 +217,8 @@
       "proc_billed_energy": 121600,
       "energy_total_mean_j": 100.888,
       "energy_net_mean_j": 94.827,
-      "edp_mean_js": 586.544,
-      "joules_per_token": 3.4789
+      "edp_mean_js": 551.303,
+      "joules_per_token": 3.2699
     },
     "W2": {
       "sample_count": 30,
@@ -241,8 +241,8 @@
       "proc_billed_energy": 124592,
       "energy_total_mean_j": 118.406,
       "energy_net_mean_j": 111.072,
-      "edp_mean_js": 833.878,
-      "joules_per_token": 6.5781
+      "edp_mean_js": 782.221,
+      "joules_per_token": 6.1707
     },
     "W4": {
       "sample_count": 30,
@@ -265,8 +265,8 @@
       "proc_billed_energy": 84819,
       "energy_total_mean_j": 944.27,
       "energy_net_mean_j": 886.188,
-      "edp_mean_js": 52820.374,
-      "joules_per_token": 3.3485
+      "edp_mean_js": 49571.324,
+      "joules_per_token": 3.1425
     },
     "W1": {
       "sample_count": 30,
@@ -289,8 +289,8 @@
       "proc_billed_energy": 85107,
       "energy_total_mean_j": 95.178,
       "energy_net_mean_j": 89.437,
-      "edp_mean_js": 523.768,
-      "joules_per_token": 2.3214
+      "edp_mean_js": 492.167,
+      "joules_per_token": 2.1814
     }
   },
   "openclaw_full": {
@@ -315,8 +315,8 @@
       "proc_billed_energy": 5783,
       "energy_total_mean_j": 338.623,
       "energy_net_mean_j": 318.116,
-      "edp_mean_js": 6694.656,
-      "joules_per_token": 12.0937
+      "edp_mean_js": 6289.224,
+      "joules_per_token": 11.3613
     },
     "W3": {
       "sample_count": 30,
@@ -339,8 +339,8 @@
       "proc_billed_energy": 6062,
       "energy_total_mean_j": 355.129,
       "energy_net_mean_j": 333.524,
-      "edp_mean_js": 7389.347,
-      "joules_per_token": 9.5981
+      "edp_mean_js": 6939.809,
+      "joules_per_token": 9.0142
     },
     "W4": {
       "sample_count": 30,
@@ -363,8 +363,8 @@
       "proc_billed_energy": 6455,
       "energy_total_mean_j": 3429.116,
       "energy_net_mean_j": 3219.715,
-      "edp_mean_js": 691911.31,
-      "joules_per_token": 11.7435
+      "edp_mean_js": 649659.282,
+      "joules_per_token": 11.0264
     },
     "W1": {
       "sample_count": 30,
@@ -387,8 +387,8 @@
       "proc_billed_energy": 5808,
       "energy_total_mean_j": 350.958,
       "energy_net_mean_j": 329.501,
-      "edp_mean_js": 7258.755,
-      "joules_per_token": 5.8493
+      "edp_mean_js": 6814.963,
+      "joules_per_token": 5.4917
     }
   },
   "picoclaw": {
@@ -413,8 +413,8 @@
       "proc_billed_energy": 6354,
       "energy_total_mean_j": 125.379,
       "energy_net_mean_j": 117.612,
-      "edp_mean_js": 942.94,
-      "joules_per_token": 6.9655
+      "edp_mean_js": 884.521,
+      "joules_per_token": 6.534
     },
     "W3": {
       "sample_count": 30,
@@ -437,8 +437,8 @@
       "proc_billed_energy": 5326,
       "energy_total_mean_j": 100.154,
       "energy_net_mean_j": 94.131,
-      "edp_mean_js": 585.607,
-      "joules_per_token": 3.4536
+      "edp_mean_js": 550.386,
+      "joules_per_token": 3.2459
     },
     "W1": {
       "sample_count": 30,
@@ -461,8 +461,8 @@
       "proc_billed_energy": 5465,
       "energy_total_mean_j": 94.66,
       "energy_net_mean_j": 88.965,
-      "edp_mean_js": 522.658,
-      "joules_per_token": 2.3088
+      "edp_mean_js": 491.206,
+      "joules_per_token": 2.1699
     },
     "W4": {
       "sample_count": 30,
@@ -485,8 +485,8 @@
       "proc_billed_energy": 7050,
       "energy_total_mean_j": 934.056,
       "energy_net_mean_j": 876.639,
-      "edp_mean_js": 51723.067,
-      "joules_per_token": 3.3359
+      "edp_mean_js": 48543.568,
+      "joules_per_token": 3.1309
     }
   }
 }
