@@ -41,6 +41,7 @@ def update_manifest() -> int:
     # Also track additional core files if present
     additional = [
         "scripts/run_prefill_ablation.py",
+        "scripts/run_w2_resample.py",
         "results/publication_campaign/tables/table_prefill_ablation.tex",
     ]
     for rel_path in additional:
@@ -50,6 +51,8 @@ def update_manifest() -> int:
 
     updated = {}
     for rel_path in sorted(manifest.keys()):
+        if rel_path.startswith("results/simulated_check/"):
+            continue
         abs_path = os.path.join(REPO_DIR, rel_path)
         if os.path.exists(abs_path):
             updated[rel_path] = compute_sha256(abs_path)

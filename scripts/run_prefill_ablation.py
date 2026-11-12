@@ -229,7 +229,7 @@ def generate_latex_table(records: list[dict]):
 
     latex = r"""\begin{table*}[t]
 \centering
-\caption{Controlled Tool Catalog Schema Prefill and KV-Cache Reuse Characterization on llama.cpp / Metal GPU. Evaluates prompt token length ($N_{\text{prompt}}$), Time-to-First-Token (TTFT), and Prefill duration ($T_{\text{prefill}}$) across catalog sizes ($T \in \{0, 15, 54, 100\}$) under Cold Prefill ($\texttt{cache\_prompt} = \text{false}$) versus Warm KV-Cache Reuse ($\texttt{cache\_prompt} = \text{true}$). Values denote empirical median ($n=10$).}
+\caption{Controlled Tool Catalog Schema Prefill and KV-Cache Reuse Characterization (\texttt{llama.cpp} / Metal GPU). Evaluates prompt token length ($N_{\text{prompt}}$), Time-to-First-Token (TTFT), and Prefill duration ($T_{\text{prefill}}$) on the underlying local inference server across catalog sizes ($T \in \{0, 15, 54, 100\}$) under Cold Prefill ($\texttt{cache\_prompt} = \text{false}$) versus Warm KV-Cache Reuse ($\texttt{cache\_prompt} = \text{true}$). Values denote empirical median ($n=10$).}
 \label{tab:prefill_ablation}
 \small
 \begin{tabular}{l r r r r r r r}

@@ -434,9 +434,17 @@ def plot_pmc_hardware_counters(summary: dict, raw_trials: list[dict], out_dir: s
     return out
 
 
-def generate_all_charts(output_dir: str | None = None) -> list[str]:
+def generate_all_charts(output_dir: str | None = None, fig_dir: str | None = None) -> list[str]:
+    pub_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
     if output_dir is None:
-        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+        output_dir = pub_dir
+
+    if fig_dir is None:
+        if os.path.abspath(output_dir) == os.path.abspath(pub_dir):
+            fig_dir = FIG_DIR
+        else:
+            fig_dir = os.path.join(output_dir, "figures")
+    os.makedirs(fig_dir, exist_ok=True)
 
     stats_file = os.path.join(output_dir, "summary_statistics.json")
     raw_file = os.path.join(output_dir, "raw_trials.jsonl")
@@ -459,12 +467,12 @@ def generate_all_charts(output_dir: str | None = None) -> list[str]:
         except Exception:
             pass
 
-    f1 = draw_architecture_diagram(FIG_DIR)
-    f2 = plot_exp1_startup_memory(summary, raw_trials, FIG_DIR)
-    f3 = plot_exp2_latency_overhead(summary, raw_trials, FIG_DIR)
-    f4 = plot_exp3_energy_edp(summary, raw_trials, FIG_DIR)
-    f5 = plot_exp4_tools_and_prompt_bloat(summary, raw_trials, FIG_DIR)
-    f6 = plot_pmc_hardware_counters(summary, raw_trials, FIG_DIR)
+    f1 = draw_architecture_diagram(fig_dir)
+    f2 = plot_exp1_startup_memory(summary, raw_trials, fig_dir)
+    f3 = plot_exp2_latency_overhead(summary, raw_trials, fig_dir)
+    f4 = plot_exp3_energy_edp(summary, raw_trials, fig_dir)
+    f5 = plot_exp4_tools_and_prompt_bloat(summary, raw_trials, fig_dir)
+    f6 = plot_pmc_hardware_counters(summary, raw_trials, fig_dir)
 
     figures = [f1, f2, f3, f4, f5, f6]
     print("Generated publication figures:")

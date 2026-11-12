@@ -9,12 +9,12 @@
       "significant_alpha_0_05": true
     },
     "W2": {
-      "u_statistic": 900.0,
-      "raw_p_value": 3.0198593591621564e-11,
-      "cliffs_delta": 1.0,
-      "vargha_delaney_a12": 1.0,
-      "holm_bonferroni_p_value": 0.0,
-      "significant_alpha_0_05": true
+      "u_statistic": 424.0,
+      "raw_p_value": 0.7061714882812296,
+      "cliffs_delta": -0.0578,
+      "vargha_delaney_a12": 0.4711,
+      "holm_bonferroni_p_value": 0.706171,
+      "significant_alpha_0_05": false
     },
     "W3": {
       "u_statistic": 0.0,
@@ -73,14 +73,14 @@
       "raw_p_value": 0.26749605658007647,
       "cliffs_delta": 0.1678,
       "vargha_delaney_a12": 0.5839,
-      "holm_bonferroni_p_value": 0.3429,
+      "holm_bonferroni_p_value": 0.534992,
       "significant_alpha_0_05": false
     },
     "W2": {
-      "u_statistic": 900.0,
-      "raw_p_value": 3.0198593591621564e-11,
-      "cliffs_delta": 1.0,
-      "vargha_delaney_a12": 1.0,
+      "u_statistic": 61.0,
+      "raw_p_value": 9.26028739563309e-09,
+      "cliffs_delta": -0.8644,
+      "vargha_delaney_a12": 0.0678,
       "holm_bonferroni_p_value": 0.0,
       "significant_alpha_0_05": true
     },
@@ -89,7 +89,7 @@
       "raw_p_value": 0.019883076413910725,
       "cliffs_delta": 0.3511,
       "vargha_delaney_a12": 0.6756,
-      "holm_bonferroni_p_value": 0.059649,
+      "holm_bonferroni_p_value": 0.079532,
       "significant_alpha_0_05": false
     },
     "W4": {
@@ -141,15 +141,15 @@
       "raw_p_value": 0.17145004745971015,
       "cliffs_delta": -0.2067,
       "vargha_delaney_a12": 0.3967,
-      "holm_bonferroni_p_value": 0.3429,
+      "holm_bonferroni_p_value": 0.51435,
       "significant_alpha_0_05": false
     },
     "W2": {
-      "u_statistic": 0.0,
-      "raw_p_value": 3.0198593591621564e-11,
-      "cliffs_delta": -1.0,
-      "vargha_delaney_a12": 0.0,
-      "holm_bonferroni_p_value": 0.0,
+      "u_statistic": 802.0,
+      "raw_p_value": 2.0282948555391948e-07,
+      "cliffs_delta": 0.7822,
+      "vargha_delaney_a12": 0.8911,
+      "holm_bonferroni_p_value": 1e-06,
       "significant_alpha_0_05": true
     },
     "W3": {

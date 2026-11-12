@@ -105,6 +105,7 @@ Os orquestradores executam os testes fatoriais W1 a W4 contra o servidor neural:
 ```bash
 ./tools/.venv/bin/python benchmark/run_unified_benchmark.py
 ```
+*(Exemplo Ilustrativo da Estrutura de Saída do Runner / Illustrative Runner Output Format)*
 ```text
 [001/600] picoclaw         W1 Rep 1: Task=5497.0ms, Orch=29.73ms, RAM=11.2MB, EDP=491.2J·s
 [002/600] openclaw_minimal W1 Rep 1: Task=5847.5ms, Orch=51.28ms, RAM=85.6MB, EDP=550.5J·s
@@ -112,7 +113,7 @@ Os orquestradores executam os testes fatoriais W1 a W4 contra o servidor neural:
 [004/600] python_native    W1 Rep 1: Task=5485.6ms, Orch=10.41ms, RAM=38.2MB, EDP=492.2J·s
 [005/600] neural_baseline  W1 Rep 1: Task=5489.6ms, Orch=0.00ms, RAM=0.0MB, EDP=483.6J·s
 ```
-*Legenda Técnica:* Traces em tempo real mostrando a latência de tarefa ($T_{\text{task}}$), tempo de inferência neural ($T_{\text{neural}}$), overhead do runtime ($T_{\text{orch}}$) e consumo de memória RAM residente (RSS).
+*Legenda Técnica:* Traces em tempo real ilustrando a estrutura de saída do runner com a latência de tarefa ($T_{\text{task}}$), tempo de inferência neural ($T_{\text{neural}}$), overhead do runtime ($T_{\text{orch}}$) e consumo de memória RAM residente (RSS).
 
 ---
 
@@ -307,6 +308,7 @@ data/workload_data/
 ```bash
 ./tools/.venv/bin/python benchmark/run_unified_benchmark.py
 ```
+*(Illustrative Runner Output Format / Exemplo Ilustrativo da Estrutura de Saída do Runner)*
 ```text
 [001/600] picoclaw         W1 Rep 1: Task=5497.0ms, Orch=29.73ms, RAM=11.2MB, EDP=491.2J·s
 [002/600] openclaw_minimal W1 Rep 1: Task=5847.5ms, Orch=51.28ms, RAM=85.6MB, EDP=550.5J·s
@@ -314,7 +316,7 @@ data/workload_data/
 [004/600] python_native    W1 Rep 1: Task=5485.6ms, Orch=10.41ms, RAM=38.2MB, EDP=492.2J·s
 [005/600] neural_baseline  W1 Rep 1: Task=5489.6ms, Orch=0.00ms, RAM=0.0MB, EDP=483.6J·s
 ```
-*Technical Caption:* Real-time execution traces capturing task latency ($T_{\text{task}}$), neural serving time ($T_{\text{neural}}$), runtime overhead ($T_{\text{orch}}$), and Resident Set Size (RSS).
+*Technical Caption:* Real-time execution traces demonstrating the illustrative runner output format capturing task latency ($T_{\text{task}}$), neural serving time ($T_{\text{neural}}$), runtime overhead ($T_{\text{orch}}$), and Resident Set Size (RSS).
 
 ---
 
