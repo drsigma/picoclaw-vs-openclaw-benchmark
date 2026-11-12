@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
-Poisson Sampling Validation & High-Assertiveness Statistical Engine
-Computes Poisson sample sizes, Garwood (1936) exact chi-square confidence intervals,
-Cameron-Trivedi dispersion tests, and generates empirical validation datasets
-achieving >=90% to 100% statistical assertiveness.
+[LEGACY / EXPLORATORY ARTIFACT - NÃO FAZ PARTE DA CAMPANHA DE PUBLICAÇÃO]
+This script belongs to prior exploratory benchmark runs and is archived for historical
+transparency. It is NOT part of the peer-reviewed SoftwareX publication campaign pipeline.
 """
 import json
 import math

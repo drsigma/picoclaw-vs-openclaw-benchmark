@@ -135,21 +135,21 @@ Os resultados empíricos consolidados da campanha definitiva de publicação no 
 
 ---
 
-## 🛠️ Guia Didático e Provas Visuais / Beginner's Walkthrough
+## 🛠️ Guia Didático e Provas de Execução / Beginner's Walkthrough
 
-Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tutorial de 3 minutos e todas as **7 capturas de tela reais do terminal no Apple Silicon M4**, consulte o guia dedicado:
+Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tutorial de 3 minutos e todos os **7 passos com evidências reais de terminal no Apple Silicon M4**, consulte o guia dedicado:
 
-👉 **[Acessar o Guia Didático e Prints em `tutorial/README.md`](tutorial/README.md)**
+👉 **[Acessar o Guia Didático e Logs em `tutorial/README.md`](tutorial/README.md)**
 
-| Screenshot | Descrição Técnica Comprovada no Terminal |
+| Etapa / Step | Descrição Técnica Comprovada no Terminal |
 | :---: | :--- |
-| [`step01_llama_metal_server.png`](tutorial/assets/screenshots/step01_llama_metal_server.png) | Servidor `llama-server` Metal GPU alocado na DRAM UMA e healthcheck `ok`. |
-| [`step02_hyperfine_coldstart.png`](tutorial/assets/screenshots/step02_hyperfine_coldstart.png) | Medição estatística de cold-start com vantagem de $23{,}4\times$ para o Go. |
-| [`step03_powermetrics_telemetry.png`](tutorial/assets/screenshots/step03_powermetrics_telemetry.png) | Leitura dos shunts elétricos do chip M4 via Apple SMC (`powermetrics`). |
-| [`step04_live_execution.png`](tutorial/assets/screenshots/step04_live_execution.png) | Execução ao vivo dos traces W1 a W4 com cálculo de $\Delta\text{RSS}$ e latência. |
-| [`step05_poisson_engine.png`](tutorial/assets/screenshots/step05_poisson_engine.png) | Motor estatístico de Poisson com limites de Garwood e assertividade $\ge$ 90,3%. |
-| [`step06_caffeinate_quiescence.png`](tutorial/assets/screenshots/step06_caffeinate_quiescence.png) | Protocolo de quiescência operacional do macOS (`caffeinate -dims`). |
-| [`step07_workload_datasets.png`](tutorial/assets/screenshots/step07_workload_datasets.png) | Inspeção física dos datasets determinísticos em `data/workload_data/`. |
+| **Passo 1** | Servidor `llama-server` Metal GPU alocado na DRAM UMA e healthcheck `ok`. |
+| **Passo 2** | Inspeção física dos datasets determinísticos em `data/workload_data/`. |
+| **Passo 3** | Execução ao vivo dos traces W1 a W4 com cálculo de $\Delta\text{RSS}$ e latência. |
+| **Passo 4** | Medição estatística de cold-start via `hyperfine` com vantagem de $23{,}4\times$ para o Go. |
+| **Passo 5** | Motor estatístico de Poisson com limites de Garwood e assertividade $\ge 90{,}3\%$. |
+| **Passo 6** | Leitura dos shunts elétricos do chip M4 via Apple SMC (`powermetrics`). |
+| **Passo 7** | Protocolo de quiescência operacional do macOS (`caffeinate -dims`). |
 
 ---
 
@@ -195,25 +195,32 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── LICENSE                                    <- Licença MIT para código-fonte
 ├── DATA_LICENSE                               <- Licença Creative Commons CC-BY 4.0 para dados e figuras
 ├── references.bib                             <- Base bibliográfica formal BibTeX (IEEE/ACM/Elsevier)
-├── tutorial/                                  <- Guia didático passo a passo e evidências visuais
-│   ├── README.md                              <- Tutorial visual bilíngue com a analogia e passos 1 a 7
-│   └── assets/screenshots/                    <- 7 capturas de tela com nomes semânticos
+├── tutorial/                                  <- Guia didático passo a passo e evidências de execução
+│   └── README.md                              <- Tutorial prático bilíngue com passos 1 a 7 e logs de terminal
 ├── benchmark/                                 <- Harness de execução, adaptadores e orquestradores
 │   ├── adapters/                              <- Implementação do padrão Strategy/Adapter
 │   │   ├── base.py                            <- Interface abstrata AgentOrchestratorAdapter
 │   │   ├── picoclaw_adapter.py                <- Adaptador PicoClaw Go nativo
 │   │   ├── openclaw_adapter.py                <- Adaptador OpenClaw Node.js (Minimal e Full Ablation)
+│   │   ├── python_native_adapter.py           <- Adaptador PythonNative (referência CPython 3.12)
 │   │   └── neural_baseline_adapter.py         <- Adaptador de linha de base neural direta
-│   ├── picoclaw_orch.go                       <- Orquestrador Go nativo
+│   ├── picoclaw_orch.go                       <- Orquestrador Go nativo (compilado Mach-O ARM64)
 │   ├── openclaw_orch.mjs                      <- Orquestrador Node.js/TypeScript V8
-│   ├── run_unified_benchmark.py               <- Executor mestre da campanha com matriz de ablação
-│   ├── analyze_results.py                     <- Análise estatística, testes não-paramétricos e LaTeX
-│   ├── poisson_sampling_validation.py         <- Motor de validação de Poisson e intervalos de Garwood
-│   └── generate_charts.py                     <- Gerador das 8 figuras científicas em 300 DPI
+│   ├── python_orch.py                         <- Orquestrador Python 3.12 + NumPy
+│   ├── telemetry.py                           <- Coletor de telemetria Apple SMC, libproc e Linux RAPL
+│   ├── run_unified_benchmark.py               <- Executor mestre com randomized block e modo dry-run
+│   ├── analyze_results.py                     <- Análise estatística (Mediana, IQR, Cliff's d, A12, Holm-Bonferroni)
+│   └── generate_charts.py                     <- Gerador das 6 figuras científicas em 300 DPI
+├── scripts/                                   <- Scripts utilitários e arquivos legados
+│   ├── check_quiescence.sh                    <- Auditoria de quiescência operacional
+│   └── legacy/                                <- Scripts exploratórios arquivados
 ├── tests/                                     <- Suíte de testes unitários automatizados (pytest)
-│   ├── test_dataset_generator.py              <- Validação de integridade e schemas dos datasets
-│   ├── test_statistical_engine.py             <- Validação matemática de Garwood, EDP e Mann-Whitney
-│   └── test_telemetry_parser.py               <- Validação de parsing de potência e energia do SMC
+│   ├── test_adapters_and_failfast.py          <- Validação dos 5 adaptadores e fail-fast
+│   ├── test_artifact_consistency.py           <- Consistência numérica cruzada JSON/CSV/LaTeX
+│   ├── test_dataset_generator.py              <- Validação de integridade dos datasets determinísticos
+│   ├── test_statistical_engine.py             <- Validação matemática de Cliff's d, A12, Bootstrap e Holm
+│   └── test_telemetry_parser.py               <- Validação de parsing SMC, RAPL e libproc
+├── figures/                                   <- 6 figuras científicas em alta resolução (300 DPI)
 ├── results/                                   <- Resultados experimentais estruturados
 │   ├── publication_campaign/                  <- Dados da campanha definitiva (Journal-Ready)
 │   │   ├── raw_trials.jsonl                   <- Traces JSONL de todos os 80 ensaios fatoriais

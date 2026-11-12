@@ -3,25 +3,41 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/binary"
 	"encoding/json"
 	"fmt"
-	"io"
 	"math"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"regexp"
 	"runtime"
+	"sort"
 	"strings"
 	"syscall"
 	"time"
 )
 
-type ToolSchema struct {
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
-	Parameters  map[string]interface{} `json:"parameters"`
+type FunctionParameterProp struct {
+	Type        string `json:"type"`
+	Description string `json:"description,omitempty"`
+}
+
+type FunctionParameters struct {
+	Type       string                           `json:"type"`
+	Properties map[string]FunctionParameterProp `json:"properties"`
+	Required   []string                         `json:"required"`
+}
+
+type ToolFunction struct {
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Parameters  FunctionParameters `json:"parameters"`
+}
+
+type ToolDefinition struct {
+	Type     string       `json:"type"`
+	Function ToolFunction `json:"function"`
 }
 
 type ChatMessage struct {
@@ -30,42 +46,71 @@ type ChatMessage struct {
 }
 
 type ChatRequest struct {
-	Model       string        `json:"model"`
-	Messages    []ChatMessage `json:"messages"`
-	MaxTokens   int           `json:"max_tokens"`
-	Temperature float64       `json:"temperature"`
-	Seed        int           `json:"seed"`
-	Stream      bool          `json:"stream"`
+	Model       string           `json:"model"`
+	Messages    []ChatMessage    `json:"messages"`
+	Tools       []ToolDefinition `json:"tools,omitempty"`
+	MaxTokens   int              `json:"max_tokens"`
+	Temperature float64          `json:"temperature"`
+	Seed        int              `json:"seed"`
+	Stream      bool             `json:"stream"`
 }
 
 type TrialResult struct {
-	Architecture   string  `json:"architecture"`
-	Workload       string  `json:"workload"`
-	Warmth         string  `json:"warmth"`
-	TTaskMs        float64 `json:"t_task_ms"`
-	TNeuralMs      float64 `json:"t_neural_ms"`
-	TOrchMs        float64 `json:"t_orch_ms"`
-	PhiOrchPct     float64 `json:"phi_orch_pct"`
-	TTFTMs         float64 `json:"ttft_ms"`
-	ITLMs          float64 `json:"itl_ms"`
-	TDispatchMs    float64 `json:"t_dispatch_ms"`
-	RToolOpsSec    float64 `json:"r_tool_ops_sec"`
-	RSSIdleMB      float64 `json:"rss_idle_mb"`
-	RSSPeakMB      float64 `json:"rss_peak_mb"`
-	AlphaMem       float64 `json:"alpha_mem"`
-	OutputTokens   int     `json:"output_tokens"`
-	ToolCalls      int     `json:"tool_calls"`
+	Architecture string  `json:"architecture"`
+	Workload     string  `json:"workload"`
+	Warmth       string  `json:"warmth"`
+	TTaskMs      float64 `json:"t_task_ms"`
+	TNeuralMs    float64 `json:"t_neural_ms"`
+	TOrchMs      float64 `json:"t_orch_ms"`
+	PhiOrchPct   float64 `json:"phi_orch_pct"`
+	TTFTMs       float64 `json:"ttft_ms"`
+	ITLMs        float64 `json:"itl_ms"`
+	TDispatchMs  float64 `json:"t_dispatch_ms"`
+	RToolOpsSec  float64 `json:"r_tool_ops_sec"`
+	RSSIdleMB    float64 `json:"rss_idle_mb"`
+	RSSPeakMB    float64 `json:"rss_peak_mb"`
+	AlphaMem     float64 `json:"alpha_mem"`
+	OutputTokens int     `json:"output_tokens"`
+	ToolCalls    int     `json:"tool_calls"`
+}
+
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func getRSSMB() float64 {
 	var rusage syscall.Rusage
 	if err := syscall.Getrusage(syscall.RUSAGE_SELF, &rusage); err == nil {
-		// On Darwin, Maxrss is in bytes
 		return float64(rusage.Maxrss) / (1024.0 * 1024.0)
 	}
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	return float64(m.Sys) / (1024.0 * 1024.0)
+}
+
+func buildStandardToolCatalog(count int) []ToolDefinition {
+	tools := make([]ToolDefinition, count)
+	for i := 0; i < count; i++ {
+		tools[i] = ToolDefinition{
+			Type: "function",
+			Function: ToolFunction{
+				Name:        fmt.Sprintf("system_tool_%d", i),
+				Description: fmt.Sprintf("Standard system tool descriptor #%d for agent runtime evaluation.", i),
+				Parameters: FunctionParameters{
+					Type: "object",
+					Properties: map[string]FunctionParameterProp{
+						"action": {Type: "string", Description: "Action to execute"},
+						"target": {Type: "string", Description: "Target parameter or file path"},
+					},
+					Required: []string{"action", "target"},
+				},
+			},
+		}
+	}
+	return tools
 }
 
 func executeToolListDir(mockDir string) (string, error) {
@@ -76,11 +121,16 @@ func executeToolListDir(mockDir string) (string, error) {
 	var names []string
 	for _, e := range entries {
 		info, _ := e.Info()
-		names = append(names, fmt.Sprintf("%s:%d", e.Name(), info.Size()))
+		sz := int64(0)
+		if info != nil {
+			sz = info.Size()
+		}
+		names = append(names, fmt.Sprintf("%s:%d", e.Name(), sz))
 	}
+	k := minInt(10, len(names))
 	out, _ := json.Marshal(map[string]interface{}{
 		"count": len(names),
-		"files": names[:10],
+		"files": names[:k],
 	})
 	return string(out), nil
 }
@@ -105,30 +155,39 @@ func executeToolGrepLogs(logFile string) ([]float64, string, error) {
 			}
 		}
 	}
+	k := minInt(5, len(vals))
+	sample := []float64{}
+	if k > 0 {
+		sample = vals[:k]
+	}
 	out, _ := json.Marshal(map[string]interface{}{
 		"matched_records": len(vals),
-		"sample":          vals[:5],
+		"sample":          sample,
 	})
 	return vals, string(out), nil
 }
 
 func executeToolCalcStats(vals []float64) string {
-	if len(vals) == 0 {
+	n := len(vals)
+	if n == 0 {
 		return "{}"
 	}
 	sum := 0.0
 	for _, v := range vals {
 		sum += v
 	}
-	mean := sum / float64(len(vals))
+	mean := sum / float64(n)
 	varSq := 0.0
 	for _, v := range vals {
 		d := v - mean
 		varSq += d * d
 	}
-	variance := varSq / float64(len(vals)-1)
+	variance := 0.0
+	if n > 1 {
+		variance = varSq / float64(n-1)
+	}
 	out, _ := json.Marshal(map[string]interface{}{
-		"n":        len(vals),
+		"n":        n,
 		"mean":     mean,
 		"variance": variance,
 		"stddev":   math.Sqrt(variance),
@@ -136,43 +195,118 @@ func executeToolCalcStats(vals []float64) string {
 	return string(out)
 }
 
+type docScore struct {
+	idx   int
+	score float32
+}
+
 func executeVectorRAG(baseDir string) string {
-	// 100k-param projection (256->384) + 10,000x384 cosine similarity search in native Go
+	const inDim = 256
+	const outDim = 384
 	const nDocs = 10000
-	const dim = 384
-	qVec := make([]float32, dim)
-	for d := 0; d < dim; d++ {
-		qVec[d] = float32(math.Sin(float64(d)*0.17)) * 0.05
+
+	wProj := make([]float32, inDim*outDim)
+	bProj := make([]float32, outDim)
+	docMatrix := make([]float32, nDocs*outDim)
+
+	wFile := filepath.Join(baseDir, "w_proj.bin")
+	bFile := filepath.Join(baseDir, "b_proj.bin")
+	docsBinFile := filepath.Join(baseDir, "doc_embeddings.bin")
+
+	loaded := false
+	if wBytes, err := os.ReadFile(wFile); err == nil && len(wBytes) == inDim*outDim*4 {
+		if bBytes, err := os.ReadFile(bFile); err == nil && len(bBytes) == outDim*4 {
+			if docBytes, err := os.ReadFile(docsBinFile); err == nil && len(docBytes) == nDocs*outDim*4 {
+				for i := 0; i < inDim*outDim; i++ {
+					wProj[i] = math.Float32frombits(binary.LittleEndian.Uint32(wBytes[i*4 : (i+1)*4]))
+				}
+				for i := 0; i < outDim; i++ {
+					bProj[i] = math.Float32frombits(binary.LittleEndian.Uint32(bBytes[i*4 : (i+1)*4]))
+				}
+				for i := 0; i < nDocs*outDim; i++ {
+					docMatrix[i] = math.Float32frombits(binary.LittleEndian.Uint32(docBytes[i*4 : (i+1)*4]))
+				}
+				loaded = true
+			}
+		}
 	}
-	scores := make([]float32, nDocs)
-	topIdx := [5]int{0, 1, 2, 3, 4}
+
+	if !loaded {
+		for i := 0; i < inDim*outDim; i++ {
+			wProj[i] = float32(math.Sin(float64(i)*0.01)) * 0.05
+		}
+		for i := 0; i < outDim; i++ {
+			bProj[i] = float32(math.Cos(float64(i)*0.02)) * 0.01
+		}
+		for i := 0; i < nDocs*outDim; i++ {
+			docMatrix[i] = float32(((i*31 + 17) % 100)) * 0.01
+		}
+	}
+
+	// 1. Query vector initialization and linear projection (256 -> 384)
+	qRaw := make([]float32, inDim)
+	for d := 0; d < inDim; d++ {
+		qRaw[d] = float32(math.Sin(float64(d)*0.17)) * 0.05
+	}
+
+	qProj := make([]float32, outDim)
+	for j := 0; j < outDim; j++ {
+		sum := bProj[j]
+		for i := 0; i < inDim; i++ {
+			sum += qRaw[i] * wProj[i*outDim+j]
+		}
+		qProj[j] = sum
+	}
+
+	// 2. L2 Normalization of projected query vector
+	var normSq float32
+	for j := 0; j < outDim; j++ {
+		normSq += qProj[j] * qProj[j]
+	}
+	norm := float32(math.Sqrt(float64(normSq))) + 1e-8
+	for j := 0; j < outDim; j++ {
+		qProj[j] /= norm
+	}
+
+	// 3. Cosine similarity against all 10,000 document vectors
+	scores := make([]docScore, nDocs)
 	for i := 0; i < nDocs; i++ {
 		var dot float32
-		for d := 0; d < dim; d++ {
-			v := float32(((i*31 + d*17) % 100)) * 0.01
-			dot += qVec[d] * v
+		rowOffset := i * outDim
+		for j := 0; j < outDim; j++ {
+			dot += qProj[j] * docMatrix[rowOffset+j]
 		}
-		scores[i] = dot
-		if dot > scores[topIdx[0]] {
-			topIdx[0] = i
-		}
+		scores[i] = docScore{idx: i, score: dot}
 	}
+
+	// 4. Descending sort to select Top-5 chunks
+	sort.Slice(scores, func(a, b int) bool {
+		return scores[a].score > scores[b].score
+	})
+
 	docsFile := filepath.Join(baseDir, "rag_chunks_10k.json")
 	raw, _ := os.ReadFile(docsFile)
 	var chunks map[string]string
 	_ = json.Unmarshal(raw, &chunks)
+
 	var sb strings.Builder
 	for k := 0; k < 5; k++ {
-		sb.WriteString(chunks[fmt.Sprintf("%d", k)])
+		topIdx := scores[k].idx
+		if text, ok := chunks[fmt.Sprintf("%d", topIdx)]; ok {
+			sb.WriteString(text)
+		} else {
+			sb.WriteString(fmt.Sprintf("[Chunk #%04d] Context reference document.", topIdx))
+		}
 		sb.WriteString("\n")
 	}
 	return sb.String()
 }
 
-func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage, maxTokens int) (float64, float64, float64, int, string) {
+func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage, tools []ToolDefinition, maxTokens int) (float64, float64, float64, int, string) {
 	reqBody := ChatRequest{
 		Model:       "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
 		Messages:    messages,
+		Tools:       tools,
 		MaxTokens:   maxTokens,
 		Temperature: 0.0,
 		Seed:        42,
@@ -189,16 +323,16 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 	defer resp.Body.Close()
 
 	var ttftMs float64
+	var promptMs, predictedMs float64
+	hasServerTimings := false
 	firstChunk := true
 	tokenCount := 0
 	var outText strings.Builder
 	reader := bufio.NewReader(resp.Body)
+
 	for {
 		line, err := reader.ReadString('\n')
 		if err != nil {
-			if err == io.EOF {
-				break
-			}
 			break
 		}
 		line = strings.TrimSpace(line)
@@ -209,16 +343,32 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 			}
 			var chunk map[string]interface{}
 			if err := json.Unmarshal([]byte(dataStr), &chunk); err == nil {
+				if timings, ok := chunk["timings"].(map[string]interface{}); ok {
+					if pMs, ok := timings["prompt_ms"].(float64); ok {
+						promptMs = pMs
+						hasServerTimings = true
+					}
+					if predMs, ok := timings["predicted_ms"].(float64); ok {
+						predictedMs = predMs
+						hasServerTimings = true
+					}
+				}
 				if choices, ok := chunk["choices"].([]interface{}); ok && len(choices) > 0 {
 					if c0, ok := choices[0].(map[string]interface{}); ok {
 						if delta, ok := c0["delta"].(map[string]interface{}); ok {
+							hasData := false
 							if content, ok := delta["content"].(string); ok && len(content) > 0 {
-								if firstChunk {
-									ttftMs = float64(time.Since(t0).Nanoseconds()) / 1e6
-									firstChunk = false
-								}
+								hasData = true
 								tokenCount++
 								outText.WriteString(content)
+							}
+							if toolCalls, ok := delta["tool_calls"].([]interface{}); ok && len(toolCalls) > 0 {
+								hasData = true
+								tokenCount += len(toolCalls)
+							}
+							if hasData && firstChunk {
+								ttftMs = float64(time.Since(t0).Nanoseconds()) / 1e6
+								firstChunk = false
 							}
 						}
 					}
@@ -226,7 +376,14 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 			}
 		}
 	}
-	totalNeuralMs := float64(time.Since(t0).Nanoseconds()) / 1e6
+
+	var totalNeuralMs float64
+	if hasServerTimings {
+		totalNeuralMs = promptMs + predictedMs
+	} else {
+		totalNeuralMs = float64(time.Since(t0).Nanoseconds()) / 1e6
+	}
+
 	itlMs := 0.0
 	if tokenCount > 1 {
 		itlMs = (totalNeuralMs - ttftMs) / float64(tokenCount-1)
@@ -239,16 +396,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 	var tNeuralTotal, ttftFirst, itlAvg, tDispatchTotal float64
 	var totalTokens, toolCalls int
 
-	// Prompt templating & JSON schema validation overhead (PicoClaw Go runtime)
-	schemas := make([]ToolSchema, 15)
-	for i := 0; i < 15; i++ {
-		schemas[i] = ToolSchema{
-			Name:        fmt.Sprintf("tool_%d", i),
-			Description: "PicoClaw native Go statically typed tool descriptor",
-			Parameters:  map[string]interface{}{"type": "object", "required": []string{"target"}},
-		}
-	}
-	_, _ = json.Marshal(schemas)
+	// Equalized tool definitions sent in request (15 tools for minimal/picoclaw parity)
+	toolCatalog := buildStandardToolCatalog(15)
 
 	mockDir := filepath.Join(baseDir, "mock_files")
 	logFile := filepath.Join(baseDir, "system_logs.jsonl")
@@ -258,10 +407,10 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		prompt := strings.Repeat("Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. ", 8) +
 			"Summarize the primary latency determinant in two concise sentences."
 		msgs := []ChatMessage{
-			{Role: "system", Content: "You are PicoClaw, a concise technical systems assistant."},
+			{Role: "system", Content: "You are a concise technical systems assistant."},
 			{Role: "user", Content: prompt},
 		}
-		tn, ttft, itl, ntok, _ := callLlamaStream(client, apiURL, msgs, 64)
+		tn, ttft, itl, ntok, _ := callLlamaStream(client, apiURL, msgs, toolCatalog, 64)
 		tNeuralTotal = tn
 		ttftFirst = ttft
 		itlAvg = itl
@@ -273,18 +422,15 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		res1, _ := executeToolListDir(mockDir)
 		vals, res2, _ := executeToolGrepLogs(logFile)
 		res3 := executeToolCalcStats(vals)
-		// Subprocess check to match real tool invocation semantics
-		cmd := exec.Command("/bin/echo", "tool_chain_sync")
-		_ = cmd.Run()
 		tDispatchTotal = float64(time.Since(tTool0).Nanoseconds()) / 1e6
 		toolCalls = 3
 
 		prompt := fmt.Sprintf("System Tool Chain Results:\n1. list_dir: %s\n2. grep_logs: %s\n3. calc_stats: %s\nProvide a concise technical diagnostic summary of the bus latency metrics.", res1, res2, res3)
 		msgs := []ChatMessage{
-			{Role: "system", Content: "You are PicoClaw executing a 3-step diagnostic tool chain."},
+			{Role: "system", Content: "You are a concise technical systems assistant."},
 			{Role: "user", Content: prompt},
 		}
-		tn, ttft, itl, ntok, _ := callLlamaStream(client, apiURL, msgs, 128)
+		tn, ttft, itl, ntok, _ := callLlamaStream(client, apiURL, msgs, toolCatalog, 128)
 		tNeuralTotal = tn
 		ttftFirst = ttft
 		itlAvg = itl
@@ -297,10 +443,10 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		toolCalls = 1
 
 		msgs := []ChatMessage{
-			{Role: "system", Content: "You are PicoClaw RAG engine. Synthesize the retrieved vector memory chunks."},
+			{Role: "system", Content: "You are a concise technical systems assistant."},
 			{Role: "user", Content: "Retrieved Context:\n" + ragContext + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
 		}
-		tn, ttft, itl, ntok, _ := callLlamaStream(client, apiURL, msgs, 256)
+		tn, ttft, itl, ntok, _ := callLlamaStream(client, apiURL, msgs, toolCatalog, 256)
 		tNeuralTotal = tn
 		ttftFirst = ttft
 		itlAvg = itl
@@ -310,7 +456,7 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		toolCalls = 10
 		var itlSum float64
 		history := []ChatMessage{
-			{Role: "system", Content: "You are PicoClaw operating in a 10-turn autonomous ReAct diagnostic loop."},
+			{Role: "system", Content: "You are a concise technical systems assistant."},
 		}
 		for step := 1; step <= 10; step++ {
 			tTool0 := time.Now()
@@ -323,7 +469,7 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 				Role:    "user",
 				Content: fmt.Sprintf("Turn %d Observation: %s. State next brief diagnostic action.", step, statStr),
 			})
-			tn, ttft, itl, ntok, reply := callLlamaStream(client, apiURL, history, 64)
+			tn, ttft, itl, ntok, reply := callLlamaStream(client, apiURL, history, toolCatalog, 64)
 			tNeuralTotal += tn
 			if step == 1 {
 				ttftFirst = ttft
@@ -336,8 +482,11 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 	}
 
 	tTaskMs := float64(time.Since(tStart).Nanoseconds()) / 1e6
-	tOrchMs := math.Max(0.05, tTaskMs-tNeuralTotal)
-	phiOrch := (tOrchMs / tTaskMs) * 100.0
+	tOrchMs := math.Max(0.0, tTaskMs-tNeuralTotal)
+	phiOrch := 0.0
+	if tTaskMs > 0 {
+		phiOrch = (tOrchMs / tTaskMs) * 100.0
+	}
 	rTool := 0.0
 	if toolCalls > 0 && tDispatchTotal > 0 {
 		rTool = float64(toolCalls) / (tDispatchTotal / 1000.0)
@@ -376,15 +525,10 @@ func main() {
 	}
 	baseDir := os.Getenv("WORKLOAD_DATA_DIR")
 	if baseDir == "" {
-		if exe, err := os.Executable(); err == nil {
-			cand := filepath.Join(filepath.Dir(filepath.Dir(exe)), "data", "workload_data")
-			if _, err := os.Stat(cand); err == nil {
-				baseDir = cand
-			}
+		candidates := []string{
+			"./data/workload_data",
+			"../data/workload_data",
 		}
-	}
-	if baseDir == "" {
-		candidates := []string{"./data/workload_data", "../data/workload_data"}
 		for _, c := range candidates {
 			if _, err := os.Stat(c); err == nil {
 				baseDir = c

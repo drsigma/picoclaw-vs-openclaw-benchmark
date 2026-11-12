@@ -69,7 +69,7 @@ class OpenClawAdapter(AgentOrchestratorAdapter):
             "runtime": self.runtime,
             "language": self.language,
             "mode": self.mode,
-            "tool_catalog_size": 54 if self.mode == "full" else 3,
+            "tool_catalog_size": 54 if self.mode == "full" else 15,
             "node_binary": self.node_bin,
             "gc_architecture": "Generational mark-compact (Scavenger + Old Space)",
             "schema_validator": "TypeBox (@sinclair/typebox JSON-Schema)"

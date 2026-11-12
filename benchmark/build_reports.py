@@ -678,7 +678,7 @@ OpenClaw CLI: {'peak_rss_mb': 164.55, 'peak_phys_mb': 115.56, 'instructions': 47
         "(α_mem = 2.41), whereas OpenClaw's V8 heap expands to 448.33 ± 3.95 MB (13.25x larger memory footprint, p = 1.55 × 10^-47). "
         "In terms of energy efficiency on Apple M4 (Figure 5), real 100 ms SMC powermetrics traces confirm an idle baseline of ~1.46 W "
         "(1,430 mW CPU + 28 mW GPU + 0 mW ANE) and active inference power of 15.64 W (PicoClaw: 4,061 mW CPU + 11,577 mW GPU @ 1,578 MHz) "
-        "to 15.72 W (OpenClaw: 4,070 mW CPU + 11,645 mW GPU @ 1,578 MHz, peaking at 16.46–16.87 W). Because Metal GPU inference dominates "
+        "to 15.72 W (OpenClaw: 4,070 mW CPU + 11,645 mW GPU @ 1,578 MHz, peaking at ~16.5–16.9 W). Because Metal GPU inference dominates "
         "active power (~74% of SoC power), total package energy E_pkg differs by 1.4%–13.0% under equalized prompts (e.g., 24.47 J on T1 "
         "vs. 21.65 J on T2, reducing EDP by 24.4% from 41.48 J·s to 31.62 J·s, p = 1.25 × 10^-13). However, under default CLI operation "
         "(Figure 6b), OpenClaw's 16,369-token prompt consumes ~35.9 s of GPU prefill (~560 Joules) before emitting a single response token.",

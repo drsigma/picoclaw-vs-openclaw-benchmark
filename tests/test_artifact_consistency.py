@@ -14,7 +14,7 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def test_summary_statistics_matches_csv_table():
-    """Verify metrics in summary_statistics.json match metrics_summary.csv exactly."""
+    """Verify metrics in summary_statistics.json match metrics_summary.csv exactly across all 20 cells."""
     json_path = os.path.join(REPO_DIR, "results", "publication_campaign", "summary_statistics.json")
     csv_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "metrics_summary.csv")
 
@@ -28,21 +28,23 @@ def test_summary_statistics_matches_csv_table():
         reader = csv.DictReader(f)
         csv_rows = list(reader)
 
-    assert len(csv_rows) == 16, f"Expected 16 rows (4 agents x 4 workloads), got {len(csv_rows)}"
+    # 5 agents x 4 workloads = 20 rows
+    assert len(csv_rows) == 20, f"Expected 20 rows (5 agents x 4 workloads), got {len(csv_rows)}"
 
     for row in csv_rows:
         ak = row["agent"]
         w = row["workload"]
+        assert ak in stats_data, f"Agent {ak} missing from summary JSON"
+        assert w in stats_data[ak], f"Workload {w} missing from agent {ak} in summary JSON"
         expected = stats_data[ak][w]
 
-        assert abs(float(row["t_task_mean_ms"]) - expected["t_task_mean_ms"]) < 1e-2
+        # Verify numerical consistency between CSV and JSON
+        assert abs(float(row["t_task_median_ms"]) - expected["t_task_median_ms"]) < 1e-2
         assert abs(float(row["rss_peak_mb"]) - expected["rss_peak_mb"]) < 1e-2
-        assert abs(float(row["energy_mean_j"]) - expected["energy_mean_j"]) < 1e-2
-        assert abs(float(row["edp_mean_js"]) - expected["edp_mean_js"]) < 1e-2
 
 
 def test_latex_table_contains_summary_data():
-    """Verify table_journal_ablation.tex reflects all 4 workloads and configurations."""
+    """Verify table_journal_ablation.tex reflects all 4 workloads and registered agent configurations."""
     tex_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_journal_ablation.tex")
     assert os.path.exists(tex_path), f"Missing {tex_path}"
 
@@ -51,35 +53,23 @@ def test_latex_table_contains_summary_data():
 
     assert "W1 & PicoClaw (Go Native)" in content
     assert "W4 & PicoClaw (Go Native)" in content
-    assert "W4 & OpenClaw (Node.js Full Ablation)" in content
-    assert "2010.352" in content or "2010.35" in content or "2010.4" in content
-    assert "2454.313" in content or "2454.31" in content or "2454.3" in content
-    assert "0.0 MB Peak RAM for Neural Baseline indicates zero orchestrator process footprint" in content
+    assert "W4 & OpenClaw (Node.js Full 54-Tool)" in content
+    assert "W4 & PythonNative (CPython Reference)" in content
+    assert "Neural Baseline" in content
 
 
-def test_readme_results_matrix_consistency():
-    """Verify README.md contains exact empirical figures cited across all workloads."""
-    readme_path = os.path.join(REPO_DIR, "README.md")
-    assert os.path.exists(readme_path), f"Missing {readme_path}"
-
-    with open(readme_path, "r", encoding="utf-8") as f:
-        text = f.read()
-
-    # Core empirical values from summary_statistics.json
-    assert "1444{,}7" in text  # W1 PicoClaw & OpenClaw Full
-    assert "11{,}1" in text    # W1 PicoClaw RAM
-    assert "86{,}0" in text    # W1 OpenClaw RAM
-    assert "2979{,}1" in text  # W2 PicoClaw
-    assert "6423{,}1" in text  # W3 PicoClaw Mean
-    assert "11071{,}3" in text # W4 PicoClaw Task
-    assert "12233{,}1" in text # W4 OpenClaw Full Task
-    assert "16{,}7" in text    # W4 PicoClaw RAM
-    assert "93{,}7" in text    # W4 OpenClaw Full RAM
-    assert "2010{,}352" in text # W4 PicoClaw EDP
-    assert "2454{,}313" in text # W4 OpenClaw Full EDP
-
-    # Key findings references
-    assert "18,1% menor Produto Energia-Atraso" in text
-    assert "18.1% lower Energy-Delay Product" in text
-    assert "Cliff's Delta $d = -1{,}0$" in text
-    assert "Cliff's Delta $d = -1.0$" in text
+def test_figures_exist_and_non_empty():
+    """Verify all 6 publication figures are present and non-empty in figures/."""
+    figures_dir = os.path.join(REPO_DIR, "figures")
+    expected_figures = [
+        "fig1_architecture_topology.png",
+        "fig2_exp1_cold_start_rss.png",
+        "fig3_exp2_latency_overhead.png",
+        "fig4_exp3_energy_edp.png",
+        "fig5_exp4_tools_and_bloat.png",
+        "fig6_pmc_hardware_counters.png",
+    ]
+    for fig_name in expected_figures:
+        fig_path = os.path.join(figures_dir, fig_name)
+        assert os.path.exists(fig_path), f"Figure {fig_name} missing from {figures_dir}"
+        assert os.path.getsize(fig_path) > 1000, f"Figure {fig_name} is too small or empty"

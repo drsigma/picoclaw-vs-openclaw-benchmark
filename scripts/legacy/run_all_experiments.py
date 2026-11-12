@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Master Experimental Execution & Telemetry Harness (Experiments 1, 2, 3, 4)
-Executes Full Factorial Matrix (T1-T16, n=30 repetitions = 480 observations)
-Course: CCM313-EEI203 - Performance Analysis of Networks and Systems (UFABC)
+[LEGACY / EXPLORATORY ARTIFACT - NÃO FAZ PARTE DA CAMPANHA DE PUBLICAÇÃO]
+This script belongs to prior exploratory benchmark runs and is archived for historical
+transparency. It is NOT part of the peer-reviewed SoftwareX publication campaign pipeline.
 """
 import ctypes
 import json

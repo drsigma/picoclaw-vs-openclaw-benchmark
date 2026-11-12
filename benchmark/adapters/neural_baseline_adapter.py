@@ -4,11 +4,13 @@ Adaptador Direto de Linha de Base Neural (llama.cpp Metal GPU Loopback)
 
 Author / Autor: Rafael Paniccia Cassetta (UFABC)
 """
+from __future__ import annotations
 
 import json
+import os
 import time
 import urllib.request
-from typing import Any, Dict, List
+from typing import Any
 
 from benchmark.adapters.base import AgentOrchestratorAdapter
 
@@ -16,102 +18,190 @@ from benchmark.adapters.base import AgentOrchestratorAdapter
 class NeuralBaselineAdapter(AgentOrchestratorAdapter):
     """
     Direct neural inference adapter bypassing agent orchestration layers.
-    Measures pure LLM inference latency directly via loopback HTTP (127.0.0.1:8080).
+    Measures pure LLM inference latency directly via loopback HTTP (127.0.0.1:8080)
+    executing the exact same sequence of HTTP completions as the worker runtimes.
     """
 
-    def __init__(self, api_url: str = "http://127.0.0.1:8080/v1/chat/completions"):
+    def __init__(self, api_url: str | None = None):
         super().__init__(
             name="NeuralBaseline",
             runtime="llama.cpp b11887 (Metal GPU Shaders)",
             language="C++20 Native",
-            mode="direct_neural"
+            mode="direct_neural",
         )
-        self.api_url = api_url
+        self.api_url = api_url or os.environ.get("LLAMA_API_URL", "http://127.0.0.1:8080/v1/chat/completions")
 
     def setup(self) -> bool:
+        health_url = self.api_url.replace("/v1/chat/completions", "/health")
         try:
-            req = urllib.request.Request("http://127.0.0.1:8080/health")
+            req = urllib.request.Request(health_url)
             with urllib.request.urlopen(req, timeout=2) as resp:
                 return resp.status == 200
         except Exception:
             return False
 
-    def cold_start_cmd(self) -> List[str]:
+    def cold_start_cmd(self) -> list[str]:
         return ["curl", "-s", "http://127.0.0.1:8080/health"]
 
-    def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> Dict[str, Any]:
-        if not prompt:
-            if workload_id == "W1":
-                prompt = (
-                    "Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. " * 8 +
-                    "Summarize the primary latency determinant in two concise sentences."
-                )
-                max_tokens = 64
-            elif workload_id == "W2":
-                prompt = "System Tool Chain Results:\n1. list_dir: 50 files\n2. grep_logs: 12 errors\n3. calc_stats: mean 4.2ms\nProvide a concise diagnostic."
-                max_tokens = 128
-            elif workload_id == "W3":
-                prompt = "Synthesize retrieved RAG vector context and explain how UMA bandwidth and GC interact."
-                max_tokens = 256
-            else: # W4
-                prompt = "Execute 10-turn ReAct diagnostic loop summary."
-                max_tokens = 256
-        else:
-            max_tokens = 128
-
-        payload = {
+    def _call_stream(self, messages: list[dict], max_tokens: int) -> tuple[float, float, float, int, str]:
+        payload = json.dumps({
             "model": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
-            "messages": [
-                {"role": "system", "content": "You are a concise technical assistant."},
-                {"role": "user", "content": prompt}
-            ],
+            "messages": messages,
             "max_tokens": max_tokens,
             "temperature": 0.0,
-            "seed": 42
-        }
+            "seed": 42,
+            "stream": True,
+        }).encode("utf-8")
 
-        data_bytes = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            self.api_url,
-            data=data_bytes,
-            headers={"Content-Type": "application/json"}
-        )
+        t0 = time.monotonic()
+        req = urllib.request.Request(self.api_url, data=payload, headers={"Content-Type": "application/json"})
+        prompt_ms = 0.0
+        predicted_ms = 0.0
+        has_server_timings = False
+        ttft_ms = 0.0
+        first_chunk = True
+        token_count = 0
+        out_text = []
 
-        t0 = time.perf_counter_ns()
-        with urllib.request.urlopen(req, timeout=60) as resp:
-            raw_resp = json.loads(resp.read().decode("utf-8"))
-        elapsed_ms = (time.perf_counter_ns() - t0) / 1e6
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            for raw_line in resp:
+                line = raw_line.decode("utf-8").strip()
+                if not line.startswith("data: "):
+                    continue
+                data_str = line[6:]
+                if data_str == "[DONE]":
+                    break
+                try:
+                    chunk = json.loads(data_str)
+                    timings = chunk.get("timings")
+                    if isinstance(timings, dict):
+                        if "prompt_ms" in timings:
+                            prompt_ms = float(timings["prompt_ms"])
+                            has_server_timings = True
+                        if "predicted_ms" in timings:
+                            predicted_ms = float(timings["predicted_ms"])
+                            has_server_timings = True
 
-        tokens = raw_resp.get("usage", {}).get("completion_tokens", 0)
+                    choices = chunk.get("choices")
+                    if choices and len(choices) > 0:
+                        delta = choices[0].get("delta", {})
+                        content = delta.get("content")
+                        if content:
+                            if first_chunk:
+                                ttft_ms = (time.monotonic() - t0) * 1000.0
+                                first_chunk = False
+                            token_count += 1
+                            out_text.append(content)
+                except Exception:
+                    pass
+
+        if has_server_timings:
+            total_neural_ms = prompt_ms + predicted_ms
+        else:
+            total_neural_ms = (time.monotonic() - t0) * 1000.0
+
+        itl_ms = (total_neural_ms - ttft_ms) / float(token_count - 1) if token_count > 1 else 0.0
+        return total_neural_ms, ttft_ms, itl_ms, token_count, "".join(out_text)
+
+    def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> dict[str, Any]:
+        t_start = time.monotonic()
+        t_neural_total = 0.0
+        ttft_first = 0.0
+        itl_avg = 0.0
+        total_tokens = 0
+
+        if workload_id == "W1":
+            p = (
+                "Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. " * 8
+                + "Summarize the primary latency determinant in two concise sentences."
+            )
+            msgs = [
+                {"role": "system", "content": "You are a concise technical systems assistant."},
+                {"role": "user", "content": p},
+            ]
+            tn, ttft, itl, ntok, _ = self._call_stream(msgs, 64)
+            t_neural_total = tn
+            ttft_first = ttft
+            itl_avg = itl
+            total_tokens = ntok
+
+        elif workload_id == "W2":
+            p = (
+                "System Tool Chain Results:\n1. list_dir: 50 files\n2. grep_logs: 12 errors\n3. calc_stats: mean 42.5ms\n"
+                "Provide a concise technical diagnostic summary of the bus latency metrics."
+            )
+            msgs = [
+                {"role": "system", "content": "You are a concise technical systems assistant."},
+                {"role": "user", "content": p},
+            ]
+            tn, ttft, itl, ntok, _ = self._call_stream(msgs, 128)
+            t_neural_total = tn
+            ttft_first = ttft
+            itl_avg = itl
+            total_tokens = ntok
+
+        elif workload_id == "W3":
+            msgs = [
+                {"role": "system", "content": "You are a concise technical systems assistant."},
+                {"role": "user", "content": "Retrieved Context: UMA bandwidth and cache coherence.\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
+            ]
+            tn, ttft, itl, ntok, _ = self._call_stream(msgs, 256)
+            t_neural_total = tn
+            ttft_first = ttft
+            itl_avg = itl
+            total_tokens = ntok
+
+        elif workload_id == "W4":
+            history = [
+                {"role": "system", "content": "You are a concise technical systems assistant."},
+            ]
+            itl_sum = 0.0
+            for step in range(1, 11):
+                history.append({
+                    "role": "user",
+                    "content": f"Turn {step} Observation: Latency variance 42.5ms. State next brief diagnostic action.",
+                })
+                tn, ttft, itl, ntok, reply = self._call_stream(history, 64)
+                t_neural_total += tn
+                if step == 1:
+                    ttft_first = ttft
+                itl_sum += itl
+                total_tokens += ntok
+                history.append({"role": "assistant", "content": reply})
+            itl_avg = itl_sum / 10.0
+
+        t_task_ms = (time.monotonic() - t_start) * 1000.0
 
         return {
             "architecture": "Neural Baseline (Direct llama.cpp)",
             "workload": workload_id,
             "warmth": "Cold",
-            "t_task_ms": elapsed_ms,
-            "t_neural_ms": elapsed_ms,
+            "t_task_ms": t_task_ms,
+            "t_neural_ms": t_neural_total,
             "t_orch_ms": 0.0,
             "phi_orch_pct": 0.0,
-            "ttft_ms": 25.0,
-            "itl_ms": elapsed_ms / max(1, tokens),
+            "ttft_ms": ttft_first,
+            "itl_ms": itl_avg,
             "t_dispatch_ms": 0.0,
             "r_tool_ops_sec": 0.0,
             "rss_idle_mb": 0.0,
             "rss_peak_mb": 0.0,
             "alpha_mem": 1.0,
-            "output_tokens": tokens,
-            "tool_calls": 0
+            "output_tokens": total_tokens,
+            "tool_calls": 0,
         }
 
     def teardown(self) -> None:
         pass
 
-    def metadata(self) -> Dict[str, Any]:
+    def metadata(self) -> dict[str, Any]:
         return {
             "name": self.name,
             "runtime": self.runtime,
             "language": self.language,
             "mode": self.mode,
-            "decoding_policy": "Greedy deterministic (temperature=0.0, seed=42)",
-            "hardware_backend": "10-core Apple Metal GPU, UMA zero-copy"
+            "tool_catalog_size": 0,
+            "endpoint": self.api_url,
+            "gc_architecture": "None (C++ Manual Allocation)",
+            "concurrency_model": "Native POSIX Threads (OpenMP / pthread)",
         }

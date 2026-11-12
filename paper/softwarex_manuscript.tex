@@ -81,13 +81,14 @@ C10 & Support email for questions & \texttt{rafael.paniccia@aluno.ufabc.edu.br} 
 \label{sec:motivation}
 Autonomous agentic workflows employing the ReAct (Reasoning and Acting) paradigm \cite{yao2023react} require orchestrators to iteratively parse tool schemas, validate arguments, dispatch operating system operations, and format prompts for Large Language Model (LLM) inference \cite{schick2023toolformer}. On unified memory microarchitectures such as Apple Silicon (UMA @ 120 GB/s), agent orchestrators share physical LPDDR5X DRAM channels with GPU compute shaders running quantized neural inference (\texttt{llama.cpp}) \cite{reddi2020mlperf}. 
 
-Prior benchmarks predominantly evaluate LLM reasoning accuracy on cloud APIs \cite{reddi2020mlperf}, obscuring client-side runtime bottlenecks. Software runtime overhead (e.g., V8 garbage collection, context serialization, dynamic schema validation) directly impairs execution latency and increases the Energy-Delay Product ($\text{EDP} = E \times T$) \cite{horowitz1994low,barroso2007case,pereira2021ranking}. 
+Prior benchmarks predominantly evaluate LLM reasoning accuracy on cloud APIs \cite{reddi2020mlperf,llmperf2023,agentsysbench2024}, obscuring client-side runtime bottlenecks. Software runtime overhead (e.g., V8 garbage collection, context serialization, dynamic schema validation) directly impairs execution latency and increases the Energy-Delay Product ($\text{EDP} = E \times T$) \cite{horowitz1994low,gonzalez1996energy,barroso2007case,pereira2021ranking,georgiou2022energy,you2023zeus,alems2024,greenbench2024}. 
 
 To bridge this gap, we developed \texttt{picoclaw-vs-openclaw-benchmark}, an open-source, extensible framework providing:
 \begin{enumerate}
     \item Rigorous mathematical isolation of orchestrator delay: $T_{\text{task}} = T_{\text{neural}} + T_{\text{orch}}$, with microsecond precision;
-    \item Physical hardware telemetry leveraging Apple SMC shunt sampling alongside Darwin XNU \texttt{libproc} instruction counters;
+    \item Physical hardware telemetry leveraging Apple SMC shunt sampling alongside Darwin XNU \texttt{libproc} instruction counters and Linux RAPL energy interfaces;
     \item Controlled ablation quantifying the cost of 54 enterprise tools versus an equalized minimal configuration;
+    \item Reference cross-language comparison encompassing Go (compiled native), Node.js (JIT V8), and Python 3.12 (interpreted reference);
     \item Multi-platform reviewer reproducibility with zero external dependencies and graceful unprivileged non-root fallback.
 \end{enumerate}
 
@@ -97,7 +98,13 @@ To bridge this gap, we developed \texttt{picoclaw-vs-openclaw-benchmark}, an ope
 \subsection{Software Architecture}
 The framework is designed around an extensible Object-Oriented Adapter pattern (\texttt{benchmark/adapters/}), decoupling experimental workload generation from specific orchestrator runtime implementations:
 \begin{itemize}
-    \item \textbf{Adapter Layer (\texttt{AgentOrchestratorAdapter}):} Abstract strategy defining standardized lifecycle hooks: \texttt{setup()}, \texttt{cold\_start\_cmd()}, \texttt{run\_workload(w\_id)}, and \texttt{teardown()}. Implementations include \texttt{PicoClawAdapter} (native Mach-O Go binary), \texttt{OpenClawAdapter} (V8 engine supporting \texttt{minimal} and \texttt{full} ablation modes), and \texttt{NeuralBaselineAdapter} (direct HTTP pass-through).
+    \item \textbf{Adapter Layer (\texttt{AgentOrchestratorAdapter}):} Abstract strategy defining standardized lifecycle hooks: \texttt{setup()}, \texttt{cold\_start\_cmd()}, \texttt{run\_workload(w\_id)}, and \texttt{teardown()}. Registered implementations include:
+    \begin{itemize}
+        \item \texttt{PicoClawAdapter}: Compiled native Mach-O ARM64 binary written in Go 1.23;
+        \item \texttt{OpenClawAdapter}: Node.js / V8 runtime evaluating both \texttt{minimal} (15 tools) and \texttt{full} (54 tools) schema loads;
+        \item \texttt{PythonNativeAdapter}: Interpreted baseline in pure Python 3.12 with NumPy vector projections;
+        \item \texttt{NeuralBaselineAdapter}: Direct HTTP streaming pass-through measuring zero-overhead neural latency.
+    \end{itemize}
     \item \textbf{Deterministic Workload Generator (\texttt{data/workload\_data/}):} Provides four difficulty tiers:
     \begin{itemize}
         \item \textbf{W1 (Simple Reflection):} In-memory synthesis (64 tokens);
@@ -119,6 +126,11 @@ The analysis engine (\texttt{benchmark/analyze\_results.py}) computes formal com
     tested for equidispersion via Cameron-Trivedi regression \cite{cameron1990regression}.
     \item \textbf{Non-Parametric Effect Sizes:} Computes the two-sided Mann-Whitney $U$ test \cite{mann1947test}, Cliff's Delta $d \in [-1, 1]$ \cite{cliff1993dominance}, and Vargha-Delaney $\hat{A}_{12} \in [0, 1]$ \cite{vargha2000critique}, establishing stochastic dominance without assuming normality.
 \end{itemize}
+
+\subsection{Hardware Constraints, Permissions, and Third-Party Licenses}
+Direct access to Apple SMC hardware sensors via \texttt{powermetrics} requires elevated \texttt{root} privileges due to Apple Darwin XNU kernel protections against microarchitectural power side-channel vulnerabilities. Crucially, the benchmark runner enforces privilege isolation: all evaluated agent runtimes, orchestrator subprocesses, and the \texttt{llama-server} neural daemon execute strictly in unprivileged user space. When administrative privileges are absent (e.g., standard continuous integration runners or non-root reviewer environments), the telemetry layer degrades gracefully: latency, memory footprint, and POSIX \texttt{libproc} instruction counters are captured continuously, while energy and power dissipation fields are safely flagged as unavailable (\texttt{N/A}).
+
+All benchmarked software components are governed by permissive open-source licenses: \texttt{llama.cpp} is licensed under the MIT License; \texttt{PicoClaw} is distributed under the MIT License; and \texttt{OpenClaw} is provided under the MIT License. The benchmark harness itself is released under the MIT License, ensuring unconstrained reproducibility and extensibility.
 
 \section{Illustrative Examples and Empirical Results}
 \label{sec:examples}

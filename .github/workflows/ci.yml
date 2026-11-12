@@ -38,9 +38,9 @@ jobs:
         run: |
           pytest -v tests/
 
-      - name: Run Reviewer Simulation Integration Test (make simulate-campaign)
+      - name: Run Reviewer Fast Dry-Run Integration Test (make dry-run)
         run: |
-          make simulate-campaign
+          make dry-run
 
       - name: Run Figure Reproduction Pipeline (make reproduce-figures)
         run: |

@@ -1,79 +1,110 @@
+#!/usr/bin/env python3
 """
-Master Journal-Ready Benchmark Campaign Runner with Full Ablation Matrix
-Executor Mestre da Campanha Experimental com Matriz Completa de Ablação
-
-Author / Autor: Rafael Paniccia Cassetta (UFABC)
-Language / Idioma: Bilingual (PT-BR & EN-US comments, English code)
+benchmark/run_unified_benchmark.py - Master Empirical Campaign Runner
+Executes randomized, block-interleaved benchmark trials across all agent orchestrator
+configurations with real hardware power telemetry (Apple SMC / Linux RAPL) and libproc attribution.
+Fails fast with RuntimeError if neural endpoint is offline in real benchmark mode.
 """
+from __future__ import annotations
 
 import argparse
 import http.server
 import json
 import os
+import platform
+import random
+import shutil
 import socket
+import subprocess
 import sys
 import threading
 import time
-from typing import Any, Dict, List
+import urllib.request
+from typing import Any
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_DIR)
 
 from benchmark.adapters import get_adapter  # noqa: E402
 from benchmark.analyze_results import analyze_publication_campaign  # noqa: E402
+from benchmark.generate_charts import generate_all_charts  # noqa: E402
+from benchmark.telemetry import (  # noqa: E402
+    LinuxRAPLMonitor,
+    SMCPowerMonitor,
+)
 
 
 class MockLlamaServerHandler(http.server.BaseHTTPRequestHandler):
     """
-    Lightweight, self-contained mock HTTP server simulating llama.cpp /v1/chat/completions.
-    Servidor HTTP loopback leve e independente simulando o endpoint /v1/chat/completions do llama.cpp.
+    Lightweight local mock loopback server for CI and dry-run validation.
+    Handles /v1/chat/completions (streaming and non-streaming) and /health.
     """
 
     def log_message(self, format, *args):
-        # Suppress request logging for fast, clean benchmark output
         pass
 
+    def do_GET(self):
+        if self.path == "/health":
+            body = b'{"status":"ok"}'
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        else:
+            self.send_response(404)
+            self.end_headers()
+
     def do_POST(self):
-        content_length = int(self.headers.get("Content-Length", 0))
-        body = self.rfile.read(content_length).decode("utf-8", errors="ignore") if content_length > 0 else ""
+        length = int(self.headers.get("Content-Length", 0))
+        raw_body = self.rfile.read(length).decode("utf-8", errors="ignore") if length > 0 else ""
 
-        # Determine workload context from prompt tokens
-        tokens = 64
-        if "3-step diagnostic" in body or "W2" in body:
-            tokens = 128
-        elif "RAG" in body or "W3" in body:
-            tokens = 256
-        elif "autonomous ReAct" in body or "W4" in body:
-            tokens = 640
+        is_streaming = '"stream":true' in raw_body.replace(" ", "")
 
-        resp_payload = {
-            "id": "chatcmpl-mock-eval-deterministic",
-            "object": "chat.completion",
-            "created": int(time.time()),
-            "model": "Llama-3.2-3B-Instruct",
-            "choices": [
-                {
-                    "index": 0,
-                    "message": {
-                        "role": "assistant",
-                        "content": "Deterministic simulation response for peer-review verification."
-                    },
-                    "finish_reason": "stop"
-                }
-            ],
-            "usage": {
-                "prompt_tokens": 128,
-                "completion_tokens": tokens,
-                "total_tokens": 128 + tokens
+        if is_streaming:
+            self.send_response(200)
+            self.send_header("Content-Type", "text/event-stream")
+            self.send_header("Cache-Control", "no-cache")
+            self.send_header("Connection", "close")
+            self.end_headers()
+
+            # SSE chunk 1: role
+            c1 = b'data: {"choices":[{"finish_reason":null,"index":0,"delta":{"role":"assistant"}}]}\n\n'
+            self.wfile.write(c1)
+
+            # SSE chunk 2: content
+            c2 = b'data: {"choices":[{"finish_reason":null,"index":0,"delta":{"content":"Analysis complete."}}]}\n\n'
+            self.wfile.write(c2)
+
+            # SSE chunk 3: final timing
+            c3 = b'data: {"choices":[{"finish_reason":"stop","index":0,"delta":{}}],"timings":{"prompt_ms":12.5,"predicted_ms":18.2}}\n\n'
+            self.wfile.write(c3)
+
+            self.wfile.write(b"data: [DONE]\n\n")
+            self.wfile.flush()
+            self.close_connection = True
+        else:
+            resp_payload = {
+                "id": "chatcmpl-mock-eval",
+                "object": "chat.completion",
+                "created": int(time.time()),
+                "model": "Llama-3.2-3B-Instruct",
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {"role": "assistant", "content": "Analysis complete."},
+                        "finish_reason": "stop",
+                    }
+                ],
+                "timings": {"prompt_ms": 12.5, "predicted_ms": 18.2},
+                "usage": {"prompt_tokens": 128, "completion_tokens": 16, "total_tokens": 144},
             }
-        }
-
-        resp_bytes = json.dumps(resp_payload).encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(resp_bytes)))
-        self.end_headers()
-        self.wfile.write(resp_bytes)
+            body = json.dumps(resp_payload).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
 
 
 def is_port_in_use(port: int = 8080) -> bool:
@@ -81,254 +112,292 @@ def is_port_in_use(port: int = 8080) -> bool:
         return s.connect_ex(("127.0.0.1", port)) == 0
 
 
-def start_mock_server_if_needed(port: int = 8080) -> Any:
+def check_server_health(url: str = "http://127.0.0.1:8080/health", timeout: float = 2.0) -> bool:
+    try:
+        req = urllib.request.Request(url)
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            return resp.status == 200
+    except Exception:
+        return False
+
+
+def start_mock_server_if_needed(port: int = 8080) -> http.server.HTTPServer | None:
     if is_port_in_use(port):
         return None
     server = http.server.HTTPServer(("127.0.0.1", port), MockLlamaServerHandler)
-    server_thread = threading.Thread(target=server.serve_forever, daemon=True)
-    server_thread.start()
+    t = threading.Thread(target=server.serve_forever, daemon=True)
+    t.start()
     time.sleep(0.1)
     return server
 
 
-def check_is_root() -> bool:
-    """Return True if executing with root/superuser privileges."""
-    return hasattr(os, "geteuid") and os.geteuid() == 0
-
-
-def generate_simulated_result(agent_key: str, workload_id: str, rep: int) -> Dict[str, Any]:
-    """
-    Generate portable deterministic simulation records matching empirical baseline profiles.
-    Gera registros de simulação determinísticos e portáteis aderentes aos perfis empíricos de referência.
-    """
-    profiles = {
-        "picoclaw": {
-            "W1": {"t_task": 1444.7, "t_neural": 1444.3, "t_orch": 0.386, "rss": 11.1, "tokens": 64},
-            "W2": {"t_task": 2979.1, "t_neural": 2974.3, "t_orch": 4.736, "rss": 12.4, "tokens": 128},
-            "W3": {"t_task": 7979.4 if rep == 1 else 6035.5, "t_neural": 7975.4 if rep == 1 else 6029.8, "t_orch": 5.493, "rss": 12.2, "tokens": 256},
-            "W4": {"t_task": 11071.3, "t_neural": 11048.8, "t_orch": 22.468, "rss": 16.7, "tokens": 640},
-        },
-        "openclaw_minimal": {
-            "W1": {"t_task": 1446.4, "t_neural": 1446.1, "t_orch": 0.318, "rss": 86.0, "tokens": 64},
-            "W2": {"t_task": 2899.1, "t_neural": 2894.7, "t_orch": 4.353, "rss": 88.1, "tokens": 128},
-            "W3": {"t_task": 5998.2, "t_neural": 5988.0, "t_orch": 10.216, "rss": 91.5, "tokens": 256},
-            "W4": {"t_task": 12175.3, "t_neural": 12165.2, "t_orch": 10.121, "rss": 92.6, "tokens": 640},
-        },
-        "openclaw_full": {
-            "W1": {"t_task": 1444.7, "t_neural": 1444.4, "t_orch": 0.339, "rss": 86.0, "tokens": 64},
-            "W2": {"t_task": 2885.6, "t_neural": 2881.1, "t_orch": 4.472, "rss": 88.1, "tokens": 128},
-            "W3": {"t_task": 6016.9, "t_neural": 6007.1, "t_orch": 9.841, "rss": 91.6, "tokens": 256},
-            "W4": {"t_task": 12233.1, "t_neural": 12220.3, "t_orch": 12.776, "rss": 93.7, "tokens": 640},
-        },
-        "neural_baseline": {
-            "W1": {"t_task": 1518.7, "t_neural": 1518.7, "t_orch": 0.0, "rss": 0.0, "tokens": 64},
-            "W2": {"t_task": 2879.0, "t_neural": 2879.0, "t_orch": 0.0, "rss": 0.0, "tokens": 128},
-            "W3": {"t_task": 5749.0, "t_neural": 5749.0, "t_orch": 0.0, "rss": 0.0, "tokens": 256},
-            "W4": {"t_task": 5783.4, "t_neural": 5783.4, "t_orch": 0.0, "rss": 0.0, "tokens": 640},
-        }
+def collect_host_metadata() -> dict[str, Any]:
+    meta = {
+        "platform": platform.platform(),
+        "system": platform.system(),
+        "machine": platform.machine(),
+        "python_version": platform.python_version(),
     }
-    p = profiles[agent_key][workload_id]
-    jitter = 1.0 + ((rep % 3) - 1) * 0.002
-    return {
-        "architecture": agent_key,
-        "workload": workload_id,
-        "t_task_ms": p["t_task"] * jitter,
-        "t_neural_ms": p["t_neural"] * jitter,
-        "t_orch_ms": p["t_orch"],
-        "rss_peak_mb": p["rss"],
-        "output_tokens": p["tokens"],
-        "tool_calls": 3 if workload_id in ["W2", "W4"] else 0,
-        "ttft_ms": 1955.62 if (workload_id == "W3" and rep == 1 and agent_key == "picoclaw") else 26.5,
-        "itl_ms": 23.5,
-        "t_dispatch_ms": p["t_orch"] * 0.8,
-        "r_tool_ops_sec": 1000.0 / max(0.1, p["t_orch"]),
-        "rss_idle_mb": max(0.0, p["rss"] - 2.0)
-    }
+    if sys.platform == "darwin":
+        try:
+            res = subprocess.run(["sw_vers"], capture_output=True, text=True, timeout=2.0)
+            meta["macos_version"] = res.stdout.strip().replace("\n", " | ")
+        except Exception:
+            pass
+        try:
+            res = subprocess.run(["sysctl", "-n", "machdep.cpu.brand_string"], capture_output=True, text=True, timeout=2.0)
+            meta["cpu_brand"] = res.stdout.strip()
+        except Exception:
+            pass
+    try:
+        node_bin = shutil.which("node") or os.path.join(REPO_DIR, "tools", "node", "bin", "node")
+        if os.path.exists(node_bin):
+            res = subprocess.run([node_bin, "--version"], capture_output=True, text=True, timeout=2.0)
+            meta["node_version"] = res.stdout.strip()
+    except Exception:
+        pass
+    try:
+        go_bin = shutil.which("go") or os.path.join(REPO_DIR, "tools", "go", "bin", "go")
+        if os.path.exists(go_bin):
+            res = subprocess.run([go_bin, "version"], capture_output=True, text=True, timeout=2.0)
+            meta["go_version"] = res.stdout.strip()
+    except Exception:
+        pass
+    return meta
 
 
 def run_campaign(
-    reps_per_condition: int = 5,
-    simulate: bool = False,
-    output_dir: str = None
+    reps_per_condition: int = 30,
+    dry_run: bool = False,
+    output_dir: str | None = None,
+    cooldown_sec: float = 1.0,
 ):
-    """
-    Execute factorial matrix across all 4 orchestrator configurations.
-    Executa a matriz fatorial completa entre as 4 configurações de orquestração.
-    """
-    is_root = check_is_root()
-
     print("========================================================================")
-    if simulate:
-        print(" 🧪 [PT-BR] Modo Simulado Portátil para Revisores (Sem Sudo / Multi-OS)")
-        print("    [EN-US] Reviewer Portable Simulation Mode (No Sudo / Cross-Platform)")
+    if dry_run:
+        print(" 🧪 [PT-BR] Modo Dry-Run / Mock Rápido (Verificação Portátil de Pipeline)")
+        print("    [EN-US] Dry-Run / Fast Mock Mode (Portable Pipeline Verification)")
     else:
-        print(" 🚀 [PT-BR] Iniciando Campanha Experimental de Publicação (Journal-Ready)")
-        print("    [EN-US] Launching Journal-Ready Publication Experimental Campaign")
+        print(" 🚀 [PT-BR] Iniciando Campanha Experimental de Publicação (Medições Reais)")
+        print("    [EN-US] Launching Publication Experimental Campaign (Hardware Measurements)")
     print("========================================================================")
 
-    if not is_root and not simulate:
-        print("⚠️  [PT-BR] AVISO: Executando sem privilégios de superusuário (root).")
-        print("    A telemetria elétrica do Apple SMC (powermetrics) requer root devido a")
-        print("    proteções do kernel Darwin/XNU contra ataques de canal lateral de potência.")
-        print("    O benchmark prosseguirá em espaço de usuário coletando latência (T_task, T_orch),")
-        print("    memória (RSS) e contadores libproc sem bloquear ou solicitar senha.")
-        print("⚠️  [EN-US] NOTICE: Running without superuser (root) privileges.")
-        print("    Apple SMC electrical telemetry (powermetrics) requires root due to")
-        print("    Darwin/XNU kernel protections against side-channel power analysis attacks.")
-        print("    The benchmark proceeds unprivileged in user space, collecting latency (T_task, T_orch),")
-        print("    memory (RSS), and libproc counters without blocking or password prompts.\n")
+    # Fail-Fast check when in real benchmark mode
+    if not dry_run:
+        health_url = os.environ.get("LLAMA_HEALTH_URL", "http://127.0.0.1:8080/health")
+        if not check_server_health(health_url):
+            raise RuntimeError(
+                f"llama-server not reachable on {health_url}. "
+                "Real benchmark mode requires llama-server listening on port 8080. "
+                "Start llama-server or run with --dry-run for mock simulation."
+            )
 
     if output_dir is None:
-        if simulate:
-            output_dir = os.path.join(REPO_DIR, "results", "simulated_check")
-        else:
-            output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
 
     os.makedirs(output_dir, exist_ok=True)
     raw_trials_path = os.path.join(output_dir, "raw_trials.jsonl")
 
-    if os.path.exists(raw_trials_path):
-        os.remove(raw_trials_path)
+    # Start mock server if needed for dry-run
+    if dry_run:
+        port = 8088
+        _mock_srv = start_mock_server_if_needed(port)
+        _ = _mock_srv
+        os.environ["LLAMA_API_URL"] = f"http://127.0.0.1:{port}/v1/chat/completions"
+        print(f"🌐 [INFO] Local loopback mock server listening on 127.0.0.1:{port}.")
+    else:
+        os.environ["LLAMA_API_URL"] = "http://127.0.0.1:8080/v1/chat/completions"
 
-    # Start mock server if needed in simulation mode
-    mock_server = None
-    if simulate:
-        mock_server = start_mock_server_if_needed(8080)
-        if mock_server:
-            print("🌐 [EN-US] Lightweight mock llama.cpp loopback server active on port 8080.")
+    # Hardware Power Monitors
+    smc_monitor = SMCPowerMonitor(sample_interval_ms=50)
+    rapl_monitor = LinuxRAPLMonitor()
 
-    agents = ["picoclaw", "openclaw_minimal", "openclaw_full", "neural_baseline"]
+    telemetry_backend = "unprivileged_no_smc"
+    if not dry_run:
+        if smc_monitor.active:
+            print("⚡ [INFO] Apple SMC hardware telemetry active (root powermetrics shunts).")
+            print("         Measuring 5-second quiescent idle baseline...")
+            idle_mw = smc_monitor.measure_idle_baseline(5.0)
+            print(f"         Quiescent idle baseline package power: {idle_mw:.2f} mW.")
+            telemetry_backend = smc_monitor.telemetry_backend
+        elif rapl_monitor.active:
+            print("⚡ [INFO] Linux RAPL hardware energy counters active (/sys/class/powercap).")
+            telemetry_backend = rapl_monitor.telemetry_backend
+        else:
+            print("⚠️  [NOTICE] Running unprivileged without root SMC shunts or RAPL.")
+            print("            Latency, RSS, and process counters will be recorded.")
+            print("            Joules energy fields will be recorded as null (N/A).\n")
+            telemetry_backend = "unprivileged_no_smc" if sys.platform == "darwin" else "linux_psutil_unprivileged"
+
+    host_meta = collect_host_metadata()
+    agents = ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native", "neural_baseline"]
     workloads = ["W1", "W2", "W3", "W4"]
 
-    POWER_ACTIVE_W = 16.4 if (is_root or simulate) else 16.4
+    total_eval_trials = len(agents) * len(workloads) * reps_per_condition
+    print(f"📊 Matrix: {len(agents)} agents x {len(workloads)} workloads x {reps_per_condition} reps = {total_eval_trials} evaluation trials.")
 
-    total_trials = len(agents) * len(workloads) * reps_per_condition
-    trial_count = 0
+    # Instantiate and setup adapters
+    adapter_instances = {}
+    for ak in agents:
+        ad = get_adapter(ak, REPO_DIR)
+        if not ad.setup():
+            raise RuntimeError(f"Failed to setup adapter '{ak}'. Check compiler and runtime paths.")
+        adapter_instances[ak] = ad
 
-    print(f"📊 Matrix: {len(agents)} agents x {len(workloads)} workloads x {reps_per_condition} reps = {total_trials} total trials.\n")
+    trials_written = 0
+    rng = random.Random(42)
 
-    trials_data: List[Dict[str, Any]] = []
+    with open(raw_trials_path, "w", encoding="utf-8") as out_f:
+        # Phase A: Warmup rounds (3 per condition, discarded from statistics)
+        if not dry_run:
+            print("\n🔥 Executing warmup rounds (3 per condition, marked with is_warmup=True)...")
+            for w in workloads:
+                for ak in agents:
+                    for w_rep in range(3):
+                        ad = adapter_instances[ak]
+                        res = ad.run_workload(w, iterations=1)
+                        record = {
+                            "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                            "agent_key": ak,
+                            "architecture": ad.name,
+                            "runtime": ad.runtime,
+                            "workload": w,
+                            "rep": w_rep + 1,
+                            "is_warmup": True,
+                            "is_simulated": False,
+                            "data_source": "measured_hardware_warmup",
+                            "t_task_ms": res.get("t_task_ms", 0.0),
+                            "t_neural_ms": res.get("t_neural_ms", 0.0),
+                            "t_orch_ms": res.get("t_orch_ms", 0.0),
+                            "rss_peak_mb": res.get("rss_peak_mb", 0.0),
+                            "output_tokens": res.get("output_tokens", 0),
+                            "tool_calls": res.get("tool_calls", 0),
+                            "energy_total_j": None,
+                            "energy_net_above_idle_j": None,
+                            "edp_js": None,
+                        }
+                        out_f.write(json.dumps(record) + "\n")
+                        out_f.flush()
 
-    for agent_key in agents:
-        try:
-            adapter = get_adapter(agent_key, REPO_DIR)
-            adapter_name = adapter.name
-            adapter_mode = adapter.mode
-            adapter_runtime = adapter.runtime
-        except Exception:
-            adapter = None
-            adapter_name = agent_key
-            adapter_mode = "simulated"
-            adapter_runtime = "Portable Mock"
+        # Phase B: Main Evaluation Trials (Block-Interleaved Randomization)
+        print("\n▶️  Dispatching randomized evaluation blocks...")
+        for rep in range(1, reps_per_condition + 1):
+            # Create block of all (agent, workload) conditions and shuffle
+            block = [(ak, w) for ak in agents for w in workloads]
+            rng.shuffle(block)
 
-        print(f"▶️ Testing Agent: {adapter_name} [{adapter_mode}] ({adapter_runtime})")
+            for ak, w in block:
+                trials_written += 1
+                ad = adapter_instances[ak]
 
-        for w_id in workloads:
-            for rep in range(1, reps_per_condition + 1):
-                trial_count += 1
-                t0_ns = time.perf_counter_ns()
+                # Telemetry capture
+                if smc_monitor.active:
+                    smc_monitor.start()
+                elif rapl_monitor.active:
+                    rapl_monitor.start()
 
-                res = None
-                if not simulate and adapter is not None:
-                    try:
-                        res = adapter.run_workload(w_id)
-                    except Exception as e:
-                        print(f"   ⚠️ Adapter call exception ({e}); falling back to portable simulation.")
-                        res = None
+                t0_trial = time.monotonic()
+                res = ad.run_workload(w, iterations=1)
+                t_elapsed_s = time.monotonic() - t0_trial
 
-                if res is None:
-                    res = generate_simulated_result(agent_key, w_id, rep)
+                energy_dict = None
+                if smc_monitor.active:
+                    energy_dict = smc_monitor.stop()
+                elif rapl_monitor.active:
+                    energy_dict = rapl_monitor.stop()
 
-                t_task_ms = res.get("t_task_ms", 0.0)
+                t_task_ms = res.get("t_task_ms", t_elapsed_s * 1000.0)
                 t_neural_ms = res.get("t_neural_ms", 0.0)
-                t_orch_ms = res.get("t_orch_ms", max(0.0, t_task_ms - t_neural_ms))
-                tokens = res.get("output_tokens", 64)
-                tool_calls = res.get("tool_calls", 0)
+                t_orch_ms = max(0.0, res.get("t_orch_ms", t_task_ms - t_neural_ms))
+                rss_peak = res.get("rss_peak_mb", 0.0)
+                tokens = res.get("output_tokens", 0)
 
-                t_seconds = t_task_ms / 1000.0
-                energy_joules = POWER_ACTIVE_W * t_seconds
-                edp_js = energy_joules * t_seconds
-                joules_per_token = energy_joules / max(1, tokens)
+                energy_total_j = None
+                energy_net_j = None
+                edp_js = None
+                j_per_token = None
 
-                record = {
-                    "campaign": "simulated_check" if simulate else "publication_campaign",
-                    "timestamp_ns": t0_ns,
-                    "iteration": rep,
-                    "agent_key": agent_key,
-                    "architecture": res.get("architecture", adapter_name),
-                    "mode": adapter_mode,
-                    "workload": w_id,
-                    "t_task_ms": t_task_ms,
-                    "t_neural_ms": t_neural_ms,
-                    "t_orch_ms": t_orch_ms,
-                    "phi_orch_pct": (t_orch_ms / max(0.001, t_task_ms)) * 100.0,
-                    "ttft_ms": res.get("ttft_ms", 25.0),
-                    "itl_ms": res.get("itl_ms", 22.0),
-                    "t_dispatch_ms": res.get("t_dispatch_ms", 0.0),
-                    "r_tool_ops_sec": res.get("r_tool_ops_sec", 0.0),
-                    "rss_idle_mb": res.get("rss_idle_mb", 10.0),
-                    "rss_peak_mb": res.get("rss_peak_mb", 15.0),
+                if energy_dict is not None and energy_dict.get("energy_total_j") is not None:
+                    energy_total_j = energy_dict["energy_total_j"]
+                    energy_net_j = energy_dict["energy_net_above_idle_j"]
+                    edp_js = round(energy_total_j * (t_task_ms / 1000.0), 4)
+                    if tokens > 0:
+                        j_per_token = round(energy_total_j / tokens, 4)
+                    ds = "measured_hardware"
+                else:
+                    ds = "dry_run_mock" if dry_run else "unprivileged_user_space"
+
+                trial_record = {
+                    "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                    "agent_key": ak,
+                    "architecture": ad.name,
+                    "runtime": ad.runtime,
+                    "mode": ad.mode,
+                    "workload": w,
+                    "rep": rep,
+                    "is_warmup": False,
+                    "is_simulated": dry_run,
+                    "data_source": ds,
+                    "telemetry_backend": telemetry_backend,
+                    "t_task_ms": round(t_task_ms, 2),
+                    "t_neural_ms": round(t_neural_ms, 2),
+                    "t_orch_ms": round(t_orch_ms, 3),
+                    "phi_orch_pct": round((t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0, 3),
+                    "ttft_ms": round(res.get("ttft_ms", 0.0), 2),
+                    "itl_ms": round(res.get("itl_ms", 0.0), 2),
+                    "t_dispatch_ms": round(res.get("t_dispatch_ms", 0.0), 3),
+                    "r_tool_ops_sec": round(res.get("r_tool_ops_sec", 0.0), 2),
+                    "rss_idle_mb": round(res.get("rss_idle_mb", 0.0), 2),
+                    "rss_peak_mb": round(rss_peak, 2),
                     "output_tokens": tokens,
-                    "tool_calls": tool_calls,
-                    "energy_joules": energy_joules,
+                    "tool_calls": res.get("tool_calls", 0),
+                    "energy_total_j": energy_total_j,
+                    "energy_net_above_idle_j": energy_net_j,
                     "edp_js": edp_js,
-                    "joules_per_token": joules_per_token
+                    "joules_per_token": j_per_token,
+                    "host_metadata": host_meta,
                 }
 
-                trials_data.append(record)
+                out_f.write(json.dumps(trial_record) + "\n")
+                out_f.flush()
 
-                with open(raw_trials_path, "a", encoding="utf-8") as out_f:
-                    out_f.write(json.dumps(record) + "\n")
+                edp_disp = f"{edp_js:.3f}J·s" if edp_js is not None else "N/A"
+                print(
+                    f"   [{trials_written:03d}/{total_eval_trials:03d}] {ak:16s} {w} Rep {rep}: "
+                    f"Task={t_task_ms:.1f}ms, Orch={t_orch_ms:.3f}ms, RAM={rss_peak:.1f}MB, EDP={edp_disp}"
+                )
 
-                print(f"   [{trial_count:03d}/{total_trials:03d}] {w_id} Rep {rep}: Task={t_task_ms:.1f}ms, Orch={t_orch_ms:.3f}ms, RAM={record['rss_peak_mb']:.1f}MB, EDP={edp_js:.3f}J·s")
+                if cooldown_sec > 0:
+                    time.sleep(cooldown_sec)
 
-    print(f"\n✅ [PT-BR] Campanha concluída com sucesso! Gravados {len(trials_data)} ensaios em {raw_trials_path}")
-    print(f"   [EN-US] Campaign completed successfully! Recorded {len(trials_data)} trials to {raw_trials_path}")
+    print(f"\n✅ Recorded {trials_written} evaluated trials to {raw_trials_path}")
 
-    # In simulation mode, execute end-to-end analysis and figure verification
-    if simulate:
-        print("\n📈 [PT-BR] Executando análise estatística no diretório de simulação...")
-        print("   [EN-US] Executing statistical analysis in simulation directory...")
-        analyze_publication_campaign(input_path=raw_trials_path, output_dir=output_dir)
+    # Generate analytical tables and statistical tests
+    print("\n📈 Executing non-parametric statistical analysis...")
+    analyze_publication_campaign(raw_trials_path, output_dir)
 
-        print("\n🎨 [PT-BR] Verificando gerador de figuras gráficas...")
-        print("   [EN-US] Verifying chart generator pipeline...")
-        import benchmark.generate_charts as gc
-        gc.main()
-        print("🏁 [PT-BR] Pipeline de simulação verificado com sucesso em menos de 10 segundos!")
-        print("   [EN-US] Simulation pipeline fully verified in under 10 seconds!")
+    # Generate publication charts
+    print("\n🎨 Generating publication charts...")
+    generate_all_charts(output_dir)
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(
-        description="Unified Benchmark Runner with Full Ablation Matrix and Portable Simulation Mode"
+def main():
+    parser = argparse.ArgumentParser(description="Unified Agent Benchmark Campaign Runner")
+    parser.add_argument("--dry-run", action="store_true", help="Fast mock validation mode for CI and portable testing")
+    parser.add_argument("--reps", type=int, default=None, help="Repetitions per condition (defaults: 2 for dry-run, 30 for publication)")
+    parser.add_argument("--output-dir", type=str, default=None, help="Output directory for trials and tables")
+    parser.add_argument("--cooldown", type=float, default=None, help="Cooldown sleep in seconds between trials")
+    args = parser.parse_args()
+
+    reps = args.reps if args.reps is not None else (2 if args.dry_run else 30)
+    cooldown = args.cooldown if args.cooldown is not None else (0.05 if args.dry_run else 0.5)
+
+    run_campaign(
+        reps_per_condition=reps,
+        dry_run=args.dry_run,
+        output_dir=args.output_dir,
+        cooldown_sec=cooldown,
     )
-    parser.add_argument(
-        "--simulate",
-        action="store_true",
-        help="Run fast portable simulation with mock telemetry for reviewers and CI environments"
-    )
-    parser.add_argument(
-        "--no-sudo",
-        action="store_true",
-        help="Run without root privileges, using standard user-space metrics"
-    )
-    parser.add_argument(
-        "--reps",
-        type=int,
-        default=None,
-        help="Number of repetitions per experimental condition"
-    )
-    parser.add_argument(
-        "--output-dir",
-        type=str,
-        default=None,
-        help="Custom output directory for experimental results"
-    )
-    return parser.parse_args()
 
 
 if __name__ == "__main__":
-    args = parse_args()
-    reps = args.reps if args.reps is not None else (2 if args.simulate else 5)
-    run_campaign(reps_per_condition=reps, simulate=args.simulate, output_dir=args.output_dir)
+    main()

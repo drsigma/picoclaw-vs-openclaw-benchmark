@@ -3,6 +3,7 @@ tools/.venv/
 tools/python_runtime/
 tools/uv_cache/
 tools/node/
+tools/go/
 
 # Python & OS artifacts
 __pycache__/

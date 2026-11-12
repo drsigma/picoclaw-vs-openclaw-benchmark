@@ -1,0 +1,343 @@
+#!/usr/bin/env python3
+"""
+benchmark/python_orch.py - Reference Python 3.12 Agent Worker
+Evaluates CPython VM dynamic interpretation, memory overhead, JSON serialization,
+and tool dispatch under workloads identical to Go and Node.js workers.
+"""
+from __future__ import annotations
+
+import json
+import math
+import os
+import re
+import sys
+import time
+import urllib.request
+
+import numpy as np
+
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+API_URL = os.environ.get("LLAMA_API_URL", "http://127.0.0.1:8080/v1/chat/completions")
+BASE_DIR = os.environ.get("WORKLOAD_DATA_DIR", os.path.join(REPO_DIR, "data", "workload_data"))
+
+
+def get_rss_mb() -> float:
+    try:
+        import resource
+        rusage = resource.getrusage(resource.RUSAGE_SELF)
+        if sys.platform == "darwin":
+            return rusage.ru_maxrss / (1024.0 * 1024.0)
+        return rusage.ru_maxrss / 1024.0
+    except Exception:
+        return 0.0
+
+
+def build_tool_catalog(count: int = 15) -> list[dict]:
+    catalog = []
+    for i in range(count):
+        catalog.append({
+            "type": "function",
+            "function": {
+                "name": f"system_tool_{i}",
+                "description": f"Standard system tool descriptor #{i} for agent runtime evaluation.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "action": {"type": "string", "description": "Action to execute"},
+                        "target": {"type": "string", "description": "Target parameter or file path"},
+                    },
+                    "required": ["action", "target"],
+                },
+            },
+        })
+    # Serialization pass
+    return json.loads(json.dumps(catalog))
+
+
+def execute_tool_list_dir(mock_dir: str) -> str:
+    entries = sorted(os.listdir(mock_dir))
+    files = []
+    for name in entries:
+        try:
+            sz = os.path.getsize(os.path.join(mock_dir, name))
+            files.append(f"{name}:{sz}")
+        except Exception:
+            files.append(f"{name}:0")
+    return json.dumps({"count": len(files), "files": files[:10]})
+
+
+def execute_tool_grep_logs(log_file: str) -> tuple[list[float], str]:
+    vals: list[float] = []
+    pattern = re.compile(r'"subsystem":\s*"UMA_BUS_CONTROLLER"')
+    with open(log_file, "r", encoding="utf-8") as f:
+        for line in f:
+            if pattern.search(line):
+                try:
+                    obj = json.loads(line)
+                    lat = obj.get("latency_ms")
+                    if isinstance(lat, (int, float)):
+                        vals.append(float(lat))
+                except Exception:
+                    pass
+    summary = json.dumps({"matched_records": len(vals), "sample": vals[:5]})
+    return vals, summary
+
+
+def execute_tool_calc_stats(vals: list[float]) -> str:
+    n = len(vals)
+    if n == 0:
+        return "{}"
+    mean = sum(vals) / float(n)
+    var = sum((v - mean) ** 2 for v in vals) / float(n - 1) if n > 1 else 0.0
+    return json.dumps({"n": n, "mean": mean, "variance": var, "stddev": math.sqrt(var)})
+
+
+def execute_vector_rag(base_dir: str) -> str:
+    in_dim = 256
+    out_dim = 384
+    n_docs = 10000
+
+    w_file = os.path.join(base_dir, "w_proj.bin")
+    b_file = os.path.join(base_dir, "b_proj.bin")
+    docs_bin = os.path.join(base_dir, "doc_embeddings.bin")
+
+    if os.path.exists(w_file) and os.path.exists(b_file) and os.path.exists(docs_bin):
+        w_proj = np.fromfile(w_file, dtype=np.float32).reshape(in_dim, out_dim)
+        b_proj = np.fromfile(b_file, dtype=np.float32)
+        doc_matrix = np.fromfile(docs_bin, dtype=np.float32).reshape(n_docs, out_dim)
+    else:
+        rng = np.random.default_rng(42)
+        w_proj = rng.standard_normal((in_dim, out_dim), dtype=np.float32) * 0.05
+        b_proj = rng.standard_normal((out_dim,), dtype=np.float32) * 0.01
+        doc_matrix = rng.standard_normal((n_docs, out_dim), dtype=np.float32)
+        doc_matrix /= np.linalg.norm(doc_matrix, axis=1, keepdims=True) + 1e-8
+
+    # 1. Query vector initialization & linear projection
+    d_idx = np.arange(in_dim, dtype=np.float32)
+    q_raw = np.sin(d_idx * 0.17) * 0.05
+    q_proj = np.dot(q_raw, w_proj) + b_proj
+
+    # 2. L2 Normalization of projected query vector
+    q_norm = q_proj / (np.linalg.norm(q_proj) + 1e-8)
+
+    # 3. Cosine similarity against all 10,000 document vectors
+    scores = np.dot(doc_matrix, q_norm)
+
+    # 4. Descending sort to select Top-5 chunks
+    top5_indices = np.argsort(scores)[::-1][:5]
+
+    chunks_file = os.path.join(base_dir, "rag_chunks_10k.json")
+    chunks = {}
+    if os.path.exists(chunks_file):
+        try:
+            with open(chunks_file, "r", encoding="utf-8") as f:
+                chunks = json.load(f)
+        except Exception:
+            pass
+
+    out_lines = []
+    for idx in top5_indices:
+        text = chunks.get(str(idx), f"[Chunk #{idx:04d}] Context reference document.")
+        out_lines.append(text)
+    return "\n".join(out_lines) + "\n"
+
+
+def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) -> tuple[float, float, float, int, str]:
+    payload = json.dumps({
+        "model": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+        "messages": messages,
+        "tools": tools,
+        "max_tokens": max_tokens,
+        "temperature": 0.0,
+        "seed": 42,
+        "stream": True,
+    }).encode("utf-8")
+
+    t0 = time.monotonic()
+    req = urllib.request.Request(API_URL, data=payload, headers={"Content-Type": "application/json"})
+    prompt_ms = 0.0
+    predicted_ms = 0.0
+    has_server_timings = False
+    ttft_ms = 0.0
+    first_chunk = True
+    token_count = 0
+    out_text = []
+
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        for raw_line in resp:
+            line = raw_line.decode("utf-8").strip()
+            if not line.startswith("data: "):
+                continue
+            data_str = line[6:]
+            if data_str == "[DONE]":
+                break
+            try:
+                chunk = json.loads(data_str)
+                timings = chunk.get("timings")
+                if isinstance(timings, dict):
+                    if "prompt_ms" in timings:
+                        prompt_ms = float(timings["prompt_ms"])
+                        has_server_timings = True
+                    if "predicted_ms" in timings:
+                        predicted_ms = float(timings["predicted_ms"])
+                        has_server_timings = True
+
+                choices = chunk.get("choices")
+                if choices and len(choices) > 0:
+                    delta = choices[0].get("delta", {})
+                    has_data = False
+                    content = delta.get("content")
+                    if content:
+                        has_data = True
+                        token_count += 1
+                        out_text.append(content)
+                    tool_calls = delta.get("tool_calls")
+                    if tool_calls:
+                        has_data = True
+                        token_count += len(tool_calls)
+                    if has_data and first_chunk:
+                        ttft_ms = (time.monotonic() - t0) * 1000.0
+                        first_chunk = False
+            except Exception:
+                pass
+
+    if has_server_timings:
+        total_neural_ms = prompt_ms + predicted_ms
+    else:
+        total_neural_ms = (time.monotonic() - t0) * 1000.0
+
+    itl_ms = (total_neural_ms - ttft_ms) / float(token_count - 1) if token_count > 1 else 0.0
+    return total_neural_ms, ttft_ms, itl_ms, token_count, "".join(out_text)
+
+
+def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
+    t_start = time.monotonic()
+    t_neural_total = 0.0
+    ttft_first = 0.0
+    itl_avg = 0.0
+    t_dispatch_total = 0.0
+    total_tokens = 0
+    tool_calls = 0
+
+    tool_catalog = build_tool_catalog(15)
+    mock_dir = os.path.join(BASE_DIR, "mock_files")
+    log_file = os.path.join(BASE_DIR, "system_logs.jsonl")
+
+    if tier == "W1":
+        prompt = (
+            "Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. " * 8
+            + "Summarize the primary latency determinant in two concise sentences."
+        )
+        msgs = [
+            {"role": "system", "content": "You are a concise technical systems assistant."},
+            {"role": "user", "content": prompt},
+        ]
+        tn, ttft, itl, ntok, _ = call_llama_stream(msgs, tool_catalog, 64)
+        t_neural_total = tn
+        ttft_first = ttft
+        itl_avg = itl
+        total_tokens = ntok
+        tool_calls = 0
+
+    elif tier == "W2":
+        t0_tool = time.monotonic()
+        res1 = execute_tool_list_dir(mock_dir)
+        vals, res2 = execute_tool_grep_logs(log_file)
+        res3 = execute_tool_calc_stats(vals)
+        t_dispatch_total = (time.monotonic() - t0_tool) * 1000.0
+        tool_calls = 3
+
+        prompt = f"System Tool Chain Results:\n1. list_dir: {res1}\n2. grep_logs: {res2}\n3. calc_stats: {res3}\nProvide a concise technical diagnostic summary of the bus latency metrics."
+        msgs = [
+            {"role": "system", "content": "You are a concise technical systems assistant."},
+            {"role": "user", "content": prompt},
+        ]
+        tn, ttft, itl, ntok, _ = call_llama_stream(msgs, tool_catalog, 128)
+        t_neural_total = tn
+        ttft_first = ttft
+        itl_avg = itl
+        total_tokens = ntok
+
+    elif tier == "W3":
+        t0_tool = time.monotonic()
+        rag_context = execute_vector_rag(BASE_DIR)
+        t_dispatch_total = (time.monotonic() - t0_tool) * 1000.0
+        tool_calls = 1
+
+        msgs = [
+            {"role": "system", "content": "You are a concise technical systems assistant."},
+            {"role": "user", "content": "Retrieved Context:\n" + rag_context + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
+        ]
+        tn, ttft, itl, ntok, _ = call_llama_stream(msgs, tool_catalog, 256)
+        t_neural_total = tn
+        ttft_first = ttft
+        itl_avg = itl
+        total_tokens = ntok
+
+    elif tier == "W4":
+        tool_calls = 10
+        itl_sum = 0.0
+        history = [
+            {"role": "system", "content": "You are a concise technical systems assistant."},
+        ]
+        for step in range(1, 11):
+            t0_tool = time.monotonic()
+            execute_tool_list_dir(mock_dir)
+            vals, _ = execute_tool_grep_logs(log_file)
+            stat_str = execute_tool_calc_stats(vals)
+            t_dispatch_total += (time.monotonic() - t0_tool) * 1000.0
+
+            history.append({
+                "role": "user",
+                "content": f"Turn {step} Observation: {stat_str}. State next brief diagnostic action.",
+            })
+            tn, ttft, itl, ntok, reply = call_llama_stream(history, tool_catalog, 64)
+            t_neural_total += tn
+            if step == 1:
+                ttft_first = ttft
+            itl_sum += itl
+            total_tokens += ntok
+            history.append({"role": "assistant", "content": reply})
+        itl_avg = itl_sum / 10.0
+
+    t_task_ms = (time.monotonic() - t_start) * 1000.0
+    t_orch_ms = max(0.0, t_task_ms - t_neural_total)
+    phi_orch = (t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0
+    r_tool = (tool_calls / (t_dispatch_total / 1000.0)) if (tool_calls > 0 and t_dispatch_total > 0) else 0.0
+    rss_peak = max(rss_idle, get_rss_mb())
+    alpha_mem = rss_peak / max(1.0, rss_idle)
+
+    return {
+        "architecture": "PythonNative (CPython 3.12)",
+        "workload": tier,
+        "warmth": warmth,
+        "t_task_ms": t_task_ms,
+        "t_neural_ms": t_neural_total,
+        "t_orch_ms": t_orch_ms,
+        "phi_orch_pct": phi_orch,
+        "ttft_ms": ttft_first,
+        "itl_ms": itl_avg,
+        "t_dispatch_ms": t_dispatch_total,
+        "r_tool_ops_sec": r_tool,
+        "rss_idle_mb": rss_idle,
+        "rss_peak_mb": rss_peak,
+        "alpha_mem": alpha_mem,
+        "output_tokens": total_tokens,
+        "tool_calls": tool_calls,
+    }
+
+
+def main():
+    tier = sys.argv[1] if len(sys.argv) > 1 else "W1"
+    warmth = sys.argv[2] if len(sys.argv) > 2 else "Cold"
+    reps = int(sys.argv[3]) if len(sys.argv) > 3 else 1
+    rss_idle = get_rss_mb()
+    results = []
+    for _ in range(reps):
+        res = run_workload(tier, warmth, rss_idle)
+        results.append(res)
+    print(json.dumps(results))
+
+
+if __name__ == "__main__":
+    main()

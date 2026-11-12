@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 """
-Multi-Campaign Cross-Validation and Empirical Reproducibility Engine
-Compares Campaign 1 through Campaign 5 on Apple Silicon M4:
-- Inter-campaign Grand Mean, Standard Deviation, and CV% (Coefficient of Variation)
-- One-Way ANOVA across test sessions to verify reproducibility (H0: mu1 = mu2 = ... = muk)
-- Poisson Tool Dispatch Rate consistency and Garwood CIs across runs
-- Renders fig8_three_campaigns_reproducibility.png
-- Generates campaign_comparison/CAMPAIGN_COMPARISON.md (PT) & CAMPAIGN_COMPARISON_EN.md (EN)
+[LEGACY / EXPLORATORY ARTIFACT - NÃO FAZ PARTE DA CAMPANHA DE PUBLICAÇÃO]
+This script belongs to prior exploratory benchmark runs and is archived for historical
+transparency. It is NOT part of the peer-reviewed SoftwareX publication campaign pipeline.
 """
 import glob
 import json

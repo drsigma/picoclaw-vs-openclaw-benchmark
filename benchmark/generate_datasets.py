@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Deterministic Synthetic Workload Dataset Generator for W1, W2, W3, W4
-Course: CCM313-EEI203 - Performance Analysis of Networks and Systems (UFABC)
+Generates standardized deterministic inputs for cross-runtime benchmark parity.
 """
 import json
 import os
@@ -14,6 +14,9 @@ BASE_DIR = os.path.join(REPO_DIR, "data", "workload_data")
 MOCK_DIR = os.path.join(BASE_DIR, "mock_files")
 LOG_FILE = os.path.join(BASE_DIR, "system_logs.jsonl")
 EMBED_FILE = os.path.join(BASE_DIR, "embedding_head_100k.npz")
+W_BIN = os.path.join(BASE_DIR, "w_proj.bin")
+B_BIN = os.path.join(BASE_DIR, "b_proj.bin")
+DOCS_BIN = os.path.join(BASE_DIR, "doc_embeddings.bin")
 DOCS_FILE = os.path.join(BASE_DIR, "rag_chunks_10k.json")
 
 
@@ -67,7 +70,12 @@ def main():
         doc_embeddings=doc_Matrix,
     )
 
-    # Save metadata for top chunks so RAG injection produces ~1,280 retrieved context tokens
+    # Export contiguous raw float32 binaries for direct cross-language access (Go, Node.js, Python)
+    w_proj.tofile(W_BIN)
+    b_proj.tofile(B_BIN)
+    doc_Matrix.tofile(DOCS_BIN)
+
+    # Save metadata for all 10,000 chunks
     sample_chunks = {}
     topics = [
         "Apple M4 Unified Memory Architecture LPDDR5X 120 GB/s bandwidth zero-copy tensor dispatch",
@@ -75,12 +83,15 @@ def main():
         "Node.js V8 generational scavenger and mark-compact garbage collection pauses in TypeScript",
         "Quantized GGUF Q4_K_M neural inference prefill and decode bandwidth scaling on Metal GPU",
         "POSIX local loopback IPC socket serialization and JSON schema validation overhead in agents",
+        "Multi-core cache coherence and L1/L2 instruction cache miss penalty in agent runtimes",
+        "Non-blocking asynchronous I/O event loops and libuv thread pool scalability",
+        "Ahead-of-Time native Mach-O binary execution vs Just-In-Time bytecode compilation",
     ]
-    for idx in range(100):
+    for idx in range(10000):
         t = topics[idx % len(topics)]
         sample_chunks[str(idx)] = (
             f"[Chunk #{idx:04d}] Technical Reference: {t}. "
-            + ("Empirical telemetry confirms cache-line coherence across performance and efficiency cores " * 14)
+            + ("Empirical telemetry confirms cache-line coherence across performance and efficiency cores. " * 4)
         )
     with open(DOCS_FILE, "w", encoding="utf-8") as f:
         json.dump(sample_chunks, f, indent=2)
@@ -90,6 +101,8 @@ def main():
     print(f"Created 50 mock files in {MOCK_DIR}")
     print(f"Created JSON log file: {LOG_FILE} ({log_size_kb:.1f} KB, {len(records)} lines, 500 target points)")
     print(f"Created 100k-param projection head + 10,000x384 vector matrix: {EMBED_FILE} ({embed_size_mb:.2f} MB)")
+    print(f"Exported raw binary embeddings: {W_BIN}, {B_BIN}, {DOCS_BIN}")
+    print(f"Created 10,000 document text memory chunks: {DOCS_FILE}")
 
 
 if __name__ == "__main__":

@@ -9,7 +9,7 @@
 SHELL := /bin/bash
 VENV_PY := $(shell if [ -f tools/.venv/bin/python ]; then echo tools/.venv/bin/python; else echo python3; fi)
 
-.PHONY: help setup check-quiescence test simulate-campaign benchmark benchmark-full-smc reproduce-figures clean
+.PHONY: help setup check-quiescence test dry-run simulate-campaign benchmark benchmark-full-smc reproduce-figures clean
 
 help:
 	@echo "========================================================================"
@@ -19,7 +19,7 @@ help:
 	@echo "   make setup              - Configura venv Python, Node.js e ferramentas embarcadas"
 	@echo "   make check-quiescence   - Audita estado térmico, CPU idle e modo anti-sono caffeinate"
 	@echo "   make test               - Executa linter (ruff) e testes unitários automatizados"
-	@echo "   make simulate-campaign  - Verificação rápida portátil para revisores (Sem Sudo / Multi-OS)"
+	@echo "   make dry-run            - Verificação rápida portátil para revisores (Modo Dry-Run / CI)"
 	@echo "   make benchmark          - Executa campanha experimental completa (espaço de usuário comum)"
 	@echo "   make benchmark-full-smc - Executa com sudo powermetrics para telemetria elétrica completa do SMC"
 	@echo "   make reproduce-figures  - Regenera todas as figuras científicas em 300 DPI"
@@ -29,7 +29,7 @@ help:
 	@echo "   make setup              - Provisions isolated Python venv, Node.js, and embedded tools"
 	@echo "   make check-quiescence   - Audits thermal state, CPU idle, and caffeinate anti-sleep"
 	@echo "   make test               - Runs linter (ruff) and automated unit test suite"
-	@echo "   make simulate-campaign  - Reviewer fast portable verification (No Sudo / Cross-Platform)"
+	@echo "   make dry-run            - Reviewer fast portable dry-run verification (No Sudo / CI)"
 	@echo "   make benchmark          - Runs publication-grade campaign (standard unprivileged user mode)"
 	@echo "   make benchmark-full-smc - Runs with sudo powermetrics for full hardware electrical SMC telemetry"
 	@echo "   make reproduce-figures  - Recompiles all 300-DPI scientific publication figures"
@@ -50,10 +50,12 @@ test:
 	$(VENV_PY) -m ruff check benchmark/ tests/
 	$(VENV_PY) -m pytest -v tests/
 
-simulate-campaign:
-	@echo "🧪 [PT-BR] Executando verificação rápida portátil para revisores (Sem Sudo / Multi-OS)..."
-	@echo "   [EN-US] Running reviewer fast portable simulation pipeline (No Sudo / Cross-Platform)..."
-	$(VENV_PY) benchmark/run_unified_benchmark.py --simulate
+dry-run:
+	@echo "🧪 [PT-BR] Executando verificação rápida portátil para revisores (Modo Dry-Run)..."
+	@echo "   [EN-US] Running fast reviewer portable dry-run verification..."
+	$(VENV_PY) benchmark/run_unified_benchmark.py --dry-run
+
+simulate-campaign: dry-run
 
 benchmark:
 	@echo "⚡ [PT-BR] Disparando campanha de benchmark em espaço de usuário comum..."

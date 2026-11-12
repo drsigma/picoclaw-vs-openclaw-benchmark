@@ -4,18 +4,19 @@ Inicialização do Pacote de Adaptadores e Função Factory
 
 Author / Autor: Rafael Paniccia Cassetta (UFABC)
 """
-
-from typing import Dict, Type
+from typing import Callable, Dict
 
 from benchmark.adapters.base import AgentOrchestratorAdapter
 from benchmark.adapters.neural_baseline_adapter import NeuralBaselineAdapter
 from benchmark.adapters.openclaw_adapter import OpenClawAdapter
 from benchmark.adapters.picoclaw_adapter import PicoClawAdapter
+from benchmark.adapters.python_native_adapter import PythonNativeAdapter
 
-ADAPTER_REGISTRY: Dict[str, Type[AgentOrchestratorAdapter]] = {
-    "picoclaw": PicoClawAdapter,
+ADAPTER_REGISTRY: Dict[str, Callable[[str], AgentOrchestratorAdapter]] = {
+    "picoclaw": lambda repo_dir: PicoClawAdapter(repo_dir),
     "openclaw_minimal": lambda repo_dir: OpenClawAdapter(repo_dir, mode="minimal"),
     "openclaw_full": lambda repo_dir: OpenClawAdapter(repo_dir, mode="full"),
+    "python_native": lambda repo_dir: PythonNativeAdapter(repo_dir),
     "neural_baseline": lambda repo_dir: NeuralBaselineAdapter(),
 }
 
@@ -36,7 +37,8 @@ __all__ = [
     "AgentOrchestratorAdapter",
     "PicoClawAdapter",
     "OpenClawAdapter",
+    "PythonNativeAdapter",
     "NeuralBaselineAdapter",
     "get_adapter",
-    "ADAPTER_REGISTRY"
+    "ADAPTER_REGISTRY",
 ]

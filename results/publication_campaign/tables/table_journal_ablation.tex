@@ -1,31 +1,35 @@
 \begin{table*}[t]
 \centering
-\caption{Empirical Performance Evaluation and Ablation Matrix on Apple Silicon M4 (Mean $\pm$ Std. Dev.). Note: 0.0 MB Peak RAM for Neural Baseline indicates zero orchestrator process footprint (direct HTTP pass-through), excluding the unified memory allocation (UMA) of the daemon \texttt{llama-server}.}
+\caption{Empirical Performance Evaluation and Runtime Ablation Matrix (Median, IQR, and Mean $\pm$ SD). Note: 0.0 MB Peak RAM for Neural Baseline indicates zero orchestrator process footprint (direct HTTP pass-through), excluding the unified memory allocation (UMA) of the background \texttt{llama-server} daemon. Energy values are N/A when executing without privileged SMC/RAPL hardware access.}
 \label{tab:evaluation_ablation_m4}
 \small
 \begin{tabular}{l l r r r r r}
 \hline
-\textbf{Workload Tier} & \textbf{Configuration} & \textbf{Task Time (ms)} & \textbf{Orch. Delay (ms)} & \textbf{Peak RAM (MB)} & \textbf{Energy (J)} & \textbf{EDP (J$\cdot$s)} \\
+\textbf{Workload} & \textbf{Configuration} & \textbf{Median (IQR) [ms]} & \textbf{Mean $\pm$ SD [ms]} & \textbf{Orch Delay [ms]} & \textbf{Peak RAM [MB]} & \textbf{Energy [J]} \\
 \hline
-W1 & Neural Baseline (Direct) & 1518.7 $\pm$ 162.1 & 0.000 & 0.0 & 24.91 & 38.169 \\
-W1 & PicoClaw (Go Native) & 1444.7 $\pm$ 13.1 & 0.386 & 11.1 & 23.69 & 34.230 \\
-W1 & OpenClaw (Node.js Minimal) & 1446.4 $\pm$ 12.4 & 0.318 & 86.0 & 23.72 & 34.314 \\
-W1 & OpenClaw (Node.js Full Ablation) & 1444.7 $\pm$ 7.1 & 0.339 & 86.0 & 23.69 & 34.230 \\
+W1 & Neural Baseline (Direct) & 0.7 (0.0) & 0.7 $\pm$ 0.0 & 0.000 & 0.0 & N/A \\
+W1 & PicoClaw (Go Native) & 0.7 (0.0) & 0.7 $\pm$ 0.1 & 0.000 & 11.0 & N/A \\
+W1 & OpenClaw (Node.js Minimal) & 18.1 (0.6) & 18.1 $\pm$ 0.9 & 0.000 & 67.7 & N/A \\
+W1 & OpenClaw (Node.js Full 54-Tool) & 17.7 (0.2) & 17.7 $\pm$ 0.3 & 0.000 & 67.9 & N/A \\
+W1 & PythonNative (CPython Reference) & 7.3 (0.1) & 7.3 $\pm$ 0.1 & 0.000 & 38.0 & N/A \\
 \hline
-W2 & Neural Baseline (Direct) & 2879.0 $\pm$ 49.8 & 0.000 & 0.0 & 47.22 & 135.968 \\
-W2 & PicoClaw (Go Native) & 2979.1 $\pm$ 172.1 & 4.736 & 12.4 & 48.86 & 145.942 \\
-W2 & OpenClaw (Node.js Minimal) & 2899.1 $\pm$ 55.3 & 4.353 & 88.1 & 47.54 & 137.877 \\
-W2 & OpenClaw (Node.js Full Ablation) & 2885.6 $\pm$ 11.8 & 4.472 & 88.1 & 47.32 & 136.557 \\
+W2 & Neural Baseline (Direct) & 0.7 (0.1) & 0.7 $\pm$ 0.1 & 0.000 & 0.0 & N/A \\
+W2 & PicoClaw (Go Native) & 1.9 (0.1) & 1.9 $\pm$ 0.2 & 0.000 & 11.9 & N/A \\
+W2 & OpenClaw (Node.js Minimal) & 18.5 (0.2) & 18.5 $\pm$ 0.3 & 0.000 & 68.4 & N/A \\
+W2 & OpenClaw (Node.js Full 54-Tool) & 18.6 (0.0) & 18.6 $\pm$ 0.0 & 0.000 & 68.6 & N/A \\
+W2 & PythonNative (CPython Reference) & 7.8 (0.1) & 7.8 $\pm$ 0.1 & 0.000 & 38.0 & N/A \\
 \hline
-W3 & Neural Baseline (Direct) & 5749.0 $\pm$ 21.9 & 0.000 & 0.0 & 94.28 & 542.035 \\
-W3 & PicoClaw (Go Native) & 6423.1 $\pm$ 870.0 & 5.493 & 12.2 & 105.34 & 686.539 \\
-W3 & OpenClaw (Node.js Minimal) & 5998.2 $\pm$ 10.6 & 10.216 & 91.5 & 98.37 & 590.048 \\
-W3 & OpenClaw (Node.js Full Ablation) & 6016.9 $\pm$ 9.9 & 9.841 & 91.6 & 98.68 & 593.739 \\
+W3 & Neural Baseline (Direct) & 0.7 (0.0) & 0.7 $\pm$ 0.0 & 0.000 & 0.0 & N/A \\
+W3 & PicoClaw (Go Native) & 27.1 (1.5) & 27.1 $\pm$ 2.2 & 0.000 & 50.6 & N/A \\
+W3 & OpenClaw (Node.js Minimal) & 30.9 (0.0) & 30.9 $\pm$ 0.0 & 0.236 & 103.1 & N/A \\
+W3 & OpenClaw (Node.js Full 54-Tool) & 30.6 (0.0) & 30.6 $\pm$ 0.1 & 0.000 & 102.6 & N/A \\
+W3 & PythonNative (CPython Reference) & 14.6 (0.1) & 14.6 $\pm$ 0.1 & 0.000 & 69.6 & N/A \\
 \hline
-W4 & Neural Baseline (Direct) & 5783.4 $\pm$ 95.4 & 0.000 & 0.0 & 94.85 & 548.655 \\
-W4 & PicoClaw (Go Native) & 11071.3 $\pm$ 98.7 & 22.468 & 16.7 & 181.57 & 2010.352 \\
-W4 & OpenClaw (Node.js Minimal) & 12175.3 $\pm$ 76.4 & 10.121 & 92.6 & 199.68 & 2431.186 \\
-W4 & OpenClaw (Node.js Full Ablation) & 12233.1 $\pm$ 71.7 & 12.776 & 93.7 & 200.62 & 2454.313 \\
+W4 & Neural Baseline (Direct) & 2.9 (0.2) & 2.9 $\pm$ 0.3 & 0.000 & 0.0 & N/A \\
+W4 & PicoClaw (Go Native) & 16.4 (0.8) & 16.4 $\pm$ 1.1 & 0.000 & 16.6 & N/A \\
+W4 & OpenClaw (Node.js Minimal) & 30.4 (0.8) & 30.4 $\pm$ 1.1 & 0.000 & 89.2 & N/A \\
+W4 & OpenClaw (Node.js Full 54-Tool) & 31.3 (1.3) & 31.3 $\pm$ 1.8 & 0.000 & 90.4 & N/A \\
+W4 & PythonNative (CPython Reference) & 17.2 (0.1) & 17.2 $\pm$ 0.1 & 0.000 & 38.2 & N/A \\
 \hline
 \end{tabular}
 \end{table*}
