@@ -8,7 +8,7 @@
 
 ## 🇧🇷 Português (PT-BR): Como Entender e Reproduzir em 3 Minutos
 
-Este guia didático foi elaborado para estudantes, pesquisadores e engenheiros que desejam compreender a essência do benchmark sem atrito técnico imediato, acompanhando cada etapa com os registros visuais autênticos do terminal no Apple Silicon M4.
+Este guia didático foi elaborado para estudantes, pesquisadores e engenheiros que desejam compreender a essência do benchmark sem atrito técnico imediato, acompanhando cada etapa com exemplos ilustrativos da estrutura de saída do terminal no Apple Silicon M4.
 
 ---
 
@@ -236,7 +236,7 @@ sudo -E ./tools/.venv/bin/python scripts/run_warm_cache_campaign.py
 
 ## 🇺🇸 English (EN-US): How to Understand and Reproduce in 3 Minutes
 
-This walkthrough is tailored for students, researchers, and engineers seeking an intuitive yet technically precise understanding of the benchmark, supported by authentic terminal logs recorded on Apple Silicon M4.
+This walkthrough is tailored for students, researchers, and engineers seeking an intuitive yet technically precise understanding of the benchmark, supported by illustrative terminal output examples recorded on Apple Silicon M4.
 
 ---
 

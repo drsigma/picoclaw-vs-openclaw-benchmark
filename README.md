@@ -133,7 +133,7 @@ $^*$*Nota sobre o Baseline Neural / Note on Neural Baseline:* O valor de **`0,0 
   7. **Caracterização de Prefill de Catálogo e Reuso de KV-Cache:** Conforme atestado no estudo de caracterização de catálogos ($0, 15, 54, 100$ ferramentas no llama.cpp / Metal GPU), o inchaço de esquemas corporativos satura o pré-processamento de atenção na GPU Metal ($T_{\text{prefill}}$ cresce de $128\text{ ms}$ para $>4000\text{ ms}$ e $>38000\text{ ms}$), exibindo escalabilidade super-linear compatível com a complexidade de atenção do transformer (*super-linear scaling compatible with transformer attention complexity*), enquanto o reuso do KV-cache elimina essa sobrecarga redundante ($5{,}4\times\text{ a }956\times$ speedup de prefill), confirmando que o gargalo de catálogos volumosos reside na atenção do modelo e não no despacho do orquestrador.
   8. **Dualidade de Regimes Operacionais (Regime A Cold Prefill vs. Regime B Warm Cache):** O repositório avalia dois regimes completos ($n=30$ cada, 660 ensaios por campanha):
      * *Regime A (`cache_prompt=false`):* O prefill frio na GPU Metal domina $>75\%$ do tempo total de execução e satura a potência do encapsulamento em $\approx 16\text{ W}$, provocando quase-paridade ponta a ponta entre os runtimes.
-     * *Regime B (`cache_prompt=true`):* Com o prefill amortizado pelo reuso do KV-cache no `llama-server` (retenção de prefixo isolada por bloco com $\text{Cache Hit } \ge 97{,}6\%$), a latência global despenca (ex: W2 cai de $5556\text{ ms}$ para patamares próximos a 1,2 s (~4,6× mais rápido)), tornando a fração de sobrecarga do orquestrador ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) claramente mensurável ($\Phi_{\text{orch}}$ de $0{,}29\%$ a $2{,}21\%$) entre o binário Go nativo e runtimes interpretados/JIT.
+     * *Regime B (`cache_prompt=true`):* Com o prefill amortizado pelo reuso do KV-cache no `llama-server` (protocolo isolado por bloco determinando taxa verificada de `Cache Hit` de **$99{,}9\%$ a $100{,}0\%$** em W1–W3 e **$97{,}6\%$ a $99{,}3\%$** em W4), a latência global despenca: no W2, o tempo de execução cai de $5556{,}1\text{ ms}$ para patamares sub-segundo (**$725{,}9\text{ ms}$** no PicoClaw, **$752{,}3\text{ ms}$** no OpenClaw Minimal e **$913{,}5\text{ ms}$** no OpenClaw Full — redução de **$21{,}6\times$** no catálogo de 54 ferramentas quando isolado por bloco). Sob esse amortecimento de prefill, a parcela relativa de sobrecarga de orquestração ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) situa-se entre **$0{,}37\%$ e $4{,}65\%$** dependendo da intensidade de I/O e computação vetorial, permanecendo a latência ponta a ponta de Go, Python e Node-Minimal dentro de $\pm 1{,}7\%$ a $4{,}2\%$ do baseline neural direto.
 
 * **🇺🇸 EN-US:**
   1. **Cold-Start Launch:** PicoClaw cold-starts in **$9.63\text{ ms}$** vs. $225.55\text{ ms}$ for OpenClaw (**$23.4\times$ faster**).
@@ -145,7 +145,7 @@ $^*$*Nota sobre o Baseline Neural / Note on Neural Baseline:* O valor de **`0,0 
   7. **Schema Prefill Characterization & KV-Cache Reuse:** Across catalog sizes ($0, 15, 54, 100$ tools on llama.cpp / Metal GPU), enterprise schema injection escalates GPU prefill duration exhibiting super-linear scaling compatible with transformer attention complexity, while KV-cache activation avoids redundant attention computation ($5.4\times\text{ to }956\times$ prefill speedup), confirming that enterprise schema bloat bottlenecks agent execution via transformer attention costs rather than host orchestrator delay.
   8. **Operational Dual-Regime Trade-offs (Regime A Cold Prefill vs. Regime B Warm Cache):** The testbed characterizes two full campaigns ($n=30$ each, 660 physical trials per regime):
      * *Regime A (`cache_prompt=false`):* Cold attention prefill on the Metal GPU accounts for $>75\%$ of total execution duration and saturates package power at $\approx 16\text{ W}$, producing near-parity in wall-clock duration between host runtimes.
-     * *Regime B (`cache_prompt=true`):* When prompt prefill is amortized via block-isolated KV-cache retention in `llama-server` (verified $\text{Cache Hit } \ge 97.6\%$), overall task duration drops dramatically (e.g. W2 latency drops to near 1.2 s, ~4.6x faster), causing orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) to become clearly measurable ($\Phi_{\text{orch}}$ between $0.29\%$ and $2.21\%$) across runtimes.
+     * *Regime B (`cache_prompt=true`):* When prompt prefill is amortized via block-isolated KV-cache retention in `llama-server` (verified `Cache Hit` rates of **$99.9\%$ to $100.0\%$** across W1–W3 and **$97.6\%$ to $99.3\%$** in W4), overall task duration drops dramatically: in W2, runtime plunges from $5556.1\text{ ms}$ to sub-second levels (**$725.9\text{ ms}$** for PicoClaw, **$752.3\text{ ms}$** for OpenClaw Minimal, and **$913.5\text{ ms}$** for OpenClaw Full — a **$21.6\times$** latency reduction for the 54-tool catalog under block-isolated caching). Under amortized prefill, orchestrator overhead share ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) spans **$0.37\%$ to $4.65\%$** depending on I/O and vector intensity, while end-to-end latency for Go, Python, and Node-Minimal remains within $\pm 1.7\%$ to $4.2\%$ of the direct neural baseline.
 
 ---
 
@@ -215,13 +215,14 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── LICENSE                                    <- Licença MIT para código-fonte
 ├── DATA_LICENSE                               <- Licença Creative Commons CC-BY 4.0 para dados e figuras
 ├── references.bib                             <- Base bibliográfica formal BibTeX (IEEE/ACM/Elsevier)
-├── tutorial/                                  <- Guia didático passo a passo e evidências de execução
-│   └── README.md                              <- Tutorial prático bilíngue com passos 1 a 7 e logs de terminal
+├── tutorial/                                  <- Guia didático passo a passo e logs ilustrativos
+│   └── README.md                              <- Tutorial prático bilíngue com passos 1 a 9 e traces ilustrativos
 ├── benchmark/                                 <- Harness de execução, adaptadores e orquestradores
 │   ├── adapters/                              <- Implementação do padrão Strategy/Adapter
 │   │   ├── base.py                            <- Interface abstrata AgentOrchestratorAdapter
 │   │   ├── picoclaw_adapter.py                <- Adaptador PicoClaw Go nativo
 │   │   ├── openclaw_adapter.py                <- Adaptador OpenClaw Node.js (Minimal e Full Ablation)
+│   │   ├── bun_minimal_adapter.py             <- Adaptador BunMinimal (< 35 linhas, extensibilidade multi-runtime)
 │   │   ├── python_native_adapter.py           <- Adaptador PythonNative (referência CPython 3.12)
 │   │   └── neural_baseline_adapter.py         <- Adaptador de linha de base neural direta
 │   ├── picoclaw_orch.go                       <- Orquestrador Go nativo (compilado Mach-O ARM64)
@@ -231,11 +232,15 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 │   ├── run_unified_benchmark.py               <- Executor mestre com randomized block e modo dry-run
 │   ├── analyze_results.py                     <- Análise estatística (Mediana, IQR, Cliff's d, A12, Holm-Bonferroni)
 │   └── generate_charts.py                     <- Gerador das 6 figuras científicas em 300 DPI
-├── scripts/                                   <- Scripts utilitários e arquivos legados
+├── scripts/                                   <- Scripts utilitários e de campanha
+│   ├── run_prefill_ablation.py                <- Caracterização de prefill e ajuste polinomial (Metal GPU)
+│   ├── run_warm_cache_campaign.py             <- Campanha do Regime B com isolamento de blocos (KV-cache ativo)
+│   ├── run_w2_resample.py                     <- Script auditável de reamostragem focada de W2 com backup
+│   ├── verify_manifest.py                     <- Validador criptográfico de integridade SHA-256 (181 arquivos)
 │   ├── check_quiescence.sh                    <- Auditoria de quiescência operacional
 │   └── legacy/                                <- Scripts exploratórios arquivados
 ├── tests/                                     <- Suíte de testes unitários automatizados (pytest)
-│   ├── test_adapters_and_failfast.py          <- Validação dos 5 adaptadores e fail-fast
+│   ├── test_adapters_and_failfast.py          <- Validação dos adaptadores e fail-fast
 │   ├── test_artifact_consistency.py           <- Consistência numérica cruzada JSON/CSV/LaTeX
 │   ├── test_dataset_generator.py              <- Validação de integridade dos datasets determinísticos
 │   ├── test_statistical_engine.py             <- Validação matemática de Cliff's d, A12, Bootstrap e Holm
@@ -243,12 +248,19 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── figures/                                   <- 6 figuras científicas em alta resolução (300 DPI)
 ├── results/                                   <- Resultados experimentais estruturados
 │   ├── publication_campaign/                  <- Dados da campanha definitiva (Journal-Ready)
-│   │   ├── raw_trials.jsonl                   <- Traces JSONL de todos os 660 ensaios fatoriais (60 warmups + 600 avaliações)
+│   │   ├── raw_trials.jsonl                   <- Traces JSONL do Regime A (660 ensaios: 60 warmups + 600 avaliações)
+│   │   ├── warm_cache_trials.jsonl            <- Traces JSONL do Regime B (660 ensaios com reuso determinístico de KV-cache)
+│   │   ├── prefill_ablation.jsonl             <- Ensaios de ablação de catálogos (0, 15, 54, 100 ferramentas)
+│   │   ├── prefill_regression_fit.json        <- Ajuste de regressão linear vs. quadrática (R² = 0,9999)
+│   │   ├── campaign_metadata.json             <- Metadados completos do ambiente, flags de hardware e auditoria
 │   │   ├── summary_statistics.json            <- Médias, desvios, p50/p95/p99 e métricas de EDP
 │   │   ├── statistical_tests.json             <- Testes Mann-Whitney U, Cliff's Delta e Vargha-Delaney
+│   │   ├── warm_cache_summary.json            <- Estatísticas sumárias do Regime B (Warm Cache)
+│   │   ├── warm_cache_statistical_tests.json  <- Testes estatísticos de hipótese do Regime B
 │   │   └── tables/                            <- Tabelas formatadas em LaTeX (.tex) e CSV (.csv)
 │   └── exploratory_campaigns/                 <- Campanhas 1 a 5 preservadas com proveniência total
 │       ├── CHANGELOG_CAMPAIGNS.md             <- Histórico de evolução metodológica
+│       ├── raw_trials_pre_w2_fix.jsonl        <- Backup auditável dos dados brutos pré-correção de W2
 │       └── campaign_run_1..5/                 <- Dados das campanhas preliminares
 ├── data/                                      <- Datasets determinísticos e assinaturas SHA-256
 │   ├── workload_data/                         <- 50 mock files, 750 logs JSONL, RAG chunks e pesos 384d

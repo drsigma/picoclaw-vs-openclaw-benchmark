@@ -5,7 +5,7 @@
   "DATA_LICENSE": "28c5c1ca68684f48dd4b4333657bcdbfd9f2222ddcd1e15a1ea40ba543117492",
   "LICENSE": "4c391846d226468fc7c446e8e962f9bca63dfef0096fb88dd29243987d4892b1",
   "Makefile": "6ab2186272578a5912f96e00eff35d8baa31c988ec4fbe119a84edc1f79839d2",
-  "README.md": "6581537b69dd7fd6e07e1461ee82a95d2178789a1cfe4cf44110d13c6bbf9480",
+  "README.md": "d8a578a097810a582321399b7523064ba4c7a1f2abf2450f79532337192fa5b1",
   "benchmark/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "benchmark/adapters/__init__.py": "5aedd44265f63dd7d4f0504bb7bfccd0b05c843925029699137cca738f9ec2e7",
   "benchmark/adapters/base.py": "65a4f485692ead175d82a48631f69051ed2caff44fa844a7c871db0ed4092098",
@@ -121,7 +121,7 @@
   "figures/fig8_three_campaigns_reproducibility.png": "c74f1d7aa8de95b2ad1533fe178ded76a134695246200d1649c7cb1e20a3afba",
   "paper/COVER_LETTER.md": "a42177fb8261b16199c4653ec89a3809a33edeed513215118370ac2a9a559d44",
   "paper/HIGHLIGHTS.md": "ae43c79d7840d8c7658f5caf34bd9e5c6ce90745aa0faecf68d7774b8c243c49",
-  "paper/softwarex_manuscript.tex": "42be36e8b473e2fdf1f3c45acc8adf13a83c06639bcf0f64084b63aa88d69eb7",
+  "paper/softwarex_manuscript.tex": "2a000a90aedc1a80ec85dc6b9ade6818898840f633257197b14159e17214bf3c",
   "pyproject.toml": "968c81a365bf5b593749ba710f8a42918045462c763f7717bed4584bd8efc9cd",
   "references.bib": "9df6b6ccd62928fa3995dfb538b187a92f31b2fb393438fdf3acbe446bb4d09d",
   "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx": "588fc20fba5098d0c2e45aaf5a5582d6a44b29a4021de8801e2957e349323b12",
@@ -179,5 +179,5 @@
   "tests/test_dataset_generator.py": "66a08eaed0f641aaad41aadfbcd241aa09a157549884fdf6dfe89f914dae5bf9",
   "tests/test_statistical_engine.py": "357fb87f55273026224efc79a446fa2c25edaca8ddc133a7fc7544e6bb832e74",
   "tests/test_telemetry_parser.py": "ea835745da8b243370f60f7a36a8a87290fda156768e1328381bb7d8f79e1b2d",
-  "tutorial/README.md": "1b64ad02ae8a6483aa4d555b16d257384ec3acde40b2c58b03a8075fb73b0b25"
+  "tutorial/README.md": "bdcb4f8d8bab3b3cce7d5422c7b3602a9531eb3dcc1f570a32e0a29342a83a59"
 }
