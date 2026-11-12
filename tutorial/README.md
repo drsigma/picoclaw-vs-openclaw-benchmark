@@ -27,7 +27,7 @@ make setup
 # 3. Executar a Verificação Rápida Portátil (< 5 segundos, sem GPU, sem Sudo)
 make dry-run
 
-# 4. Executar os 28 testes unitários automatizados (pytest e linter ruff)
+# 4. Executar os 31 testes unitários automatizados (pytest e linter ruff)
 make test
 
 # 5. Regenerar todas as 6 figuras científicas em 300 DPI
@@ -139,16 +139,16 @@ Summary:
 ---
 
 #### Passo 5: Verificação de Integridade Criptográfica (SHA-256)
-Auditoria automática dos 181 arquivos do repositório contra a assinatura digital:
+Auditoria automática dos 185 arquivos do repositório contra a assinatura digital:
 ```bash
 make verify
 ```
 ```text
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (181 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (185 files)
 ========================================================================
-✅ [SUCCESS] All 181/181 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 185/185 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 ```
@@ -255,7 +255,7 @@ make setup
 # 3. Run Instant Portable Dry-Run Verification (< 5 seconds, No GPU, No Sudo)
 make dry-run
 
-# 4. Run the 28 automated unit tests (pytest and ruff linter)
+# 4. Run the 31 automated unit tests (pytest and ruff linter)
 make test
 
 # 5. Re-render all 6 publication figures in 300 DPI
@@ -363,16 +363,16 @@ Summary:
 ---
 
 #### Step 5: Cryptographic Integrity Verification (SHA-256)
-Automated audit of all 181 tracked repository files against their cryptographic hashes:
+Automated audit of all 185 tracked repository files against their cryptographic hashes:
 ```bash
 make verify
 ```
 ```text
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (181 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (185 files)
 ========================================================================
-✅ [SUCCESS] All 181/181 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 185/185 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 ```

@@ -5,7 +5,7 @@
   "DATA_LICENSE": "28c5c1ca68684f48dd4b4333657bcdbfd9f2222ddcd1e15a1ea40ba543117492",
   "LICENSE": "4c391846d226468fc7c446e8e962f9bca63dfef0096fb88dd29243987d4892b1",
   "Makefile": "6ab2186272578a5912f96e00eff35d8baa31c988ec4fbe119a84edc1f79839d2",
-  "README.md": "6c7bf8cdc5c60cdf3560b5e69dc6c7583bb2cb26f52424ab0ae87dafd8d96900",
+  "README.md": "c1b9e150b790093c3df04b23c3fdb077d5093bc0458b57b241465d595afb173c",
   "benchmark/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "benchmark/adapters/__init__.py": "5aedd44265f63dd7d4f0504bb7bfccd0b05c843925029699137cca738f9ec2e7",
   "benchmark/adapters/base.py": "65a4f485692ead175d82a48631f69051ed2caff44fa844a7c871db0ed4092098",
@@ -119,9 +119,9 @@
   "figures/fig6_pmc_hardware_counters.png": "da69393a656d6d97282847581375ac43a218cc762d34bb30a5ef31672e59c704",
   "figures/fig7_poisson_assertiveness.png": "47d81aaa9b9f1df51447ab333eebee6bc9c62cd2db2abb0312e20edd4593156f",
   "figures/fig8_three_campaigns_reproducibility.png": "c74f1d7aa8de95b2ad1533fe178ded76a134695246200d1649c7cb1e20a3afba",
-  "paper/COVER_LETTER.md": "a42177fb8261b16199c4653ec89a3809a33edeed513215118370ac2a9a559d44",
-  "paper/HIGHLIGHTS.md": "ae43c79d7840d8c7658f5caf34bd9e5c6ce90745aa0faecf68d7774b8c243c49",
-  "paper/softwarex_manuscript.tex": "a0ba160752aaf3295a243276ffc28f68e9781b42a95264a5358d9de99e4af610",
+  "paper/COVER_LETTER.md": "409d38553148079b4848f35cad1fd88881cf62e30e463542e8435cd7151da936",
+  "paper/HIGHLIGHTS.md": "b870dcee2284f0c13d4b556852fe0b460730cf1123d760d75a009f88dda85100",
+  "paper/softwarex_manuscript.tex": "70236b0f337f0c93e775f035268e78ad336c49a9f278db27cb196ed6cafc19aa",
   "pyproject.toml": "968c81a365bf5b593749ba710f8a42918045462c763f7717bed4584bd8efc9cd",
   "references.bib": "98e8b495ea96acd5164013a910293f0cfaaccf5d8a2268263ae783b4f738615c",
   "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx": "588fc20fba5098d0c2e45aaf5a5582d6a44b29a4021de8801e2957e349323b12",
@@ -183,5 +183,5 @@
   "tests/test_dataset_generator.py": "66a08eaed0f641aaad41aadfbcd241aa09a157549884fdf6dfe89f914dae5bf9",
   "tests/test_statistical_engine.py": "8cf49681a89f19291f734545795072da8d1e97407830de8ed6dc39d8032d1b3a",
   "tests/test_telemetry_parser.py": "ea835745da8b243370f60f7a36a8a87290fda156768e1328381bb7d8f79e1b2d",
-  "tutorial/README.md": "bdcb4f8d8bab3b3cce7d5422c7b3602a9531eb3dcc1f570a32e0a29342a83a59"
+  "tutorial/README.md": "f9d239b22a39dcdefd184890569b9a9aaeaa214675a0e35b81acf2aec856cf52"
 }

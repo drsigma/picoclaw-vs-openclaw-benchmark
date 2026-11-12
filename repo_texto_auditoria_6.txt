@@ -2,8 +2,8 @@
 PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA - REVISAO 6
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-12T20:56:37.644633+00:00
-Git HEAD: 4c49e1d0a074db784b997cf32bae1815674c7430
+Data de Geracao (UTC): 2026-11-12T21:06:51.534140+00:00
+Git HEAD: 400e8d88045b38e40b2e3f34c573ee9642dc757e
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
@@ -20,7 +20,7 @@ SECAO 1: MANUSCRITO CIENTIFICO, REFERENCIAS, CITACAO, GOVERNANCA E LICENCAS
 
 ================================================================================
 FILE: paper/softwarex_manuscript.tex
-SHA-256: a0ba160752aaf3295a243276ffc28f68e9781b42a95264a5358d9de99e4af610
+SHA-256: 70236b0f337f0c93e775f035268e78ad336c49a9f278db27cb196ed6cafc19aa
 ================================================================================
 \documentclass[preprint,12pt,3p]{elsarticle}
 
@@ -334,7 +334,7 @@ The \texttt{picoclaw-vs-openclaw-benchmark} framework delivers an open, extensib
 This work was conducted at the Center for Engineering, Modeling and Applied Social Sciences (CECS) of the Federal University of ABC (UFABC), Brazil.
 
 \section*{Data Availability}
-The complete raw experimental dataset (including \texttt{raw\_trials.jsonl}, \texttt{prefill\_ablation.jsonl}, and \texttt{warm\_cache\_trials.jsonl}), cryptographic SHA-256 verification manifests, statistical hypothesis test matrices, and automated chart generation scripts are openly available in the repository under the Creative Commons Attribution 4.0 International (CC BY 4.0) license at \url{https://github.com/rafapcassetta/picoclaw-vs-openclaw-benchmark} and permanently preserved on Zenodo (\url{https://doi.org/10.5281/zenodo.PENDING_RELEASE}) in accordance with software citation principles \cite{smith2016software}. To comply with third-party model licensing and platform portability, proprietary model weights (\texttt{models/}) and pre-compiled node/go dependencies (\texttt{tools/}) are not redistributed in the repository; they are deterministically downloaded or compiled via \texttt{scripts/fetch\_testbed\_assets.sh}. Across all experimental campaigns and ablation runs conducted on the Apple Silicon M4 hardware testbed ($1{,}320$ benchmark trials + $528$ prefill ablation runs), total electrical energy consumed was approximately $580\text{ kJ}$ ($\approx 0.16\text{ kWh}$).
+The complete raw experimental dataset (including \texttt{raw\_trials.jsonl}, \texttt{prefill\_ablation.jsonl}, and \texttt{warm\_cache\_trials.jsonl}), cryptographic SHA-256 verification manifests, statistical hypothesis test matrices, and automated chart generation scripts are openly available in the repository under the Creative Commons Attribution 4.0 International (CC BY 4.0) license at \url{https://github.com/drsigma/picoclaw-vs-openclaw-benchmark} and permanently preserved on Zenodo (\url{https://doi.org/10.5281/zenodo.PENDING_RELEASE}) in accordance with software citation principles \cite{smith2016software}. To comply with third-party model licensing and platform portability, proprietary model weights (\texttt{models/}) and pre-compiled node/go dependencies (\texttt{tools/}) are not redistributed in the repository; they are deterministically downloaded or compiled via \texttt{scripts/setup\_environment.sh} (\texttt{make setup}). Across all experimental campaigns and ablation runs conducted on the Apple Silicon M4 hardware testbed ($1{,}320$ benchmark trials + $528$ prefill ablation runs), total electrical energy consumed was approximately $580\text{ kJ}$ ($\approx 0.16\text{ kWh}$).
 
 \section*{Declaration of Competing Interest}
 The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
@@ -785,7 +785,7 @@ jobs:
 
 ================================================================================
 FILE: README.md
-SHA-256: 6c7bf8cdc5c60cdf3560b5e69dc6c7583bb2cb26f52424ab0ae87dafd8d96900
+SHA-256: c1b9e150b790093c3df04b23c3fdb077d5093bc0458b57b241465d595afb173c
 ================================================================================
 # A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon
 
@@ -964,7 +964,7 @@ Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tut
 | **Passo 2** | Inspeção física dos datasets determinísticos em `data/workload_data/`. |
 | **Passo 3** | Execução ao vivo dos traces W1 a W4 com cálculo de $\Delta\text{RSS}$ e latência. |
 | **Passo 4** | Medição estatística de cold-start via `hyperfine` com vantagem de $23{,}4\times$ para o Go. |
-| **Passo 5** | Verificação de integridade criptográfica SHA-256 de todos os 181 arquivos (`make verify`). |
+| **Passo 5** | Verificação de integridade criptográfica SHA-256 de todos os 185 arquivos (`make verify`). |
 | **Passo 6** | Modo Dry-Run portátil de validação completa do pipeline (`make dry-run`). |
 | **Passo 7** | Leitura dos shunts elétricos do chip M4 via Apple SMC (`powermetrics -i 50`). |
 | **Passo 8** | Protocolo de quiescência operacional do macOS (`caffeinate -dims`). |
@@ -1039,7 +1039,7 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 │   ├── run_prefill_ablation.py                <- Caracterização de prefill e ajuste polinomial (Metal GPU)
 │   ├── run_warm_cache_campaign.py             <- Campanha do Regime B com isolamento de blocos (KV-cache ativo)
 │   ├── run_w2_resample.py                     <- Script auditável de reamostragem focada de W2 com backup
-│   ├── verify_manifest.py                     <- Validador criptográfico de integridade SHA-256 (181 arquivos)
+│   ├── verify_manifest.py                     <- Validador criptográfico de integridade SHA-256 (185 arquivos)
 │   ├── check_quiescence.sh                    <- Auditoria de quiescência operacional
 │   └── legacy/                                <- Scripts exploratórios arquivados
 ├── tests/                                     <- Suíte de testes unitários automatizados (pytest)
@@ -1053,17 +1053,18 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 │   ├── publication_campaign/                  <- Dados da campanha definitiva (Journal-Ready)
 │   │   ├── raw_trials.jsonl                   <- Traces JSONL do Regime A (660 ensaios: 60 warmups + 600 avaliações)
 │   │   ├── warm_cache_trials.jsonl            <- Traces JSONL do Regime B (660 ensaios com reuso determinístico de KV-cache)
-│   │   ├── prefill_ablation.jsonl             <- Ensaios de ablação de catálogos (0, 15, 54, 100 ferramentas)
+│   │   ├── prefill_ablation.jsonl             <- Ensaios de ablação de catálogos (8 níveis: 0, 5, 10, 15, 25, 40, 54, 100 ferramentas)
 │   │   ├── prefill_regression_fit.json        <- Ajuste de regressão linear vs. quadrática (R² = 0,9999)
 │   │   ├── campaign_metadata.json             <- Metadados completos do ambiente, flags de hardware e auditoria
 │   │   ├── summary_statistics.json            <- Médias, desvios, p50/p95/p99 e métricas de EDP
 │   │   ├── statistical_tests.json             <- Testes Mann-Whitney U, Cliff's Delta e Vargha-Delaney
 │   │   ├── warm_cache_summary.json            <- Estatísticas sumárias do Regime B (Warm Cache)
 │   │   ├── warm_cache_statistical_tests.json  <- Testes estatísticos de hipótese do Regime B
+│   │   ├── spearman_correlation_matrix.json   <- Matriz de correlação de postos de Spearman (12 dimensões)
+│   │   ├── pca_variance_decomposition.json    <- Decomposição de variância e loadings de PCA (PC1, PC2, PC3)
 │   │   └── tables/                            <- Tabelas formatadas em LaTeX (.tex) e CSV (.csv)
 │   └── exploratory_campaigns/                 <- Campanhas 1 a 5 preservadas com proveniência total
 │       ├── CHANGELOG_CAMPAIGNS.md             <- Histórico de evolução metodológica
-│       ├── raw_trials_pre_w2_fix.jsonl        <- Backup auditável dos dados brutos pré-correção de W2
 │       └── campaign_run_1..5/                 <- Dados das campanhas preliminares
 ├── data/                                      <- Datasets determinísticos e assinaturas SHA-256
 │   ├── workload_data/                         <- 50 mock files, 750 logs JSONL, RAG chunks e pesos 384d
@@ -1095,7 +1096,7 @@ make dry-run
 # 1. Configurar o ambiente isolado automaticamente (Python venv, Node.js e ferramentas)
 make setup
 
-# 2. Auditar a integridade e executar os 28 testes unitários automatizados da suíte (pytest e ruff linter) / 28 automated unit tests
+# 2. Auditar a integridade e executar os 31 testes unitários automatizados da suíte (pytest e ruff linter) / 31 automated unit tests
 make test
 
 # 3. Execução em espaço de usuário comum (Sem Sudo / Degradação Graciosa)
@@ -1144,7 +1145,7 @@ As decisões metodológicas, modelos estatísticos e formulações de hardware e
 
 ================================================================================
 FILE: paper/COVER_LETTER.md
-SHA-256: a42177fb8261b16199c4653ec89a3809a33edeed513215118370ac2a9a559d44
+SHA-256: 409d38553148079b4848f35cad1fd88881cf62e30e463542e8435cd7151da936
 ================================================================================
 # Cover Letter for Submission to SoftwareX (Elsevier)
 
@@ -1153,7 +1154,7 @@ The Editor-in-Chief
 *SoftwareX*, Elsevier  
 
 **Subject:** Submission of Original Software Article:  
-*"PicoClaw vs. OpenClaw: An Extensible, Multi-Platform Benchmark Suite for Autonomous AI Agent Orchestration Architectures on Apple Silicon"*
+*"A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"*
 
 **Author:**  
 Rafael Paniccia Cassetta  
@@ -1165,7 +1166,7 @@ Email: `rafael.paniccia@aluno.ufabc.edu.br`
 
 Dear Editor-in-Chief and Editorial Board of *SoftwareX*,
 
-I am pleased to submit our original software manuscript titled **"PicoClaw vs. OpenClaw: An Extensible, Multi-Platform Benchmark Suite for Autonomous AI Agent Orchestration Architectures on Apple Silicon"** for consideration as an original research software article in *SoftwareX*.
+I am pleased to submit our original software manuscript titled **"A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"** for consideration as an original research software article in *SoftwareX*.
 
 ### Originality and Scientific Contribution
 With the rapid migration of autonomous AI agents from remote cloud endpoints to local client devices, execution runtime bottlenecks have become a defining constraint. On unified memory architectures such as Apple Silicon (UMA @ 120 GB/s), agent orchestrators compete directly with quantized neural weights (`llama.cpp`) for memory bus bandwidth and compute cycles.
@@ -1173,15 +1174,15 @@ With the rapid migration of autonomous AI agents from remote cloud endpoints to 
 Our software, `picoclaw-vs-openclaw-benchmark`, addresses this fundamental challenge by providing:
 1. **Mathematical Isolation of Orchestrator Overhead ($T_{\text{orch}}$):** A modular framework decoupling neural inference latency from agent execution delay across four standardized workload tiers (W1–W4).
 2. **Two-Layer Hardware Telemetry and Privilege Model:** Dual-layer physical instrumentation combining (i) system-wide package electrical power sampling via Apple SMC (`powermetrics` at 50 ms resolution, numerically integrated via the composite trapezoidal rule) with (ii) per-process microarchitectural attribution (`ri_instructions`, `ri_cycles`, `ri_billed_energy`, and `ri_lifetime_max_phys_footprint`) polled from the Darwin XNU kernel via `libproc` (`proc_pid_rusage` with `RUSAGE_INFO_V4`). Crucially, privilege isolation is strictly enforced: all agent runtimes, orchestrator child processes, and the `llama-server` daemon execute exclusively in unprivileged user space, with graceful non-root degradation marking electrical fields as `N/A` without synthetic proxies.
-3. **Rigorous Non-Parametric Statistics:** Full automated computation of Energy-Delay Product ($\text{EDP} = E \times T$), Medians and Interquartile Ranges ($\text{IQR}$), two-sided Mann-Whitney $U$ tests adjusted via the step-down Holm-Bonferroni method, Cliff's Delta ($d$), and Vargha-Delaney effect sizes ($\hat{A}_{12}$) with empirical 95% bootstrap confidence intervals (2,000 resamples).
-4. **Controlled Ablation Matrix and Empirical Findings:** Physical evaluation across 600 trials ($n=30$ per condition) demonstrates that the native Go runtime (PicoClaw) achieves complete stochastic dominance ($d = -1.0$, $\hat{A}_{12} = 0.0$, $p < 10^{-5}$) in long autonomous ReAct loops (W4), delivering **50.98% lower Energy-Delay Product**, executing **$3.78\times$ fewer instructions**, and operating with a **$4.15\times$ to $7.62\times$ leaner memory footprint** compared to enterprise Node.js/V8 configurations (OpenClaw Full).
+3. **Rigorous Non-Parametric Statistics and Factor Analysis:** Automated computation of Energy-Delay Product ($\text{EDP} = E \times T$), Medians and Interquartile Ranges ($\text{IQR}$), two-sided Mann-Whitney $U$ tests adjusted via step-down Holm-Bonferroni, Cliff's Delta ($d$), Vargha-Delaney effect sizes ($\hat{A}_{12}$ with 95% bootstrap CIs), pairwise Spearman correlation matrices, and Principal Component Analysis (PCA) variance decomposition.
+4. **Controlled Ablation Matrix and Empirical Findings:** Physical evaluation across 1,320 trials ($n=30$ per condition across cold-prefill Regime A and warm-cache Regime B) demonstrates that compiled Go (PicoClaw) achieves $23.4\times$ faster cold-start invocation ($9.63\text{ ms}$ vs. $225.55\text{ ms}$ for Node.js V8), $2.82\times$ lower physical memory footprint on global average, $3.84\times$ fewer retired instructions, and $4.72\times$ fewer CPU cycles. In 10-turn autonomous ReAct loops (W4) under Regime A, avoiding 54-tool catalog prompt bloat delivers a **$92.53\%$ lower Energy-Delay Product** ($d = -1.0$, $\hat{A}_{12} = 0.0$, $p < 10^{-5}$). In Regime B with amortized KV-cache prefix retention, block isolation delivers a **$21.6\times$ latency reduction** for the 54-tool catalog, revealing that orchestrator overhead ($\Phi_{\text{orch}} \in [0.37\%, 4.65\%]$) becomes directly measurable in I/O and vector-intensive workloads.
 
 ### Multi-OS Reviewer Reproducibility
 Recognizing that journal reviewers operate across diverse environments (including Linux x86_64 machines without Apple Metal GPUs or superuser access), our framework incorporates a **reviewer-friendly portable dry-run pipeline (`make dry-run`)**. This command dispatches a self-contained loopback mock server, executes the complete factorial matrix, runs non-parametric hypothesis tests, and renders high-resolution publication figures in under **5 seconds**, backed by continuous integration testing on both `ubuntu-latest` and `macos-latest` GitHub Actions runners.
 
 The complete code, datasets, telemetry logs, and documentation are available under open licenses (MIT License for software and Creative Commons CC-BY 4.0 for data) at:  
 👉 `https://github.com/drsigma/picoclaw-vs-openclaw-benchmark`  
-Permanent Zenodo archive DOI: `10.5281/zenodo.placeholder` (prepared for Release `v1.0.0`).
+Permanent Zenodo archive DOI: `10.5281/zenodo.PENDING_RELEASE` (prepared for Release `v1.0.0`).
 
 This manuscript has not been published elsewhere and is not currently under consideration by any other journal. All authors have approved the submission.
 
@@ -1197,21 +1198,22 @@ Federal University of ABC (UFABC), Brazil
 
 ================================================================================
 FILE: paper/HIGHLIGHTS.md
-SHA-256: ae43c79d7840d8c7658f5caf34bd9e5c6ce90745aa0faecf68d7774b8c243c49
+SHA-256: b870dcee2284f0c13d4b556852fe0b460730cf1123d760d75a009f88dda85100
 ================================================================================
 # Research Highlights (SoftwareX Editorial Submission)
 
-* Empirical systems benchmark of Go and Node.js AI agent runtimes on Apple M4.
-* PicoClaw Go runtime slashes peak physical RAM by 2.9x over Node.js V8.
-* Hardware counters reveal 3.8x fewer instructions and 4.5x fewer CPU cycles.
-* PicoClaw reduces Energy-Delay Product by 51% in 10-turn autonomous ReAct loops.
-* Two-layer telemetry combines SMC power integration with per-process libproc.
+* Empirical systems benchmark of Go, Node.js, and Python AI agent runtimes on Apple M4.
+* Compiled Go cold-starts 23.4x faster (9.63 ms vs. 225.55 ms) and cuts peak RAM by 2.82x.
+* Hardware performance counters show 3.84x fewer instructions and 4.72x fewer CPU cycles.
+* Deterministic KV-cache amortization achieves 21.6x latency speedup for 54-tool schemas.
+* Go delivers 92.53% lower EDP in 10-turn autonomous ReAct loops over prompt-bloated setups.
+* Two-layer non-root telemetry combines SMC electrical shunts with Darwin XNU libproc.
 
 
 
 ================================================================================
 FILE: tutorial/README.md
-SHA-256: bdcb4f8d8bab3b3cce7d5422c7b3602a9531eb3dcc1f570a32e0a29342a83a59
+SHA-256: f9d239b22a39dcdefd184890569b9a9aaeaa214675a0e35b81acf2aec856cf52
 ================================================================================
 # Guia Didático e Tutorial Visual Passo a Passo / Beginner's Walkthrough & Visual Proofs
 
@@ -1242,7 +1244,7 @@ make setup
 # 3. Executar a Verificação Rápida Portátil (< 5 segundos, sem GPU, sem Sudo)
 make dry-run
 
-# 4. Executar os 28 testes unitários automatizados (pytest e linter ruff)
+# 4. Executar os 31 testes unitários automatizados (pytest e linter ruff)
 make test
 
 # 5. Regenerar todas as 6 figuras científicas em 300 DPI
@@ -1354,16 +1356,16 @@ Summary:
 ---
 
 #### Passo 5: Verificação de Integridade Criptográfica (SHA-256)
-Auditoria automática dos 181 arquivos do repositório contra a assinatura digital:
+Auditoria automática dos 185 arquivos do repositório contra a assinatura digital:
 ```bash
 make verify
 ```
 ```text
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (181 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (185 files)
 ========================================================================
-✅ [SUCCESS] All 181/181 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 185/185 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 ```
@@ -1470,7 +1472,7 @@ make setup
 # 3. Run Instant Portable Dry-Run Verification (< 5 seconds, No GPU, No Sudo)
 make dry-run
 
-# 4. Run the 28 automated unit tests (pytest and ruff linter)
+# 4. Run the 31 automated unit tests (pytest and ruff linter)
 make test
 
 # 5. Re-render all 6 publication figures in 300 DPI
@@ -1578,16 +1580,16 @@ Summary:
 ---
 
 #### Step 5: Cryptographic Integrity Verification (SHA-256)
-Automated audit of all 181 tracked repository files against their cryptographic hashes:
+Automated audit of all 185 tracked repository files against their cryptographic hashes:
 ```bash
 make verify
 ```
 ```text
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (181 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (185 files)
 ========================================================================
-✅ [SUCCESS] All 181/181 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 185/185 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 ```
@@ -5889,7 +5891,7 @@ SHA-256: cbb0d1cbc0ded19c0d0c9383d7828d2bdbc48759127632002dced236762ccc5a
 
 ================================================================================
 FILE: data/manifest_sha256.json
-SHA-256: 3389740cb4a0b7c5a66d75cefa1d3d66507f2705eed8713afdef1c2f6e089e52
+SHA-256: 984741de1f6bb22eca973c065352c694b93ad44b73d78ab89eaf07b7849d53a0
 ================================================================================
 {
   ".gitignore": "e8f77378c0791a2fa72c9068e6023417399531d6938bc781524d8b352060138f",
@@ -5898,7 +5900,7 @@ SHA-256: 3389740cb4a0b7c5a66d75cefa1d3d66507f2705eed8713afdef1c2f6e089e52
   "DATA_LICENSE": "28c5c1ca68684f48dd4b4333657bcdbfd9f2222ddcd1e15a1ea40ba543117492",
   "LICENSE": "4c391846d226468fc7c446e8e962f9bca63dfef0096fb88dd29243987d4892b1",
   "Makefile": "6ab2186272578a5912f96e00eff35d8baa31c988ec4fbe119a84edc1f79839d2",
-  "README.md": "6c7bf8cdc5c60cdf3560b5e69dc6c7583bb2cb26f52424ab0ae87dafd8d96900",
+  "README.md": "c1b9e150b790093c3df04b23c3fdb077d5093bc0458b57b241465d595afb173c",
   "benchmark/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "benchmark/adapters/__init__.py": "5aedd44265f63dd7d4f0504bb7bfccd0b05c843925029699137cca738f9ec2e7",
   "benchmark/adapters/base.py": "65a4f485692ead175d82a48631f69051ed2caff44fa844a7c871db0ed4092098",
@@ -6012,9 +6014,9 @@ SHA-256: 3389740cb4a0b7c5a66d75cefa1d3d66507f2705eed8713afdef1c2f6e089e52
   "figures/fig6_pmc_hardware_counters.png": "da69393a656d6d97282847581375ac43a218cc762d34bb30a5ef31672e59c704",
   "figures/fig7_poisson_assertiveness.png": "47d81aaa9b9f1df51447ab333eebee6bc9c62cd2db2abb0312e20edd4593156f",
   "figures/fig8_three_campaigns_reproducibility.png": "c74f1d7aa8de95b2ad1533fe178ded76a134695246200d1649c7cb1e20a3afba",
-  "paper/COVER_LETTER.md": "a42177fb8261b16199c4653ec89a3809a33edeed513215118370ac2a9a559d44",
-  "paper/HIGHLIGHTS.md": "ae43c79d7840d8c7658f5caf34bd9e5c6ce90745aa0faecf68d7774b8c243c49",
-  "paper/softwarex_manuscript.tex": "a0ba160752aaf3295a243276ffc28f68e9781b42a95264a5358d9de99e4af610",
+  "paper/COVER_LETTER.md": "409d38553148079b4848f35cad1fd88881cf62e30e463542e8435cd7151da936",
+  "paper/HIGHLIGHTS.md": "b870dcee2284f0c13d4b556852fe0b460730cf1123d760d75a009f88dda85100",
+  "paper/softwarex_manuscript.tex": "70236b0f337f0c93e775f035268e78ad336c49a9f278db27cb196ed6cafc19aa",
   "pyproject.toml": "968c81a365bf5b593749ba710f8a42918045462c763f7717bed4584bd8efc9cd",
   "references.bib": "98e8b495ea96acd5164013a910293f0cfaaccf5d8a2268263ae783b4f738615c",
   "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx": "588fc20fba5098d0c2e45aaf5a5582d6a44b29a4021de8801e2957e349323b12",
@@ -6076,7 +6078,7 @@ SHA-256: 3389740cb4a0b7c5a66d75cefa1d3d66507f2705eed8713afdef1c2f6e089e52
   "tests/test_dataset_generator.py": "66a08eaed0f641aaad41aadfbcd241aa09a157549884fdf6dfe89f914dae5bf9",
   "tests/test_statistical_engine.py": "8cf49681a89f19291f734545795072da8d1e97407830de8ed6dc39d8032d1b3a",
   "tests/test_telemetry_parser.py": "ea835745da8b243370f60f7a36a8a87290fda156768e1328381bb7d8f79e1b2d",
-  "tutorial/README.md": "bdcb4f8d8bab3b3cce7d5422c7b3602a9531eb3dcc1f570a32e0a29342a83a59"
+  "tutorial/README.md": "f9d239b22a39dcdefd184890569b9a9aaeaa214675a0e35b81acf2aec856cf52"
 }
 
 
