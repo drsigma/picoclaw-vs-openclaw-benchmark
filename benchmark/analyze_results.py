@@ -281,7 +281,7 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
     # Generate LaTeX Table (table_journal_ablation.tex) with complete 8 columns and footer metadata
     latex_table = r"""\begin{table*}[t]
 \centering
-\caption{Empirical Performance Evaluation and Runtime Ablation Matrix on Apple Silicon M4. Peak Phys RAM denotes lifetime maximum resident physical footprint recorded via Darwin kernel \texttt{libproc}. Net Energy is integrated above quiescent idle baseline ($1.46\text{ W}$) via Apple SMC hardware shunts at 50~ms resolution. Billed Energy and CPU Cycles are captured via \texttt{RUSAGE\_INFO\_V4}.}
+\caption{Empirical Performance Evaluation and Runtime Ablation Matrix on Apple Silicon M4. Peak Phys RAM denotes lifetime maximum resident physical footprint recorded via Darwin kernel \texttt{libproc}. Net Energy is integrated above quiescent idle baseline (measured quiescent idle baseline) via Apple SMC hardware shunts at 50~ms resolution. Billed Energy and CPU Cycles are captured via \texttt{RUSAGE\_INFO\_V4}.}
 \label{tab:evaluation_ablation_m4}
 \small
 \begin{tabular}{l l r r r r r r}
@@ -367,6 +367,14 @@ def generate_empirical_macros(
     pico_trials = [r for r in eval_records if r.get("agent_key") == "picoclaw"]
     open_min_trials = [r for r in eval_records if r.get("agent_key") == "openclaw_minimal"]
 
+    pico_w2_trials = [r for r in eval_records if r.get("agent_key") == "picoclaw" and r.get("workload") == "W2"]
+    open_min_w2_trials = [r for r in eval_records if r.get("agent_key") == "openclaw_minimal" and r.get("workload") == "W2"]
+
+    pico_w2_tokens = float(np.mean([r.get("completion_tokens", 0) for r in pico_w2_trials])) if pico_w2_trials else 18.0
+    open_min_w2_tokens = float(np.mean([r.get("completion_tokens", 0) for r in open_min_w2_trials])) if open_min_w2_trials else 29.0
+    pico_w2_neural_mean = float(np.mean([r.get("t_neural_ms", 0.0) for r in pico_w2_trials])) if pico_w2_trials else 7517.6
+    open_min_w2_neural_mean = float(np.mean([r.get("t_neural_ms", 0.0) for r in open_min_w2_trials])) if open_min_w2_trials else 5470.2
+
     pico_inst_m = float(np.mean([r.get("proc_instructions", 0) for r in pico_trials])) / 1e6 if pico_trials else 244.2
     pico_cyc_m = float(np.mean([r.get("proc_cycles", 0) for r in pico_trials])) / 1e6 if pico_trials else 83.8
     open_min_inst_m = float(np.mean([r.get("proc_instructions", 0) for r in open_min_trials])) / 1e6 if open_min_trials else 923.8
@@ -436,10 +444,10 @@ def generate_empirical_macros(
         f"\\newcommand{{\\WTwoNeuralMedian}}{{{neural_w2['t_task_median_ms']:.1f}}}",
         f"\\newcommand{{\\WTwoNeuralMean}}{{{neural_w2['t_task_mean_ms']:.1f}}}",
         f"\\newcommand{{\\WTwoNeuralEnergy}}{{{_val(neural_w2, 'energy_total_mean_j', 28.71):.2f}}}",
-        "\\newcommand{\\WTwoOpenMinTokens}{16.0}",
-        "\\newcommand{\\WTwoPicoTokens}{18.0}",
-        "\\newcommand{\\WTwoNeuralPico}{3487.1}",
-        "\\newcommand{\\WTwoNeuralOpenMin}{1096.3}",
+        f"\\newcommand{{\\WTwoOpenMinTokens}}{{{open_min_w2_tokens:.1f}}}",
+        f"\\newcommand{{\\WTwoPicoTokens}}{{{pico_w2_tokens:.1f}}}",
+        f"\\newcommand{{\\WTwoNeuralPico}}{{{pico_w2_neural_mean:.1f}}}",
+        f"\\newcommand{{\\WTwoNeuralOpenMin}}{{{open_min_w2_neural_mean:.1f}}}",
         f"\\newcommand{{\\WTwoPicoOrchMedian}}{{{pico_w2['t_orch_median_ms']:.2f}}}",
         f"\\newcommand{{\\WTwoPicoOrchMean}}{{{pico_w2['t_orch_mean_ms']:.2f}}}",
         f"\\newcommand{{\\WTwoOpenMinOrchMedian}}{{{open_min_w2['t_orch_median_ms']:.2f}}}",
@@ -461,6 +469,7 @@ def generate_empirical_macros(
         f"\\newcommand{{\\PicoRSSMin}}{{{min(pico_rss_all):.2f}}}",
         f"\\newcommand{{\\PicoRSSMax}}{{{max(pico_rss_all):.2f}}}",
         f"\\newcommand{{\\PicoRSSWThree}}{{{pico_w3['rss_peak_mb']:.2f}}}",
+        f"\\newcommand{{\\PicoRSSWFour}}{{{pico_w4['rss_peak_mb']:.2f}}}",
         f"\\newcommand{{\\PicoRSSOverallMean}}{{{float(np.mean(pico_rss_all)):.2f}}}",
         f"\\newcommand{{\\OpenRSSMin}}{{{min(open_rss_all):.2f}}}",
         f"\\newcommand{{\\OpenRSSMax}}{{{max(open_rss_all):.2f}}}",

@@ -93,26 +93,26 @@ Os resultados empíricos consolidados da matriz de avaliação (5 configuraçõe
 
 | Workload | Configuração / Configuration | Mediana Latência Total / Median Task Latency (ms) | Overhead Agente / Orch Delay $T_{\text{orch}}$ (ms) | Pico RAM / Peak RSS (MB) | Energia Média / Mean Energy (J) |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **W1 (Reflexão / Simple Reflection)** | **NeuralBaseline (Direct)** | $1422{,}1$ | $0{,}000$ | $0{,}0^*$ | $20{,}78$ |
-| | **PicoClaw (Go Native)** | $1453{,}7$ | $44{,}311$ | **$11{,}2$** | $21{,}91$ |
-| | **OpenClaw Minimal (15 Tools)** | $1498{,}5$ | $52{,}369$ | $85{,}5$ | $22{,}33$ |
-| | **OpenClaw Full 54-Tool (Ablation)** | $2524{,}4$ | $64{,}414$ | $85{,}6$ | $58{,}81$ |
-| | **PythonNative (CPython Reference)** | $1453{,}6$ | $30{,}745$ | $38{,}0$ | $22{,}28$ |
-| **W2 (3 Ferramentas / 3-Tool Chain)** | **NeuralBaseline (Direct)** | $3646{,}6$ | $0{,}000$ | $0{,}0^*$ | $28{,}71$ |
-| | **PicoClaw (Go Native)** | $3471{,}8$ | $3{,}015$ | **$12{,}2$** | $36{,}22$ |
-| | **OpenClaw Minimal (15 Tools)** | $1263{,}9$ | $69{,}422$ | $85{,}5$ | $18{,}23$ |
-| | **OpenClaw Full 54-Tool (Ablation)** | $1652{,}9$ | $74{,}365$ | $85{,}8$ | $55{,}25$ |
-| | **PythonNative (CPython Reference)** | $3646{,}1$ | $1{,}094$ | $38{,}1$ | $28{,}88$ |
-| **W3 (Busca Vetorial / Vector RAG)** | **NeuralBaseline (Direct)** | $1708{,}4$ | $0{,}000$ | $0{,}0^*$ | $24{,}52$ |
-| | **PicoClaw (Go Native)** | $1766{,}7$ | $67{,}596$ | **$51{,}7$** | $25{,}90$ |
-| | **OpenClaw Minimal (15 Tools)** | $1990{,}1$ | $84{,}034$ | $117{,}0$ | $23{,}24$ |
-| | **OpenClaw Full 54-Tool (Ablation)** | $2611{,}7$ | $88{,}813$ | $117{,}7$ | $51{,}05$ |
-| | **PythonNative (CPython Reference)** | $1728{,}6$ | $43{,}701$ | $69{,}6$ | $22{,}69$ |
-| **W4 (Loop ReAct / 10-Turn ReAct)** | **NeuralBaseline (Direct)** | $8407{,}7$ | $0{,}000$ | $0{,}0^*$ | $70{,}48$ |
-| | **PicoClaw (Go Native)** | $8494{,}9$ | $92{,}302$ | **$16{,}7$** | $97{,}11$ |
-| | **OpenClaw Minimal (15 Tools)** | $8469{,}7$ | $133{,}708$ | $92{,}7$ | $71{,}07$ |
-| | **OpenClaw Full 54-Tool (Ablation)** | $11229{,}9$ | $179{,}786$ | $92{,}3$ | $107{,}75$ |
-| | **PythonNative (CPython Reference)** | $8485{,}6$ | $71{,}767$ | $38{,}2$ | $72{,}08$ |
+| **W1 (Reflexão / Simple Reflection)** | **NeuralBaseline (Direct)** | $5489{,}6$ | $0{,}000$ | $0{,}0^*$ | $93{,}78$ |
+| | **PicoClaw (Go Native)** | $5497{,}0$ | $29{,}728$ | **$11{,}2$** | $94{,}66$ |
+| | **OpenClaw Minimal (15 Tools)** | $5847{,}5$ | $51{,}283$ | $85{,}6$ | $100{,}13$ |
+| | **OpenClaw Full 54-Tool (Ablation)** | $20674{,}1$ | $66{,}441$ | $85{,}6$ | $350{,}96$ |
+| | **PythonNative (CPython Reference)** | $5485{,}6$ | $10{,}415$ | $38{,}2$ | $95{,}18$ |
+| **W2 (3 Ferramentas / 3-Tool Chain)** | **NeuralBaseline (Direct)** | $7014{,}5$ | $0{,}000$ | $0{,}0^*$ | $117{,}19$ |
+| | **PicoClaw (Go Native)** | $7510{,}5$ | $3{,}048$ | **$12{,}2$** | $125{,}38$ |
+| | **OpenClaw Minimal (15 Tools)** | $5551{,}6$ | $85{,}883$ | $85{,}7$ | $95{,}76$ |
+| | **OpenClaw Full 54-Tool (Ablation)** | $19758{,}8$ | $71{,}815$ | $85{,}7$ | $338{,}62$ |
+| | **PythonNative (CPython Reference)** | $7019{,}7$ | $1{,}071$ | $38{,}2$ | $118{,}41$ |
+| **W3 (Busca Vetorial / Vector RAG)** | **NeuralBaseline (Direct)** | $5752{,}9$ | $0{,}000$ | $0{,}0^*$ | $100{,}06$ |
+| | **PicoClaw (Go Native)** | $5816{,}9$ | $46{,}107$ | **$52{,}5$** | $100{,}15$ |
+| | **OpenClaw Minimal (15 Tools)** | $6343{,}5$ | $67{,}617$ | $114{,}3$ | $109{,}55$ |
+| | **OpenClaw Full 54-Tool (Ablation)** | $20786{,}4$ | $88{,}954$ | $112{,}7$ | $355{,}13$ |
+| | **PythonNative (CPython Reference)** | $5801{,}5$ | $21{,}646$ | $69{,}7$ | $100{,}89$ |
+| **W4 (Loop ReAct / 10-Turn ReAct)** | **NeuralBaseline (Direct)** | $55924{,}9$ | $0{,}000$ | $0{,}0^*$ | $941{,}28$ |
+| | **PicoClaw (Go Native)** | $55354{,}8$ | $66{,}028$ | **$16{,}6$** | $934{,}06$ |
+| | **OpenClaw Minimal (15 Tools)** | $58201{,}2$ | $143{,}357$ | $89{,}7$ | $979{,}81$ |
+| | **OpenClaw Full 54-Tool (Ablation)** | $201797{,}0$ | $199{,}328$ | $89{,}4$ | $3429{,}12$ |
+| | **PythonNative (CPython Reference)** | $55934{,}8$ | $64{,}718$ | $38{,}3$ | $944{,}27$ |
 
 $^*$*Nota sobre o Baseline Neural / Note on Neural Baseline:* O valor de **`0,0 MB` de Pico RAM RSS** no *Neural Baseline* refere-se estritamente à pegada de memória do processo orquestrador (inexistente na invocação HTTP direta via socket), excluindo o consumo de memória unificada (UMA) residente do daemon `llama-server` na GPU Metal. / The **`0.0 MB` Peak RAM RSS** for *Neural Baseline* refers strictly to the orchestrator process memory footprint (non-existent in direct HTTP socket calls), excluding the unified memory (UMA) footprint of the background `llama-server` Metal GPU daemon.
 
@@ -125,25 +125,25 @@ $^*$*Nota sobre o Baseline Neural / Note on Neural Baseline:* O valor de **`0,0 
 
 * **🇧🇷 PT-BR:**
   1. **Cold-Start Launch:** PicoClaw inicializa em **$9{,}63\text{ ms}$** vs. $225{,}55\text{ ms}$ do OpenClaw (**$23{,}4\times$ mais rápido**).
-  2. **Eficiência de Memória RAM e Silício:** O PicoClaw consome de **$11{,}2\text{ a }16{,}7\text{ MB}$** de RSS (média $22{,}95\text{ MB}$, pico físico $15{,}82\text{ MB}$), enquanto o OpenClaw consome de **$85{,}5\text{ a }117{,}0\text{ MB}$** (média $95{,}19\text{ MB}$, pico físico $45{,}88\text{ MB}$), reduzindo em **$4{,}15\times\text{ a }7{,}62\times$** a contenção no barramento compartilhado LPDDR5X (120 GB/s UMA).
-  3. **Eficiência de Instruções e Ciclos:** Medições via `libproc` comprovam que o PicoClaw executa $244{,}2\times 10^6$ instruções e $83{,}8\times 10^6$ ciclos, contra $923{,}8\times 10^6$ instruções ($3{,}78\times$ mais) e $378{,}2\times 10^6$ ciclos ($4{,}51\times$ mais) no OpenClaw Minimal.
-  4. **Escalabilidade em Loops Longos (W4) e Dominância Estocástica:** No ciclo autônomo ReAct de 10 passos, o PicoClaw completou a tarefa com $8494{,}9\text{ ms}$ de mediana e $\text{EDP} = 827{,}50\text{ J}\cdot\text{s}$, alcançando **$50{,}98\%$ menor Energy-Delay Product** e dominância estocástica completa sobre o OpenClaw Full ($d = -1{,}0$, $\hat{A}_{12} = 0{,}0$, $p < 10^{-5}$).
-  5. **Estudo de Ablação (Prompt Bloat):** A injeção de 54 ferramentas corporativas no OpenClaw Full eleva o tempo médio de W1 de $1415{,}9\text{ ms}$ para $6604{,}1\text{ ms}$ e a energia de $22{,}33\text{ J}$ para $58{,}81\text{ J}$ ($2{,}63\times$).
-  6. **Dinâmica de Geração de Tokens em W2 e Eficiência Normalizada ($J/\text{token}$):** No Workload W2 (3-Tool Chain), a menor latência de tarefa total observada no OpenClaw Minimal ($1263{,}9\text{ ms}$, $18{,}23\text{ J}$) decorre da geração autoregressiva de apenas 16 tokens pelo LLaMA-3.2-3B frente a 18 tokens no PicoClaw ($3471{,}8\text{ ms}$, $36{,}22\text{ J}$). Contudo, o isolamento microarquitetural confirma a superioridade do runtime Go: overhead de orquestração $T_{\text{orch}}$ mediano de apenas **$2{,}72\text{ ms}$** no PicoClaw contra **$64{,}72\text{ ms}$** no OpenClaw Minimal (**$23\times$ menor atraso de orquestração**), além de **$12{,}17\text{ MB}$** de RSS contra **$85{,}52\text{ MB}$** ($7{,}0\times$ menor consumo de memória). As métricas normalizadas ($1{,}14\text{ J/token}$ vs. $2{,}01\text{ J/token}$) confirmam que a discrepância na duração total é fruto da extensão da resposta gerada pelo modelo neural e não de overhead de runtime.
+  2. **Eficiência de Memória RAM e Silício:** O PicoClaw consome de **$11{,}2\text{ a }16{,}6\text{ MB}$** de RSS (subindo para $52{,}5\text{ MB}$ no W3, média global $23{,}15\text{ MB}$, pico físico $16{,}05\text{ MB}$), enquanto o OpenClaw consome de **$85{,}6\text{ a }114{,}3\text{ MB}$** (média global $93{,}82\text{ MB}$, pico físico $45{,}27\text{ MB}$), reduzindo em **$7{,}04\times\text{ a }7{,}61\times$** a contenção no barramento compartilhado LPDDR5X (120 GB/s UMA; pico físico $2{,}82\times$ menor).
+  3. **Eficiência de Instruções e Ciclos:** Medições via `libproc` comprovam que o PicoClaw executa $245{,}0\times 10^6$ instruções e $85{,}6\times 10^6$ ciclos, contra $938{,}5\times 10^6$ instruções ($3{,}83\times$ mais) e $396{,}9\times 10^6$ ciclos ($4{,}64\times$ mais) no OpenClaw Minimal.
+  4. **Escalabilidade em Loops Longos (W4) e Dominância Estocástica:** No ciclo autônomo ReAct de 10 passos, o PicoClaw completou a tarefa com $55354{,}8\text{ ms}$ de mediana e $\text{EDP} = 51723{,}07\text{ J}\cdot\text{s}$, alcançando **$92{,}52\%$ menor Energy-Delay Product** e dominância estocástica completa sobre o OpenClaw Full ($d = -1{,}0$, $\hat{A}_{12} = 0{,}0$, $p < 10^{-5}$).
+  5. **Estudo de Ablação (Prompt Bloat):** A injeção de 54 ferramentas corporativas no OpenClaw Full eleva o tempo médio de W1 de $5852{,}6\text{ ms}$ para $20682{,}7\text{ ms}$ e a energia de $100{,}13\text{ J}$ para $350{,}96\text{ J}$ ($3{,}50\times$).
+  6. **Dinâmica de Geração de Tokens em W2 e Eficiência Normalizada ($J/\text{token}$):** No Workload W2 (3-Tool Chain), a menor latência de tarefa total observada no OpenClaw Minimal ($5551{,}6\text{ ms}$, $95{,}76\text{ J}$) decorre da geração autoregressiva de 29 tokens pelo LLaMA-3.2-3B frente a 18 tokens no PicoClaw ($7510{,}5\text{ ms}$, $125{,}38\text{ J}$). Contudo, o isolamento microarquitetural confirma a superioridade do runtime Go: overhead de orquestração $T_{\text{orch}}$ mediano de apenas **$3{,}05\text{ ms}$** no PicoClaw contra **$85{,}88\text{ ms}$** no OpenClaw Minimal (**$28\times$ menor atraso de orquestração**), além de **$12{,}16\text{ MB}$** de RSS contra **$85{,}65\text{ MB}$** ($7{,}0\times$ menor consumo de memória). As métricas normalizadas ($3{,}30\text{ J/token}$ vs. $6{,}97\text{ J/token}$) confirmam que a discrepância na duração total é fruto da extensão da resposta gerada pelo modelo neural e não de overhead de runtime.
 
 * **🇺🇸 EN-US:**
   1. **Cold-Start Launch:** PicoClaw cold-starts in **$9.63\text{ ms}$** vs. $225.55\text{ ms}$ for OpenClaw (**$23.4\times$ faster**).
-  2. **RAM & Silicon Efficiency:** PicoClaw consumes between **$11.2\text{ and }16.7\text{ MB}$** RSS (average $22.95\text{ MB}$, peak physical $15.82\text{ MB}$), whereas OpenClaw demands **$85.5\text{ to }117.0\text{ MB}$** (average $95.19\text{ MB}$, peak physical $45.88\text{ MB}$), delivering a **$4.15\times\text{ to }7.62\times$** reduction in LPDDR5X UMA bus contention.
-  3. **Instruction & Cycle Efficiency:** Darwin `libproc` counters reveal PicoClaw retires $244.2\times 10^6$ instructions and $83.8\times 10^6$ cycles, compared to $923.8\times 10^6$ instructions ($3.78\times$ higher) and $378.2\times 10^6$ cycles ($4.51\times$ higher) in OpenClaw Minimal.
-  4. **Long ReAct Loops Scalability (W4) & Stochastic Dominance:** In the 10-turn autonomous ReAct loop, PicoClaw finished with $8494.9\text{ ms}$ median and $\text{EDP} = 827.50\text{ J}\cdot\text{s}$, achieving **$50.98\%$ lower Energy-Delay Product** with complete stochastic dominance over OpenClaw Full ($d = -1.0$, $\hat{A}_{12} = 0.0$, $p < 10^{-5}$).
-  5. **Ablation Findings (Prompt Bloat):** Dynamic schema injection of 54 corporate tools in OpenClaw Full increases W1 mean latency from $1415.9\text{ ms}$ to $6604.1\text{ ms}$ and mean energy from $22.33\text{ J}$ to $58.81\text{ J}$ ($2.63\times$).
-  6. **W2 Token Generation Dynamics & Normalized Efficiency ($J/\text{token}$):** In Workload W2 (3-Tool Chain), OpenClaw Minimal's lower total task latency ($1263.9\text{ ms}$, $18.23\text{ J}$) is driven by the LLaMA-3.2-3B model emitting only 16 output tokens vs. 18 tokens for PicoClaw ($3471.8\text{ ms}$, $36.22\text{ J}$). However, microarchitectural isolation proves compiled Go runtime superiority: PicoClaw incurs a median orchestration delay $T_{\text{orch}}$ of only **$2.72\text{ ms}$** vs. **$64.72\text{ ms}$** for OpenClaw Minimal (**$23\times$ lower orchestration overhead**), alongside **$12.17\text{ MB}$** RSS vs. **$85.52\text{ MB}$** ($7.0\times$ lower memory footprint). Token-normalized energy ($1.14\text{ J/token}$ vs. $2.01\text{ J/token}$) validates that total task duration variance stems from autoregressive token decoding dynamics rather than orchestrator inefficiency.
+  2. **RAM & Silicon Efficiency:** PicoClaw consumes between **$11.2\text{ and }16.6\text{ MB}$** RSS (rising to $52.5\text{ MB}$ in W3, average $23.15\text{ MB}$, peak physical $16.05\text{ MB}$), whereas OpenClaw demands **$85.6\text{ to }114.3\text{ MB}$** (average $93.82\text{ MB}$, peak physical $45.27\text{ MB}$), delivering a **$7.04\times\text{ to }7.61\times$** reduction in LPDDR5X UMA bus contention ($2.82\times$ leaner physical peak footprint).
+  3. **Instruction & Cycle Efficiency:** Darwin `libproc` counters reveal PicoClaw retires $245.0\times 10^6$ instructions and $85.6\times 10^6$ cycles, compared to $938.5\times 10^6$ instructions ($3.83\times$ higher) and $396.9\times 10^6$ cycles ($4.64\times$ higher) in OpenClaw Minimal.
+  4. **Long ReAct Loops Scalability (W4) & Stochastic Dominance:** In the 10-turn autonomous ReAct loop, PicoClaw finished with $55354.8\text{ ms}$ median and $\text{EDP} = 51723.07\text{ J}\cdot\text{s}$, achieving **$92.52\%$ lower Energy-Delay Product** with complete stochastic dominance over OpenClaw Full ($d = -1.0$, $\hat{A}_{12} = 0.0$, $p < 10^{-5}$).
+  5. **Ablation Findings (Prompt Bloat):** Dynamic schema injection of 54 corporate tools in OpenClaw Full increases W1 mean latency from $5852.6\text{ ms}$ to $20682.7\text{ ms}$ and mean energy from $100.13\text{ J}$ to $350.96\text{ J}$ ($3.50\times$).
+  6. **W2 Token Generation Dynamics & Normalized Efficiency ($J/\text{token}$):** In Workload W2 (3-Tool Chain), OpenClaw Minimal's lower total task latency ($5551.6\text{ ms}$, $95.76\text{ J}$) is driven by the LLaMA-3.2-3B model emitting 29 output tokens vs. 18 tokens for PicoClaw ($7510.5\text{ ms}$, $125.38\text{ J}$). However, microarchitectural isolation proves compiled Go runtime superiority: PicoClaw incurs a median orchestration delay $T_{\text{orch}}$ of only **$3.05\text{ ms}$** vs. **$85.88\text{ ms}$** for OpenClaw Minimal (**$28\times$ lower orchestration overhead**), alongside **$12.16\text{ MB}$** RSS vs. **$85.65\text{ MB}$** ($7.0\times$ lower memory footprint). Token-normalized energy ($3.30\text{ J/token}$ vs. $6.97\text{ J/token}$) validates that total task duration variance stems from autoregressive token decoding dynamics rather than orchestrator inefficiency.
 
 ---
 
 ## 🛠️ Guia Didático e Provas de Execução / Beginner's Walkthrough
 
-Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tutorial de 3 minutos e todos os **7 passos com evidências reais de terminal no Apple Silicon M4**, consulte o guia dedicado:
+Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tutorial de 3 minutos e todos os **8 passos com evidências reais de terminal no Apple Silicon M4**, consulte o guia dedicado:
 
 👉 **[Acessar o Guia Didático e Logs em `tutorial/README.md`](tutorial/README.md)**
 
@@ -153,9 +153,10 @@ Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tut
 | **Passo 2** | Inspeção física dos datasets determinísticos em `data/workload_data/`. |
 | **Passo 3** | Execução ao vivo dos traces W1 a W4 com cálculo de $\Delta\text{RSS}$ e latência. |
 | **Passo 4** | Medição estatística de cold-start via `hyperfine` com vantagem de $23{,}4\times$ para o Go. |
-| **Passo 5** | Motor estatístico de Poisson com limites de Garwood e assertividade $\ge 90{,}3\%$. |
-| **Passo 6** | Leitura dos shunts elétricos do chip M4 via Apple SMC (`powermetrics`). |
-| **Passo 7** | Protocolo de quiescência operacional do macOS (`caffeinate -dims`). |
+| **Passo 5** | Verificação de integridade criptográfica SHA-256 de todos os 176 arquivos (`make verify`). |
+| **Passo 6** | Modo Dry-Run portátil de validação completa do pipeline (`make dry-run`). |
+| **Passo 7** | Leitura dos shunts elétricos do chip M4 via Apple SMC (`powermetrics -i 50`). |
+| **Passo 8** | Protocolo de quiescência operacional do macOS (`caffeinate -dims`). |
 
 ---
 

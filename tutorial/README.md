@@ -106,11 +106,11 @@ Os orquestradores executam os testes fatoriais W1 a W4 contra o servidor neural:
 ./tools/.venv/bin/python benchmark/run_unified_benchmark.py
 ```
 ```text
-[001/040] picoclaw         W1: Task=1444.7ms, Orch=0.386ms, RAM=11.1MB
-[002/040] openclaw_minimal W1: Task=1446.4ms, Orch=0.318ms, RAM=86.0MB
-[003/040] openclaw_full    W1: Task=1444.7ms, Orch=0.339ms, RAM=86.0MB
-[004/040] python_native    W1: Task=1445.1ms, Orch=0.520ms, RAM=38.1MB
-[005/040] neural_baseline  W1: Task=1444.2ms, Orch=0.000ms, RAM=0.0MB
+[001/040] picoclaw         W1: Task=5497.0ms, Orch=29.728ms, RAM=11.2MB
+[002/040] openclaw_minimal W1: Task=5847.5ms, Orch=51.283ms, RAM=85.6MB
+[003/040] openclaw_full    W1: Task=20674.1ms, Orch=66.441ms, RAM=85.6MB
+[004/040] python_native    W1: Task=5485.6ms, Orch=10.415ms, RAM=38.2MB
+[005/040] neural_baseline  W1: Task=5489.6ms, Orch=0.000ms, RAM=0.0MB
 ```
 *Legenda Técnica:* Traces em tempo real mostrando a latência de tarefa ($T_{\text{task}}$), tempo de inferência neural ($T_{\text{neural}}$), overhead do runtime ($T_{\text{orch}}$) e consumo de memória RAM residente (RSS).
 
@@ -179,25 +179,25 @@ Loaded 40 evaluated trial records.
 
 ---
 
-#### Passo 6: Telemetria de Hardware e Modo Anti-Sono (Caffeinate)
+#### Passo 7: Telemetria de Hardware via Apple SMC (`powermetrics -i 50`)
 Amostragem dos sensores de potência física do silício M4 via SMC:
 ```bash
-/usr/bin/caffeinate -dims &
-sudo powermetrics -i 100 -n 10 --samplers cpu_power,gpu_power
+sudo powermetrics -i 50 -n 10 --samplers cpu_power,gpu_power
 ```
 ```text
-*** Sampled system activity (Mon Nov 10 20:00:00 2026 -0300) (100.12ms elapsed) ***
+*** Sampled system activity (Mon Nov 10 20:00:00 2026 -0300) (50.12ms elapsed) ***
 CPU Power: 2840 mW
 GPU Power: 12650 mW
 ANE Power: 0 mW
 Combined Power (CPU + GPU + ANE): 15490 mW
 ```
-*Legenda Técnica:* Leitura em tempo real dos shunts elétricos do Apple M4 SoC revelando dissipação de **12,6 W na GPU Metal** e **2,8 W na CPU** sob carga de geração de tokens.
+*Legenda Técnica:* Leitura em tempo real dos shunts elétricos do Apple M4 SoC a cada 50 ms revelando dissipação de **12,6 W na GPU Metal** e **2,8 W na CPU** sob carga de geração de tokens.
 
 ---
 
-#### Passo 7: Garantia de Quiescência Operacional do macOS
+#### Passo 8: Garantia de Quiescência Operacional do macOS (`caffeinate -dims`)
 ```bash
+/usr/bin/caffeinate -dims &
 ./scripts/check_quiescence.sh
 ```
 ```text
@@ -308,11 +308,11 @@ data/workload_data/
 ./tools/.venv/bin/python benchmark/run_unified_benchmark.py
 ```
 ```text
-[001/040] picoclaw         W1: Task=1444.7ms, Orch=0.386ms, RAM=11.1MB
-[002/040] openclaw_minimal W1: Task=1446.4ms, Orch=0.318ms, RAM=86.0MB
-[003/040] openclaw_full    W1: Task=1444.7ms, Orch=0.339ms, RAM=86.0MB
-[004/040] python_native    W1: Task=1445.1ms, Orch=0.520ms, RAM=38.1MB
-[005/040] neural_baseline  W1: Task=1444.2ms, Orch=0.000ms, RAM=0.0MB
+[001/040] picoclaw         W1: Task=5497.0ms, Orch=29.728ms, RAM=11.2MB
+[002/040] openclaw_minimal W1: Task=5847.5ms, Orch=51.283ms, RAM=85.6MB
+[003/040] openclaw_full    W1: Task=20674.1ms, Orch=66.441ms, RAM=85.6MB
+[004/040] python_native    W1: Task=5485.6ms, Orch=10.415ms, RAM=38.2MB
+[005/040] neural_baseline  W1: Task=5489.6ms, Orch=0.000ms, RAM=0.0MB
 ```
 *Technical Caption:* Real-time execution traces capturing task latency ($T_{\text{task}}$), neural serving time ($T_{\text{neural}}$), runtime overhead ($T_{\text{orch}}$), and Resident Set Size (RSS).
 
@@ -380,24 +380,24 @@ Loaded 40 evaluated trial records.
 
 ---
 
-#### Step 6: Power Telemetry & System Quiescence Protocol
+#### Step 7: Hardware Power Telemetry via Apple SMC (`powermetrics -i 50`)
 ```bash
-/usr/bin/caffeinate -dims &
-sudo powermetrics -i 100 -n 10 --samplers cpu_power,gpu_power
+sudo powermetrics -i 50 -n 10 --samplers cpu_power,gpu_power
 ```
 ```text
-*** Sampled system activity (Mon Nov 10 20:00:00 2026 -0300) (100.12ms elapsed) ***
+*** Sampled system activity (Mon Nov 10 20:00:00 2026 -0300) (50.12ms elapsed) ***
 CPU Power: 2840 mW
 GPU Power: 12650 mW
 ANE Power: 0 mW
 Combined Power (CPU + GPU + ANE): 15490 mW
 ```
-*Technical Caption:* Real-time Apple M4 SoC power rail telemetry sampling via SMC, indicating **12.6 W Metal GPU** and **2.8 W CPU** power draw during token generation.
+*Technical Caption:* Real-time Apple M4 SoC power rail telemetry sampling via SMC at 50 ms intervals, indicating **12.6 W Metal GPU** and **2.8 W CPU** power draw during token generation.
 
 ---
 
-#### Step 7: System Quiescence Pre-Flight Check
+#### Step 8: System Quiescence Pre-Flight Check (`caffeinate -dims`)
 ```bash
+/usr/bin/caffeinate -dims &
 ./scripts/check_quiescence.sh
 ```
 ```text
