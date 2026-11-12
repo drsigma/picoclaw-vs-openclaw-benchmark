@@ -120,7 +120,7 @@
   "figures/fig8_three_campaigns_reproducibility.png": "c74f1d7aa8de95b2ad1533fe178ded76a134695246200d1649c7cb1e20a3afba",
   "paper/COVER_LETTER.md": "a42177fb8261b16199c4653ec89a3809a33edeed513215118370ac2a9a559d44",
   "paper/HIGHLIGHTS.md": "ae43c79d7840d8c7658f5caf34bd9e5c6ce90745aa0faecf68d7774b8c243c49",
-  "paper/softwarex_manuscript.tex": "498ea204bf479f31c832cbd2fa34c634136e469359bbd3e02c505a8d4695b788",
+  "paper/softwarex_manuscript.tex": "13f36bfac8e2743a58ec35567c905d3cb5e4f835c86a8809b0176f5eb52adb3f",
   "pyproject.toml": "968c81a365bf5b593749ba710f8a42918045462c763f7717bed4584bd8efc9cd",
   "references.bib": "c9579c69b553cde06ec8513c520a008cba2630211e28b8614c439efb3aba2172",
   "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx": "588fc20fba5098d0c2e45aaf5a5582d6a44b29a4021de8801e2957e349323b12",
@@ -174,5 +174,5 @@
   "tests/test_dataset_generator.py": "66a08eaed0f641aaad41aadfbcd241aa09a157549884fdf6dfe89f914dae5bf9",
   "tests/test_statistical_engine.py": "357fb87f55273026224efc79a446fa2c25edaca8ddc133a7fc7544e6bb832e74",
   "tests/test_telemetry_parser.py": "ea835745da8b243370f60f7a36a8a87290fda156768e1328381bb7d8f79e1b2d",
-  "tutorial/README.md": "3904438a02226cb6b733d13bbe0323b9fea8d2ef76efd27be3b462873bb3d1f1"
+  "tutorial/README.md": "c70d3e8cce16e77a2612bf7329363c5b8435f5e37f1eba94b66338936d944e90"
 }
