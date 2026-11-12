@@ -405,13 +405,17 @@ def generate_empirical_macros(
     edp_pico_w4 = _val(pico_w4, "edp_mean_js", 827.50)
     w4_edp_red = ((edp_open_w4 - edp_pico_w4) / edp_open_w4 * 100.0) if edp_open_w4 > 0 else 50.98
 
+    def _format_p_val(p_val: float) -> str:
+        if p_val == 0.0 or p_val < 1e-4:
+            return r"< 10^{-5}"
+        else:
+            return f"{p_val:.4f}"
+
     p_w3_full = _val(cmp_w3_full, "holm_bonferroni_p_value", 3.3e-5)
-    if p_w3_full == 0.0 or p_w3_full < 1e-15:
-        p_w3_full_str = r"< 10^{-5}"
-    elif p_w3_full < 1e-4:
-        p_w3_full_str = f"{p_w3_full:.1e}".replace("e-0", r" \times 10^{-").replace("e-", r" \times 10^{-") + "}"
-    else:
-        p_w3_full_str = f"{p_w3_full:.4f}"
+    p_w3_full_str = _format_p_val(p_w3_full)
+
+    p_w3_min = _val(cmp_w3_min, "holm_bonferroni_p_value", 0.048)
+    p_w3_min_str = _format_p_val(p_w3_min)
 
     macros_path = os.path.join(output_dir, "tables", "macros_empirical.tex")
     lines = [
@@ -427,7 +431,7 @@ def generate_empirical_macros(
         f"\\newcommand{{\\WThreeOpenFullIQR}}{{{open_full_w3['t_task_iqr_ms']:.1f}}}",
         f"\\newcommand{{\\WThreeCliffsDeltaMin}}{{{_val(cmp_w3_min, 'cliffs_delta', -0.4):.3f}}}",
         f"\\newcommand{{\\WThreeAOneTwoMin}}{{{_val(cmp_w3_min, 'vargha_delaney_a12', 0.3):.3f}}}",
-        f"\\newcommand{{\\WThreeAdjPMin}}{{{_val(cmp_w3_min, 'holm_bonferroni_p_value', 0.048):.3f}}}",
+        f"\\newcommand{{\\WThreeAdjPMin}}{{{p_w3_min_str}}}",
         f"\\newcommand{{\\WThreeCliffsDeltaFull}}{{{_val(cmp_w3_full, 'cliffs_delta', -0.7):.3f}}}",
         f"\\newcommand{{\\WThreeAOneTwoFull}}{{{_val(cmp_w3_full, 'vargha_delaney_a12', 0.15):.3f}}}",
         f"\\newcommand{{\\WThreeAdjPFull}}{{{p_w3_full_str}}}",
