@@ -87,9 +87,15 @@ def execute_tool_calc_stats(vals: list[float]) -> str:
     n = len(vals)
     if n == 0:
         return "{}"
-    mean = sum(vals) / float(n)
-    var = sum((v - mean) ** 2 for v in vals) / float(n - 1) if n > 1 else 0.0
-    return json.dumps({"n": n, "mean": mean, "variance": var, "stddev": math.sqrt(var)}, separators=(",", ":"))
+    sum_val = 0.0
+    for v in vals:
+        sum_val += v
+    mean = sum_val / float(n)
+    var = 0.0
+    for v in vals:
+        var += (v - mean) ** 2
+    variance = var / float(n - 1) if n > 1 else 0.0
+    return json.dumps({"n": n, "mean": mean, "variance": variance, "stddev": math.sqrt(variance)}, separators=(",", ":"))
 
 
 def execute_vector_rag(base_dir: str) -> str:

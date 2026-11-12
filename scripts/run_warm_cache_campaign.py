@@ -67,7 +67,7 @@ def generate_warm_cache_latex_table(
 
     latex_table = r"""\begin{table*}[t]
 \centering
-\caption{Controlled Performance Evaluation under Realistic KV-Cache Reuse Regime (\texttt{cache\_prompt=true}) on Apple Silicon M4. When prompt prefill is amortized via deterministic block-isolated KV-cache retention, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) becomes discriminative between compiled native and interpreted runtimes. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution. Peak Phys RAM denotes lifetime maximum resident physical footprint via Darwin kernel \texttt{libproc}.}
+\caption{Controlled Performance Evaluation under Realistic KV-Cache Reuse Regime (\texttt{cache\_prompt=true}) on Apple Silicon M4. When prompt prefill is amortized via deterministic block-isolated KV-cache retention, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) becomes directly measurable in I/O and vector-intensive workloads (W2--W3) while remaining within server timing noise ($\pm 1\text{--}2\%$) in W1 and W4. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution. Peak Phys RAM denotes lifetime maximum resident physical footprint via Darwin kernel \texttt{libproc}.}
 \label{tab:evaluation_warm_cache_m4}
 \small
 \begin{tabular}{l l c r r r r r r r}

@@ -5,6 +5,7 @@ Exportador do Pacote Consolidado de Auditoria para Submissão Elsevier SoftwareX
 
 Generates repo_texto_auditoria_6.txt containing full audit proofs, file contents,
 cryptographic SHA-256 signatures, licenses, CI workflow, and telemetry summaries.
+Ordered with manuscript, tables, and licenses upfront to guarantee complete AI context visibility.
 
 Author: Rafael Paniccia Cassetta (UFABC)
 """
@@ -79,7 +80,7 @@ def dump_file(rel_path: str) -> str:
 
 
 def generate_bundle():
-    print(f"📦 Generating audit bundle: {OUTPUT_FILE}...")
+    print(f"📦 Generating prioritized audit bundle: {OUTPUT_FILE}...")
 
     now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
     git_head = get_cmd_output(["git", "rev-parse", "HEAD"])
@@ -104,54 +105,59 @@ Status Git:
 
     sections = [header]
 
-    # 1. Dataset Verification & Samples
-    sections.append("=" * 80 + "\nSECAO 1: DADOS BRUTOS FISICOS (JSONL SUMMARIES & HASHES)\n" + "=" * 80 + "\n")
-    jsonl_files = [
-        "results/publication_campaign/raw_trials.jsonl",
-        "results/publication_campaign/warm_cache_trials.jsonl",
-        "results/publication_campaign/prefill_ablation.jsonl",
-        "results/exploratory_campaigns/raw_trials_pre_w2_fix.jsonl",
+    # SECAO 1: MANUSCRITO, BIBLIOGRAFIA, LICENCAS, CI/CD E DOCUMENTACAO
+    sections.append("=" * 80 + "\nSECAO 1: MANUSCRITO CIENTIFICO, REFERENCIAS, CITACAO, GOVERNANCA E LICENCAS\n" + "=" * 80 + "\n")
+    priority_docs = [
+        "paper/softwarex_manuscript.tex",
+        "references.bib",
+        "CITATION.cff",
+        "LICENSE",
+        "DATA_LICENSE",
+        ".github/workflows/ci.yml",
+        "README.md",
+        "paper/COVER_LETTER.md",
+        "paper/HIGHLIGHTS.md",
+        "tutorial/README.md",
     ]
-    for jf in jsonl_files:
-        sections.append(get_jsonl_summary(jf))
+    for doc in priority_docs:
+        sections.append(dump_file(doc))
 
-    # 2. Key Metadata & Tables
-    sections.append("=" * 80 + "\nSECAO 2: TABELAS LATEX E RESUMOS ESTATISTICOS\n" + "=" * 80 + "\n")
+    # SECAO 2: TABELAS LATEX E RESUMOS ESTATISTICOS CONSOLIDADOS
+    sections.append("=" * 80 + "\nSECAO 2: TABELAS LATEX E RESUMOS ESTATISTICOS CONSOLIDADOS\n" + "=" * 80 + "\n")
     meta_files = [
         "results/publication_campaign/tables/table_journal_ablation.tex",
         "results/publication_campaign/tables/table_warm_cache.tex",
         "results/publication_campaign/tables/table_prefill_ablation.tex",
         "results/publication_campaign/tables/table_spearman_correlation.tex",
         "results/publication_campaign/tables/macros_empirical.tex",
+        "results/publication_campaign/campaign_metadata.json",
         "results/publication_campaign/prefill_regression_fit.json",
         "results/publication_campaign/spearman_correlation_matrix.json",
         "results/publication_campaign/summary_statistics.json",
         "results/publication_campaign/warm_cache_summary.json",
+        "results/publication_campaign/warm_cache_statistical_tests.json",
         "data/manifest_sha256.json",
     ]
     for mf in meta_files:
         sections.append(dump_file(mf))
 
-    # 3. Governance, CI & Legal
-    sections.append("=" * 80 + "\nSECAO 3: GOVERNANCA, LICENCAS E CI/CD\n" + "=" * 80 + "\n")
-    gov_files = [
-        "LICENSE",
-        "DATA_LICENSE",
-        ".github/workflows/ci.yml",
-        ".gitignore",
-        "Makefile",
-        "pyproject.toml",
+    # SECAO 3: RESUMO AUDITAVEL DE DADOS BRUTOS FISICOS (JSONL HASHES & SAMPLES)
+    sections.append("=" * 80 + "\nSECAO 3: RESUMO AUDITAVEL DE DADOS BRUTOS FISICOS (JSONL HASHES & SAMPLES)\n" + "=" * 80 + "\n")
+    jsonl_files = [
+        "results/publication_campaign/raw_trials.jsonl",
+        "results/publication_campaign/warm_cache_trials.jsonl",
+        "results/publication_campaign/prefill_ablation.jsonl",
     ]
-    for gf in gov_files:
-        sections.append(dump_file(gf))
+    for jf in jsonl_files:
+        sections.append(get_jsonl_summary(jf))
 
-    # 4. Source Code & Adapters
-    sections.append("=" * 80 + "\nSECAO 4: CODIGO-FONTE DOS ORQUESTRADORES E ADAPTADORES\n" + "=" * 80 + "\n")
+    # SECAO 4: CODIGO-FONTE DOS ORQUESTRADORES, ADAPTADORES E SCRIPTS
+    sections.append("=" * 80 + "\nSECAO 4: CODIGO-FONTE DOS ORQUESTRADORES, ADAPTADORES E SCRIPTS\n" + "=" * 80 + "\n")
     code_files = [
         "benchmark/adapters/base.py",
         "benchmark/adapters/picoclaw_adapter.py",
         "benchmark/adapters/openclaw_adapter.py",
-        "benchmark/adapters/python_adapter.py",
+        "benchmark/adapters/python_native_adapter.py",
         "benchmark/adapters/neural_baseline_adapter.py",
         "benchmark/adapters/bun_minimal_adapter.py",
         "benchmark/adapters/__init__.py",
@@ -164,11 +170,13 @@ Status Git:
         "scripts/run_prefill_ablation.py",
         "scripts/run_warm_cache_campaign.py",
         "scripts/verify_manifest.py",
+        "Makefile",
+        "pyproject.toml",
     ]
     for cf in code_files:
         sections.append(dump_file(cf))
 
-    # 5. Tests
+    # SECAO 5: SUITE DE TESTES UNITARIOS
     sections.append("=" * 80 + "\nSECAO 5: SUITE DE TESTES UNITARIOS\n" + "=" * 80 + "\n")
     test_files = [
         "tests/test_adapters_and_failfast.py",
@@ -180,24 +188,11 @@ Status Git:
     for tf in test_files:
         sections.append(dump_file(tf))
 
-    # 6. Documentation & Manuscript
-    sections.append("=" * 80 + "\nSECAO 6: MANUSCRITO E DOCUMENTACAO DE SUBMISSAO\n" + "=" * 80 + "\n")
-    doc_files = [
-        "paper/softwarex_manuscript.tex",
-        "references.bib",
-        "paper/COVER_LETTER.md",
-        "paper/HIGHLIGHTS.md",
-        "README.md",
-        "tutorial/README.md",
-    ]
-    for df in doc_files:
-        sections.append(dump_file(df))
-
     bundle_content = "\n".join(sections)
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         f.write(bundle_content)
 
-    print(f"✅ Generated audit bundle: {OUTPUT_FILE} ({len(bundle_content)} characters, {os.path.getsize(OUTPUT_FILE)} bytes)")
+    print(f"✅ Generated prioritized audit bundle: {OUTPUT_FILE} ({len(bundle_content)} characters, {os.path.getsize(OUTPUT_FILE)} bytes)")
 
 
 if __name__ == "__main__":

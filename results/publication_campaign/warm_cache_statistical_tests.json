@@ -11,7 +11,7 @@
       1030.99,
       1037.22
     ],
-    "holm_bonferroni_p_value": 0.528652
+    "holm_bonferroni_p_value": 0.520145
   },
   "picoclaw_vs_openclaw_full_W1": {
     "workload": "W1",
@@ -39,7 +39,7 @@
       1021.42,
       1028.42
     ],
-    "holm_bonferroni_p_value": 0.029803
+    "holm_bonferroni_p_value": 0.023842
   },
   "picoclaw_vs_neural_baseline_W1": {
     "workload": "W1",
@@ -53,7 +53,7 @@
       1033.27,
       1037.824
     ],
-    "holm_bonferroni_p_value": 0.263131
+    "holm_bonferroni_p_value": 0.175421
   },
   "picoclaw_vs_openclaw_minimal_W2": {
     "workload": "W2",
@@ -87,29 +87,29 @@
     "workload": "W2",
     "reference": "picoclaw",
     "comparison": "python_native",
-    "mann_whitney_u": 284.0,
-    "raw_p_value": 0.014409465063790514,
-    "cliffs_delta": 0.3689,
-    "vargha_delaney_a12": 0.6844,
+    "mann_whitney_u": 119.0,
+    "raw_p_value": 1.0273791393288757e-06,
+    "cliffs_delta": 0.7356,
+    "vargha_delaney_a12": 0.8678,
     "bootstrap_ci_95": [
-      726.465,
-      731.64
+      736.095,
+      745.11
     ],
-    "holm_bonferroni_p_value": 0.057638
+    "holm_bonferroni_p_value": 6e-06
   },
   "picoclaw_vs_neural_baseline_W2": {
     "workload": "W2",
     "reference": "picoclaw",
     "comparison": "neural_baseline",
-    "mann_whitney_u": 670.0,
-    "raw_p_value": 0.0011737583520143354,
-    "cliffs_delta": -0.4889,
-    "vargha_delaney_a12": 0.2556,
+    "mann_whitney_u": 267.0,
+    "raw_p_value": 0.006972441494570254,
+    "cliffs_delta": 0.4067,
+    "vargha_delaney_a12": 0.7033,
     "bootstrap_ci_95": [
-      719.695,
-      724.76
+      727.765,
+      735.59
     ],
-    "holm_bonferroni_p_value": 0.007043
+    "holm_bonferroni_p_value": 0.023842
   },
   "picoclaw_vs_openclaw_minimal_W3": {
     "workload": "W3",
@@ -123,7 +123,7 @@
       757.885,
       764.165
     ],
-    "holm_bonferroni_p_value": 0.000325
+    "holm_bonferroni_p_value": 0.000232
   },
   "picoclaw_vs_openclaw_full_W3": {
     "workload": "W3",
@@ -199,28 +199,28 @@
     "workload": "W4",
     "reference": "picoclaw",
     "comparison": "python_native",
-    "mann_whitney_u": 819.0,
-    "raw_p_value": 5.0921962234840314e-08,
-    "cliffs_delta": -0.82,
-    "vargha_delaney_a12": 0.09,
+    "mann_whitney_u": 103.0,
+    "raw_p_value": 3.0102616021326525e-07,
+    "cliffs_delta": 0.7711,
+    "vargha_delaney_a12": 0.8856,
     "bootstrap_ci_95": [
-      8234.24,
-      8265.94
+      8413.305,
+      8500.78
     ],
-    "holm_bonferroni_p_value": 0.0
+    "holm_bonferroni_p_value": 2e-06
   },
   "picoclaw_vs_neural_baseline_W4": {
     "workload": "W4",
     "reference": "picoclaw",
     "comparison": "neural_baseline",
-    "mann_whitney_u": 374.0,
-    "raw_p_value": 0.26432621279678536,
-    "cliffs_delta": 0.1689,
-    "vargha_delaney_a12": 0.5844,
+    "mann_whitney_u": 1.0,
+    "raw_p_value": 3.3383888204288e-11,
+    "cliffs_delta": 0.9978,
+    "vargha_delaney_a12": 0.9989,
     "bootstrap_ci_95": [
-      8301.9239,
-      8427.645
+      8468.589,
+      8509.29
     ],
-    "holm_bonferroni_p_value": 0.528652
+    "holm_bonferroni_p_value": 0.0
   }
 }
