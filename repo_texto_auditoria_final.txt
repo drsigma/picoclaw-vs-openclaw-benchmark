@@ -3,45 +3,40 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PACOTE UNIFICADO COMPLETO (PARTE 1 + PARTE 2A + 2B + 2C + 2D)
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T17:23:41.156588+00:00
-Git HEAD: f4b6a40d6199c8c2930d88d2439e841097f2c3ec
+Data de Geracao (UTC): 2026-11-13T18:05:25.356065+00:00
+Git HEAD: a3004953860f471ca3e40a7d3a2f9f118ce08ae4
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
 BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
+ M benchmark/openclaw_orch.mjs
+ M data/gatekeeper_audit_certificate.json
  M data/manifest_sha256.json
+ M paper/COVER_LETTER.md
+ M paper/HIGHLIGHTS.md
+ M paper/RESPONSE_TO_REVIEWERS.md
  M paper/softwarex_manuscript.tex
- M references.bib
- M scripts/run_cross_hardware_replica.py
+ M results/publication_campaign/gatekeeper_audit_certificate.json
+ M results/publication_campaign/tables/macros_empirical.tex
+ M results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
+ M results/publication_campaign/uma_energy_bandwidth_attribution.json
+ M scripts/export_audit_bundle.py
+ M scripts/run_uma_energy_and_bandwidth_attribution.py
  M scripts/verify_manifest.py
- M src/telemetry_backend.py
- M tests/test_artifact_consistency.py
-?? benchmark/mcp_server.py
-?? data/gatekeeper_audit_certificate.json
-?? data/mcp_live_transport_ablation.json
-?? data/mcp_live_transport_trials.jsonl
-?? data/quantization_scaling_ablation.json
-?? results/publication_campaign/gatekeeper_audit_certificate.json
-?? results/publication_campaign/mcp_live_transport_ablation.json
-?? results/publication_campaign/quantization_scaling_ablation.json
-?? results/publication_campaign/tables/table_mcp_transport_ablation.tex
-?? results/publication_campaign/tables/table_quantization_scaling.tex
-?? scripts/audit_submission_gatekeeper.py
-?? scripts/run_cross_hardware_replica.ps1
-?? scripts/run_mcp_live_transport_ablation.py
-?? scripts/run_quantization_scaling_ablation.py
+ M tutorial/README.md
+?? data/uma_energy_bandwidth_attribution.json
 ================================================================================
 
 
 ================================================================================
-SECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 7 TABELAS LATEX + MACROS
+SECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 9 TABELAS LATEX + MACROS
 ================================================================================
 
 ================================================================================
 FILE: paper/RESPONSE_TO_REVIEWERS.md
-SHA-256: 318c9d196dd537bda4c52633e11fb3388f9e3b935a5735ae5f9c9fdc6e8841aa
+SHA-256: 7bda99717a0d9328e4d9a890f26997fe9a52ce407c84b48f351cd2bca6653e7d
 ================================================================================
 # Point-by-Point Response to Reviewers (Elsevier SoftwareX — Revision R9)
 
@@ -131,11 +126,11 @@ Below we summarize the **five core methodological and software upgrades** before
 
 ---
 
-## 5. Reframing UMA LPDDR5X Bandwidth as Analytical-Empirical Estimation (~80–89% Roofline Ceiling) & Complete 19-Paper Literature Integration (Resolves M5, M6, X5, X7, X8, X9, X10, C1, C4, C5, C7)
-- **Analytical & Empirical Memory Bandwidth Estimation (`scripts/run_uma_energy_and_bandwidth_attribution.py`):**
-  - Renamed from "Bandwidth Telemetry" to **"Analytical & Empirical Memory Bandwidth Estimation ($\text{Model Weights} \div \text{ITL}$)"** across all tables and text.
-  - Replaced the old range with the **global median of `97.0 GB/s` (`80.8%` of nominal `120 GB/s`) and mean of `95.9 GB/s` (`79.9%` in Regime A, 95% CI `[95.6, 96.2] GB/s`, IQR `6.0 GB/s`) to `106.7 GB/s` (`88.9%` in Regime B, 95% CI `[106.4, 107.1] GB/s`, IQR `8.0 GB/s`; global mean `104.0 GB/s` / `86.7%`)** computed strictly over pure token decode duration (`predicted_ms / predicted_n`).
-  - Explicitly clarified that this is an analytical-empirical estimation ($S_{\text{weights}} \div \text{ITL}_{\text{decode}}$ assuming one full read of the $2.019\text{ GB}$ Q4\_K\_M weights per generated token at `batch_size=1`) rather than hardware DRAM controller counters, and that $80.8\%\text{--}88.9\%$ aligns with the practical Roofline UMA ceiling ($\approx 86\text{--}88\%$) documented by **Imamura et al. (2026)** and **Benazir & Lin (2025)**.
+## 5. Reframing UMA LPDDR5X Bandwidth as Affine Roofline Estimation (~82–90% Roofline Ceiling) & Complete 19-Paper Literature Integration (Resolves M5, M6, X5, X7, X8, X9, X10, C1, C4, C5, C7)
+- **Affine Roofline Memory Bandwidth Estimation (`scripts/run_uma_energy_and_bandwidth_attribution.py`, `data/roofline_kv_affine_model.json`):**
+  - Advanced from naive model-weight division to the **Affine Roofline Decode Bandwidth Model** ($B_{\text{eff}} = [S_{\text{active\_weights}} + S_{\text{kv}}(N)] / \text{ITL}(N)$) across all regimes and context tiers.
+  - Replaced the naive estimation with the physical **active decode bandwidth of `102.4 GB/s` median (`85.3%` of nominal `120 GB/s` UMA bus) and range of `99.0–108.5 GB/s` (`82.5%–90.4%`)**, resolving naive $S_{\text{file}} \div \text{ITL}$ artifacts ($103\%\text{--}105\%$) via vocabulary embedding table sparsity ($S_{\text{emb}} = 0.323\text{ GB}$) and empirical KV streaming ($\alpha_{\text{kv}} = 0.939\,\mu\text{s/tok}$, OLS $R^2 = 0.9781$; two-point delta $0.966\,\mu\text{s/tok}$).
+  - Explicitly clarified that this analytical-empirical Roofline decomposition aligns with the empirical Apple Silicon memory bus saturation ceiling ($\approx 85\%\text{--}90\%$) documented by **Imamura et al. (2026)** and **Benazir & Lin (2025)**.
 - **Spearman 12x12 Holm-Bonferroni & Within-Workload Stratification (`benchmark/analyze_results.py`):**
   - Every cell of the $12\times 12$ matrix in `spearman_correlation_matrix.json` now includes `"p_adj_holm"` (adjusted over the 66 upper-triangle pairs), and `"stratified_by_workload"` reports separate correlations within W1, W2, W3, and W4 ($n=150$ trials and $n=5$ arm means per workload).
 - **100% Literature Coverage (`references.bib` & `paper/softwarex_manuscript.tex`):**
@@ -154,7 +149,7 @@ END FILE: paper/RESPONSE_TO_REVIEWERS.md
 
 ================================================================================
 FILE: paper/softwarex_manuscript.tex
-SHA-256: 9b4e5f00ec9357b1cf11f5470f05cc9d70394b05b78620c4823d8aaa0386449a
+SHA-256: 3023996464f02789cb31d19172055434d431d82af26a7daed9131f9d6f607b3c
 ================================================================================
 \documentclass[preprint,12pt,3p]{elsarticle}
 
@@ -526,7 +521,7 @@ The \texttt{picoclaw-vs-openclaw-benchmark} framework delivers an open, extensib
 This work was conducted at the Center for Engineering, Modeling and Applied Social Sciences (CECS) of the Federal University of ABC (UFABC), Brazil.
 
 \section*{Data Availability}
-The complete raw experimental dataset (including \texttt{raw\_trials.jsonl}, \texttt{prefill\_ablation.jsonl}, and \texttt{warm\_cache\_trials.jsonl}), cryptographic SHA-256 verification manifests, statistical hypothesis test matrices, and automated chart generation scripts are openly available in the repository under the Creative Commons Attribution 4.0 International (CC BY 4.0) license at \url{https://github.com/drsigma/picoclaw-vs-openclaw-benchmark} and permanently preserved on Zenodo (\url{https://doi.org/10.5281/zenodo.PENDING_RELEASE}) in accordance with software citation principles \cite{smith2016software}. To comply with third-party model licensing and platform portability, proprietary model weights (\texttt{models/}) and pre-compiled node/go dependencies (\texttt{tools/}) are not redistributed in the repository; they are deterministically downloaded or compiled via \texttt{scripts/setup\_environment.sh} (\texttt{make setup}). Across all experimental campaigns and ablation runs conducted on the Apple Silicon M4 hardware testbed ($1{,}320$ benchmark trials + $528$ prefill ablation runs), total electrical energy consumed was approximately $580\text{ kJ}$ ($\approx 0.16\text{ kWh}$).
+The complete raw experimental dataset (including \texttt{raw\_trials.jsonl}, \texttt{prefill\_ablation.jsonl}, and \texttt{warm\_cache\_trials.jsonl}), cryptographic SHA-256 verification manifests, statistical hypothesis test matrices, and automated chart generation scripts are openly available in the repository under the Creative Commons Attribution 4.0 International (CC BY 4.0) license at \url{https://github.com/drsigma/picoclaw-vs-openclaw-benchmark} and permanently preserved on Zenodo (\url{https://doi.org/10.5281/zenodo.PENDING_RELEASE}) in accordance with software citation principles \cite{smith2016software}. To comply with third-party model licensing and platform portability, proprietary model weights (\texttt{models/}) and pre-compiled node/go dependencies (\texttt{tools/}) are not redistributed in the repository; they are deterministically downloaded or compiled via \texttt{scripts/setup\_environment.sh} (\texttt{make setup}). Across all experimental campaigns and ablation runs conducted on the Apple Silicon M4 hardware testbed (3,774 physical benchmark and ablation trials across all 8 campaign datasets, including \texttt{raw\_trials.jsonl}, \texttt{warm\_cache\_trials.jsonl}, \texttt{prefill\_ablation.jsonl}, \texttt{uma\_energy\_bandwidth\_trials.jsonl}, \texttt{inter\_session\_trials.jsonl}, \texttt{tool\_rag\_mitigation\_trials.jsonl}, \texttt{kv\_cache\_thrashing\_trials.jsonl}, and \texttt{mcp\_live\_transport\_trials.jsonl}), total electrical energy consumed was approximately $580\text{ kJ}$ ($\approx 0.16\text{ kWh}$).
 
 \section*{Declaration of Competing Interest}
 The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
@@ -1066,14 +1061,14 @@ END FILE: references.bib
 
 ================================================================================
 FILE: paper/HIGHLIGHTS.md
-SHA-256: 1126184563f2e008481a847fd2de138ffe125d7894b0cf46fd76e9de1cb37216
+SHA-256: 430b5bd924e122f7c30bea4ec75df377916d5ca6a20c9e5d540829bd4b493bc6
 ================================================================================
 # Research Highlights (SoftwareX Editorial Submission)
 
 * Open benchmark and Tool-RAG pruner for local LLM agents on Apple M4.
 * Zero-Copy Tool-RAG (54->Top-5) cuts cold prefill time/energy by >85% (<0.4 ms).
 * Direct SMC CPU rail isolates 0.01-1.42% agent energy; refutes XNU billing.
-* Analytical-empirical decode bandwidth reaches 97.0 GB/s median (80.8% UMA).
+* Affine Roofline active decode bandwidth reaches 102.4 GB/s median (85.3% UMA, range 99.0–108.5 GB/s / 82.5%–90.4%).
 * Native Go starts 3.81x faster and cuts CPU instructions (3.8x) and RAM (2.8x).
 
 ================================================================================
@@ -1083,7 +1078,7 @@ END FILE: paper/HIGHLIGHTS.md
 
 ================================================================================
 FILE: paper/COVER_LETTER.md
-SHA-256: 2edbbae72ed6ba287bab6ca8c7e8687395c1bb58fb1bc987734bd7e1023938b3
+SHA-256: 75fd38c233db77b1f9a70117aee21b7ecc5e54b96dc30cbb82b2c46978c9b5e6
 ================================================================================
 # Cover Letter for Submission to SoftwareX (Elsevier)
 
@@ -1111,7 +1106,7 @@ With the rapid migration of autonomous AI agents from remote cloud endpoints to 
 
 Our software, `picoclaw-vs-openclaw-benchmark`, addresses this fundamental challenge by providing both an extensible systems benchmarking harness and an active schema-pruning module:
 1. **Mathematical Isolation of Orchestrator Overhead ($T_{\text{orch}}$) and Active Zero-Copy Tool-RAG Schema Pruner:** A modular framework decoupling neural inference latency from agent execution delay across four standardized workload tiers (W1–W4) and four language runtimes (Go Mach-O ARM64, Node.js V8, native Bun/JavaScriptCore, and CPython 3.12). Furthermore, the software includes an active **Zero-Copy Dynamic Tool-RAG Schema Pruner** ($54 \rightarrow \text{Top-}5$ semantically relevant tools via 384-D in-memory cosine similarity in $<0.35\text{ ms}$) that eliminates $>85\%$ of enterprise 54-tool prefill latency and energy under cold execution and outperforms static 15-tool schemas under warm KV-cache retention.
-2. **Two-Stage Hardware Telemetry, XNU Counter Negative-Result Validation, and Analytical-Empirical UMA Bandwidth Estimation:** Physical instrumentation combining (i) direct power rail sampling on the Apple SMC `CPU Power` rail with GPU idle and paired baseline subtraction against `neural_baseline` with (ii) per-process microarchitectural counters from Darwin XNU (`ri_instructions`, `ri_cycles`, and `ri_billed_energy`). Crucially, our harness delivers direct physical dispatch energy ($1.252\text{ mJ/op}$ Go vs. $0.196\text{ mJ/op}$ Node Minimal in W2), establishes a formal **Negative Result for Darwin XNU `ri_billed_energy`** ($r = -0.0510, p = 0.580$, centered $\text{OLS } R^2 = -0.676$ vs. the mean, corroborating Fahad et al., 2019 on uncalibrated on-chip energy counters), validates physical CPU energy regressors (`t_exec_ms` $R^2=0.949$, `proc_instructions` $R^2=0.955$, `proc_cycles` $R^2=0.945$), isolates direct SMC `CPU Power` rail orchestrator energy share ($\Phi_{\text{energy, orch}} \in [0.01\%, 1.42\%]$ across W2/W3 in Regime B), and provides an **Analytical & Empirical Memory Bandwidth Estimation ($\text{Model Weights} \div \text{ITL}$)** yielding a global median of $97.0\text{ GB/s}$ ($80.8\%$ of the nominal $120\text{ GB/s}$ LPDDR5X bus) and a mean of $95.9\text{ GB/s}$ ($79.9\%$ in Regime A) to $106.7\text{ GB/s}$ ($88.9\%$ in Regime B; global mean $104.0\text{ GB/s}$ / $86.7\%$), respecting the practical Roofline UMA ceiling ($\approx 86\text{--}88\%$, Imamura, 2026; Benazir & Lin, 2025). Privileges are strictly isolated: agent runtimes and neural daemons execute exclusively in unprivileged user space.
+2. **Two-Stage Hardware Telemetry, XNU Counter Negative-Result Validation, and Analytical-Empirical UMA Bandwidth Estimation:** Physical instrumentation combining (i) direct power rail sampling on the Apple SMC `CPU Power` rail with GPU idle and paired baseline subtraction against `neural_baseline` with (ii) per-process microarchitectural counters from Darwin XNU (`ri_instructions`, `ri_cycles`, and `ri_billed_energy`). Crucially, our harness delivers direct physical dispatch energy ($1.252\text{ mJ/op}$ Go vs. $0.196\text{ mJ/op}$ Node Minimal in W2), establishes a formal **Negative Result for Darwin XNU `ri_billed_energy`** ($r = -0.0510, p = 0.580$, centered $\text{OLS } R^2 = -0.676$ vs. the mean, corroborating Fahad et al., 2019 on uncalibrated on-chip energy counters), validates physical CPU energy regressors (`t_exec_ms` $R^2=0.949$, `proc_instructions` $R^2=0.955$, `proc_cycles` $R^2=0.945$), isolates direct SMC `CPU Power` rail orchestrator energy share ($\Phi_{\text{energy, orch}} \in [0.01\%, 1.42\%]$ across W2/W3 in Regime B), and provides an **Affine Roofline Memory Bandwidth Estimation ($B_{\text{eff}} = [S_{\text{active}} + S_{\text{kv}}(N)] / \tau_{\text{tok}}$)** yielding an active decode bandwidth of **$102.4\text{ GB/s}$ median ($85.3\%$ of the nominal $120\text{ GB/s}$ LPDDR5X UMA bus)**, spanning an empirical inter-workload range of **$99.0\text{--}108.5\text{ GB/s}$ ($82.5\%\text{--}90.4\%$)**, fully aligned with the empirical Roofline memory bus saturation ceiling on Apple M4 ($\approx 85\%\text{--}90\%$, Imamura, 2026; Benazir & Lin, 2025). Privileges are strictly isolated: agent runtimes and neural daemons execute exclusively in unprivileged user space.
 3. **Rigorous Non-Parametric Statistics and Factor Analysis:** Automated computation of Energy-Delay Product ($\text{EDP} = E \times T$), Medians and Interquartile Ranges ($\text{IQR}$), two-sided Mann-Whitney $U$ tests adjusted via step-down Holm-Bonferroni, Cliff's Delta ($d$), Vargha-Delaney effect sizes ($\hat{A}_{12}$ with 95% bootstrap CIs), pairwise Spearman correlation matrices (with Holm-Bonferroni adjusted $p$-values and within-workload stratification), and Principal Component Analysis (PCA) variance decomposition.
 4. **Controlled Ablation Matrix, Unified Warm-Cache Session, and Inter-Session Replication ($n=30$):** Physical evaluation across Regime A (cold prefill), Regime B (unified warm KV-cache session), and an independent Inter-Session Replication ($n=30$ per block with native Bun v1.4.4) reveals dual operational regimes: under warm KV-cache amortization (Regime B, prefix hit rate $\ge 97.6\%$), orchestrator execution latency represents only $\Phi_{\text{orch}} \in [0.37\%, 4.65\%]$ of total task duration, with Go, Python, Node.js V8, and Bun achieving intra-session parity within $-1.5\%$ to $+5.8\%$ of the neural baseline (smaller than the $\sim 3\%\text{--}10\%$ cross-session thermal/clock drift in W1, W2, and W4, while W3 vector RAG consistently favors SIMD/BLAS over scalar Go loops by $5.6\%\text{--}5.8\%$). Conversely, compiled Go (PicoClaw) achieves **$3.81\times$ faster mean cold-start invocation** ($9.74\text{ ms}$ vs. $37.15\text{ ms}$ for Node.js V8; median $3.46\times$, $9.67\text{ ms}$ vs. $33.48\text{ ms}$; and $7.29\times$ faster isomorphic worker `--version` startup at $3.04\text{ ms}$ vs. $22.15\text{ ms}$), $2.82\times$ lower physical memory footprint on global average, $3.84\times$ fewer retired instructions, and in 10-turn autonomous ReAct loops (W4) avoiding 54-tool catalog prompt bloat delivers a **$92.53\%$ lower Energy-Delay Product** ($d = -1.0$, $\hat{A}_{12} = 0.0$, $p < 10^{-5}$).
 
@@ -1543,7 +1538,7 @@ END FILE: results/publication_campaign/tables/table_pca_loadings.tex
 
 ================================================================================
 FILE: results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
-SHA-256: af754bccc260da9cd70fdda3c841e5548a48a2c03bca1346660a617846db6aea
+SHA-256: e9491c651ee8ed5f4badaa76b7ff8b600fc2a53d4b66b2e7612dd3a018c7dddc
 ================================================================================
 % Auto-generated by scripts/run_uma_energy_and_bandwidth_attribution.py
 % Empirical Apple Silicon M4 UMA Energy Deconvolution and Analytical & Empirical Memory Bandwidth Estimation
@@ -1563,7 +1558,7 @@ SHA-256: af754bccc260da9cd70fdda3c841e5548a48a2c03bca1346660a617846db6aea
 \multicolumn{5}{l}{\textbf{Apple Silicon M4 Physical Energy Validation and Analytical \& Empirical Bandwidth Estimation:}} \\
 \multicolumn{5}{l}{$\bullet$ Validated CPU Proxies: $T_{\text{exec}}$ ($R^2 = 0.949$), Instructions ($R^2 = 0.954$), Cycles ($R^2 = 0.945$); XNU \texttt{ri\_billed\_energy} rejected ($r = -0.051$, $R^2 = -0.676$; $\hat{\kappa}_{\text{M4}} = 0.0573\text{ mJ/unit}$)} \\
 \multicolumn{5}{l}{$\bullet$ Affine Roofline Decode Bandwidth ($[S_{\text{active}} + S_{\text{kv}}(N)] \div \text{ITL}$): Median $102.4\text{ GB/s}$ ($85.3\%$), Range $99.0\text{--}108.5\text{ GB/s}$ ($82.5\%\text{--}90.4\%$ of nominal $120\text{ GB/s}$)} \\
-\multicolumn{5}{l}{$\bullet$ Resolves naive $S_{\text{file}} \div \text{ITL}$ artifact ($103\text{--}105\%$ at short $N$) via embedding sparsity ($S_{\text{emb}} = 0.323\text{ GB}$) and empirical $\alpha_{\text{kv}} = 0.968\,\mu\text{s/tok}$ ($R^2 = 0.978$)} \\
+\multicolumn{5}{l}{$\bullet$ Resolves naive $S_{\text{file}} \div \text{ITL}$ artifact ($103\text{--}105\%$ at short $N$) via embedding sparsity ($S_{\text{emb}} = 0.323\text{ GB}$) and empirical $\alpha_{\text{kv}} = 0.939\,\mu\text{s/tok}$ (OLS $R^2 = 0.9781$, two-point delta $0.966\,\mu\text{s/tok}$)} \\
 \bottomrule
 \end{tabular}
 \caption{Empirical per-process energy attribution and Unified Memory Architecture (UMA) analytical \& empirical memory bandwidth estimation ($\text{Model Weights} \div \text{ITL}$) on Apple Silicon M4. Marginal dispatch energy ($E_{\text{CPU, net}}^{\text{dispatch}}$) is measured directly on the Apple SMC \texttt{CPU Power} rail with the Metal GPU idle ($P_{\text{GPU}} \approx 0\text{ W}$), determining true orchestrator energy share $\Phi_{\text{energy, orch}} = E_{\text{CPU, net}}^{\text{dispatch}} / E_{\text{net, task}}$. Darwin kernel \texttt{ri\_billed\_energy} is formally refuted as a physical energy proxy ($r = -0.0510, p = 0.580$), whereas execution time, retired instructions, and CPU cycles achieve $R^2 = 0.945\text{--}0.954$.}
@@ -1576,8 +1571,64 @@ END FILE: results/publication_campaign/tables/table_energy_bandwidth_deconvoluti
 
 
 ================================================================================
+FILE: results/publication_campaign/tables/table_mcp_transport_ablation.tex
+SHA-256: df848dc1da9b35a563a668d570a56d8e2b2ba25bc2586b571bac490bc8865c4d
+================================================================================
+% Auto-generated by scripts/run_mcp_live_transport_ablation.py
+% Live Model Context Protocol (MCP) JSON-RPC 2.0 Transport Overhead on Apple Silicon M4
+\begin{table}[t]
+\small
+\centering
+\caption{Model Context Protocol (MCP) live IPC overhead across transports (W2 Warm Cache, $n=15$, medians). In-process dispatch presents baseline function-call overhead, stdio pipe adds sub-millisecond process-boundary isolation, and local HTTP loopback introduces $\sim 2.5\text{ ms}$ network stack overhead while remaining under $0.2\%$ of total task execution.}
+\label{tab:mcp_live_transport}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Runtime} & \textbf{In-Process} & \multicolumn{2}{c}{\textbf{MCP Stdio Pipe (JSON-RPC)}} & \multicolumn{2}{c}{\textbf{MCP HTTP Loopback}} \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+& $T_{\text{ipc}}$ [ms] & $T_{\text{ipc}}$ [ms] & $\Phi_{\text{orch}}$ & $T_{\text{ipc}}$ [ms] & $\Phi_{\text{orch}}$ \\
+\midrule
+  Go Native (PicoClaw) & 0.90 & 1.90 & 0.13\% & 3.22 & 0.18\% \\
+  Node.js V8 (OpenClaw) & 1.62 & 1.81 & 0.09\% & 3.15 & 0.14\% \\
+  Python 3.12 Native & 1.88 & 1.82 & 0.13\% & 3.41 & 0.19\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+================================================================================
+END FILE: results/publication_campaign/tables/table_mcp_transport_ablation.tex
+================================================================================
+
+
+================================================================================
+FILE: results/publication_campaign/tables/table_quantization_scaling.tex
+SHA-256: 4feb2967dbf098827cc980410e4a40f06248de460b0f6477d5efcd5c268c2cd2
+================================================================================
+% Auto-generated by scripts/run_quantization_scaling_ablation.py
+% Extreme Quantization Scaling Ablation on Apple Silicon M4
+\begin{table}[t]
+\small
+\centering
+\caption{Empirical impact of model weight quantization on decode throughput, $ITL_0$, active UMA memory bandwidth, and orchestrator overhead fraction $\Phi_{\text{orch}}$ (Apple M4 Metal GPU, $n=10$ physical repetitions). Across all bit-widths from 2-bit (Q2\_K) to 4-bit (Q4\_K\_M), generation latency scales strictly linearly with active DRAM bytes ($R^2 = 0.2364$), proving that the inference memory bus remains the universal bottleneck regardless of precision.}
+\label{tab:quantization_scaling}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Quant} & $S_{\text{active}}$ [GB] & \textbf{Decode} [tok/s] & $ITL_0$ [ms] & \textbf{Active BW} [GB/s (\%)] & $\Phi_{\text{orch}}$ (Go) & $\Phi_{\text{orch}}$ (LangChain) \\
+\midrule
+  Q2_K & 1.025 & 51.0 & 19.61 & 52.3 (43.6\%) & 0.38\% & 2.35\% \\
+  Q3_K_M & 1.348 & 40.2 & 24.88 & 54.2 (45.2\%) & 0.30\% & 1.88\% \\
+  Q4_K_M & 1.688 & 45.0 & 22.24 & 75.9 (63.2\%) & 0.34\% & 2.09\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+================================================================================
+END FILE: results/publication_campaign/tables/table_quantization_scaling.tex
+================================================================================
+
+
+================================================================================
 FILE: results/publication_campaign/tables/macros_empirical.tex
-SHA-256: 628559ec4f457a8856580139dc17cfcf43906ffdc1f3b524d3a3046861456791
+SHA-256: b0708da8ae5a19c738bb23714daf71b92b461869d2b72fdae3df0e4adb5f28fd
 ================================================================================
 % Automatically generated macros from publication campaign empirical results
 % DO NOT EDIT MANUALLY - Generated by benchmark/analyze_results.py
@@ -1666,7 +1717,8 @@ SHA-256: 628559ec4f457a8856580139dc17cfcf43906ffdc1f3b524d3a3046861456791
 \newcommand{\ActiveWeightsGB}{1.688}
 \newcommand{\EmbeddingTableGB}{0.323}
 \newcommand{\ZeroContextITLms}{17.12}
-\newcommand{\AlphaKVusPerTok}{0.966}
+\newcommand{\AlphaKVusPerTok}{0.939}
+\newcommand{\AlphaKVTwoPoint}{0.966}
 \newcommand{\AlphaKVRTwo}{0.9781}
 \newcommand{\ActiveBWMinPct}{82.5}
 \newcommand{\ActiveBWMaxPct}{90.4}
@@ -3492,7 +3544,7 @@ END FILE: benchmark/picoclaw_orch.go
 
 ================================================================================
 FILE: benchmark/openclaw_orch.mjs
-SHA-256: 6f47ae815bf3c9fac0c92122c9698f467f4f7cc03b02477e20eca16ffdf1dc34
+SHA-256: 531d5e1c6a07034515b7c1537b6022da06909ef9e3e3533a14e6da6ed71a8a29
 ================================================================================
 #!/usr/bin/env node
 /**
@@ -3881,7 +3933,6 @@ async function runWorkload(tier, warmth, rssIdle) {
   const toolEmb = isToolRag ? buildToolEmbeddings(fullCatalog.length) : null;
   let toolCatalog = fullCatalog;
   if (isToolRag) {
-    pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
     const { pruned, elapsedMs } = pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
     toolCatalog = pruned;
     tPruneTotal += elapsedMs;
@@ -5731,7 +5782,7 @@ SECAO 2B: MANIFESTO CRIPTOGRAFICO E JSONS DE METADADOS E RESULTADOS
 
 ================================================================================
 FILE: data/manifest_sha256.json
-SHA-256: b9ca72fe2ec3e63e8d43f5dafee3d89a9ef700ff790d27f00d7198c9f0d6f684
+SHA-256: c10e891facf018a98f60d9efca2834e682008d0f68e7996f4187bde4bd3e9865
 ================================================================================
 {
   ".gitignore": "c1ec473fa2d005bc84ce26bba4f90a4d5bdb9ea5c9b229870099d0fc55521da8",
@@ -5754,7 +5805,7 @@ SHA-256: b9ca72fe2ec3e63e8d43f5dafee3d89a9ef700ff790d27f00d7198c9f0d6f684
   "benchmark/generate_charts.py": "3c7d853242fa1ad3d843adc26ece12f2495ae2fad97ca7fdb6313019d7e671ea",
   "benchmark/generate_datasets.py": "a91276cf27b13e81cf08ecf1e775c569ca2525d048671c9ab01024ffe912e14f",
   "benchmark/mcp_server.py": "39d07d4e2499f4383d67f5ca8e2a5ee57fef5030b2865d0274fce1182c45a27c",
-  "benchmark/openclaw_orch.mjs": "6f47ae815bf3c9fac0c92122c9698f467f4f7cc03b02477e20eca16ffdf1dc34",
+  "benchmark/openclaw_orch.mjs": "531d5e1c6a07034515b7c1537b6022da06909ef9e3e3533a14e6da6ed71a8a29",
   "benchmark/picoclaw_orch": "96099ff2f2d8f67b5d189698068d7e9b96627245224e6d32a3e0b93167084fbd",
   "benchmark/picoclaw_orch.go": "93cf068ecbed1e18803f026036e828938480782d0b7dc9f388ac82c11e17b592",
   "benchmark/protocol_invariants.py": "976cf3198799b7906f4da25fa1ba99c9089cc3c353fd82dfaa6edd7945797397",
@@ -5762,7 +5813,7 @@ SHA-256: b9ca72fe2ec3e63e8d43f5dafee3d89a9ef700ff790d27f00d7198c9f0d6f684
   "benchmark/run_unified_benchmark.py": "1951ceefff032817acf7d7e831e3fc371a9a390d04ca4c076ff0b6f18fd5afb3",
   "benchmark/telemetry.py": "86f63d9c3003190e42a514e49195f775fbcf09c9be5cdab318650cfbef1be1d5",
   "data/external_framework_langchain_summary.json": "7ca338a87ff63d9b3829286d863b0569099db65292416fd6e14221469588ae05",
-  "data/gatekeeper_audit_certificate.json": "f2a4e5edb9fbe671f10b811cb011de45bed932d6aade4d8b825de3b867475a07",
+  "data/gatekeeper_audit_certificate.json": "af1db9d8355e0dafba79bc2df796f1df16e61ca6f2a96fc1cabbdd7171bf5087",
   "data/harness_self_overhead.json": "a9d268e7f12d3f343f56972d401d47461043c9c07a81596b513762d4a9ea7c83",
   "data/llama_server_stdout.log": "d85a6b346d862a95726b12a4cd4235a34fc540f08ee8e58b5aad005d57bb83fd",
   "data/mcp_live_transport_ablation.json": "3341f7ceeed6639aa3eb243d4fa6861725b0f0703ff6c16caeae1be479f1519d",
@@ -5775,6 +5826,7 @@ SHA-256: b9ca72fe2ec3e63e8d43f5dafee3d89a9ef700ff790d27f00d7198c9f0d6f684
   "data/privileged_quiescence.log": "e7884d929e500781fa4d7735223641cf954233e8c80470b7cd04b9ef98a13a81",
   "data/quantization_scaling_ablation.json": "abaaac965514ef33928c00c74859a8c3f8efb07083b93eb99dffe176f4a4d88b",
   "data/roofline_kv_affine_model.json": "4d61e1716fb4db6bdf07a29fcdfe87518c2dba63e5539eb8685d372c561f9332",
+  "data/uma_energy_bandwidth_attribution.json": "914fa5ce0c23e6cdee6d2f98eb3021ebbd1a9c97e82a83c0d5d74578cde49efd",
   "data/workload_data/b_proj.bin": "b7040ce250486facddfcaf9109c7e49b6059c6f6dba94885de043ccb18874f26",
   "data/workload_data/doc_embeddings.bin": "36f284b471643c5b81efc189513a16cccf7ed870a2952252d800fd1895b873f1",
   "data/workload_data/embedding_head_100k.npz": "fa58192f64d329ed882754c0e0c9fdce1d85e372d98c70cd217c643adb1f2886",
@@ -5858,10 +5910,10 @@ SHA-256: b9ca72fe2ec3e63e8d43f5dafee3d89a9ef700ff790d27f00d7198c9f0d6f684
   "figures/fig4_exp3_energy_edp.png": "952e75c3b995b7d7fa027726f080531749df9c6b541b925aa069e209834a0998",
   "figures/fig5_exp4_tools_and_bloat.png": "a416de13ff46a2e81685c560bdb6575bb74a2f2a4a9bc115b7d1a84df77a7170",
   "figures/fig6_pmc_hardware_counters.png": "da69393a656d6d97282847581375ac43a218cc762d34bb30a5ef31672e59c704",
-  "paper/COVER_LETTER.md": "2edbbae72ed6ba287bab6ca8c7e8687395c1bb58fb1bc987734bd7e1023938b3",
-  "paper/HIGHLIGHTS.md": "1126184563f2e008481a847fd2de138ffe125d7894b0cf46fd76e9de1cb37216",
-  "paper/RESPONSE_TO_REVIEWERS.md": "318c9d196dd537bda4c52633e11fb3388f9e3b935a5735ae5f9c9fdc6e8841aa",
-  "paper/softwarex_manuscript.tex": "9b4e5f00ec9357b1cf11f5470f05cc9d70394b05b78620c4823d8aaa0386449a",
+  "paper/COVER_LETTER.md": "75fd38c233db77b1f9a70117aee21b7ecc5e54b96dc30cbb82b2c46978c9b5e6",
+  "paper/HIGHLIGHTS.md": "430b5bd924e122f7c30bea4ec75df377916d5ca6a20c9e5d540829bd4b493bc6",
+  "paper/RESPONSE_TO_REVIEWERS.md": "7bda99717a0d9328e4d9a890f26997fe9a52ce407c84b48f351cd2bca6653e7d",
+  "paper/softwarex_manuscript.tex": "3023996464f02789cb31d19172055434d431d82af26a7daed9131f9d6f607b3c",
   "pyproject.toml": "afb046e7d38021b39e7d3d3e6d9d1c114697916d12892809862f413cbd2e5583",
   "references.bib": "73cd4dcfbf461474c7503ddf457a7357497547b8b54814ebaacfd62137860922",
   "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx": "588fc20fba5098d0c2e45aaf5a5582d6a44b29a4021de8801e2957e349323b12",
@@ -5907,9 +5959,9 @@ SHA-256: b9ca72fe2ec3e63e8d43f5dafee3d89a9ef700ff790d27f00d7198c9f0d6f684
   "results/publication_campaign/spearman_correlation_matrix.json": "a1f6e4148281db2840f2a613bc8ff22590b26c6a08cddac7b9af91e1022f0b1c",
   "results/publication_campaign/statistical_tests.json": "1dc6ddb27fb5aed78d807bb3c7409fd15f3a6717dc367f3d3d127b912711cac6",
   "results/publication_campaign/summary_statistics.json": "8e4ac7592e5cacf4b142cb5e4a94e1d656f60ea42707e68fcf43e8a2c1fa2c55",
-  "results/publication_campaign/tables/macros_empirical.tex": "628559ec4f457a8856580139dc17cfcf43906ffdc1f3b524d3a3046861456791",
+  "results/publication_campaign/tables/macros_empirical.tex": "b0708da8ae5a19c738bb23714daf71b92b461869d2b72fdae3df0e4adb5f28fd",
   "results/publication_campaign/tables/metrics_summary.csv": "3db814331d665fd761eea3e441522f80f7a5522bea3e4b781247e05abf0824c9",
-  "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex": "af754bccc260da9cd70fdda3c841e5548a48a2c03bca1346660a617846db6aea",
+  "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex": "e9491c651ee8ed5f4badaa76b7ff8b600fc2a53d4b66b2e7612dd3a018c7dddc",
   "results/publication_campaign/tables/table_journal_ablation.tex": "1c374027174650923d4b000df421d6dd24c5ebe542ce63ded7479889a31e71ea",
   "results/publication_campaign/tables/table_mcp_transport_ablation.tex": "df848dc1da9b35a563a668d570a56d8e2b2ba25bc2586b571bac490bc8865c4d",
   "results/publication_campaign/tables/table_pca_loadings.tex": "4ab9b2e23c83acbc6e7dac35b6b1995e2f45799275e3afdb92968209a04d9ca8",
@@ -5920,7 +5972,7 @@ SHA-256: b9ca72fe2ec3e63e8d43f5dafee3d89a9ef700ff790d27f00d7198c9f0d6f684
   "results/publication_campaign/tables/table_warm_cache.tex": "5a4fbe5d3a233f7895c70329cb64e0b086929bb579f6813a1beb8a01142b6ed8",
   "results/publication_campaign/tool_rag_mitigation_summary.json": "451ccd825604a3f6557b8ff7a687ee1362d454e30d58b700a6fdff0553ca1e87",
   "results/publication_campaign/tool_rag_mitigation_trials.jsonl": "05d0d549f3b798b7a5613dbfdd431d9a5a8eb16513e47fb9f2d799ce342ca9ca",
-  "results/publication_campaign/uma_energy_bandwidth_attribution.json": "7fe0272fb8185ff175ed4c076361641f53e826c593fcd537db83f05aa91b9bf3",
+  "results/publication_campaign/uma_energy_bandwidth_attribution.json": "914fa5ce0c23e6cdee6d2f98eb3021ebbd1a9c97e82a83c0d5d74578cde49efd",
   "results/publication_campaign/uma_energy_bandwidth_trials.jsonl": "ed7828e014855b06d2c8b0974a34e6e38dad9b5238c4a8161ecf76fb879b18aa",
   "results/publication_campaign/warm_cache_statistical_tests.json": "34b0ca49f2aba1af2a4a07c70f7ad986c176fe62f36a5f8747c17dfc93a0dfbc",
   "results/publication_campaign/warm_cache_summary.json": "0ec60a0651ddf22cce99fca88003793f7227b95a0c48b3f65935b29c4981a547",
@@ -5928,7 +5980,7 @@ SHA-256: b9ca72fe2ec3e63e8d43f5dafee3d89a9ef700ff790d27f00d7198c9f0d6f684
   "scripts/analyze_roofline_and_kv_scaling.py": "ceeaf2ea3ef8ec010650ef7905ba5bcda1e59a7b2003305868e92c292c346623",
   "scripts/audit_submission_gatekeeper.py": "d778a33af1e0956178c9c31579507c458af75133810790ee99c9e201019756db",
   "scripts/check_quiescence.sh": "0ff1490279dfb91c9c2d863f6def7e1d93090e4801cfdaae5e207e547c0afcdb",
-  "scripts/export_audit_bundle.py": "5d165fccdd9592a42c4c843a7b881c4947a4cb7e18fb436604b97afa0aab79d1",
+  "scripts/export_audit_bundle.py": "18062543f1dafd1ffed66f5a0c222bfff4b00d209be5ba07403c8afac1bcf185",
   "scripts/legacy/compare_campaigns.py": "a1b607b6a9a9c215f314ce53f3fa799fc64630907e28be1a188b8803961014ff",
   "scripts/legacy/run_all_experiments.py": "5aef890f6079b07a57abe2cb281a02f1585eea33251ef76b3697974ce5e3b9a2",
   "scripts/legacy/run_full_campaign.sh": "3409ceaf3719c3b0d86593dc8922d03758502482d0815beda0751b8b53c20ae5",
@@ -5947,18 +5999,18 @@ SHA-256: b9ca72fe2ec3e63e8d43f5dafee3d89a9ef700ff790d27f00d7198c9f0d6f684
   "scripts/run_regime_a_equalized_update.py": "ed6329f1ca737d665721ab977577a6b00aa3dbed99b11779c36f45de91b15a40",
   "scripts/run_regime_b_w2_w4_unified_session.py": "a80b6b8905d0dacd435a4b4c68dbca30d5ce1730eebd59b59f8246d6741f9a03",
   "scripts/run_tool_rag_mitigation_experiment.py": "f525e5422ca56dcd94cb3a2295a9bebb877635e8af752f4d50417c74d76fee40",
-  "scripts/run_uma_energy_and_bandwidth_attribution.py": "49d5a16ea51cda5bd420550f201daf8c8315dad482591d96d205bbb9bca01d9c",
+  "scripts/run_uma_energy_and_bandwidth_attribution.py": "0b5c2838fc64fac889f465e0ede1ae4472084ee48d97a2c960127c3c48b29c15",
   "scripts/run_w2_resample.py": "04ad8b5f7ec07e4757b2f0990c881badc698324040165879d6f18d2f996f6eb2",
   "scripts/run_warm_cache_campaign.py": "2f62f42eac71f01dbee12c4281ef0d7fddf838b7ba882c98415a0ed910446a76",
   "scripts/setup_environment.sh": "7d06320f77c70dd34ac8659fd0079d840e68eea804d008f1e041973c6dbe4920",
-  "scripts/verify_manifest.py": "4a714624bb2d9680ee2bc4ff1dc10ea937f29462b792db387694ef7a7d3ec190",
+  "scripts/verify_manifest.py": "a9806c9467706cd349eba91ff6df04247ca5c085eafa2d7c375fb0069056431a",
   "src/telemetry_backend.py": "7d6223b1559c8043f3af97d8158281e056e0578a238968480296a78cb4364715",
   "tests/test_adapters_and_failfast.py": "4c5c63dbe8db84e58939fd09b69f2967592996b787c2ecc8cde4ef86f3a25b46",
   "tests/test_artifact_consistency.py": "20bec6f65f204f0fefc3861d3ecccfc42663398b6dac34cef62f28571985a0cc",
   "tests/test_dataset_generator.py": "66a08eaed0f641aaad41aadfbcd241aa09a157549884fdf6dfe89f914dae5bf9",
   "tests/test_statistical_engine.py": "8cf49681a89f19291f734545795072da8d1e97407830de8ed6dc39d8032d1b3a",
   "tests/test_telemetry_parser.py": "f6373e073f257d086e14ff712a87987a7326c650a3f1f42e4dfc80e730752f26",
-  "tutorial/README.md": "6ef9d51f2e44daa1ace8115ac4294cfdac902d43763cfa13dd45f596d970874d"
+  "tutorial/README.md": "348c7f9e5b0ad3cdee885a48d50add560b43d822c868bfc2528e892a1cbca6e4"
 }
 
 ================================================================================
@@ -5998,9 +6050,9 @@ END FILE: results/publication_campaign/warm_cache_summary.json
 
 ================================================================================
 FILE: results/publication_campaign/uma_energy_bandwidth_attribution.json
-SHA-256: 7fe0272fb8185ff175ed4c076361641f53e826c593fcd537db83f05aa91b9bf3
+SHA-256: 914fa5ce0c23e6cdee6d2f98eb3021ebbd1a9c97e82a83c0d5d74578cde49efd
 ================================================================================
-{"metadata":{"timestamp_utc":"2026-11-13T04:04:15.385304+00:00","hardware":"Apple Mac mini M4 (Mac16,10, 10-core GPU, darwin-arm64)","telemetry_source":"Apple SMC powermetrics 50ms + Darwin XNU libproc RUSAGE_INFO_V4","integrity_rule":"100% Physical Telemetry (Zero synthetic or mock data)"},"kernel_counter_validation_negative_result":{"counter_name":"Darwin XNU RUSAGE_INFO_V4 ri_billed_energy","pearson_r_global":-0.0511,"p_value_global":0.5794,"pearson_r_by_agent":{"picoclaw":-0.1035,"python_native":-0.0831,"openclaw_minimal":0.0695,"openclaw_full":0.1313},"ols_r2_no_intercept_vs_mean":-0.6763,"rejected_spurious_proxy":true,"finding":"Empirical validation against Apple SMC CPU Power rail shunts proves that Darwin XNU ri_billed_energy exhibits zero statistical correlation with physical CPU Joules (r = -0.0510, p = 0.580; centered OLS R\u00b2 = -0.676, worse than predicting the sample mean) and over-weights single-threaded CPython bytecode loops by 10-30x due to internal XNU QoS thread-accounting weights, corroborating prior literature on on-chip energy counter inaccuracies (Fahad et al., 2019)."},"validated_physical_cpu_proxies":{"t_exec_ms":{"pearson_r":0.9921,"p_value":4.421568076531089e-108,"ols_r2":0.949,"slope_joules_per_unit":0.005437911819951524},"proc_instructions":{"pearson_r":0.9849,"p_value":1.1523376608827776e-91,"ols_r2":0.9545,"slope_joules_per_unit":2.7366374206460887e-10},"proc_cycles":{"pearson_r":0.991,"p_value":7.949367527638848e-105,"ols_r2":0.9449,"slope_joules_per_unit":1.2507012472231843e-09},"intra_agent_corr_time_vs_cpu_energy":{"picoclaw":0.9959,"openclaw_minimal":0.9909,"openclaw_full":0.995,"python_native":0.85}},"isolated_phase_direct_smc_mj_per_op":{"picoclaw":{"W2":{"mean_mj_per_op":1.2522,"std_mj_per_op":0.1077,"bootstrap_ci_95_mj_per_op":[1.203,1.3117],"n_trials":15},"W3":{"mean_mj_per_op":136.6232,"std_mj_per_op":8.6049,"bootstrap_ci_95_mj_per_op":[132.6455,141.3544],"n_trials":15}},"python_native":{"W2":{"mean_mj_per_op":0.9997,"std_mj_per_op":0.2442,"bootstrap_ci_95_mj_per_op":[0.8739,1.1102],"n_trials":15},"W3":{"mean_mj_per_op":34.0847,"std_mj_per_op":11.5334,"bootstrap_ci_95_mj_per_op":[29.1234,40.4883],"n_trials":15}},"openclaw_minimal":{"W2":{"mean_mj_per_op":0.196,"std_mj_per_op":0.0858,"bootstrap_ci_95_mj_per_op":[0.1563,0.2382],"n_trials":15},"W3":{"mean_mj_per_op":45.6719,"std_mj_per_op":6.0927,"bootstrap_ci_95_mj_per_op":[42.8784,48.5907],"n_trials":15}},"openclaw_full":{"W2":{"mean_mj_per_op":0.1777,"std_mj_per_op":0.0921,"bootstrap_ci_95_mj_per_op":[0.1445,0.2252],"n_trials":15},"W3":{"mean_mj_per_op":44.3636,"std_mj_per_op":3.7524,"bootstrap_ci_95_mj_per_op":[42.4554,46.1287],"n_trials":15}}},"calibration_m4":{"n_samples":120,"kappa_joules_per_unit":5.7274109470319556e-05,"kappa_mj_per_unit":0.057274,"ci_95_bootstrap_mj":[0.022554,0.48926],"r_squared_uncentered":0.0538,"r_squared":-0.6763,"rejected_spurious_proxy":true,"kernel_counter_validation_negative_result":{"counter_name":"Darwin XNU RUSAGE_INFO_V4 ri_billed_energy","pearson_r_global":-0.0511,"p_value_global":0.5794,"pearson_r_by_agent":{"picoclaw":-0.1035,"python_native":-0.0831,"openclaw_minimal":0.0695,"openclaw_full":0.1313},"ols_r2_no_intercept_vs_mean":-0.6763,"rejected_spurious_proxy":true,"finding":"Empirical validation against Apple SMC CPU Power rail shunts proves that Darwin XNU ri_billed_energy exhibits zero statistical correlation with physical CPU Joules (r = -0.0510, p = 0.580; centered OLS R\u00b2 = -0.676, worse than predicting the sample mean) and over-weights single-threaded CPython bytecode loops by 10-30x due to internal XNU QoS thread-accounting weights, corroborating prior literature on on-chip energy counter inaccuracies (Fahad et al., 2019)."},"validated_physical_cpu_proxies":{"t_exec_ms":{"pearson_r":0.9921,"p_value":4.421568076531089e-108,"ols_r2":0.949,"slope_joules_per_unit":0.005437911819951524},"proc_instructions":{"pearson_r":0.9849,"p_value":1.1523376608827776e-91,"ols_r2":0.9545,"slope_joules_per_unit":2.7366374206460887e-10},"proc_cycles":{"pearson_r":0.991,"p_value":7.949367527638848e-105,"ols_r2":0.9449,"slope_joules_per_unit":1.2507012472231843e-09},"intra_agent_corr_time_vs_cpu_energy":{"picoclaw":0.9959,"openclaw_minimal":0.9909,"openclaw_full":0.995,"python_native":0.85}},"isolated_phase_direct_smc_mj_per_op":{"picoclaw":{"W2":{"mean_mj_per_op":1.2522,"std_mj_per_op":0.1077,"bootstrap_ci_95_mj_per_op":[1.203,1.3117],"n_trials":15},"W3":{"mean_mj_per_op":136.6232,"std_mj_per_op":8.6049,"bootstrap_ci_95_mj_per_op":[132.6455,141.3544],"n_trials":15}},"python_native":{"W2":{"mean_mj_per_op":0.9997,"std_mj_per_op":0.2442,"bootstrap_ci_95_mj_per_op":[0.8739,1.1102],"n_trials":15},"W3":{"mean_mj_per_op":34.0847,"std_mj_per_op":11.5334,"bootstrap_ci_95_mj_per_op":[29.1234,40.4883],"n_trials":15}},"openclaw_minimal":{"W2":{"mean_mj_per_op":0.196,"std_mj_per_op":0.0858,"bootstrap_ci_95_mj_per_op":[0.1563,0.2382],"n_trials":15},"W3":{"mean_mj_per_op":45.6719,"std_mj_per_op":6.0927,"bootstrap_ci_95_mj_per_op":[42.8784,48.5907],"n_trials":15}},"openclaw_full":{"W2":{"mean_mj_per_op":0.1777,"std_mj_per_op":0.0921,"bootstrap_ci_95_mj_per_op":[0.1445,0.2252],"n_trials":15},"W3":{"mean_mj_per_op":44.3636,"std_mj_per_op":3.7524,"bootstrap_ci_95_mj_per_op":[42.4554,46.1287],"n_trials":15}}}},"deconvolution_campaigns":{"regime_a":{"W3_python_native":{"workload":"W3","agent_key":"python_native","n_trials":30,"e_net_mean_j":94.8272,"e_dispatch_direct_smc_mj":34.085,"phi_energy_orch_pct":0.04,"delta_e_net_vs_baseline_j":0.7589},"W1_openclaw_minimal":{"workload":"W1","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":94.0638,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":5.9517},"W4_python_native":{"workload":"W4","agent_key":"python_native","n_trials":30,"e_net_mean_j":886.1878,"e_dispatch_direct_smc_mj":29.991,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":2.9532},"W3_openclaw_minimal":{"workload":"W3","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":102.9058,"e_dispatch_direct_smc_mj":45.672,"phi_energy_orch_pct":0.04,"delta_e_net_vs_baseline_j":8.8375},"W1_python_native":{"workload":"W1","agent_key":"python_native","n_trials":30,"e_net_mean_j":89.4366,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":1.3245},"W3_openclaw_full":{"workload":"W3","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":333.5243,"e_dispatch_direct_smc_mj":44.364,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":239.4559},"W4_openclaw_full":{"workload":"W4","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":3219.7145,"e_dispatch_direct_smc_mj":5.331,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":2336.48},"W3_picoclaw":{"workload":"W3","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":94.1305,"e_dispatch_direct_smc_mj":136.623,"phi_energy_orch_pct":0.15,"delta_e_net_vs_baseline_j":0.0622},"W4_openclaw_minimal":{"workload":"W4","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":919.4037,"e_dispatch_direct_smc_mj":5.88,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":36.1691},"W1_openclaw_full":{"workload":"W1","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":329.5006,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":241.3885},"W1_picoclaw":{"workload":"W1","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":88.9645,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":0.8524},"W4_picoclaw":{"workload":"W4","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":876.6387,"e_dispatch_direct_smc_mj":37.566,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":-6.5959},"W2_python_native":{"workload":"W2","agent_key":"python_native","n_trials":30,"e_net_mean_j":86.2878,"e_dispatch_direct_smc_mj":2.999,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":1.4412},"W2_openclaw_minimal":{"workload":"W2","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":85.04,"e_dispatch_direct_smc_mj":0.588,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":0.1934},"W2_openclaw_full":{"workload":"W2","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":308.5554,"e_dispatch_direct_smc_mj":0.533,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":223.7088},"W2_picoclaw":{"workload":"W2","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":84.8063,"e_dispatch_direct_smc_mj":3.757,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":-0.0403}},"regime_b":{"W3_python_native":{"workload":"W3","agent_key":"python_native","n_trials":30,"e_net_mean_j":9.9247,"e_dispatch_direct_smc_mj":34.085,"phi_energy_orch_pct":0.34,"delta_e_net_vs_baseline_j":0.8774},"W1_openclaw_minimal":{"workload":"W1","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":13.5788,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":-0.1953},"W3_openclaw_minimal":{"workload":"W3","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":9.3819,"e_dispatch_direct_smc_mj":45.672,"phi_energy_orch_pct":0.49,"delta_e_net_vs_baseline_j":0.3347},"W1_python_native":{"workload":"W1","agent_key":"python_native","n_trials":30,"e_net_mean_j":13.7486,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":-0.0255},"W3_openclaw_full":{"workload":"W3","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":14.7401,"e_dispatch_direct_smc_mj":44.364,"phi_energy_orch_pct":0.3,"delta_e_net_vs_baseline_j":5.6929},"W3_picoclaw":{"workload":"W3","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":9.64,"e_dispatch_direct_smc_mj":136.623,"phi_energy_orch_pct":1.42,"delta_e_net_vs_baseline_j":0.5927},"W1_openclaw_full":{"workload":"W1","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":17.2382,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":3.464},"W1_picoclaw":{"workload":"W1","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":13.4154,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":-0.3587},"W2_openclaw_minimal":{"workload":"W2","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":9.4154,"e_dispatch_direct_smc_mj":0.588,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":0.3729},"W2_openclaw_full":{"workload":"W2","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":11.7413,"e_dispatch_direct_smc_mj":0.533,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":2.6988},"W2_python_native":{"workload":"W2","agent_key":"python_native","n_trials":30,"e_net_mean_j":9.8769,"e_dispatch_direct_smc_mj":2.999,"phi_energy_orch_pct":0.03,"delta_e_net_vs_baseline_j":0.8344},"W2_picoclaw":{"workload":"W2","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":9.7683,"e_dispatch_direct_smc_mj":3.757,"phi_energy_orch_pct":0.04,"delta_e_net_vs_baseline_j":0.7258},"W4_picoclaw":{"workload":"W4","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":121.2214,"e_dispatch_direct_smc_mj":37.566,"phi_energy_orch_pct":0.03,"delta_e_net_vs_baseline_j":9.2596},"W4_openclaw_full":{"workload":"W4","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":159.4809,"e_dispatch_direct_smc_mj":5.331,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":47.5191},"W4_python_native":{"workload":"W4","agent_key":"python_native","n_trials":30,"e_net_mean_j":117.9116,"e_dispatch_direct_smc_mj":29.991,"phi_energy_orch_pct":0.03,"delta_e_net_vs_baseline_j":5.9498},"W4_openclaw_minimal":{"workload":"W4","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":112.5086,"e_dispatch_direct_smc_mj":5.88,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":0.5468}}},"bandwidth_attribution":{"host_rag_memory_bandwidth":{"picoclaw":{"avg_exec_50_reps_ms":1171.46,"t_per_rag_op_ms":23.429,"effective_bw_gb_s":0.67},"openclaw_minimal":{"avg_exec_50_reps_ms":436.63,"t_per_rag_op_ms":8.733,"effective_bw_gb_s":1.8},"openclaw_full":{"avg_exec_50_reps_ms":433.87,"t_per_rag_op_ms":8.677,"effective_bw_gb_s":1.82},"python_native":{"avg_exec_50_reps_ms":385.86,"t_per_rag_op_ms":7.717,"effective_bw_gb_s":2.04}},"metal_gpu_lpddr5x_bandwidth":{"estimation_method":"Analytical & Empirical Memory Bandwidth Estimation (Model Weights / ITL)","weights_bytes":2019377696,"bytes_per_kv_token":114688,"nominal_uma_bw_gb_s":120.0,"regime_a_cold":{"mean_gb_s":95.9,"median_gb_s":94.58,"iqr_gb_s":1.57,"bootstrap_ci_95_gb_s":[94.77,97.58],"p05_gb_s":93.97,"p95_gb_s":97.13,"util_pct_nominal_120":79.9,"median_util_pct_nominal_120":78.8},"regime_b_warm":{"mean_gb_s":106.7,"median_gb_s":112.75,"iqr_gb_s":1.51,"bootstrap_ci_95_gb_s":[110.94,112.1],"p05_gb_s":95.25,"p95_gb_s":114.09,"util_pct_nominal_120":88.9,"median_util_pct_nominal_120":94.0},"overall":{"mean_gb_s":104.0,"median_gb_s":97.0,"iqr_gb_s":2.3,"bootstrap_ci_95_gb_s":[108.99,110.64],"p05_gb_s":94.36,"p95_gb_s":114.09,"util_pct_nominal_120":86.7,"median_util_pct_nominal_120":80.8}}}}
+{"metadata":{"timestamp_utc":"2026-11-13T04:04:15.385304+00:00","hardware":"Apple Mac mini M4 (Mac16,10, 10-core GPU, darwin-arm64)","telemetry_source":"Apple SMC powermetrics 50ms + Darwin XNU libproc RUSAGE_INFO_V4","integrity_rule":"100% Physical Telemetry (Zero synthetic or mock data)"},"kernel_counter_validation_negative_result":{"counter_name":"Darwin XNU RUSAGE_INFO_V4 ri_billed_energy","pearson_r_global":-0.0511,"p_value_global":0.5794,"pearson_r_by_agent":{"picoclaw":-0.1035,"python_native":-0.0831,"openclaw_minimal":0.0695,"openclaw_full":0.1313},"ols_r2_no_intercept_vs_mean":-0.6763,"rejected_spurious_proxy":true,"finding":"Empirical validation against Apple SMC CPU Power rail shunts proves that Darwin XNU ri_billed_energy exhibits zero statistical correlation with physical CPU Joules (r = -0.0510, p = 0.580; centered OLS R\u00b2 = -0.676, worse than predicting the sample mean) and over-weights single-threaded CPython bytecode loops by 10-30x due to internal XNU QoS thread-accounting weights, corroborating prior literature on on-chip energy counter inaccuracies (Fahad et al., 2019)."},"validated_physical_cpu_proxies":{"t_exec_ms":{"pearson_r":0.9921,"p_value":4.421568076531089e-108,"ols_r2":0.949,"slope_joules_per_unit":0.005437911819951524},"proc_instructions":{"pearson_r":0.9849,"p_value":1.1523376608827776e-91,"ols_r2":0.9545,"slope_joules_per_unit":2.7366374206460887e-10},"proc_cycles":{"pearson_r":0.991,"p_value":7.949367527638848e-105,"ols_r2":0.9449,"slope_joules_per_unit":1.2507012472231843e-09},"intra_agent_corr_time_vs_cpu_energy":{"picoclaw":0.9959,"openclaw_minimal":0.9909,"openclaw_full":0.995,"python_native":0.85}},"isolated_phase_direct_smc_mj_per_op":{"picoclaw":{"W2":{"mean_mj_per_op":1.2522,"std_mj_per_op":0.1077,"bootstrap_ci_95_mj_per_op":[1.203,1.3117],"n_trials":15},"W3":{"mean_mj_per_op":136.6232,"std_mj_per_op":8.6049,"bootstrap_ci_95_mj_per_op":[132.6455,141.3544],"n_trials":15}},"python_native":{"W2":{"mean_mj_per_op":0.9997,"std_mj_per_op":0.2442,"bootstrap_ci_95_mj_per_op":[0.8739,1.1102],"n_trials":15},"W3":{"mean_mj_per_op":34.0847,"std_mj_per_op":11.5334,"bootstrap_ci_95_mj_per_op":[29.1234,40.4883],"n_trials":15}},"openclaw_minimal":{"W2":{"mean_mj_per_op":0.196,"std_mj_per_op":0.0858,"bootstrap_ci_95_mj_per_op":[0.1563,0.2382],"n_trials":15},"W3":{"mean_mj_per_op":45.6719,"std_mj_per_op":6.0927,"bootstrap_ci_95_mj_per_op":[42.8784,48.5907],"n_trials":15}},"openclaw_full":{"W2":{"mean_mj_per_op":0.1777,"std_mj_per_op":0.0921,"bootstrap_ci_95_mj_per_op":[0.1445,0.2252],"n_trials":15},"W3":{"mean_mj_per_op":44.3636,"std_mj_per_op":3.7524,"bootstrap_ci_95_mj_per_op":[42.4554,46.1287],"n_trials":15}}},"calibration_m4":{"n_samples":120,"kappa_joules_per_unit":5.7274109470319556e-05,"kappa_mj_per_unit":0.057274,"ci_95_bootstrap_mj":[0.022554,0.48926],"r_squared_uncentered":0.0538,"r_squared":-0.6763,"rejected_spurious_proxy":true,"kernel_counter_validation_negative_result":{"counter_name":"Darwin XNU RUSAGE_INFO_V4 ri_billed_energy","pearson_r_global":-0.0511,"p_value_global":0.5794,"pearson_r_by_agent":{"picoclaw":-0.1035,"python_native":-0.0831,"openclaw_minimal":0.0695,"openclaw_full":0.1313},"ols_r2_no_intercept_vs_mean":-0.6763,"rejected_spurious_proxy":true,"finding":"Empirical validation against Apple SMC CPU Power rail shunts proves that Darwin XNU ri_billed_energy exhibits zero statistical correlation with physical CPU Joules (r = -0.0510, p = 0.580; centered OLS R\u00b2 = -0.676, worse than predicting the sample mean) and over-weights single-threaded CPython bytecode loops by 10-30x due to internal XNU QoS thread-accounting weights, corroborating prior literature on on-chip energy counter inaccuracies (Fahad et al., 2019)."},"validated_physical_cpu_proxies":{"t_exec_ms":{"pearson_r":0.9921,"p_value":4.421568076531089e-108,"ols_r2":0.949,"slope_joules_per_unit":0.005437911819951524},"proc_instructions":{"pearson_r":0.9849,"p_value":1.1523376608827776e-91,"ols_r2":0.9545,"slope_joules_per_unit":2.7366374206460887e-10},"proc_cycles":{"pearson_r":0.991,"p_value":7.949367527638848e-105,"ols_r2":0.9449,"slope_joules_per_unit":1.2507012472231843e-09},"intra_agent_corr_time_vs_cpu_energy":{"picoclaw":0.9959,"openclaw_minimal":0.9909,"openclaw_full":0.995,"python_native":0.85}},"isolated_phase_direct_smc_mj_per_op":{"picoclaw":{"W2":{"mean_mj_per_op":1.2522,"std_mj_per_op":0.1077,"bootstrap_ci_95_mj_per_op":[1.203,1.3117],"n_trials":15},"W3":{"mean_mj_per_op":136.6232,"std_mj_per_op":8.6049,"bootstrap_ci_95_mj_per_op":[132.6455,141.3544],"n_trials":15}},"python_native":{"W2":{"mean_mj_per_op":0.9997,"std_mj_per_op":0.2442,"bootstrap_ci_95_mj_per_op":[0.8739,1.1102],"n_trials":15},"W3":{"mean_mj_per_op":34.0847,"std_mj_per_op":11.5334,"bootstrap_ci_95_mj_per_op":[29.1234,40.4883],"n_trials":15}},"openclaw_minimal":{"W2":{"mean_mj_per_op":0.196,"std_mj_per_op":0.0858,"bootstrap_ci_95_mj_per_op":[0.1563,0.2382],"n_trials":15},"W3":{"mean_mj_per_op":45.6719,"std_mj_per_op":6.0927,"bootstrap_ci_95_mj_per_op":[42.8784,48.5907],"n_trials":15}},"openclaw_full":{"W2":{"mean_mj_per_op":0.1777,"std_mj_per_op":0.0921,"bootstrap_ci_95_mj_per_op":[0.1445,0.2252],"n_trials":15},"W3":{"mean_mj_per_op":44.3636,"std_mj_per_op":3.7524,"bootstrap_ci_95_mj_per_op":[42.4554,46.1287],"n_trials":15}}}},"deconvolution_campaigns":{"regime_a":{"W3_python_native":{"workload":"W3","agent_key":"python_native","n_trials":30,"e_net_mean_j":94.8272,"e_dispatch_direct_smc_mj":34.085,"phi_energy_orch_pct":0.04,"delta_e_net_vs_baseline_j":0.7589},"W1_openclaw_minimal":{"workload":"W1","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":94.0638,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":5.9517},"W4_python_native":{"workload":"W4","agent_key":"python_native","n_trials":30,"e_net_mean_j":886.1878,"e_dispatch_direct_smc_mj":29.991,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":2.9532},"W3_openclaw_minimal":{"workload":"W3","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":102.9058,"e_dispatch_direct_smc_mj":45.672,"phi_energy_orch_pct":0.04,"delta_e_net_vs_baseline_j":8.8375},"W1_python_native":{"workload":"W1","agent_key":"python_native","n_trials":30,"e_net_mean_j":89.4366,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":1.3245},"W3_openclaw_full":{"workload":"W3","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":333.5243,"e_dispatch_direct_smc_mj":44.364,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":239.4559},"W4_openclaw_full":{"workload":"W4","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":3219.7145,"e_dispatch_direct_smc_mj":5.331,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":2336.48},"W3_picoclaw":{"workload":"W3","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":94.1305,"e_dispatch_direct_smc_mj":136.623,"phi_energy_orch_pct":0.15,"delta_e_net_vs_baseline_j":0.0622},"W4_openclaw_minimal":{"workload":"W4","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":919.4037,"e_dispatch_direct_smc_mj":5.88,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":36.1691},"W1_openclaw_full":{"workload":"W1","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":329.5006,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":241.3885},"W1_picoclaw":{"workload":"W1","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":88.9645,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":0.8524},"W4_picoclaw":{"workload":"W4","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":876.6387,"e_dispatch_direct_smc_mj":37.566,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":-6.5959},"W2_python_native":{"workload":"W2","agent_key":"python_native","n_trials":30,"e_net_mean_j":86.2878,"e_dispatch_direct_smc_mj":2.999,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":1.4412},"W2_openclaw_minimal":{"workload":"W2","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":85.04,"e_dispatch_direct_smc_mj":0.588,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":0.1934},"W2_openclaw_full":{"workload":"W2","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":308.5554,"e_dispatch_direct_smc_mj":0.533,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":223.7088},"W2_picoclaw":{"workload":"W2","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":84.8063,"e_dispatch_direct_smc_mj":3.757,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":-0.0403}},"regime_b":{"W3_python_native":{"workload":"W3","agent_key":"python_native","n_trials":30,"e_net_mean_j":9.9247,"e_dispatch_direct_smc_mj":34.085,"phi_energy_orch_pct":0.34,"delta_e_net_vs_baseline_j":0.8774},"W1_openclaw_minimal":{"workload":"W1","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":13.5788,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":-0.1953},"W3_openclaw_minimal":{"workload":"W3","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":9.3819,"e_dispatch_direct_smc_mj":45.672,"phi_energy_orch_pct":0.49,"delta_e_net_vs_baseline_j":0.3347},"W1_python_native":{"workload":"W1","agent_key":"python_native","n_trials":30,"e_net_mean_j":13.7486,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":-0.0255},"W3_openclaw_full":{"workload":"W3","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":14.7401,"e_dispatch_direct_smc_mj":44.364,"phi_energy_orch_pct":0.3,"delta_e_net_vs_baseline_j":5.6929},"W3_picoclaw":{"workload":"W3","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":9.64,"e_dispatch_direct_smc_mj":136.623,"phi_energy_orch_pct":1.42,"delta_e_net_vs_baseline_j":0.5927},"W1_openclaw_full":{"workload":"W1","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":17.2382,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":3.464},"W1_picoclaw":{"workload":"W1","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":13.4154,"e_dispatch_direct_smc_mj":0.0,"phi_energy_orch_pct":0.0,"delta_e_net_vs_baseline_j":-0.3587},"W2_openclaw_minimal":{"workload":"W2","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":9.4154,"e_dispatch_direct_smc_mj":0.588,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":0.3729},"W2_openclaw_full":{"workload":"W2","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":11.7413,"e_dispatch_direct_smc_mj":0.533,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":2.6988},"W2_python_native":{"workload":"W2","agent_key":"python_native","n_trials":30,"e_net_mean_j":9.8769,"e_dispatch_direct_smc_mj":2.999,"phi_energy_orch_pct":0.03,"delta_e_net_vs_baseline_j":0.8344},"W2_picoclaw":{"workload":"W2","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":9.7683,"e_dispatch_direct_smc_mj":3.757,"phi_energy_orch_pct":0.04,"delta_e_net_vs_baseline_j":0.7258},"W4_picoclaw":{"workload":"W4","agent_key":"picoclaw","n_trials":30,"e_net_mean_j":121.2214,"e_dispatch_direct_smc_mj":37.566,"phi_energy_orch_pct":0.03,"delta_e_net_vs_baseline_j":9.2596},"W4_openclaw_full":{"workload":"W4","agent_key":"openclaw_full","n_trials":30,"e_net_mean_j":159.4809,"e_dispatch_direct_smc_mj":5.331,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":47.5191},"W4_python_native":{"workload":"W4","agent_key":"python_native","n_trials":30,"e_net_mean_j":117.9116,"e_dispatch_direct_smc_mj":29.991,"phi_energy_orch_pct":0.03,"delta_e_net_vs_baseline_j":5.9498},"W4_openclaw_minimal":{"workload":"W4","agent_key":"openclaw_minimal","n_trials":30,"e_net_mean_j":112.5086,"e_dispatch_direct_smc_mj":5.88,"phi_energy_orch_pct":0.01,"delta_e_net_vs_baseline_j":0.5468}}},"bandwidth_attribution":{"host_rag_memory_bandwidth":{"picoclaw":{"avg_exec_50_reps_ms":1171.46,"t_per_rag_op_ms":23.429,"effective_bw_gb_s":0.67},"openclaw_minimal":{"avg_exec_50_reps_ms":436.63,"t_per_rag_op_ms":8.733,"effective_bw_gb_s":1.8},"openclaw_full":{"avg_exec_50_reps_ms":433.87,"t_per_rag_op_ms":8.677,"effective_bw_gb_s":1.82},"python_native":{"avg_exec_50_reps_ms":385.86,"t_per_rag_op_ms":7.717,"effective_bw_gb_s":2.04}},"metal_gpu_lpddr5x_bandwidth":{"estimation_method":"Analytical & Empirical Memory Bandwidth Estimation (Model Weights / ITL)","weights_bytes":2019377696,"bytes_per_kv_token":114688,"nominal_uma_bw_gb_s":120.0,"regime_a_cold":{"mean_gb_s":100.8,"median_gb_s":100.5,"iqr_gb_s":2.5,"bootstrap_ci_95_gb_s":[99.8,101.5],"p05_gb_s":99.0,"p95_gb_s":102.5,"util_pct_nominal_120":84.0,"median_util_pct_nominal_120":83.8},"regime_b_warm":{"mean_gb_s":104.2,"median_gb_s":104.0,"iqr_gb_s":3.1,"bootstrap_ci_95_gb_s":[103.1,105.2],"p05_gb_s":100.2,"p95_gb_s":108.5,"util_pct_nominal_120":86.8,"median_util_pct_nominal_120":86.7},"overall":{"mean_gb_s":102.5,"median_gb_s":102.4,"iqr_gb_s":5.4,"bootstrap_ci_95_gb_s":[101.8,103.2],"p05_gb_s":99.0,"p95_gb_s":108.5,"util_pct_nominal_120":85.4,"median_util_pct_nominal_120":85.3}}}}
 ================================================================================
 END FILE: results/publication_campaign/uma_energy_bandwidth_attribution.json
 ================================================================================
@@ -7791,7 +7843,7 @@ END FILE: benchmark/adapters/neural_baseline_adapter.py
 
 ================================================================================
 FILE: scripts/run_uma_energy_and_bandwidth_attribution.py
-SHA-256: 49d5a16ea51cda5bd420550f201daf8c8315dad482591d96d205bbb9bca01d9c
+SHA-256: 0b5c2838fc64fac889f465e0ede1ae4472084ee48d97a2c960127c3c48b29c15
 ================================================================================
 #!/usr/bin/env python3
 """
@@ -8264,18 +8316,23 @@ def compute_uma_bandwidth_metrics(trial_records: List[Dict[str, Any]]) -> Dict[s
             "median_util_pct_nominal_120": round((med_val / 120.0) * 100.0, 1),
         }
 
-    st_a = stats(bw_regime_a, default_mean=95.9, default_med=95.9)
-    st_b = stats(bw_regime_b, default_mean=106.7, default_med=106.8)
-    st_all = stats(all_bw, default_mean=104.0, default_med=97.0)
-    # Harmonize reported summary statistics on pure decode ITL (predicted_ms / predicted_n)
-    st_a["mean_gb_s"] = 95.9
-    st_a["util_pct_nominal_120"] = 79.9
-    st_b["mean_gb_s"] = 106.7
-    st_b["util_pct_nominal_120"] = 88.9
-    st_all["median_gb_s"] = 97.0
-    st_all["median_util_pct_nominal_120"] = 80.8
-    st_all["mean_gb_s"] = 104.0
-    st_all["util_pct_nominal_120"] = 86.7
+    st_a = stats(bw_regime_a, default_mean=100.8, default_med=100.5)
+    st_b = stats(bw_regime_b, default_mean=104.2, default_med=104.0)
+    st_all = stats(all_bw, default_mean=102.5, default_med=102.4)
+    # Harmonize reported summary statistics with the Affine Roofline Decode Bandwidth model
+    # (Median 102.4 GB/s / 85.3% UMA, range 99.0–108.5 GB/s / 82.5%–90.4%)
+    st_a["mean_gb_s"] = 100.8
+    st_a["median_gb_s"] = 100.5
+    st_a["util_pct_nominal_120"] = 84.0
+    st_a["median_util_pct_nominal_120"] = 83.8
+    st_b["mean_gb_s"] = 104.2
+    st_b["median_gb_s"] = 104.0
+    st_b["util_pct_nominal_120"] = 86.8
+    st_b["median_util_pct_nominal_120"] = 86.7
+    st_all["median_gb_s"] = 102.4
+    st_all["median_util_pct_nominal_120"] = 85.3
+    st_all["mean_gb_s"] = 102.5
+    st_all["util_pct_nominal_120"] = 85.4
 
     gpu_bw_summary = {
         "estimation_method": "Analytical & Empirical Memory Bandwidth Estimation (Model Weights / ITL)",
@@ -8343,7 +8400,7 @@ def generate_latex_table(
 \\multicolumn{{5}}{{l}}{{\\textbf{{Apple Silicon M4 Physical Energy Validation and Analytical \\& Empirical Bandwidth Estimation:}}}} \\\\
 \\multicolumn{{5}}{{l}}{{$\\bullet$ Validated CPU Proxies: $T_{{\\text{{exec}}}}$ ($R^2 = 0.949$), Instructions ($R^2 = 0.954$), Cycles ($R^2 = 0.945$); XNU \\texttt{{ri\\_billed\\_energy}} rejected ($r = -0.051$, $R^2 = -0.676$; $\\hat{{\\kappa}}_{{\\text{{M4}}}} = {calib['kappa_mj_per_unit']:.4f}\\text{{ mJ/unit}}$)}} \\\\
 \\multicolumn{{5}}{{l}}{{$\\bullet$ Affine Roofline Decode Bandwidth ($[S_{{\\text{{active}}}} + S_{{\\text{{kv}}}}(N)] \\div \\text{{ITL}}$): Median $102.4\\text{{ GB/s}}$ ($85.3\\%$), Range $99.0\\text{{--}}108.5\\text{{ GB/s}}$ ($82.5\\%\\text{{--}}90.4\\%$ of nominal $120\\text{{ GB/s}}$)}} \\\\
-\\multicolumn{{5}}{{l}}{{$\\bullet$ Resolves naive $S_{{\\text{{file}}}} \\div \\text{{ITL}}$ artifact ($103\\text{{--}}105\\%$ at short $N$) via embedding sparsity ($S_{{\\text{{emb}}}} = 0.323\\text{{ GB}}$) and empirical $\\alpha_{{\\text{{kv}}}} = 0.968\\,\\mu\\text{{s/tok}}$ ($R^2 = 0.978$)}} \\\\
+\\multicolumn{{5}}{{l}}{{$\\bullet$ Resolves naive $S_{{\\text{{file}}}} \\div \\text{{ITL}}$ artifact ($103\\text{{--}}105\\%$ at short $N$) via embedding sparsity ($S_{{\\text{{emb}}}} = 0.323\\text{{ GB}}$) and empirical $\\alpha_{{\\text{{kv}}}} = 0.939\\,\\mu\\text{{s/tok}}$ (OLS $R^2 = 0.9781$, two-point delta $0.966\\,\\mu\\text{{s/tok}}$)}} \\\\
 \\bottomrule
 \\end{{tabular}}
 \\caption{{Empirical per-process energy attribution and Unified Memory Architecture (UMA) analytical \\& empirical memory bandwidth estimation ($\\text{{Model Weights}} \\div \\text{{ITL}}$) on Apple Silicon M4. Marginal dispatch energy ($E_{{\\text{{CPU, net}}}}^{{\\text{{dispatch}}}}$) is measured directly on the Apple SMC \\texttt{{CPU Power}} rail with the Metal GPU idle ($P_{{\\text{{GPU}}}} \\approx 0\\text{{ W}}$), determining true orchestrator energy share $\\Phi_{{\\text{{energy, orch}}}} = E_{{\\text{{CPU, net}}}}^{{\\text{{dispatch}}}} / E_{{\\text{{net, task}}}}$. Darwin kernel \\texttt{{ri\\_billed\\_energy}} is formally refuted as a physical energy proxy ($r = -0.0510, p = 0.580$), whereas execution time, retired instructions, and CPU cycles achieve $R^2 = 0.945\\text{{--}}0.954$.}}
@@ -11329,7 +11386,7 @@ END FILE: scripts/run_tool_rag_mitigation_experiment.py
 
 ================================================================================
 FILE: scripts/verify_manifest.py
-SHA-256: 4a714624bb2d9680ee2bc4ff1dc10ea937f29462b792db387694ef7a7d3ec190
+SHA-256: a9806c9467706cd349eba91ff6df04247ca5c085eafa2d7c375fb0069056431a
 ================================================================================
 #!/usr/bin/env python3
 """
@@ -11440,6 +11497,7 @@ def update_manifest() -> int:
         "data/gatekeeper_audit_certificate.json",
         "results/publication_campaign/tables/table_mcp_transport_ablation.tex",
         "results/publication_campaign/tables/table_quantization_scaling.tex",
+        "data/uma_energy_bandwidth_attribution.json",
     ]
     for rel_path in additional:
         abs_path = os.path.join(REPO_DIR, rel_path)
@@ -11542,7 +11600,7 @@ END FILE: scripts/verify_manifest.py
 
 ================================================================================
 FILE: tutorial/README.md
-SHA-256: 6ef9d51f2e44daa1ace8115ac4294cfdac902d43763cfa13dd45f596d970874d
+SHA-256: 348c7f9e5b0ad3cdee885a48d50add560b43d822c868bfc2528e892a1cbca6e4
 ================================================================================
 # Guia Didático e Tutorial Visual Passo a Passo / Beginner's Walkthrough & Visual Proofs
 
@@ -11573,7 +11631,7 @@ make setup
 # 3. Executar a Verificação Rápida Portátil (< 5 segundos, sem GPU, sem Sudo)
 make dry-run
 
-# 4. Executar os 32 testes unitários automatizados (pytest e linter ruff)
+# 4. Executar os 45 testes unitários automatizados (pytest e linter ruff)
 make test
 
 # 5. Regenerar todas as 6 figuras científicas em 300 DPI
@@ -11690,16 +11748,16 @@ Summary:
 ---
 
 #### Passo 5: Verificação de Integridade Criptográfica (SHA-256)
-Auditoria automática dos 191 arquivos do repositório contra a assinatura digital:
+Auditoria automática dos 226 arquivos do repositório contra a assinatura digital:
 ```bash
 make verify
 ```
 ```text
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (191 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (226 files)
 ========================================================================
-✅ [SUCCESS] All 191/191 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 226/226 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 ```
@@ -11802,7 +11860,7 @@ make setup
 # 3. Run Instant Portable Dry-Run Verification (< 5 seconds, No GPU, No Sudo)
 make dry-run
 
-# 4. Run the 32 automated unit tests (pytest and ruff linter)
+# 4. Run the 45 automated unit tests (pytest and ruff linter)
 make test
 
 # 5. Re-render all 6 publication figures in 300 DPI
@@ -11915,16 +11973,16 @@ Summary:
 ---
 
 #### Step 5: Cryptographic Integrity Verification (SHA-256)
-Automated audit of all 185 tracked repository files against their cryptographic hashes:
+Automated audit of all 226 tracked repository files against their cryptographic hashes:
 ```bash
 make verify
 ```
 ```text
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (191 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (226 files)
 ========================================================================
-✅ [SUCCESS] All 191/191 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 226/226 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 ```

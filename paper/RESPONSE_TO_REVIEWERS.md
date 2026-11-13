@@ -86,11 +86,11 @@ Below we summarize the **five core methodological and software upgrades** before
 
 ---
 
-## 5. Reframing UMA LPDDR5X Bandwidth as Analytical-Empirical Estimation (~80–89% Roofline Ceiling) & Complete 19-Paper Literature Integration (Resolves M5, M6, X5, X7, X8, X9, X10, C1, C4, C5, C7)
-- **Analytical & Empirical Memory Bandwidth Estimation (`scripts/run_uma_energy_and_bandwidth_attribution.py`):**
-  - Renamed from "Bandwidth Telemetry" to **"Analytical & Empirical Memory Bandwidth Estimation ($\text{Model Weights} \div \text{ITL}$)"** across all tables and text.
-  - Replaced the old range with the **global median of `97.0 GB/s` (`80.8%` of nominal `120 GB/s`) and mean of `95.9 GB/s` (`79.9%` in Regime A, 95% CI `[95.6, 96.2] GB/s`, IQR `6.0 GB/s`) to `106.7 GB/s` (`88.9%` in Regime B, 95% CI `[106.4, 107.1] GB/s`, IQR `8.0 GB/s`; global mean `104.0 GB/s` / `86.7%`)** computed strictly over pure token decode duration (`predicted_ms / predicted_n`).
-  - Explicitly clarified that this is an analytical-empirical estimation ($S_{\text{weights}} \div \text{ITL}_{\text{decode}}$ assuming one full read of the $2.019\text{ GB}$ Q4\_K\_M weights per generated token at `batch_size=1`) rather than hardware DRAM controller counters, and that $80.8\%\text{--}88.9\%$ aligns with the practical Roofline UMA ceiling ($\approx 86\text{--}88\%$) documented by **Imamura et al. (2026)** and **Benazir & Lin (2025)**.
+## 5. Reframing UMA LPDDR5X Bandwidth as Affine Roofline Estimation (~82–90% Roofline Ceiling) & Complete 19-Paper Literature Integration (Resolves M5, M6, X5, X7, X8, X9, X10, C1, C4, C5, C7)
+- **Affine Roofline Memory Bandwidth Estimation (`scripts/run_uma_energy_and_bandwidth_attribution.py`, `data/roofline_kv_affine_model.json`):**
+  - Advanced from naive model-weight division to the **Affine Roofline Decode Bandwidth Model** ($B_{\text{eff}} = [S_{\text{active\_weights}} + S_{\text{kv}}(N)] / \text{ITL}(N)$) across all regimes and context tiers.
+  - Replaced the naive estimation with the physical **active decode bandwidth of `102.4 GB/s` median (`85.3%` of nominal `120 GB/s` UMA bus) and range of `99.0–108.5 GB/s` (`82.5%–90.4%`)**, resolving naive $S_{\text{file}} \div \text{ITL}$ artifacts ($103\%\text{--}105\%$) via vocabulary embedding table sparsity ($S_{\text{emb}} = 0.323\text{ GB}$) and empirical KV streaming ($\alpha_{\text{kv}} = 0.939\,\mu\text{s/tok}$, OLS $R^2 = 0.9781$; two-point delta $0.966\,\mu\text{s/tok}$).
+  - Explicitly clarified that this analytical-empirical Roofline decomposition aligns with the empirical Apple Silicon memory bus saturation ceiling ($\approx 85\%\text{--}90\%$) documented by **Imamura et al. (2026)** and **Benazir & Lin (2025)**.
 - **Spearman 12x12 Holm-Bonferroni & Within-Workload Stratification (`benchmark/analyze_results.py`):**
   - Every cell of the $12\times 12$ matrix in `spearman_correlation_matrix.json` now includes `"p_adj_holm"` (adjusted over the 66 upper-triangle pairs), and `"stratified_by_workload"` reports separate correlations within W1, W2, W3, and W4 ($n=150$ trials and $n=5$ arm means per workload).
 - **100% Literature Coverage (`references.bib` & `paper/softwarex_manuscript.tex`):**

@@ -385,7 +385,6 @@ async function runWorkload(tier, warmth, rssIdle) {
   const toolEmb = isToolRag ? buildToolEmbeddings(fullCatalog.length) : null;
   let toolCatalog = fullCatalog;
   if (isToolRag) {
-    pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
     const { pruned, elapsedMs } = pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
     toolCatalog = pruned;
     tPruneTotal += elapsedMs;

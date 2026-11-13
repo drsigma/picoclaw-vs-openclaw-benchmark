@@ -3,35 +3,30 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2A: CODIGO-FONTE NUCLEO, TELEMETRIA, INVARIANTES E ADAPTADORES
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T17:23:40.966782+00:00
-Git HEAD: f4b6a40d6199c8c2930d88d2439e841097f2c3ec
+Data de Geracao (UTC): 2026-11-13T18:05:25.158560+00:00
+Git HEAD: a3004953860f471ca3e40a7d3a2f9f118ce08ae4
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
 BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
+ M benchmark/openclaw_orch.mjs
+ M data/gatekeeper_audit_certificate.json
  M data/manifest_sha256.json
+ M paper/COVER_LETTER.md
+ M paper/HIGHLIGHTS.md
+ M paper/RESPONSE_TO_REVIEWERS.md
  M paper/softwarex_manuscript.tex
- M references.bib
- M scripts/run_cross_hardware_replica.py
+ M results/publication_campaign/gatekeeper_audit_certificate.json
+ M results/publication_campaign/tables/macros_empirical.tex
+ M results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
+ M results/publication_campaign/uma_energy_bandwidth_attribution.json
+ M scripts/export_audit_bundle.py
+ M scripts/run_uma_energy_and_bandwidth_attribution.py
  M scripts/verify_manifest.py
- M src/telemetry_backend.py
- M tests/test_artifact_consistency.py
-?? benchmark/mcp_server.py
-?? data/gatekeeper_audit_certificate.json
-?? data/mcp_live_transport_ablation.json
-?? data/mcp_live_transport_trials.jsonl
-?? data/quantization_scaling_ablation.json
-?? results/publication_campaign/gatekeeper_audit_certificate.json
-?? results/publication_campaign/mcp_live_transport_ablation.json
-?? results/publication_campaign/quantization_scaling_ablation.json
-?? results/publication_campaign/tables/table_mcp_transport_ablation.tex
-?? results/publication_campaign/tables/table_quantization_scaling.tex
-?? scripts/audit_submission_gatekeeper.py
-?? scripts/run_cross_hardware_replica.ps1
-?? scripts/run_mcp_live_transport_ablation.py
-?? scripts/run_quantization_scaling_ablation.py
+ M tutorial/README.md
+?? data/uma_energy_bandwidth_attribution.json
 ================================================================================
 
 
@@ -1850,7 +1845,7 @@ END FILE: benchmark/picoclaw_orch.go
 
 ================================================================================
 FILE: benchmark/openclaw_orch.mjs
-SHA-256: 6f47ae815bf3c9fac0c92122c9698f467f4f7cc03b02477e20eca16ffdf1dc34
+SHA-256: 531d5e1c6a07034515b7c1537b6022da06909ef9e3e3533a14e6da6ed71a8a29
 ================================================================================
 #!/usr/bin/env node
 /**
@@ -2239,7 +2234,6 @@ async function runWorkload(tier, warmth, rssIdle) {
   const toolEmb = isToolRag ? buildToolEmbeddings(fullCatalog.length) : null;
   let toolCatalog = fullCatalog;
   if (isToolRag) {
-    pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
     const { pruned, elapsedMs } = pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
     toolCatalog = pruned;
     tPruneTotal += elapsedMs;

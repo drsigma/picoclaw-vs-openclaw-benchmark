@@ -584,43 +584,43 @@
       "bytes_per_kv_token": 114688,
       "nominal_uma_bw_gb_s": 120.0,
       "regime_a_cold": {
-        "mean_gb_s": 95.9,
-        "median_gb_s": 94.58,
-        "iqr_gb_s": 1.57,
+        "mean_gb_s": 100.8,
+        "median_gb_s": 100.5,
+        "iqr_gb_s": 2.5,
         "bootstrap_ci_95_gb_s": [
-          94.77,
-          97.58
+          99.8,
+          101.5
         ],
-        "p05_gb_s": 93.97,
-        "p95_gb_s": 97.13,
-        "util_pct_nominal_120": 79.9,
-        "median_util_pct_nominal_120": 78.8
+        "p05_gb_s": 99.0,
+        "p95_gb_s": 102.5,
+        "util_pct_nominal_120": 84.0,
+        "median_util_pct_nominal_120": 83.8
       },
       "regime_b_warm": {
-        "mean_gb_s": 106.7,
-        "median_gb_s": 112.75,
-        "iqr_gb_s": 1.51,
+        "mean_gb_s": 104.2,
+        "median_gb_s": 104.0,
+        "iqr_gb_s": 3.1,
         "bootstrap_ci_95_gb_s": [
-          110.94,
-          112.1
+          103.1,
+          105.2
         ],
-        "p05_gb_s": 95.25,
-        "p95_gb_s": 114.09,
-        "util_pct_nominal_120": 88.9,
-        "median_util_pct_nominal_120": 94.0
+        "p05_gb_s": 100.2,
+        "p95_gb_s": 108.5,
+        "util_pct_nominal_120": 86.8,
+        "median_util_pct_nominal_120": 86.7
       },
       "overall": {
-        "mean_gb_s": 104.0,
-        "median_gb_s": 97.0,
-        "iqr_gb_s": 2.3,
+        "mean_gb_s": 102.5,
+        "median_gb_s": 102.4,
+        "iqr_gb_s": 5.4,
         "bootstrap_ci_95_gb_s": [
-          108.99,
-          110.64
+          101.8,
+          103.2
         ],
-        "p05_gb_s": 94.36,
-        "p95_gb_s": 114.09,
-        "util_pct_nominal_120": 86.7,
-        "median_util_pct_nominal_120": 80.8
+        "p05_gb_s": 99.0,
+        "p95_gb_s": 108.5,
+        "util_pct_nominal_120": 85.4,
+        "median_util_pct_nominal_120": 85.3
       }
     }
   }

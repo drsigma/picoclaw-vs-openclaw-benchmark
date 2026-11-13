@@ -145,7 +145,7 @@ def generate_bundle():
             os.remove(p)
             print(f"🧹 Cleaned legacy file: {p}")
 
-    # PARTE 1: Manuscrito, Resposta aos Revisores, Bibliografia, Governanca e 7 Tabelas LaTeX + Macros
+    # PARTE 1: Manuscrito, Resposta aos Revisores, Bibliografia, Governanca e 9 Tabelas LaTeX + Macros
     part1_files = [
         "paper/RESPONSE_TO_REVIEWERS.md",
         "paper/softwarex_manuscript.tex",
@@ -162,13 +162,15 @@ def generate_bundle():
         "results/publication_campaign/tables/table_spearman_correlation.tex",
         "results/publication_campaign/tables/table_pca_loadings.tex",
         "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex",
+        "results/publication_campaign/tables/table_mcp_transport_ablation.tex",
+        "results/publication_campaign/tables/table_quantization_scaling.tex",
         "results/publication_campaign/tables/macros_empirical.tex",
     ]
 
     seen_p1: Set[str] = set()
     p1_sections = [
         build_header("PARTE 1: RESPOSTA AOS REVISORES, MANUSCRITO .TEX, BIBLIOGRAFIA E TABELAS LATEX"),
-        "=" * 80 + "\nSECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 7 TABELAS LATEX + MACROS\n" + "=" * 80 + "\n",
+        "=" * 80 + "\nSECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 9 TABELAS LATEX + MACROS\n" + "=" * 80 + "\n",
     ]
     for f in part1_files:
         block = dump_file(f, seen_p1)
@@ -309,7 +311,7 @@ def generate_bundle():
     seen_unified: Set[str] = set()
     unified_sections = [
         build_header("PACOTE UNIFICADO COMPLETO (PARTE 1 + PARTE 2A + 2B + 2C + 2D)"),
-        "=" * 80 + "\nSECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 7 TABELAS LATEX + MACROS\n" + "=" * 80 + "\n",
+        "=" * 80 + "\nSECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 9 TABELAS LATEX + MACROS\n" + "=" * 80 + "\n",
     ]
     for f in part1_files:
         block = dump_file(f, seen_unified)
