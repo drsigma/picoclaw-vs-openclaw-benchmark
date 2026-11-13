@@ -3,15 +3,43 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2B: MANIFESTO CRIPTOGRAFICO SHA-256 E JSONS DE RESULTADOS
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T15:53:23.120904+00:00
-Git HEAD: e799c9dfecc30ef39b7918f40322780fe3c2ccf0
+Data de Geracao (UTC): 2026-11-13T17:07:58.112087+00:00
+Git HEAD: 32b16d92b7c9df80dc1afbf19b3275b3b7d09c56
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
 BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
-(clean working tree)
+ M data/manifest_sha256.json
+ M paper/softwarex_manuscript.tex
+ M pyproject.toml
+ M results/publication_campaign/prefill_ablation.jsonl
+ M results/publication_campaign/tables/macros_empirical.tex
+ M results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
+ M results/publication_campaign/tool_rag_mitigation_trials.jsonl
+ M results/publication_campaign/uma_energy_bandwidth_trials.jsonl
+ M scripts/run_prefill_ablation.py
+ M scripts/run_tool_rag_mitigation_experiment.py
+ M scripts/run_uma_energy_and_bandwidth_attribution.py
+ M scripts/verify_manifest.py
+ M tests/test_artifact_consistency.py
+ M tests/test_telemetry_parser.py
+?? data/external_framework_langchain_summary.json
+?? data/external_framework_langchain_trials.jsonl
+?? data/harness_self_overhead.json
+?? data/roofline_kv_affine_model.json
+?? extensions/
+?? results/publication_campaign/external_framework_langchain_summary.json
+?? results/publication_campaign/external_framework_langchain_trials.jsonl
+?? results/publication_campaign/harness_self_overhead.json
+?? results/publication_campaign/roofline_kv_affine_model.json
+?? scripts/analyze_roofline_and_kv_scaling.py
+?? scripts/measure_harness_self_overhead.py
+?? scripts/run_cross_hardware_replica.py
+?? scripts/run_cross_hardware_replica.sh
+?? scripts/run_external_framework_langchain_benchmark.py
+?? src/
 ================================================================================
 
 
@@ -21,7 +49,7 @@ SECAO 2B: MANIFESTO CRIPTOGRAFICO SHA-256 E TABELAS JSON INTEGRAIS DE METADADOS 
 
 ================================================================================
 FILE: data/manifest_sha256.json
-SHA-256: a69a320530c7b2002cd08c18b655a3e9f8ae34e65154aa7f0c9cae49e65eb69a
+SHA-256: a3e7e054376cd0106788e7555d65962ae605104b5b0f5174f0507e01a7adc15b
 ================================================================================
 {
   ".gitignore": "c1ec473fa2d005bc84ce26bba4f90a4d5bdb9ea5c9b229870099d0fc55521da8",
@@ -50,6 +78,8 @@ SHA-256: a69a320530c7b2002cd08c18b655a3e9f8ae34e65154aa7f0c9cae49e65eb69a
   "benchmark/python_orch.py": "de0daf4b27e04e80147d71f9bb0ad948e00e9d38352bed843ef4aff2a8ba9f27",
   "benchmark/run_unified_benchmark.py": "1951ceefff032817acf7d7e831e3fc371a9a390d04ca4c076ff0b6f18fd5afb3",
   "benchmark/telemetry.py": "86f63d9c3003190e42a514e49195f775fbcf09c9be5cdab318650cfbef1be1d5",
+  "data/external_framework_langchain_summary.json": "7ca338a87ff63d9b3829286d863b0569099db65292416fd6e14221469588ae05",
+  "data/harness_self_overhead.json": "a9d268e7f12d3f343f56972d401d47461043c9c07a81596b513762d4a9ea7c83",
   "data/llama_server_stdout.log": "d85a6b346d862a95726b12a4cd4235a34fc540f08ee8e58b5aad005d57bb83fd",
   "data/pm_open_run.json": "c32c08f976a3117eda5031c926aff41f53fc927f6a724ae9421d5a5d59b6474f",
   "data/pm_pico_run.json": "d63b5dadd4a583e345cfd184c7cba4ab4e3cae9399583bd60e1871551dcf7bc6",
@@ -58,6 +88,7 @@ SHA-256: a69a320530c7b2002cd08c18b655a3e9f8ae34e65154aa7f0c9cae49e65eb69a
   "data/powermetrics_parsed.json": "5fa3bbd419b131d121b559fc84fb120f9e81e28bafca415a805e66c77c032699",
   "data/powermetrics_picoclaw.txt": "961c2b1020f38e54cc60dfc6ce1cb87ad18bd2fa0e3f1e3b7e8631b204ffc707",
   "data/privileged_quiescence.log": "e7884d929e500781fa4d7735223641cf954233e8c80470b7cd04b9ef98a13a81",
+  "data/roofline_kv_affine_model.json": "4d61e1716fb4db6bdf07a29fcdfe87518c2dba63e5539eb8685d372c561f9332",
   "data/workload_data/b_proj.bin": "b7040ce250486facddfcaf9109c7e49b6059c6f6dba94885de043ccb18874f26",
   "data/workload_data/doc_embeddings.bin": "36f284b471643c5b81efc189513a16cccf7ed870a2952252d800fd1895b873f1",
   "data/workload_data/embedding_head_100k.npz": "fa58192f64d329ed882754c0e0c9fdce1d85e372d98c70cd217c643adb1f2886",
@@ -134,6 +165,7 @@ SHA-256: a69a320530c7b2002cd08c18b655a3e9f8ae34e65154aa7f0c9cae49e65eb69a
   "docs/10_TECNOLOGIAS_BIBLIOTECAS_E_FERRAMENTAS_PT.md": "4a2bf4bb13f44995c77ee676af1754854afc11d63360cfffb3eeb5a412db9a7e",
   "docs/11_CODE_EXPLANATION_AND_MATHEMATICAL_CALCULATIONS_EN.md": "ef9f62c0237a96c1c29f64fc4831ebd92dfbaee0b987a6b639cfc38adebbb168",
   "docs/11_EXPLICACAO_DOS_CODIGOS_E_CALCULOS_MATEMATICOS_PT.md": "57ddb34172c8fee3bd09db538fa6aff5e7794149f0689a5a70627ed9cfa1f8bc",
+  "extensions/langchain_adapter/langchain_orch.py": "acd467bc9065b0588331d53be380b17fdedf5ef2cd3063263712402f80fc22a6",
   "figures/fig1_architecture_topology.png": "927967882c837d5e48b1a6dac2ee38a6357454ffd013f0e5976fbec45bfc0b46",
   "figures/fig2_exp1_cold_start_rss.png": "f7a75023886e7ceb7363ca9e4ffc1cc77fd154d7411d377568aa2c8aea48c370",
   "figures/fig3_exp2_latency_overhead.png": "9f30c427bf54063611b8d43e230ad092bafed3a683d11b4d442bdd798eff5d27",
@@ -143,8 +175,8 @@ SHA-256: a69a320530c7b2002cd08c18b655a3e9f8ae34e65154aa7f0c9cae49e65eb69a
   "paper/COVER_LETTER.md": "2edbbae72ed6ba287bab6ca8c7e8687395c1bb58fb1bc987734bd7e1023938b3",
   "paper/HIGHLIGHTS.md": "1126184563f2e008481a847fd2de138ffe125d7894b0cf46fd76e9de1cb37216",
   "paper/RESPONSE_TO_REVIEWERS.md": "318c9d196dd537bda4c52633e11fb3388f9e3b935a5735ae5f9c9fdc6e8841aa",
-  "paper/softwarex_manuscript.tex": "cf0065f2f4a477473698985afb9a05097a4433061fe4e67eedf28d7f903e5abb",
-  "pyproject.toml": "968c81a365bf5b593749ba710f8a42918045462c763f7717bed4584bd8efc9cd",
+  "paper/softwarex_manuscript.tex": "520643b37db4c6500bde6c6278cf6d4a9a51b4ff0a1db95e928f7281ce677044",
+  "pyproject.toml": "afb046e7d38021b39e7d3d3e6d9d1c114697916d12892809862f413cbd2e5583",
   "references.bib": "a5d2271405f2044a744c4a63b3f54600e9869d4fe364acaed3f4b8567d62055e",
   "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.docx": "588fc20fba5098d0c2e45aaf5a5582d6a44b29a4021de8801e2957e349323b12",
   "reports/CCM313-EEI203-project-workplan-Rafael-Paniccia-Cassetta-revised.pdf": "e67b9a3f67a6e8ec62a57caf154b078e2afe9b3b821f2be1a32b5d8e3988cf54",
@@ -182,16 +214,16 @@ SHA-256: a69a320530c7b2002cd08c18b655a3e9f8ae34e65154aa7f0c9cae49e65eb69a
   "results/publication_campaign/llama_server_publication.log": "34872dd81352b3b1c91fb3b090234f1745bbc84b8f62370519b711f3c27c22a0",
   "results/publication_campaign/pca_variance_decomposition.json": "930eaf4fb847b92e2d8505e99637f59659898dcf5b13806ebc4dc3035dfe9a67",
   "results/publication_campaign/powermetrics_publication_sample.txt": "d6699f5488281b59e2412310e4aa633d4934f9a91a82a65fe24eaadece09d46a",
-  "results/publication_campaign/prefill_ablation.jsonl": "af578cc8df26fcb831a948555e399822a75c8020e0c8e5abc3b70aeb31c0358a",
+  "results/publication_campaign/prefill_ablation.jsonl": "e22b701029232e65e72c2a4070b7f9f440b846efab3355a5897576398f677c14",
   "results/publication_campaign/prefill_regression_fit.json": "7d8df2472d97b53a07843f104e0c9ed2c6b5a75bb07c63ebd90cd51f3183b8fc",
   "results/publication_campaign/raw_trials.jsonl": "596fff28f29cdea03c1ce19698daa4ecbabb94495f0bd82e5e657036a92d9613",
   "results/publication_campaign/sensitivity_and_outlier_analysis.json": "36be11a86943f7df3f32b19ef28b93ff4b5da1f05d49d7b86766df21648d3f92",
   "results/publication_campaign/spearman_correlation_matrix.json": "a1f6e4148281db2840f2a613bc8ff22590b26c6a08cddac7b9af91e1022f0b1c",
   "results/publication_campaign/statistical_tests.json": "1dc6ddb27fb5aed78d807bb3c7409fd15f3a6717dc367f3d3d127b912711cac6",
   "results/publication_campaign/summary_statistics.json": "8e4ac7592e5cacf4b142cb5e4a94e1d656f60ea42707e68fcf43e8a2c1fa2c55",
-  "results/publication_campaign/tables/macros_empirical.tex": "cf20e8fd93fa96cb96c5ddd647bf14f1fb089cf2b6f2ce8ab86bdccb4a5bdca7",
+  "results/publication_campaign/tables/macros_empirical.tex": "628559ec4f457a8856580139dc17cfcf43906ffdc1f3b524d3a3046861456791",
   "results/publication_campaign/tables/metrics_summary.csv": "3db814331d665fd761eea3e441522f80f7a5522bea3e4b781247e05abf0824c9",
-  "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex": "56c006b9db072bdda65971aee1f29819220ddf1de39af2cf5a8963f5be40be42",
+  "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex": "af754bccc260da9cd70fdda3c841e5548a48a2c03bca1346660a617846db6aea",
   "results/publication_campaign/tables/table_journal_ablation.tex": "1c374027174650923d4b000df421d6dd24c5ebe542ce63ded7479889a31e71ea",
   "results/publication_campaign/tables/table_pca_loadings.tex": "4ab9b2e23c83acbc6e7dac35b6b1995e2f45799275e3afdb92968209a04d9ca8",
   "results/publication_campaign/tables/table_prefill_ablation.tex": "5d493233f483dde2345cdd0626955afa08161adee70f2230b094fdabac8ab181",
@@ -199,35 +231,41 @@ SHA-256: a69a320530c7b2002cd08c18b655a3e9f8ae34e65154aa7f0c9cae49e65eb69a
   "results/publication_campaign/tables/table_tool_rag_mitigation.tex": "7a50a0eae14333dffb6533b250dc07a7c505b759d1cf735e35739718e0830fdf",
   "results/publication_campaign/tables/table_warm_cache.tex": "5a4fbe5d3a233f7895c70329cb64e0b086929bb579f6813a1beb8a01142b6ed8",
   "results/publication_campaign/tool_rag_mitigation_summary.json": "451ccd825604a3f6557b8ff7a687ee1362d454e30d58b700a6fdff0553ca1e87",
-  "results/publication_campaign/tool_rag_mitigation_trials.jsonl": "eb15c8ebb0047dd9c10a6a9596d5b8becfde4fb7757fc72ad2c9e66ef75d4f78",
+  "results/publication_campaign/tool_rag_mitigation_trials.jsonl": "05d0d549f3b798b7a5613dbfdd431d9a5a8eb16513e47fb9f2d799ce342ca9ca",
   "results/publication_campaign/uma_energy_bandwidth_attribution.json": "7fe0272fb8185ff175ed4c076361641f53e826c593fcd537db83f05aa91b9bf3",
-  "results/publication_campaign/uma_energy_bandwidth_trials.jsonl": "0af67a45c195d8817209a5fe177589da59bd9c7d4f6814d94186639c95c43465",
+  "results/publication_campaign/uma_energy_bandwidth_trials.jsonl": "ed7828e014855b06d2c8b0974a34e6e38dad9b5238c4a8161ecf76fb879b18aa",
   "results/publication_campaign/warm_cache_statistical_tests.json": "34b0ca49f2aba1af2a4a07c70f7ad986c176fe62f36a5f8747c17dfc93a0dfbc",
   "results/publication_campaign/warm_cache_summary.json": "0ec60a0651ddf22cce99fca88003793f7227b95a0c48b3f65935b29c4981a547",
   "results/publication_campaign/warm_cache_trials.jsonl": "6e9156ffd3fbf0a424924c3c7b4710174f00f6b9fb363cfb2d0b0af73c5ad192",
+  "scripts/analyze_roofline_and_kv_scaling.py": "ceeaf2ea3ef8ec010650ef7905ba5bcda1e59a7b2003305868e92c292c346623",
   "scripts/check_quiescence.sh": "0ff1490279dfb91c9c2d863f6def7e1d93090e4801cfdaae5e207e547c0afcdb",
   "scripts/export_audit_bundle.py": "5d165fccdd9592a42c4c843a7b881c4947a4cb7e18fb436604b97afa0aab79d1",
   "scripts/legacy/compare_campaigns.py": "a1b607b6a9a9c215f314ce53f3fa799fc64630907e28be1a188b8803961014ff",
   "scripts/legacy/run_all_experiments.py": "5aef890f6079b07a57abe2cb281a02f1585eea33251ef76b3697974ce5e3b9a2",
   "scripts/legacy/run_full_campaign.sh": "3409ceaf3719c3b0d86593dc8922d03758502482d0815beda0751b8b53c20ae5",
   "scripts/legacy/run_live_campaign.py": "1a3969384d332a508fd17649696c4ee9ab363c38b52f3f518bb56e3893e84b56",
+  "scripts/measure_harness_self_overhead.py": "b1015de5a5ffd824e61a8a8b1013f402de83f5016759677b8cd023313fb12c31",
+  "scripts/run_cross_hardware_replica.py": "d836106f8b2a86c0753294f41517ae387f7d3775d8845759574a0d755b1b5904",
+  "scripts/run_cross_hardware_replica.sh": "f1dda4bcef268460961da697bbffe8a05f1382f63e0dc6b70494512b2e571755",
+  "scripts/run_external_framework_langchain_benchmark.py": "97ef5c5aaa3cc7d777b5b7134a7c9858c42dbc51f0367e06a58f60c22b9dd695",
   "scripts/run_independent_validation_suite.py": "57529f277a7ae2bc9447139a89c93bae5485b261cda85723d297a6705c829f69",
   "scripts/run_inter_session_replication.py": "bd0d52489b2b274082ddb313787a60a3e9a41ddbb4e358f700ead7e59a310965",
   "scripts/run_kv_cache_thrashing_ablation.py": "c751242a50b4404c5e09c02b469a3d0ee27ea24d7721425825222b22b762fc0d",
-  "scripts/run_prefill_ablation.py": "555b4738417985827181d360a9bc1bbff659e231107a8bfb7d98b8c7d585400d",
+  "scripts/run_prefill_ablation.py": "75e245cc4a655df1b8609cf7d478282e0a916cb99bd723716f0ce8119e462756",
   "scripts/run_regime_a_equalized_update.py": "ed6329f1ca737d665721ab977577a6b00aa3dbed99b11779c36f45de91b15a40",
   "scripts/run_regime_b_w2_w4_unified_session.py": "a80b6b8905d0dacd435a4b4c68dbca30d5ce1730eebd59b59f8246d6741f9a03",
-  "scripts/run_tool_rag_mitigation_experiment.py": "cb7b89e8d3d611a687cc03a3be4f3b351386d85c6d322b0853456059a535a768",
-  "scripts/run_uma_energy_and_bandwidth_attribution.py": "0cb080d0d038ce8302a3c5419d987cea00a53a03087feb69235311af387fd473",
+  "scripts/run_tool_rag_mitigation_experiment.py": "f525e5422ca56dcd94cb3a2295a9bebb877635e8af752f4d50417c74d76fee40",
+  "scripts/run_uma_energy_and_bandwidth_attribution.py": "49d5a16ea51cda5bd420550f201daf8c8315dad482591d96d205bbb9bca01d9c",
   "scripts/run_w2_resample.py": "04ad8b5f7ec07e4757b2f0990c881badc698324040165879d6f18d2f996f6eb2",
   "scripts/run_warm_cache_campaign.py": "2f62f42eac71f01dbee12c4281ef0d7fddf838b7ba882c98415a0ed910446a76",
   "scripts/setup_environment.sh": "7d06320f77c70dd34ac8659fd0079d840e68eea804d008f1e041973c6dbe4920",
-  "scripts/verify_manifest.py": "8d5676689788b79d31ba9e5f08f71dcf309a6759c39d69362d01c94f4dfb16ca",
+  "scripts/verify_manifest.py": "776c66609e5f5c05abe685923b0a22b249dc20cfc7e29e261405b1807ac363d2",
+  "src/telemetry_backend.py": "a62eff5414a34cce79746e134fcb55ca5ee480911b955945600a0e9bdfbc24e5",
   "tests/test_adapters_and_failfast.py": "4c5c63dbe8db84e58939fd09b69f2967592996b787c2ecc8cde4ef86f3a25b46",
-  "tests/test_artifact_consistency.py": "f67435751e2d1fa9fd71ab44d14e2ca4ed75ae2b24d062a0f0ea74b62b2d224a",
+  "tests/test_artifact_consistency.py": "56711e5a9ca6e01d68a81f5c247f38ca07d30460a684bd1c7edfe4109df4a5b7",
   "tests/test_dataset_generator.py": "66a08eaed0f641aaad41aadfbcd241aa09a157549884fdf6dfe89f914dae5bf9",
   "tests/test_statistical_engine.py": "8cf49681a89f19291f734545795072da8d1e97407830de8ed6dc39d8032d1b3a",
-  "tests/test_telemetry_parser.py": "ea835745da8b243370f60f7a36a8a87290fda156768e1328381bb7d8f79e1b2d",
+  "tests/test_telemetry_parser.py": "f6373e073f257d086e14ff712a87987a7326c650a3f1f42e4dfc80e730752f26",
   "tutorial/README.md": "6ef9d51f2e44daa1ace8115ac4294cfdac902d43763cfa13dd45f596d970874d"
 }
 

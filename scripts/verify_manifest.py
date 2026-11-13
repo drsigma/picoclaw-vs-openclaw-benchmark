@@ -87,6 +87,16 @@ def update_manifest() -> int:
         "results/publication_campaign/independent_validation_report.json",
         "results/publication_campaign/cross_hardware_and_independent_validation.json",
         "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex",
+        "data/roofline_kv_affine_model.json",
+        "data/harness_self_overhead.json",
+        "data/external_framework_langchain_summary.json",
+        "extensions/langchain_adapter/langchain_orch.py",
+        "src/telemetry_backend.py",
+        "scripts/analyze_roofline_and_kv_scaling.py",
+        "scripts/measure_harness_self_overhead.py",
+        "scripts/run_cross_hardware_replica.py",
+        "scripts/run_cross_hardware_replica.sh",
+        "scripts/run_external_framework_langchain_benchmark.py",
     ]
     for rel_path in additional:
         abs_path = os.path.join(REPO_DIR, rel_path)

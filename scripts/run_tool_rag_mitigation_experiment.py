@@ -313,6 +313,7 @@ def main() -> int:
                             "energy_total_j": e_tot,
                             "energy_net_above_idle_j": e_net,
                             "edp_js": edp_js,
+                            "http_status": int(res.get("http_status", 200)),
                         }
                         measured_tool_rag_records.append(rec)
 

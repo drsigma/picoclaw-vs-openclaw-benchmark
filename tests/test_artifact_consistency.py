@@ -598,6 +598,87 @@ def test_all_checklist_gates_0_to_8_verified():
             assert phrase.lower() not in content, f"Forbidden phrase '{phrase}' found in {check_file}"
 
 
+def test_all_jsonl_records_contain_http_status_200():
+    """Gate A2 / D1: Enforces that 100% of records in all publication campaign JSONL datasets contain http_status == 200."""
+    import glob
+    jsonl_files = sorted(glob.glob(os.path.join(REPO_DIR, "results", "publication_campaign", "*.jsonl")))
+    assert len(jsonl_files) >= 6, "Expected at least 6 campaign datasets"
+
+    total_records = 0
+    for jf in jsonl_files:
+        with open(jf, "r", encoding="utf-8") as f:
+            for idx, line in enumerate(f, 1):
+                if not line.strip():
+                    continue
+                total_records += 1
+                rec = json.loads(line)
+                assert "http_status" in rec, f"Missing http_status in {jf}:{idx}"
+                assert rec["http_status"] == 200, f"Non-200 http_status ({rec['http_status']}) in {jf}:{idx}"
+
+    assert total_records >= 3700, f"Expected at least 3700 verified physical records, found {total_records}"
+
+
+def test_roofline_kv_affine_model_physical_limits():
+    """Gate A / C: Enforces physical roofline validity and affine KV scaling model parameters."""
+    model_path = os.path.join(REPO_DIR, "data", "roofline_kv_affine_model.json")
+    assert os.path.exists(model_path), f"Missing {model_path}"
+
+    with open(model_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    # 1. Weights layout
+    layout = data["gguf_tensor_decomposition"]
+    assert layout["active_weights_bytes"] == 1688334336
+    assert layout["token_embedding_bytes"] == 323205120
+    assert layout["file_size_bytes"] == 2019377696
+
+    # 2. Affine KV scaling regression
+    reg = data["kv_cache_scaling_affine_model"]["linear_regression"]
+    assert 16.5 <= reg["itl_0_intercept_ms"] <= 17.5
+    assert 0.90 <= reg["alpha_kv_slope_us_per_token"] <= 1.05
+    assert reg["r_squared"] > 0.97
+
+    # 3. Physical bandwidth roofline: NO context level may exceed 120.0 GB/s Apple M4 theoretical peak
+    levels = data["kv_cache_scaling_affine_model"]["per_context_level_bandwidth"]
+    for lvl, m in levels.items():
+        assert m["active_bw_gb_s"] < 120.0, f"Level {lvl} exceeded 120 GB/s: {m['active_bw_gb_s']}"
+        assert 80.0 <= m["active_utilization_pct"] <= 95.0
+        assert m["is_above_120_gbs"] is False
+
+
+def test_harness_self_overhead_bounds():
+    """Gate D2: Verifies telemetry harness self-overhead quantification."""
+    overhead_path = os.path.join(REPO_DIR, "data", "harness_self_overhead.json")
+    assert os.path.exists(overhead_path), f"Missing {overhead_path}"
+
+    with open(overhead_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    quant = data["overhead_quantification"]
+    # Telemetry overhead must be negligible (absolute delta under 5%) and not statistically significant
+    assert abs(quant["overhead_latency_median_pct"]) < 5.0
+    assert quant["p_value"] > 0.05
+    assert quant["is_statistically_significant"] is False
+
+
+def test_external_framework_langchain_summary():
+    """Gate C1: Verifies external enterprise framework (LangChain Core) evaluation."""
+    summary_path = os.path.join(REPO_DIR, "data", "external_framework_langchain_summary.json")
+    assert os.path.exists(summary_path), f"Missing {summary_path}"
+
+    with open(summary_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    assert data["n_total_trials"] == 144
+    assert data["n_evaluated_trials"] == 120
+    # LangChain Core physical RSS should be between 50 and 80 MB
+    w2_warm = data["regime_b_warm"]["W2"]
+    assert 50.0 <= w2_warm["proc_peak_phys_mb_median"] <= 80.0
+    assert w2_warm["t_task_median_ms"] > 1500.0
+
+
+
+
 
 
 

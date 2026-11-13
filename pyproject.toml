@@ -20,7 +20,7 @@ cache-dir = "/tmp/ruff_cache"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = ["E501"]
+ignore = ["E501", "E402"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

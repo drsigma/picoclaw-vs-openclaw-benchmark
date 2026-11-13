@@ -3,15 +3,43 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2A: CODIGO-FONTE NUCLEO, TELEMETRIA, INVARIANTES E ADAPTADORES
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T15:53:23.090140+00:00
-Git HEAD: e799c9dfecc30ef39b7918f40322780fe3c2ccf0
+Data de Geracao (UTC): 2026-11-13T17:07:58.081629+00:00
+Git HEAD: 32b16d92b7c9df80dc1afbf19b3275b3b7d09c56
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
 BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
-(clean working tree)
+ M data/manifest_sha256.json
+ M paper/softwarex_manuscript.tex
+ M pyproject.toml
+ M results/publication_campaign/prefill_ablation.jsonl
+ M results/publication_campaign/tables/macros_empirical.tex
+ M results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
+ M results/publication_campaign/tool_rag_mitigation_trials.jsonl
+ M results/publication_campaign/uma_energy_bandwidth_trials.jsonl
+ M scripts/run_prefill_ablation.py
+ M scripts/run_tool_rag_mitigation_experiment.py
+ M scripts/run_uma_energy_and_bandwidth_attribution.py
+ M scripts/verify_manifest.py
+ M tests/test_artifact_consistency.py
+ M tests/test_telemetry_parser.py
+?? data/external_framework_langchain_summary.json
+?? data/external_framework_langchain_trials.jsonl
+?? data/harness_self_overhead.json
+?? data/roofline_kv_affine_model.json
+?? extensions/
+?? results/publication_campaign/external_framework_langchain_summary.json
+?? results/publication_campaign/external_framework_langchain_trials.jsonl
+?? results/publication_campaign/harness_self_overhead.json
+?? results/publication_campaign/roofline_kv_affine_model.json
+?? scripts/analyze_roofline_and_kv_scaling.py
+?? scripts/measure_harness_self_overhead.py
+?? scripts/run_cross_hardware_replica.py
+?? scripts/run_cross_hardware_replica.sh
+?? scripts/run_external_framework_langchain_benchmark.py
+?? src/
 ================================================================================
 
 
@@ -175,7 +203,7 @@ END FILE: Makefile
 
 ================================================================================
 FILE: pyproject.toml
-SHA-256: 968c81a365bf5b593749ba710f8a42918045462c763f7717bed4584bd8efc9cd
+SHA-256: afb046e7d38021b39e7d3d3e6d9d1c114697916d12892809862f413cbd2e5583
 ================================================================================
 [project]
 name = "picoclaw-vs-openclaw-benchmark"
@@ -199,7 +227,7 @@ cache-dir = "/tmp/ruff_cache"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I"]
-ignore = ["E501"]
+ignore = ["E501", "E402"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

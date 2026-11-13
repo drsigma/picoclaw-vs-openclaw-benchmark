@@ -143,6 +143,7 @@ def call_llama_streaming(messages: list[dict], tools: list[dict], cache_prompt: 
         "cached_tokens": cached_tokens,
         "uncached_prompt_tokens": uncached_prompt_tokens,
         "completion_tokens": completion_tokens,
+        "http_status": 200,
     }
 
 

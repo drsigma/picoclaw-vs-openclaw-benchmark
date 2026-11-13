@@ -109,3 +109,22 @@ def test_rapl_monitor_graceful_handling():
     monitor.start()
     res = monitor.stop()
     assert res is None or isinstance(res, dict)
+
+
+def test_multiplatform_telemetry_backend():
+    """Gate E2/E3: Verifies multiplatform telemetry abstraction layer (src/telemetry_backend.py)."""
+    from src.telemetry_backend import UnifiedTelemetryBackend
+    backend = UnifiedTelemetryBackend(sample_interval_ms=100)
+    assert backend is not None
+    assert hasattr(backend, "start_campaign")
+    assert hasattr(backend, "stop_campaign")
+    assert hasattr(backend, "slice_energy")
+    assert hasattr(backend, "run_process_with_telemetry")
+
+    if sys.platform == "darwin":
+        assert backend.is_darwin_arm64 is True
+        assert backend.backend_name == "apple_smc_powermetrics"
+    else:
+        assert backend.is_darwin_arm64 is False
+
+

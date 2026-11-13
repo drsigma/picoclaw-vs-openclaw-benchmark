@@ -3,15 +3,43 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 1: RESPOSTA AOS REVISORES, MANUSCRITO .TEX, BIBLIOGRAFIA E TABELAS LATEX
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T15:53:23.054137+00:00
-Git HEAD: e799c9dfecc30ef39b7918f40322780fe3c2ccf0
+Data de Geracao (UTC): 2026-11-13T17:07:58.038915+00:00
+Git HEAD: 32b16d92b7c9df80dc1afbf19b3275b3b7d09c56
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
 BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
-(clean working tree)
+ M data/manifest_sha256.json
+ M paper/softwarex_manuscript.tex
+ M pyproject.toml
+ M results/publication_campaign/prefill_ablation.jsonl
+ M results/publication_campaign/tables/macros_empirical.tex
+ M results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
+ M results/publication_campaign/tool_rag_mitigation_trials.jsonl
+ M results/publication_campaign/uma_energy_bandwidth_trials.jsonl
+ M scripts/run_prefill_ablation.py
+ M scripts/run_tool_rag_mitigation_experiment.py
+ M scripts/run_uma_energy_and_bandwidth_attribution.py
+ M scripts/verify_manifest.py
+ M tests/test_artifact_consistency.py
+ M tests/test_telemetry_parser.py
+?? data/external_framework_langchain_summary.json
+?? data/external_framework_langchain_trials.jsonl
+?? data/harness_self_overhead.json
+?? data/roofline_kv_affine_model.json
+?? extensions/
+?? results/publication_campaign/external_framework_langchain_summary.json
+?? results/publication_campaign/external_framework_langchain_trials.jsonl
+?? results/publication_campaign/harness_self_overhead.json
+?? results/publication_campaign/roofline_kv_affine_model.json
+?? scripts/analyze_roofline_and_kv_scaling.py
+?? scripts/measure_harness_self_overhead.py
+?? scripts/run_cross_hardware_replica.py
+?? scripts/run_cross_hardware_replica.sh
+?? scripts/run_external_framework_langchain_benchmark.py
+?? src/
 ================================================================================
 
 
@@ -134,7 +162,7 @@ END FILE: paper/RESPONSE_TO_REVIEWERS.md
 
 ================================================================================
 FILE: paper/softwarex_manuscript.tex
-SHA-256: cf0065f2f4a477473698985afb9a05097a4433061fe4e67eedf28d7f903e5abb
+SHA-256: 520643b37db4c6500bde6c6278cf6d4a9a51b4ff0a1db95e928f7281ce677044
 ================================================================================
 \documentclass[preprint,12pt,3p]{elsarticle}
 
@@ -444,9 +472,9 @@ we confirm that under amortized KV-cache reuse (Regime B), true host orchestrato
 
 Analytical and empirical memory bandwidth estimation across the unified 120~GB/s LPDDR5X bus is modeled via:
 \begin{equation}
-\text{BW}_{\text{host, W3}} = \frac{S_{\text{RAG}}}{T_{\text{RAG}}}, \quad \text{BW}_{\text{decode}} = \frac{S_{\text{weights}} + N_{\text{ctx}} \cdot S_{\text{KV/tok}}}{\text{ITL}_{\text{decode}}}
+\text{BW}_{\text{host, W3}} = \frac{S_{\text{RAG}}}{T_{\text{RAG}}}, \quad \text{BW}_{\text{decode}}(N) = \frac{S_{\text{active\_weights}} + S_{\text{KV}}(N)}{\text{ITL}_{\text{decode}}(N)}, \quad \text{with } \text{ITL}(N) = \text{ITL}_0 + \alpha_{\text{kv}} \cdot N
 \end{equation}
-In host vector search (W3), streaming the $S_{\text{RAG}} = 15.75\text{ MB}$ projection weights and document embeddings achieves $0.67\text{ GB/s}$ in Go, $1.80\text{ GB/s}$ in Node.js Minimal ($1.82\text{ GB/s}$ in Full), and $2.04\text{ GB/s}$ in Python. During autoregressive neural decoding on the Metal GPU (`batch_size=1`), assuming one complete read of the $S_{\text{weights}} = 2.019\text{ GB}$ GGUF Q4\_K\_M weight tensors per generated token divided by pure inter-token decode latency ($\text{ITL}_{\text{decode}} = \texttt{predicted\_ms} / \texttt{predicted\_n}$), our analytical-empirical estimation yields a global median memory bandwidth of $97.0\text{ GB/s}$ ($80.8\%$ of nominal $120\text{ GB/s}$) and a mean ranging from $95.9\text{ GB/s}$ ($79.9\%$ in Regime A, 95\% bootstrap CI $[95.6, 96.2]\text{ GB/s}$, IQR $6.0\text{ GB/s}$) to $106.7\text{ GB/s}$ ($88.9\%$ in Regime B, 95\% bootstrap CI $[106.4, 107.1]\text{ GB/s}$, IQR $8.0\text{ GB/s}$; global mean $104.0\text{ GB/s}$ / $86.7\%$). We emphasize that this represents an analytical-empirical bandwidth estimation ($\text{Model Weights} \div \text{ITL}$) rather than hardware DRAM controller counter telemetry, and its observed $80.8\%\text{--}88.9\%$ utilization aligns closely with the practical Roofline memory bus saturation ceiling ($\approx 86\text{--}88\%$) established for Apple Silicon UMA architectures \cite{imamura2026apple,benazir2025llm}.
+In host vector search (W3), streaming the $S_{\text{RAG}} = 15.75\text{ MB}$ projection weights and document embeddings achieves $0.67\text{ GB/s}$ in Go, $1.80\text{ GB/s}$ in Node.js Minimal ($1.82\text{ GB/s}$ in Full), and $2.04\text{ GB/s}$ in Python. During autoregressive neural decoding on the Metal GPU (\texttt{batch\_size=1}), naive estimation using total GGUF file size ($S_{\text{file}} = 2.019\text{ GB} \div \text{ITL}$) creates an apparent physical artifact exceeding 100\% ($103\%\text{--}105\%$ or $120.5\text{--}123.8\text{ GB/s}$) in short contexts (e.g., $N=60$, $\text{ITL} = 16.76\text{ ms}$). Physical tensor inspection of \texttt{Llama-3.2-3B-Instruct-Q4\_K\_M} decomposes the $2.019\text{ GB}$ file into $S_{\text{active\_weights}} = 1.688\text{ GB}$ across the 28 dense Transformer layers (\texttt{blk.*}) and output norm ($83.61\%$ of the file) and $S_{\text{emb}} = 0.323\text{ GB}$ for the vocabulary embedding matrix ($128{,}256 \times 3{,}072$), which undergoes a sparse single-vector lookup ($\sim 3\text{ KB}$ per decode step) rather than dense streaming. Furthermore, decode latency scales affinely with context length $N$ due to streaming the Grouped Query Attention KV-cache ($S_{\text{KV}}(N) = N \cdot 114.688\text{ KB}$, where each token expends $28\text{ layers} \times 2\text{ (K+V)} \times 8\text{ heads} \times 128\text{ dim} \times 2\text{ bytes}$). Fitting this affine model over 480 physical evaluations ($N \in [60, 13216]$) yields $\text{ITL}_0 = 17.12\text{ ms}$ (zero-context baseline, 95\% CI $[17.04, 17.19]\text{ ms}$) and marginal KV streaming cost $\alpha_{\text{kv}} = 0.939\,\mu\text{s/tok}$ (95\% CI $[0.926, 0.951]\,\mu\text{s/tok}$, two-point extreme delta $[29.61 - 16.90]\text{ ms} / [13216 - 60]\text{ tok} = 0.966\,\mu\text{s/tok}$, $R^2 = 0.9781$, $p < 10^{-15}$), matching the physical time ($0.972\,\mu\text{s}$) required to stream $114.688\text{ KB}$ of KV cache over the $120\text{ GB/s}$ bus. Recomputing active bandwidth $[S_{\text{active\_weights}} + S_{\text{KV}}(N)] \div \text{ITL}(N)$ across all regimes and context tiers yields a median of $102.4\text{ GB/s}$ ($85.3\%$) and a strictly bounded physical range of $99.0\text{--}108.5\text{ GB/s}$ ($82.5\%\text{--}90.4\%$ of the 120~GB/s ceiling; maximum observed trial $113.04\text{ GB/s}$ / $94.2\%$), with zero cells exceeding the physical memory bus ceiling. We emphasize that this represents an analytical-empirical Roofline decomposition aligning closely with empirical Apple Silicon memory bus saturation ceilings ($\approx 85\%\text{--}88\%$) \cite{imamura2026apple,benazir2025llm}.
 
 \subsection{Execution Instructions}
 Reviewers can reproduce the entire analysis without local model weights or superuser privileges via:
@@ -483,7 +511,7 @@ To ensure rigorous interpretation and prevent over-generalization of our empiric
     \item \textbf{Apple Silicon Unified Memory Architecture (UMA) Specifics:} All physical hardware measurements were conducted on an Apple Mac mini M4 featuring $24\text{ GB}$ of shared LPDDR5X UMA memory ($120\text{ GB/s}$ theoretical peak). Unlike discrete PCIe GPU topologies on x86\_64 servers---where host-to-device DMA transfers across the PCIe bus incur explicit copy latency and separate DRAM/VRAM allocation---UMA shares a single physical memory pool between CPU and GPU. Consequently, client-side orchestrator heap bloat on UMA directly reduces the physical DRAM available for neural KV-cache slots and model weights.
     \item \textbf{KV-Cache Slot Isolation and Prefix Invalidation Protocol:} Regime B evaluates deterministic single-slot execution (\texttt{-np 1}) with block-isolated priming (3 warmups + 30 consecutive trials per condition) to measure steady-state prefix reuse ($\text{Cache Hit} = 97.7\%\text{--}100.0\%$). In multi-tenant or interleaved multi-agent servers where distinct system prompts contend for a single KV-cache slot without RadixAttention tree sharing \cite{zheng2024sglang} or multi-slot partitioning (\texttt{-np > 1}), frequent prefix invalidation degrades execution toward Regime A cold-prefill behavior.
     \item \textbf{Indirect Process Energy Attribution and Negative Validation of \texttt{ri\_billed\_energy}:} Because hardware power shunts on UMA SoCs instrument aggregate package rails rather than individual POSIX PIDs, concurrent CPU--GPU execution cannot be physically separated at the analog sensor level \cite{fahad2019comparative,you2023zeus}. Our phase-isolated calibration on the Apple SMC \texttt{CPU Power} rail formally refutes Darwin XNU's \texttt{ri\_billed\_energy} counter as a valid physical Joule proxy ($r = -0.0510, p = 0.580$, centered $\text{OLS } R^2 = -0.676$), demonstrating that uncalibrated kernel billing units reflect QoS scheduler heuristics rather than true energy. Accurate host energy attribution strictly requires either phase-isolated SMC \texttt{CPU Power} rail integration with the GPU idle ($\Phi_{\text{energy, orch}} \in [0.01\%, 1.42\%]$) or our validated physical regressors (\texttt{t\_exec\_ms}, \texttt{proc\_instructions}, and \texttt{proc\_cycles}, $R^2 = 0.945\text{--}0.955$).
-    \item \textbf{Cross-Hardware Generalization:} While the software harness provides cross-platform support for Linux Intel RAPL (\texttt{powercap}) and portable dry-run verification (\texttt{make dry-run}), the empirical constants reported here ($\alpha = 1.2342$ prefill exponent, $97.0\text{ GB/s}$ median analytical-empirical decode bandwidth) are specific to the Apple M4 Metal backend and \texttt{llama.cpp b11887}. Future work should replicate these campaigns across higher-bandwidth Apple Silicon tiers (M4 Pro/Max/Ultra), discrete NVIDIA CUDA/NVML systems, and low-power ARM edge boards.
+    \item \textbf{Cross-Hardware Generalization:} While the software harness provides cross-platform support for Linux Intel RAPL (\texttt{powercap}) and portable dry-run verification (\texttt{make dry-run}), the empirical constants reported here ($\alpha = 1.2342$ prefill exponent, $102.4\text{ GB/s}$ median active decode bandwidth [$85.3\%$ of nominal $120\text{ GB/s}$, range $82.5\%\text{--}90.4\%$]) are specific to the Apple M4 Metal backend and \texttt{llama.cpp b11887}. Future work should replicate these campaigns across higher-bandwidth Apple Silicon tiers (M4 Pro/Max/Ultra), discrete NVIDIA CUDA/NVML systems, and low-power ARM edge boards.
 \end{enumerate}
 
 \section{Conclusions}
@@ -1491,7 +1519,7 @@ END FILE: results/publication_campaign/tables/table_pca_loadings.tex
 
 ================================================================================
 FILE: results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
-SHA-256: 56c006b9db072bdda65971aee1f29819220ddf1de39af2cf5a8963f5be40be42
+SHA-256: af754bccc260da9cd70fdda3c841e5548a48a2c03bca1346660a617846db6aea
 ================================================================================
 % Auto-generated by scripts/run_uma_energy_and_bandwidth_attribution.py
 % Empirical Apple Silicon M4 UMA Energy Deconvolution and Analytical & Empirical Memory Bandwidth Estimation
@@ -1510,7 +1538,8 @@ SHA-256: 56c006b9db072bdda65971aee1f29819220ddf1de39af2cf5a8963f5be40be42
 \midrule
 \multicolumn{5}{l}{\textbf{Apple Silicon M4 Physical Energy Validation and Analytical \& Empirical Bandwidth Estimation:}} \\
 \multicolumn{5}{l}{$\bullet$ Validated CPU Proxies: $T_{\text{exec}}$ ($R^2 = 0.949$), Instructions ($R^2 = 0.954$), Cycles ($R^2 = 0.945$); XNU \texttt{ri\_billed\_energy} rejected ($r = -0.051$, $R^2 = -0.676$; $\hat{\kappa}_{\text{M4}} = 0.0573\text{ mJ/unit}$)} \\
-\multicolumn{5}{l}{$\bullet$ Analytical \& Empirical Memory Bandwidth Estimation ($\text{Model Weights} \div \text{ITL}$): Median $97.0\text{ GB/s}$ ($80.8\%$), Mean $95.9\text{ GB/s}$ ($79.9\%$ in Regime A) to $106.7\text{ GB/s}$ ($88.9\%$ in Regime B; global mean $104.0\text{ GB/s}$ / $86.7\%$ of nominal $120\text{ GB/s}$)} \\
+\multicolumn{5}{l}{$\bullet$ Affine Roofline Decode Bandwidth ($[S_{\text{active}} + S_{\text{kv}}(N)] \div \text{ITL}$): Median $102.4\text{ GB/s}$ ($85.3\%$), Range $99.0\text{--}108.5\text{ GB/s}$ ($82.5\%\text{--}90.4\%$ of nominal $120\text{ GB/s}$)} \\
+\multicolumn{5}{l}{$\bullet$ Resolves naive $S_{\text{file}} \div \text{ITL}$ artifact ($103\text{--}105\%$ at short $N$) via embedding sparsity ($S_{\text{emb}} = 0.323\text{ GB}$) and empirical $\alpha_{\text{kv}} = 0.968\,\mu\text{s/tok}$ ($R^2 = 0.978$)} \\
 \bottomrule
 \end{tabular}
 \caption{Empirical per-process energy attribution and Unified Memory Architecture (UMA) analytical \& empirical memory bandwidth estimation ($\text{Model Weights} \div \text{ITL}$) on Apple Silicon M4. Marginal dispatch energy ($E_{\text{CPU, net}}^{\text{dispatch}}$) is measured directly on the Apple SMC \texttt{CPU Power} rail with the Metal GPU idle ($P_{\text{GPU}} \approx 0\text{ W}$), determining true orchestrator energy share $\Phi_{\text{energy, orch}} = E_{\text{CPU, net}}^{\text{dispatch}} / E_{\text{net, task}}$. Darwin kernel \texttt{ri\_billed\_energy} is formally refuted as a physical energy proxy ($r = -0.0510, p = 0.580$), whereas execution time, retired instructions, and CPU cycles achieve $R^2 = 0.945\text{--}0.954$.}
@@ -1524,7 +1553,7 @@ END FILE: results/publication_campaign/tables/table_energy_bandwidth_deconvoluti
 
 ================================================================================
 FILE: results/publication_campaign/tables/macros_empirical.tex
-SHA-256: cf20e8fd93fa96cb96c5ddd647bf14f1fb089cf2b6f2ce8ab86bdccb4a5bdca7
+SHA-256: 628559ec4f457a8856580139dc17cfcf43906ffdc1f3b524d3a3046861456791
 ================================================================================
 % Automatically generated macros from publication campaign empirical results
 % DO NOT EDIT MANUALLY - Generated by benchmark/analyze_results.py
@@ -1608,6 +1637,16 @@ SHA-256: cf20e8fd93fa96cb96c5ddd647bf14f1fb089cf2b6f2ce8ab86bdccb4a5bdca7
 \newcommand{\WFourAOneTwo}{0.0}
 \newcommand{\WFourAdjP}{< 10^{-5}}
 
+
+% Affine Roofline & KV-Cache Bandwidth Deconvolution Macros
+\newcommand{\ActiveWeightsGB}{1.688}
+\newcommand{\EmbeddingTableGB}{0.323}
+\newcommand{\ZeroContextITLms}{17.12}
+\newcommand{\AlphaKVusPerTok}{0.966}
+\newcommand{\AlphaKVRTwo}{0.9781}
+\newcommand{\ActiveBWMinPct}{82.5}
+\newcommand{\ActiveBWMaxPct}{90.4}
+\newcommand{\ActiveBWMedianGBs}{102.4}
 
 ================================================================================
 END FILE: results/publication_campaign/tables/macros_empirical.tex

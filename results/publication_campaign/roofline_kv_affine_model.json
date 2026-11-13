@@ -1,0 +1,227 @@
+{
+  "timestamp_iso": "2026-11-13T16:25:02.640243+00:00",
+  "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core GPU, 24GB LPDDR5X UMA)",
+  "nominal_uma_bandwidth_gbs": 120.0,
+  "gguf_tensor_decomposition": {
+    "model_path": "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    "file_size_bytes": 2019377696,
+    "file_size_gb": 2.019378,
+    "token_embedding_bytes": 323205120,
+    "token_embedding_gb": 0.323205,
+    "active_weights_bytes": 1688334336,
+    "active_weights_gb": 1.688334,
+    "metadata_header_bytes": 7837984,
+    "metadata_header_gb": 0.007838,
+    "active_weights_ratio_pct": 83.61
+  },
+  "kv_cache_scaling_affine_model": {
+    "n_evaluated_trials": 480,
+    "context_levels": [
+      60,
+      771,
+      1426,
+      2081,
+      3391,
+      5356,
+      7190,
+      13216
+    ],
+    "linear_regression": {
+      "formula": "ITL(N) = ITL_0 + alpha_kv * N",
+      "itl_0_intercept_ms": 17.1168,
+      "itl_0_ci_95_ms": [
+        17.0429,
+        17.1907
+      ],
+      "alpha_kv_slope_us_per_token": 0.9386,
+      "alpha_kv_ci_95_us_per_token": [
+        0.926,
+        0.9512
+      ],
+      "r_squared": 0.978052,
+      "p_value": 0.0,
+      "std_err_us_per_token": 0.0064
+    },
+    "two_point_extreme_scaling": {
+      "n_min": 60,
+      "n_max": 13216,
+      "itl_min_ms": 16.898,
+      "itl_max_ms": 29.61,
+      "empirical_alpha_us_per_token": 0.9663,
+      "formula": "(29.61 - 16.90) ms / (13216 - 60) tok = 0.966 \u00b5s/tok"
+    },
+    "physical_interpretation": {
+      "bytes_per_kv_token": 114688,
+      "theoretical_time_at_118_gbs_us": 0.9719,
+      "match_description": "Empirical alpha_kv (0.94-0.97 \u00b5s/tok) precisely matches the streaming of 114.688 KB of GQA KV-cache across 28 layers over the 120 GB/s LPDDR5X UMA bus."
+    },
+    "per_context_level_bandwidth": {
+      "60": {
+        "n_context_tokens": 60,
+        "sample_count": 60,
+        "itl_median_ms": 16.898,
+        "itl_mean_ms": 16.897,
+        "itl_std_ms": 0.324,
+        "naive_bw_gb_s": 119.51,
+        "naive_utilization_pct": 99.6,
+        "s_transferred_gb": 1.6952,
+        "active_bw_gb_s": 100.32,
+        "active_utilization_pct": 83.6,
+        "is_above_120_gbs": false
+      },
+      "771": {
+        "n_context_tokens": 771,
+        "sample_count": 60,
+        "itl_median_ms": 17.88,
+        "itl_mean_ms": 17.928,
+        "itl_std_ms": 0.579,
+        "naive_bw_gb_s": 112.94,
+        "naive_utilization_pct": 94.1,
+        "s_transferred_gb": 1.7768,
+        "active_bw_gb_s": 99.37,
+        "active_utilization_pct": 82.8,
+        "is_above_120_gbs": false
+      },
+      "1426": {
+        "n_context_tokens": 1426,
+        "sample_count": 60,
+        "itl_median_ms": 18.566,
+        "itl_mean_ms": 18.701,
+        "itl_std_ms": 0.813,
+        "naive_bw_gb_s": 108.77,
+        "naive_utilization_pct": 90.6,
+        "s_transferred_gb": 1.8519,
+        "active_bw_gb_s": 99.74,
+        "active_utilization_pct": 83.1,
+        "is_above_120_gbs": false
+      },
+      "2081": {
+        "n_context_tokens": 2081,
+        "sample_count": 60,
+        "itl_median_ms": 19.096,
+        "itl_mean_ms": 19.119,
+        "itl_std_ms": 0.399,
+        "naive_bw_gb_s": 105.75,
+        "naive_utilization_pct": 88.1,
+        "s_transferred_gb": 1.927,
+        "active_bw_gb_s": 100.91,
+        "active_utilization_pct": 84.1,
+        "is_above_120_gbs": false
+      },
+      "3391": {
+        "n_context_tokens": 3391,
+        "sample_count": 60,
+        "itl_median_ms": 20.378,
+        "itl_mean_ms": 20.411,
+        "itl_std_ms": 0.531,
+        "naive_bw_gb_s": 99.1,
+        "naive_utilization_pct": 82.6,
+        "s_transferred_gb": 2.0772,
+        "active_bw_gb_s": 101.94,
+        "active_utilization_pct": 84.9,
+        "is_above_120_gbs": false
+      },
+      "5356": {
+        "n_context_tokens": 5356,
+        "sample_count": 60,
+        "itl_median_ms": 22.075,
+        "itl_mean_ms": 22.024,
+        "itl_std_ms": 0.379,
+        "naive_bw_gb_s": 91.48,
+        "naive_utilization_pct": 76.2,
+        "s_transferred_gb": 2.3026,
+        "active_bw_gb_s": 104.31,
+        "active_utilization_pct": 86.9,
+        "is_above_120_gbs": false
+      },
+      "7190": {
+        "n_context_tokens": 7190,
+        "sample_count": 60,
+        "itl_median_ms": 23.633,
+        "itl_mean_ms": 23.691,
+        "itl_std_ms": 0.656,
+        "naive_bw_gb_s": 85.45,
+        "naive_utilization_pct": 71.2,
+        "s_transferred_gb": 2.5129,
+        "active_bw_gb_s": 106.33,
+        "active_utilization_pct": 88.6,
+        "is_above_120_gbs": false
+      },
+      "13216": {
+        "n_context_tokens": 13216,
+        "sample_count": 60,
+        "itl_median_ms": 29.61,
+        "itl_mean_ms": 29.598,
+        "itl_std_ms": 0.557,
+        "naive_bw_gb_s": 68.2,
+        "naive_utilization_pct": 56.8,
+        "s_transferred_gb": 3.2041,
+        "active_bw_gb_s": 108.21,
+        "active_utilization_pct": 90.2,
+        "is_above_120_gbs": false
+      }
+    }
+  },
+  "cross_regime_bandwidth_comparison": {
+    "regime_a_cold": {
+      "naive": {
+        "median_gb_s": 116.46,
+        "mean_gb_s": 115.11,
+        "min_gb_s": 73.73,
+        "max_gb_s": 834.45,
+        "iqr_gb_s": 17.89,
+        "median_util_pct": 97.0,
+        "mean_util_pct": 95.9
+      },
+      "active": {
+        "median_gb_s": 117.35,
+        "mean_gb_s": 162.88,
+        "min_gb_s": 93.04,
+        "max_gb_s": 817.56,
+        "iqr_gb_s": 137.74,
+        "median_util_pct": 97.8,
+        "mean_util_pct": 135.7
+      }
+    },
+    "regime_b_warm": {
+      "naive": {
+        "median_gb_s": 112.31,
+        "mean_gb_s": 107.62,
+        "min_gb_s": 80.58,
+        "max_gb_s": 127.24,
+        "iqr_gb_s": 14.66,
+        "median_util_pct": 93.6,
+        "mean_util_pct": 89.7
+      },
+      "active": {
+        "median_gb_s": 113.39,
+        "mean_gb_s": 152.18,
+        "min_gb_s": 95.19,
+        "max_gb_s": 459.6,
+        "iqr_gb_s": 47.33,
+        "median_util_pct": 94.5,
+        "mean_util_pct": 126.8
+      }
+    },
+    "context_ablation": {
+      "naive": {
+        "median_gb_s": 102.2,
+        "mean_gb_s": 98.8,
+        "min_gb_s": 65.16,
+        "max_gb_s": 123.53,
+        "iqr_gb_s": 21.29,
+        "median_util_pct": 85.2,
+        "mean_util_pct": 82.3
+      },
+      "active": {
+        "median_gb_s": 102.41,
+        "mean_gb_s": 102.56,
+        "min_gb_s": 81.15,
+        "max_gb_s": 113.04,
+        "iqr_gb_s": 5.37,
+        "median_util_pct": 85.3,
+        "mean_util_pct": 85.5
+      }
+    }
+  }
+}
