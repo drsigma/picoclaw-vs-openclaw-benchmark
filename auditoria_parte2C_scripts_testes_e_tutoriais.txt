@@ -1,10 +1,10 @@
 ================================================================================
 PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
-PARTE 2C: SCRIPTS DE ABLACOES, REPLICACAO E VALIDAO EMPIRICA
+PARTE 2C: MOTOR DE ANALISE, ABLACAO KV CACHE E UMA ATTRIBUTION
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T15:24:40.600354+00:00
-Git HEAD: 6b97fc3897a3e12f4ce12a7fa1697e91dc1553de
+Data de Geracao (UTC): 2026-11-13T15:52:43.691322+00:00
+Git HEAD: 177d5371e0246e4c904f9cb028ec6ee01648c056
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
@@ -12,13 +12,1388 @@ BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
  M data/manifest_sha256.json
+ M results/publication_campaign/cross_hardware_and_independent_validation.json
+ M results/publication_campaign/independent_validation_report.json
  M scripts/export_audit_bundle.py
+ M scripts/run_independent_validation_suite.py
+ M scripts/verify_manifest.py
 ================================================================================
 
 
 ================================================================================
-SECAO 2C: ADAPTADOR NEURAL, SCRIPTS DE EXECUCAO DE ABLACOES E AMBIENTE
+SECAO 2C: MOTOR DE ANALISE ESTATISTICA E SCRIPTS CRITICOS DOS GATES 1 A 4
 ================================================================================
+
+================================================================================
+FILE: benchmark/analyze_results.py
+SHA-256: e86878c829a571dcd001c303248c9795bfd1768ab5a4232fb28c8263ef52c965
+================================================================================
+"""
+benchmark/analyze_results.py - Rigorous Non-Parametric Statistical Analysis
+Calculates median (p50), interquartile range (IQR), Mann-Whitney U tests with
+Holm-Bonferroni correction, Cliff's Delta, Vargha-Delaney A12 effect sizes with
+Bootstrap 95% Confidence Intervals (2,000 resamples), and produces publication tables.
+"""
+from __future__ import annotations
+
+import json
+import os
+import sys
+from typing import Any
+
+import numpy as np
+from scipy import stats
+
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if REPO_DIR not in sys.path:
+    sys.path.insert(0, REPO_DIR)
+
+from benchmark.protocol_invariants import validate_campaign_invariants  # noqa: E402
+
+
+def cliffs_delta(lst1: list[float], lst2: list[float]) -> float:
+    """
+    Compute Cliff's Delta non-parametric effect size d in [-1, 1].
+    - d = +1.0: lst1 is strictly greater than lst2 in all pairwise comparisons.
+    - d = -1.0: lst1 is strictly smaller than lst2 in all pairwise comparisons.
+    - d = 0.0: No stochastic dominance.
+    """
+    n1, n2 = len(lst1), len(lst2)
+    if n1 == 0 or n2 == 0:
+        return 0.0
+    more = sum(1 for x in lst1 for y in lst2 if x > y)
+    less = sum(1 for x in lst1 for y in lst2 if x < y)
+    return (more - less) / float(n1 * n2)
+
+
+def vargha_delaney_a12(lst1: list[float], lst2: list[float]) -> float:
+    """
+    Compute Vargha-Delaney A12 effect size statistic in [0, 1].
+    A12 = P(X > Y) + 0.5 * P(X == Y) = (d + 1) / 2.
+    """
+    d = cliffs_delta(lst1, lst2)
+    return (d + 1.0) / 2.0
+
+
+def bootstrap_ci(
+    data: list[float],
+    n_resamples: int = 2000,
+    alpha: float = 0.05,
+    seed: int = 42,
+) -> tuple[float, float]:
+    """
+    Computes empirical 95% bootstrap confidence interval for the sample median.
+    """
+    if len(data) == 0:
+        return 0.0, 0.0
+    if len(data) == 1:
+        return float(data[0]), float(data[0])
+
+    rng = np.random.default_rng(seed)
+    arr = np.array(data, dtype=np.float64)
+    boot_medians = np.empty(n_resamples, dtype=np.float64)
+
+    for i in range(n_resamples):
+        sample = rng.choice(arr, size=len(arr), replace=True)
+        boot_medians[i] = np.median(sample)
+
+    lower = float(np.percentile(boot_medians, 100.0 * (alpha / 2.0)))
+    upper = float(np.percentile(boot_medians, 100.0 * (1.0 - alpha / 2.0)))
+    return round(lower, 4), round(upper, 4)
+
+
+def holm_bonferroni_adjust(p_values: list[float]) -> list[float]:
+    """
+    Adjusts a list of p-values using the step-down Holm-Bonferroni method.
+    Guarantees strong family-wise error rate control under multiple comparisons.
+    """
+    m = len(p_values)
+    if m == 0:
+        return []
+
+    # Sort indices by original p-value
+    indexed = sorted(enumerate(p_values), key=lambda x: x[1])
+    adjusted = [0.0] * m
+    running_max = 0.0
+
+    for rank, (orig_idx, p_val) in enumerate(indexed):
+        # Step-down multiplier: (m - rank)
+        adj_p = p_val * (m - rank)
+        adj_p = min(1.0, max(running_max, adj_p))
+        running_max = adj_p
+        adjusted[orig_idx] = round(adj_p, 6)
+
+    return adjusted
+
+
+def analyze_publication_campaign(input_path: str | None = None, output_dir: str | None = None):
+    if input_path is None:
+        input_path = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
+    if output_dir is None:
+        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+
+    os.makedirs(os.path.join(output_dir, "tables"), exist_ok=True)
+
+    if not os.path.exists(input_path):
+        print(f"Error: {input_path} not found. Please run benchmark/run_unified_benchmark.py first.")
+        return
+
+    records = []
+    with open(input_path, "r", encoding="utf-8") as f:
+        for line in f:
+            if line.strip():
+                try:
+                    records.append(json.loads(line))
+                except Exception:
+                    pass
+
+    # Filter out warmup runs if marked
+    eval_records = [r for r in records if not r.get("is_warmup", False)]
+    if not eval_records:
+        eval_records = records
+
+    # Audit and filter invalid/failed trials
+    valid_records = []
+    for r in eval_records:
+        status = r.get("http_status", 200)
+        fr = r.get("finish_reason", "stop")
+        if status != 200:
+            print(f"⚠️  [WARNING] Dropping trial with non-200 HTTP status: {status}")
+            continue
+        if fr not in ("stop", "length", "tool_calls"):
+            print(f"⚠️  [NOTICE] Unconventional finish_reason in trial: {fr}")
+        pt = r.get("prompt_tokens", 0)
+        ct = r.get("completion_tokens") or r.get("output_tokens", 0)
+        if pt is None or int(pt) <= 0:
+            raise ValueError(
+                f"FATAL: Evaluated trial record {r.get('agent_key')} {r.get('workload')} Rep {r.get('rep')} "
+                f"registered invalid prompt_tokens <= 0 ({pt}). All evaluated trials must record positive prompt tokens."
+            )
+        if ct is None or int(ct) <= 0:
+            raise ValueError(
+                f"FATAL: Evaluated trial record {r.get('agent_key')} {r.get('workload')} Rep {r.get('rep')} "
+                f"registered invalid completion_tokens <= 0 ({ct}). All evaluated trials must record positive completion tokens."
+            )
+        valid_records.append(r)
+    eval_records = valid_records
+
+    # Enforce strict protocol invariants via benchmark/protocol_invariants.py
+    has_energy = all(r.get("energy_net_above_idle_j") is not None for r in eval_records)
+    validate_campaign_invariants(
+        eval_records,
+        expected_eval_count=len(eval_records),
+        require_equalized_tokens=False,
+        require_energy=has_energy,
+        metadata={"session_id": "S1_REGIME_A_20261112", "git_commit": "7bf09b4"},
+        require_gate_0_fields=True,
+    )
+
+    print(f"Loaded {len(eval_records)} evaluated trial records (filtered {len(records) - len(eval_records)} warmups).")
+
+    # Group by (agent_key, workload)
+    groups: dict[str, dict[str, list[dict[str, Any]]]] = {}
+    for r in eval_records:
+        ak = r.get("agent_key") or r.get("architecture", "unknown")
+        w = r.get("workload", "W1")
+        groups.setdefault(ak, {}).setdefault(w, []).append(r)
+
+    summary_stats: dict[str, Any] = {}
+    csv_rows = [
+        "agent,workload,n,t_task_median_ms,t_task_iqr_ms,t_task_mean_ms,t_task_std_ms,t_task_p95_ms,"
+        "t_orch_median_ms,rss_peak_mb,energy_total_mean_j,energy_net_mean_j,edp_mean_js,joules_per_token"
+    ]
+
+    for ak, w_dict in groups.items():
+        summary_stats[ak] = {}
+        for w, items in w_dict.items():
+            for item in items:
+                pt_val = item.get("prompt_tokens", 0)
+                ct_val = item.get("completion_tokens") or item.get("output_tokens", 0)
+                assert pt_val is not None and int(pt_val) > 0, f"Invariant violation: prompt_tokens <= 0 in {ak} {w}"
+                assert ct_val is not None and int(ct_val) > 0, f"Invariant violation: completion_tokens <= 0 in {ak} {w}"
+
+            t_tasks = [float(x["t_task_ms"]) for x in items if x.get("t_task_ms") is not None]
+            t_orchs = [float(x["t_orch_ms"]) for x in items if x.get("t_orch_ms") is not None]
+            t_dispatches = [float(x.get("t_dispatch_ms", 0.0)) for x in items if x.get("t_dispatch_ms") is not None]
+            rss_peaks = [float(x["rss_peak_mb"]) for x in items if x.get("rss_peak_mb") is not None]
+            proc_phys = [float(x.get("proc_peak_phys_mb", 0.0)) for x in items if x.get("proc_peak_phys_mb") is not None]
+            proc_inst = [float(x.get("proc_instructions", 0.0)) for x in items if x.get("proc_instructions") is not None]
+            proc_cyc = [float(x.get("proc_cycles", 0.0)) for x in items if x.get("proc_cycles") is not None]
+            proc_billed = [float(x.get("proc_billed_energy", 0.0)) for x in items if x.get("proc_billed_energy") is not None]
+            pts = [int(x.get("prompt_tokens", 0)) for x in items]
+            cts = [int(x.get("completion_tokens") or x.get("output_tokens", 0)) for x in items]
+            frs = [str(x.get("finish_reason", "stop")) for x in items]
+
+            # Collect energy metrics (handling None for unprivileged runs)
+            energies_total = [float(x["energy_total_j"]) for x in items if x.get("energy_total_j") is not None]
+            energies_net = [float(x["energy_net_above_idle_j"]) for x in items if x.get("energy_net_above_idle_j") is not None]
+            edps_net = [
+                float(x["energy_net_above_idle_j"]) * (float(x["t_task_ms"]) / 1000.0)
+                for x in items
+                if x.get("energy_net_above_idle_j") is not None and x.get("t_task_ms") is not None
+            ]
+            j_tokens_net = [
+                float(x["energy_net_above_idle_j"]) / float(x.get("completion_tokens") or x.get("output_tokens") or 1)
+                for x in items
+                if x.get("energy_net_above_idle_j") is not None and (x.get("completion_tokens") or x.get("output_tokens", 0)) > 0
+            ]
+
+            # Primary non-parametric metrics
+            p50_t = float(np.percentile(t_tasks, 50)) if t_tasks else 0.0
+            q25_t = float(np.percentile(t_tasks, 25)) if t_tasks else 0.0
+            q75_t = float(np.percentile(t_tasks, 75)) if t_tasks else 0.0
+            iqr_t = q75_t - q25_t
+            p95_t = float(np.percentile(t_tasks, 95)) if t_tasks else 0.0
+            mean_t = float(np.mean(t_tasks)) if t_tasks else 0.0
+            std_t = float(np.std(t_tasks, ddof=1)) if len(t_tasks) > 1 else 0.0
+
+            p50_orch = float(np.percentile(t_orchs, 50)) if t_orchs else 0.0
+            mean_orch = float(np.mean(t_orchs)) if t_orchs else 0.0
+            p50_disp = float(np.percentile(t_dispatches, 50)) if t_dispatches else 0.0
+            mean_rss = float(np.mean(rss_peaks)) if rss_peaks else 0.0
+            mean_phys = float(np.mean(proc_phys)) if proc_phys else mean_rss
+            mean_inst = int(np.mean(proc_inst)) if proc_inst else 0
+            mean_cyc = int(np.mean(proc_cyc)) if proc_cyc else 0
+            mean_billed = int(np.mean(proc_billed)) if proc_billed else 0
+
+            mean_e_total = float(np.mean(energies_total)) if energies_total else None
+            mean_e_net = float(np.mean(energies_net)) if energies_net else None
+            mean_edp = float(np.mean(edps_net)) if edps_net else None
+            mean_jtok = float(np.mean(j_tokens_net)) if j_tokens_net else None
+
+            ci_low, ci_high = bootstrap_ci(t_tasks)
+
+            summary_stats[ak][w] = {
+                "sample_count": len(t_tasks),
+                "t_task_median_ms": round(p50_t, 2),
+                "t_task_iqr_ms": round(iqr_t, 2),
+                "t_task_bootstrap_ci_95": [ci_low, ci_high],
+                "t_task_mean_ms": round(mean_t, 2),
+                "t_task_std_ms": round(std_t, 2),
+                "t_task_p95_ms": round(p95_t, 2),
+                "t_orch_median_ms": round(p50_orch, 3),
+                "t_orch_mean_ms": round(mean_orch, 3),
+                "t_dispatch_median_ms": round(p50_disp, 3),
+                "rss_peak_mb": round(mean_rss, 2),
+                "proc_peak_phys_mb": round(mean_phys, 2),
+                "proc_instructions": mean_inst,
+                "proc_cycles": mean_cyc,
+                "proc_billed_energy": mean_billed,
+                "prompt_tokens_mean": round(float(np.mean(pts)), 2) if pts else 0,
+                "completion_tokens_mean": round(float(np.mean(cts)), 2) if cts else 0,
+                "finish_reason": frs[0] if frs else "stop",
+                "energy_total_mean_j": round(mean_e_total, 3) if mean_e_total is not None else None,
+                "energy_net_mean_j": round(mean_e_net, 3) if mean_e_net is not None else None,
+                "edp_mean_js": round(mean_edp, 3) if mean_edp is not None else None,
+                "joules_per_token": round(mean_jtok, 4) if mean_jtok is not None else None,
+            }
+
+            e_str = f"{mean_e_total:.3f}" if mean_e_total is not None else "N/A"
+            enet_str = f"{mean_e_net:.3f}" if mean_e_net is not None else "N/A"
+            edp_str = f"{mean_edp:.3f}" if mean_edp is not None else "N/A"
+            jtok_str = f"{mean_jtok:.4f}" if mean_jtok is not None else "N/A"
+
+            csv_rows.append(
+                f"{ak},{w},{len(t_tasks)},{p50_t:.2f},{iqr_t:.2f},{mean_t:.2f},{std_t:.2f},{p95_t:.2f},"
+                f"{p50_orch:.3f},{mean_rss:.2f},{e_str},{enet_str},{edp_str},{jtok_str}"
+            )
+
+    # Statistical comparisons with Holm-Bonferroni correction
+    comparisons: dict[str, Any] = {}
+    pairs = [
+        ("picoclaw", "openclaw_minimal", "PicoClaw_vs_OpenClawMinimal"),
+        ("picoclaw", "openclaw_full", "PicoClaw_vs_OpenClawFull"),
+        ("picoclaw", "python_native", "PicoClaw_vs_PythonNative"),
+        ("openclaw_minimal", "openclaw_full", "OpenClawAblation_Minimal_vs_Full"),
+        ("neural_baseline", "picoclaw", "NeuralBaseline_vs_PicoClaw"),
+    ]
+
+    all_p_entries = []
+    for a1, a2, label in pairs:
+        comparisons[label] = {}
+        for w in ["W1", "W2", "W3", "W4"]:
+            vals1 = [float(x["t_task_ms"]) for x in groups.get(a1, {}).get(w, []) if x.get("t_task_ms") is not None]
+            vals2 = [float(x["t_task_ms"]) for x in groups.get(a2, {}).get(w, []) if x.get("t_task_ms") is not None]
+            if len(vals1) > 0 and len(vals2) > 0:
+                try:
+                    u_stat, raw_p = stats.mannwhitneyu(vals1, vals2, alternative="two-sided")
+                except Exception:
+                    u_stat, raw_p = 0.0, 1.0
+
+                d = cliffs_delta(vals1, vals2)
+                a12 = vargha_delaney_a12(vals1, vals2)
+
+                entry = {
+                    "u_statistic": float(u_stat),
+                    "raw_p_value": float(raw_p),
+                    "cliffs_delta": round(float(d), 4),
+                    "vargha_delaney_a12": round(float(a12), 4),
+                }
+                comparisons[label][w] = entry
+                all_p_entries.append((label, w, raw_p))
+
+    # Apply Holm-Bonferroni correction across all hypotheses
+    if all_p_entries:
+        raw_p_list = [item[2] for item in all_p_entries]
+        adj_p_list = holm_bonferroni_adjust(raw_p_list)
+        for idx, (lbl, w, _) in enumerate(all_p_entries):
+            adj_p = adj_p_list[idx]
+            comparisons[lbl][w]["holm_bonferroni_p_value"] = adj_p
+            comparisons[lbl][w]["significant_alpha_0_05"] = bool(adj_p < 0.05)
+
+    # Save JSON summary & statistical tests
+    stats_out = os.path.join(output_dir, "summary_statistics.json")
+    with open(stats_out, "w", encoding="utf-8") as f:
+        json.dump(summary_stats, f, indent=2)
+
+    tests_out = os.path.join(output_dir, "statistical_tests.json")
+    with open(tests_out, "w", encoding="utf-8") as f:
+        json.dump(comparisons, f, indent=2)
+
+    # Save CSV
+    csv_out = os.path.join(output_dir, "tables", "metrics_summary.csv")
+    with open(csv_out, "w", encoding="utf-8") as f:
+        f.write("\n".join(csv_rows) + "\n")
+
+    # Generate LaTeX Table (table_journal_ablation.tex) with complete 9 columns and dynamic footer metadata
+    latex_table = r"""\begin{table*}[t]
+\centering
+\caption{Empirical Performance Evaluation and Runtime Ablation Matrix on Apple Silicon M4. Peak Phys RAM denotes lifetime maximum resident physical footprint recorded via Darwin kernel \texttt{libproc}. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution. Dispatch and HTTP latency isolate tool-execution and network overhead ($T_{\text{orch}} \approx T_{\text{dispatch}} + T_{\text{http}}$). Prompt and Completion token counts reflect tokenizer throughput. Note: Regime A preserves the pre-equalization serialization baseline (where formatting differences in tool descriptions and Python JSON separators yielded 2,153 vs. 2,273 tokens in W1, 2,297 vs. 2,321 in W2, 2,410 vs. 2,530 in W3, and 22,980 vs. 23,255 vs. 24,180 in W4; $\le 5.2\%$ variance), whereas Regime B (\texttt{table\_warm\_cache.tex}) enforces strict byte-and-token parity (2,153, 2,177, 2,410, and 22,980 tokens) across all 15-tool arms.}
+\label{tab:evaluation_ablation_m4}
+\small
+\begin{tabular}{l l c r r r r r r}
+\hline
+\textbf{Workload} & \textbf{Architecture (Ref.)} & \textbf{Prompt/Comp} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{Billed / Cycles} \\
+\hline
+"""
+    agents_order = [
+        ("neural_baseline", "Direct Local LLM Baseline"),
+        ("picoclaw", "Go Native Orchestrator (PicoClaw Ref.)"),
+        ("openclaw_minimal", "Node.js V8 Orchestrator (OpenClaw Min Ref.)"),
+        ("openclaw_full", "Node.js V8 Orchestrator (OpenClaw Full 54-Tool)"),
+        ("python_native", "Python 3.12 Reference Agent"),
+    ]
+
+    for w in ["W1", "W2", "W3", "W4"]:
+        for ak, label in agents_order:
+            entry = summary_stats.get(ak, {}).get(w)
+            if entry:
+                items = groups.get(ak, {}).get(w, [])
+                p_tok = int(round(np.mean([float(x.get("prompt_tokens", 0)) for x in items]))) if items else 0
+                c_tok = int(round(np.mean([float(x.get("completion_tokens") or x.get("output_tokens", 0)) for x in items]))) if items else 0
+                p50 = entry["t_task_median_ms"]
+                iqr = entry["t_task_iqr_ms"]
+                d_m = entry.get("t_dispatch_median_ms", 0.0)
+                h_m = float(np.percentile([float(x.get("t_http_ms", 0.0)) for x in items if x.get("t_http_ms") is not None], 50)) if items else 0.0
+                disp_http = f"{d_m:.2f} / {h_m:.2f}"
+                ram = entry.get("proc_peak_phys_mb", entry["rss_peak_mb"])
+                enet_val = entry.get("energy_net_mean_j")
+                enet_str = f"{enet_val:.2f}" if enet_val is not None else "N/A"
+                edp_val = entry.get("edp_mean_js")
+                edp_str = f"{edp_val:.2f}" if edp_val is not None else "N/A"
+                billed = entry.get("proc_billed_energy", 0)
+                cyc = entry.get("proc_cycles", 0)
+                cyc_str = f"{cyc/1e6:.1f}M" if cyc > 0 else "0"
+                billed_cyc_str = f"{billed} / {cyc_str}" if billed > 0 or cyc > 0 else "N/A"
+                latex_table += f"{w} & {label} & {p_tok} / {c_tok} & {p50:.1f} ({iqr:.1f}) & {disp_http} & {ram:.1f} & {enet_str} & {edp_str} & {billed_cyc_str} \\\\\n"
+        latex_table += r"\hline" + "\n"
+
+    total_evals = len(eval_records)
+    warmups_count = len(records) - len(eval_records)
+    cond_count = len(groups) * 4 if groups else 1
+    n_per_cond = int(total_evals / cond_count) if cond_count > 0 else 0
+    backends = sorted(list({str(r.get("telemetry_backend", "apple_smc_powermetrics")) for r in eval_records}))
+    backend_str = "Apple Silicon SMC (\\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \\texttt{libproc}" if "apple_smc_powermetrics" in backends else ", ".join(backends)
+    datasources = sorted(list({str(r.get("data_source", "measured_hardware")) for r in eval_records}))
+    datasource_str = ", ".join(datasources).replace("_", r"\_")
+
+    latex_table += f"""\\multicolumn{{9}}{{l}}{{\\footnotesize $n = {n_per_cond}$ independent physical evaluations per condition ({total_evals} total evaluations, {warmups_count} warmups excluded).}} \\\\
+\\multicolumn{{9}}{{l}}{{\\footnotesize Telemetry Backend: {backend_str}. Data Source: \\texttt{{{datasource_str}}}.}} \\\\
+\\hline
+\\end{{tabular}}
+\\end{{table*}}
+"""
+
+    tex_out = os.path.join(output_dir, "tables", "table_journal_ablation.tex")
+    with open(tex_out, "w", encoding="utf-8") as f:
+        f.write(latex_table)
+
+    # Generate macros_empirical.tex with all prose-cited empirical numbers
+    generate_empirical_macros(summary_stats, comparisons, eval_records, output_dir)
+
+    # Compute Spearman rank correlation matrix across regimes
+    compute_spearman_correlation_matrix(
+        regime_a_path=input_path,
+        regime_b_path=os.path.join(output_dir, "warm_cache_trials.jsonl"),
+        output_dir=output_dir,
+    )
+
+    # Compute Principal Component Analysis (PCA) variance decomposition across regimes
+    compute_pca_variance_decomposition(
+        regime_a_path=input_path,
+        regime_b_path=os.path.join(output_dir, "warm_cache_trials.jsonl"),
+        output_dir=output_dir,
+    )
+
+    # Compute Gate 3 & Gate 4 Outlier, Power, Duration, and Token Sensitivity Analysis
+    compute_sensitivity_and_outlier_analysis(
+        regime_a_path=input_path,
+        regime_b_path=os.path.join(output_dir, "warm_cache_trials.jsonl"),
+        output_dir=output_dir,
+    )
+
+    print(f"✅ Generated summary JSON: {stats_out}")
+    print(f"✅ Generated statistical tests JSON: {tests_out}")
+    print(f"✅ Generated CSV table: {csv_out}")
+    print(f"✅ Generated LaTeX table: {tex_out}")
+
+
+def generate_empirical_macros(
+    summary_stats: dict[str, Any],
+    comparisons: dict[str, Any],
+    eval_records: list[dict[str, Any]],
+    output_dir: str,
+) -> str:
+    # Mandatory agent and workload validation
+    for ak in ["picoclaw", "openclaw_minimal", "openclaw_full", "neural_baseline"]:
+        if ak not in summary_stats:
+            raise KeyError(f"Missing mandatory agent in summary_statistics: {ak}")
+        for w in ["W1", "W2", "W3", "W4"]:
+            if w not in summary_stats[ak]:
+                raise KeyError(f"Missing mandatory workload '{w}' for agent '{ak}' in summary_statistics")
+
+    pico_w2 = summary_stats["picoclaw"]["W2"]
+    pico_w3 = summary_stats["picoclaw"]["W3"]
+    pico_w4 = summary_stats["picoclaw"]["W4"]
+
+    open_min_w1 = summary_stats["openclaw_minimal"]["W1"]
+    open_min_w2 = summary_stats["openclaw_minimal"]["W2"]
+    open_min_w3 = summary_stats["openclaw_minimal"]["W3"]
+
+    open_full_w1 = summary_stats["openclaw_full"]["W1"]
+    open_full_w3 = summary_stats["openclaw_full"]["W3"]
+    open_full_w4 = summary_stats["openclaw_full"]["W4"]
+
+    neural_w2 = summary_stats["neural_baseline"]["W2"]
+
+    cmp_w3_min = comparisons.get("PicoClaw_vs_OpenClawMinimal", {}).get("W3")
+    cmp_w3_full = comparisons.get("PicoClaw_vs_OpenClawFull", {}).get("W3")
+    cmp_w4 = comparisons.get("PicoClaw_vs_OpenClawFull", {}).get("W4")
+
+    if cmp_w3_min is None or cmp_w3_full is None or cmp_w4 is None:
+        raise KeyError("Missing mandatory statistical comparison in comparisons")
+
+    pico_trials = [r for r in eval_records if r.get("agent_key") == "picoclaw"]
+    open_min_trials = [r for r in eval_records if r.get("agent_key") == "openclaw_minimal"]
+
+    if not pico_trials or not open_min_trials:
+        raise ValueError("Missing trial records for picoclaw or openclaw_minimal in eval_records")
+
+    pico_w2_trials = [r for r in pico_trials if r.get("workload") == "W2"]
+    open_min_w2_trials = [r for r in open_min_trials if r.get("workload") == "W2"]
+
+    if not pico_w2_trials or not open_min_w2_trials:
+        raise ValueError("Missing W2 trial records for picoclaw or openclaw_minimal")
+
+    pico_w2_tokens = float(np.mean([r["completion_tokens"] for r in pico_w2_trials]))
+    open_min_w2_tokens = float(np.mean([r["completion_tokens"] for r in open_min_w2_trials]))
+    pico_w2_neural_mean = float(np.mean([r["t_neural_ms"] for r in pico_w2_trials]))
+    open_min_w2_neural_mean = float(np.mean([r["t_neural_ms"] for r in open_min_w2_trials]))
+
+    pico_inst_m = float(np.mean([r.get("proc_instructions", 0) for r in pico_trials])) / 1e6
+    pico_cyc_m = float(np.mean([r.get("proc_cycles", 0) for r in pico_trials])) / 1e6
+    open_min_inst_m = float(np.mean([r.get("proc_instructions", 0) for r in open_min_trials])) / 1e6
+    open_min_cyc_m = float(np.mean([r.get("proc_cycles", 0) for r in open_min_trials])) / 1e6
+
+    inst_ratio = open_min_inst_m / pico_inst_m if pico_inst_m > 0 else 0.0
+    cyc_ratio = open_min_cyc_m / pico_cyc_m if pico_cyc_m > 0 else 0.0
+
+    pico_rss_all = [summary_stats["picoclaw"][w]["rss_peak_mb"] for w in ["W1", "W2", "W3", "W4"]]
+    open_rss_all = [summary_stats["openclaw_minimal"][w]["rss_peak_mb"] for w in ["W1", "W2", "W3", "W4"]]
+
+    pico_phys_all = [summary_stats["picoclaw"][w].get("proc_peak_phys_mb", summary_stats["picoclaw"][w]["rss_peak_mb"]) for w in ["W1", "W2", "W3", "W4"]]
+    open_phys_all = [summary_stats["openclaw_minimal"][w].get("proc_peak_phys_mb", summary_stats["openclaw_minimal"][w]["rss_peak_mb"]) for w in ["W1", "W2", "W3", "W4"]]
+
+    ram_ratios = [open_rss_all[i] / pico_rss_all[i] for i in range(4)]
+    phys_ratios = [open_phys_all[i] / pico_phys_all[i] for i in range(4)]
+
+    pico_phys_m = float(np.mean([r.get("proc_peak_phys_mb", 0) for r in pico_trials]))
+    open_min_phys_m = float(np.mean([r.get("proc_peak_phys_mb", 0) for r in open_min_trials]))
+    phys_ratio = open_min_phys_m / pico_phys_m if pico_phys_m > 0 else 0.0
+
+    w2_orch_speedup = open_min_w2["t_orch_median_ms"] / pico_w2["t_orch_median_ms"] if pico_w2["t_orch_median_ms"] > 0 else 1.0
+    w2_ram_reduction = open_min_w2["rss_peak_mb"] / pico_w2["rss_peak_mb"] if pico_w2["rss_peak_mb"] > 0 else 1.0
+
+    def _fmt_energy(val: float | None) -> str:
+        if val is None:
+            return r"\textbf{N/A}"
+        return f"{val:.2f}"
+
+    def _fmt_ratio(num: float | None, den: float | None) -> str:
+        if num is None or den is None or den == 0.0:
+            return r"\textbf{N/A}"
+        return f"{(num / den):.2f}"
+
+    def _fmt_pct(num: float | None, den: float | None) -> str:
+        if num is None or den is None or den == 0.0:
+            return r"\textbf{N/A}"
+        return f"{((den - num) / den * 100.0):.2f}"
+
+    def _format_p_val(p_val: float) -> str:
+        if p_val < 1e-5:
+            return r"< 10^{-5}"
+        else:
+            return f"= {p_val:.4f}"
+
+    p_w3_full_str = _format_p_val(cmp_w3_full["holm_bonferroni_p_value"])
+    p_w3_min_str = _format_p_val(cmp_w3_min["holm_bonferroni_p_value"])
+    p_w4_str = _format_p_val(cmp_w4["holm_bonferroni_p_value"])
+
+    macros_path = os.path.join(output_dir, "tables", "macros_empirical.tex")
+    lines = [
+        "% Automatically generated macros from publication campaign empirical results",
+        "% DO NOT EDIT MANUALLY - Generated by benchmark/analyze_results.py",
+        f"\\newcommand{{\\WThreePicoMedian}}{{{pico_w3['t_task_median_ms']:.1f}}}",
+        f"\\newcommand{{\\WThreePicoIQR}}{{{pico_w3['t_task_iqr_ms']:.1f}}}",
+        f"\\newcommand{{\\WThreePicoMean}}{{{pico_w3['t_task_mean_ms']:.1f}}}",
+        f"\\newcommand{{\\WThreePicoSD}}{{{pico_w3['t_task_std_ms']:.1f}}}",
+        f"\\newcommand{{\\WThreeOpenMinMedian}}{{{open_min_w3['t_task_median_ms']:.1f}}}",
+        f"\\newcommand{{\\WThreeOpenMinIQR}}{{{open_min_w3['t_task_iqr_ms']:.1f}}}",
+        f"\\newcommand{{\\WThreeOpenFullMedian}}{{{open_full_w3['t_task_median_ms']:.1f}}}",
+        f"\\newcommand{{\\WThreeOpenFullIQR}}{{{open_full_w3['t_task_iqr_ms']:.1f}}}",
+        f"\\newcommand{{\\WThreeCliffsDeltaMin}}{{{cmp_w3_min['cliffs_delta']:.3f}}}",
+        f"\\newcommand{{\\WThreeAOneTwoMin}}{{{cmp_w3_min['vargha_delaney_a12']:.3f}}}",
+        f"\\newcommand{{\\WThreeAdjPMin}}{{{p_w3_min_str}}}",
+        f"\\newcommand{{\\WThreeCliffsDeltaFull}}{{{cmp_w3_full['cliffs_delta']:.3f}}}",
+        f"\\newcommand{{\\WThreeAOneTwoFull}}{{{cmp_w3_full['vargha_delaney_a12']:.3f}}}",
+        f"\\newcommand{{\\WThreeAdjPFull}}{{{p_w3_full_str}}}",
+        f"\\newcommand{{\\WThreePicoOrchMedian}}{{{pico_w3['t_orch_median_ms']:.2f}}}",
+        f"\\newcommand{{\\WThreeOpenMinOrchMedian}}{{{open_min_w3['t_orch_median_ms']:.2f}}}",
+        f"\\newcommand{{\\WThreeOpenFullOrchMedian}}{{{open_full_w3['t_orch_median_ms']:.2f}}}",
+        "",
+        f"\\newcommand{{\\WTwoOpenMinMedian}}{{{open_min_w2['t_task_median_ms']:.1f}}}",
+        f"\\newcommand{{\\WTwoOpenMinMean}}{{{open_min_w2['t_task_mean_ms']:.1f}}}",
+        f"\\newcommand{{\\WTwoOpenMinEnergy}}{{{_fmt_energy(open_min_w2.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WTwoPicoMedian}}{{{pico_w2['t_task_median_ms']:.1f}}}",
+        f"\\newcommand{{\\WTwoPicoMean}}{{{pico_w2['t_task_mean_ms']:.1f}}}",
+        f"\\newcommand{{\\WTwoPicoEnergy}}{{{_fmt_energy(pico_w2.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WTwoNeuralMedian}}{{{neural_w2['t_task_median_ms']:.1f}}}",
+        f"\\newcommand{{\\WTwoNeuralMean}}{{{neural_w2['t_task_mean_ms']:.1f}}}",
+        f"\\newcommand{{\\WTwoNeuralEnergy}}{{{_fmt_energy(neural_w2.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WTwoOpenMinTokens}}{{{open_min_w2_tokens:.1f}}}",
+        f"\\newcommand{{\\WTwoPicoTokens}}{{{pico_w2_tokens:.1f}}}",
+        f"\\newcommand{{\\WTwoNeuralPico}}{{{pico_w2_neural_mean:.1f}}}",
+        f"\\newcommand{{\\WTwoNeuralOpenMin}}{{{open_min_w2_neural_mean:.1f}}}",
+        f"\\newcommand{{\\WTwoPicoOrchMedian}}{{{pico_w2['t_orch_median_ms']:.2f}}}",
+        f"\\newcommand{{\\WTwoPicoOrchMean}}{{{pico_w2['t_orch_mean_ms']:.2f}}}",
+        f"\\newcommand{{\\WTwoOpenMinOrchMedian}}{{{open_min_w2['t_orch_median_ms']:.2f}}}",
+        f"\\newcommand{{\\WTwoOpenMinOrchMean}}{{{open_min_w2['t_orch_mean_ms']:.2f}}}",
+        f"\\newcommand{{\\WTwoOrchSpeedup}}{{{round(w2_orch_speedup)}}}",
+        f"\\newcommand{{\\WTwoPicoRSS}}{{{pico_w2['rss_peak_mb']:.2f}}}",
+        f"\\newcommand{{\\WTwoOpenMinRSS}}{{{open_min_w2['rss_peak_mb']:.2f}}}",
+        f"\\newcommand{{\\WTwoRAMReduction}}{{{w2_ram_reduction:.1f}}}",
+        f"\\newcommand{{\\WTwoOpenMinJoulePerToken}}{{{_fmt_energy(open_min_w2.get('joules_per_token'))}}}",
+        f"\\newcommand{{\\WTwoPicoJoulePerToken}}{{{_fmt_energy(pico_w2.get('joules_per_token'))}}}",
+        "",
+        f"\\newcommand{{\\PicoInstructionsMeanM}}{{{pico_inst_m:.1f}}}",
+        f"\\newcommand{{\\PicoCyclesMeanM}}{{{pico_cyc_m:.1f}}}",
+        f"\\newcommand{{\\OpenMinInstructionsMeanM}}{{{open_min_inst_m:.1f}}}",
+        f"\\newcommand{{\\OpenMinCyclesMeanM}}{{{open_min_cyc_m:.1f}}}",
+        f"\\newcommand{{\\InstructionOverheadRatio}}{{{inst_ratio:.2f}}}",
+        f"\\newcommand{{\\CyclesOverheadRatio}}{{{cyc_ratio:.2f}}}",
+        "",
+        f"\\newcommand{{\\PicoRSSMin}}{{{min(pico_rss_all):.2f}}}",
+        f"\\newcommand{{\\PicoRSSMax}}{{{max(pico_rss_all):.2f}}}",
+        f"\\newcommand{{\\PicoRSSWThree}}{{{pico_w3['rss_peak_mb']:.2f}}}",
+        f"\\newcommand{{\\PicoRSSWFour}}{{{pico_w4['rss_peak_mb']:.2f}}}",
+        f"\\newcommand{{\\PicoRSSOverallMean}}{{{float(np.mean(pico_rss_all)):.2f}}}",
+        f"\\newcommand{{\\OpenRSSMin}}{{{min(open_rss_all):.2f}}}",
+        f"\\newcommand{{\\OpenRSSMax}}{{{max(open_rss_all):.2f}}}",
+        f"\\newcommand{{\\OpenRSSOverallMean}}{{{float(np.mean(open_rss_all)):.2f}}}",
+        f"\\newcommand{{\\RAMReductionMinRatio}}{{{min(ram_ratios):.2f}}}",
+        f"\\newcommand{{\\RAMReductionMaxRatio}}{{{max(ram_ratios):.2f}}}",
+        f"\\newcommand{{\\PeakPhysReductionMinRatio}}{{{min(phys_ratios):.2f}}}",
+        f"\\newcommand{{\\PeakPhysReductionMaxRatio}}{{{max(phys_ratios):.2f}}}",
+        f"\\newcommand{{\\PicoPeakPhysMean}}{{{pico_phys_m:.2f}}}",
+        f"\\newcommand{{\\OpenMinPeakPhysMean}}{{{open_min_phys_m:.2f}}}",
+        f"\\newcommand{{\\PeakPhysLeanerRatio}}{{{phys_ratio:.2f}}}",
+        "",
+        f"\\newcommand{{\\WOneOpenMinMean}}{{{open_min_w1['t_task_mean_ms']:.1f}}}",
+        f"\\newcommand{{\\WOneOpenFullMean}}{{{open_full_w1['t_task_mean_ms']:.1f}}}",
+        f"\\newcommand{{\\WOneOpenMinEnergy}}{{{_fmt_energy(open_min_w1.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WOneOpenFullEnergy}}{{{_fmt_energy(open_full_w1.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WOneEnergyBloatRatio}}{{{_fmt_ratio(open_full_w1.get('energy_net_mean_j'), open_min_w1.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WFourOpenFullEnergy}}{{{_fmt_energy(open_full_w4.get('energy_net_mean_j'))}}}",
+        f"\\newcommand{{\\WFourOpenFullEDP}}{{{_fmt_energy(open_full_w4.get('edp_mean_js'))}}}",
+        f"\\newcommand{{\\WFourOpenFullMedian}}{{{open_full_w4['t_task_median_ms']:.1f}}}",
+        f"\\newcommand{{\\WFourPicoMedian}}{{{pico_w4['t_task_median_ms']:.1f}}}",
+        f"\\newcommand{{\\WFourPicoEDP}}{{{_fmt_energy(pico_w4.get('edp_mean_js'))}}}",
+        f"\\newcommand{{\\WFourEDPReductionPct}}{{{_fmt_pct(pico_w4.get('edp_mean_js'), open_full_w4.get('edp_mean_js'))}}}",
+        f"\\newcommand{{\\WFourCliffsDelta}}{{{cmp_w4['cliffs_delta']:.1f}}}",
+        f"\\newcommand{{\\WFourAOneTwo}}{{{cmp_w4['vargha_delaney_a12']:.1f}}}",
+        f"\\newcommand{{\\WFourAdjP}}{{{p_w4_str}}}",
+        "",
+    ]
+
+    with open(macros_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"✅ Generated LaTeX macros: {macros_path}")
+    return macros_path
+
+
+def compute_spearman_correlation_matrix(
+    regime_a_path: str | None = None,
+    regime_b_path: str | None = None,
+    output_dir: str | None = None,
+) -> dict[str, Any]:
+    """
+    Computes pairwise Spearman rank correlation matrix (rho and two-tailed p-values)
+    across 12 critical systems telemetry dimensions for Regime A (Cold Prefill)
+    and Regime B (Realistic KV-Cache Reuse).
+    Outputs results/publication_campaign/spearman_correlation_matrix.json
+    and results/publication_campaign/tables/table_spearman_correlation.tex.
+    """
+    if regime_a_path is None:
+        regime_a_path = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
+    if regime_b_path is None:
+        regime_b_path = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
+    if output_dir is None:
+        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+
+    def load_trials(p: str) -> list[dict]:
+        if not os.path.exists(p):
+            return []
+        with open(p, "r", encoding="utf-8") as f:
+            return [
+                json.loads(line)
+                for line in f
+                if line.strip() and not json.loads(line).get("is_warmup", False)
+            ]
+
+    recs_a = load_trials(regime_a_path)
+    recs_b = load_trials(regime_b_path)
+
+    metric_defs = [
+        ("t_task_ms", "Task Latency", "$T_{\\text{task}}$"),
+        ("t_neural_ms", "Neural Latency", "$T_{\\text{neural}}$"),
+        ("t_orch_ms", "Orch Overhead", "$T_{\\text{orch}}$"),
+        ("t_dispatch_ms", "Dispatch Latency", "$T_{\\text{disp}}$"),
+        ("t_http_ms", "HTTP Latency", "$T_{\\text{http}}$"),
+        ("rss_peak_mb", "Peak RSS", "RSS"),
+        ("proc_peak_phys_mb", "Peak Phys RAM", "PhysRAM"),
+        ("proc_instructions", "Retired Instructions", "Instr"),
+        ("proc_cycles", "CPU Cycles", "Cycles"),
+        ("prompt_tokens", "Prompt Tokens", "$N_{\\text{prompt}}$"),
+        ("energy_net_above_idle_j", "Net Energy", "$E_{\\text{net}}$"),
+        ("edp_js", "Energy-Delay Product", "EDP"),
+    ]
+
+    def build_matrix(records: list[dict]):
+        matrix: dict[str, dict[str, dict[str, Any]]] = {}
+        m_keys = [m[0] for m in metric_defs]
+        upper_coords: list[tuple[str, str]] = []
+        upper_raw_p: list[float] = []
+
+        for i, m1 in enumerate(m_keys):
+            matrix[m1] = {}
+            for j, m2 in enumerate(m_keys):
+                if i == j:
+                    matrix[m1][m2] = {
+                        "rho": 1.0,
+                        "p_value": 0.0,
+                        "p_adj_holm": 0.0,
+                        "significant_001": True,
+                    }
+                    continue
+                pairs = [(float(r[m1]), float(r[m2])) for r in records if r.get(m1) is not None and r.get(m2) is not None]
+                if len(pairs) > 2:
+                    vals1 = [p[0] for p in pairs]
+                    vals2 = [p[1] for p in pairs]
+                    if len(set(vals1)) <= 1 or len(set(vals2)) <= 1:
+                        rho, p_val = 0.0, 1.0
+                    else:
+                        res_sp = stats.spearmanr(vals1, vals2)
+                        rho = 0.0 if np.isnan(res_sp.statistic) else float(res_sp.statistic)
+                        p_val = 1.0 if np.isnan(res_sp.pvalue) else float(res_sp.pvalue)
+                    matrix[m1][m2] = {
+                        "rho": round(float(rho), 4),
+                        "p_value": round(float(p_val), 6),
+                        "p_adj_holm": round(float(p_val), 6),
+                        "significant_001": bool(p_val < 0.001),
+                    }
+                    if i < j:
+                        upper_coords.append((m1, m2))
+                        upper_raw_p.append(float(p_val))
+                else:
+                    matrix[m1][m2] = {"rho": None, "p_value": None, "p_adj_holm": None, "significant_001": False}
+
+        if upper_raw_p:
+            adj_upper = holm_bonferroni_adjust(upper_raw_p)
+            for (m1, m2), p_adj in zip(upper_coords, adj_upper):
+                p_adj_round = round(float(p_adj), 6)
+                sig = bool(p_adj < 0.001)
+                matrix[m1][m2]["p_adj_holm"] = p_adj_round
+                matrix[m1][m2]["significant_001"] = sig
+                matrix[m2][m1]["p_adj_holm"] = p_adj_round
+                matrix[m2][m1]["significant_001"] = sig
+
+        return matrix
+
+    def build_stratified_by_workload(records: list[dict]) -> dict[str, Any]:
+        out_strat: dict[str, Any] = {}
+        key_pairs = [
+            ("t_task_ms", "prompt_tokens"),
+            ("t_task_ms", "energy_net_above_idle_j"),
+            ("t_task_ms", "t_orch_ms"),
+            ("t_dispatch_ms", "t_task_ms"),
+            ("t_orch_ms", "proc_instructions"),
+            ("proc_instructions", "proc_cycles"),
+            ("proc_instructions", "rss_peak_mb"),
+            ("proc_peak_phys_mb", "t_orch_ms"),
+        ]
+        for w in ["W1", "W2", "W3", "W4"]:
+            w_recs = [r for r in records if r.get("workload") == w]
+            if not w_recs:
+                continue
+            trial_level = {}
+            raw_ps = []
+            pair_keys = []
+            for m1, m2 in key_pairs:
+                pk = f"{m1}_vs_{m2}"
+                pts = [(float(r[m1]), float(r[m2])) for r in w_recs if r.get(m1) is not None and r.get(m2) is not None]
+                if len(pts) > 2 and len({x[0] for x in pts}) > 1 and len({x[1] for x in pts}) > 1:
+                    sp = stats.spearmanr([x[0] for x in pts], [x[1] for x in pts])
+                    rho_v = 0.0 if np.isnan(sp.statistic) else float(sp.statistic)
+                    p_v = 1.0 if np.isnan(sp.pvalue) else float(sp.pvalue)
+                else:
+                    rho_v, p_v = 0.0, 1.0
+                trial_level[pk] = {"n": len(pts), "rho": round(rho_v, 4), "p_value": round(p_v, 6)}
+                pair_keys.append(pk)
+                raw_ps.append(p_v)
+            adj_ps = holm_bonferroni_adjust(raw_ps) if raw_ps else []
+            for pk, ap in zip(pair_keys, adj_ps):
+                trial_level[pk]["p_adj_holm"] = round(float(ap), 6)
+
+            # Arm-level means (n=5 arms per workload)
+            by_arm: dict[str, list[dict]] = {}
+            for r in w_recs:
+                by_arm.setdefault(str(r.get("agent_key")), []).append(r)
+            arm_means_corr = {}
+            for m1, m2 in key_pairs:
+                pk = f"{m1}_vs_{m2}"
+                a_pts = []
+                for ak, a_list in by_arm.items():
+                    v1 = [float(x[m1]) for x in a_list if x.get(m1) is not None]
+                    v2 = [float(x[m2]) for x in a_list if x.get(m2) is not None]
+                    if v1 and v2:
+                        a_pts.append((sum(v1) / len(v1), sum(v2) / len(v2)))
+                if len(a_pts) >= 3 and len({x[0] for x in a_pts}) > 1 and len({x[1] for x in a_pts}) > 1:
+                    sp_a = stats.spearmanr([x[0] for x in a_pts], [x[1] for x in a_pts])
+                    ra_v = 0.0 if np.isnan(sp_a.statistic) else float(sp_a.statistic)
+                    pa_v = 1.0 if np.isnan(sp_a.pvalue) else float(sp_a.pvalue)
+                else:
+                    ra_v, pa_v = 0.0, 1.0
+                arm_means_corr[pk] = {"n_arms": len(a_pts), "rho": round(ra_v, 4), "p_value": round(pa_v, 6)}
+
+            out_strat[w] = {
+                "n_trials": len(w_recs),
+                "trial_level_n150": trial_level,
+                "arm_means_n5": arm_means_corr,
+            }
+        return out_strat
+
+    mat_a = build_matrix(recs_a) if recs_a else {}
+    mat_b = build_matrix(recs_b) if recs_b else {}
+    strat_a = build_stratified_by_workload(recs_a) if recs_a else {}
+    strat_b = build_stratified_by_workload(recs_b) if recs_b else {}
+
+    # Define analytical non-tautological pairs for publication table (M4, X6)
+    analytical_pairs = [
+        ("t_task_ms", "prompt_tokens", "$T_{\\text{task}}$ vs $N_{\\text{prompt}}$ (Prompt Token Length)"),
+        ("t_task_ms", "energy_net_above_idle_j", "$T_{\\text{task}}$ vs $E_{\\text{net}}$ (Active Package Energy)"),
+        ("t_task_ms", "t_orch_ms", "$T_{\\text{task}}$ vs $T_{\\text{orch}}$ (Orchestrator Overhead Share)"),
+        ("t_neural_ms", "prompt_tokens", "$T_{\\text{neural}}$ vs $N_{\\text{prompt}}$ (Attention Prefill Duration)"),
+        ("energy_net_above_idle_j", "prompt_tokens", "$E_{\\text{net}}$ vs $N_{\\text{prompt}}$ (Prefill Energy Drain)"),
+        ("proc_instructions", "proc_cycles", "Retired Instructions vs CPU Cycles"),
+        ("proc_instructions", "t_orch_ms", "Retired Instructions vs $T_{\\text{orch}}$"),
+        ("proc_instructions", "rss_peak_mb", "Retired Instructions vs Peak RSS"),
+        ("proc_peak_phys_mb", "t_orch_ms", "Peak Phys RAM vs $T_{\\text{orch}}$"),
+        ("t_dispatch_ms", "t_orch_ms", "$T_{\\text{disp}}$ vs $T_{\\text{orch}}$ (Dispatch Dominance)"),
+        ("cond_means", "task_tokens", "Condition Means ($n=20$): $T_{\\text{task}}$ vs $N_{\\text{prompt}}$"),
+        ("intra_w2", "orch_instr", "Intra-Workload W2 (Fixed $N_{\\text{prompt}}$): $T_{\\text{orch}}$ vs Instr"),
+        ("intra_w3", "disp_task", "Intra-Workload W3 (Vector I/O): $T_{\\text{disp}}$ vs $T_{\\text{task}}$"),
+    ]
+
+    def evaluate_pair(records: list[dict], p_type: str, m1: str, m2: str):
+        if not records:
+            return 0.0, 1.0
+        if p_type == "standard":
+            pairs = [(float(r[m1]), float(r[m2])) for r in records if r.get(m1) is not None and r.get(m2) is not None]
+            if len(pairs) < 3:
+                return 0.0, 1.0
+            r, p = stats.spearmanr([x[0] for x in pairs], [x[1] for x in pairs])
+            return float(r), float(p)
+        elif p_type == "cond_means":
+            conds = {}
+            for r in records:
+                k = (r.get("workload"), r.get("agent_key"))
+                if k not in conds:
+                    conds[k] = {"tasks": [], "tokens": []}
+                if r.get("t_task_ms") is not None and r.get("prompt_tokens") is not None:
+                    conds[k]["tasks"].append(float(r["t_task_ms"]))
+                    conds[k]["tokens"].append(float(r["prompt_tokens"]))
+            mean_tasks = [sum(v["tasks"]) / len(v["tasks"]) for v in conds.values() if v["tasks"]]
+            mean_tokens = [sum(v["tokens"]) / len(v["tokens"]) for v in conds.values() if v["tokens"]]
+            if len(mean_tasks) < 3:
+                return 0.0, 1.0
+            r, p = stats.spearmanr(mean_tasks, mean_tokens)
+            return float(r), float(p)
+        elif p_type == "intra_w2":
+            w2_recs = [r for r in records if r.get("workload") == "W2"]
+            pairs = [(float(r["t_orch_ms"]), float(r["proc_instructions"])) for r in w2_recs if r.get("t_orch_ms") is not None and r.get("proc_instructions") is not None]
+            if len(pairs) < 3:
+                return 0.0, 1.0
+            r, p = stats.spearmanr([x[0] for x in pairs], [x[1] for x in pairs])
+            return float(r), float(p)
+        elif p_type == "intra_w3":
+            w3_recs = [r for r in records if r.get("workload") == "W3"]
+            pairs = [(float(r["t_dispatch_ms"]), float(r["t_task_ms"])) for r in w3_recs if r.get("t_dispatch_ms") is not None and r.get("t_task_ms") is not None]
+            if len(pairs) < 3:
+                return 0.0, 1.0
+            r, p = stats.spearmanr([x[0] for x in pairs], [x[1] for x in pairs])
+            return float(r), float(p)
+        return 0.0, 1.0
+
+    table_data = []
+    p_vals_a = []
+    p_vals_b = []
+
+    for item in analytical_pairs:
+        k1, k2, label = item
+        if k1 == "cond_means":
+            ra, pa = evaluate_pair(recs_a, "cond_means", "", "")
+            rb, pb = evaluate_pair(recs_b, "cond_means", "", "")
+        elif k1 == "intra_w2":
+            ra, pa = evaluate_pair(recs_a, "intra_w2", "", "")
+            rb, pb = evaluate_pair(recs_b, "intra_w2", "", "")
+        elif k1 == "intra_w3":
+            ra, pa = evaluate_pair(recs_a, "intra_w3", "", "")
+            rb, pb = evaluate_pair(recs_b, "intra_w3", "", "")
+        else:
+            ra, pa = evaluate_pair(recs_a, "standard", k1, k2)
+            rb, pb = evaluate_pair(recs_b, "standard", k1, k2)
+
+        table_data.append((label, ra, pa, rb, pb))
+        p_vals_a.append(pa)
+        p_vals_b.append(pb)
+
+    adj_p_a = holm_bonferroni_adjust(p_vals_a)
+    adj_p_b = holm_bonferroni_adjust(p_vals_b)
+
+    reported_pairs = []
+    for idx, (label, ra, pa, rb, pb) in enumerate(table_data):
+        reported_pairs.append({
+            "interaction": label,
+            "regime_a_cold": {
+                "rho": round(float(ra), 4),
+                "p_raw": float(pa),
+                "p_adj_holm": float(adj_p_a[idx]),
+            },
+            "regime_b_warm": {
+                "rho": round(float(rb), 4),
+                "p_raw": float(pb),
+                "p_adj_holm": float(adj_p_b[idx]),
+            },
+        })
+
+    out_json_path = os.path.join(output_dir, "spearman_correlation_matrix.json")
+    full_output = {
+        "description": "Pairwise Spearman Rank Correlation Matrix across 12 Systems Dimensions with Holm-Bonferroni Adjustment",
+        "n_evaluations_regime_a": len(recs_a),
+        "n_evaluations_regime_b": len(recs_b),
+        "metrics": [m[0] for m in metric_defs],
+        "metric_labels": {m[0]: m[1] for m in metric_defs},
+        "table_reported_pairs_with_holm": reported_pairs,
+        "stratified_by_workload": {
+            "regime_a_cold_prefill": strat_a,
+            "regime_b_warm_kv_cache": strat_b,
+        },
+        "regime_a_cold_prefill": mat_a,
+        "regime_b_warm_kv_cache": mat_b,
+    }
+    with open(out_json_path, "w", encoding="utf-8") as f:
+        json.dump(full_output, f, indent=2)
+    print(f"✅ Generated Spearman correlation matrix JSON: {out_json_path}")
+
+    # Generate LaTeX Table
+    tex_path = os.path.join(output_dir, "tables", "table_spearman_correlation.tex")
+    latex = r"""\begin{table*}[t]
+\centering
+\caption{Non-Parametric Spearman Rank Correlation Matrix ($\rho$) across Critical Systems Telemetry Dimensions on Apple Silicon M4. Contrasts Regime A (Cold Prefill, $n=600$) and Regime B (Warm KV-Cache Reuse, $n=600$). Tautological identities ($T_{\text{task}}$ vs $T_{\text{neural}}$, $T_{\text{task}}$ vs EDP, RSS vs PhysRAM) are excluded in favor of non-trivial architectural interactions, condition-level aggregation ($n=20$), and intra-workload controls. $p$-values are adjusted for family-wise error rate control via step-down Holm-Bonferroni: $^{***}p_{\text{adj}} < 0.001$, $^{**}p_{\text{adj}} < 0.01$, $^{*}p_{\text{adj}} < 0.05$.}
+\label{tab:spearman_correlation}
+\small
+\begin{tabular}{l r r r r}
+\hline
+\textbf{Systems Interaction} & \textbf{Regime A ($\rho_{\text{cold}}$)} & \textbf{Holm-adj. $p$ (A)} & \textbf{Regime B ($\rho_{\text{warm}}$)} & \textbf{Holm-adj. $p$ (B)} \\
+\hline
+"""
+
+    def fmt_cell(r, p_adj):
+        stars = "***" if p_adj < 0.001 else ("**" if p_adj < 0.01 else ("*" if p_adj < 0.05 else ""))
+        p_str = "$< 10^{-5}$" if p_adj < 0.00001 else f"{p_adj:.4f}"
+        return f"{r:+.3f}$^{{{stars}}}$", p_str
+
+    for idx, (label, ra, pa, rb, pb) in enumerate(table_data):
+        str_ra, str_pa = fmt_cell(ra, adj_p_a[idx])
+        str_rb, str_pb = fmt_cell(rb, adj_p_b[idx])
+        latex += f"{label} & {str_ra} & {str_pa} & {str_rb} & {str_pb} \\\\\n"
+
+    latex += r"""\hline
+\multicolumn{5}{l}{\footnotesize Non-parametric Spearman rank correlation with step-down Holm-Bonferroni family-wise error adjustment ($1{,}200$ total physical evaluations).} \\
+\hline
+\end{tabular}
+\end{table*}
+"""
+    with open(tex_path, "w", encoding="utf-8") as f:
+        f.write(latex)
+    print(f"✅ Generated Spearman correlation LaTeX table: {tex_path}")
+    return full_output
+
+
+def compute_pca_variance_decomposition(
+    regime_a_path: str | None = None,
+    regime_b_path: str | None = None,
+    output_dir: str | None = None,
+) -> dict[str, Any]:
+    """
+    Computes Principal Component Analysis (PCA) variance decomposition and factor loadings
+    via Singular Value Decomposition (np.linalg.svd) on Z-score standardized observations
+    across evaluated agent runtimes (picoclaw, openclaw_minimal, openclaw_full, python_native).
+
+    Outputs results/publication_campaign/pca_variance_decomposition.json
+    and results/publication_campaign/tables/table_pca_loadings.tex.
+    """
+    if regime_a_path is None:
+        regime_a_path = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
+    if regime_b_path is None:
+        regime_b_path = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
+    if output_dir is None:
+        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+
+    target_agents = ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native"]
+    metric_defs = [
+        ("prompt_tokens", "Prompt Tokens", "$N_{\\text{prompt}}$"),
+        ("t_neural_ms", "Neural Latency", "$T_{\\text{neural}}$"),
+        ("t_task_ms", "Task Latency", "$T_{\\text{task}}$"),
+        ("energy_net_above_idle_j", "Net Energy", "$E_{\\text{net}}$"),
+        ("edp_js", "Energy-Delay Product", "EDP"),
+        ("t_orch_ms", "Orchestrator Overhead", "$T_{\\text{orch}}$"),
+        ("t_http_ms", "HTTP Latency", "$T_{\\text{http}}$"),
+        ("t_dispatch_ms", "Dispatch Latency", "$T_{\\text{disp}}$"),
+        ("rss_peak_mb", "Peak RSS", "RSS"),
+        ("proc_peak_phys_mb", "Peak Phys RAM", "PhysRAM"),
+        ("proc_instructions", "Retired Instructions", "Instr"),
+        ("proc_cycles", "CPU Cycles", "Cycles"),
+    ]
+    metrics = [m[0] for m in metric_defs]
+
+    def load_clean_trials(p: str) -> list[dict]:
+        if not os.path.exists(p):
+            return []
+        with open(p, "r", encoding="utf-8") as f:
+            records = []
+            for line in f:
+                if not line.strip():
+                    continue
+                d = json.loads(line)
+                if d.get("is_warmup", False):
+                    continue
+                if d.get("agent_key") not in target_agents:
+                    continue
+                if any(d.get(m) is None for m in metrics):
+                    continue
+                records.append(d)
+            return records
+
+    def run_pca_on_records(records: list[dict]):
+        if not records or len(records) < len(metrics):
+            return {}
+        n = len(records)
+        p = len(metrics)
+        X = np.array([[float(r[m]) for m in metrics] for r in records], dtype=np.float64)
+        mean = np.mean(X, axis=0)
+        std = np.std(X, axis=0, ddof=1)
+        std[std == 0.0] = 1.0
+        Z = (X - mean) / std
+
+        U, S, Vt = np.linalg.svd(Z, full_matrices=False)
+        V = Vt.T  # shape (p, p), columns are principal axes
+
+        # Standardize signs for deterministic, intuitive presentation:
+        # PC1: prompt_tokens positive
+        if V[0, 0] < 0:
+            V[:, 0] = -V[:, 0]
+        # PC2: proc_instructions positive
+        if V[10, 1] < 0:
+            V[:, 1] = -V[:, 1]
+        # PC3: t_dispatch_ms positive
+        if V[7, 2] < 0:
+            V[:, 2] = -V[:, 2]
+
+        lambdas = (S ** 2) / (n - 1)
+        total_var = float(np.sum(lambdas))
+        var_exp_ratio = lambdas / total_var
+        var_exp_pct = var_exp_ratio * 100.0
+        cum_var_pct = np.cumsum(var_exp_pct)
+
+        components = []
+        for k in range(p):
+            c_dict = {
+                "component": f"PC{k+1}",
+                "eigenvalue": round(float(lambdas[k]), 4),
+                "explained_variance_pct": round(float(var_exp_pct[k]), 2),
+                "cumulative_variance_pct": round(float(cum_var_pct[k]), 2),
+                "loadings": {},
+                "contributions_pct": {},
+            }
+            for j, m in enumerate(metrics):
+                load_val = float(V[j, k])
+                contrib_val = float((V[j, k] ** 2) * 100.0)
+                c_dict["loadings"][m] = round(load_val, 4)
+                c_dict["contributions_pct"][m] = round(contrib_val, 2)
+            components.append(c_dict)
+
+        return {
+            "n_trials": n,
+            "n_variables": p,
+            "eigenvalues": [round(float(x), 4) for x in lambdas],
+            "explained_variance_pct": [round(float(x), 2) for x in var_exp_pct],
+            "cumulative_variance_pct": [round(float(x), 2) for x in cum_var_pct],
+            "components": components,
+            "orthogonality_max_error": float(np.max(np.abs(np.dot(V.T, V) - np.eye(p)))),
+            "sum_explained_variance_pct": float(np.sum(var_exp_pct)),
+        }
+
+    recs_a = load_clean_trials(regime_a_path)
+    recs_b = load_clean_trials(regime_b_path)
+
+    pca_a = run_pca_on_records(recs_a)
+    pca_b = run_pca_on_records(recs_b)
+
+    def run_within_workload_pca(records: list[dict]):
+        if not records or len(records) < len(metrics):
+            return {}
+        workload_groups = {}
+        for r in records:
+            w = r.get("workload")
+            if w not in workload_groups:
+                workload_groups[w] = []
+            workload_groups[w].append(r)
+
+        z_blocks = []
+        for w, w_recs in sorted(workload_groups.items()):
+            X_w = np.array([[float(r[m]) for m in metrics] for r in w_recs], dtype=np.float64)
+            mean_w = np.mean(X_w, axis=0)
+            std_w = np.std(X_w, axis=0, ddof=1)
+            std_w[std_w == 0.0] = 1.0
+            Z_w = (X_w - mean_w) / std_w
+            z_blocks.append(Z_w)
+
+        Z_within = np.vstack(z_blocks)
+        n = Z_within.shape[0]
+        p = len(metrics)
+
+        U, S, Vt = np.linalg.svd(Z_within, full_matrices=False)
+        V = Vt.T
+
+        if V[10, 0] < 0:
+            V[:, 0] = -V[:, 0]
+        if V[7, 1] < 0:
+            V[:, 1] = -V[:, 1]
+        if V[8, 2] < 0:
+            V[:, 2] = -V[:, 2]
+
+        lambdas = (S ** 2) / (n - 1)
+        total_var = float(np.sum(lambdas))
+        var_exp_pct = (lambdas / total_var) * 100.0
+        cum_var_pct = np.cumsum(var_exp_pct)
+
+        components = []
+        for k in range(min(p, 5)):
+            c_dict = {
+                "component": f"Within_PC{k+1}",
+                "eigenvalue": round(float(lambdas[k]), 4),
+                "explained_variance_pct": round(float(var_exp_pct[k]), 2),
+                "cumulative_variance_pct": round(float(cum_var_pct[k]), 2),
+                "loadings": {},
+                "contributions_pct": {},
+            }
+            for j, m in enumerate(metrics):
+                c_dict["loadings"][m] = round(float(V[j, k]), 4)
+                c_dict["contributions_pct"][m] = round(float((V[j, k] ** 2) * 100.0), 2)
+            components.append(c_dict)
+
+        return {
+            "description": "Within-workload Z-score normalized PCA removing cross-tier scaling effects",
+            "n_trials": n,
+            "eigenvalues": [round(float(x), 4) for x in lambdas[:5]],
+            "explained_variance_pct": [round(float(x), 2) for x in var_exp_pct[:5]],
+            "cumulative_variance_pct": [round(float(x), 2) for x in cum_var_pct[:5]],
+            "components": components,
+        }
+
+    within_pca_a = run_within_workload_pca(recs_a)
+    within_pca_b = run_within_workload_pca(recs_b)
+
+    out_json_path = os.path.join(output_dir, "pca_variance_decomposition.json")
+    full_output = {
+        "description": "Principal Component Analysis (PCA) Variance Decomposition on Apple Silicon M4 across 12 Telemetry Dimensions",
+        "method": "SVD on Z-score standardized observation matrix Z = (X - mu) / sigma",
+        "evaluated_agents": target_agents,
+        "n_trials_explanation": "Evaluates N=480 trials per regime across 4 agent runtimes. The neural_baseline (120 trials) is omitted from PCA due to structural zeros in host orchestration metrics (T_orch=0, RSS=0, Instructions=0, Cycles=0).",
+        "metrics": metrics,
+        "regime_a_cold_prefill": pca_a,
+        "regime_b_warm_kv_cache": pca_b,
+        "within_workload_normalized_pca": {
+            "regime_a_cold_prefill": within_pca_a,
+            "regime_b_warm_kv_cache": within_pca_b,
+        },
+    }
+    with open(out_json_path, "w", encoding="utf-8") as f:
+        json.dump(full_output, f, indent=2)
+    print(f"✅ Generated PCA variance decomposition JSON: {out_json_path}")
+
+    # Generate LaTeX Table
+    tex_path = os.path.join(output_dir, "tables", "table_pca_loadings.tex")
+    latex = r"""\begin{table*}[t]
+\centering
+\caption{Principal Component Analysis (PCA) Variance Decomposition and Factor Loadings across Telemetry Dimensions on Apple Silicon M4. Evaluates $N=480$ trials per regime across compiled and interpreted agent runtimes (\texttt{picoclaw}, \texttt{openclaw\_minimal}, \texttt{openclaw\_full}, \texttt{python\_native}). $\text{PC}_1$ captures prompt prefill scale and energy dissipation; $\text{PC}_2$ isolates host runtime microarchitectural footprint (RAM, CPU cycles, instructions); $\text{PC}_3$ isolates tool dispatch and I/O execution. Values in parentheses denote relative variable contribution (\%).}
+\label{tab:pca_loadings}
+\small
+\begin{tabular}{l c r r r r r r}
+\hline
+ & & \multicolumn{3}{c}{\textbf{Regime A: Cold Prefill}} & \multicolumn{3}{c}{\textbf{Regime B: Warm KV-Cache}} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-8}
+\textbf{Systems Dimension} & \textbf{Symbol} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} \\
+\hline
+"""
+
+    def get_comp(pca_res, idx):
+        if not pca_res or "components" not in pca_res or len(pca_res["components"]) <= idx:
+            return None
+        return pca_res["components"][idx]
+
+    c1_a = get_comp(pca_a, 0)
+    c2_a = get_comp(pca_a, 1)
+    c3_a = get_comp(pca_a, 2)
+    c1_b = get_comp(pca_b, 0)
+    c2_b = get_comp(pca_b, 1)
+    c3_b = get_comp(pca_b, 2)
+
+    def fmt_cell(comp, m):
+        if not comp:
+            return "N/A"
+        loading_val = comp["loadings"].get(m, 0.0)
+        c = comp["contributions_pct"].get(m, 0.0)
+        return f"{loading_val:+.3f} ({c:4.1f}\\%)"
+
+    for m, name, sym in metric_defs:
+        row_str = f"{name} & {sym} & "
+        row_str += f"{fmt_cell(c1_a, m)} & {fmt_cell(c2_a, m)} & {fmt_cell(c3_a, m)} & "
+        row_str += f"{fmt_cell(c1_b, m)} & {fmt_cell(c2_b, m)} & {fmt_cell(c3_b, m)} \\\\\n"
+        latex += row_str
+
+    latex += r"""\hline
+"""
+    # Summary rows
+    def fmt_stat(pca_res, key, fmt_spec):
+        if not pca_res or key not in pca_res:
+            return ["N/A", "N/A", "N/A"]
+        vals = pca_res[key][:3]
+        return [fmt_spec.format(v) for v in vals]
+
+    ev_a = fmt_stat(pca_a, "eigenvalues", "{:.2f}")
+    ev_b = fmt_stat(pca_b, "eigenvalues", "{:.2f}")
+    latex += f"\\multicolumn{{2}}{{l}}{{\\textbf{{Eigenvalue ($\\lambda_k$)}}}} & {ev_a[0]} & {ev_a[1]} & {ev_a[2]} & {ev_b[0]} & {ev_b[1]} & {ev_b[2]} \\\\\n"
+
+    var_a = fmt_stat(pca_a, "explained_variance_pct", "{:.1f}\\%")
+    var_b = fmt_stat(pca_b, "explained_variance_pct", "{:.1f}\\%")
+    latex += f"\\multicolumn{{2}}{{l}}{{\\textbf{{Explained Variance [\\%]}}}} & {var_a[0]} & {var_a[1]} & {var_a[2]} & {var_b[0]} & {var_b[1]} & {var_b[2]} \\\\\n"
+
+    cum_a = fmt_stat(pca_a, "cumulative_variance_pct", "{:.1f}\\%")
+    cum_b = fmt_stat(pca_b, "cumulative_variance_pct", "{:.1f}\\%")
+    latex += f"\\multicolumn{{2}}{{l}}{{\\textbf{{Cumulative Variance [\\%]}}}} & {cum_a[0]} & {cum_a[1]} & {cum_a[2]} & {cum_b[0]} & {cum_b[1]} & {cum_b[2]} \\\\\n"
+
+    latex += r"""\hline
+\multicolumn{8}{l}{\footnotesize Principal component analysis via SVD on Z-score standardized observations ($N=480$ per regime across 4 agent runtimes).} \\
+\multicolumn{8}{l}{\footnotesize Values denote factor loadings (eigenvector entries) and relative contribution percentages: $\text{contrib}_j = v_{jk}^2 \times 100\%$.} \\
+\hline
+\end{tabular}
+\end{table*}
+"""
+    with open(tex_path, "w", encoding="utf-8") as f:
+        f.write(latex)
+    print(f"✅ Generated PCA loadings LaTeX table: {tex_path}")
+    return full_output
+
+
+def compute_sensitivity_and_outlier_analysis(
+    regime_a_path: str | None = None,
+    regime_b_path: str | None = None,
+    output_dir: str | None = None,
+) -> dict[str, Any]:
+    """
+    Computes Gate 3 (Item 11) and Gate 4 (Item 9) sensitivity analyses:
+      1. Pre-registered Tukey 1.5*IQR outlier analysis and 5% trimmed mean across all 20 cells
+         of Regime A (raw_trials.jsonl) and Regime B (warm_cache_trials.jsonl), proving that
+         outlier removal changes cell medians by < 0.8% and trims <= 3.3% of observations.
+      2. Active electrical power (P_net = E_net / T_task in Watts), duration, prompt vs. completion
+         token sensitivity, and explicit separation of prompt prefill (prompt_ms) vs. autoregressive
+         decode (predicted_ms) across all conditions.
+    Saves results/publication_campaign/sensitivity_and_outlier_analysis.json.
+    """
+    if regime_a_path is None:
+        regime_a_path = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
+    if regime_b_path is None:
+        regime_b_path = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
+    if output_dir is None:
+        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+
+    def load_eval_trials(p: str) -> list[dict[str, Any]]:
+        if not os.path.exists(p):
+            return []
+        with open(p, "r", encoding="utf-8") as f:
+            return [
+                json.loads(line)
+                for line in f
+                if line.strip() and not json.loads(line).get("is_warmup", False)
+            ]
+
+    recs_a = load_eval_trials(regime_a_path)
+    recs_b = load_eval_trials(regime_b_path)
+
+    def analyze_regime(records: list[dict[str, Any]], regime_label: str) -> dict[str, Any]:
+        cells: dict[str, Any] = {}
+        total_outliers = 0
+        total_samples = 0
+        max_rel_diff_pct = 0.0
+        active_power_watts_all: list[float] = []
+        prompt_ms_all: list[float] = []
+        predicted_ms_all: list[float] = []
+
+        by_cell: dict[tuple[str, str], list[dict[str, Any]]] = {}
+        for r in records:
+            ak = str(r.get("agent_key", "unknown"))
+            w = str(r.get("workload", "W1"))
+            by_cell.setdefault((ak, w), []).append(r)
+
+        for (ak, w), c_recs in sorted(by_cell.items()):
+            vals = np.array([float(x["t_task_ms"]) for x in c_recs], dtype=np.float64)
+            n = len(vals)
+            total_samples += n
+            q1 = float(np.percentile(vals, 25))
+            q3 = float(np.percentile(vals, 75))
+            iqr = q3 - q1
+            low_fence = q1 - 1.5 * iqr
+            high_fence = q3 + 1.5 * iqr
+            inliers = vals[(vals >= low_fence) & (vals <= high_fence)]
+            n_outliers = int(n - len(inliers))
+            total_outliers += n_outliers
+
+            full_med = float(np.median(vals))
+            inlier_med = float(np.median(inliers)) if len(inliers) > 0 else full_med
+            trimmed_mean_5pct = float(stats.trim_mean(vals, 0.05))
+            rel_diff_med_pct = abs(inlier_med - full_med) / full_med * 100.0 if full_med > 0 else 0.0
+            if rel_diff_med_pct > max_rel_diff_pct:
+                max_rel_diff_pct = rel_diff_med_pct
+
+            # Active Power (W), Prefill (prompt_ms), Decode (predicted_ms), and Token Sensitivity
+            p_watts = [
+                float(x["energy_net_above_idle_j"]) / (float(x["t_task_ms"]) / 1000.0)
+                for x in c_recs
+                if x.get("energy_net_above_idle_j") is not None and float(x.get("t_task_ms", 0.0)) > 0
+            ]
+            active_power_watts_all.extend(p_watts)
+            p_ms_list = [float(x.get("prompt_ms", 0.0)) for x in c_recs]
+            pred_ms_list = [float(x.get("predicted_ms", 0.0)) for x in c_recs]
+            prompt_ms_all.extend(p_ms_list)
+            predicted_ms_all.extend(pred_ms_list)
+
+            pt_mean = float(np.mean([float(x["prompt_tokens"]) for x in c_recs]))
+            ct_mean = float(np.mean([float(x.get("completion_tokens", x.get("output_tokens", 1))) for x in c_recs]))
+            en_mean = float(np.mean([float(x["energy_net_above_idle_j"]) for x in c_recs if x.get("energy_net_above_idle_j") is not None]))
+
+            cells[f"{ak}_{w}"] = {
+                "agent_key": ak,
+                "workload": w,
+                "n_full": n,
+                "n_outliers_tukey_1_5_iqr": n_outliers,
+                "outlier_fraction_pct": round(n_outliers / n * 100.0, 2),
+                "t_task_median_full_ms": round(full_med, 2),
+                "t_task_median_inliers_ms": round(inlier_med, 2),
+                "t_task_trimmed_mean_5pct_ms": round(trimmed_mean_5pct, 2),
+                "median_relative_shift_after_outlier_removal_pct": round(rel_diff_med_pct, 4),
+                "prompt_ms_median": round(float(np.median(p_ms_list)), 2),
+                "predicted_ms_median": round(float(np.median(pred_ms_list)), 2),
+                "prefill_share_of_neural_pct": round(
+                    float(np.median(p_ms_list)) / max(0.01, float(np.median(p_ms_list)) + float(np.median(pred_ms_list))) * 100.0,
+                    2,
+                ),
+                "active_power_net_mean_w": round(float(np.mean(p_watts)), 2) if p_watts else 0.0,
+                "active_power_net_sd_w": round(float(np.std(p_watts, ddof=1)), 2) if len(p_watts) > 1 else 0.0,
+                "energy_per_prompt_token_mj": round((en_mean * 1000.0) / max(1.0, pt_mean), 3),
+                "energy_per_completion_token_mj": round((en_mean * 1000.0) / max(1.0, ct_mean), 2),
+            }
+
+        return {
+            "regime": regime_label,
+            "total_evaluated_trials": total_samples,
+            "total_tukey_outliers": total_outliers,
+            "overall_outlier_fraction_pct": round(total_outliers / max(1, total_samples) * 100.0, 2),
+            "max_cell_median_shift_after_outlier_removal_pct": round(max_rel_diff_pct, 4),
+            "active_power_net_overall_mean_w": round(float(np.mean(active_power_watts_all)), 2) if active_power_watts_all else 0.0,
+            "active_power_net_overall_sd_w": round(float(np.std(active_power_watts_all, ddof=1)), 2) if len(active_power_watts_all) > 1 else 0.0,
+            "prompt_ms_overall_median": round(float(np.median(prompt_ms_all)), 2) if prompt_ms_all else 0.0,
+            "predicted_ms_overall_median": round(float(np.median(predicted_ms_all)), 2) if predicted_ms_all else 0.0,
+            "cells": cells,
+        }
+
+    res_a = analyze_regime(recs_a, "Regime A (Cold Prefill, cache_prompt=false)")
+    res_b = analyze_regime(recs_b, "Regime B (Warm KV-Cache Reuse, cache_prompt=true)")
+
+    out_payload = {
+        "description": "Gate 3 (Outlier Sensitivity) and Gate 4 (Power, Duration, Token, and Prefill/Decode Sensitivity) Analysis on Apple Silicon M4",
+        "outlier_methodology": "Pre-registered Tukey fence [Q1 - 1.5*IQR, Q3 + 1.5*IQR] and 5% Trimmed Mean across all 40 experimental blocks (1,200 physical trials).",
+        "key_findings": {
+            "outlier_invariance_verified": bool(
+                res_a["max_cell_median_shift_after_outlier_removal_pct"] < 0.8
+                and res_b["max_cell_median_shift_after_outlier_removal_pct"] < 0.8
+            ),
+            "regime_a_active_power_mean_w": res_a["active_power_net_overall_mean_w"],
+            "regime_b_active_power_mean_w": res_b["active_power_net_overall_mean_w"],
+            "regime_a_max_median_shift_pct": res_a["max_cell_median_shift_after_outlier_removal_pct"],
+            "regime_b_max_median_shift_pct": res_b["max_cell_median_shift_after_outlier_removal_pct"],
+        },
+        "regime_a_cold_prefill": res_a,
+        "regime_b_warm_kv_cache": res_b,
+    }
+
+    out_path = os.path.join(output_dir, "sensitivity_and_outlier_analysis.json")
+    with open(out_path, "w", encoding="utf-8") as f:
+        json.dump(out_payload, f, indent=2)
+    print(f"✅ Generated sensitivity and outlier analysis JSON: {out_path}")
+    return out_payload
+
+
+if __name__ == "__main__":
+    in_p = sys.argv[1] if len(sys.argv) > 1 else None
+    out_d = sys.argv[2] if len(sys.argv) > 2 else None
+    analyze_publication_campaign(in_p, out_d)
+
+================================================================================
+END FILE: benchmark/analyze_results.py
+================================================================================
+
 
 ================================================================================
 FILE: benchmark/adapters/neural_baseline_adapter.py
@@ -965,909 +2340,6 @@ END FILE: scripts/run_uma_energy_and_bandwidth_attribution.py
 
 
 ================================================================================
-FILE: scripts/run_inter_session_replication.py
-SHA-256: bd0d52489b2b274082ddb313787a60a3e9a41ddbb4e358f700ead7e59a310965
-================================================================================
-#!/usr/bin/env python3
-"""
-scripts/run_inter_session_replication.py - Rigorous Inter-Session Replication (n=30) & Real Bun JSC Benchmark
-Executes independent Session 2 replication (seed=99, n=30 evaluations + 3 primings per block)
-in Regime B (BENCH_CACHE_PROMPT=true) with randomized block order, a single continuous
-SMCPowerMonitor(sample_interval_ms=50), real subprocess rusage telemetry, and native Bun JSC (darwin-aarch64).
-Outputs:
-  - results/publication_campaign/inter_session_trials.jsonl
-  - results/publication_campaign/inter_session_replication.json
-
-Author / Autor: Rafael Paniccia Cassetta (UFABC)
-"""
-from __future__ import annotations
-
-import json
-import math
-import os
-import random
-import subprocess
-import sys
-import time
-import urllib.request
-from typing import Any
-
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if REPO_DIR not in sys.path:
-    sys.path.insert(0, REPO_DIR)
-
-from benchmark.adapters import get_adapter  # noqa: E402
-from benchmark.protocol_invariants import validate_campaign_invariants  # noqa: E402
-from benchmark.telemetry import SMCPowerMonitor  # noqa: E402
-
-WARM_TRIALS_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
-BACKUP_TWO_SESSION_PATH = os.path.join(REPO_DIR, "results", "exploratory_campaigns", "warm_cache_trials_two_session_backup.jsonl")
-OUT_TRIALS_JSONL = os.path.join(REPO_DIR, "results", "publication_campaign", "inter_session_trials.jsonl")
-OUT_JSON_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "inter_session_replication.json")
-
-
-def get_git_commit() -> str:
-    res = subprocess.run(["git", "rev-parse", "--short=12", "HEAD"], cwd=REPO_DIR, capture_output=True, text=True)
-    return res.stdout.strip() or "c251847"
-
-
-def check_server_health(url: str = "http://127.0.0.1:8080/health") -> bool:
-    req = urllib.request.Request(url)
-    with urllib.request.urlopen(req, timeout=3.0) as resp:
-        return resp.status == 200
-
-
-def load_records_by_cell(path: str) -> dict[tuple[str, str], list[dict[str, Any]]]:
-    data: dict[tuple[str, str], list[dict[str, Any]]] = {}
-    if not os.path.exists(path):
-        raise RuntimeError(f"FATAL: Required trials file missing: {path}")
-    with open(path, "r", encoding="utf-8") as f:
-        for line in f:
-            if not line.strip():
-                continue
-            d = json.loads(line)
-            key = (d["workload"], d["agent_key"])
-            data.setdefault(key, []).append(d)
-    return data
-
-
-def _mean(vals: list[float]) -> float:
-    if not vals:
-        raise RuntimeError("FATAL: Empty list in _mean")
-    return sum(vals) / len(vals)
-
-
-def _std(vals: list[float]) -> float:
-    if len(vals) < 2:
-        return 0.0
-    m = _mean(vals)
-    return math.sqrt(sum((x - m) ** 2 for x in vals) / (len(vals) - 1))
-
-
-def _median(vals: list[float]) -> float:
-    s = sorted(vals)
-    n = len(s)
-    if n == 0:
-        raise RuntimeError("FATAL: Empty list in _median")
-    if n % 2 == 1:
-        return s[n // 2]
-    return 0.5 * (s[n // 2 - 1] + s[n // 2])
-
-
-def run_replication() -> int:
-    if sys.platform != "darwin":
-        raise RuntimeError(f"FATAL: Physical hardware benchmark requires macOS Darwin, got {sys.platform}")
-
-    workloads = ["W1", "W2", "W3", "W4"]
-    target_agents = ["picoclaw", "openclaw_minimal", "python_native", "neural_baseline", "bun_minimal"]
-    n_evals = 30
-    n_primings = 3
-    git_commit = get_git_commit()
-    session_id = "session_2_replication_m4"
-
-    bun_adapter = get_adapter("bun_jsc_orchestrator", REPO_DIR)
-    bun_meta = bun_adapter.metadata()
-    if bun_meta.get("is_fallback_node", True) or bun_meta.get("runner_binary_used") != "bun":
-        raise RuntimeError(f"FATAL: Real native 'bun' binary required, got metadata: {bun_meta}")
-
-    if "--analyze-only" in sys.argv and os.path.exists(OUT_TRIALS_JSONL):
-        print(f"📊 [INFO] Running in --analyze-only mode on {OUT_TRIALS_JSONL}...")
-        all_s2_records = []
-        with open(OUT_TRIALS_JSONL, "r", encoding="utf-8") as f:
-            for line in f:
-                if line.strip():
-                    r = json.loads(line)
-                    r.setdefault("session_id", session_id)
-                    r.setdefault("git_commit", git_commit)
-                    r.setdefault("http_status", 200)
-                    r.setdefault("finish_reason", "stop")
-                    all_s2_records.append(r)
-    else:
-        if not check_server_health():
-            raise RuntimeError("FATAL: llama-server unreachable at http://127.0.0.1:8080/health")
-
-        os.environ["BENCH_CACHE_PROMPT"] = "true"
-        smc_monitor = SMCPowerMonitor(sample_interval_ms=50)
-        if not smc_monitor.active:
-            raise RuntimeError("FATAL: Apple SMC powermetrics is not active!")
-
-        print("⚡ Measuring 3.0s quiescent idle baseline on Apple Silicon M4...")
-        idle_mw = smc_monitor.measure_idle_baseline(3.0)
-        print(f"   Idle package power: {idle_mw:.2f} mW. Starting single continuous SMC powermetrics daemon...")
-        smc_monitor.start_campaign()
-
-        adapters = {}
-        for ak in target_agents:
-            ad = get_adapter(ak, REPO_DIR)
-            if not ad.setup():
-                raise RuntimeError(f"FATAL: Adapter setup failed for {ak}")
-            adapters[ak] = ad
-
-        blocks_to_execute = []
-        reused_records = []
-
-        if "--resample-bun-only" in sys.argv and os.path.exists(OUT_TRIALS_JSONL):
-            print("🔄 [INFO] --resample-bun-only: Re-executing 4 blocks of BunJSCOrchestratorAdapter (benchmark/bun_jsc_agent.mjs)...")
-            existing_cells = load_records_by_cell(OUT_TRIALS_JSONL)
-            for w in workloads:
-                for ak in target_agents:
-                    if ak == "bun_minimal":
-                        blocks_to_execute.append((ak, w))
-                    else:
-                        for r in existing_cells.get((w, ak), []):
-                            r_copy = dict(r)
-                            r_copy["session_id"] = session_id
-                            r_copy["git_commit"] = git_commit
-                            r_copy.setdefault("http_status", 200)
-                            r_copy.setdefault("finish_reason", "stop")
-                            reused_records.append(r_copy)
-        else:
-            archival_w4 = {}
-            if os.path.exists(BACKUP_TWO_SESSION_PATH):
-                backup_cells = load_records_by_cell(BACKUP_TWO_SESSION_PATH)
-                for ak in ["picoclaw", "openclaw_minimal", "python_native", "neural_baseline"]:
-                    cell_recs = backup_cells.get(("W4", ak), [])
-                    eval_only = [r for r in cell_recs if not r.get("is_warmup", False)]
-                    if len(eval_only) == n_evals:
-                        archival_w4[ak] = cell_recs
-
-            for w in workloads:
-                for ak in target_agents:
-                    if w == "W4" and ak in archival_w4:
-                        for r in archival_w4[ak]:
-                            r_copy = dict(r)
-                            r_copy["session_id"] = session_id
-                            r_copy["git_commit"] = git_commit
-                            r_copy.setdefault("http_status", 200)
-                            r_copy.setdefault("finish_reason", "stop")
-                            reused_records.append(r_copy)
-                    else:
-                        blocks_to_execute.append((ak, w))
-
-            rng = random.Random(99)
-            rng.shuffle(blocks_to_execute)
-
-        print(f"🚀 Executing {len(blocks_to_execute)} physical blocks (n={n_evals} evals + {n_primings} primings per block)...")
-        measured_records = []
-
-        try:
-            for b_idx, (ak, w) in enumerate(blocks_to_execute, start=1):
-                ad = adapters[ak]
-                print(f"\n📦 [Session 2 Block {b_idx:02d}/{len(blocks_to_execute):02d}] {ak} on {w} ({n_primings} primings + {n_evals} evaluations)", flush=True)
-
-                for p_rep in range(1, n_primings + 1):
-                    res = ad.run_workload(w, iterations=1)
-                    pt = int(res.get("prompt_tokens", 0))
-                    ct = int(res.get("completion_tokens", res.get("output_tokens", 0)))
-                    cached_t = int(res.get("cached_tokens", 0))
-                    uncached_t = int(res.get("uncached_prompt_tokens", 0))
-                    ttft_ms = float(res.get("ttft_ms", 0.0))
-                    itl_ms = float(res.get("itl_ms", 0.0))
-                    if pt <= 0 or ct <= 0 or ttft_ms <= 0 or itl_ms <= 0:
-                        raise RuntimeError(f"FATAL: Invalid priming telemetry on {ak} {w}: pt={pt}, ct={ct}, ttft={ttft_ms}, itl={itl_ms}")
-                    t_task_ms = float(res.get("t_task_ms", 0.0))
-                    t_neural_ms = float(res.get("t_neural_ms", 0.0))
-                    t_orch_ms = float(res.get("t_orch_ms", max(0.0, t_task_ms - t_neural_ms)))
-                    phi_orch_pct = (t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0
-                    cache_hit_pct = (cached_t / pt * 100.0) if pt > 0 else 0.0
-
-                    measured_records.append({
-                        "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                        "session_id": session_id,
-                        "git_commit": git_commit,
-                        "agent_key": ak,
-                        "architecture": ad.name,
-                        "runtime": ad.runtime,
-                        "mode": getattr(ad, "mode", "minimal"),
-                        "workload": w,
-                        "rep": p_rep,
-                        "is_warmup": True,
-                        "is_simulated": False,
-                        "data_source": "measured_hardware_inter_session_warmup",
-                        "telemetry_backend": smc_monitor.telemetry_backend,
-                        "t_task_ms": round(t_task_ms, 2),
-                        "t_neural_ms": round(t_neural_ms, 2),
-                        "t_orch_ms": round(t_orch_ms, 3),
-                        "phi_orch_pct": round(phi_orch_pct, 3),
-                        "ttft_ms": round(ttft_ms, 2),
-                        "itl_ms": round(itl_ms, 2),
-                        "t_dispatch_ms": round(float(res.get("t_dispatch_ms", 0.0)), 3),
-                        "t_http_ms": round(float(res.get("t_http_ms", 0.0)), 3),
-                        "rss_peak_mb": round(float(res.get("rss_peak_mb", 0.0)), 2),
-                        "proc_peak_phys_mb": round(float(res.get("proc_peak_phys_mb", 0.0)), 2),
-                        "proc_instructions": int(res.get("proc_instructions", 0)),
-                        "proc_cycles": int(res.get("proc_cycles", 0)),
-                        "proc_billed_energy": int(res.get("proc_billed_energy", 0)),
-                        "prompt_tokens": pt,
-                        "completion_tokens": ct,
-                        "cached_tokens": cached_t,
-                        "uncached_prompt_tokens": uncached_t,
-                        "cache_hit_pct": round(cache_hit_pct, 2),
-                        "http_status": int(res.get("http_status", 200)),
-                        "finish_reason": str(res.get("finish_reason", "stop")),
-                        "runner_binary_used": res.get("runner_binary_used", "native"),
-                        "worker_script": res.get("worker_script", ""),
-                        "is_fallback_node": bool(res.get("is_fallback_node", False)),
-                        "energy_total_j": None,
-                        "energy_net_above_idle_j": None,
-                        "edp_js": None,
-                    })
-
-                for eval_rep in range(1, n_evals + 1):
-                    t0_ns = time.monotonic_ns()
-                    res = ad.run_workload(w, iterations=1)
-                    t1_ns = time.monotonic_ns()
-
-                    energy_dict = smc_monitor.slice_energy(t0_ns, t1_ns)
-                    if energy_dict is None:
-                        time.sleep(0.06)
-                        energy_dict = smc_monitor.slice_energy(t0_ns, t1_ns)
-                    if energy_dict is None or energy_dict.get("energy_total_j") is None:
-                        raise RuntimeError(f"FATAL: SMC slice_energy returned None on {ak} {w} rep {eval_rep}")
-
-                    pt = int(res.get("prompt_tokens", 0))
-                    ct = int(res.get("completion_tokens", res.get("output_tokens", 0)))
-                    cached_t = int(res.get("cached_tokens", 0))
-                    uncached_t = int(res.get("uncached_prompt_tokens", 0))
-                    ttft_ms = float(res.get("ttft_ms", 0.0))
-                    itl_ms = float(res.get("itl_ms", 0.0))
-                    if pt <= 0 or ct <= 0 or ttft_ms <= 0 or itl_ms <= 0:
-                        raise RuntimeError(f"FATAL: Invalid eval telemetry on {ak} {w} rep {eval_rep}")
-
-                    t_task_ms = float(res.get("t_task_ms", 0.0))
-                    t_neural_ms = float(res.get("t_neural_ms", 0.0))
-                    t_orch_ms = float(res.get("t_orch_ms", max(0.0, t_task_ms - t_neural_ms)))
-                    phi_orch_pct = (t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0
-                    cache_hit_pct = (cached_t / pt * 100.0) if pt > 0 else 0.0
-
-                    e_tot = float(energy_dict["energy_total_j"])
-                    e_net = float(energy_dict["energy_net_above_idle_j"])
-                    edp_js = round(e_net * (t_task_ms / 1000.0), 4)
-
-                    rec = {
-                        "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                        "session_id": session_id,
-                        "git_commit": git_commit,
-                        "agent_key": ak,
-                        "architecture": ad.name,
-                        "runtime": ad.runtime,
-                        "mode": getattr(ad, "mode", "minimal"),
-                        "workload": w,
-                        "rep": eval_rep,
-                        "is_warmup": False,
-                        "is_simulated": False,
-                        "data_source": "measured_hardware_inter_session",
-                        "telemetry_backend": smc_monitor.telemetry_backend,
-                        "t_task_ms": round(t_task_ms, 2),
-                        "t_neural_ms": round(t_neural_ms, 2),
-                        "t_orch_ms": round(t_orch_ms, 3),
-                        "phi_orch_pct": round(phi_orch_pct, 3),
-                        "ttft_ms": round(ttft_ms, 2),
-                        "itl_ms": round(itl_ms, 2),
-                        "t_dispatch_ms": round(float(res.get("t_dispatch_ms", 0.0)), 3),
-                        "t_http_ms": round(float(res.get("t_http_ms", 0.0)), 3),
-                        "rss_peak_mb": round(float(res.get("rss_peak_mb", 0.0)), 2),
-                        "proc_peak_phys_mb": round(float(res.get("proc_peak_phys_mb", 0.0)), 2),
-                        "proc_instructions": int(res.get("proc_instructions", 0)),
-                        "proc_cycles": int(res.get("proc_cycles", 0)),
-                        "proc_billed_energy": int(res.get("proc_billed_energy", 0)),
-                        "prompt_tokens": pt,
-                        "completion_tokens": ct,
-                        "cached_tokens": cached_t,
-                        "uncached_prompt_tokens": uncached_t,
-                        "cache_hit_pct": round(cache_hit_pct, 2),
-                        "http_status": int(res.get("http_status", 200)),
-                        "finish_reason": str(res.get("finish_reason", "stop")),
-                        "runner_binary_used": res.get("runner_binary_used", "native"),
-                        "worker_script": res.get("worker_script", ""),
-                        "is_fallback_node": bool(res.get("is_fallback_node", False)),
-                        "energy_total_j": e_tot,
-                        "energy_net_above_idle_j": e_net,
-                        "edp_js": edp_js,
-                    }
-                    measured_records.append(rec)
-
-                    if eval_rep % 10 == 0 or eval_rep == n_evals:
-                        print(
-                            f"   [Rep {eval_rep:02d}/{n_evals:02d}] {ak:16s} {w}: Task={rec['t_task_ms']:6.1f}ms, "
-                            f"Orch={rec['t_orch_ms']:5.2f}ms, PhysRAM={rec['proc_peak_phys_mb']:5.1f}MB, NetE={e_net:.2f}J",
-                            flush=True,
-                        )
-        finally:
-            smc_monitor.stop_campaign()
-
-        all_s2_records = measured_records + reused_records
-
-    with open(OUT_TRIALS_JSONL, "w", encoding="utf-8") as f:
-        for r in all_s2_records:
-            f.write(json.dumps(r) + "\n")
-    print(f"\n💾 Wrote {len(all_s2_records)} Session 2 records to {OUT_TRIALS_JSONL}")
-
-    # Load Session 1 (primary unified warm_cache_trials.jsonl)
-    s1_cells = load_records_by_cell(WARM_TRIALS_PATH)
-    s2_cells: dict[tuple[str, str], list[dict[str, Any]]] = {}
-    for r in all_s2_records:
-        if not r.get("is_warmup", False):
-            s2_cells.setdefault((r["workload"], r["agent_key"]), []).append(r)
-
-    comparison: dict[str, dict[str, Any]] = {}
-    rel_diff_list: list[float] = []
-    pooled_cv_list: list[float] = []
-    intra_session_contrasts: dict[str, dict[str, Any]] = {}
-
-    for w in workloads:
-        comparison[w] = {}
-        intra_session_contrasts[w] = {}
-
-        # Baseline means in Session 1 and Session 2
-        s1_base = [r["t_task_ms"] for r in s1_cells.get((w, "neural_baseline"), []) if not r.get("is_warmup", False)]
-        s2_base = [r["t_task_ms"] for r in s2_cells.get((w, "neural_baseline"), [])]
-        m1_base = _mean(s1_base)
-        m2_base = _mean(s2_base)
-
-        for ak in ["picoclaw", "openclaw_minimal", "python_native", "neural_baseline"]:
-            s1_recs = [r for r in s1_cells.get((w, ak), []) if not r.get("is_warmup", False)]
-            s2_recs = s2_cells.get((w, ak), [])
-            if not s1_recs or not s2_recs:
-                raise RuntimeError(f"FATAL: Missing records for {w} {ak}")
-
-            s1_tasks = [float(r["t_task_ms"]) for r in s1_recs]
-            s2_tasks = [float(r["t_task_ms"]) for r in s2_recs]
-
-            m1 = _mean(s1_tasks)
-            m2 = _mean(s2_tasks)
-            pool_mean = 0.5 * (m1 + m2)
-            abs_diff = abs(m1 - m2)
-            rel_diff_pct = (abs_diff / pool_mean) * 100.0 if pool_mean > 0 else 0.0
-            sd_means = abs_diff / math.sqrt(2.0)
-            pooled_cv_pct = (sd_means / pool_mean) * 100.0 if pool_mean > 0 else 0.0
-
-            rel_diff_list.append(rel_diff_pct)
-            pooled_cv_list.append(pooled_cv_pct)
-
-            s1_delta_vs_base_pct = ((m1 - m1_base) / m1_base) * 100.0 if m1_base > 0 else 0.0
-            s2_delta_vs_base_pct = ((m2 - m2_base) / m2_base) * 100.0 if m2_base > 0 else 0.0
-
-            comparison[w][ak] = {
-                "session_1_n": len(s1_tasks),
-                "session_1_mean_task_ms": round(m1, 2),
-                "session_1_median_task_ms": round(_median(s1_tasks), 2),
-                "session_1_std_task_ms": round(_std(s1_tasks), 2),
-                "session_2_n": len(s2_tasks),
-                "session_2_mean_task_ms": round(m2, 2),
-                "session_2_median_task_ms": round(_median(s2_tasks), 2),
-                "session_2_std_task_ms": round(_std(s2_tasks), 2),
-                "inter_session_rel_diff_pct": round(rel_diff_pct, 2),
-                "inter_session_pooled_cv_pct": round(pooled_cv_pct, 2),
-                "inter_session_drift_pct": round(rel_diff_pct, 2),
-                "session_1_delta_vs_neural_baseline_pct": round(s1_delta_vs_base_pct, 2),
-                "session_2_delta_vs_neural_baseline_pct": round(s2_delta_vs_base_pct, 2),
-            }
-            if ak != "neural_baseline":
-                intra_session_contrasts[w][ak] = {
-                    "session_1_vs_baseline_pct": round(s1_delta_vs_base_pct, 2),
-                    "session_2_vs_baseline_pct": round(s2_delta_vs_base_pct, 2),
-                }
-
-    overall_mean_rel_diff = _mean(rel_diff_list)
-    overall_mean_pooled_cv = _mean(pooled_cv_list)
-
-    bun_summary: dict[str, Any] = {}
-    for w in workloads:
-        recs = s2_cells.get((w, "bun_minimal"), [])
-        if not recs:
-            raise RuntimeError(f"FATAL: Missing bun_minimal records for {w}")
-        tasks = [float(r["t_task_ms"]) for r in recs]
-        orchs = [float(r["t_orch_ms"]) for r in recs]
-        disps = [float(r.get("t_dispatch_ms", 0.0)) for r in recs]
-        https = [float(r.get("t_http_ms", 0.0)) for r in recs]
-        phys = [float(r.get("proc_peak_phys_mb", 0.0)) for r in recs]
-        rsss = [float(r.get("rss_peak_mb", 0.0)) for r in recs]
-        insts = [float(r.get("proc_instructions", 0)) for r in recs]
-        cycs = [float(r.get("proc_cycles", 0)) for r in recs]
-        enets = [float(r["energy_net_above_idle_j"]) for r in recs if r.get("energy_net_above_idle_j") is not None]
-
-        m_task = _mean(tasks)
-        m_orch = _mean(orchs)
-        s2_base_m = _mean([float(r["t_task_ms"]) for r in s2_cells.get((w, "neural_baseline"), [])])
-        bun_summary[w] = {
-            "n_evaluations": len(recs),
-            "worker_script": "benchmark/bun_jsc_agent.mjs",
-            "adapter_class": "BunJSCOrchestratorAdapter",
-            "mean_task_ms": round(m_task, 2),
-            "median_task_ms": round(_median(tasks), 2),
-            "std_task_ms": round(_std(tasks), 2),
-            "mean_orch_ms": round(m_orch, 2),
-            "mean_dispatch_ms": round(_mean(disps), 2),
-            "mean_http_ms": round(_mean(https), 2),
-            "orch_share_pct": round((m_orch / m_task * 100.0) if m_task > 0 else 0.0, 2),
-            "delta_vs_session2_neural_baseline_pct": round(((m_task - s2_base_m) / s2_base_m * 100.0) if s2_base_m > 0 else 0.0, 2),
-            "proc_peak_phys_mb_mean": round(_mean(phys), 2),
-            "rss_peak_mb_mean": round(_mean(rsss), 2),
-            "proc_instructions_mean": int(round(_mean(insts))),
-            "proc_cycles_mean": int(round(_mean(cycs))),
-            "energy_net_mean_j": round(_mean(enets), 2) if enets else None,
-            "runner_binary": "bun",
-            "is_fallback_node": False,
-        }
-
-    out_data = {
-        "description": "Rigorous Inter-Session Replication (Session 2, seed=99, n=30 per cell) and Native Bun JSC (benchmark/bun_jsc_agent.mjs) Benchmark",
-        "session_id": session_id,
-        "git_commit": git_commit,
-        "caching_protocol": "Deterministic block-isolation (-np 1, 3 primings + 30 evaluations per block, BENCH_CACHE_PROMPT=true, randomized block order)",
-        "hardware": "Apple Mac mini M4 (Mac16,10, 10-core Metal GPU)",
-        "raw_trials_file": "results/publication_campaign/inter_session_trials.jsonl",
-        "inter_session_comparisons": comparison,
-        "paired_intra_session_contrasts_vs_neural_baseline": intra_session_contrasts,
-        "overall_mean_inter_session_rel_diff_pct": round(overall_mean_rel_diff, 2),
-        "overall_mean_inter_session_pooled_cv_pct": round(overall_mean_pooled_cv, 2),
-        "overall_mean_inter_session_cv_pct": round(overall_mean_pooled_cv, 2),
-        "bun_minimal_evaluation": bun_summary,
-        "bun_jsc_orchestrator_evaluation": bun_summary,
-    }
-
-    # Validate all 7 protocol invariants on Session 2 dataset!
-    inv_res = validate_campaign_invariants(
-        all_s2_records,
-        expected_eval_count=600,
-        require_equalized_tokens=True,
-        require_energy=True,
-        metadata=out_data,
-        expected_reps_per_cell=30,
-    )
-    out_data["protocol_invariants_validation"] = inv_res
-
-    with open(OUT_JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump(out_data, f, indent=2)
-
-    print(f"✅ Generated inter-session replication results: {OUT_JSON_PATH}")
-    print(f"   Overall Mean Inter-Session Relative Diff: {overall_mean_rel_diff:.2f}% | Pooled CV: {overall_mean_pooled_cv:.2f}%")
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(run_replication())
-
-================================================================================
-END FILE: scripts/run_inter_session_replication.py
-================================================================================
-
-
-================================================================================
-FILE: scripts/run_tool_rag_mitigation_experiment.py
-SHA-256: cb7b89e8d3d611a687cc03a3be4f3b351386d85c6d322b0853456059a535a768
-================================================================================
-#!/usr/bin/env python3
-"""
-scripts/run_tool_rag_mitigation_experiment.py - Zero-Copy Tool-RAG Schema Pruner Benchmark
-Evaluates dynamic semantic tool pruning (54 corporate tools -> Top-5 semantically relevant tools)
-on Apple Silicon M4 across W1-W4 under Regime A (Cold Prefill, cache_prompt=false) and
-Regime B (Warm KV-Cache Reuse, cache_prompt=true) with continuous SMCPowerMonitor(sample_interval_ms=50).
-Compares:
-  - openclaw_full (54 tools unpruned)
-  - openclaw_minimal (15 static tools)
-  - openclaw_tool_rag (54 -> Top-5 dynamic pruning in Node.js V8)
-  - picoclaw_tool_rag (54 -> Top-5 dynamic pruning in Go Native)
-Outputs:
-  - results/publication_campaign/tool_rag_mitigation_trials.jsonl
-  - results/publication_campaign/tool_rag_mitigation_summary.json
-  - results/publication_campaign/tables/table_tool_rag_mitigation.tex
-
-Author / Autor: Rafael Paniccia Cassetta (UFABC)
-"""
-from __future__ import annotations
-
-import json
-import math
-import os
-import random
-import sys
-import time
-import urllib.request
-from typing import Any
-
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if REPO_DIR not in sys.path:
-    sys.path.insert(0, REPO_DIR)
-
-from benchmark.adapters import get_adapter  # noqa: E402
-from benchmark.telemetry import SMCPowerMonitor  # noqa: E402
-
-RAW_TRIALS_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
-WARM_TRIALS_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
-OUT_TRIALS_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "tool_rag_mitigation_trials.jsonl")
-OUT_SUMMARY_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "tool_rag_mitigation_summary.json")
-OUT_TABLE_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_tool_rag_mitigation.tex")
-
-
-def check_server_health(url: str = "http://127.0.0.1:8080/health") -> bool:
-    req = urllib.request.Request(url)
-    with urllib.request.urlopen(req, timeout=3.0) as resp:
-        return resp.status == 200
-
-
-def _mean(vals: list[float]) -> float:
-    return sum(vals) / len(vals) if vals else 0.0
-
-
-def _median(vals: list[float]) -> float:
-    if not vals:
-        return 0.0
-    s = sorted(vals)
-    n = len(s)
-    return s[n // 2] if n % 2 == 1 else 0.5 * (s[n // 2 - 1] + s[n // 2])
-
-
-def _std(vals: list[float]) -> float:
-    if len(vals) < 2:
-        return 0.0
-    m = _mean(vals)
-    return math.sqrt(sum((x - m) ** 2 for x in vals) / (len(vals) - 1))
-
-
-def load_reference_baseline_trials(path: str, regime: str) -> list[dict[str, Any]]:
-    records = []
-    if not os.path.exists(path):
-        raise RuntimeError(f"FATAL: Reference campaign file missing: {path}")
-    with open(path, "r", encoding="utf-8") as f:
-        for line in f:
-            if not line.strip():
-                continue
-            d = json.loads(line)
-            if d.get("agent_key") in ("openclaw_full", "openclaw_minimal"):
-                rec = dict(d)
-                rec["regime"] = regime
-                rec["t_prune_ms"] = 0.0
-                records.append(rec)
-    return records
-
-
-def generate_latex_table(summary: dict[str, Any]) -> None:
-    os.makedirs(os.path.dirname(OUT_TABLE_PATH), exist_ok=True)
-    lines = [
-        "% Auto-generated by scripts/run_tool_rag_mitigation_experiment.py",
-        r"\begin{table*}[t]",
-        r"\small",
-        r"\centering",
-        r"\caption{Active Prompt-Bloat Mitigation via Zero-Copy Dynamic Tool-RAG Schema Pruning ($54 \rightarrow \text{Top-}5$ semantically relevant tools) across Workloads W1--W4 on Apple Silicon M4 ($n=30$ physical trials per condition). In Regime A (\texttt{cache\_prompt=false}), dynamic schema pruning eliminates $>85\%$ of enterprise catalog latency and electrical energy overhead with $<0.35\text{ ms}$ host CPU pruning cost ($T_{\text{prune}}$). In Regime B (\texttt{cache\_prompt=true}), Tool-RAG outperforms even the static 15-tool catalog by minimizing active KV-cache attention span.}",
-        r"\label{tab:tool_rag_mitigation}",
-        r"\begin{tabular}{llrrrrrrr}",
-        r"\toprule",
-        r"\textbf{Regime} & \textbf{Workload / Arm} & \textbf{Schemas} & \textbf{Prompt Tok} & \textbf{$T_{\text{prune}}$ [ms]} & \textbf{Median $T_{\text{task}}$ [ms]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{$\Delta T_{\text{task}}$ vs. 54-Tool} \\",
-        r"\midrule",
-    ]
-
-    arm_labels = [
-        ("openclaw_full", "Node.js V8 Full (OpenClaw Ref.)"),
-        ("openclaw_minimal", "Node.js V8 Min (OpenClaw Ref.)"),
-        ("openclaw_tool_rag", "Node.js V8 Tool-RAG (OpenClaw Ref.)"),
-        ("picoclaw_tool_rag", "Go Native Tool-RAG (PicoClaw Ref.)"),
-    ]
-    schema_str = {
-        "openclaw_full": "54 (Static)",
-        "openclaw_minimal": "15 (Static)",
-        "openclaw_tool_rag": r"$54 \rightarrow 5$",
-        "picoclaw_tool_rag": r"$54 \rightarrow 5$",
-    }
-
-    for reg_key, reg_label in [("regime_a_cold", "Regime A (Cold)"), ("regime_b_warm", "Regime B (Warm)")]:
-        for w in ["W1", "W2", "W3", "W4"]:
-            full_med = summary[reg_key][w]["openclaw_full"]["t_task_median_ms"]
-            for ak, label in arm_labels:
-                st = summary[reg_key][w][ak]
-                pt = int(round(st["prompt_tokens_mean"]))
-                tp = st["t_prune_mean_ms"]
-                med = st["t_task_median_ms"]
-                en = st["energy_net_mean_j"]
-                edp = st["edp_mean_js"]
-                delta_pct = ((med - full_med) / full_med * 100.0) if full_med > 0 else 0.0
-                delta_str = "---" if ak == "openclaw_full" else f"{delta_pct:+.1f}\\%"
-                tp_str = "---" if tp == 0.0 else f"{tp:.3f}"
-                lines.append(
-                    f"{reg_label} & {w} {label} & {schema_str[ak]} & {pt} & {tp_str} & {med:.1f} & {en:.2f} & {edp:.2f} & {delta_str} \\\\"
-                )
-            lines.append(r"\midrule")
-
-    if lines[-1] == r"\midrule":
-        lines[-1] = r"\bottomrule"
-    else:
-        lines.append(r"\bottomrule")
-    lines.extend([
-        r"\end{tabular}",
-        r"\end{table*}",
-        "",
-    ])
-    with open(OUT_TABLE_PATH, "w", encoding="utf-8") as f:
-        f.write("\n".join(lines))
-    print(f"✅ Generated Tool-RAG LaTeX table: {OUT_TABLE_PATH}")
-
-
-def main() -> int:
-    if sys.platform != "darwin":
-        raise RuntimeError(f"FATAL: Physical hardware execution requires macOS Darwin, got {sys.platform}")
-
-    workloads = ["W1", "W2", "W3", "W4"]
-    tool_rag_agents = ["openclaw_tool_rag", "picoclaw_tool_rag"]
-    all_agents = ["openclaw_full", "openclaw_minimal", "openclaw_tool_rag", "picoclaw_tool_rag"]
-    n_evals = 30
-    n_warmups = 3
-
-    if "--analyze-only" in sys.argv and os.path.exists(OUT_TRIALS_PATH):
-        print(f"📊 [INFO] Running in --analyze-only mode on {OUT_TRIALS_PATH}...")
-        all_records = []
-        with open(OUT_TRIALS_PATH, "r", encoding="utf-8") as f:
-            for line in f:
-                if line.strip():
-                    all_records.append(json.loads(line))
-    else:
-        if not check_server_health():
-            raise RuntimeError("FATAL: llama-server unreachable at http://127.0.0.1:8080/health")
-
-        smc_monitor = SMCPowerMonitor(sample_interval_ms=50)
-        if not smc_monitor.active:
-            raise RuntimeError("FATAL: Apple SMC powermetrics is not active!")
-
-        print("⚡ Measuring 3.0s quiescent idle baseline on Apple Silicon M4...")
-        idle_mw = smc_monitor.measure_idle_baseline(3.0)
-        print(f"   Idle package power: {idle_mw:.2f} mW. Starting continuous SMC powermetrics daemon...")
-        smc_monitor.start_campaign()
-
-        adapters = {}
-        for ak in tool_rag_agents:
-            ad = get_adapter(ak, REPO_DIR)
-            if not ad.setup():
-                raise RuntimeError(f"FATAL: Failed to setup adapter {ak}")
-            adapters[ak] = ad
-
-        measured_tool_rag_records = []
-        rng = random.Random(2026)
-
-        try:
-            for regime_key, cache_flag in [("regime_b_warm", "true"), ("regime_a_cold", "false")]:
-                os.environ["BENCH_CACHE_PROMPT"] = cache_flag
-                blocks = [(ak, w) for ak in tool_rag_agents for w in workloads]
-                rng.shuffle(blocks)
-                print(f"\n🚀 Executing Tool-RAG physical campaign for {regime_key} (BENCH_CACHE_PROMPT={cache_flag}, {len(blocks)} blocks)...")
-
-                for b_idx, (ak, w) in enumerate(blocks, start=1):
-                    ad = adapters[ak]
-                    print(f"\n📦 [{regime_key} Block {b_idx:02d}/{len(blocks):02d}] {ak} on {w} ({n_warmups} warmups + {n_evals} evals)", flush=True)
-
-                    for w_rep in range(1, n_warmups + 1):
-                        res = ad.run_workload(w, iterations=1)
-                        pt = int(res.get("prompt_tokens", 0))
-                        ct = int(res.get("completion_tokens", res.get("output_tokens", 0)))
-                        ttft_ms = float(res.get("ttft_ms", 0.0))
-                        itl_ms = float(res.get("itl_ms", 0.0))
-                        t_prune_ms = float(res.get("t_prune_ms", 0.0))
-                        if pt <= 0 or ct <= 0 or ttft_ms <= 0 or itl_ms <= 0 or t_prune_ms <= 0:
-                            raise RuntimeError(f"FATAL: Invalid Tool-RAG warmup telemetry: {res}")
-                        t_task_ms = float(res.get("t_task_ms", 0.0))
-                        t_neural_ms = float(res.get("t_neural_ms", 0.0))
-                        t_orch_ms = float(res.get("t_orch_ms", max(0.0, t_task_ms - t_neural_ms)))
-                        phi_orch = (t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0
-                        cached_t = int(res.get("cached_tokens", 0))
-                        cache_hit = (cached_t / pt * 100.0) if pt > 0 else 0.0
-
-                        measured_tool_rag_records.append({
-                            "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                            "regime": regime_key,
-                            "agent_key": ak,
-                            "architecture": ad.name,
-                            "runtime": ad.runtime,
-                            "mode": "tool_rag_top5_of_54",
-                            "workload": w,
-                            "rep": w_rep,
-                            "is_warmup": True,
-                            "is_simulated": False,
-                            "data_source": f"measured_hardware_tool_rag_{regime_key}_warmup",
-                            "telemetry_backend": smc_monitor.telemetry_backend,
-                            "t_task_ms": round(t_task_ms, 2),
-                            "t_neural_ms": round(t_neural_ms, 2),
-                            "t_orch_ms": round(t_orch_ms, 3),
-                            "phi_orch_pct": round(phi_orch, 3),
-                            "ttft_ms": round(ttft_ms, 2),
-                            "itl_ms": round(itl_ms, 2),
-                            "t_dispatch_ms": round(float(res.get("t_dispatch_ms", 0.0)), 3),
-                            "t_prune_ms": round(t_prune_ms, 4),
-                            "t_http_ms": round(float(res.get("t_http_ms", 0.0)), 3),
-                            "rss_peak_mb": round(float(res.get("rss_peak_mb", 0.0)), 2),
-                            "proc_peak_phys_mb": round(float(res.get("proc_peak_phys_mb", 0.0)), 2),
-                            "proc_instructions": int(res.get("proc_instructions", 0)),
-                            "proc_cycles": int(res.get("proc_cycles", 0)),
-                            "proc_billed_energy": int(res.get("proc_billed_energy", 0)),
-                            "prompt_tokens": pt,
-                            "completion_tokens": ct,
-                            "cached_tokens": cached_t,
-                            "uncached_prompt_tokens": int(res.get("uncached_prompt_tokens", 0)),
-                            "cache_hit_pct": round(cache_hit, 2),
-                            "energy_total_j": None,
-                            "energy_net_above_idle_j": None,
-                            "edp_js": None,
-                        })
-
-                    for eval_rep in range(1, n_evals + 1):
-                        t0_ns = time.monotonic_ns()
-                        res = ad.run_workload(w, iterations=1)
-                        t1_ns = time.monotonic_ns()
-
-                        energy_dict = smc_monitor.slice_energy(t0_ns, t1_ns)
-                        if energy_dict is None:
-                            time.sleep(0.06)
-                            energy_dict = smc_monitor.slice_energy(t0_ns, t1_ns)
-                        if energy_dict is None or energy_dict.get("energy_total_j") is None:
-                            raise RuntimeError(f"FATAL: SMC slice_energy returned None on {ak} {w} rep {eval_rep}")
-
-                        pt = int(res.get("prompt_tokens", 0))
-                        ct = int(res.get("completion_tokens", res.get("output_tokens", 0)))
-                        ttft_ms = float(res.get("ttft_ms", 0.0))
-                        itl_ms = float(res.get("itl_ms", 0.0))
-                        t_prune_ms = float(res.get("t_prune_ms", 0.0))
-                        if pt <= 0 or ct <= 0 or ttft_ms <= 0 or itl_ms <= 0 or t_prune_ms <= 0:
-                            raise RuntimeError(f"FATAL: Invalid Tool-RAG eval telemetry: {res}")
-
-                        t_task_ms = float(res.get("t_task_ms", 0.0))
-                        t_neural_ms = float(res.get("t_neural_ms", 0.0))
-                        t_orch_ms = float(res.get("t_orch_ms", max(0.0, t_task_ms - t_neural_ms)))
-                        phi_orch = (t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0
-                        cached_t = int(res.get("cached_tokens", 0))
-                        cache_hit = (cached_t / pt * 100.0) if pt > 0 else 0.0
-
-                        e_tot = float(energy_dict["energy_total_j"])
-                        e_net = float(energy_dict["energy_net_above_idle_j"])
-                        edp_js = round(e_net * (t_task_ms / 1000.0), 4)
-
-                        rec = {
-                            "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                            "regime": regime_key,
-                            "agent_key": ak,
-                            "architecture": ad.name,
-                            "runtime": ad.runtime,
-                            "mode": "tool_rag_top5_of_54",
-                            "workload": w,
-                            "rep": eval_rep,
-                            "is_warmup": False,
-                            "is_simulated": False,
-                            "data_source": f"measured_hardware_tool_rag_{regime_key}",
-                            "telemetry_backend": smc_monitor.telemetry_backend,
-                            "t_task_ms": round(t_task_ms, 2),
-                            "t_neural_ms": round(t_neural_ms, 2),
-                            "t_orch_ms": round(t_orch_ms, 3),
-                            "phi_orch_pct": round(phi_orch, 3),
-                            "ttft_ms": round(ttft_ms, 2),
-                            "itl_ms": round(itl_ms, 2),
-                            "t_dispatch_ms": round(float(res.get("t_dispatch_ms", 0.0)), 3),
-                            "t_prune_ms": round(t_prune_ms, 4),
-                            "t_http_ms": round(float(res.get("t_http_ms", 0.0)), 3),
-                            "rss_peak_mb": round(float(res.get("rss_peak_mb", 0.0)), 2),
-                            "proc_peak_phys_mb": round(float(res.get("proc_peak_phys_mb", 0.0)), 2),
-                            "proc_instructions": int(res.get("proc_instructions", 0)),
-                            "proc_cycles": int(res.get("proc_cycles", 0)),
-                            "proc_billed_energy": int(res.get("proc_billed_energy", 0)),
-                            "prompt_tokens": pt,
-                            "completion_tokens": ct,
-                            "cached_tokens": cached_t,
-                            "uncached_prompt_tokens": int(res.get("uncached_prompt_tokens", 0)),
-                            "cache_hit_pct": round(cache_hit, 2),
-                            "energy_total_j": e_tot,
-                            "energy_net_above_idle_j": e_net,
-                            "edp_js": edp_js,
-                        }
-                        measured_tool_rag_records.append(rec)
-
-                        if eval_rep % 10 == 0 or eval_rep == n_evals:
-                            print(
-                                f"   [Rep {eval_rep:02d}/{n_evals:02d}] {ak:18s} {w}: Task={rec['t_task_ms']:6.1f}ms, "
-                                f"Prune={rec['t_prune_ms']:5.3f}ms, Prompt={pt}, NetE={e_net:.2f}J",
-                                flush=True,
-                            )
-        finally:
-            smc_monitor.stop_campaign()
-
-        ref_a = load_reference_baseline_trials(RAW_TRIALS_PATH, "regime_a_cold")
-        ref_b = load_reference_baseline_trials(WARM_TRIALS_PATH, "regime_b_warm")
-        all_records = ref_a + ref_b + measured_tool_rag_records
-
-        with open(OUT_TRIALS_PATH, "w", encoding="utf-8") as f:
-            for r in all_records:
-                f.write(json.dumps(r) + "\n")
-        print(f"\n💾 Wrote {len(all_records)} total records to {OUT_TRIALS_PATH}")
-
-    # Summarize across regimes, workloads, and arms
-    summary: dict[str, Any] = {
-        "description": "Zero-Copy Dynamic Tool-RAG Schema Pruner (54 -> Top-5 Tools) Empirical Evaluation on Apple Silicon M4",
-        "regime_a_cold": {},
-        "regime_b_warm": {},
-    }
-
-    for reg_key in ("regime_a_cold", "regime_b_warm"):
-        summary[reg_key] = {}
-        for w in workloads:
-            summary[reg_key][w] = {}
-            for ak in all_agents:
-                sub = [
-                    r for r in all_records
-                    if r.get("regime") == reg_key and r.get("workload") == w and r.get("agent_key") == ak and not r.get("is_warmup", False)
-                ]
-                if not sub:
-                    raise RuntimeError(f"FATAL: Missing evaluated records for {reg_key} {w} {ak}")
-                tasks = [float(r["t_task_ms"]) for r in sub]
-                orchs = [float(r["t_orch_ms"]) for r in sub]
-                prunes = [float(r.get("t_prune_ms", 0.0)) for r in sub]
-                pts = [float(r["prompt_tokens"]) for r in sub]
-                enets = [float(r["energy_net_above_idle_j"]) for r in sub if r.get("energy_net_above_idle_j") is not None]
-                edps = [float(r.get("edp_js") or r.get("edp_net_js") or (float(r["energy_net_above_idle_j"]) * float(r["t_task_ms"]) / 1000.0)) for r in sub if r.get("energy_net_above_idle_j") is not None]
-                phys = [float(r.get("proc_peak_phys_mb", 0.0)) for r in sub]
-
-                summary[reg_key][w][ak] = {
-                    "n_trials": len(sub),
-                    "prompt_tokens_mean": round(_mean(pts), 1),
-                    "t_prune_mean_ms": round(_mean(prunes), 4),
-                    "t_task_mean_ms": round(_mean(tasks), 2),
-                    "t_task_median_ms": round(_median(tasks), 2),
-                    "t_task_std_ms": round(_std(tasks), 2),
-                    "t_orch_mean_ms": round(_mean(orchs), 3),
-                    "energy_net_mean_j": round(_mean(enets), 2),
-                    "edp_mean_js": round(_mean(edps), 2),
-                    "proc_peak_phys_mb_mean": round(_mean(phys), 2),
-                }
-
-            # Compute relative reductions vs openclaw_full
-            full_s = summary[reg_key][w]["openclaw_full"]
-            min_s = summary[reg_key][w]["openclaw_minimal"]
-            for rag_ak in ("openclaw_tool_rag", "picoclaw_tool_rag"):
-                rag_s = summary[reg_key][w][rag_ak]
-                rag_s["latency_reduction_vs_full_54_pct"] = round(
-                    (1.0 - rag_s["t_task_median_ms"] / full_s["t_task_median_ms"]) * 100.0, 2
-                )
-                rag_s["energy_reduction_vs_full_54_pct"] = round(
-                    (1.0 - rag_s["energy_net_mean_j"] / full_s["energy_net_mean_j"]) * 100.0, 2
-                )
-                rag_s["edp_reduction_vs_full_54_pct"] = round(
-                    (1.0 - rag_s["edp_mean_js"] / full_s["edp_mean_js"]) * 100.0, 2
-                )
-                rag_s["latency_reduction_vs_minimal_15_pct"] = round(
-                    (1.0 - rag_s["t_task_median_ms"] / min_s["t_task_median_ms"]) * 100.0, 2
-                )
-
-    with open(OUT_SUMMARY_PATH, "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
-    print(f"✅ Saved Tool-RAG summary JSON: {OUT_SUMMARY_PATH}")
-
-    generate_latex_table(summary)
-    return 0
-
-
-if __name__ == "__main__":
-    sys.exit(main())
-
-================================================================================
-END FILE: scripts/run_tool_rag_mitigation_experiment.py
-================================================================================
-
-
-================================================================================
 FILE: scripts/run_kv_cache_thrashing_ablation.py
 SHA-256: c751242a50b4404c5e09c02b469a3d0ee27ea24d7721425825222b22b762fc0d
 ================================================================================
@@ -2387,369 +2859,6 @@ if __name__ == "__main__":
 
 ================================================================================
 END FILE: scripts/run_kv_cache_thrashing_ablation.py
-================================================================================
-
-
-================================================================================
-FILE: scripts/verify_manifest.py
-SHA-256: d5085a61355e9456544657bc2eccf2dab1a1a08cfbca85d34361a0ef6cd99350
-================================================================================
-#!/usr/bin/env python3
-"""
-scripts/verify_manifest.py - Cryptographic Artifact Integrity Verifier
-Verificador Criptográfico de Integridade de Artefatos
-
-Validates registered SHA-256 hashes in data/manifest_sha256.json against files on disk.
-Valida os hashes SHA-256 registrados em data/manifest_sha256.json contra os arquivos em disco.
-
-Author / Autor: Rafael Paniccia Cassetta (UFABC)
-Language / Idioma: Bilingual (PT-BR & EN-US)
-"""
-from __future__ import annotations
-
-import hashlib
-import json
-import os
-import sys
-
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MANIFEST_PATH = os.path.join(REPO_DIR, "data", "manifest_sha256.json")
-
-
-def compute_sha256(filepath: str) -> str:
-    """Compute SHA-256 hex digest of a file in 64 KB streaming chunks."""
-    h = hashlib.sha256()
-    with open(filepath, "rb") as f:
-        while chunk := f.read(65536):
-            h.update(chunk)
-    return h.hexdigest()
-
-
-def update_manifest() -> int:
-    """Recomputes SHA-256 for all tracked files and updates data/manifest_sha256.json."""
-    if not os.path.exists(MANIFEST_PATH):
-        print(f"❌ [ERROR] Manifest file not found: {MANIFEST_PATH}")
-        return 1
-
-    with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
-        manifest = json.load(f)
-
-    # Also track additional core files if present
-    additional = [
-        "paper/RESPONSE_TO_REVIEWERS.md",
-        "benchmark/protocol_invariants.py",
-        "benchmark/bun_jsc_agent.mjs",
-        "benchmark/adapters/bun_minimal_adapter.py",
-        "scripts/run_prefill_ablation.py",
-        "scripts/run_w2_resample.py",
-        "scripts/run_warm_cache_campaign.py",
-        "scripts/run_regime_a_equalized_update.py",
-        "scripts/run_regime_b_w2_w4_unified_session.py",
-        "scripts/run_inter_session_replication.py",
-        "scripts/run_tool_rag_mitigation_experiment.py",
-        "scripts/export_audit_bundle.py",
-        "results/exploratory_campaigns/raw_trials_pre_w2_fix.jsonl",
-        "results/exploratory_campaigns/warm_cache_trials_two_session_backup.jsonl",
-        "results/publication_campaign/prefill_regression_fit.json",
-        "results/publication_campaign/tables/table_prefill_ablation.tex",
-        "results/publication_campaign/tables/table_warm_cache.tex",
-        "results/publication_campaign/tables/table_tool_rag_mitigation.tex",
-        "results/publication_campaign/warm_cache_trials.jsonl",
-        "results/publication_campaign/warm_cache_summary.json",
-        "results/publication_campaign/warm_cache_statistical_tests.json",
-        "results/publication_campaign/campaign_metadata.json",
-        "results/publication_campaign/spearman_correlation_matrix.json",
-        "results/publication_campaign/tables/table_spearman_correlation.tex",
-        "results/publication_campaign/pca_variance_decomposition.json",
-        "results/publication_campaign/tables/table_pca_loadings.tex",
-        "results/publication_campaign/prefill_ablation.jsonl",
-        "results/publication_campaign/inter_session_trials.jsonl",
-        "results/publication_campaign/inter_session_replication.json",
-        "results/publication_campaign/tool_rag_mitigation_trials.jsonl",
-        "results/publication_campaign/tool_rag_mitigation_summary.json",
-        "results/publication_campaign/hyperfine_cold_start.json",
-        "results/publication_campaign/hyperfine_agent_init.json",
-        "results/publication_campaign/hyperfine_worker_version.json",
-        "results/publication_campaign/llama_server_publication.log",
-        "results/publication_campaign/powermetrics_publication_sample.txt",
-        "scripts/run_uma_energy_and_bandwidth_attribution.py",
-        "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
-        "results/publication_campaign/uma_energy_bandwidth_attribution.json",
-        "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex",
-    ]
-    for rel_path in additional:
-        abs_path = os.path.join(REPO_DIR, rel_path)
-        if os.path.exists(abs_path) and rel_path not in manifest:
-            manifest[rel_path] = ""
-
-    updated = {}
-    for rel_path in sorted(manifest.keys()):
-        if (
-            rel_path.startswith("results/simulated_check/")
-            or rel_path == "data/results_all.json"
-            or rel_path.startswith("results/exploratory_campaigns/campaign_comparison/")
-            or "poisson" in rel_path.lower()
-            or "fig7" in rel_path
-            or "fig8" in rel_path
-        ):
-            continue
-        abs_path = os.path.join(REPO_DIR, rel_path)
-        if os.path.exists(abs_path):
-            updated[rel_path] = compute_sha256(abs_path)
-        else:
-            print(f"⚠️  [SKIP] File missing on disk, omitting from updated manifest: {rel_path}")
-
-    with open(MANIFEST_PATH, "w", encoding="utf-8") as f:
-        json.dump(updated, f, indent=2)
-        f.write("\n")
-
-    print(f"✅ [SUCCESS] Updated {len(updated)} tracked file signatures in {MANIFEST_PATH}")
-    return 0
-
-
-def verify_manifest() -> int:
-    if "--update" in sys.argv:
-        return update_manifest()
-
-    if not os.path.exists(MANIFEST_PATH):
-        print(f"❌ [ERROR] Manifest file not found: {MANIFEST_PATH}")
-        return 1
-
-    with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
-        manifest = json.load(f)
-
-    total_files = len(manifest)
-    print("========================================================================")
-    print(" 🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)")
-    print(f"    [EN-US] Cryptographic Artifact Integrity Verification ({total_files} files)")
-    print("========================================================================")
-
-    mismatches = []
-    missing = []
-    verified_count = 0
-
-    for rel_path, exp_val in manifest.items():
-        abs_path = os.path.join(REPO_DIR, rel_path)
-        if not os.path.exists(abs_path):
-            missing.append(rel_path)
-            continue
-
-        if isinstance(exp_val, dict):
-            expected_hash = exp_val.get("sha256", "")
-        else:
-            expected_hash = str(exp_val)
-
-        actual_hash = compute_sha256(abs_path)
-        if actual_hash.lower() != expected_hash.lower():
-            mismatches.append((rel_path, expected_hash, actual_hash))
-        else:
-            verified_count += 1
-
-    if missing:
-        print(f"\n❌ [ERROR] Missing files ({len(missing)}):")
-        for m in missing:
-            print(f"   - {m}")
-
-    if mismatches:
-        print(f"\n❌ [ERROR] Hash mismatches ({len(mismatches)}):")
-        for p, exp, act in mismatches:
-            print(f"   - {p}")
-            print(f"     Expected: {exp}")
-            print(f"     Actual:   {act}")
-
-    if not missing and not mismatches:
-        print(f"✅ [SUCCESS] All {verified_count}/{total_files} tracked files match their cryptographic SHA-256 signature!")
-        print("   [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.")
-        print("========================================================================\n")
-        return 0
-    else:
-        print(f"\n⚠️  [FAILURE] Verification failed: {verified_count}/{total_files} valid, {len(mismatches)} altered, {len(missing)} missing.")
-        print("========================================================================\n")
-        return 1
-
-
-if __name__ == "__main__":
-    sys.exit(verify_manifest())
-
-================================================================================
-END FILE: scripts/verify_manifest.py
-================================================================================
-
-
-================================================================================
-FILE: scripts/setup_environment.sh
-SHA-256: 7d06320f77c70dd34ac8659fd0079d840e68eea804d008f1e041973c6dbe4920
-================================================================================
-#!/usr/bin/env bash
-# ==============================================================================
-# PicoClaw vs. OpenClaw Benchmark Suite - Master Testbed Setup Script
-# Script de Configuração Mestra do Ambiente de Testes
-#
-# Sets up Python virtual environment, dependencies, dataset generation,
-# and compiles picoclaw_orch if Go is available.
-# Cross-platform: macOS (Apple Silicon / Intel), Linux (x86_64 / arm64), WSL2.
-# ==============================================================================
-set -euo pipefail
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_DIR="$(dirname "$SCRIPT_DIR")"
-BENCH_DIR="$REPO_DIR/benchmark"
-TOOLS_DIR="$REPO_DIR/tools"
-DATA_DIR="$REPO_DIR/data"
-
-echo "========================================================================"
-echo " 🚀 Initializing PicoClaw vs. OpenClaw Testbed Environment"
-echo "    Repository: $REPO_DIR"
-echo "========================================================================"
-
-OS="$(uname -s)"
-ARCH="$(uname -m)"
-echo "[INFO] Detected Platform: $OS ($ARCH)"
-
-# 1. Tornar executáveis os binários e scripts do repositório
-chmod +x "$REPO_DIR/scripts/"*.sh 2>/dev/null || true
-chmod +x "$REPO_DIR/benchmark/"*.sh 2>/dev/null || true
-chmod +x "$REPO_DIR/benchmark/picoclaw_orch" 2>/dev/null || true
-chmod +x "$TOOLS_DIR/uv/uv" 2>/dev/null || true
-chmod +x "$TOOLS_DIR/hyperfine/hyperfine" 2>/dev/null || true
-chmod +x "$TOOLS_DIR/picoclaw/picoclaw" 2>/dev/null || true
-chmod +x "$TOOLS_DIR/llama_cpp/llama-b11887/llama-server" 2>/dev/null || true
-
-# 2. Provisionar ambiente virtual Python
-VENV_DIR="$TOOLS_DIR/.venv"
-if [ ! -d "$VENV_DIR" ]; then
-    echo "---> [1/4] Creating Python 3.12 Virtual Environment..."
-    if [ "$OS" = "Darwin" ] && [ "$ARCH" = "arm64" ] && [ -x "$TOOLS_DIR/uv/uv" ]; then
-        export UV_PYTHON_INSTALL_DIR="$TOOLS_DIR/python_runtime"
-        export UV_CACHE_DIR="$TOOLS_DIR/uv_cache"
-        "$TOOLS_DIR/uv/uv" venv "$VENV_DIR" --python 3.12
-    elif command -v uv >/dev/null 2>&1; then
-        uv venv "$VENV_DIR" --python 3.12
-    elif command -v python3 >/dev/null 2>&1; then
-        python3 -m venv "$VENV_DIR"
-    else
-        echo "[ERROR] Python 3 not found in PATH. Please install Python 3.12+."
-        exit 1
-    fi
-fi
-
-PYTHON_BIN="$VENV_DIR/bin/python"
-
-# 3. Instalar dependências científicas
-echo "---> [2/4] Installing Python dependencies (numpy, scipy, matplotlib, pytest, ruff, python-docx, Pillow, psutil)..."
-if [ -x "$TOOLS_DIR/uv/uv" ] && [ "$OS" = "Darwin" ] && [ "$ARCH" = "arm64" ]; then
-    "$TOOLS_DIR/uv/uv" pip install --python "$PYTHON_BIN" \
-        numpy scipy matplotlib pytest ruff python-docx Pillow dulwich psutil
-else
-    "$PYTHON_BIN" -m pip install --upgrade pip
-    "$PYTHON_BIN" -m pip install \
-        numpy scipy matplotlib pytest ruff python-docx Pillow dulwich psutil
-fi
-
-# 4. Compilar orquestrador Go nativo se go estiver disponível
-echo "---> [3/4] Checking Go toolchain for picoclaw_orch compilation..."
-if command -v go >/dev/null 2>&1; then
-    echo "       Compiling benchmark/picoclaw_orch with system go ($(go version))..."
-    CGO_ENABLED=0 go build -o "$BENCH_DIR/picoclaw_orch" "$BENCH_DIR/picoclaw_orch.go"
-    chmod +x "$BENCH_DIR/picoclaw_orch"
-elif [ -x "$TOOLS_DIR/go/bin/go" ]; then
-    echo "       Compiling benchmark/picoclaw_orch with embedded tools/go..."
-    CGO_ENABLED=0 "$TOOLS_DIR/go/bin/go" build -o "$BENCH_DIR/picoclaw_orch" "$BENCH_DIR/picoclaw_orch.go"
-    chmod +x "$BENCH_DIR/picoclaw_orch"
-else
-    echo "       [INFO] Go compiler not detected. Using precompiled picoclaw_orch binary (if present)."
-fi
-
-# 5. Garantir integridade dos datasets de carga sintética W1-W4
-echo "---> [4/4] Verifying deterministic workload datasets in data/workload_data/..."
-if [ ! -f "$DATA_DIR/workload_data/system_logs.jsonl" ] || [ ! -f "$DATA_DIR/workload_data/embedding_head_100k.npz" ]; then
-    echo "       Generating workload datasets (mock_files, syslog, RAG vectors)..."
-    "$PYTHON_BIN" "$BENCH_DIR/generate_datasets.py"
-else
-    echo "       Deterministic datasets verified."
-fi
-
-echo "========================================================================"
-echo " ✅ Testbed Setup Complete!"
-echo "    Python: $PYTHON_BIN"
-echo "    To test: make test"
-echo "    To simulate: make simulate-campaign"
-echo "========================================================================"
-
-================================================================================
-END FILE: scripts/setup_environment.sh
-================================================================================
-
-
-================================================================================
-FILE: scripts/check_quiescence.sh
-SHA-256: 0ff1490279dfb91c9c2d863f6def7e1d93090e4801cfdaae5e207e547c0afcdb
-================================================================================
-#!/usr/bin/env bash
-# ==============================================================================
-# System Quiescence and Host Thermal Pre-Flight Audit
-# Auditoria Pré-Voo de Quiescência do Sistema e Estado Térmico do Host
-#
-# Author / Autor: Rafael Paniccia Cassetta (UFABC)
-# Language / Idioma: Bilingual (PT-BR & EN-US)
-# ==============================================================================
-set -euo pipefail
-
-echo "========================================================================"
-echo " 🔍 [PT-BR] Auditoria Pré-Voo de Quiescência do Apple Silicon M4"
-echo "    [EN-US] Apple Silicon M4 System Quiescence Pre-Flight Audit"
-echo "========================================================================"
-
-# 1. Architecture Check / Verificação de Arquitetura
-ARCH=$(uname -m)
-OS=$(uname -s)
-if [ "$ARCH" != "arm64" ] || [ "$OS" != "Darwin" ]; then
-    echo "❌ [PT-BR] Erro: Este benchmark exige macOS ARM64 (Apple Silicon). Detectado: $OS $ARCH"
-    echo "   [EN-US] Error: This benchmark requires macOS ARM64 (Apple Silicon). Detected: $OS $ARCH"
-    exit 1
-fi
-echo "✅ [PT-BR] Plataforma verificada: Apple Silicon macOS ($ARCH)"
-echo "   [EN-US] Verified platform: Apple Silicon macOS ($ARCH)"
-
-# 2. Check caffeinate daemon / Verificar processo anti-sono caffeinate
-if pgrep -l caffeinate >/dev/null; then
-    CAFF_PID=$(pgrep -d ',' caffeinate)
-    echo "✅ [PT-BR] Modo anti-sono ativo (caffeinate PID: $CAFF_PID)"
-    echo "   [EN-US] Anti-sleep mode active (caffeinate PID: $CAFF_PID)"
-else
-    echo "⚠️  [PT-BR] caffeinate inativo. Ativando '/usr/bin/caffeinate -dims' em segundo plano..."
-    echo "   [EN-US] caffeinate inactive. Spawning '/usr/bin/caffeinate -dims' in background..."
-    /usr/bin/caffeinate -dims &
-fi
-
-# 3. Check Spotlight indexing / Verificar indexação do Spotlight
-if command -v mdutil >/dev/null 2>&1; then
-    MD_STATUS=$(mdutil -s / 2>/dev/null || true)
-    echo "ℹ️  [PT-BR] Estado do Spotlight: $MD_STATUS"
-    echo "   [EN-US] Spotlight state: $MD_STATUS"
-fi
-
-# 4. Thermal & Background Contention Check / Verificação de Carga Concorrente
-CPU_LOAD=$(top -l 1 -n 0 | awk '/CPU usage/ {print $3, $5}')
-echo "ℹ️  [PT-BR] Utilização atual de CPU: $CPU_LOAD"
-echo "   [EN-US] Current CPU load: $CPU_LOAD"
-
-# 5. Check llama-server local daemon / Verificar servidor neural local
-if curl -s http://127.0.0.1:8080/health >/dev/null 2>&1; then
-    echo "✅ [PT-BR] Servidor llama-server respondendo na porta 8080 (Metal GPU pronta)"
-    echo "   [EN-US] Local llama-server responding on port 8080 (Metal GPU ready)"
-else
-    echo "⚠️  [PT-BR] Servidor llama-server NÃO detectado na porta 8080. O runner tentará iniciá-lo."
-    echo "   [EN-US] Local llama-server NOT detected on port 8080. Runner will attempt startup."
-fi
-
-echo "========================================================================"
-echo " ✅ [PT-BR] Auditoria concluída. Ambiente pronto para benchmark."
-echo "    [EN-US] Pre-flight audit completed. Testbed ready for benchmarking."
-echo "========================================================================"
-
-================================================================================
-END FILE: scripts/check_quiescence.sh
 ================================================================================
 
 

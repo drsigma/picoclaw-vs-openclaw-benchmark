@@ -2,15 +2,15 @@
   "protocol_version": "SoftwareX-Gate5-Gate6-v1.0",
   "status": "ALL_TOLERANCES_PASSED",
   "environment": {
-    "timestamp_iso": "2026-11-13T04:40:13Z",
-    "git_commit": "7bf09b4",
+    "timestamp_iso": "2026-11-13T15:33:32Z",
+    "git_commit": "177d537",
     "platform_system": "Darwin",
     "platform_machine": "arm64",
     "platform_release": "25.6.0",
     "python_version": "3.12.15",
-    "go_version": "unavailable ([Errno 2] No such file or directory: 'go')",
-    "node_version": "unavailable ([Errno 2] No such file or directory: 'node')",
-    "bun_version": "unavailable ([Errno 2] No such file or directory: 'bun')"
+    "go_version": "go version go1.23.2 darwin/arm64",
+    "node_version": "v26.12.1",
+    "bun_version": "1.4.4"
   },
   "telemetry_backend": "apple_smc_powermetrics",
   "commands_executed": [
@@ -36,7 +36,7 @@
     },
     "t_orch_ms_upper_bound": {
       "threshold_ms": 250.0,
-      "max_observed_ms": 51.725,
+      "max_observed_ms": 52.62,
       "passed": true
     },
     "uma_cycle_regressor_r_squared": {
@@ -70,9 +70,9 @@
       "completion_tokens": 29,
       "http_status": 200,
       "finish_reason": "tool_calls",
-      "t_task_ms": 874.41,
-      "t_orch_ms": 6.969,
-      "proc_peak_phys_mb": 4.94,
+      "t_task_ms": 1553.38,
+      "t_orch_ms": 9.526,
+      "proc_peak_phys_mb": 5.05,
       "within_tolerance": true
     },
     "node_orchestrator": {
@@ -85,8 +85,8 @@
       "completion_tokens": 29,
       "http_status": 200,
       "finish_reason": "tool_calls",
-      "t_task_ms": 904.73,
-      "t_orch_ms": 51.725,
+      "t_task_ms": 896.42,
+      "t_orch_ms": 52.62,
       "proc_peak_phys_mb": 37.47,
       "within_tolerance": true
     },
@@ -100,9 +100,9 @@
       "completion_tokens": 29,
       "http_status": 200,
       "finish_reason": "tool_calls",
-      "t_task_ms": 13555.89,
-      "t_orch_ms": 26.801,
-      "proc_peak_phys_mb": 37.66,
+      "t_task_ms": 13602.57,
+      "t_orch_ms": 30.312,
+      "proc_peak_phys_mb": 37.33,
       "within_tolerance": true
     },
     "python_reference_agent": {
@@ -115,9 +115,9 @@
       "completion_tokens": 29,
       "http_status": 200,
       "finish_reason": "tool_calls",
-      "t_task_ms": 1205.56,
-      "t_orch_ms": 17.285,
-      "proc_peak_phys_mb": 24.02,
+      "t_task_ms": 1187.68,
+      "t_orch_ms": 15.659,
+      "proc_peak_phys_mb": 24.25,
       "within_tolerance": true
     },
     "bun_jsc_orchestrator": {
@@ -130,9 +130,9 @@
       "completion_tokens": 29,
       "http_status": 200,
       "finish_reason": "tool_calls",
-      "t_task_ms": 1134.81,
-      "t_orch_ms": 14.6,
-      "proc_peak_phys_mb": 7.77,
+      "t_task_ms": 1140.23,
+      "t_orch_ms": 11.244,
+      "proc_peak_phys_mb": 7.78,
       "within_tolerance": true
     },
     "local_llm_baseline": {
@@ -145,7 +145,7 @@
       "completion_tokens": 29,
       "http_status": 200,
       "finish_reason": "tool_calls",
-      "t_task_ms": 1138.42,
+      "t_task_ms": 1119.79,
       "t_orch_ms": 0.0,
       "proc_peak_phys_mb": 0.0,
       "within_tolerance": true
@@ -280,6 +280,11 @@
         "verified_in_ci_dry_run": true
       }
     ],
-    "inter_session_drift_pct": {}
+    "inter_session_drift_pct": {
+      "min_rel_diff_pct": 0.22,
+      "max_rel_diff_pct": 3.32,
+      "mean_rel_diff_pct": 1.62,
+      "pooled_cv_pct": 1.15
+    }
   }
 }

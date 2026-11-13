@@ -1,10 +1,10 @@
 ================================================================================
 PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
-PARTE 2A: CODIGO-FONTE NUCLEO, ADAPTADORES E TESTES UNITARIOS
+PARTE 2A: CODIGO-FONTE NUCLEO, TELEMETRIA, INVARIANTES E ADAPTADORES
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T15:24:40.543604+00:00
-Git HEAD: 6b97fc3897a3e12f4ce12a7fa1697e91dc1553de
+Data de Geracao (UTC): 2026-11-13T15:52:43.624877+00:00
+Git HEAD: 177d5371e0246e4c904f9cb028ec6ee01648c056
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
@@ -12,12 +12,16 @@ BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
  M data/manifest_sha256.json
+ M results/publication_campaign/cross_hardware_and_independent_validation.json
+ M results/publication_campaign/independent_validation_report.json
  M scripts/export_audit_bundle.py
+ M scripts/run_independent_validation_suite.py
+ M scripts/verify_manifest.py
 ================================================================================
 
 
 ================================================================================
-SECAO 2A: CI/CD, BUILD, INVARIANTES FORMALIZADOS, ORQUESTRADORES, ADAPTADORES E TESTES
+SECAO 2A: CI/CD, BUILD, TELEMETRIA, INVARIANTES FORMALIZADOS, ORQUESTRADORES E ADAPTADORES
 ================================================================================
 
 ================================================================================
@@ -2981,6 +2985,552 @@ END FILE: benchmark/python_orch.py
 
 
 ================================================================================
+FILE: benchmark/telemetry.py
+SHA-256: 86f63d9c3003190e42a514e49195f775fbcf09c9be5cdab318650cfbef1be1d5
+================================================================================
+#!/usr/bin/env python3
+"""
+benchmark/telemetry.py - Hardware Power & Process Resource Telemetry
+Implements strict empirical telemetry parsers, numerical energy integrators (trapezoidal rule),
+Apple Silicon SMC hardware shunt monitors (powermetrics), Linux RAPL energy meters,
+and Darwin XNU libproc per-process micro-architectural resource monitors.
+"""
+from __future__ import annotations
+
+import ctypes
+import os
+import re
+import shutil
+import subprocess
+import sys
+import threading
+import time
+from typing import Any
+
+# Darwin XNU libproc bindings for RUSAGE_INFO_V4 hardware polling
+if sys.platform == "darwin":
+    try:
+        _libproc = ctypes.CDLL("/usr/lib/libproc.dylib")
+    except Exception:
+        _libproc = None
+else:
+    _libproc = None
+
+
+class _rusage_info_v4(ctypes.Structure):
+    _fields_ = [
+        ("ri_uuid", ctypes.c_uint8 * 16),
+        ("ri_user_time", ctypes.c_uint64),
+        ("ri_system_time", ctypes.c_uint64),
+        ("ri_pkg_idle_wkups", ctypes.c_uint64),
+        ("ri_interrupt_wkups", ctypes.c_uint64),
+        ("ri_pageins", ctypes.c_uint64),
+        ("ri_wired_size", ctypes.c_uint64),
+        ("ri_resident_size", ctypes.c_uint64),
+        ("ri_phys_footprint", ctypes.c_uint64),
+        ("ri_proc_start_abstime", ctypes.c_uint64),
+        ("ri_proc_exit_abstime", ctypes.c_uint64),
+        ("ri_child_user_time", ctypes.c_uint64),
+        ("ri_child_system_time", ctypes.c_uint64),
+        ("ri_child_pkg_idle_wkups", ctypes.c_uint64),
+        ("ri_child_interrupt_wkups", ctypes.c_uint64),
+        ("ri_child_pageins", ctypes.c_uint64),
+        ("ri_child_elapsed_abstime", ctypes.c_uint64),
+        ("ri_diskio_bytesread", ctypes.c_uint64),
+        ("ri_diskio_byteswritten", ctypes.c_uint64),
+        ("ri_cpu_time_qos_default", ctypes.c_uint64),
+        ("ri_cpu_time_qos_maintenance", ctypes.c_uint64),
+        ("ri_cpu_time_qos_background", ctypes.c_uint64),
+        ("ri_cpu_time_qos_utility", ctypes.c_uint64),
+        ("ri_cpu_time_qos_legacy", ctypes.c_uint64),
+        ("ri_cpu_time_qos_user_initiated", ctypes.c_uint64),
+        ("ri_cpu_time_qos_user_interactive", ctypes.c_uint64),
+        ("ri_billed_system_time", ctypes.c_uint64),
+        ("ri_serviced_system_time", ctypes.c_uint64),
+        ("ri_logical_writes", ctypes.c_uint64),
+        ("ri_lifetime_max_phys_footprint", ctypes.c_uint64),
+        ("ri_instructions", ctypes.c_uint64),
+        ("ri_cycles", ctypes.c_uint64),
+        ("ri_billed_energy", ctypes.c_uint64),
+        ("ri_serviced_energy", ctypes.c_uint64),
+        ("ri_interval_max_phys_footprint", ctypes.c_uint64),
+        ("ri_runnable_time", ctypes.c_uint64),
+    ]
+
+
+def get_process_rusage_v4(pid: int | None = None) -> dict[str, Any] | None:
+    """
+    Extracts POSIX process hardware counter metrics via Darwin XNU libproc.proc_pid_rusage.
+    Returns resident set size, lifetime peak physical footprint, instructions, cycles, and billed energy.
+    Falls back to psutil on Linux, or returns None if unavailable.
+    """
+    if pid is None:
+        pid = os.getpid()
+    if sys.platform == "darwin" and _libproc is not None:
+        try:
+            info = _rusage_info_v4()
+            res = _libproc.proc_pid_rusage(ctypes.c_int(pid), ctypes.c_int(4), ctypes.byref(info))
+            if res == 0:
+                return {
+                    "proc_rss_mb": round(info.ri_resident_size / (1024.0 * 1024.0), 2),
+                    "proc_peak_phys_mb": round(info.ri_lifetime_max_phys_footprint / (1024.0 * 1024.0), 2),
+                    "proc_instructions": int(info.ri_instructions),
+                    "proc_cycles": int(info.ri_cycles),
+                    "proc_billed_energy": int(info.ri_billed_energy),
+                }
+        except Exception:
+            return None
+
+    # Generic POSIX / Linux psutil fallback
+    try:
+        import psutil
+        p = psutil.Process(pid)
+        mem = p.memory_info()
+        return {
+            "proc_rss_mb": round(mem.rss / (1024.0 * 1024.0), 2),
+            "proc_peak_phys_mb": round(mem.rss / (1024.0 * 1024.0), 2),
+            "proc_instructions": 0,
+            "proc_cycles": 0,
+            "proc_billed_energy": 0,
+        }
+    except Exception:
+        return None
+
+
+def run_subprocess_with_rusage(
+    cmd: list[str],
+    cwd: str | None = None,
+    env: dict[str, str] | None = None,
+    timeout: float | None = None,
+) -> tuple[str, str, int, dict[str, Any]]:
+    """
+    Executes a child process via subprocess.Popen and monitors hardware performance
+    counters via Darwin XNU libproc (RUSAGE_INFO_V4) or Linux psutil.
+    Returns (stdout, stderr, returncode, hardware_metrics_dict).
+    """
+    proc = subprocess.Popen(
+        cmd,
+        cwd=cwd,
+        env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+    )
+    hw_stats = {
+        "proc_instructions": 0,
+        "proc_cycles": 0,
+        "proc_billed_energy": 0,
+        "proc_peak_phys_mb": 0.0,
+        "proc_rss_mb": 0.0,
+    }
+    stop_event = threading.Event()
+
+    def sampler():
+        while not stop_event.is_set():
+            if proc.poll() is not None:
+                break
+            st = get_process_rusage_v4(proc.pid)
+            if st:
+                for k in hw_stats:
+                    if k in st and st[k] > hw_stats[k]:
+                        hw_stats[k] = st[k]
+            time.sleep(0.002)
+
+    th = threading.Thread(target=sampler, daemon=True)
+    th.start()
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        stdout, stderr = proc.communicate()
+        raise
+    finally:
+        stop_event.set()
+        th.join(timeout=0.1)
+
+    return stdout, stderr, proc.returncode, hw_stats
+
+
+def parse_powermetrics_sample(sample_text: str, default_timestamp_ns: int | None = None) -> dict[str, Any]:
+    """
+    Parses a single Apple SMC powermetrics text block.
+    Extracts CPU Power, GPU Power, ANE Power, Combined Power, and elapsed timing.
+    """
+    cpu_mw = 0.0
+    gpu_mw = 0.0
+    ane_mw = 0.0
+    combined_mw = 0.0
+
+    m_cpu = re.search(r"CPU Power:\s*([\d\.]+)\s*mW", sample_text)
+    if m_cpu:
+        cpu_mw = float(m_cpu.group(1))
+
+    m_gpu = re.search(r"GPU Power:\s*([\d\.]+)\s*mW", sample_text)
+    if m_gpu:
+        gpu_mw = float(m_gpu.group(1))
+
+    m_ane = re.search(r"ANE Power:\s*([\d\.]+)\s*mW", sample_text)
+    if m_ane:
+        ane_mw = float(m_ane.group(1))
+
+    m_comb = re.search(r"Combined Power \(CPU \+ GPU \+ ANE\):\s*([\d\.]+)\s*mW", sample_text)
+    if m_comb:
+        combined_mw = float(m_comb.group(1))
+    else:
+        combined_mw = cpu_mw + gpu_mw + ane_mw
+
+    # Parse elapsed duration if present
+    m_elapsed = re.search(r"\(([\d\.]+)ms elapsed\)", sample_text)
+    elapsed_ms = float(m_elapsed.group(1)) if m_elapsed else 50.0
+
+    ts_ns = default_timestamp_ns if default_timestamp_ns is not None else time.monotonic_ns()
+
+    return {
+        "timestamp_ns": ts_ns,
+        "elapsed_ms": elapsed_ms,
+        "cpu_mw": cpu_mw,
+        "gpu_mw": gpu_mw,
+        "ane_mw": ane_mw,
+        "package_mw": combined_mw,
+    }
+
+
+def integrate_energy_trapezoidal(samples: list[dict[str, Any]], idle_package_mw: float = 0.0) -> dict[str, float]:
+    """
+    Numerically integrates power samples over time using the composite trapezoidal rule:
+        Energy (J) = sum_{i=0}^{N-2} ((P_i + P_{i+1}) / 2000.0) * dt_s
+    Accounts for real non-uniform monotonic timestamps (timestamp_ns).
+    Computes separate electrical energy rails for CPU, GPU, Apple Neural Engine, Total SoC Package,
+    and Net energy above quiescent idle baseline.
+    """
+    if not samples:
+        return {
+            "energy_cpu_j": 0.0,
+            "energy_gpu_j": 0.0,
+            "energy_ane_j": 0.0,
+            "energy_total_j": 0.0,
+            "energy_net_above_idle_j": 0.0,
+            "duration_s": 0.0,
+            "avg_power_w": 0.0,
+        }
+
+    if len(samples) == 1:
+        s0 = samples[0]
+        dt = s0.get("elapsed_ms", 50.0) / 1000.0
+        e_cpu = (s0["cpu_mw"] / 1000.0) * dt
+        e_gpu = (s0["gpu_mw"] / 1000.0) * dt
+        e_ane = (s0["ane_mw"] / 1000.0) * dt
+        e_total = (s0["package_mw"] / 1000.0) * dt
+        e_net = max(0.0, e_total - (idle_package_mw / 1000.0) * dt)
+        return {
+            "energy_cpu_j": round(e_cpu, 4),
+            "energy_gpu_j": round(e_gpu, 4),
+            "energy_ane_j": round(e_ane, 4),
+            "energy_total_j": round(e_total, 4),
+            "energy_net_above_idle_j": round(e_net, 4),
+            "duration_s": round(dt, 4),
+            "avg_power_w": round(e_total / dt, 4) if dt > 0 else 0.0,
+        }
+
+    e_cpu = 0.0
+    e_gpu = 0.0
+    e_ane = 0.0
+    e_total = 0.0
+    t_start = samples[0]["timestamp_ns"]
+    t_end = samples[-1]["timestamp_ns"]
+    duration_s = max((t_end - t_start) / 1e9, 1e-6)
+
+    for i in range(len(samples) - 1):
+        s0 = samples[i]
+        s1 = samples[i + 1]
+        dt = (s1["timestamp_ns"] - s0["timestamp_ns"]) / 1e9
+        if dt <= 0:
+            dt = s1.get("elapsed_ms", 50.0) / 1000.0
+
+        e_cpu += ((s0["cpu_mw"] + s1["cpu_mw"]) / 2000.0) * dt
+        e_gpu += ((s0["gpu_mw"] + s1["gpu_mw"]) / 2000.0) * dt
+        e_ane += ((s0["ane_mw"] + s1["ane_mw"]) / 2000.0) * dt
+        e_total += ((s0["package_mw"] + s1["package_mw"]) / 2000.0) * dt
+
+    e_idle = (idle_package_mw / 1000.0) * duration_s
+    e_net = max(0.0, e_total - e_idle)
+    avg_power_w = (e_total / duration_s) if duration_s > 0 else 0.0
+
+    return {
+        "energy_cpu_j": round(e_cpu, 4),
+        "energy_gpu_j": round(e_gpu, 4),
+        "energy_ane_j": round(e_ane, 4),
+        "energy_total_j": round(e_total, 4),
+        "energy_net_above_idle_j": round(e_net, 4),
+        "duration_s": round(duration_s, 4),
+        "avg_power_w": round(avg_power_w, 4),
+    }
+
+
+class SMCPowerMonitor:
+    """
+    Apple SMC Hardware Power Rail Monitor using sudo powermetrics.
+    Maintains a single continuous powermetrics background process across the campaign
+    sampling at 50 ms resolution. Slices energy integration across trial time windows
+    [t_start_ns, t_end_ns] without restarting powermetrics between trials.
+    If non-root and sudo is unavailable or on non-macOS platforms,
+    degrades gracefully without synthetic estimation, returning None for energy metrics.
+    """
+
+    def __init__(self, sample_interval_ms: int = 50):
+        self.sample_interval_ms = sample_interval_ms
+        self.is_macos = sys.platform == "darwin"
+        self.is_root = os.geteuid() == 0 if hasattr(os, "geteuid") else False
+        self.has_powermetrics = bool(shutil.which("powermetrics"))
+        self.active = self.is_macos and (self.is_root or self._check_sudo()) and self.has_powermetrics
+        self.telemetry_backend = "apple_smc_powermetrics" if self.active else "unprivileged_no_smc"
+        self.idle_package_mw = 0.0
+        self.idle_cpu_mw = 0.0
+        self.idle_gpu_mw = 0.0
+
+        self._proc: subprocess.Popen | None = None
+        self._thread: threading.Thread | None = None
+        self._stop_event = threading.Event()
+        self._samples: list[dict[str, Any]] = []
+        self._lock = threading.Lock()
+        self._current_start_ns: int = 0
+
+    def _check_sudo(self) -> bool:
+        """Check if sudo is available without password prompt."""
+        try:
+            res = subprocess.run(["sudo", "-n", "true"], capture_output=True, timeout=1.0)
+            return res.returncode == 0
+        except Exception:
+            return False
+
+    def measure_idle_baseline(self, duration_sec: float = 5.0) -> float:
+        """
+        Measures quiescent idle baseline power dissipation for duration_sec seconds.
+        Returns average idle package milliwatts.
+        """
+        if not self.active:
+            self.idle_package_mw = 0.0
+            return 0.0
+
+        sample_count = max(2, int((duration_sec * 1000.0) / self.sample_interval_ms))
+        cmd = [
+            "sudo",
+            "-n",
+            "powermetrics",
+            "-i",
+            str(self.sample_interval_ms),
+            "-n",
+            str(sample_count),
+            "--samplers",
+            "cpu_power,gpu_power,ane_power",
+        ]
+        if self.is_root:
+            cmd = cmd[2:]  # Remove 'sudo', '-n'
+        try:
+            res = subprocess.run(cmd, capture_output=True, text=True, timeout=duration_sec + 5.0)
+            blocks = res.stdout.split("*** Sampled system activity")
+            samples = []
+            for b in blocks:
+                if "CPU Power" in b or "GPU Power" in b:
+                    samples.append(parse_powermetrics_sample(b))
+            if samples:
+                self.idle_package_mw = sum(s["package_mw"] for s in samples) / len(samples)
+                self.idle_cpu_mw = sum(s["cpu_mw"] for s in samples) / len(samples)
+                self.idle_gpu_mw = sum(s["gpu_mw"] for s in samples) / len(samples)
+            else:
+                self.idle_package_mw = 0.0
+                self.idle_cpu_mw = 0.0
+                self.idle_gpu_mw = 0.0
+        except Exception:
+            self.idle_package_mw = 0.0
+            self.idle_cpu_mw = 0.0
+            self.idle_gpu_mw = 0.0
+
+        return self.idle_package_mw
+
+    def start_campaign(self) -> None:
+        """Starts a SINGLE continuous background powermetrics sampling process for the entire campaign."""
+        if not self.active or self._proc is not None:
+            return
+
+        with self._lock:
+            self._samples = []
+        self._stop_event.clear()
+
+        cmd = [
+            "sudo",
+            "-n",
+            "powermetrics",
+            "-i",
+            str(self.sample_interval_ms),
+            "--samplers",
+            "cpu_power,gpu_power,ane_power",
+        ]
+        if self.is_root:
+            cmd = cmd[2:]
+
+        try:
+            self._proc = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+                text=True,
+                bufsize=1,
+                cwd=None,
+            )
+            self._thread = threading.Thread(target=self._reader_loop, daemon=True)
+            self._thread.start()
+        except Exception:
+            self.active = False
+            self.telemetry_backend = "unprivileged_no_smc"
+
+    def stop_campaign(self) -> None:
+        """Terminates the continuous powermetrics background sampling process."""
+        if self._proc is None:
+            return
+        self._stop_event.set()
+        try:
+            self._proc.terminate()
+            self._proc.wait(timeout=2.0)
+        except Exception:
+            try:
+                self._proc.kill()
+            except Exception:
+                pass
+        finally:
+            self._proc = None
+
+        if self._thread is not None:
+            self._thread.join(timeout=1.0)
+            self._thread = None
+
+    def start(self, agent_key: str = "picoclaw") -> None:
+        """Trial-level start: ensures campaign process is active and marks trial start timestamp."""
+        if not self.active:
+            return
+        if self._proc is None:
+            self.start_campaign()
+        self._current_start_ns = time.monotonic_ns()
+
+    def stop(self, agent_key: str | None = None) -> dict[str, float] | None:
+        """Trial-level stop: slices energy from trial start timestamp to current time."""
+        if not self.active:
+            return None
+        t_end_ns = time.monotonic_ns()
+        return self.slice_energy(self._current_start_ns, t_end_ns)
+
+    def slice_energy(self, t_start_ns: int, t_end_ns: int) -> dict[str, float] | None:
+        """
+        Integrates exactly the power samples contained within [t_start_ns, t_end_ns].
+        Thread-safe slicing from continuous memory buffer.
+        Note: The powermetrics sampling period is 50 ms (-i 50), introducing a synchronization
+        latency bounded by <= 50 ms.
+        """
+        if not self.active:
+            return None
+
+        # Short sleep to allow reader loop to buffer trailing sample
+        time.sleep(0.06)
+
+        with self._lock:
+            if not self._samples:
+                return None
+            sub_samples = [s for s in self._samples if t_start_ns <= s["timestamp_ns"] <= t_end_ns]
+            if not sub_samples:
+                before = [s for s in self._samples if s["timestamp_ns"] < t_start_ns]
+                after = [s for s in self._samples if s["timestamp_ns"] > t_end_ns]
+                candidate = []
+                if before:
+                    candidate.append(before[-1])
+                if after:
+                    candidate.append(after[0])
+                sub_samples = candidate
+
+        if not sub_samples:
+            return None
+
+        if len(sub_samples) == 1:
+            sub_samples = [dict(sub_samples[0], elapsed_ms=max(1.0, (t_end_ns - t_start_ns) / 1e6))]
+
+        return integrate_energy_trapezoidal(sub_samples, self.idle_package_mw)
+
+    def _reader_loop(self) -> None:
+        if self._proc is None or self._proc.stdout is None:
+            return
+        buffer = []
+        for line in self._proc.stdout:
+            if self._stop_event.is_set():
+                break
+            if "*** Sampled system activity" in line:
+                if buffer:
+                    block = "".join(buffer)
+                    s = parse_powermetrics_sample(block, time.monotonic_ns())
+                    with self._lock:
+                        self._samples.append(s)
+                        if len(self._samples) > 10000:
+                            self._samples = self._samples[-5000:]
+                    buffer = [line]
+                else:
+                    buffer.append(line)
+            else:
+                buffer.append(line)
+
+
+class LinuxRAPLMonitor:
+    """
+    Linux Running Average Power Limit (RAPL) sysfs hardware energy counter.
+    Reads /sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj before and after trial.
+    """
+
+    def __init__(self):
+        self.is_linux = sys.platform.startswith("linux")
+        self.rapl_path = "/sys/class/powercap/intel-rapl/intel-rapl:0/energy_uj"
+        self.active = self.is_linux and os.path.exists(self.rapl_path) and os.access(self.rapl_path, os.R_OK)
+        self.telemetry_backend = "linux_rapl" if self.active else "linux_psutil_unprivileged"
+        self._start_uj: int | None = None
+        self._start_time: float | None = None
+
+    def start(self) -> None:
+        if not self.active:
+            return
+        try:
+            with open(self.rapl_path, "r") as f:
+                self._start_uj = int(f.read().strip())
+            self._start_time = time.monotonic()
+        except Exception:
+            self._start_uj = None
+
+    def stop(self) -> dict[str, float] | None:
+        if not self.active or self._start_uj is None or self._start_time is None:
+            return None
+        try:
+            with open(self.rapl_path, "r") as f:
+                end_uj = int(f.read().strip())
+            end_time = time.monotonic()
+            duration_s = max(end_time - self._start_time, 1e-6)
+            diff_uj = end_uj - self._start_uj
+            if diff_uj < 0:
+                # Counter wrapped around 32-bit/64-bit threshold
+                diff_uj += 2**32
+            energy_j = diff_uj / 1_000_000.0
+            return {
+                "energy_cpu_j": round(energy_j, 4),
+                "energy_gpu_j": 0.0,
+                "energy_ane_j": 0.0,
+                "energy_total_j": round(energy_j, 4),
+                "energy_net_above_idle_j": round(energy_j, 4),
+                "duration_s": round(duration_s, 4),
+                "avg_power_w": round(energy_j / duration_s, 4) if duration_s > 0 else 0.0,
+            }
+        except Exception:
+            return None
+
+================================================================================
+END FILE: benchmark/telemetry.py
+================================================================================
+
+
+================================================================================
 FILE: benchmark/adapters/base.py
 SHA-256: 65a4f485692ead175d82a48631f69051ed2caff44fa844a7c871db0ed4092098
 ================================================================================
@@ -3515,327 +4065,6 @@ __all__ = [
 
 ================================================================================
 END FILE: benchmark/adapters/__init__.py
-================================================================================
-
-
-================================================================================
-FILE: tests/test_adapters_and_failfast.py
-SHA-256: 4c5c63dbe8db84e58939fd09b69f2967592996b787c2ecc8cde4ef86f3a25b46
-================================================================================
-"""
-Unit Tests for Adapter Registry & Fail-Fast Architecture
-Testes Unitários para Registro de Adaptadores e Arquitetura Fail-Fast
-
-Author / Autor: Rafael Paniccia Cassetta (UFABC)
-Language / Idioma: Bilingual (PT-BR & EN-US comments, English code)
-"""
-
-import os
-
-import pytest
-
-from benchmark.adapters import ADAPTER_REGISTRY, get_adapter
-from benchmark.adapters.base import AgentOrchestratorAdapter
-from benchmark.run_unified_benchmark import (
-    check_server_health,
-    run_campaign,
-    start_mock_server_if_needed,
-)
-
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
-
-def test_adapter_registry_contains_all_registered_agents():
-    """Verify both neutral architecture keys and compatible product-reference aliases are registered in ADAPTER_REGISTRY."""
-    expected_agents = {
-        "go_orchestrator",
-        "node_orchestrator_minimal",
-        "node_orchestrator_full",
-        "python_reference_agent",
-        "local_llm_baseline",
-        "bun_jsc_orchestrator",
-        "picoclaw",
-        "openclaw_minimal",
-        "openclaw_full",
-        "python_native",
-        "neural_baseline",
-        "bun_minimal",
-    }
-    registered = set(ADAPTER_REGISTRY.keys())
-    assert expected_agents.issubset(registered), f"Missing agents: {expected_agents - registered}"
-
-
-def test_bun_minimal_adapter_metadata_and_execution(monkeypatch):
-    """Verify BunJSCOrchestratorAdapter executes dedicated benchmark/bun_jsc_agent.mjs and conforms to interface."""
-    mock_port = 8088
-    start_mock_server_if_needed(mock_port)
-    monkeypatch.setenv("LLAMA_API_URL", f"http://127.0.0.1:{mock_port}/v1/chat/completions")
-
-    adapter = get_adapter("bun_jsc_orchestrator", REPO_DIR)
-    meta = adapter.metadata()
-    assert meta.get("worker_script") == "benchmark/bun_jsc_agent.mjs"
-    assert "runner_binary_used" in meta
-    assert "is_fallback_node" in meta
-    assert isinstance(meta["is_fallback_node"], bool)
-    assert meta["mode"] == "minimal"
-    assert meta["runner_binary_used"] in ("bun", "node")
-
-    for w in ("W1", "W2", "W3"):
-        res = adapter.run_workload(w)
-        assert res.get("prompt_tokens", 0) > 0
-        assert res.get("completion_tokens", 0) > 0
-        assert res.get("t_task_ms", 0.0) > 0.0
-        assert res.get("worker_script") == "benchmark/bun_jsc_agent.mjs"
-
-
-def test_adapter_instances_subclass_base_adapter():
-    """Verify every registered adapter conforms to AgentOrchestratorAdapter interface."""
-    for name in ADAPTER_REGISTRY:
-        adapter = get_adapter(name, REPO_DIR)
-        assert isinstance(adapter, AgentOrchestratorAdapter)
-        assert hasattr(adapter, "run_workload")
-        assert hasattr(adapter, "setup")
-        assert hasattr(adapter, "cold_start_cmd")
-        assert hasattr(adapter, "name")
-        assert hasattr(adapter, "language")
-        assert hasattr(adapter, "runtime")
-
-
-def test_adapter_run_workload_across_targets(monkeypatch):
-    """Verify each adapter runs workload W1 deterministically in standard test environment."""
-    mock_port = 8088
-    start_mock_server_if_needed(mock_port)
-    monkeypatch.setenv("LLAMA_API_URL", f"http://127.0.0.1:{mock_port}/v1/chat/completions")
-
-    for name in ADAPTER_REGISTRY:
-        adapter = get_adapter(name, REPO_DIR)
-        result = adapter.run_workload("W1")
-        assert isinstance(result, dict)
-        assert len(result) > 0
-
-
-def test_fail_fast_on_unreachable_server(monkeypatch):
-    """
-    Verify fail-fast policy: when dry_run=False and the neural server port is offline,
-    the pipeline immediately raises RuntimeError instead of generating synthetic data.
-    """
-    # Test health check against an offline loopback port (59999)
-    offline_url = "http://127.0.0.1:59999/health"
-    is_healthy = check_server_health(url=offline_url, timeout=0.2)
-    assert is_healthy is False
-
-    # Point LLAMA_HEALTH_URL to the offline port
-    monkeypatch.setenv("LLAMA_HEALTH_URL", offline_url)
-
-    # Verify run_campaign fails fast with RuntimeError when target port is offline
-    with pytest.raises(RuntimeError) as exc_info:
-        run_campaign(reps_per_condition=1, dry_run=False)
-
-    assert "llama-server not reachable" in str(exc_info.value)
-
-================================================================================
-END FILE: tests/test_adapters_and_failfast.py
-================================================================================
-
-
-================================================================================
-FILE: tests/test_dataset_generator.py
-SHA-256: 66a08eaed0f641aaad41aadfbcd241aa09a157549884fdf6dfe89f914dae5bf9
-================================================================================
-"""
-Unit Tests for Deterministic Workload Datasets
-Testes Unitários para Datasets Determinísticos dos Workloads
-
-Author / Autor: Rafael Paniccia Cassetta (UFABC)
-"""
-
-import json
-import os
-
-import numpy as np
-
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA_DIR = os.path.join(REPO_DIR, "data", "workload_data")
-
-
-def test_mock_files_directory_structure():
-    """Verify mock_files contains exactly 50 synthetic deterministic files."""
-    mock_dir = os.path.join(DATA_DIR, "mock_files")
-    assert os.path.exists(mock_dir), f"Directory {mock_dir} does not exist"
-    files = [f for f in os.listdir(mock_dir) if not f.startswith(".")]
-    assert len(files) == 50, f"Expected 50 mock files, found {len(files)}"
-    for f in files:
-        full_p = os.path.join(mock_dir, f)
-        assert os.path.getsize(full_p) > 0, f"File {f} is empty"
-
-
-def test_system_logs_schema_and_record_count():
-    """Verify system_logs.jsonl contains 750 valid JSON lines with required fields."""
-    log_file = os.path.join(DATA_DIR, "system_logs.jsonl")
-    assert os.path.exists(log_file), f"Log file {log_file} does not exist"
-
-    count = 0
-    with open(log_file, "r", encoding="utf-8") as f:
-        for idx, line in enumerate(f):
-            count += 1
-            record = json.loads(line)
-            assert "timestamp" in record, f"Line {idx} missing timestamp"
-            assert "subsystem" in record, f"Line {idx} missing subsystem"
-            assert "level" in record, f"Line {idx} missing level"
-            assert "latency_ms" in record, f"Line {idx} missing latency_ms"
-            assert isinstance(record["latency_ms"], (int, float)), f"Line {idx} latency_ms not numeric"
-
-    assert count == 750, f"Expected 750 log entries, counted {count}"
-
-
-def test_rag_chunks_count_and_format():
-    """Verify rag_chunks_10k.json contains valid text chunks with index keys."""
-    rag_file = os.path.join(DATA_DIR, "rag_chunks_10k.json")
-    assert os.path.exists(rag_file), f"RAG chunks file {rag_file} does not exist"
-
-    with open(rag_file, "r", encoding="utf-8") as f:
-        chunks = json.load(f)
-
-    assert len(chunks) >= 100, f"Expected at least 100 chunks, found {len(chunks)}"
-    assert "0" in chunks, "Index 0 missing in chunks"
-    assert isinstance(chunks["0"], str) and len(chunks["0"]) > 50
-
-
-def test_embedding_head_matrix_dimensions():
-    """Verify embedding_head_100k.npz contains the dense projection matrix."""
-    emb_file = os.path.join(DATA_DIR, "embedding_head_100k.npz")
-    assert os.path.exists(emb_file), f"Embedding weights {emb_file} missing"
-
-    data = np.load(emb_file)
-    assert len(data.files) > 0
-    key = data.files[0]
-    mat = data[key]
-    assert mat.dtype in (np.float32, np.float64)
-    assert mat.size >= 98000, f"Matrix size {mat.size} below expected ~98k parameters"
-
-================================================================================
-END FILE: tests/test_dataset_generator.py
-================================================================================
-
-
-================================================================================
-FILE: tests/test_telemetry_parser.py
-SHA-256: ea835745da8b243370f60f7a36a8a87290fda156768e1328381bb7d8f79e1b2d
-================================================================================
-"""
-Unit Tests for Hardware Telemetry & Powermetrics Parsing
-Testes Unitários para Telemetria de Hardware e Parser do Powermetrics
-
-Author / Autor: Rafael Paniccia Cassetta (UFABC)
-Language / Idioma: Bilingual (PT-BR & EN-US comments, English code)
-"""
-
-import sys
-
-import pytest
-
-from benchmark.telemetry import (
-    LinuxRAPLMonitor,
-    SMCPowerMonitor,
-    get_process_rusage_v4,
-    integrate_energy_trapezoidal,
-    parse_powermetrics_sample,
-)
-
-
-def test_parse_sample_block():
-    """Verify powermetrics sample parsing into CPU, GPU, ANE and package power."""
-    sample_raw = """
-    *** Sampled system activity (Mon Nov 10 20:00:00 2026 -0300) (100.12ms elapsed) ***
-
-    CPU Power: 1250 mW
-    GPU Power: 11400 mW
-    ANE Power: 0 mW
-    Combined Power (CPU + GPU + ANE): 12650 mW
-    """
-    parsed = parse_powermetrics_sample(sample_raw)
-    assert parsed["cpu_mw"] == 1250.0
-    assert parsed["gpu_mw"] == 11400.0
-    assert parsed["ane_mw"] == 0.0
-    assert parsed["package_mw"] == 12650.0
-
-
-def test_parse_sample_fallback_combined():
-    """Verify fallback summation if Combined Power header is absent."""
-    sample_raw = """
-    CPU Power: 2000 mW
-    GPU Power: 3000 mW
-    """
-    parsed = parse_powermetrics_sample(sample_raw)
-    assert parsed["cpu_mw"] == 2000.0
-    assert parsed["gpu_mw"] == 3000.0
-    assert parsed["package_mw"] == 5000.0
-
-
-def test_integrate_energy_trapezoidal():
-    """Verify trapezoidal numerical integration of power samples over monotonic timestamps."""
-    # 0.0s: 10 W (10000 mW)
-    # 1.0s: 20 W (20000 mW) -> trapezoid area = 1.0 * (10 + 20) / 2 = 15 J
-    # 2.0s: 20 W (20000 mW) -> rectangle area = 1.0 * (20 + 20) / 2 = 20 J
-    # Total expected: 35.0 J
-    samples = [
-        {"timestamp_ns": 0, "package_mw": 10000.0, "cpu_mw": 6000.0, "gpu_mw": 4000.0, "ane_mw": 0.0},
-        {"timestamp_ns": 1_000_000_000, "package_mw": 20000.0, "cpu_mw": 12000.0, "gpu_mw": 8000.0, "ane_mw": 0.0},
-        {"timestamp_ns": 2_000_000_000, "package_mw": 20000.0, "cpu_mw": 12000.0, "gpu_mw": 8000.0, "ane_mw": 0.0},
-    ]
-    summary = integrate_energy_trapezoidal(samples)
-    assert pytest.approx(summary["energy_total_j"], 0.001) == 35.0
-    assert summary["duration_s"] == 2.0
-
-
-def test_integrate_energy_empty_or_single():
-    """Verify empty sample list yields 0.0 Joules."""
-    res_empty = integrate_energy_trapezoidal([])
-    assert res_empty["energy_total_j"] == 0.0
-
-    res_single = integrate_energy_trapezoidal([{
-        "timestamp_ns": 0,
-        "elapsed_ms": 100.0,
-        "package_mw": 5000.0,
-        "cpu_mw": 2000.0,
-        "gpu_mw": 3000.0,
-        "ane_mw": 0.0
-    }])
-    assert res_single["energy_total_j"] > 0.0
-
-
-def test_get_process_rusage_v4():
-    """Verify Darwin libproc hardware counters on macOS, or None fallback on Linux."""
-    res = get_process_rusage_v4()
-    if sys.platform == "darwin":
-        assert res is not None
-        assert "proc_instructions" in res
-        assert "proc_cycles" in res
-        assert "proc_rss_mb" in res
-        assert isinstance(res["proc_instructions"], int)
-        assert isinstance(res["proc_cycles"], int)
-    else:
-        # On Linux without libproc, either returns psutil dict or None
-        assert res is None or "proc_rss_mb" in res
-
-
-def test_smc_monitor_no_sudo_degradation():
-    """Verify SMCPowerMonitor non-root graceful degradation without crashing."""
-    monitor = SMCPowerMonitor()
-    monitor.start()
-    res = monitor.stop()
-    assert res is None or isinstance(res, dict)
-
-
-def test_rapl_monitor_graceful_handling():
-    """Verify LinuxRAPLMonitor graceful fallback when sysfs nodes are unavailable."""
-    monitor = LinuxRAPLMonitor()
-    monitor.start()
-    res = monitor.stop()
-    assert res is None or isinstance(res, dict)
-
-================================================================================
-END FILE: tests/test_telemetry_parser.py
 ================================================================================
 
 

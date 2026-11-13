@@ -77,8 +77,15 @@ def update_manifest() -> int:
         "results/publication_campaign/llama_server_publication.log",
         "results/publication_campaign/powermetrics_publication_sample.txt",
         "scripts/run_uma_energy_and_bandwidth_attribution.py",
+        "scripts/run_kv_cache_thrashing_ablation.py",
+        "scripts/run_independent_validation_suite.py",
         "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
         "results/publication_campaign/uma_energy_bandwidth_attribution.json",
+        "results/publication_campaign/kv_cache_thrashing_trials.jsonl",
+        "results/publication_campaign/kv_cache_thrashing_summary.json",
+        "results/publication_campaign/sensitivity_and_outlier_analysis.json",
+        "results/publication_campaign/independent_validation_report.json",
+        "results/publication_campaign/cross_hardware_and_independent_validation.json",
         "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex",
     ]
     for rel_path in additional:

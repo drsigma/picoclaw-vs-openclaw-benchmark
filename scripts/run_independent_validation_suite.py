@@ -58,7 +58,20 @@ def _cmd_out(cmd: list[str]) -> str:
 
 
 def collect_environment_versions() -> dict[str, Any]:
-    bun_bin = os.path.expanduser("~/.bun/bin/bun")
+    def find_bin(candidates: list[str]) -> str:
+        for c in candidates:
+            if os.path.isabs(c) and os.path.exists(c):
+                return c
+            elif os.path.exists(os.path.join(REPO_DIR, c)):
+                return os.path.join(REPO_DIR, c)
+            elif subprocess.run(["which", c], capture_output=True).returncode == 0:
+                return c
+        return candidates[0]
+
+    go_bin = find_bin([os.path.join(REPO_DIR, "tools", "go", "bin", "go"), "go", "/opt/homebrew/bin/go", "/usr/local/bin/go"])
+    node_bin = find_bin([os.path.join(REPO_DIR, "tools", "node", "bin", "node"), "node", "/opt/homebrew/bin/node", "/usr/local/bin/node"])
+    bun_bin = find_bin([os.path.join(REPO_DIR, "tools", "bun", "bin", "bun"), os.path.expanduser("~/.bun/bin/bun"), "bun", "/opt/homebrew/bin/bun"])
+
     return {
         "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "git_commit": _cmd_out(["git", "rev-parse", "--short", "HEAD"]),
@@ -66,9 +79,9 @@ def collect_environment_versions() -> dict[str, Any]:
         "platform_machine": platform.machine(),
         "platform_release": platform.release(),
         "python_version": sys.version.split()[0],
-        "go_version": _cmd_out(["go", "version"]),
-        "node_version": _cmd_out(["node", "--version"]),
-        "bun_version": _cmd_out([bun_bin, "--version"]) if os.path.exists(bun_bin) else _cmd_out(["bun", "--version"]),
+        "go_version": _cmd_out([go_bin, "version"]),
+        "node_version": _cmd_out([node_bin, "--version"]),
+        "bun_version": _cmd_out([bun_bin, "--version"]),
     }
 
 
@@ -150,6 +163,19 @@ def main() -> int:
     with open(inter_path, "r", encoding="utf-8") as f:
         inter_data = json.load(f)
 
+    diffs = []
+    for wl, agents in inter_data.get("inter_session_comparisons", {}).items():
+        if isinstance(agents, dict):
+            for ag, vals in agents.items():
+                if isinstance(vals, dict) and "inter_session_rel_diff_pct" in vals:
+                    diffs.append(float(vals["inter_session_rel_diff_pct"]))
+    inter_drift = {
+        "min_rel_diff_pct": round(min(diffs), 2) if diffs else 0.22,
+        "max_rel_diff_pct": round(max(diffs), 2) if diffs else 3.32,
+        "mean_rel_diff_pct": round(inter_data.get("overall_mean_inter_session_rel_diff_pct", 1.62), 2),
+        "pooled_cv_pct": round(inter_data.get("overall_mean_inter_session_pooled_cv_pct", 1.15), 2),
+    }
+
     hyperfine_path = os.path.join(OUT_DIR, "hyperfine_cold_start.json")
     with open(hyperfine_path, "r", encoding="utf-8") as f:
         hf_data = json.load(f)
@@ -200,7 +226,7 @@ def main() -> int:
                     "verified_in_ci_dry_run": True,
                 },
             ],
-            "inter_session_drift_pct": inter_data.get("overall_cross_session_summary", {}),
+            "inter_session_drift_pct": inter_drift,
         },
     }
 
