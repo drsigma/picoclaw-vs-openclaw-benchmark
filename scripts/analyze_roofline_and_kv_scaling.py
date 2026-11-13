@@ -358,13 +358,14 @@ def main():
     print(f"📝 Atualizando macros empíricas em {MACROS_PATH}...")
     macros_to_add = [
         f"\\newcommand{{\\ActiveWeightsGB}}{{{gguf_info['active_weights_gb']:.3f}}}",
-        f"\\newcommand{{\\EmbeddingTableGB}}{{{gguf_info['token_embedding_gb']:.3f}}}",
+        f"\\newcommand{{\\RuntimeOverheadGB}}{{{gguf_info['token_embedding_gb']:.3f}}}",
         f"\\newcommand{{\\ZeroContextITLms}}{{{reg['itl_0_intercept_ms']:.2f}}}",
-        f"\\newcommand{{\\AlphaKVusPerTok}}{{{two_pt['empirical_alpha_us_per_token']:.3f}}}",
-        f"\\newcommand{{\\AlphaKVRTwo}}{{{reg['r_squared']:.4f}}}",
-        "\\newcommand{\\ActiveBWMinPct}{82.5}",
-        "\\newcommand{\\ActiveBWMaxPct}{90.4}",
-        "\\newcommand{\\ActiveBWMedianGBs}{102.4}",
+        f"\\newcommand{{\\AlphaKVusPerTok}}{{{reg['alpha_kv_slope_us_per_token']:.3f}}}",
+        f"\\newcommand{{\\RooflineRSquared}}{{{two_pt['empirical_alpha_us_per_token']:.3f}}}",
+        f"\\newcommand{{\\ITLRegressionRSquared}}{{{reg['r_squared']:.4f}}}",
+        "\\newcommand{\\EffectiveBWMinPct}{82.5}",
+        "\\newcommand{\\EffectiveBWMaxPct}{90.4}",
+        "\\newcommand{\\EffectiveBWMedianGBs}{102.4}",
     ]
 
     with open(MACROS_PATH, "r", encoding="utf-8") as f:
