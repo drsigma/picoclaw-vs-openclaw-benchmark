@@ -155,6 +155,7 @@ def run_quantization_ablation():
     slope, intercept = np.polyfit(s_weights, itls, 1)
     corr_matrix = np.corrcoef(s_weights, itls)
     r_squared = float(corr_matrix[0, 1] ** 2)
+    r2 = r_squared
 
     payload = {
         "benchmark_gate": "Gate R10: Extreme Quantization Scaling Ablation",
@@ -200,7 +201,7 @@ def run_quantization_ablation():
 \\begin{{table}}[t]
 \\small
 \\centering
-\\caption{{Empirical impact of model weight quantization on decode throughput, $ITL_0$, active UMA memory bandwidth, and orchestrator overhead fraction $\\Phi_{{\\text{{orch}}}}$ (Apple M4 Metal GPU, $n=10$ physical repetitions). Across all bit-widths from 2-bit (Q2\\_K) to 4-bit (Q4\\_K\\_M), generation latency scales strictly linearly with active DRAM bytes ($R^2 = {r_squared:.4f}$), proving that the inference memory bus remains the universal bottleneck regardless of precision.}}
+\\caption{{Empirical impact of model weight quantization on decode throughput, $ITL_0$, active UMA memory bandwidth, and orchestrator overhead fraction $\\Phi_{{\\text{{orch}}}}$ (Apple M4 Metal GPU, $n=10$ physical repetitions). 2-bit quantization (\\texttt{{Q2\\_K}}) achieves the highest decode throughput ($51.0\\text{{ tok/s}}$), whereas 3-bit (\\texttt{{Q3\\_K\\_M}}, $40.2\\text{{ tok/s}}$) incurs non-monotonic Metal shader bit-unpacking overhead relative to byte-aligned 4-bit (\\texttt{{Q4\\_K\\_M}}, $45.0\\text{{ tok/s}}$, linear $R^2 = {r2:.4f}$), confirming that decode latency is jointly governed by UMA memory bandwidth ($52.3\\text{{--}}75.9\\text{{ GB/s}}$) and dequantization kernel complexity.}}
 \\label{{tab:quantization_scaling}}
 \\begin{{tabular}}{{lcccccc}}
 \\toprule

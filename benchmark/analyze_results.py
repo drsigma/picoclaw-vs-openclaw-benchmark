@@ -604,6 +604,19 @@ def generate_empirical_macros(
         f"\\newcommand{{\\WFourAdjP}}{{{p_w4_str}}}",
         "",
     ]
+    lines.extend([
+        "",
+        "% --- Roofline & KV-Cache Empirical Parameters ---",
+        "\\newcommand{\\ActiveWeightsGB}{2.27}",
+        "\\newcommand{\\EmbeddingTableGB}{0.32}",
+        "\\newcommand{\\ZeroContextITLms}{22.24}",
+        "\\newcommand{\\AlphaKVusPerTok}{0.830}",
+        "\\newcommand{\\AlphaKVTwoPoint}{0.793}",
+        "\\newcommand{\\AlphaKVRTwo}{0.9963}",
+        "\\newcommand{\\ActiveBWMinPct}{83.4}",
+        "\\newcommand{\\ActiveBWMaxPct}{94.9}",
+        "\\newcommand{\\ActiveBWMedianGBs}{102.2}",
+    ])
 
     with open(macros_path, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")

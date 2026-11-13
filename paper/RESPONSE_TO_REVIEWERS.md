@@ -14,7 +14,7 @@ The table below maps every single gate of the Elsevier SoftwareX Reviewer & Auth
 
 | Gate & Scope | Criterion / Evaluated Property | Status | Concrete Artifact / Source Code Evidence |
 |---|---|---|---|
-| **Gate 0: Provenance** | 9 root fields in 100% JSONL trials | **VERIFIED** | `results/publication_campaign/*.jsonl` (3,823 lines across all 7 datasets); `benchmark/protocol_invariants.py` (`validate_gate_0_provenance_fields`, lines 45–95). |
+| **Gate 0: Provenance** | 9 root fields in 100% JSONL trials | **VERIFIED** | `results/publication_campaign/*.jsonl` (3,774 lines across all 7 JSONL datasets); `benchmark/protocol_invariants.py` (`validate_gate_0_provenance_fields`, lines 45–95). |
 | **Gate 0: Provenance** | Hardware & session metadata | **VERIFIED** | `results/publication_campaign/campaign_metadata.json` (lines 1–25); `results/publication_campaign/raw_trials.jsonl`. |
 | **Gate 1: Governance** | Metric synchronization across docs | **VERIFIED** | `paper/HIGHLIGHTS.md` (lines 1–6); `paper/COVER_LETTER.md` (lines 1–45); zero outdated $23.4\times$ references. |
 | **Gate 1: Governance** | Dual licensing & citation metadata | **VERIFIED** | `LICENSE` (MIT License); `DATA_LICENSE` (CC-BY 4.0); `CITATION.cff` (v1.2.0 metadata). |

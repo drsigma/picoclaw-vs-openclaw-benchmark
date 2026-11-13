@@ -144,16 +144,16 @@ Summary:
 ---
 
 #### Passo 5: Verificação de Integridade Criptográfica (SHA-256)
-Auditoria automática dos 226 arquivos do repositório contra a assinatura digital:
+Auditoria automática dos 160 arquivos do repositório contra a assinatura digital:
 ```bash
 make verify
 ```
 ```text
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (226 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (160 files)
 ========================================================================
-✅ [SUCCESS] All 226/226 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 160/160 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 ```
@@ -369,16 +369,16 @@ Summary:
 ---
 
 #### Step 5: Cryptographic Integrity Verification (SHA-256)
-Automated audit of all 226 tracked repository files against their cryptographic hashes:
+Automated audit of all 160 tracked repository files against their cryptographic hashes:
 ```bash
 make verify
 ```
 ```text
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (226 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (160 files)
 ========================================================================
-✅ [SUCCESS] All 226/226 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 160/160 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 ```

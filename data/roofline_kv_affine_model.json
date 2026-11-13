@@ -1,5 +1,5 @@
 {
-  "timestamp_iso": "2026-11-13T16:25:02.640243+00:00",
+  "timestamp_iso": "2026-11-13T18:22:55.638363+00:00",
   "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core GPU, 24GB LPDDR5X UMA)",
   "nominal_uma_bandwidth_gbs": 120.0,
   "gguf_tensor_decomposition": {

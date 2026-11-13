@@ -182,6 +182,7 @@ def run_gatekeeper_suite(target_files: List[str] | None = None) -> int:
         "audit_timestamp_iso": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "total_datasets_audited": len(target_files),
         "total_records_verified": total_evaluated_records,
+        "overall_ready_for_submission": all_passed,
         "gatekeeper_verdict": "CERTIFIED_VALID" if all_passed else "REJECTED_NON_COMPLIANT",
         "invariants_enforced": [
             "All 9 root provenance fields present on 100% of rows",
