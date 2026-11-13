@@ -17,13 +17,13 @@ The table below maps every single gate of the Elsevier SoftwareX Reviewer & Auth
 | **Gate 0: Provenance** | 9 root fields in 100% JSONL trials | **VERIFIED** | `results/publication_campaign/*.jsonl` (3,823 lines across all 7 datasets); `benchmark/protocol_invariants.py` (`validate_gate_0_provenance_fields`, lines 45–95). |
 | **Gate 0: Provenance** | Hardware & session metadata | **VERIFIED** | `results/publication_campaign/campaign_metadata.json` (lines 1–25); `results/publication_campaign/raw_trials.jsonl`. |
 | **Gate 1: Governance** | Metric synchronization across docs | **VERIFIED** | `paper/HIGHLIGHTS.md` (lines 1–6); `paper/COVER_LETTER.md` (lines 1–45); zero outdated $23.4\times$ references. |
-| **Gate 1: Governance** | Dual licensing & citation metadata | **VERIFIED** | `LICENSE` (Apache 2.0); `DATA_LICENSE` (CC-BY 4.0); `CITATION.cff` (v1.2.0 metadata). |
+| **Gate 1: Governance** | Dual licensing & citation metadata | **VERIFIED** | `LICENSE` (MIT License); `DATA_LICENSE` (CC-BY 4.0); `CITATION.cff` (v1.2.0 metadata). |
 | **Gate 2: Failures & Thrashing** | Zero silent fallbacks or mocks | **VERIFIED** | `benchmark/adapters/bun_minimal_adapter.py` (lines 20–35); `benchmark/telemetry.py` (fail-fast exceptions). |
 | **Gate 2: Failures & Thrashing** | Physical KV-Cache Thrashing ablation | **VERIFIED** | `scripts/run_kv_cache_thrashing_ablation.py`; `results/publication_campaign/kv_cache_thrashing_trials.jsonl` ($n=90$). |
-| **Gate 2: Failures & Thrashing** | Degraded mode quantified ($19.91\times$ penalty) | **VERIFIED** | `results/publication_campaign/kv_cache_thrashing_summary.json` (lines 153–158: $0.45\%$ cache hit, $531.33\times$ prefill penalty); `paper/softwarex_manuscript.tex` (Section 4.5). |
+| **Gate 2: Failures & Thrashing** | Degraded mode quantified ($19.91\times$ penalty) | **VERIFIED** | `results/publication_campaign/kv_cache_thrashing_summary.json` (lines 153–158: $0.45\%$ cache hit, $531.33\times$ prefill penalty); `paper/softwarex_manuscript.tex` (Section 3.5). |
 | **Gate 3: Sensitivity & Outliers** | Tukey $1.5\times\text{IQR}$ & 5% Trimmed Mean | **VERIFIED** | `benchmark/analyze_results.py` (`compute_sensitivity_and_outlier_analysis`); `results/publication_campaign/sensitivity_and_outlier_analysis.json` ($< 0.095\%$ median shift). |
 | **Gate 4: Power & Footprint** | Active net power decomposition | **VERIFIED** | `results/publication_campaign/sensitivity_and_outlier_analysis.json` ($\bar{P}_{\text{net}} = 15.86\text{ W}$ in A vs. $13.04\text{ W}$ in B; `prompt_ms` vs. `predicted_ms` separated). |
-| **Gate 4: Power & Footprint** | Unified Peak Physical Footprint | **VERIFIED** | `paper/softwarex_manuscript.tex` (Section 2.3, 4.3, 4.5; `proc_peak_phys_mb` via Darwin `libproc` `RUSAGE_INFO_V4`); `README.md`. |
+| **Gate 4: Power & Footprint** | Unified Peak Physical Footprint | **VERIFIED** | `paper/softwarex_manuscript.tex` (Section 2.3, 3.3, 3.5; `proc_peak_phys_mb` via Darwin `libproc` `RUSAGE_INFO_V4`); `README.md`. |
 | **Gate 4: Power & Footprint** | Negative validation of `ri_billed_energy` | **VERIFIED** | `results/publication_campaign/uma_energy_bandwidth_attribution.json` ($r = -0.051$, $R^2 = -0.676$ rejected); physical regressors validated ($R^2 \ge 0.94$). |
 | **Gate 5: Tabular Transparency** | TTFT, ITL, Cached vs. Uncached tokens | **VERIFIED** | `results/publication_campaign/tables/table_warm_cache.tex` (lines 1–40); `results/publication_campaign/warm_cache_summary.json`. |
 | **Gate 5: Tabular Transparency** | Thrashing control rows in LaTeX table | **VERIFIED** | `results/publication_campaign/tables/table_warm_cache.tex` (rows `W2 (T2)` for 15-tool and 54-tool). |
@@ -33,7 +33,7 @@ The table below maps every single gate of the Elsevier SoftwareX Reviewer & Auth
 | **Gate 7: Automated Test** | Full Gate 0–8 automated check | **VERIFIED** | `tests/test_artifact_consistency.py` (`test_all_checklist_gates_0_to_8_verified`, lines 513–575). |
 | **Gate 8: Hype-Free & References** | Eradication of hype superlatives | **VERIFIED** | Zero occurrences of forbidden phrases (`proves superiority`, `energy dominance`, `universally faster`, `direct DRAM bandwidth telemetry`) across all manuscript and summary files. |
 | **Gate 8: Literature Integration** | 6 checklist-inspired papers cited | **VERIFIED** | `references.bib` & `paper/softwarex_manuscript.tex` Table 2 & Section 1: `budgetbench2025`, `openmcp2025`, `edgepi2025`, `reprodataagents2025`, `mcpgranite2025`, `agentware2025`. |
-| **Gate 8: Threats to Validity** | Explicit dedicated limitation section | **VERIFIED** | `paper/softwarex_manuscript.tex` Section 5.2 (`Threats to Validity and Methodological Limitations` covering 6 explicit validity boundaries). |
+| **Gate 8: Threats to Validity** | Explicit dedicated limitation section | **VERIFIED** | `paper/softwarex_manuscript.tex` Section 4.2 (`Threats to Validity and Methodological Limitations` covering 6 explicit validity boundaries). |
 
 ---
 

@@ -339,11 +339,15 @@ async function callLlamaStream(messages, tools, maxTokens) {
 
   const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedPromptTokens);
   const totalNeuralMs = hasServerTimings ? (promptMs + predictedMs) : (performance.now() - t0);
+  const finalPromptMs = hasServerTimings ? promptMs : ttftMs;
+  const finalPredictedMs = hasServerTimings ? predictedMs : Math.max(0.0, totalNeuralMs - ttftMs);
   if (completionTokens === 0) completionTokens = tokenCount;
   if (!finishReason) finishReason = "stop";
   const itlMs = completionTokens > 1 ? (totalNeuralMs - ttftMs) / (completionTokens - 1) : 0.0;
   return {
     totalNeuralMs,
+    promptMs: finalPromptMs,
+    predictedMs: finalPredictedMs,
     ttftMs,
     itlMs,
     promptTokens,
@@ -359,6 +363,8 @@ async function callLlamaStream(messages, tools, maxTokens) {
 async function runWorkload(tier, warmth, rssIdle) {
   const tStart = performance.now();
   let tNeuralTotal = 0.0;
+  let totalPromptMs = 0.0;
+  let totalPredictedMs = 0.0;
   let ttftFirst = 0.0;
   let itlAvg = 0.0;
   let tDispatchTotal = 0.0;
@@ -400,6 +406,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     ];
     const r = await callLlamaStream(msgs, toolCatalog, 64);
     tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -424,6 +432,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     ];
     const r = await callLlamaStream(msgs, toolCatalog, 128);
     tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -444,6 +454,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     ];
     const r = await callLlamaStream(msgs, toolCatalog, 256);
     tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -477,6 +489,8 @@ async function runWorkload(tier, warmth, rssIdle) {
       });
       const r = await callLlamaStream(history, toolCatalog, 64);
       tNeuralTotal += r.totalNeuralMs;
+      totalPromptMs += r.promptMs;
+      totalPredictedMs += r.predictedMs;
       if (step === 1) ttftFirst = r.ttftMs;
       itlSum += r.itlMs;
       totalPromptTokens += r.promptTokens;
@@ -512,6 +526,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     warmth: warmth,
     t_task_ms: tTaskMs,
     t_neural_ms: tNeuralTotal,
+    prompt_ms: totalPromptMs,
+    predicted_ms: totalPredictedMs,
     t_orch_ms: tOrchMs,
     phi_orch_pct: phiOrch,
     ttft_ms: ttftFirst,

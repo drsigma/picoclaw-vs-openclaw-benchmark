@@ -98,8 +98,13 @@ def format_compact_json_dict(content: str) -> str:
         return content
 
 
-def dump_file(rel_path: str) -> str:
+def dump_file(rel_path: str, seen: set[str] | None = None) -> str:
     """Reads and returns 100% full content of the specified file with SHA-256 header and explicit closing delimiter."""
+    if seen is not None:
+        if rel_path in seen:
+            return ""
+        seen.add(rel_path)
+
     abs_path = os.path.join(REPO_DIR, rel_path)
     if not os.path.exists(abs_path):
         return f"=== FILE: {rel_path} (MISSING) ===\n\n"
@@ -202,17 +207,20 @@ def generate_bundle():
         "results/publication_campaign/tables/macros_empirical.tex",
     ]
 
+    seen_p1: set[str] = set()
     p1_sections = [
         build_header("PARTE 1: RESPOSTA AOS REVISORES, MANUSCRITO .TEX, BIBLIOGRAFIA E TABELAS LATEX"),
         "=" * 80 + "\nSECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 7 TABELAS LATEX + MACROS\n" + "=" * 80 + "\n",
     ]
     for f in part1_files:
-        p1_sections.append(dump_file(f))
+        block = dump_file(f, seen_p1)
+        if block:
+            p1_sections.append(block)
     p1_sections.append("=" * 80 + "\nFIM DA PARTE 1 DO PACOTE DE AUDITORIA (100% INTEGRAL SEM TRUNCAMENTO)\n" + "=" * 80 + "\n")
     part1_content = "\n".join(p1_sections)
     with open(OUTPUT_PART1, "w", encoding="utf-8") as f:
         f.write(part1_content)
-    print(f"✅ Generated Part 1: {OUTPUT_PART1} ({len(part1_content)} chars, {os.path.getsize(OUTPUT_PART1)} bytes)")
+    print(f"✅ Generated Part 1: {OUTPUT_PART1} ({len(part1_content)} chars, {os.path.getsize(OUTPUT_PART1)} bytes, {len(seen_p1)} unique files)")
 
     # PARTE 2: CI/CD, Makefile, Codigo-Fonte de Producao (incluindo protocol_invariants.py e bun_jsc_agent.mjs), Scripts, Testes, JSONs e Manifesto SHA-256
     part2_files = [
@@ -280,30 +288,42 @@ def generate_bundle():
         "data/manifest_sha256.json",
     ]
 
+    seen_p2: set[str] = set()
     p2_sections = [
         build_header("PARTE 2: CODIGO-FONTE, SCRIPTS, TESTES, JSONS DE RESULTADOS E MANIFESTO SHA-256"),
         "=" * 80 + "\nSECAO 2: CODIGO-FONTE INTEGRAL, SCRIPTS, TESTES, JSONS DE RESULTADOS E MANIFESTO SHA-256\n" + "=" * 80 + "\n",
     ]
     for f in part2_files:
-        p2_sections.append(dump_file(f))
+        block = dump_file(f, seen_p2)
+        if block:
+            p2_sections.append(block)
     p2_sections.append("=" * 80 + "\nFIM DA PARTE 2 DO PACOTE DE AUDITORIA (100% ARQUIVOS E MANIFESTO VERIFICADOS)\n" + "=" * 80 + "\n")
     part2_content = "\n".join(p2_sections)
     with open(OUTPUT_PART2, "w", encoding="utf-8") as f:
         f.write(part2_content)
-    print(f"✅ Generated Part 2: {OUTPUT_PART2} ({len(part2_content)} chars, {os.path.getsize(OUTPUT_PART2)} bytes)")
+    print(f"✅ Generated Part 2: {OUTPUT_PART2} ({len(part2_content)} chars, {os.path.getsize(OUTPUT_PART2)} bytes, {len(seen_p2)} unique files)")
 
-    # Unified bundle for backward compatibility
+    # Unified bundle for backward compatibility with zero duplication
+    seen_unified: set[str] = set()
     unified_sections = [
         build_header("PACOTE UNIFICADO COMPLETO (PARTE 1 + PARTE 2)"),
-        "\n".join(p1_sections[1:-1]),
-        "\n".join(p2_sections[1:-1]),
-        "=" * 80 + "\nFIM DO PACOTE DE AUDITORIA INTEGRAL (100% ARQUIVOS VERIFICADOS)\n" + "=" * 80 + "\n",
+        "=" * 80 + "\nSECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 7 TABELAS LATEX + MACROS\n" + "=" * 80 + "\n",
     ]
+    for f in part1_files:
+        block = dump_file(f, seen_unified)
+        if block:
+            unified_sections.append(block)
+    unified_sections.append("=" * 80 + "\nSECAO 2: CODIGO-FONTE INTEGRAL, SCRIPTS, TESTES, JSONS DE RESULTADOS E MANIFESTO SHA-256\n" + "=" * 80 + "\n")
+    for f in part2_files:
+        block = dump_file(f, seen_unified)
+        if block:
+            unified_sections.append(block)
+    unified_sections.append("=" * 80 + "\nFIM DO PACOTE DE AUDITORIA INTEGRAL (100% ARQUIVOS VERIFICADOS)\n" + "=" * 80 + "\n")
     bundle_content = "\n".join(unified_sections)
     for out_path in [OUTPUT_FINAL, OUTPUT_FILE_6, OUTPUT_FILE_6_4]:
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(bundle_content)
-        print(f"✅ Generated unified bundle: {out_path} ({len(bundle_content)} chars, {os.path.getsize(out_path)} bytes)")
+        print(f"✅ Generated unified bundle: {out_path} ({len(bundle_content)} chars, {os.path.getsize(out_path)} bytes, {len(seen_unified)} unique files)")
 
     # PARTE 3: Dados Brutos JSONL Completos
     export_raw_jsonl_dataset()
@@ -320,6 +340,7 @@ def export_raw_jsonl_dataset():
         "results/publication_campaign/prefill_ablation.jsonl",
         "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
     ]
+    seen_jsonl: set[str] = set()
     parts = [
         "================================================================================",
         "PARTE 3: DADOS BRUTOS COMPLETOS (100% REGISTROS JSONL SEM CORTES)",
@@ -327,6 +348,9 @@ def export_raw_jsonl_dataset():
         "================================================================================\n",
     ]
     for rel_path in jsonl_files:
+        if rel_path in seen_jsonl:
+            continue
+        seen_jsonl.add(rel_path)
         abs_path = os.path.join(REPO_DIR, rel_path)
         if not os.path.exists(abs_path):
             continue
@@ -350,7 +374,7 @@ def export_raw_jsonl_dataset():
     for out_p in [OUTPUT_PART3, OUTPUT_RAW_JSONL]:
         with open(out_p, "w", encoding="utf-8") as f:
             f.write(content)
-        print(f"✅ Generated Part 3 raw JSONL dump: {out_p} ({len(parts)} lines, {os.path.getsize(out_p)} bytes)")
+        print(f"✅ Generated Part 3 raw JSONL dump: {out_p} ({len(parts)} lines, {os.path.getsize(out_p)} bytes, {len(seen_jsonl)} unique datasets)")
 
 
 if __name__ == "__main__":

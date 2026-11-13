@@ -63,6 +63,8 @@ type TrialResult struct {
 	Warmth           string  `json:"warmth"`
 	TTaskMs          float64 `json:"t_task_ms"`
 	TNeuralMs        float64 `json:"t_neural_ms"`
+	PromptMs         float64 `json:"prompt_ms"`
+	PredictedMs      float64 `json:"predicted_ms"`
 	TOrchMs          float64 `json:"t_orch_ms"`
 	PhiOrchPct       float64 `json:"phi_orch_pct"`
 	TTFTMs           float64 `json:"ttft_ms"`
@@ -295,6 +297,8 @@ type docScore struct {
 
 type StreamResult struct {
 	TotalNeuralMs        float64
+	PromptMs             float64
+	PredictedMs          float64
 	TTFTMs               float64
 	ITLMs                float64
 	PromptTokens         int
@@ -528,8 +532,15 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 		itlMs = (totalNeuralMs - ttftMs) / float64(completionTokens-1)
 	}
 
+	if !hasServerTimings {
+		promptMs = ttftMs
+		predictedMs = math.Max(0.0, totalNeuralMs-ttftMs)
+	}
+
 	return StreamResult{
 		TotalNeuralMs:        totalNeuralMs,
+		PromptMs:             promptMs,
+		PredictedMs:          predictedMs,
 		TTFTMs:               ttftMs,
 		ITLMs:                itlMs,
 		PromptTokens:         promptTokens,
@@ -544,7 +555,7 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 
 func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssIdle float64) TrialResult {
 	tStart := time.Now()
-	var tNeuralTotal, ttftFirst, itlAvg, tDispatchTotal, tPruneTotal float64
+	var tNeuralTotal, totalPromptMs, totalPredictedMs, ttftFirst, itlAvg, tDispatchTotal, tPruneTotal float64
 	var totalPromptTokens, totalCompletionTokens, totalCachedTokens, totalUncachedPromptTokens, toolCalls int
 	var lastFinishReason string
 	lastHttpStatus := 200
@@ -581,6 +592,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		}
 		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 64)
 		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
 		ttftFirst = sr.TTFTMs
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
@@ -612,6 +625,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		}
 		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 128)
 		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
 		ttftFirst = sr.TTFTMs
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
@@ -633,6 +648,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		}
 		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 256)
 		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
 		ttftFirst = sr.TTFTMs
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
@@ -667,6 +684,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 			})
 			sr := callLlamaStream(client, apiURL, history, toolCatalog, 64)
 			tNeuralTotal += sr.TotalNeuralMs
+			totalPromptMs += sr.PromptMs
+			totalPredictedMs += sr.PredictedMs
 			if step == 1 {
 				ttftFirst = sr.TTFTMs
 			}
@@ -718,6 +737,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		Warmth:               warmth,
 		TTaskMs:              tTaskMs,
 		TNeuralMs:            tNeuralTotal,
+		PromptMs:             totalPromptMs,
+		PredictedMs:          totalPredictedMs,
 		TOrchMs:              tOrchMs,
 		PhiOrchPct:           phiOrch,
 		TTFTMs:               ttftFirst,

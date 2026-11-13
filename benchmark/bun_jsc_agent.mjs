@@ -287,12 +287,16 @@ async function streamCompletionJSC(messages, tools, maxTokens) {
 
   const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedTokens);
   const neuralMs = hasTimings ? (promptMs + predictedMs) : (nowMs() - tReq0);
+  const finalPromptMs = hasTimings ? promptMs : ttftMs;
+  const finalPredictedMs = hasTimings ? predictedMs : Math.max(0.0, neuralMs - ttftMs);
   if (completionTokens === 0) completionTokens = deltaCount;
   if (!finishReason) finishReason = "stop";
   const itlMs = completionTokens > 1 ? Math.max(0.0, (neuralMs - ttftMs) / (completionTokens - 1)) : 0.0;
 
   return {
     neuralMs,
+    promptMs: finalPromptMs,
+    predictedMs: finalPredictedMs,
     ttftMs,
     itlMs,
     promptTokens,
@@ -315,6 +319,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
   const logFile = path.join(BASE_DIR, "system_logs.jsonl");
 
   let tNeuralTotal = 0.0;
+  let totalPromptMs = 0.0;
+  let totalPredictedMs = 0.0;
   let ttftFirst = 0.0;
   let itlAvg = 0.0;
   let tDispatchTotal = tCatMs;
@@ -336,6 +342,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     ];
     const r = await streamCompletionJSC(messages, toolCatalog, 64);
     tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -359,6 +367,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     ];
     const r = await streamCompletionJSC(messages, toolCatalog, 128);
     tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -379,6 +389,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     ];
     const r = await streamCompletionJSC(messages, toolCatalog, 256);
     tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -404,6 +416,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
       });
       const r = await streamCompletionJSC(history, toolCatalog, 64);
       tNeuralTotal += r.neuralMs;
+      totalPromptMs += r.promptMs;
+      totalPredictedMs += r.predictedMs;
       if (step === 1) ttftFirst = r.ttftMs;
       itlSum += r.itlMs;
       totalPromptTokens += r.promptTokens;
@@ -438,6 +452,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     warmth,
     t_task_ms: tTaskMs,
     t_neural_ms: tNeuralTotal,
+    prompt_ms: totalPromptMs,
+    predicted_ms: totalPredictedMs,
     t_orch_ms: tOrchMs,
     phi_orch_pct: phiOrch,
     ttft_ms: ttftFirst,

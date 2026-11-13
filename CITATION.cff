@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this benchmark suite, datasets, or experimental findings in your research, please cite it as below."
-title: "A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"
+title: "A Reproducible Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and KV-Cache Dynamics in Local LLM Agents on Apple Silicon"
 authors:
   - family-names: "Paniccia Cassetta"
     given-names: "Rafael"

@@ -3,15 +3,24 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2: CODIGO-FONTE, SCRIPTS, TESTES, JSONS DE RESULTADOS E MANIFESTO SHA-256
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T12:16:47.734175+00:00
-Git HEAD: 71d3cf7c4648ab2dcfa623b92ce5b75347f9c7b9
+Data de Geracao (UTC): 2026-11-13T12:55:48.428086+00:00
+Git HEAD: 8da3d88d3d6259f22ea09888cc645c7c1e1f6d23
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
 BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
-(clean working tree)
+M CITATION.cff
+ M benchmark/bun_jsc_agent.mjs
+ M benchmark/openclaw_orch.mjs
+ M benchmark/picoclaw_orch
+ M benchmark/picoclaw_orch.go
+ M benchmark/python_orch.py
+ M paper/RESPONSE_TO_REVIEWERS.md
+ M paper/softwarex_manuscript.tex
+ M references.bib
+ M scripts/export_audit_bundle.py
 ================================================================================
 
 
@@ -452,7 +461,7 @@ END FILE: benchmark/protocol_invariants.py
 
 ================================================================================
 FILE: benchmark/bun_jsc_agent.mjs
-SHA-256: 9c9d08fa605b1ec61d06ebbc9042d9a2ad6e443806a5c2751a010e07c1b9bcf5
+SHA-256: 97363835471ecfee7cd589bb801bed2fa2f246442c4208f0a83442ff4b9a2713
 ================================================================================
 #!/usr/bin/env bun
 /**
@@ -743,12 +752,16 @@ async function streamCompletionJSC(messages, tools, maxTokens) {
 
   const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedTokens);
   const neuralMs = hasTimings ? (promptMs + predictedMs) : (nowMs() - tReq0);
+  const finalPromptMs = hasTimings ? promptMs : ttftMs;
+  const finalPredictedMs = hasTimings ? predictedMs : Math.max(0.0, neuralMs - ttftMs);
   if (completionTokens === 0) completionTokens = deltaCount;
   if (!finishReason) finishReason = "stop";
   const itlMs = completionTokens > 1 ? Math.max(0.0, (neuralMs - ttftMs) / (completionTokens - 1)) : 0.0;
 
   return {
     neuralMs,
+    promptMs: finalPromptMs,
+    predictedMs: finalPredictedMs,
     ttftMs,
     itlMs,
     promptTokens,
@@ -771,6 +784,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
   const logFile = path.join(BASE_DIR, "system_logs.jsonl");
 
   let tNeuralTotal = 0.0;
+  let totalPromptMs = 0.0;
+  let totalPredictedMs = 0.0;
   let ttftFirst = 0.0;
   let itlAvg = 0.0;
   let tDispatchTotal = tCatMs;
@@ -792,6 +807,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     ];
     const r = await streamCompletionJSC(messages, toolCatalog, 64);
     tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -815,6 +832,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     ];
     const r = await streamCompletionJSC(messages, toolCatalog, 128);
     tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -835,6 +854,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     ];
     const r = await streamCompletionJSC(messages, toolCatalog, 256);
     tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -860,6 +881,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
       });
       const r = await streamCompletionJSC(history, toolCatalog, 64);
       tNeuralTotal += r.neuralMs;
+      totalPromptMs += r.promptMs;
+      totalPredictedMs += r.predictedMs;
       if (step === 1) ttftFirst = r.ttftMs;
       itlSum += r.itlMs;
       totalPromptTokens += r.promptTokens;
@@ -894,6 +917,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     warmth,
     t_task_ms: tTaskMs,
     t_neural_ms: tNeuralTotal,
+    prompt_ms: totalPromptMs,
+    predicted_ms: totalPredictedMs,
     t_orch_ms: tOrchMs,
     phi_orch_pct: phiOrch,
     ttft_ms: ttftFirst,
@@ -941,7 +966,7 @@ END FILE: benchmark/bun_jsc_agent.mjs
 
 ================================================================================
 FILE: benchmark/picoclaw_orch.go
-SHA-256: a1c0bd54e2cc26babe35e5c3c747e8bb2cc3ca44ef81a71366e1037b41baba18
+SHA-256: 93cf068ecbed1e18803f026036e828938480782d0b7dc9f388ac82c11e17b592
 ================================================================================
 package main
 
@@ -1008,6 +1033,8 @@ type TrialResult struct {
 	Warmth           string  `json:"warmth"`
 	TTaskMs          float64 `json:"t_task_ms"`
 	TNeuralMs        float64 `json:"t_neural_ms"`
+	PromptMs         float64 `json:"prompt_ms"`
+	PredictedMs      float64 `json:"predicted_ms"`
 	TOrchMs          float64 `json:"t_orch_ms"`
 	PhiOrchPct       float64 `json:"phi_orch_pct"`
 	TTFTMs           float64 `json:"ttft_ms"`
@@ -1240,6 +1267,8 @@ type docScore struct {
 
 type StreamResult struct {
 	TotalNeuralMs        float64
+	PromptMs             float64
+	PredictedMs          float64
 	TTFTMs               float64
 	ITLMs                float64
 	PromptTokens         int
@@ -1473,8 +1502,15 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 		itlMs = (totalNeuralMs - ttftMs) / float64(completionTokens-1)
 	}
 
+	if !hasServerTimings {
+		promptMs = ttftMs
+		predictedMs = math.Max(0.0, totalNeuralMs-ttftMs)
+	}
+
 	return StreamResult{
 		TotalNeuralMs:        totalNeuralMs,
+		PromptMs:             promptMs,
+		PredictedMs:          predictedMs,
 		TTFTMs:               ttftMs,
 		ITLMs:                itlMs,
 		PromptTokens:         promptTokens,
@@ -1489,7 +1525,7 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 
 func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssIdle float64) TrialResult {
 	tStart := time.Now()
-	var tNeuralTotal, ttftFirst, itlAvg, tDispatchTotal, tPruneTotal float64
+	var tNeuralTotal, totalPromptMs, totalPredictedMs, ttftFirst, itlAvg, tDispatchTotal, tPruneTotal float64
 	var totalPromptTokens, totalCompletionTokens, totalCachedTokens, totalUncachedPromptTokens, toolCalls int
 	var lastFinishReason string
 	lastHttpStatus := 200
@@ -1526,6 +1562,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		}
 		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 64)
 		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
 		ttftFirst = sr.TTFTMs
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
@@ -1557,6 +1595,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		}
 		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 128)
 		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
 		ttftFirst = sr.TTFTMs
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
@@ -1578,6 +1618,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		}
 		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 256)
 		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
 		ttftFirst = sr.TTFTMs
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
@@ -1612,6 +1654,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 			})
 			sr := callLlamaStream(client, apiURL, history, toolCatalog, 64)
 			tNeuralTotal += sr.TotalNeuralMs
+			totalPromptMs += sr.PromptMs
+			totalPredictedMs += sr.PredictedMs
 			if step == 1 {
 				ttftFirst = sr.TTFTMs
 			}
@@ -1663,6 +1707,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		Warmth:               warmth,
 		TTaskMs:              tTaskMs,
 		TNeuralMs:            tNeuralTotal,
+		PromptMs:             totalPromptMs,
+		PredictedMs:          totalPredictedMs,
 		TOrchMs:              tOrchMs,
 		PhiOrchPct:           phiOrch,
 		TTFTMs:               ttftFirst,
@@ -1793,7 +1839,7 @@ END FILE: benchmark/picoclaw_orch.go
 
 ================================================================================
 FILE: benchmark/openclaw_orch.mjs
-SHA-256: 4afdbb95a313892c0a6986f54518524684b351bdb8e120c1999869e65bf02eaa
+SHA-256: 6f47ae815bf3c9fac0c92122c9698f467f4f7cc03b02477e20eca16ffdf1dc34
 ================================================================================
 #!/usr/bin/env node
 /**
@@ -2136,11 +2182,15 @@ async function callLlamaStream(messages, tools, maxTokens) {
 
   const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedPromptTokens);
   const totalNeuralMs = hasServerTimings ? (promptMs + predictedMs) : (performance.now() - t0);
+  const finalPromptMs = hasServerTimings ? promptMs : ttftMs;
+  const finalPredictedMs = hasServerTimings ? predictedMs : Math.max(0.0, totalNeuralMs - ttftMs);
   if (completionTokens === 0) completionTokens = tokenCount;
   if (!finishReason) finishReason = "stop";
   const itlMs = completionTokens > 1 ? (totalNeuralMs - ttftMs) / (completionTokens - 1) : 0.0;
   return {
     totalNeuralMs,
+    promptMs: finalPromptMs,
+    predictedMs: finalPredictedMs,
     ttftMs,
     itlMs,
     promptTokens,
@@ -2156,6 +2206,8 @@ async function callLlamaStream(messages, tools, maxTokens) {
 async function runWorkload(tier, warmth, rssIdle) {
   const tStart = performance.now();
   let tNeuralTotal = 0.0;
+  let totalPromptMs = 0.0;
+  let totalPredictedMs = 0.0;
   let ttftFirst = 0.0;
   let itlAvg = 0.0;
   let tDispatchTotal = 0.0;
@@ -2197,6 +2249,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     ];
     const r = await callLlamaStream(msgs, toolCatalog, 64);
     tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -2221,6 +2275,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     ];
     const r = await callLlamaStream(msgs, toolCatalog, 128);
     tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -2241,6 +2297,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     ];
     const r = await callLlamaStream(msgs, toolCatalog, 256);
     tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -2274,6 +2332,8 @@ async function runWorkload(tier, warmth, rssIdle) {
       });
       const r = await callLlamaStream(history, toolCatalog, 64);
       tNeuralTotal += r.totalNeuralMs;
+      totalPromptMs += r.promptMs;
+      totalPredictedMs += r.predictedMs;
       if (step === 1) ttftFirst = r.ttftMs;
       itlSum += r.itlMs;
       totalPromptTokens += r.promptTokens;
@@ -2309,6 +2369,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     warmth: warmth,
     t_task_ms: tTaskMs,
     t_neural_ms: tNeuralTotal,
+    prompt_ms: totalPromptMs,
+    predicted_ms: totalPredictedMs,
     t_orch_ms: tOrchMs,
     phi_orch_pct: phiOrch,
     ttft_ms: ttftFirst,
@@ -2401,7 +2463,7 @@ END FILE: benchmark/openclaw_orch.mjs
 
 ================================================================================
 FILE: benchmark/python_orch.py
-SHA-256: 5d53c625e1f54cec4470d0206e1b766e4c2c347e704026645a91a13ce8be545a
+SHA-256: de0daf4b27e04e80147d71f9bb0ad948e00e9d38352bed843ef4aff2a8ba9f27
 ================================================================================
 #!/usr/bin/env python3
 """
@@ -2666,6 +2728,8 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
         total_neural_ms = prompt_ms + predicted_ms
     else:
         total_neural_ms = (time.monotonic() - t0) * 1000.0
+        prompt_ms = ttft_ms
+        predicted_ms = max(0.0, total_neural_ms - ttft_ms)
 
     if completion_tokens == 0:
         completion_tokens = token_count
@@ -2673,12 +2737,14 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
         finish_reason = "stop"
 
     itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
-    return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
+    return total_neural_ms, prompt_ms, predicted_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
 
 
 def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
     t_start = time.monotonic()
     t_neural_total = 0.0
+    total_prompt_ms = 0.0
+    total_predicted_ms = 0.0
     ttft_first = 0.0
     itl_avg = 0.0
     t_dispatch_total = 0.0
@@ -2722,8 +2788,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": prompt},
         ]
-        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 64)
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 64)
         t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
@@ -2747,8 +2815,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": prompt},
         ]
-        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 128)
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 128)
         t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
@@ -2768,8 +2838,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": "Retrieved Context:\n" + rag_context + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
         ]
-        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
         t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
@@ -2800,8 +2872,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
                 "role": "user",
                 "content": f"Turn {step} Observation: {stat_str}. State next brief diagnostic action.",
             })
-            tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, reply = call_llama_stream(history, tool_catalog, 64)
+            tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, reply = call_llama_stream(history, tool_catalog, 64)
             t_neural_total += tn
+            total_prompt_ms += p_ms
+            total_predicted_ms += pred_ms
             if step == 1:
                 ttft_first = ttft
             itl_sum += itl
@@ -2832,6 +2906,8 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         "warmth": warmth,
         "t_task_ms": t_task_ms,
         "t_neural_ms": t_neural_total,
+        "prompt_ms": total_prompt_ms,
+        "predicted_ms": total_predicted_ms,
         "t_orch_ms": t_orch_ms,
         "phi_orch_pct": phi_orch,
         "ttft_ms": ttft_first,

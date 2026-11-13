@@ -261,6 +261,8 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
         total_neural_ms = prompt_ms + predicted_ms
     else:
         total_neural_ms = (time.monotonic() - t0) * 1000.0
+        prompt_ms = ttft_ms
+        predicted_ms = max(0.0, total_neural_ms - ttft_ms)
 
     if completion_tokens == 0:
         completion_tokens = token_count
@@ -268,12 +270,14 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
         finish_reason = "stop"
 
     itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
-    return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
+    return total_neural_ms, prompt_ms, predicted_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
 
 
 def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
     t_start = time.monotonic()
     t_neural_total = 0.0
+    total_prompt_ms = 0.0
+    total_predicted_ms = 0.0
     ttft_first = 0.0
     itl_avg = 0.0
     t_dispatch_total = 0.0
@@ -317,8 +321,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": prompt},
         ]
-        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 64)
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 64)
         t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
@@ -342,8 +348,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": prompt},
         ]
-        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 128)
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 128)
         t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
@@ -363,8 +371,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": "Retrieved Context:\n" + rag_context + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
         ]
-        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
         t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
@@ -395,8 +405,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
                 "role": "user",
                 "content": f"Turn {step} Observation: {stat_str}. State next brief diagnostic action.",
             })
-            tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, reply = call_llama_stream(history, tool_catalog, 64)
+            tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, reply = call_llama_stream(history, tool_catalog, 64)
             t_neural_total += tn
+            total_prompt_ms += p_ms
+            total_predicted_ms += pred_ms
             if step == 1:
                 ttft_first = ttft
             itl_sum += itl
@@ -427,6 +439,8 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         "warmth": warmth,
         "t_task_ms": t_task_ms,
         "t_neural_ms": t_neural_total,
+        "prompt_ms": total_prompt_ms,
+        "predicted_ms": total_predicted_ms,
         "t_orch_ms": t_orch_ms,
         "phi_orch_pct": phi_orch,
         "ttft_ms": ttft_first,

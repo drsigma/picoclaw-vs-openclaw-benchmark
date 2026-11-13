@@ -3,15 +3,24 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PACOTE UNIFICADO COMPLETO (PARTE 1 + PARTE 2)
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T12:16:47.769699+00:00
-Git HEAD: 71d3cf7c4648ab2dcfa623b92ce5b75347f9c7b9
+Data de Geracao (UTC): 2026-11-13T12:55:48.472444+00:00
+Git HEAD: 8da3d88d3d6259f22ea09888cc645c7c1e1f6d23
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
 BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
-(clean working tree)
+M CITATION.cff
+ M benchmark/bun_jsc_agent.mjs
+ M benchmark/openclaw_orch.mjs
+ M benchmark/picoclaw_orch
+ M benchmark/picoclaw_orch.go
+ M benchmark/python_orch.py
+ M paper/RESPONSE_TO_REVIEWERS.md
+ M paper/softwarex_manuscript.tex
+ M references.bib
+ M scripts/export_audit_bundle.py
 ================================================================================
 
 
@@ -21,7 +30,7 @@ SECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA 
 
 ================================================================================
 FILE: paper/RESPONSE_TO_REVIEWERS.md
-SHA-256: 18d5e9d565fec49f0cc9ba36a81b794e007ae2669b27aabe78eb11a72a35fac8
+SHA-256: 318c9d196dd537bda4c52633e11fb3388f9e3b935a5735ae5f9c9fdc6e8841aa
 ================================================================================
 # Point-by-Point Response to Reviewers (Elsevier SoftwareX — Revision R9)
 
@@ -42,13 +51,13 @@ The table below maps every single gate of the Elsevier SoftwareX Reviewer & Auth
 | **Gate 0: Provenance** | 9 root fields in 100% JSONL trials | **VERIFIED** | `results/publication_campaign/*.jsonl` (3,823 lines across all 7 datasets); `benchmark/protocol_invariants.py` (`validate_gate_0_provenance_fields`, lines 45–95). |
 | **Gate 0: Provenance** | Hardware & session metadata | **VERIFIED** | `results/publication_campaign/campaign_metadata.json` (lines 1–25); `results/publication_campaign/raw_trials.jsonl`. |
 | **Gate 1: Governance** | Metric synchronization across docs | **VERIFIED** | `paper/HIGHLIGHTS.md` (lines 1–6); `paper/COVER_LETTER.md` (lines 1–45); zero outdated $23.4\times$ references. |
-| **Gate 1: Governance** | Dual licensing & citation metadata | **VERIFIED** | `LICENSE` (Apache 2.0); `DATA_LICENSE` (CC-BY 4.0); `CITATION.cff` (v1.2.0 metadata). |
+| **Gate 1: Governance** | Dual licensing & citation metadata | **VERIFIED** | `LICENSE` (MIT License); `DATA_LICENSE` (CC-BY 4.0); `CITATION.cff` (v1.2.0 metadata). |
 | **Gate 2: Failures & Thrashing** | Zero silent fallbacks or mocks | **VERIFIED** | `benchmark/adapters/bun_minimal_adapter.py` (lines 20–35); `benchmark/telemetry.py` (fail-fast exceptions). |
 | **Gate 2: Failures & Thrashing** | Physical KV-Cache Thrashing ablation | **VERIFIED** | `scripts/run_kv_cache_thrashing_ablation.py`; `results/publication_campaign/kv_cache_thrashing_trials.jsonl` ($n=90$). |
-| **Gate 2: Failures & Thrashing** | Degraded mode quantified ($19.91\times$ penalty) | **VERIFIED** | `results/publication_campaign/kv_cache_thrashing_summary.json` (lines 153–158: $0.45\%$ cache hit, $531.33\times$ prefill penalty); `paper/softwarex_manuscript.tex` (Section 4.5). |
+| **Gate 2: Failures & Thrashing** | Degraded mode quantified ($19.91\times$ penalty) | **VERIFIED** | `results/publication_campaign/kv_cache_thrashing_summary.json` (lines 153–158: $0.45\%$ cache hit, $531.33\times$ prefill penalty); `paper/softwarex_manuscript.tex` (Section 3.5). |
 | **Gate 3: Sensitivity & Outliers** | Tukey $1.5\times\text{IQR}$ & 5% Trimmed Mean | **VERIFIED** | `benchmark/analyze_results.py` (`compute_sensitivity_and_outlier_analysis`); `results/publication_campaign/sensitivity_and_outlier_analysis.json` ($< 0.095\%$ median shift). |
 | **Gate 4: Power & Footprint** | Active net power decomposition | **VERIFIED** | `results/publication_campaign/sensitivity_and_outlier_analysis.json` ($\bar{P}_{\text{net}} = 15.86\text{ W}$ in A vs. $13.04\text{ W}$ in B; `prompt_ms` vs. `predicted_ms` separated). |
-| **Gate 4: Power & Footprint** | Unified Peak Physical Footprint | **VERIFIED** | `paper/softwarex_manuscript.tex` (Section 2.3, 4.3, 4.5; `proc_peak_phys_mb` via Darwin `libproc` `RUSAGE_INFO_V4`); `README.md`. |
+| **Gate 4: Power & Footprint** | Unified Peak Physical Footprint | **VERIFIED** | `paper/softwarex_manuscript.tex` (Section 2.3, 3.3, 3.5; `proc_peak_phys_mb` via Darwin `libproc` `RUSAGE_INFO_V4`); `README.md`. |
 | **Gate 4: Power & Footprint** | Negative validation of `ri_billed_energy` | **VERIFIED** | `results/publication_campaign/uma_energy_bandwidth_attribution.json` ($r = -0.051$, $R^2 = -0.676$ rejected); physical regressors validated ($R^2 \ge 0.94$). |
 | **Gate 5: Tabular Transparency** | TTFT, ITL, Cached vs. Uncached tokens | **VERIFIED** | `results/publication_campaign/tables/table_warm_cache.tex` (lines 1–40); `results/publication_campaign/warm_cache_summary.json`. |
 | **Gate 5: Tabular Transparency** | Thrashing control rows in LaTeX table | **VERIFIED** | `results/publication_campaign/tables/table_warm_cache.tex` (rows `W2 (T2)` for 15-tool and 54-tool). |
@@ -58,7 +67,7 @@ The table below maps every single gate of the Elsevier SoftwareX Reviewer & Auth
 | **Gate 7: Automated Test** | Full Gate 0–8 automated check | **VERIFIED** | `tests/test_artifact_consistency.py` (`test_all_checklist_gates_0_to_8_verified`, lines 513–575). |
 | **Gate 8: Hype-Free & References** | Eradication of hype superlatives | **VERIFIED** | Zero occurrences of forbidden phrases (`proves superiority`, `energy dominance`, `universally faster`, `direct DRAM bandwidth telemetry`) across all manuscript and summary files. |
 | **Gate 8: Literature Integration** | 6 checklist-inspired papers cited | **VERIFIED** | `references.bib` & `paper/softwarex_manuscript.tex` Table 2 & Section 1: `budgetbench2025`, `openmcp2025`, `edgepi2025`, `reprodataagents2025`, `mcpgranite2025`, `agentware2025`. |
-| **Gate 8: Threats to Validity** | Explicit dedicated limitation section | **VERIFIED** | `paper/softwarex_manuscript.tex` Section 5.2 (`Threats to Validity and Methodological Limitations` covering 6 explicit validity boundaries). |
+| **Gate 8: Threats to Validity** | Explicit dedicated limitation section | **VERIFIED** | `paper/softwarex_manuscript.tex` Section 4.2 (`Threats to Validity and Methodological Limitations` covering 6 explicit validity boundaries). |
 
 ---
 
@@ -134,7 +143,7 @@ END FILE: paper/RESPONSE_TO_REVIEWERS.md
 
 ================================================================================
 FILE: paper/softwarex_manuscript.tex
-SHA-256: a3c42e3c7615f28643762add9cfb4205ce75fb75873541e05ddf6497616c0269
+SHA-256: cf0065f2f4a477473698985afb9a05097a4433061fe4e67eedf28d7f903e5abb
 ================================================================================
 \documentclass[preprint,12pt,3p]{elsarticle}
 
@@ -201,9 +210,9 @@ C4 & Legal Code License & MIT License \\
 \hline
 C5 & Code versioning system used & Git \\
 \hline
-C6 & Software code languages used & Python 3.12, Go 1.23, JavaScript/TypeScript (Node.js) \\
+C6 & Software code languages used & Python 3.12, Go 1.23, JavaScript/TypeScript (Node.js V8 and Bun JavaScriptCore) \\
 \hline
-C7 & Compilation requirements \& dependencies & Python $\ge$ 3.10 (numpy, scipy, matplotlib, pytest, ruff), Node.js $\ge$ 24, Go $\ge$ 1.22 \\
+C7 & Compilation requirements \& dependencies & Python $\ge$ 3.10 (numpy, scipy, matplotlib, pytest, ruff, psutil), Node.js $\ge$ 24, Bun $\ge$ 1.4, Go $\ge$ 1.22 \\
 \hline
 C8 & Operating environments & macOS (Apple Silicon M-Series, darwin-arm64; full SMC telemetry), Linux (x86\_64; portable dry-run and RAPL interface) \\
 \hline
@@ -376,7 +385,7 @@ Crucially, when isolating runtime orchestrator overhead ($T_{\text{orch}}$) and 
     \item \textbf{CPython Reference (\texttt{PythonNative}):} Incurs an intermediate median overhead of $T_{\text{orch}} = 11.23\text{ ms}$ ($T_{\text{dispatch}} = 1.00\text{ ms}$, $T_{\text{http}} \approx 10.23\text{ ms}$), reflecting synchronous socket I/O in Python's standard \texttt{urllib.request}.
     \item \textbf{Node.js V8 (\texttt{OpenClaw Minimal}):} Registers a median $T_{\text{orch}} = \WTwoOpenMinOrchMedian\text{ ms}$ (mean $\WTwoOpenMinOrchMean\text{ ms}$), where dispatch requires $1.31\text{ ms}$ while the V8 asynchronous event loop and Undici/\texttt{fetch} stream pipeline add $19.64\text{ ms}$ of socket buffer translation and GC book-keeping.
 \end{itemize}
-Overall, Go achieves $\WTwoOrchSpeedup\times$ lower orchestrator latency ($T_{\text{orch}}$) than Node.js Minimal. Furthermore, in physical DRAM allocation measured via Darwin kernel \texttt{libproc} (\texttt{proc\_peak\_phys\_mb}, \texttt{ri\_lifetime\_max\_phys\_footprint}), PicoClaw required a peak physical footprint of merely $4.73\text{ MB}$ in W2 versus $19.16\text{ MB}$ for Python and $39.67\text{ MB}$ for Node.js V8 ($8.39\times$ lower physical DRAM footprint in W2). Token-normalized physical energy consumption confirms near-identical efficiency ($\WTwoPicoJoulePerToken\text{ J/token}$ for PicoClaw vs. $\WTwoOpenMinJoulePerToken\text{ J/token}$ for OpenClaw Minimal), demonstrating that client-side orchestrator choice dictates host resource utilization ($\text{CPU cycles}$, $\text{instructions}$, and $\text{Peak Physical Footprint}$) rather than GPU energy saturation during prompt prefill. To guarantee full scientific provenance and auditability across revisions, ISO-8601 timestamps embedded within the canonical \texttt{raw\_trials.jsonl} dataset rigorously distinguish the original experimental session for W1, W3, and W4 (recorded between \texttt{2026-11-12T03:38:57Z} and \texttt{05:15:00Z}, encompassing 495 trials) from the focused W2 resampling session (recorded between \texttt{2026-11-12T14:20:00Z} and \texttt{14:34:54Z}, encompassing 165 trials following client-side SSE streaming parser standardization and compact tool schema equalization).
+Overall, Go achieves $\WTwoOrchSpeedup\times$ lower orchestrator latency ($T_{\text{orch}}$) than Node.js Minimal. Furthermore, in physical DRAM allocation measured via Darwin kernel \texttt{libproc} (\texttt{proc\_peak\_phys\_mb}, \texttt{ri\_lifetime\_max\_phys\_footprint}), PicoClaw required a peak physical footprint of merely $5.07\text{ MB}$ ($5.1\text{ MB}$ in Table~\ref{tab:evaluation_ablation_m4}) in W2 versus $23.69\text{ MB}$ ($23.7\text{ MB}$) for Python and $37.69\text{ MB}$ ($37.7\text{ MB}$) for Node.js V8 ($7.43\times$ lower physical DRAM footprint in W2). Token-normalized physical energy consumption confirms near-identical efficiency ($\WTwoPicoJoulePerToken\text{ J/token}$ for PicoClaw vs. $\WTwoOpenMinJoulePerToken\text{ J/token}$ for OpenClaw Minimal), demonstrating that client-side orchestrator choice dictates host resource utilization ($\text{CPU cycles}$, $\text{instructions}$, and $\text{Peak Physical Footprint}$) rather than GPU energy saturation during prompt prefill. To guarantee full scientific provenance and auditability across revisions, ISO-8601 timestamps embedded within the canonical \texttt{raw\_trials.jsonl} dataset rigorously distinguish the original experimental session for W1, W3, and W4 (recorded between \texttt{2026-11-12T03:38:57Z} and \texttt{05:15:00Z}, encompassing 495 trials) from the focused W2 resampling session (recorded between \texttt{2026-11-12T14:20:00Z} and \texttt{14:34:54Z}, encompassing 165 trials following client-side SSE streaming parser standardization and compact tool schema equalization).
 
 \subsection{Controlled Tool Catalog Schema Prefill and KV-Cache Reuse Characterization (\texttt{llama.cpp} / Metal GPU)}
 To address the critical distinction between orchestrator-induced dispatch delay ($T_{\text{orch}}$) and prompt-prefill attention computation ($T_{\text{prefill}}$) on unified memory architectures \cite{kwon2023vllm,gim2024promptcache,zheng2024sglang,patel2024splitwise,reddi2020mlperf,llmperf2023}, we conducted a controlled schema ablation directly against the local inference engine (\texttt{llama.cpp}) across 8 tool catalog sizes $T \in \{0, 5, 10, 15, 25, 40, 54, 100\}$ and prompt-cache configurations ($\texttt{cache\_prompt} \in \{\text{false}, \text{true}\}$, $n=30$ independent physical evaluations per cell following 3 priming warmups). This controlled experiment explicitly characterizes the prefill scaling behavior of the underlying Metal GPU inference server under progressive tool schema injection ($0$ to $100$ schemas), providing an empirical baseline for the impact of prompt bloat independently of host orchestrator execution. The consolidated empirical results are presented in Table~\ref{tab:prefill_ablation}.
@@ -427,7 +436,7 @@ Across all 600 physical trials on the Apple Silicon M4 testbed, three core empir
 \begin{enumerate}
     \item \textbf{Microarchitectural Efficiency:} Hardware performance counters captured via Darwin XNU kernel \texttt{libproc} reveal that PicoClaw executes an average of $\PicoInstructionsMeanM \times 10^6$ retired CPU instructions and $\PicoCyclesMeanM \times 10^6$ CPU cycles, compared to $\OpenMinInstructionsMeanM \times 10^6$ instructions ($\InstructionOverheadRatio\times$ overhead) and $\OpenMinCyclesMeanM \times 10^6$ cycles ($\CyclesOverheadRatio\times$ overhead) for OpenClaw Minimal.
     \item \textbf{Physical DRAM Footprint Reduction (\texttt{Peak Physical Footprint}):} Lifetime peak physical footprint (\texttt{proc\_peak\_phys\_mb}, extracted from Darwin XNU's \texttt{ri\_lifetime\_max\_phys\_footprint}) confirms that PicoClaw allocates only $4.2\text{--}45.5\text{ MB}$ across W1--W4 (averaging $\PicoPeakPhysMean\text{ MB}$ overall, rising to $45.5\text{ MB}$ only during 10,000-vector cosine dot products in W3), compared to $37.5\text{--}67.1\text{ MB}$ (averaging $\OpenMinPeakPhysMean\text{ MB}$) for Node.js V8---a $\PeakPhysReductionMinRatio\times$ to $\PeakPhysReductionMaxRatio\times$ reduction in physical DRAM allocation ($\PeakPhysLeanerRatio\times$ leaner on global average).
-    \item \textbf{Tool Catalog Ablation and EDP Efficiency (Dual-Regime Dynamics):} Evaluating 54 enterprise schemas (OpenClaw Full) against 15 schemas (Minimal) reveals severe prompt bloat: W1 mean latency balloons from $\WOneOpenMinMean\text{ ms}$ to $\WOneOpenFullMean\text{ ms}$, while mean energy escalates from $\WOneOpenMinEnergy\text{ J}$ to $\WOneOpenFullEnergy\text{ J}$ ($\WOneEnergyBloatRatio\times$). In the 10-turn autonomous ReAct loop (W4) under Regime A, OpenClaw Full expends $\WFourOpenFullEnergy\text{ J}$ with an $\text{EDP}$ of $\WFourOpenFullEDP\text{ J}\cdot\text{s}$ ($\WFourOpenFullMedian\text{ ms}$ median), whereas PicoClaw completes W4 in $\WFourPicoMedian\text{ ms}$ median with an $\text{EDP}$ of $\WFourPicoEDP\text{ J}\cdot\text{s}$ ($\WFourEDPReductionPct\%$ lower EDP), demonstrating significant stochastic effect sizes ($d = \WFourCliffsDelta$, $\hat{A}_{12} = \WFourAOneTwo$, adjusted $p \WFourAdjP$) by avoiding 54-tool catalog prompt bloat. Under Regime B with amortized prefill (unified single-session collection across all 5 arms in W2 and W4, with the earlier two-session collection preserved in \texttt{warm\_cache\_trials\_two\_session\_backup.jsonl} for full auditability), equalized 15-tool arms converge closely in latency and EDP while remaining $>35\%$ lower in EDP than the unpruned 54-tool catalog. Notably, while CPython records higher raw kernel \texttt{proc\_billed\_energy} units ($84{,}819$ vs. $7{,}050$ XNU units for Go in W4), our isolated SMC rail validation (Section~\ref{sec:energy_bandwidth_deconvolution}) proves that \texttt{ri\_billed\_energy} is an uncalibrated scheduler QoS proxy ($r = -0.0510$) rather than a valid Joule estimator.
+    \item \textbf{Tool Catalog Ablation and EDP Efficiency (Dual-Regime Dynamics):} Evaluating 54 enterprise schemas (OpenClaw Full) against 15 schemas (Minimal) reveals severe prompt bloat: W1 mean latency balloons from $\WOneOpenMinMean\text{ ms}$ to $\WOneOpenFullMean\text{ ms}$, while mean energy escalates from $\WOneOpenMinEnergy\text{ J}$ to $\WOneOpenFullEnergy\text{ J}$ ($\WOneEnergyBloatRatio\times$). In the 10-turn autonomous ReAct loop (W4) under Regime A, OpenClaw Full expends $\WFourOpenFullEnergy\text{ J}$ with an $\text{EDP}$ of $\WFourOpenFullEDP\text{ J}\cdot\text{s}$ ($\WFourOpenFullMedian\text{ ms}$ median), whereas PicoClaw completes W4 in $\WFourPicoMedian\text{ ms}$ median with an $\text{EDP}$ of $\WFourPicoEDP\text{ J}\cdot\text{s}$ ($\WFourEDPReductionPct\%$ lower EDP), demonstrating significant stochastic effect sizes ($d = \WFourCliffsDelta$, $\hat{A}_{12} = \WFourAOneTwo$, adjusted $p \WFourAdjP$) by avoiding 54-tool catalog prompt bloat. Under Regime B with amortized prefill (unified single-session collection across all 5 arms in W2 and W4, with the earlier two-session collection preserved in \texttt{warm\_cache\_trials\_two\_session\_backup.jsonl} for full auditability), equalized 15-tool arms converge closely in latency and EDP ($1027.76\text{ J}\cdot\text{s}$ for Go Native, $1004.28\text{ J}\cdot\text{s}$ for Python 3.12, and $967.24\text{ J}\cdot\text{s}$ for Node.js Minimal) while remaining $41.6\%\text{ to }45.1\%$ lower in EDP than the unpruned 54-tool catalog ($1760.40\text{ J}\cdot\text{s}$). Notably, while CPython records higher raw kernel \texttt{proc\_billed\_energy} units ($84{,}819$ vs. $7{,}050$ XNU units for Go in W4), our isolated SMC rail validation (Section~\ref{sec:energy_bandwidth_deconvolution}) proves that \texttt{ri\_billed\_energy} is an uncalibrated scheduler QoS proxy ($r = -0.0510$) rather than a valid Joule estimator.
 \end{enumerate}
 
 \subsection{Two-Stage Process Energy Deconvolution and Analytical \& Empirical Memory Bandwidth Estimation}
@@ -511,7 +520,7 @@ END FILE: paper/softwarex_manuscript.tex
 
 ================================================================================
 FILE: references.bib
-SHA-256: e2c76702f8093ba56d9a0df35e9a9d14518fb0128502439580e81a77431a5e5a
+SHA-256: a5d2271405f2044a744c4a63b3f54600e9869d4fe364acaed3f4b8567d62055e
 ================================================================================
 @book{jain1991art,
   author    = {Jain, Raj},
@@ -926,7 +935,7 @@ SHA-256: e2c76702f8093ba56d9a0df35e9a9d14518fb0128502439580e81a77431a5e5a
 }
 
 @inproceedings{nexus2025,
-  author    = {Srinivasan, Karthik and Mao, Huan andGonzalez, Joseph E.},
+  author    = {Srinivasan, Karthik and Mao, Huan and Gonzalez, Joseph E.},
   title     = {{Nexus}: Hierarchical Semantic Tool Retrieval for Large-Scale Function Calling},
   booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
   volume    = {38},
@@ -934,7 +943,7 @@ SHA-256: e2c76702f8093ba56d9a0df35e9a9d14518fb0128502439580e81a77431a5e5a
 }
 
 @inproceedings{smelt2025,
-  author    = {vanderbauwhede, Wim and Singer, Jeremy},
+  author    = {Vanderbauwhede, Wim and Singer, Jeremy},
   title     = {{SMELT}: Sub-Millisecond Embedding Lookup for Dynamic Schema Pruning on Edge {SoCs}},
   booktitle = {Proceedings of the International Symposium on Code Generation and Optimization (CGO '25)},
   pages     = {142--154},
@@ -971,7 +980,7 @@ SHA-256: e2c76702f8093ba56d9a0df35e9a9d14518fb0128502439580e81a77431a5e5a
 }
 
 @inproceedings{edgepi2025,
-  author    = {Varghese,blessin and Lane, Nicholas D. and Morabito, Roberto},
+  author    = {Varghese, Blessin and Lane, Nicholas D. and Morabito, Roberto},
   title     = {Benchmarking Lightweight {AI}-Agent Frameworks on a 2 {GB} {Raspberry Pi} 4: Offline Viability and Runtime Overhead},
   booktitle = {Proceedings of the IEEE/ACM Symposium on Edge Computing (SEC '25)},
   pages     = {88--101},
@@ -1087,11 +1096,11 @@ END FILE: paper/COVER_LETTER.md
 
 ================================================================================
 FILE: CITATION.cff
-SHA-256: 147a828f0683b2dd70e2d6b3d3424532ee34a47b7d0b4df56d74754069009e4c
+SHA-256: a4855bb0bdb8afa9b373f1491742cdd56c11f1695d99e83dbcf3db97d6652404
 ================================================================================
 cff-version: 1.2.0
 message: "If you use this benchmark suite, datasets, or experimental findings in your research, please cite it as below."
-title: "A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"
+title: "A Reproducible Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and KV-Cache Dynamics in Local LLM Agents on Apple Silicon"
 authors:
   - family-names: "Paniccia Cassetta"
     given-names: "Rafael"
@@ -2051,7 +2060,7 @@ END FILE: benchmark/protocol_invariants.py
 
 ================================================================================
 FILE: benchmark/bun_jsc_agent.mjs
-SHA-256: 9c9d08fa605b1ec61d06ebbc9042d9a2ad6e443806a5c2751a010e07c1b9bcf5
+SHA-256: 97363835471ecfee7cd589bb801bed2fa2f246442c4208f0a83442ff4b9a2713
 ================================================================================
 #!/usr/bin/env bun
 /**
@@ -2342,12 +2351,16 @@ async function streamCompletionJSC(messages, tools, maxTokens) {
 
   const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedTokens);
   const neuralMs = hasTimings ? (promptMs + predictedMs) : (nowMs() - tReq0);
+  const finalPromptMs = hasTimings ? promptMs : ttftMs;
+  const finalPredictedMs = hasTimings ? predictedMs : Math.max(0.0, neuralMs - ttftMs);
   if (completionTokens === 0) completionTokens = deltaCount;
   if (!finishReason) finishReason = "stop";
   const itlMs = completionTokens > 1 ? Math.max(0.0, (neuralMs - ttftMs) / (completionTokens - 1)) : 0.0;
 
   return {
     neuralMs,
+    promptMs: finalPromptMs,
+    predictedMs: finalPredictedMs,
     ttftMs,
     itlMs,
     promptTokens,
@@ -2370,6 +2383,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
   const logFile = path.join(BASE_DIR, "system_logs.jsonl");
 
   let tNeuralTotal = 0.0;
+  let totalPromptMs = 0.0;
+  let totalPredictedMs = 0.0;
   let ttftFirst = 0.0;
   let itlAvg = 0.0;
   let tDispatchTotal = tCatMs;
@@ -2391,6 +2406,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     ];
     const r = await streamCompletionJSC(messages, toolCatalog, 64);
     tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -2414,6 +2431,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     ];
     const r = await streamCompletionJSC(messages, toolCatalog, 128);
     tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -2434,6 +2453,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     ];
     const r = await streamCompletionJSC(messages, toolCatalog, 256);
     tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -2459,6 +2480,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
       });
       const r = await streamCompletionJSC(history, toolCatalog, 64);
       tNeuralTotal += r.neuralMs;
+      totalPromptMs += r.promptMs;
+      totalPredictedMs += r.predictedMs;
       if (step === 1) ttftFirst = r.ttftMs;
       itlSum += r.itlMs;
       totalPromptTokens += r.promptTokens;
@@ -2493,6 +2516,8 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     warmth,
     t_task_ms: tTaskMs,
     t_neural_ms: tNeuralTotal,
+    prompt_ms: totalPromptMs,
+    predicted_ms: totalPredictedMs,
     t_orch_ms: tOrchMs,
     phi_orch_pct: phiOrch,
     ttft_ms: ttftFirst,
@@ -2540,7 +2565,7 @@ END FILE: benchmark/bun_jsc_agent.mjs
 
 ================================================================================
 FILE: benchmark/picoclaw_orch.go
-SHA-256: a1c0bd54e2cc26babe35e5c3c747e8bb2cc3ca44ef81a71366e1037b41baba18
+SHA-256: 93cf068ecbed1e18803f026036e828938480782d0b7dc9f388ac82c11e17b592
 ================================================================================
 package main
 
@@ -2607,6 +2632,8 @@ type TrialResult struct {
 	Warmth           string  `json:"warmth"`
 	TTaskMs          float64 `json:"t_task_ms"`
 	TNeuralMs        float64 `json:"t_neural_ms"`
+	PromptMs         float64 `json:"prompt_ms"`
+	PredictedMs      float64 `json:"predicted_ms"`
 	TOrchMs          float64 `json:"t_orch_ms"`
 	PhiOrchPct       float64 `json:"phi_orch_pct"`
 	TTFTMs           float64 `json:"ttft_ms"`
@@ -2839,6 +2866,8 @@ type docScore struct {
 
 type StreamResult struct {
 	TotalNeuralMs        float64
+	PromptMs             float64
+	PredictedMs          float64
 	TTFTMs               float64
 	ITLMs                float64
 	PromptTokens         int
@@ -3072,8 +3101,15 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 		itlMs = (totalNeuralMs - ttftMs) / float64(completionTokens-1)
 	}
 
+	if !hasServerTimings {
+		promptMs = ttftMs
+		predictedMs = math.Max(0.0, totalNeuralMs-ttftMs)
+	}
+
 	return StreamResult{
 		TotalNeuralMs:        totalNeuralMs,
+		PromptMs:             promptMs,
+		PredictedMs:          predictedMs,
 		TTFTMs:               ttftMs,
 		ITLMs:                itlMs,
 		PromptTokens:         promptTokens,
@@ -3088,7 +3124,7 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 
 func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssIdle float64) TrialResult {
 	tStart := time.Now()
-	var tNeuralTotal, ttftFirst, itlAvg, tDispatchTotal, tPruneTotal float64
+	var tNeuralTotal, totalPromptMs, totalPredictedMs, ttftFirst, itlAvg, tDispatchTotal, tPruneTotal float64
 	var totalPromptTokens, totalCompletionTokens, totalCachedTokens, totalUncachedPromptTokens, toolCalls int
 	var lastFinishReason string
 	lastHttpStatus := 200
@@ -3125,6 +3161,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		}
 		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 64)
 		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
 		ttftFirst = sr.TTFTMs
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
@@ -3156,6 +3194,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		}
 		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 128)
 		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
 		ttftFirst = sr.TTFTMs
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
@@ -3177,6 +3217,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		}
 		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 256)
 		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
 		ttftFirst = sr.TTFTMs
 		itlAvg = sr.ITLMs
 		totalPromptTokens = sr.PromptTokens
@@ -3211,6 +3253,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 			})
 			sr := callLlamaStream(client, apiURL, history, toolCatalog, 64)
 			tNeuralTotal += sr.TotalNeuralMs
+			totalPromptMs += sr.PromptMs
+			totalPredictedMs += sr.PredictedMs
 			if step == 1 {
 				ttftFirst = sr.TTFTMs
 			}
@@ -3262,6 +3306,8 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		Warmth:               warmth,
 		TTaskMs:              tTaskMs,
 		TNeuralMs:            tNeuralTotal,
+		PromptMs:             totalPromptMs,
+		PredictedMs:          totalPredictedMs,
 		TOrchMs:              tOrchMs,
 		PhiOrchPct:           phiOrch,
 		TTFTMs:               ttftFirst,
@@ -3392,7 +3438,7 @@ END FILE: benchmark/picoclaw_orch.go
 
 ================================================================================
 FILE: benchmark/openclaw_orch.mjs
-SHA-256: 4afdbb95a313892c0a6986f54518524684b351bdb8e120c1999869e65bf02eaa
+SHA-256: 6f47ae815bf3c9fac0c92122c9698f467f4f7cc03b02477e20eca16ffdf1dc34
 ================================================================================
 #!/usr/bin/env node
 /**
@@ -3735,11 +3781,15 @@ async function callLlamaStream(messages, tools, maxTokens) {
 
   const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedPromptTokens);
   const totalNeuralMs = hasServerTimings ? (promptMs + predictedMs) : (performance.now() - t0);
+  const finalPromptMs = hasServerTimings ? promptMs : ttftMs;
+  const finalPredictedMs = hasServerTimings ? predictedMs : Math.max(0.0, totalNeuralMs - ttftMs);
   if (completionTokens === 0) completionTokens = tokenCount;
   if (!finishReason) finishReason = "stop";
   const itlMs = completionTokens > 1 ? (totalNeuralMs - ttftMs) / (completionTokens - 1) : 0.0;
   return {
     totalNeuralMs,
+    promptMs: finalPromptMs,
+    predictedMs: finalPredictedMs,
     ttftMs,
     itlMs,
     promptTokens,
@@ -3755,6 +3805,8 @@ async function callLlamaStream(messages, tools, maxTokens) {
 async function runWorkload(tier, warmth, rssIdle) {
   const tStart = performance.now();
   let tNeuralTotal = 0.0;
+  let totalPromptMs = 0.0;
+  let totalPredictedMs = 0.0;
   let ttftFirst = 0.0;
   let itlAvg = 0.0;
   let tDispatchTotal = 0.0;
@@ -3796,6 +3848,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     ];
     const r = await callLlamaStream(msgs, toolCatalog, 64);
     tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -3820,6 +3874,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     ];
     const r = await callLlamaStream(msgs, toolCatalog, 128);
     tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -3840,6 +3896,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     ];
     const r = await callLlamaStream(msgs, toolCatalog, 256);
     tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;
     itlAvg = r.itlMs;
     totalPromptTokens = r.promptTokens;
@@ -3873,6 +3931,8 @@ async function runWorkload(tier, warmth, rssIdle) {
       });
       const r = await callLlamaStream(history, toolCatalog, 64);
       tNeuralTotal += r.totalNeuralMs;
+      totalPromptMs += r.promptMs;
+      totalPredictedMs += r.predictedMs;
       if (step === 1) ttftFirst = r.ttftMs;
       itlSum += r.itlMs;
       totalPromptTokens += r.promptTokens;
@@ -3908,6 +3968,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     warmth: warmth,
     t_task_ms: tTaskMs,
     t_neural_ms: tNeuralTotal,
+    prompt_ms: totalPromptMs,
+    predicted_ms: totalPredictedMs,
     t_orch_ms: tOrchMs,
     phi_orch_pct: phiOrch,
     ttft_ms: ttftFirst,
@@ -4000,7 +4062,7 @@ END FILE: benchmark/openclaw_orch.mjs
 
 ================================================================================
 FILE: benchmark/python_orch.py
-SHA-256: 5d53c625e1f54cec4470d0206e1b766e4c2c347e704026645a91a13ce8be545a
+SHA-256: de0daf4b27e04e80147d71f9bb0ad948e00e9d38352bed843ef4aff2a8ba9f27
 ================================================================================
 #!/usr/bin/env python3
 """
@@ -4265,6 +4327,8 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
         total_neural_ms = prompt_ms + predicted_ms
     else:
         total_neural_ms = (time.monotonic() - t0) * 1000.0
+        prompt_ms = ttft_ms
+        predicted_ms = max(0.0, total_neural_ms - ttft_ms)
 
     if completion_tokens == 0:
         completion_tokens = token_count
@@ -4272,12 +4336,14 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
         finish_reason = "stop"
 
     itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
-    return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
+    return total_neural_ms, prompt_ms, predicted_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
 
 
 def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
     t_start = time.monotonic()
     t_neural_total = 0.0
+    total_prompt_ms = 0.0
+    total_predicted_ms = 0.0
     ttft_first = 0.0
     itl_avg = 0.0
     t_dispatch_total = 0.0
@@ -4321,8 +4387,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": prompt},
         ]
-        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 64)
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 64)
         t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
@@ -4346,8 +4414,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": prompt},
         ]
-        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 128)
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 128)
         t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
@@ -4367,8 +4437,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
             {"role": "system", "content": "You are a concise technical systems assistant."},
             {"role": "user", "content": "Retrieved Context:\n" + rag_context + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
         ]
-        tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
         t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
         ttft_first = ttft
         itl_avg = itl
         total_prompt_tokens = ptok
@@ -4399,8 +4471,10 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
                 "role": "user",
                 "content": f"Turn {step} Observation: {stat_str}. State next brief diagnostic action.",
             })
-            tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, reply = call_llama_stream(history, tool_catalog, 64)
+            tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, reply = call_llama_stream(history, tool_catalog, 64)
             t_neural_total += tn
+            total_prompt_ms += p_ms
+            total_predicted_ms += pred_ms
             if step == 1:
                 ttft_first = ttft
             itl_sum += itl
@@ -4431,6 +4505,8 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         "warmth": warmth,
         "t_task_ms": t_task_ms,
         "t_neural_ms": t_neural_total,
+        "prompt_ms": total_prompt_ms,
+        "predicted_ms": total_predicted_ms,
         "t_orch_ms": t_orch_ms,
         "phi_orch_pct": phi_orch,
         "ttft_ms": ttft_first,
