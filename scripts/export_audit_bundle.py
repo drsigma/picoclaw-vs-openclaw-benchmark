@@ -126,6 +126,7 @@ def dump_file(rel_path: str) -> str:
     if rel_path in [
         "results/publication_campaign/hyperfine_cold_start.json",
         "results/publication_campaign/hyperfine_agent_init.json",
+        "results/publication_campaign/hyperfine_worker_version.json",
     ]:
         content = format_compact_hyperfine(content)
     elif rel_path == "results/publication_campaign/spearman_correlation_matrix.json":
@@ -133,7 +134,7 @@ def dump_file(rel_path: str) -> str:
     elif rel_path == "results/publication_campaign/pca_variance_decomposition.json":
         content = format_compact_pca(content)
 
-    return f"================================================================================\nFILE: {rel_path}\nSHA-256: {sha}\n================================================================================\n{content}\n\n"
+    return f"================================================================================\nFILE: {rel_path}\nSHA-256: {sha}\n================================================================================\n{content}\n================================================================================\nEND FILE: {rel_path}\n================================================================================\n\n"
 
 
 def generate_bundle():
@@ -162,9 +163,10 @@ Status Git:
 
     sections = [header]
 
-    # SECAO 1: ARTIGO, BIBLIOGRAFIA, LICENCAS, CI/CD E GOVERNANCA (100% INTEGRAL)
-    sections.append("=" * 80 + "\nSECAO 1: MANUSCRITO CIENTIFICO, REFERENCIAS, CITACAO, GOVERNANCA E LICENCAS (100% INTEGRAL)\n" + "=" * 80 + "\n")
+    # SECAO 1: RESPOSTA AOS REVISORES, ARTIGO, BIBLIOGRAFIA, LICENCAS, CI/CD E GOVERNANCA (100% INTEGRAL)
+    sections.append("=" * 80 + "\nSECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, CITACAO, GOVERNANCA E LICENCAS (100% INTEGRAL)\n" + "=" * 80 + "\n")
     priority_docs = [
+        "paper/RESPONSE_TO_REVIEWERS.md",
         "paper/softwarex_manuscript.tex",
         "references.bib",
         "paper/HIGHLIGHTS.md",
@@ -179,12 +181,13 @@ Status Git:
     for doc in priority_docs:
         sections.append(dump_file(doc))
 
-    # SECAO 2: TODAS AS 6 TABELAS LATEX E MACROS (100% INTEGRAL)
-    sections.append("=" * 80 + "\nSECAO 2: TODAS AS 6 TABELAS LATEX E MACROS (100% INTEGRAL)\n" + "=" * 80 + "\n")
+    # SECAO 2: TODAS AS 7 TABELAS LATEX E MACROS (100% INTEGRAL)
+    sections.append("=" * 80 + "\nSECAO 2: TODAS AS 7 TABELAS LATEX E MACROS (100% INTEGRAL)\n" + "=" * 80 + "\n")
     latex_tables = [
         "results/publication_campaign/tables/table_journal_ablation.tex",
         "results/publication_campaign/tables/table_warm_cache.tex",
         "results/publication_campaign/tables/table_prefill_ablation.tex",
+        "results/publication_campaign/tables/table_tool_rag_mitigation.tex",
         "results/publication_campaign/tables/table_spearman_correlation.tex",
         "results/publication_campaign/tables/table_pca_loadings.tex",
         "results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex",
@@ -213,7 +216,9 @@ Status Git:
         "benchmark/adapters/bun_minimal_adapter.py",
         "benchmark/adapters/__init__.py",
         # Active Scripts
+        "scripts/run_tool_rag_mitigation_experiment.py",
         "scripts/run_warm_cache_campaign.py",
+        "scripts/run_regime_b_w2_w4_unified_session.py",
         "scripts/run_prefill_ablation.py",
         "scripts/run_w2_resample.py",
         "scripts/run_inter_session_replication.py",
@@ -237,6 +242,7 @@ Status Git:
         "README.md",
         "tutorial/README.md",
         "results/publication_campaign/campaign_metadata.json",
+        "results/publication_campaign/tool_rag_mitigation_summary.json",
         "results/publication_campaign/prefill_regression_fit.json",
         "results/publication_campaign/uma_energy_bandwidth_attribution.json",
         "results/publication_campaign/inter_session_replication.json",
@@ -247,11 +253,14 @@ Status Git:
         "results/publication_campaign/statistical_tests.json",
         "results/publication_campaign/warm_cache_statistical_tests.json",
         "results/publication_campaign/hyperfine_cold_start.json",
+        "results/publication_campaign/hyperfine_worker_version.json",
         "results/publication_campaign/hyperfine_agent_init.json",
         "data/manifest_sha256.json",
     ]
     for dmf in doc_and_meta_files:
         sections.append(dump_file(dmf))
+
+    sections.append("=" * 80 + "\nFIM DO PACOTE DE AUDITORIA INTEGRAL (100% ARQUIVOS VERIFICADOS)\n" + "=" * 80 + "\n")
 
     bundle_content = "\n".join(sections)
     for out_path in [OUTPUT_FINAL, OUTPUT_FILE_6, OUTPUT_FILE_6_4]:
@@ -268,6 +277,8 @@ def export_raw_jsonl_dataset():
     jsonl_files = [
         "results/publication_campaign/raw_trials.jsonl",
         "results/publication_campaign/warm_cache_trials.jsonl",
+        "results/publication_campaign/tool_rag_mitigation_trials.jsonl",
+        "results/publication_campaign/inter_session_trials.jsonl",
         "results/publication_campaign/prefill_ablation.jsonl",
         "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
     ]

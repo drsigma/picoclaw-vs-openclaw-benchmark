@@ -20,12 +20,12 @@ class PicoClawAdapter(AgentOrchestratorAdapter):
     Adaptador para o binário nativo Go Mach-O ARM64 compilado do Sipeed PicoClaw.
     """
 
-    def __init__(self, repo_dir: str):
+    def __init__(self, repo_dir: str, mode: str = "native_static"):
         super().__init__(
-            name="PicoClaw",
+            name="PicoClaw" if mode != "tool_rag" else "PicoClawToolRAG",
             runtime="Go 1.23.2 (Native Mach-O ARM64)",
             language="Go",
-            mode="native_static"
+            mode=mode
         )
         self.repo_dir = repo_dir
         self.bin_path = os.path.join(repo_dir, "benchmark", "picoclaw_orch")
@@ -34,9 +34,11 @@ class PicoClawAdapter(AgentOrchestratorAdapter):
     def setup(self) -> bool:
         if not os.path.exists(self.bin_path):
             go_src = os.path.join(self.repo_dir, "benchmark", "picoclaw_orch.go")
+            go_bin = os.path.join(self.repo_dir, "tools", "go", "bin", "go")
+            go_cmd = go_bin if os.path.exists(go_bin) else "go"
             if os.path.exists(go_src):
                 subprocess.run(
-                    ["go", "build", "-o", self.bin_path, go_src],
+                    [go_cmd, "build", "-o", self.bin_path, go_src],
                     cwd=os.path.join(self.repo_dir, "benchmark"),
                     check=True
                 )
@@ -48,8 +50,12 @@ class PicoClawAdapter(AgentOrchestratorAdapter):
         return [self.bin_path, "version"]
 
     def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> Dict[str, Any]:
+        env = os.environ.copy()
+        if self.mode == "tool_rag":
+            env["PICOCLAW_MODE"] = "tool_rag"
+            env["OPENCLAW_MODE"] = "tool_rag"
         cmd = [self.bin_path, workload_id]
-        stdout, stderr, rc, hw_stats = run_subprocess_with_rusage(cmd, cwd=self.repo_dir)
+        stdout, stderr, rc, hw_stats = run_subprocess_with_rusage(cmd, cwd=self.repo_dir, env=env)
         if rc != 0:
             raise RuntimeError(f"PicoClaw execution failed (code {rc}): {stderr}")
         raw_output = stdout.strip()

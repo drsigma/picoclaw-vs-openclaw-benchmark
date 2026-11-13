@@ -68,6 +68,7 @@ type TrialResult struct {
 	TTFTMs           float64 `json:"ttft_ms"`
 	ITLMs            float64 `json:"itl_ms"`
 	TDispatchMs      float64 `json:"t_dispatch_ms"`
+	TPruneMs         float64 `json:"t_prune_ms"`
 	THttpMs          float64 `json:"t_http_ms"`
 	RToolOpsSec      float64 `json:"r_tool_ops_sec"`
 	RSSIdleMB        float64 `json:"rss_idle_mb"`
@@ -124,6 +125,85 @@ func buildStandardToolCatalog(count int) []ToolDefinition {
 		}
 	}
 	return tools
+}
+
+func buildToolEmbeddings(nTools int) []float32 {
+	const dim = 384
+	mat := make([]float32, nTools*dim)
+	for i := 0; i < nTools; i++ {
+		var tNormSq float64
+		rowOffset := i * dim
+		for d := 0; d < dim; d++ {
+			v := math.Sin(float64(i+1)*0.31 + float64(d)*0.13)
+			mat[rowOffset+d] = float32(v)
+			tNormSq += v * v
+		}
+		tNorm := float32(math.Sqrt(tNormSq) + 1e-8)
+		for d := 0; d < dim; d++ {
+			mat[rowOffset+d] /= tNorm
+		}
+	}
+	return mat
+}
+
+func pruneToolsVectorRAG(catalog []ToolDefinition, toolEmb []float32, tier string, topK int) ([]ToolDefinition, float64) {
+	t0 := time.Now()
+	const dim = 384
+	nTools := len(catalog)
+	if nTools <= topK {
+		return catalog, 0.0
+	}
+	tierSeed := 1.0
+	switch tier {
+	case "W2":
+		tierSeed = 2.0
+	case "W3":
+		tierSeed = 3.0
+	case "W4":
+		tierSeed = 4.0
+	}
+
+	qVec := make([]float32, dim)
+	var qNormSq float64
+	for d := 0; d < dim; d++ {
+		val := math.Cos(tierSeed*0.37 + float64(d)*0.19)
+		qVec[d] = float32(val)
+		qNormSq += val * val
+	}
+	qNorm := float32(math.Sqrt(qNormSq) + 1e-8)
+	for d := 0; d < dim; d++ {
+		qVec[d] /= qNorm
+	}
+
+	scores := make([]docScore, nTools)
+	for i := 0; i < nTools; i++ {
+		rowOffset := i * dim
+		var dot float32
+		for d := 0; d < dim; d++ {
+			dot += toolEmb[rowOffset+d] * qVec[d]
+		}
+		scores[i] = docScore{idx: i, score: dot}
+	}
+
+	sort.Slice(scores, func(a, b int) bool {
+		if scores[a].score == scores[b].score {
+			return scores[a].idx < scores[b].idx
+		}
+		return scores[a].score > scores[b].score
+	})
+
+	topIndices := make([]int, topK)
+	for k := 0; k < topK; k++ {
+		topIndices[k] = scores[k].idx
+	}
+	sort.Ints(topIndices)
+
+	pruned := make([]ToolDefinition, topK)
+	for k, idx := range topIndices {
+		pruned[k] = catalog[idx]
+	}
+	elapsedMs := float64(time.Since(t0).Nanoseconds()) / 1e6
+	return pruned, elapsedMs
 }
 
 func executeToolListDir(mockDir string) (string, error) {
@@ -464,14 +544,27 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 
 func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssIdle float64) TrialResult {
 	tStart := time.Now()
-	var tNeuralTotal, ttftFirst, itlAvg, tDispatchTotal float64
+	var tNeuralTotal, ttftFirst, itlAvg, tDispatchTotal, tPruneTotal float64
 	var totalPromptTokens, totalCompletionTokens, totalCachedTokens, totalUncachedPromptTokens, toolCalls int
 	var lastFinishReason string
 	lastHttpStatus := 200
 
-	// Equalized tool definitions sent in request (15 tools for minimal/picoclaw parity)
+	isToolRag := os.Getenv("OPENCLAW_MODE") == "tool_rag" || os.Getenv("PICOCLAW_MODE") == "tool_rag" || os.Getenv("TOOL_RAG_MODE") == "true"
+
+	// Equalized tool definitions sent in request (15 tools for minimal/picoclaw parity, or 54 -> Top-5 in tool_rag mode)
 	tToolCatalog0 := time.Now()
-	toolCatalog := buildStandardToolCatalog(15)
+	var fullCatalog []ToolDefinition
+	var toolEmb []float32
+	var toolCatalog []ToolDefinition
+	if isToolRag {
+		fullCatalog = buildStandardToolCatalog(54)
+		toolEmb = buildToolEmbeddings(54)
+		pruned, tpMs := pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5)
+		toolCatalog = pruned
+		tPruneTotal += tpMs
+	} else {
+		toolCatalog = buildStandardToolCatalog(15)
+	}
 	tCatalogMs := float64(time.Since(tToolCatalog0).Nanoseconds()) / 1e6
 
 	mockDir := filepath.Join(baseDir, "mock_files")
@@ -558,6 +651,11 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		tDispatchTotal = tCatalogMs
 		for step := 1; step <= 10; step++ {
 			tTool0 := time.Now()
+			if isToolRag && step > 1 {
+				pruned, tpMs := pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5)
+				toolCatalog = pruned
+				tPruneTotal += tpMs
+			}
 			_, _ = executeToolListDir(mockDir)
 			vals, _, _ := executeToolGrepLogs(logFile)
 			statStr := executeToolCalcStats(vals)
@@ -609,8 +707,13 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		cacheHitPct = (float64(totalCachedTokens) / float64(totalPromptTokens)) * 100.0
 	}
 
+	archName := "PicoClaw (Go 1.23)"
+	if isToolRag {
+		archName = "PicoClaw [tool_rag] (Go 1.23)"
+	}
+
 	return TrialResult{
-		Architecture:         "PicoClaw (Go 1.23)",
+		Architecture:         archName,
 		Workload:             tier,
 		Warmth:               warmth,
 		TTaskMs:              tTaskMs,
@@ -620,6 +723,7 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		TTFTMs:               ttftFirst,
 		ITLMs:                itlAvg,
 		TDispatchMs:          tDispatchTotal,
+		TPruneMs:             tPruneTotal,
 		THttpMs:              tHttpMs,
 		RToolOpsSec:          rTool,
 		RSSIdleMB:            rssIdle,
@@ -676,6 +780,10 @@ func runLocalToolsBenchmark(baseDir, tier string, iterations int) LocalToolResul
 }
 
 func main() {
+	if len(os.Args) > 1 && (os.Args[1] == "--version" || os.Args[1] == "version" || os.Args[1] == "--help") {
+		fmt.Println("picoclaw_orch v1.0.0")
+		os.Exit(0)
+	}
 	tier := "W1"
 	warmth := "Cold"
 	reps := 1

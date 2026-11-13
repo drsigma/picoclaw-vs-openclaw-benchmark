@@ -43,7 +43,7 @@
     "warmups_resampled": 15,
     "backup_preserved": "results/exploratory_campaigns/raw_trials_pre_w2_fix.jsonl"
   },
-  "total_campaign_net_energy_joules": 289201.34,
+  "total_campaign_net_energy_joules": 289250.01,
   "hardware": {
     "platform": "Apple Mac mini M4 (Mac16,10)",
     "soc": "Apple M4 (10-Core CPU: 4 Performance + 6 Efficiency)",

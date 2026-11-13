@@ -274,16 +274,17 @@ def test_prompt_token_parity_across_equalized_arms(monkeypatch):
     warm_file = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
     if os.path.exists(warm_file):
         with open(warm_file, "r", encoding="utf-8") as f:
-            for line in f:
-                if not line.strip():
-                    continue
-                trial = json.loads(line)
-                w = trial.get("workload")
-                a = trial.get("agent_key")
-                if a in equalized_arms and w in expected_tokens_regime_b:
-                    assert trial.get("prompt_tokens") == expected_tokens_regime_b[w], (
-                        f"warm_cache_trials.jsonl mismatch: {a} {w} has {trial.get('prompt_tokens')} != {expected_tokens_regime_b[w]}"
-                    )
+            warm_records = [json.loads(line) for line in f if line.strip()]
+        assert len(warm_records) == 660, f"Expected 660 records in warm_cache_trials.jsonl, got {len(warm_records)}"
+        for trial in warm_records:
+            assert float(trial.get("ttft_ms", 0.0)) > 0.0, f"Missing ttft_ms in warm_cache_trials.jsonl: {trial}"
+            assert float(trial.get("itl_ms", 0.0)) > 0.0, f"Missing itl_ms in warm_cache_trials.jsonl: {trial}"
+            w = trial.get("workload")
+            a = trial.get("agent_key")
+            if a in equalized_arms and w in expected_tokens_regime_b:
+                assert trial.get("prompt_tokens") == expected_tokens_regime_b[w], (
+                    f"warm_cache_trials.jsonl mismatch: {a} {w} has {trial.get('prompt_tokens')} != {expected_tokens_regime_b[w]}"
+                )
 
     raw_file = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
     if os.path.exists(raw_file):
@@ -342,6 +343,93 @@ def test_uma_energy_bandwidth_attribution_artifacts():
     assert "tab:energy_bandwidth_deconvolution" in tex
     assert "NaN" not in tex
     assert "\\hat{\\kappa}_{\\text{M4}}" in tex
+
+
+def test_energy_regressor_validity_and_spurious_rejection():
+    """Verify valid CPU energy proxies achieve R^2 >= 0.90 and XNU ri_billed_energy is flagged as rejected_spurious_proxy."""
+    json_path = os.path.join(REPO_DIR, "results", "publication_campaign", "uma_energy_bandwidth_attribution.json")
+    assert os.path.exists(json_path), f"Missing {json_path}"
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    neg_res = data.get("kernel_counter_validation_negative_result", {})
+    assert neg_res.get("rejected_spurious_proxy") is True
+    assert abs(float(neg_res.get("pearson_r_global", 1.0))) < 0.15
+    assert float(neg_res.get("ols_r2_no_intercept_vs_mean", 1.0)) < 0.0
+
+    proxies = data.get("validated_physical_cpu_proxies", {})
+    for proxy_key in ("t_exec_ms", "proc_instructions", "proc_cycles"):
+        assert proxy_key in proxies, f"Missing validated proxy {proxy_key}"
+        r_sq = float(proxies[proxy_key].get("ols_r2", 0.0))
+        assert r_sq >= 0.90, f"Expected R^2 >= 0.90 for {proxy_key}, got {r_sq}"
+
+
+def test_inter_session_and_spearman_holm_artifacts():
+    """Verify inter-session replication uses native Bun (not fallback) and Spearman matrix includes p_adj_holm and stratified_by_workload."""
+    inter_path = os.path.join(REPO_DIR, "results", "publication_campaign", "inter_session_replication.json")
+    spearman_path = os.path.join(REPO_DIR, "results", "publication_campaign", "spearman_correlation_matrix.json")
+
+    assert os.path.exists(inter_path), f"Missing {inter_path}"
+    assert os.path.exists(spearman_path), f"Missing {spearman_path}"
+
+    with open(inter_path, "r", encoding="utf-8") as f:
+        inter = json.load(f)
+
+    assert "overall_mean_inter_session_rel_diff_pct" in inter
+    assert "overall_mean_inter_session_pooled_cv_pct" in inter
+    assert "paired_intra_session_contrasts_vs_neural_baseline" in inter
+    bun_eval = inter.get("bun_minimal_evaluation", {})
+    for w in ("W1", "W2", "W3", "W4"):
+        assert w in bun_eval, f"Missing {w} in bun_minimal_evaluation"
+        assert bun_eval[w].get("n_evaluations") == 30
+        assert bun_eval[w].get("runner_binary") == "bun"
+        assert bun_eval[w].get("is_fallback_node") is False
+        assert float(bun_eval[w].get("proc_peak_phys_mb_mean", 0.0)) > 0.0
+
+    with open(spearman_path, "r", encoding="utf-8") as f:
+        sp = json.load(f)
+
+    assert "stratified_by_workload" in sp
+    for reg in ("regime_a_cold_prefill", "regime_b_warm_kv_cache"):
+        assert reg in sp["stratified_by_workload"]
+        for w in ("W1", "W2", "W3", "W4"):
+            assert w in sp["stratified_by_workload"][reg]
+            assert sp["stratified_by_workload"][reg][w]["n_trials"] == 150
+        mat = sp[reg]
+        for m1, row in mat.items():
+            for m2, cell in row.items():
+                assert "p_adj_holm" in cell, f"Missing p_adj_holm in {reg} {m1} vs {m2}"
+
+
+def test_tool_rag_mitigation_and_worker_version_artifacts():
+    """Verify Tool-RAG pruner benchmark and isomorphic worker --version hyperfine artifacts."""
+    rag_json = os.path.join(REPO_DIR, "results", "publication_campaign", "tool_rag_mitigation_summary.json")
+    rag_tex = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_tool_rag_mitigation.tex")
+    hyp_json = os.path.join(REPO_DIR, "results", "publication_campaign", "hyperfine_worker_version.json")
+
+    assert os.path.exists(rag_json), f"Missing {rag_json}"
+    assert os.path.exists(rag_tex), f"Missing {rag_tex}"
+    assert os.path.exists(hyp_json), f"Missing {hyp_json}"
+
+    with open(rag_json, "r", encoding="utf-8") as f:
+        rag = json.load(f)
+
+    for reg in ("regime_a_cold", "regime_b_warm"):
+        for w in ("W1", "W2", "W3", "W4"):
+            for ak in ("openclaw_tool_rag", "picoclaw_tool_rag"):
+                st = rag[reg][w][ak]
+                assert st["n_trials"] == 30
+                assert st["t_prune_mean_ms"] > 0.0
+                if reg == "regime_a_cold":
+                    assert st["latency_reduction_vs_full_54_pct"] > 80.0
+                    assert st["energy_reduction_vs_full_54_pct"] > 80.0
+                else:
+                    assert st["latency_reduction_vs_full_54_pct"] > 15.0
+                    assert st["latency_reduction_vs_minimal_15_pct"] > 0.0
+
+
+
 
 
 

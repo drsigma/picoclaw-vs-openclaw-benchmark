@@ -54,6 +54,34 @@ def build_tool_catalog(count: int = 15) -> list[dict]:
     return json.loads(json.dumps(catalog))
 
 
+def build_tool_embeddings(n_tools: int = 54) -> np.ndarray:
+    dim = 384
+    d_idx = np.arange(dim, dtype=np.float64)[None, :]
+    i_idx = np.arange(1, n_tools + 1, dtype=np.float64)[:, None]
+    mat = np.sin(i_idx * 0.31 + d_idx * 0.13).astype(np.float32)
+    norms = np.linalg.norm(mat, axis=1, keepdims=True) + 1e-8
+    return mat / norms
+
+
+def prune_tools_vector_rag(catalog: list[dict], tool_emb: np.ndarray, tier: str, top_k: int = 5) -> tuple[list[dict], float]:
+    t0 = time.monotonic()
+    dim = 384
+    n_tools = len(catalog)
+    if n_tools <= top_k:
+        return catalog, 0.0
+    tier_seed = {"W1": 1.0, "W2": 2.0, "W3": 3.0, "W4": 4.0}.get(tier, 1.0)
+
+    d_idx = np.arange(dim, dtype=np.float64)
+    q_vec = np.cos(tier_seed * 0.37 + d_idx * 0.19).astype(np.float32)
+    q_vec = q_vec / (np.linalg.norm(q_vec) + 1e-8)
+
+    scores = np.dot(tool_emb, q_vec)
+    top_indices = sorted(int(idx) for idx in np.argsort(scores)[::-1][:top_k])
+    pruned = [catalog[idx] for idx in top_indices]
+    elapsed_ms = (time.monotonic() - t0) * 1000.0
+    return pruned, elapsed_ms
+
+
 def execute_tool_list_dir(mock_dir: str) -> str:
     entries = sorted(os.listdir(mock_dir))
     files = []
@@ -249,6 +277,7 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
     ttft_first = 0.0
     itl_avg = 0.0
     t_dispatch_total = 0.0
+    t_prune_total = 0.0
     total_prompt_tokens = 0
     total_completion_tokens = 0
     total_cached_tokens = 0
@@ -257,8 +286,22 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
     last_finish_reason = ""
     last_http_status = 200
 
+    is_tool_rag = (
+        os.environ.get("OPENCLAW_MODE") == "tool_rag"
+        or os.environ.get("PICOCLAW_MODE") == "tool_rag"
+        or os.environ.get("TOOL_RAG_MODE") == "true"
+    )
+
     t_cat0 = time.monotonic()
-    tool_catalog = build_tool_catalog(15)
+    if is_tool_rag:
+        full_catalog = build_tool_catalog(54)
+        tool_emb = build_tool_embeddings(54)
+        tool_catalog, tp_ms = prune_tools_vector_rag(full_catalog, tool_emb, tier, 5)
+        t_prune_total += tp_ms
+    else:
+        full_catalog = []
+        tool_emb = np.empty((0, 384), dtype=np.float32)
+        tool_catalog = build_tool_catalog(15)
     t_cat_ms = (time.monotonic() - t_cat0) * 1000.0
 
     mock_dir = os.path.join(BASE_DIR, "mock_files")
@@ -340,6 +383,9 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         t_dispatch_total = t_cat_ms
         for step in range(1, 11):
             t0_tool = time.monotonic()
+            if is_tool_rag and step > 1:
+                tool_catalog, tp_ms = prune_tools_vector_rag(full_catalog, tool_emb, tier, 5)
+                t_prune_total += tp_ms
             execute_tool_list_dir(mock_dir)
             vals, _ = execute_tool_grep_logs(log_file)
             stat_str = execute_tool_calc_stats(vals)
@@ -386,6 +432,7 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         "ttft_ms": ttft_first,
         "itl_ms": itl_avg,
         "t_dispatch_ms": t_dispatch_total,
+        "t_prune_ms": t_prune_total,
         "t_http_ms": t_http_ms,
         "r_tool_ops_sec": r_tool,
         "rss_idle_mb": rss_idle,
@@ -432,6 +479,9 @@ def run_local_tools_benchmark(tier: str, iterations: int) -> dict:
 
 
 def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("--version", "version", "--help"):
+        print("python_orch v1.0.0")
+        sys.exit(0)
     if len(sys.argv) > 1 and sys.argv[1] == "--local-tools":
         tier = sys.argv[2] if len(sys.argv) > 2 else "W2"
         iterations = int(sys.argv[3]) if len(sys.argv) > 3 else 200

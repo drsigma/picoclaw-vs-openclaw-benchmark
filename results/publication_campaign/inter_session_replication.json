@@ -1,190 +1,383 @@
 {
-  "description": "Inter-Session Replication (Session 2, seed=99, n=10) and BunMinimalAdapter Physical Benchmark",
-  "caching_protocol": "Deterministic block-isolation (-np 1, 3 primings, BENCH_CACHE_PROMPT=true)",
+  "description": "Rigorous Inter-Session Replication (Session 2, seed=99, n=30 per cell) and Native Bun (darwin-aarch64) Benchmark",
+  "caching_protocol": "Deterministic block-isolation (-np 1, 3 primings + 30 evaluations per block, BENCH_CACHE_PROMPT=true, randomized block order)",
   "hardware": "Apple Mac mini M4 (Mac16,10, 10-core Metal GPU)",
+  "raw_trials_file": "results/publication_campaign/inter_session_trials.jsonl",
   "inter_session_comparisons": {
     "W1": {
       "picoclaw": {
         "session_1_n": 30,
         "session_1_mean_task_ms": 1032.08,
+        "session_1_median_task_ms": 1031.24,
         "session_1_std_task_ms": 10.8,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 1029.44,
-        "session_2_std_task_ms": 11.23,
-        "inter_session_drift_pct": 0.26
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 1059.93,
+        "session_2_median_task_ms": 1055.09,
+        "session_2_std_task_ms": 16.5,
+        "inter_session_rel_diff_pct": 2.66,
+        "inter_session_pooled_cv_pct": 1.88,
+        "inter_session_drift_pct": 2.66,
+        "session_1_delta_vs_neural_baseline_pct": -0.45,
+        "session_2_delta_vs_neural_baseline_pct": 1.07
       },
       "openclaw_minimal": {
         "session_1_n": 30,
         "session_1_mean_task_ms": 1033.86,
+        "session_1_median_task_ms": 1033.47,
         "session_1_std_task_ms": 6.07,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 1086.31,
-        "session_2_std_task_ms": 25.67,
-        "inter_session_drift_pct": 4.95
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 1068.76,
+        "session_2_median_task_ms": 1066.74,
+        "session_2_std_task_ms": 8.19,
+        "inter_session_rel_diff_pct": 3.32,
+        "inter_session_pooled_cv_pct": 2.35,
+        "inter_session_drift_pct": 3.32,
+        "session_1_delta_vs_neural_baseline_pct": -0.28,
+        "session_2_delta_vs_neural_baseline_pct": 1.91
       },
       "python_native": {
         "session_1_n": 30,
         "session_1_mean_task_ms": 1024.98,
+        "session_1_median_task_ms": 1025.4,
         "session_1_std_task_ms": 6.87,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 1100.36,
-        "session_2_std_task_ms": 28.8,
-        "inter_session_drift_pct": 7.09
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 1058.01,
+        "session_2_median_task_ms": 1058.82,
+        "session_2_std_task_ms": 9.61,
+        "inter_session_rel_diff_pct": 3.17,
+        "inter_session_pooled_cv_pct": 2.24,
+        "inter_session_drift_pct": 3.17,
+        "session_1_delta_vs_neural_baseline_pct": -1.14,
+        "session_2_delta_vs_neural_baseline_pct": 0.89
       },
       "neural_baseline": {
         "session_1_n": 30,
         "session_1_mean_task_ms": 1036.79,
+        "session_1_median_task_ms": 1034.91,
         "session_1_std_task_ms": 7.37,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 1126.92,
-        "session_2_std_task_ms": 26.9,
-        "inter_session_drift_pct": 8.33
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 1048.72,
+        "session_2_median_task_ms": 1048.44,
+        "session_2_std_task_ms": 7.55,
+        "inter_session_rel_diff_pct": 1.14,
+        "inter_session_pooled_cv_pct": 0.81,
+        "inter_session_drift_pct": 1.14,
+        "session_1_delta_vs_neural_baseline_pct": 0.0,
+        "session_2_delta_vs_neural_baseline_pct": 0.0
       }
     },
     "W2": {
       "picoclaw": {
         "session_1_n": 30,
-        "session_1_mean_task_ms": 726.23,
-        "session_1_std_task_ms": 4.65,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 841.23,
-        "session_2_std_task_ms": 20.48,
-        "inter_session_drift_pct": 14.67
+        "session_1_mean_task_ms": 743.3,
+        "session_1_median_task_ms": 741.18,
+        "session_1_std_task_ms": 11.11,
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 748.95,
+        "session_2_median_task_ms": 751.48,
+        "session_2_std_task_ms": 9.1,
+        "inter_session_rel_diff_pct": 0.76,
+        "inter_session_pooled_cv_pct": 0.54,
+        "inter_session_drift_pct": 0.76,
+        "session_1_delta_vs_neural_baseline_pct": 0.27,
+        "session_2_delta_vs_neural_baseline_pct": 1.25
       },
       "openclaw_minimal": {
         "session_1_n": 30,
-        "session_1_mean_task_ms": 754.57,
-        "session_1_std_task_ms": 11.05,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 883.81,
-        "session_2_std_task_ms": 22.54,
-        "inter_session_drift_pct": 15.78
+        "session_1_mean_task_ms": 752.6,
+        "session_1_median_task_ms": 752.83,
+        "session_1_std_task_ms": 11.65,
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 765.48,
+        "session_2_median_task_ms": 763.54,
+        "session_2_std_task_ms": 9.26,
+        "inter_session_rel_diff_pct": 1.7,
+        "inter_session_pooled_cv_pct": 1.2,
+        "inter_session_drift_pct": 1.7,
+        "session_1_delta_vs_neural_baseline_pct": 1.52,
+        "session_2_delta_vs_neural_baseline_pct": 3.48
       },
       "python_native": {
         "session_1_n": 30,
-        "session_1_mean_task_ms": 739.44,
-        "session_1_std_task_ms": 9.79,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 867.8,
-        "session_2_std_task_ms": 44.08,
-        "inter_session_drift_pct": 15.97
+        "session_1_mean_task_ms": 743.38,
+        "session_1_median_task_ms": 743.36,
+        "session_1_std_task_ms": 9.95,
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 746.85,
+        "session_2_median_task_ms": 747.16,
+        "session_2_std_task_ms": 7.76,
+        "inter_session_rel_diff_pct": 0.47,
+        "inter_session_pooled_cv_pct": 0.33,
+        "inter_session_drift_pct": 0.47,
+        "session_1_delta_vs_neural_baseline_pct": 0.28,
+        "session_2_delta_vs_neural_baseline_pct": 0.96
       },
       "neural_baseline": {
         "session_1_n": 30,
-        "session_1_mean_task_ms": 731.71,
-        "session_1_std_task_ms": 8.7,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 813.11,
-        "session_2_std_task_ms": 21.46,
-        "inter_session_drift_pct": 10.54
+        "session_1_mean_task_ms": 741.33,
+        "session_1_median_task_ms": 739.57,
+        "session_1_std_task_ms": 9.87,
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 739.72,
+        "session_2_median_task_ms": 738.64,
+        "session_2_std_task_ms": 12.95,
+        "inter_session_rel_diff_pct": 0.22,
+        "inter_session_pooled_cv_pct": 0.15,
+        "inter_session_drift_pct": 0.22,
+        "session_1_delta_vs_neural_baseline_pct": 0.0,
+        "session_2_delta_vs_neural_baseline_pct": 0.0
       }
     },
     "W3": {
       "picoclaw": {
         "session_1_n": 30,
         "session_1_mean_task_ms": 772.24,
+        "session_1_median_task_ms": 772.96,
         "session_1_std_task_ms": 11.17,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 867.29,
-        "session_2_std_task_ms": 18.77,
-        "inter_session_drift_pct": 11.59
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 786.77,
+        "session_2_median_task_ms": 784.96,
+        "session_2_std_task_ms": 9.21,
+        "inter_session_rel_diff_pct": 1.86,
+        "inter_session_pooled_cv_pct": 1.32,
+        "inter_session_drift_pct": 1.86,
+        "session_1_delta_vs_neural_baseline_pct": 5.85,
+        "session_2_delta_vs_neural_baseline_pct": 5.41
       },
       "openclaw_minimal": {
         "session_1_n": 30,
         "session_1_mean_task_ms": 761.21,
+        "session_1_median_task_ms": 759.52,
         "session_1_std_task_ms": 7.23,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 892.26,
-        "session_2_std_task_ms": 7.61,
-        "inter_session_drift_pct": 15.85
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 782.71,
+        "session_2_median_task_ms": 780.21,
+        "session_2_std_task_ms": 11.91,
+        "inter_session_rel_diff_pct": 2.78,
+        "inter_session_pooled_cv_pct": 1.97,
+        "inter_session_drift_pct": 2.78,
+        "session_1_delta_vs_neural_baseline_pct": 4.34,
+        "session_2_delta_vs_neural_baseline_pct": 4.87
       },
       "python_native": {
         "session_1_n": 30,
         "session_1_mean_task_ms": 755.38,
+        "session_1_median_task_ms": 754.92,
         "session_1_std_task_ms": 5.91,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 864.99,
-        "session_2_std_task_ms": 24.99,
-        "inter_session_drift_pct": 13.53
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 771.67,
+        "session_2_median_task_ms": 772.32,
+        "session_2_std_task_ms": 9.78,
+        "inter_session_rel_diff_pct": 2.13,
+        "inter_session_pooled_cv_pct": 1.51,
+        "inter_session_drift_pct": 2.13,
+        "session_1_delta_vs_neural_baseline_pct": 3.54,
+        "session_2_delta_vs_neural_baseline_pct": 3.39
       },
       "neural_baseline": {
         "session_1_n": 30,
         "session_1_mean_task_ms": 729.57,
+        "session_1_median_task_ms": 730.38,
         "session_1_std_task_ms": 4.72,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 821.32,
-        "session_2_std_task_ms": 26.87,
-        "inter_session_drift_pct": 11.83
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 746.38,
+        "session_2_median_task_ms": 744.83,
+        "session_2_std_task_ms": 10.22,
+        "inter_session_rel_diff_pct": 2.28,
+        "inter_session_pooled_cv_pct": 1.61,
+        "inter_session_drift_pct": 2.28,
+        "session_1_delta_vs_neural_baseline_pct": 0.0,
+        "session_2_delta_vs_neural_baseline_pct": 0.0
       }
     },
     "W4": {
       "picoclaw": {
         "session_1_n": 30,
-        "session_1_mean_task_ms": 8349.91,
-        "session_1_std_task_ms": 54.19,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 9172.08,
-        "session_2_std_task_ms": 55.54,
-        "inter_session_drift_pct": 9.38
+        "session_1_mean_task_ms": 8478.34,
+        "session_1_median_task_ms": 8458.58,
+        "session_1_std_task_ms": 111.76,
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 8349.91,
+        "session_2_median_task_ms": 8366.16,
+        "session_2_std_task_ms": 54.19,
+        "inter_session_rel_diff_pct": 1.53,
+        "inter_session_pooled_cv_pct": 1.08,
+        "inter_session_drift_pct": 1.53,
+        "session_1_delta_vs_neural_baseline_pct": -0.31,
+        "session_2_delta_vs_neural_baseline_pct": -1.57
       },
       "openclaw_minimal": {
         "session_1_n": 30,
-        "session_1_mean_task_ms": 8516.11,
-        "session_1_std_task_ms": 29.02,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 9276.75,
-        "session_2_std_task_ms": 47.79,
-        "inter_session_drift_pct": 8.55
+        "session_1_mean_task_ms": 8596.44,
+        "session_1_median_task_ms": 8605.45,
+        "session_1_std_task_ms": 41.72,
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 8516.11,
+        "session_2_median_task_ms": 8523.99,
+        "session_2_std_task_ms": 29.02,
+        "inter_session_rel_diff_pct": 0.94,
+        "inter_session_pooled_cv_pct": 0.66,
+        "inter_session_drift_pct": 0.94,
+        "session_1_delta_vs_neural_baseline_pct": 1.08,
+        "session_2_delta_vs_neural_baseline_pct": 0.39
       },
       "python_native": {
         "session_1_n": 30,
-        "session_1_mean_task_ms": 8456.51,
-        "session_1_std_task_ms": 70.95,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 9210.81,
-        "session_2_std_task_ms": 62.15,
-        "inter_session_drift_pct": 8.54
+        "session_1_mean_task_ms": 8517.08,
+        "session_1_median_task_ms": 8529.97,
+        "session_1_std_task_ms": 44.08,
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 8456.51,
+        "session_2_median_task_ms": 8451.24,
+        "session_2_std_task_ms": 70.95,
+        "inter_session_rel_diff_pct": 0.71,
+        "inter_session_pooled_cv_pct": 0.5,
+        "inter_session_drift_pct": 0.71,
+        "session_1_delta_vs_neural_baseline_pct": 0.14,
+        "session_2_delta_vs_neural_baseline_pct": -0.31
       },
       "neural_baseline": {
         "session_1_n": 30,
-        "session_1_mean_task_ms": 8482.91,
-        "session_1_std_task_ms": 38.51,
-        "session_2_n": 10,
-        "session_2_mean_task_ms": 9131.83,
-        "session_2_std_task_ms": 59.14,
-        "inter_session_drift_pct": 7.37
+        "session_1_mean_task_ms": 8504.9,
+        "session_1_median_task_ms": 8503.6,
+        "session_1_std_task_ms": 40.02,
+        "session_2_n": 30,
+        "session_2_mean_task_ms": 8482.91,
+        "session_2_median_task_ms": 8494.77,
+        "session_2_std_task_ms": 38.51,
+        "inter_session_rel_diff_pct": 0.26,
+        "inter_session_pooled_cv_pct": 0.18,
+        "inter_session_drift_pct": 0.26,
+        "session_1_delta_vs_neural_baseline_pct": 0.0,
+        "session_2_delta_vs_neural_baseline_pct": 0.0
       }
     }
   },
-  "overall_mean_inter_session_cv_pct": 10.26,
-  "bun_minimal_evaluation": {
+  "paired_intra_session_contrasts_vs_neural_baseline": {
     "W1": {
-      "n_evaluations": 10,
-      "mean_task_ms": 1192.72,
-      "mean_orch_ms": 39.91,
-      "orch_share_pct": 3.35,
-      "runner_binary": "node"
+      "picoclaw": {
+        "session_1_vs_baseline_pct": -0.45,
+        "session_2_vs_baseline_pct": 1.07
+      },
+      "openclaw_minimal": {
+        "session_1_vs_baseline_pct": -0.28,
+        "session_2_vs_baseline_pct": 1.91
+      },
+      "python_native": {
+        "session_1_vs_baseline_pct": -1.14,
+        "session_2_vs_baseline_pct": 0.89
+      }
     },
     "W2": {
-      "n_evaluations": 10,
-      "mean_task_ms": 854.88,
-      "mean_orch_ms": 41.26,
-      "orch_share_pct": 4.83,
-      "runner_binary": "node"
+      "picoclaw": {
+        "session_1_vs_baseline_pct": 0.27,
+        "session_2_vs_baseline_pct": 1.25
+      },
+      "openclaw_minimal": {
+        "session_1_vs_baseline_pct": 1.52,
+        "session_2_vs_baseline_pct": 3.48
+      },
+      "python_native": {
+        "session_1_vs_baseline_pct": 0.28,
+        "session_2_vs_baseline_pct": 0.96
+      }
     },
     "W3": {
-      "n_evaluations": 10,
-      "mean_task_ms": 900.02,
-      "mean_orch_ms": 72.86,
-      "orch_share_pct": 8.1,
-      "runner_binary": "node"
+      "picoclaw": {
+        "session_1_vs_baseline_pct": 5.85,
+        "session_2_vs_baseline_pct": 5.41
+      },
+      "openclaw_minimal": {
+        "session_1_vs_baseline_pct": 4.34,
+        "session_2_vs_baseline_pct": 4.87
+      },
+      "python_native": {
+        "session_1_vs_baseline_pct": 3.54,
+        "session_2_vs_baseline_pct": 3.39
+      }
     },
     "W4": {
-      "n_evaluations": 10,
-      "mean_task_ms": 9271.71,
-      "mean_orch_ms": 156.45,
-      "orch_share_pct": 1.69,
-      "runner_binary": "node"
+      "picoclaw": {
+        "session_1_vs_baseline_pct": -0.31,
+        "session_2_vs_baseline_pct": -1.57
+      },
+      "openclaw_minimal": {
+        "session_1_vs_baseline_pct": 1.08,
+        "session_2_vs_baseline_pct": 0.39
+      },
+      "python_native": {
+        "session_1_vs_baseline_pct": 0.14,
+        "session_2_vs_baseline_pct": -0.31
+      }
+    }
+  },
+  "overall_mean_inter_session_rel_diff_pct": 1.62,
+  "overall_mean_inter_session_pooled_cv_pct": 1.15,
+  "overall_mean_inter_session_cv_pct": 1.15,
+  "bun_minimal_evaluation": {
+    "W1": {
+      "n_evaluations": 30,
+      "mean_task_ms": 1038.98,
+      "median_task_ms": 1039.04,
+      "std_task_ms": 12.16,
+      "mean_orch_ms": 3.83,
+      "orch_share_pct": 0.37,
+      "delta_vs_session2_neural_baseline_pct": -0.93,
+      "proc_peak_phys_mb_mean": 7.49,
+      "rss_peak_mb_mean": 7.37,
+      "proc_instructions_mean": 94749245,
+      "proc_cycles_mean": 56071554,
+      "energy_net_mean_j": 13.55,
+      "runner_binary": "bun",
+      "is_fallback_node": false
+    },
+    "W2": {
+      "n_evaluations": 30,
+      "mean_task_ms": 742.52,
+      "median_task_ms": 741.16,
+      "std_task_ms": 8.29,
+      "mean_orch_ms": 4.44,
+      "orch_share_pct": 0.6,
+      "delta_vs_session2_neural_baseline_pct": 0.38,
+      "proc_peak_phys_mb_mean": 7.99,
+      "rss_peak_mb_mean": 7.63,
+      "proc_instructions_mean": 97063660,
+      "proc_cycles_mean": 51323359,
+      "energy_net_mean_j": 9.42,
+      "runner_binary": "bun",
+      "is_fallback_node": false
+    },
+    "W3": {
+      "n_evaluations": 30,
+      "mean_task_ms": 782.27,
+      "median_task_ms": 775.85,
+      "std_task_ms": 21.04,
+      "mean_orch_ms": 17.9,
+      "orch_share_pct": 2.29,
+      "delta_vs_session2_neural_baseline_pct": 4.81,
+      "proc_peak_phys_mb_mean": 35.91,
+      "rss_peak_mb_mean": 8.71,
+      "proc_instructions_mean": 365243545,
+      "proc_cycles_mean": 128297784,
+      "energy_net_mean_j": 10.3,
+      "runner_binary": "bun",
+      "is_fallback_node": false
+    },
+    "W4": {
+      "n_evaluations": 30,
+      "mean_task_ms": 8560.23,
+      "median_task_ms": 8571.29,
+      "std_task_ms": 48.22,
+      "mean_orch_ms": 48.67,
+      "orch_share_pct": 0.57,
+      "delta_vs_session2_neural_baseline_pct": 0.91,
+      "proc_peak_phys_mb_mean": 9.53,
+      "rss_peak_mb_mean": 8.39,
+      "proc_instructions_mean": 199279398,
+      "proc_cycles_mean": 179530466,
+      "energy_net_mean_j": 111.87,
+      "runner_binary": "bun",
+      "is_fallback_node": false
     }
   }
 }

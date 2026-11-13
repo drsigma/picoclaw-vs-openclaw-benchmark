@@ -637,27 +637,123 @@ def compute_spearman_correlation_matrix(
     ]
 
     def build_matrix(records: list[dict]):
-        matrix = {}
-        for m1, name1, sym1 in metric_defs:
+        matrix: dict[str, dict[str, dict[str, Any]]] = {}
+        m_keys = [m[0] for m in metric_defs]
+        upper_coords: list[tuple[str, str]] = []
+        upper_raw_p: list[float] = []
+
+        for i, m1 in enumerate(m_keys):
             matrix[m1] = {}
-            for m2, name2, sym2 in metric_defs:
-                # Strict record-level pairwise extraction
+            for j, m2 in enumerate(m_keys):
+                if i == j:
+                    matrix[m1][m2] = {
+                        "rho": 1.0,
+                        "p_value": 0.0,
+                        "p_adj_holm": 0.0,
+                        "significant_001": True,
+                    }
+                    continue
                 pairs = [(float(r[m1]), float(r[m2])) for r in records if r.get(m1) is not None and r.get(m2) is not None]
                 if len(pairs) > 2:
                     vals1 = [p[0] for p in pairs]
                     vals2 = [p[1] for p in pairs]
-                    rho, p_val = stats.spearmanr(vals1, vals2)
+                    if len(set(vals1)) <= 1 or len(set(vals2)) <= 1:
+                        rho, p_val = 0.0, 1.0
+                    else:
+                        res_sp = stats.spearmanr(vals1, vals2)
+                        rho = 0.0 if np.isnan(res_sp.statistic) else float(res_sp.statistic)
+                        p_val = 1.0 if np.isnan(res_sp.pvalue) else float(res_sp.pvalue)
                     matrix[m1][m2] = {
                         "rho": round(float(rho), 4),
                         "p_value": round(float(p_val), 6),
+                        "p_adj_holm": round(float(p_val), 6),
                         "significant_001": bool(p_val < 0.001),
                     }
+                    if i < j:
+                        upper_coords.append((m1, m2))
+                        upper_raw_p.append(float(p_val))
                 else:
-                    matrix[m1][m2] = {"rho": None, "p_value": None, "significant_001": False}
+                    matrix[m1][m2] = {"rho": None, "p_value": None, "p_adj_holm": None, "significant_001": False}
+
+        if upper_raw_p:
+            adj_upper = holm_bonferroni_adjust(upper_raw_p)
+            for (m1, m2), p_adj in zip(upper_coords, adj_upper):
+                p_adj_round = round(float(p_adj), 6)
+                sig = bool(p_adj < 0.001)
+                matrix[m1][m2]["p_adj_holm"] = p_adj_round
+                matrix[m1][m2]["significant_001"] = sig
+                matrix[m2][m1]["p_adj_holm"] = p_adj_round
+                matrix[m2][m1]["significant_001"] = sig
+
         return matrix
+
+    def build_stratified_by_workload(records: list[dict]) -> dict[str, Any]:
+        out_strat: dict[str, Any] = {}
+        key_pairs = [
+            ("t_task_ms", "prompt_tokens"),
+            ("t_task_ms", "energy_net_above_idle_j"),
+            ("t_task_ms", "t_orch_ms"),
+            ("t_dispatch_ms", "t_task_ms"),
+            ("t_orch_ms", "proc_instructions"),
+            ("proc_instructions", "proc_cycles"),
+            ("proc_instructions", "rss_peak_mb"),
+            ("proc_peak_phys_mb", "t_orch_ms"),
+        ]
+        for w in ["W1", "W2", "W3", "W4"]:
+            w_recs = [r for r in records if r.get("workload") == w]
+            if not w_recs:
+                continue
+            trial_level = {}
+            raw_ps = []
+            pair_keys = []
+            for m1, m2 in key_pairs:
+                pk = f"{m1}_vs_{m2}"
+                pts = [(float(r[m1]), float(r[m2])) for r in w_recs if r.get(m1) is not None and r.get(m2) is not None]
+                if len(pts) > 2 and len({x[0] for x in pts}) > 1 and len({x[1] for x in pts}) > 1:
+                    sp = stats.spearmanr([x[0] for x in pts], [x[1] for x in pts])
+                    rho_v = 0.0 if np.isnan(sp.statistic) else float(sp.statistic)
+                    p_v = 1.0 if np.isnan(sp.pvalue) else float(sp.pvalue)
+                else:
+                    rho_v, p_v = 0.0, 1.0
+                trial_level[pk] = {"n": len(pts), "rho": round(rho_v, 4), "p_value": round(p_v, 6)}
+                pair_keys.append(pk)
+                raw_ps.append(p_v)
+            adj_ps = holm_bonferroni_adjust(raw_ps) if raw_ps else []
+            for pk, ap in zip(pair_keys, adj_ps):
+                trial_level[pk]["p_adj_holm"] = round(float(ap), 6)
+
+            # Arm-level means (n=5 arms per workload)
+            by_arm: dict[str, list[dict]] = {}
+            for r in w_recs:
+                by_arm.setdefault(str(r.get("agent_key")), []).append(r)
+            arm_means_corr = {}
+            for m1, m2 in key_pairs:
+                pk = f"{m1}_vs_{m2}"
+                a_pts = []
+                for ak, a_list in by_arm.items():
+                    v1 = [float(x[m1]) for x in a_list if x.get(m1) is not None]
+                    v2 = [float(x[m2]) for x in a_list if x.get(m2) is not None]
+                    if v1 and v2:
+                        a_pts.append((sum(v1) / len(v1), sum(v2) / len(v2)))
+                if len(a_pts) >= 3 and len({x[0] for x in a_pts}) > 1 and len({x[1] for x in a_pts}) > 1:
+                    sp_a = stats.spearmanr([x[0] for x in a_pts], [x[1] for x in a_pts])
+                    ra_v = 0.0 if np.isnan(sp_a.statistic) else float(sp_a.statistic)
+                    pa_v = 1.0 if np.isnan(sp_a.pvalue) else float(sp_a.pvalue)
+                else:
+                    ra_v, pa_v = 0.0, 1.0
+                arm_means_corr[pk] = {"n_arms": len(a_pts), "rho": round(ra_v, 4), "p_value": round(pa_v, 6)}
+
+            out_strat[w] = {
+                "n_trials": len(w_recs),
+                "trial_level_n150": trial_level,
+                "arm_means_n5": arm_means_corr,
+            }
+        return out_strat
 
     mat_a = build_matrix(recs_a) if recs_a else {}
     mat_b = build_matrix(recs_b) if recs_b else {}
+    strat_a = build_stratified_by_workload(recs_a) if recs_a else {}
+    strat_b = build_stratified_by_workload(recs_b) if recs_b else {}
 
     # Define analytical non-tautological pairs for publication table (M4, X6)
     analytical_pairs = [
@@ -766,6 +862,10 @@ def compute_spearman_correlation_matrix(
         "metrics": [m[0] for m in metric_defs],
         "metric_labels": {m[0]: m[1] for m in metric_defs},
         "table_reported_pairs_with_holm": reported_pairs,
+        "stratified_by_workload": {
+            "regime_a_cold_prefill": strat_a,
+            "regime_b_warm_kv_cache": strat_b,
+        },
         "regime_a_cold_prefill": mat_a,
         "regime_b_warm_kv_cache": mat_b,
     }

@@ -26,9 +26,15 @@ class BunMinimalAdapter(AgentOrchestratorAdapter):
         )
         self.repo_dir = repo_dir
         self.script_path = os.path.join(repo_dir, "benchmark", "openclaw_orch.mjs")
+        local_bun = os.path.join(repo_dir, "tools", "bun", "bin", "bun")
         local_node = os.path.join(repo_dir, "tools", "node", "bin", "node")
-        self.runner_bin = shutil.which("bun") or (
-            local_node if os.path.exists(local_node) else "node"
+        self.runner_bin = (
+            local_bun
+            if os.path.exists(local_bun)
+            else (
+                shutil.which("bun")
+                or (local_node if os.path.exists(local_node) else "node")
+            )
         )
 
     def setup(self) -> bool:

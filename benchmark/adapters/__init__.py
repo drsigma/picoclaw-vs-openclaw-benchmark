@@ -15,8 +15,10 @@ from benchmark.adapters.python_native_adapter import PythonNativeAdapter
 
 ADAPTER_REGISTRY: Dict[str, Callable[[str], AgentOrchestratorAdapter]] = {
     "picoclaw": lambda repo_dir: PicoClawAdapter(repo_dir),
+    "picoclaw_tool_rag": lambda repo_dir: PicoClawAdapter(repo_dir, mode="tool_rag"),
     "openclaw_minimal": lambda repo_dir: OpenClawAdapter(repo_dir, mode="minimal"),
     "openclaw_full": lambda repo_dir: OpenClawAdapter(repo_dir, mode="full"),
+    "openclaw_tool_rag": lambda repo_dir: OpenClawAdapter(repo_dir, mode="tool_rag"),
     "python_native": lambda repo_dir: PythonNativeAdapter(repo_dir),
     "neural_baseline": lambda repo_dir: NeuralBaselineAdapter(),
     "bun_minimal": lambda repo_dir: BunMinimalAdapter(repo_dir),

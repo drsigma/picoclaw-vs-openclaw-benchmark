@@ -118,23 +118,23 @@ Os orquestradores executam os testes fatoriais W1 a W4 contra o servidor neural:
 ---
 
 #### Passo 4: Medição Estatística de Cold-Start com Hyperfine
-Cronometragem com precisão nanométrica do tempo de disparo a frio (30 repetições):
+Cronometragem com precisão nanométrica do tempo de disparo a frio (30 repetições, `hyperfine_cold_start.json` e `hyperfine_worker_version.json`):
 ```bash
 ./tools/hyperfine/hyperfine --warmup 5 --runs 30 \
-  "./tools/picoclaw/picoclaw --version" \
+  "./tools/picoclaw/picoclaw version" \
   "./tools/node/bin/node ./benchmark/openclaw_orch.mjs --version"
 ```
 ```text
-Benchmark 1: ./tools/picoclaw/picoclaw --version
-  Time (mean ± σ):       9.63 ms ±   0.42 ms    [User: 3.1 ms, System: 4.8 ms]
-  Range (min … max):     8.91 ms …  11.24 ms    30 runs
+Benchmark 1: ./tools/picoclaw/picoclaw version
+  Time (mean ± σ):       9.74 ms ±   0.38 ms    [Median: 9.67 ms]
+  Range (min … max):     9.12 ms …  10.84 ms    30 runs
 Benchmark 2: ./tools/node/bin/node ./benchmark/openclaw_orch.mjs --version
-  Time (mean ± σ):     225.55 ms ±   4.18 ms    [User: 172.4 ms, System: 38.6 ms]
-  Range (min … max):   218.40 ms … 234.12 ms    30 runs
+  Time (mean ± σ):      37.15 ms ±   4.12 ms    [Median: 33.48 ms]
+  Range (min … max):    32.80 ms …  48.90 ms    30 runs
 Summary:
-  PicoClaw ran 23.42 ± 1.12 times faster than OpenClaw
+  PicoClaw ran 3.81 times faster (mean) and 3.46 times faster (median) than OpenClaw
 ```
-*Legenda Técnica:* PicoClaw (Go nativo) inicializa em **$9{,}63\text{ ms}$**, enquanto OpenClaw (Node.js/V8) exige **$225{,}55\text{ ms}$**, comprovando vantagem de inicialização de **$23{,}4\times$** a favor do Go.
+*Legenda Técnica:* No par equivalente de checagem de versão (`hyperfine_cold_start.json`), o PicoClaw (Go nativo) inicializa em **$9{,}74\text{ ms}$** de média (**$9{,}67\text{ ms}$** de mediana) vs. **$37{,}15\text{ ms}$** de média (**$33{,}48\text{ ms}$** de mediana) no OpenClaw (Node.js/V8), comprovando vantagem de inicialização de **$3{,}81\times$ na média ($3{,}46\times$ na mediana)** a favor do Go (e **$3{,}04\text{ ms}$ vs. $22{,}15\text{ ms}$ [$7{,}29\times$]** nos workers isomórficos em `hyperfine_worker_version.json`).
 
 ---
 
@@ -345,20 +345,20 @@ data/workload_data/
 #### Step 4: Measure Cold-Start Launch Latency with Hyperfine
 ```bash
 ./tools/hyperfine/hyperfine --warmup 5 --runs 30 \
-  "./tools/picoclaw/picoclaw --version" \
+  "./tools/picoclaw/picoclaw version" \
   "./tools/node/bin/node ./benchmark/openclaw_orch.mjs --version"
 ```
 ```text
-Benchmark 1: ./tools/picoclaw/picoclaw --version
-  Time (mean ± σ):       9.63 ms ±   0.42 ms    [User: 3.1 ms, System: 4.8 ms]
-  Range (min … max):     8.91 ms …  11.24 ms    30 runs
+Benchmark 1: ./tools/picoclaw/picoclaw version
+  Time (mean ± σ):       9.74 ms ±   0.38 ms    [Median: 9.67 ms]
+  Range (min … max):     9.12 ms …  10.84 ms    30 runs
 Benchmark 2: ./tools/node/bin/node ./benchmark/openclaw_orch.mjs --version
-  Time (mean ± σ):     225.55 ms ±   4.18 ms    [User: 172.4 ms, System: 38.6 ms]
-  Range (min … max):   218.40 ms … 234.12 ms    30 runs
+  Time (mean ± σ):      37.15 ms ±   4.12 ms    [Median: 33.48 ms]
+  Range (min … max):    32.80 ms …  48.90 ms    30 runs
 Summary:
-  PicoClaw ran 23.42 ± 1.12 times faster than OpenClaw
+  PicoClaw ran 3.81 times faster (mean) and 3.46 times faster (median) than OpenClaw
 ```
-*Technical Caption:* Hyperfine statistical benchmarking proving PicoClaw launches in **$9.63\text{ ms}$** vs. OpenClaw's **$225.55\text{ ms}$** ($23.4\times$ speedup).
+*Technical Caption:* Hyperfine statistical benchmarking (`hyperfine_cold_start.json`) proving PicoClaw launches in **$9.74\text{ ms}$** mean (**$9.67\text{ ms}$** median) vs. OpenClaw's **$37.15\text{ ms}$** mean (**$33.48\text{ ms}$** median), a **$3.81\times$ mean ($3.46\times$ median)** speedup (and **$3.04\text{ ms}$ vs. $22.15\text{ ms}$ [$7.29\times$]** across the isomorphic workers in `hyperfine_worker_version.json`).
 
 ---
 

@@ -21,10 +21,10 @@ function getRSSMB() {
 }
 
 // Build OpenClaw's tool schema catalog & prompt context builder
-// Supports ablation modes: "full" (54 tools stock enterprise) vs "minimal" (15 tools equalized)
-function buildOpenClawToolCatalog() {
+// Supports ablation modes: "full" (54 tools stock enterprise), "minimal" (15 tools equalized), and "tool_rag" (54 -> Top-5)
+function buildOpenClawToolCatalog(overrideCount = null) {
   const mode = process.env.OPENCLAW_MODE || "minimal";
-  const toolCount = mode === "full" ? 54 : 15;
+  const toolCount = overrideCount !== null ? overrideCount : ((mode === "full" || mode === "tool_rag") ? 54 : 15);
   const catalog = [];
   for (let i = 0; i < toolCount; i++) {
     catalog.push({
@@ -46,6 +46,70 @@ function buildOpenClawToolCatalog() {
   // V8 object allocation and schema serialization pass
   const serialized = JSON.stringify(catalog);
   return JSON.parse(serialized);
+}
+
+function buildToolEmbeddings(nTools) {
+  const dim = 384;
+  const mat = new Float32Array(nTools * dim);
+  for (let i = 0; i < nTools; i++) {
+    let tNormSq = 0.0;
+    const rowOffset = i * dim;
+    for (let d = 0; d < dim; d++) {
+      const v = Math.sin((i + 1) * 0.31 + d * 0.13);
+      mat[rowOffset + d] = v;
+      tNormSq += v * v;
+    }
+    const tNorm = Math.fround(Math.sqrt(tNormSq) + 1e-8);
+    for (let d = 0; d < dim; d++) {
+      mat[rowOffset + d] = Math.fround(mat[rowOffset + d] / tNorm);
+    }
+  }
+  return mat;
+}
+
+function pruneToolsVectorRAG(catalog, toolEmb, tier, topK = 5) {
+  const t0 = performance.now();
+  const dim = 384;
+  const nTools = catalog.length;
+  if (nTools <= topK) {
+    return { pruned: catalog, elapsedMs: 0.0 };
+  }
+  let tierSeed = 1.0;
+  if (tier === "W2") tierSeed = 2.0;
+  else if (tier === "W3") tierSeed = 3.0;
+  else if (tier === "W4") tierSeed = 4.0;
+
+  const qVec = new Float32Array(dim);
+  let qNormSq = 0.0;
+  for (let d = 0; d < dim; d++) {
+    const val = Math.cos(tierSeed * 0.37 + d * 0.19);
+    qVec[d] = val;
+    qNormSq += val * val;
+  }
+  const qNorm = Math.fround(Math.sqrt(qNormSq) + 1e-8);
+  for (let d = 0; d < dim; d++) {
+    qVec[d] = Math.fround(qVec[d] / qNorm);
+  }
+
+  const scores = new Array(nTools);
+  for (let i = 0; i < nTools; i++) {
+    const rowOffset = i * dim;
+    let dot = 0.0;
+    for (let d = 0; d < dim; d++) {
+      dot = Math.fround(dot + Math.fround(toolEmb[rowOffset + d] * qVec[d]));
+    }
+    scores[i] = { idx: i, score: dot };
+  }
+
+  scores.sort((a, b) => {
+    if (b.score === a.score) return a.idx - b.idx;
+    return b.score - a.score;
+  });
+
+  const topIndices = scores.slice(0, topK).map((s) => s.idx).sort((a, b) => a - b);
+  const pruned = topIndices.map((idx) => catalog[idx]);
+  const elapsedMs = performance.now() - t0;
+  return { pruned, elapsedMs };
 }
 
 function executeToolListDir(mockDir) {
@@ -298,6 +362,7 @@ async function runWorkload(tier, warmth, rssIdle) {
   let ttftFirst = 0.0;
   let itlAvg = 0.0;
   let tDispatchTotal = 0.0;
+  let tPruneTotal = 0.0;
   let totalPromptTokens = 0;
   let totalCompletionTokens = 0;
   let totalCachedTokens = 0;
@@ -306,8 +371,19 @@ async function runWorkload(tier, warmth, rssIdle) {
   let lastFinishReason = "";
   let lastHttpStatus = 200;
 
+  const mode = process.env.OPENCLAW_MODE || "minimal";
+  const isToolRag = mode === "tool_rag" || process.env.TOOL_RAG_MODE === "true";
+
   const tCatalog0 = performance.now();
-  const toolCatalog = buildOpenClawToolCatalog();
+  const fullCatalog = buildOpenClawToolCatalog(isToolRag ? 54 : null);
+  const toolEmb = isToolRag ? buildToolEmbeddings(fullCatalog.length) : null;
+  let toolCatalog = fullCatalog;
+  if (isToolRag) {
+    pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
+    const { pruned, elapsedMs } = pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
+    toolCatalog = pruned;
+    tPruneTotal += elapsedMs;
+  }
   const tCatalogMs = performance.now() - tCatalog0;
 
   const mockDir = path.join(BASE_DIR, "mock_files");
@@ -385,6 +461,11 @@ async function runWorkload(tier, warmth, rssIdle) {
     tDispatchTotal = tCatalogMs;
     for (let step = 1; step <= 10; step++) {
       const tTool0 = performance.now();
+      if (isToolRag && step > 1) {
+        const { pruned, elapsedMs } = pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
+        toolCatalog = pruned;
+        tPruneTotal += elapsedMs;
+      }
       executeToolListDir(mockDir);
       const { vals } = executeToolGrepLogs(logFile);
       const statStr = executeToolCalcStats(vals);
@@ -420,8 +501,9 @@ async function runWorkload(tier, warmth, rssIdle) {
   const rTool = toolCalls > 0 && tDispatchTotal > 0 ? toolCalls / (tDispatchTotal / 1000.0) : 0.0;
   const rssPeak = Math.max(rssIdle, getRSSMB());
   const alphaMem = rssPeak / Math.max(1.0, rssIdle);
-  const v8UsedHeapMb = v8.getHeapStatistics().used_heap_size / (1024.0 * 1024.0);
-  const mode = process.env.OPENCLAW_MODE || "minimal";
+  const v8UsedHeapMb = typeof v8?.getHeapStatistics === "function"
+    ? v8.getHeapStatistics().used_heap_size / (1024.0 * 1024.0)
+    : process.memoryUsage().heapUsed / (1024.0 * 1024.0);
   const cacheHitPct = totalPromptTokens > 0 ? (totalCachedTokens / totalPromptTokens) * 100.0 : 0.0;
 
   return {
@@ -435,6 +517,7 @@ async function runWorkload(tier, warmth, rssIdle) {
     ttft_ms: ttftFirst,
     itl_ms: itlAvg,
     t_dispatch_ms: tDispatchTotal,
+    t_prune_ms: tPruneTotal,
     t_http_ms: tHttpMs,
     r_tool_ops_sec: rTool,
     rss_idle_mb: rssIdle,
@@ -486,6 +569,10 @@ function runLocalToolsBenchmark(tier, iterations) {
 
 async function main() {
   const args = process.argv.slice(2);
+  if (args.length > 0 && (args[0] === "--version" || args[0] === "version" || args[0] === "--help")) {
+    console.log("openclaw_orch v1.0.0");
+    process.exit(0);
+  }
   if (args[0] === "--local-tools") {
     const tier = args[1] || "W2";
     const iterations = parseInt(args[2] || "200", 10);

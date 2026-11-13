@@ -4,6 +4,7 @@ tools/python_runtime/
 tools/uv_cache/
 tools/node/
 tools/go/
+tools/bun/
 
 # Python & OS artifacts
 __pycache__/

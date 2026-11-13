@@ -40,16 +40,22 @@ def update_manifest() -> int:
 
     # Also track additional core files if present
     additional = [
+        "paper/RESPONSE_TO_REVIEWERS.md",
         "benchmark/adapters/bun_minimal_adapter.py",
         "scripts/run_prefill_ablation.py",
         "scripts/run_w2_resample.py",
         "scripts/run_warm_cache_campaign.py",
         "scripts/run_regime_a_equalized_update.py",
+        "scripts/run_regime_b_w2_w4_unified_session.py",
         "scripts/run_inter_session_replication.py",
+        "scripts/run_tool_rag_mitigation_experiment.py",
         "scripts/export_audit_bundle.py",
+        "results/exploratory_campaigns/raw_trials_pre_w2_fix.jsonl",
+        "results/exploratory_campaigns/warm_cache_trials_two_session_backup.jsonl",
         "results/publication_campaign/prefill_regression_fit.json",
         "results/publication_campaign/tables/table_prefill_ablation.tex",
         "results/publication_campaign/tables/table_warm_cache.tex",
+        "results/publication_campaign/tables/table_tool_rag_mitigation.tex",
         "results/publication_campaign/warm_cache_trials.jsonl",
         "results/publication_campaign/warm_cache_summary.json",
         "results/publication_campaign/warm_cache_statistical_tests.json",
@@ -59,9 +65,13 @@ def update_manifest() -> int:
         "results/publication_campaign/pca_variance_decomposition.json",
         "results/publication_campaign/tables/table_pca_loadings.tex",
         "results/publication_campaign/prefill_ablation.jsonl",
+        "results/publication_campaign/inter_session_trials.jsonl",
         "results/publication_campaign/inter_session_replication.json",
+        "results/publication_campaign/tool_rag_mitigation_trials.jsonl",
+        "results/publication_campaign/tool_rag_mitigation_summary.json",
         "results/publication_campaign/hyperfine_cold_start.json",
         "results/publication_campaign/hyperfine_agent_init.json",
+        "results/publication_campaign/hyperfine_worker_version.json",
         "results/publication_campaign/llama_server_publication.log",
         "results/publication_campaign/powermetrics_publication_sample.txt",
         "scripts/run_uma_energy_and_bandwidth_attribution.py",
@@ -78,6 +88,8 @@ def update_manifest() -> int:
     for rel_path in sorted(manifest.keys()):
         if (
             rel_path.startswith("results/simulated_check/")
+            or rel_path == "data/results_all.json"
+            or rel_path.startswith("results/exploratory_campaigns/campaign_comparison/")
             or "poisson" in rel_path.lower()
             or "fig7" in rel_path
             or "fig8" in rel_path
