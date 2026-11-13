@@ -3,30 +3,15 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 1: RESPOSTA AOS REVISORES, MANUSCRITO .TEX, BIBLIOGRAFIA E TABELAS LATEX
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T18:05:25.121507+00:00
-Git HEAD: a3004953860f471ca3e40a7d3a2f9f118ce08ae4
+Data de Geracao (UTC): 2026-11-13T18:27:36.384873+00:00
+Git HEAD: d650f6cf6911b7c66344d9787203086d03abcff5
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
 BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
- M benchmark/openclaw_orch.mjs
- M data/gatekeeper_audit_certificate.json
- M data/manifest_sha256.json
- M paper/COVER_LETTER.md
- M paper/HIGHLIGHTS.md
- M paper/RESPONSE_TO_REVIEWERS.md
- M paper/softwarex_manuscript.tex
- M results/publication_campaign/gatekeeper_audit_certificate.json
- M results/publication_campaign/tables/macros_empirical.tex
- M results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
- M results/publication_campaign/uma_energy_bandwidth_attribution.json
- M scripts/export_audit_bundle.py
- M scripts/run_uma_energy_and_bandwidth_attribution.py
- M scripts/verify_manifest.py
- M tutorial/README.md
-?? data/uma_energy_bandwidth_attribution.json
+(clean working tree)
 ================================================================================
 
 
@@ -36,7 +21,7 @@ SECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA 
 
 ================================================================================
 FILE: paper/RESPONSE_TO_REVIEWERS.md
-SHA-256: 7bda99717a0d9328e4d9a890f26997fe9a52ce407c84b48f351cd2bca6653e7d
+SHA-256: fb08dbea7678d06ef412a8b3dfabd521391df23255a3260c43a8fb4799c11806
 ================================================================================
 # Point-by-Point Response to Reviewers (Elsevier SoftwareX — Revision R9)
 
@@ -54,7 +39,7 @@ The table below maps every single gate of the Elsevier SoftwareX Reviewer & Auth
 
 | Gate & Scope | Criterion / Evaluated Property | Status | Concrete Artifact / Source Code Evidence |
 |---|---|---|---|
-| **Gate 0: Provenance** | 9 root fields in 100% JSONL trials | **VERIFIED** | `results/publication_campaign/*.jsonl` (3,823 lines across all 7 datasets); `benchmark/protocol_invariants.py` (`validate_gate_0_provenance_fields`, lines 45–95). |
+| **Gate 0: Provenance** | 9 root fields in 100% JSONL trials | **VERIFIED** | `results/publication_campaign/*.jsonl` (3,774 lines across all 7 JSONL datasets); `benchmark/protocol_invariants.py` (`validate_gate_0_provenance_fields`, lines 45–95). |
 | **Gate 0: Provenance** | Hardware & session metadata | **VERIFIED** | `results/publication_campaign/campaign_metadata.json` (lines 1–25); `results/publication_campaign/raw_trials.jsonl`. |
 | **Gate 1: Governance** | Metric synchronization across docs | **VERIFIED** | `paper/HIGHLIGHTS.md` (lines 1–6); `paper/COVER_LETTER.md` (lines 1–45); zero outdated $23.4\times$ references. |
 | **Gate 1: Governance** | Dual licensing & citation metadata | **VERIFIED** | `LICENSE` (MIT License); `DATA_LICENSE` (CC-BY 4.0); `CITATION.cff` (v1.2.0 metadata). |
@@ -149,7 +134,7 @@ END FILE: paper/RESPONSE_TO_REVIEWERS.md
 
 ================================================================================
 FILE: paper/softwarex_manuscript.tex
-SHA-256: 3023996464f02789cb31d19172055434d431d82af26a7daed9131f9d6f607b3c
+SHA-256: 97ef8b17dc8d1f014d69733d4f9ce919021cbb5895d15fd892df3c675272e36e
 ================================================================================
 \documentclass[preprint,12pt,3p]{elsarticle}
 
@@ -521,7 +506,7 @@ The \texttt{picoclaw-vs-openclaw-benchmark} framework delivers an open, extensib
 This work was conducted at the Center for Engineering, Modeling and Applied Social Sciences (CECS) of the Federal University of ABC (UFABC), Brazil.
 
 \section*{Data Availability}
-The complete raw experimental dataset (including \texttt{raw\_trials.jsonl}, \texttt{prefill\_ablation.jsonl}, and \texttt{warm\_cache\_trials.jsonl}), cryptographic SHA-256 verification manifests, statistical hypothesis test matrices, and automated chart generation scripts are openly available in the repository under the Creative Commons Attribution 4.0 International (CC BY 4.0) license at \url{https://github.com/drsigma/picoclaw-vs-openclaw-benchmark} and permanently preserved on Zenodo (\url{https://doi.org/10.5281/zenodo.PENDING_RELEASE}) in accordance with software citation principles \cite{smith2016software}. To comply with third-party model licensing and platform portability, proprietary model weights (\texttt{models/}) and pre-compiled node/go dependencies (\texttt{tools/}) are not redistributed in the repository; they are deterministically downloaded or compiled via \texttt{scripts/setup\_environment.sh} (\texttt{make setup}). Across all experimental campaigns and ablation runs conducted on the Apple Silicon M4 hardware testbed (3,774 physical benchmark and ablation trials across all 8 campaign datasets, including \texttt{raw\_trials.jsonl}, \texttt{warm\_cache\_trials.jsonl}, \texttt{prefill\_ablation.jsonl}, \texttt{uma\_energy\_bandwidth\_trials.jsonl}, \texttt{inter\_session\_trials.jsonl}, \texttt{tool\_rag\_mitigation\_trials.jsonl}, \texttt{kv\_cache\_thrashing\_trials.jsonl}, and \texttt{mcp\_live\_transport\_trials.jsonl}), total electrical energy consumed was approximately $580\text{ kJ}$ ($\approx 0.16\text{ kWh}$).
+The complete raw experimental dataset (including \texttt{raw\_trials.jsonl}, \texttt{prefill\_ablation.jsonl}, and \texttt{warm\_cache\_trials.jsonl}), cryptographic SHA-256 verification manifests, statistical hypothesis test matrices, and automated chart generation scripts are openly available in the repository under the Creative Commons Attribution 4.0 International (CC BY 4.0) license at \url{https://github.com/drsigma/picoclaw-vs-openclaw-benchmark} and permanently preserved on Zenodo (\url{https://doi.org/10.5281/zenodo.PENDING_RELEASE}) in accordance with software citation principles \cite{smith2016software}. To comply with third-party model licensing and platform portability, proprietary model weights (\texttt{models/}) and pre-compiled node/go dependencies (\texttt{tools/}) are not redistributed in the repository; they are deterministically downloaded or compiled via \texttt{scripts/setup\_environment.sh} (\texttt{make setup}). Across all experimental campaigns and ablation runs conducted on the Apple Silicon M4 hardware testbed (3,774 physical benchmark and ablation trials across all 7 JSONL campaign datasets in \texttt{results/publication\_campaign/} (including \texttt{context\_scaling\_ablation.jsonl}, \texttt{rag\_ablation\_trials.jsonl}, and \texttt{concurrency\_scaling\_trials.jsonl}), supplemented by \texttt{data/mcp\_live\_transport\_ablation.json} and \texttt{data/quantization\_scaling\_ablation.json}), total electrical energy consumed was approximately $580\text{ kJ}$ ($\approx 0.16\text{ kWh}$).
 
 \section*{Declaration of Competing Interest}
 The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
@@ -1538,7 +1523,7 @@ END FILE: results/publication_campaign/tables/table_pca_loadings.tex
 
 ================================================================================
 FILE: results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
-SHA-256: e9491c651ee8ed5f4badaa76b7ff8b600fc2a53d4b66b2e7612dd3a018c7dddc
+SHA-256: 74657f7e84144f3347889789703107805ee4cb336e2270902f4f298a2b4365d9
 ================================================================================
 % Auto-generated by scripts/run_uma_energy_and_bandwidth_attribution.py
 % Empirical Apple Silicon M4 UMA Energy Deconvolution and Analytical & Empirical Memory Bandwidth Estimation
@@ -1556,12 +1541,12 @@ SHA-256: e9491c651ee8ed5f4badaa76b7ff8b600fc2a53d4b66b2e7612dd3a018c7dddc
 \textbf{Node.js V8 Orchestrator (OpenClaw Full Ref.)} & 0.178 & 44.36 & 1.82 & 0.01\% / 0.30\% \\
 \midrule
 \multicolumn{5}{l}{\textbf{Apple Silicon M4 Physical Energy Validation and Analytical \& Empirical Bandwidth Estimation:}} \\
-\multicolumn{5}{l}{$\bullet$ Validated CPU Proxies: $T_{\text{exec}}$ ($R^2 = 0.949$), Instructions ($R^2 = 0.954$), Cycles ($R^2 = 0.945$); XNU \texttt{ri\_billed\_energy} rejected ($r = -0.051$, $R^2 = -0.676$; $\hat{\kappa}_{\text{M4}} = 0.0573\text{ mJ/unit}$)} \\
+\multicolumn{5}{l}{$\bullet$ Validated CPU Proxies: $T_{\text{exec}}$ ($R^2 = 0.949$), Instructions ($R^2 = 0.955$), Cycles ($R^2 = 0.945$); XNU \texttt{ri\_billed\_energy} rejected ($r = -0.051$, $R^2 = -0.676$; $\hat{\kappa}_{\text{M4}} = 0.0573\text{ mJ/unit}$)} \\
 \multicolumn{5}{l}{$\bullet$ Affine Roofline Decode Bandwidth ($[S_{\text{active}} + S_{\text{kv}}(N)] \div \text{ITL}$): Median $102.4\text{ GB/s}$ ($85.3\%$), Range $99.0\text{--}108.5\text{ GB/s}$ ($82.5\%\text{--}90.4\%$ of nominal $120\text{ GB/s}$)} \\
 \multicolumn{5}{l}{$\bullet$ Resolves naive $S_{\text{file}} \div \text{ITL}$ artifact ($103\text{--}105\%$ at short $N$) via embedding sparsity ($S_{\text{emb}} = 0.323\text{ GB}$) and empirical $\alpha_{\text{kv}} = 0.939\,\mu\text{s/tok}$ (OLS $R^2 = 0.9781$, two-point delta $0.966\,\mu\text{s/tok}$)} \\
 \bottomrule
 \end{tabular}
-\caption{Empirical per-process energy attribution and Unified Memory Architecture (UMA) analytical \& empirical memory bandwidth estimation ($\text{Model Weights} \div \text{ITL}$) on Apple Silicon M4. Marginal dispatch energy ($E_{\text{CPU, net}}^{\text{dispatch}}$) is measured directly on the Apple SMC \texttt{CPU Power} rail with the Metal GPU idle ($P_{\text{GPU}} \approx 0\text{ W}$), determining true orchestrator energy share $\Phi_{\text{energy, orch}} = E_{\text{CPU, net}}^{\text{dispatch}} / E_{\text{net, task}}$. Darwin kernel \texttt{ri\_billed\_energy} is formally refuted as a physical energy proxy ($r = -0.0510, p = 0.580$), whereas execution time, retired instructions, and CPU cycles achieve $R^2 = 0.945\text{--}0.954$.}
+\caption{Empirical per-process energy attribution and Unified Memory Architecture (UMA) analytical \& empirical memory bandwidth estimation ($\text{Model Weights} \div \text{ITL}$) on Apple Silicon M4. Marginal dispatch energy ($E_{\text{CPU, net}}^{\text{dispatch}}$) is measured directly on the Apple SMC \texttt{CPU Power} rail with the Metal GPU idle ($P_{\text{GPU}} \approx 0\text{ W}$), determining true orchestrator energy share $\Phi_{\text{energy, orch}} = E_{\text{CPU, net}}^{\text{dispatch}} / E_{\text{net, task}}$. Darwin kernel \texttt{ri\_billed\_energy} is formally refuted as a physical energy proxy ($r = -0.0510, p = 0.580$), whereas execution time, retired instructions, and CPU cycles achieve $R^2 = 0.945\text{--}0.955$.}
 \label{tab:energy_bandwidth_deconvolution}
 \end{table}
 
@@ -1601,14 +1586,14 @@ END FILE: results/publication_campaign/tables/table_mcp_transport_ablation.tex
 
 ================================================================================
 FILE: results/publication_campaign/tables/table_quantization_scaling.tex
-SHA-256: 4feb2967dbf098827cc980410e4a40f06248de460b0f6477d5efcd5c268c2cd2
+SHA-256: e56707ef0967cf3a4af2ae8bfe3bbc54b00cdb43f8c422c65593994c53a8449c
 ================================================================================
 % Auto-generated by scripts/run_quantization_scaling_ablation.py
 % Extreme Quantization Scaling Ablation on Apple Silicon M4
 \begin{table}[t]
 \small
 \centering
-\caption{Empirical impact of model weight quantization on decode throughput, $ITL_0$, active UMA memory bandwidth, and orchestrator overhead fraction $\Phi_{\text{orch}}$ (Apple M4 Metal GPU, $n=10$ physical repetitions). Across all bit-widths from 2-bit (Q2\_K) to 4-bit (Q4\_K\_M), generation latency scales strictly linearly with active DRAM bytes ($R^2 = 0.2364$), proving that the inference memory bus remains the universal bottleneck regardless of precision.}
+\caption{Empirical impact of model weight quantization on decode throughput, $ITL_0$, active UMA memory bandwidth, and orchestrator overhead fraction $\Phi_{\text{orch}}$ (Apple M4 Metal GPU, $n=10$ physical repetitions). 2-bit quantization (\texttt{Q2\_K}) achieves the highest decode throughput ($51.0\text{ tok/s}$), whereas 3-bit (\texttt{Q3\_K\_M}, $40.2\text{ tok/s}$) incurs non-monotonic Metal shader bit-unpacking overhead relative to byte-aligned 4-bit (\texttt{Q4\_K\_M}, $45.0\text{ tok/s}$, linear $R^2 = 0.2364$), confirming that decode latency is jointly governed by UMA memory bandwidth ($52.3\text{--}75.9\text{ GB/s}$) and dequantization kernel complexity.}
 \label{tab:quantization_scaling}
 \begin{tabular}{lcccccc}
 \toprule
@@ -1628,7 +1613,7 @@ END FILE: results/publication_campaign/tables/table_quantization_scaling.tex
 
 ================================================================================
 FILE: results/publication_campaign/tables/macros_empirical.tex
-SHA-256: b0708da8ae5a19c738bb23714daf71b92b461869d2b72fdae3df0e4adb5f28fd
+SHA-256: e79fe84cbc9ba21a7e718ea5bb95b1322d7c7742780df608155b8d80e5621c43
 ================================================================================
 % Automatically generated macros from publication campaign empirical results
 % DO NOT EDIT MANUALLY - Generated by benchmark/analyze_results.py
@@ -1713,16 +1698,16 @@ SHA-256: b0708da8ae5a19c738bb23714daf71b92b461869d2b72fdae3df0e4adb5f28fd
 \newcommand{\WFourAdjP}{< 10^{-5}}
 
 
-% Affine Roofline & KV-Cache Bandwidth Deconvolution Macros
-\newcommand{\ActiveWeightsGB}{1.688}
-\newcommand{\EmbeddingTableGB}{0.323}
-\newcommand{\ZeroContextITLms}{17.12}
-\newcommand{\AlphaKVusPerTok}{0.939}
-\newcommand{\AlphaKVTwoPoint}{0.966}
-\newcommand{\AlphaKVRTwo}{0.9781}
-\newcommand{\ActiveBWMinPct}{82.5}
-\newcommand{\ActiveBWMaxPct}{90.4}
-\newcommand{\ActiveBWMedianGBs}{102.4}
+% --- Roofline & KV-Cache Empirical Parameters ---
+\newcommand{\ActiveWeightsGB}{2.27}
+\newcommand{\EmbeddingTableGB}{0.32}
+\newcommand{\ZeroContextITLms}{22.24}
+\newcommand{\AlphaKVusPerTok}{0.830}
+\newcommand{\AlphaKVTwoPoint}{0.793}
+\newcommand{\AlphaKVRTwo}{0.9963}
+\newcommand{\ActiveBWMinPct}{83.4}
+\newcommand{\ActiveBWMaxPct}{94.9}
+\newcommand{\ActiveBWMedianGBs}{102.2}
 
 ================================================================================
 END FILE: results/publication_campaign/tables/macros_empirical.tex
