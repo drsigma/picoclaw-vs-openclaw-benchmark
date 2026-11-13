@@ -78,7 +78,7 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.9209,
+        "rho": 0.9476,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -88,7 +88,7 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.9527,
+        "rho": 0.9664,
         "p_value": 0.0,
         "significant_001": true
       }
@@ -140,7 +140,7 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.9278,
+        "rho": 0.9551,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -150,7 +150,7 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.9354,
+        "rho": 0.9496,
         "p_value": 0.0,
         "significant_001": true
       }
@@ -202,7 +202,7 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4483,
+        "rho": 0.4684,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -212,7 +212,7 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.6158,
+        "rho": 0.6162,
         "p_value": 0.0,
         "significant_001": true
       }
@@ -264,7 +264,7 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4985,
+        "rho": 0.4828,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -274,7 +274,7 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.4414,
+        "rho": 0.4542,
         "p_value": 0.0,
         "significant_001": true
       }
@@ -326,7 +326,7 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4072,
+        "rho": 0.4318,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -336,7 +336,7 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.5959,
+        "rho": 0.5958,
         "p_value": 0.0,
         "significant_001": true
       }
@@ -388,7 +388,7 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.3481,
+        "rho": 0.398,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -398,7 +398,7 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.4426,
+        "rho": 0.453,
         "p_value": 0.0,
         "significant_001": true
       }
@@ -450,7 +450,7 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.3154,
+        "rho": 0.3522,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -460,7 +460,7 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.3859,
+        "rho": 0.3947,
         "p_value": 0.0,
         "significant_001": true
       }
@@ -512,7 +512,7 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4367,
+        "rho": 0.486,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -522,7 +522,7 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.5328,
+        "rho": 0.5431,
         "p_value": 0.0,
         "significant_001": true
       }
@@ -574,7 +574,7 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4581,
+        "rho": 0.5098,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -584,54 +584,54 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.5818,
+        "rho": 0.5905,
         "p_value": 0.0,
         "significant_001": true
       }
     },
     "prompt_tokens": {
       "t_task_ms": {
-        "rho": 0.9209,
+        "rho": 0.9476,
         "p_value": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.9278,
+        "rho": 0.9551,
         "p_value": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.4483,
+        "rho": 0.4684,
         "p_value": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.4985,
+        "rho": 0.4828,
         "p_value": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.4072,
+        "rho": 0.4318,
         "p_value": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.3481,
+        "rho": 0.398,
         "p_value": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.3154,
+        "rho": 0.3522,
         "p_value": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.4367,
+        "rho": 0.486,
         "p_value": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.4581,
+        "rho": 0.5098,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -641,12 +641,12 @@
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.873,
+        "rho": 0.8849,
         "p_value": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.8733,
+        "rho": 0.9063,
         "p_value": 0.0,
         "significant_001": true
       }
@@ -698,7 +698,7 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.873,
+        "rho": 0.8849,
         "p_value": 0.0,
         "significant_001": true
       },
@@ -708,64 +708,64 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.9933,
+        "rho": 0.985,
         "p_value": 0.0,
         "significant_001": true
       }
     },
     "edp_js": {
       "t_task_ms": {
-        "rho": 0.9527,
+        "rho": 0.9664,
         "p_value": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.9354,
+        "rho": 0.9496,
         "p_value": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.6158,
+        "rho": 0.6162,
         "p_value": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.4414,
+        "rho": 0.4542,
         "p_value": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.5959,
+        "rho": 0.5958,
         "p_value": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.4426,
+        "rho": 0.453,
         "p_value": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.3859,
+        "rho": 0.3947,
         "p_value": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.5328,
+        "rho": 0.5431,
         "p_value": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.5818,
+        "rho": 0.5905,
         "p_value": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.8733,
+        "rho": 0.9063,
         "p_value": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.9933,
+        "rho": 0.985,
         "p_value": 0.0,
         "significant_001": true
       },

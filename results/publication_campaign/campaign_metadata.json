@@ -49,7 +49,7 @@
     "soc": "Apple M4 (10-Core CPU: 4 Performance + 6 Efficiency)",
     "gpu": "10-Core Apple Metal GPU",
     "memory": "24 GB Unified LPDDR5X UMA @ 120 GB/s bandwidth",
-    "os": "macOS 15.x (darwin-arm64)",
+    "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
     "telemetry": "Apple Silicon SMC (powermetrics 50 ms current shunts) + Darwin XNU libproc (RUSAGE_INFO_V4)"
   }
 }

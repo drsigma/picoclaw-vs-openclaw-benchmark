@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "timestamp_utc": "2026-11-12T22:12:29.547606+00:00",
+    "timestamp_utc": "2026-11-13T00:36:12.569572+00:00",
     "hardware": "Apple Mac mini M4 (Mac16,10, 10-core GPU, darwin-arm64)",
     "telemetry_source": "Apple SMC powermetrics 50ms + Darwin XNU libproc RUSAGE_INFO_V4",
     "integrity_rule": "100% Physical Telemetry (Zero synthetic or mock data)"
@@ -338,25 +338,25 @@
       "bytes_per_kv_token": 114688,
       "nominal_uma_bw_gb_s": 120.0,
       "regime_a_cold": {
-        "mean_gb_s": 179.52,
-        "median_gb_s": 135.79,
-        "p05_gb_s": 112.97,
-        "p95_gb_s": 463.96,
-        "util_pct_nominal_120": 149.6
+        "mean_gb_s": 95.85,
+        "median_gb_s": 94.58,
+        "p05_gb_s": 93.97,
+        "p95_gb_s": 97.13,
+        "util_pct_nominal_120": 79.9
       },
       "regime_b_warm": {
-        "mean_gb_s": 164.94,
-        "median_gb_s": 131.87,
-        "p05_gb_s": 112.53,
-        "p95_gb_s": 467.76,
-        "util_pct_nominal_120": 137.4
+        "mean_gb_s": 106.67,
+        "median_gb_s": 113.7,
+        "p05_gb_s": 94.72,
+        "p95_gb_s": 114.54,
+        "util_pct_nominal_120": 88.9
       },
       "overall": {
-        "mean_gb_s": 173.03,
-        "median_gb_s": 134.81,
-        "p05_gb_s": 112.58,
-        "p95_gb_s": 466.49,
-        "util_pct_nominal_120": 144.2
+        "mean_gb_s": 104.02,
+        "median_gb_s": 96.99,
+        "p05_gb_s": 94.1,
+        "p95_gb_s": 114.54,
+        "util_pct_nominal_120": 86.7
       }
     }
   }

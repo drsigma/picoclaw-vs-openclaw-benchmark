@@ -7,17 +7,17 @@
 \hline
 \textbf{Systems Interaction} & \textbf{Regime A ($\rho_{\text{cold}}$)} & \textbf{Holm-adj. $p$ (A)} & \textbf{Regime B ($\rho_{\text{warm}}$)} & \textbf{Holm-adj. $p$ (B)} \\
 \hline
-$T_{\text{task}}$ vs $N_{\text{prompt}}$ (Prompt Token Length) & +0.921$^{***}$ & $< 10^{-5}$ & +0.594$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{task}}$ vs $N_{\text{prompt}}$ (Prompt Token Length) & +0.948$^{***}$ & $< 10^{-5}$ & +0.594$^{***}$ & $< 10^{-5}$ \\
 $T_{\text{task}}$ vs $E_{\text{net}}$ (Active Package Energy) & +0.930$^{***}$ & $< 10^{-5}$ & +0.958$^{***}$ & $< 10^{-5}$ \\
 $T_{\text{task}}$ vs $T_{\text{orch}}$ (Orchestrator Overhead Share) & +0.597$^{***}$ & $< 10^{-5}$ & +0.534$^{***}$ & $< 10^{-5}$ \\
-$T_{\text{neural}}$ vs $N_{\text{prompt}}$ (Attention Prefill Duration) & +0.928$^{***}$ & $< 10^{-5}$ & +0.578$^{***}$ & $< 10^{-5}$ \\
-$E_{\text{net}}$ vs $N_{\text{prompt}}$ (Prefill Energy Drain) & +0.873$^{***}$ & $< 10^{-5}$ & +0.565$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{neural}}$ vs $N_{\text{prompt}}$ (Attention Prefill Duration) & +0.955$^{***}$ & $< 10^{-5}$ & +0.578$^{***}$ & $< 10^{-5}$ \\
+$E_{\text{net}}$ vs $N_{\text{prompt}}$ (Prefill Energy Drain) & +0.885$^{***}$ & $< 10^{-5}$ & +0.565$^{***}$ & $< 10^{-5}$ \\
 Retired Instructions vs CPU Cycles & +0.980$^{***}$ & $< 10^{-5}$ & +0.969$^{***}$ & $< 10^{-5}$ \\
 Retired Instructions vs $T_{\text{orch}}$ & +0.748$^{***}$ & $< 10^{-5}$ & +0.818$^{***}$ & $< 10^{-5}$ \\
 Retired Instructions vs Peak RSS & +0.938$^{***}$ & $< 10^{-5}$ & +0.952$^{***}$ & $< 10^{-5}$ \\
 Peak Phys RAM vs $T_{\text{orch}}$ & +0.696$^{***}$ & $< 10^{-5}$ & +0.745$^{***}$ & $< 10^{-5}$ \\
 $T_{\text{disp}}$ vs $T_{\text{orch}}$ (Dispatch Dominance) & +0.711$^{***}$ & $< 10^{-5}$ & +0.846$^{***}$ & $< 10^{-5}$ \\
-Condition Means ($n=20$): $T_{\text{task}}$ vs $N_{\text{prompt}}$ & +0.922$^{***}$ & $< 10^{-5}$ & +0.599$^{**}$ & 0.0053 \\
+Condition Means ($n=20$): $T_{\text{task}}$ vs $N_{\text{prompt}}$ & +0.952$^{***}$ & $< 10^{-5}$ & +0.599$^{**}$ & 0.0053 \\
 Intra-Workload W2 (Fixed $N_{\text{prompt}}$): $T_{\text{orch}}$ vs Instr & +0.930$^{***}$ & $< 10^{-5}$ & +0.917$^{***}$ & $< 10^{-5}$ \\
 Intra-Workload W3 (Vector I/O): $T_{\text{disp}}$ vs $T_{\text{task}}$ & +0.515$^{***}$ & $< 10^{-5}$ & +0.674$^{***}$ & $< 10^{-5}$ \\
 \hline
