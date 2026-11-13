@@ -72,12 +72,16 @@ O servidor neural aloca os tensores do Llama-3.2-3B na memória unificada (UMA) 
   -c 32768 -np 1 -ngl 99 --host 127.0.0.1 --port 8080 -t 4
 ```
 ```text
-llama_server: model loaded: Llama-3.2-3B-Instruct-Q4_K_M.gguf (1.92 GiB)
-llama_server: Metal GPU slots allocated: 1 (10 GPU cores active)
-llama_server: listening on http://127.0.0.1:8080
-HTTP GET /health -> 200 OK {"status": "ok"}
+0.04.154.161 I srv  llama_server: initializing ...
+0.04.154.169 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.04.156.027 I srv    load_model: loading model './models/Llama-3.2-3B-Instruct-Q4_K_M.gguf'
+0.05.841.379 I cmn          init: llama threadpool init, n_threads = 4
+0.06.149.561 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 32768, kv_unified = 'false'
+0.06.152.620 I srv  server_run_i: model loaded
+0.06.152.626 I srv  server_on_li: listening on http://127.0.0.1:8080
 ```
-*Legenda Técnica:* Inicialização do `llama-server` (b11887) no Apple M4 (`Mac16,10`). Observa-se a alocação de 3.21 bilhões de parâmetros (1,92 GiB em Q4_K_M) diretamente na DRAM compartilhada e prontidão do endpoint HTTP loopback em 347 ms.
+*Fonte do Log Real / Real Log Source:* `results/publication_campaign/llama_server_publication.log` (Linhas 1–8).  
+*Legenda Técnica:* Inicialização do `llama-server` (b11887) no Apple M4 (`Mac16,10`). Observa-se a alocação de 3.21 bilhões de parâmetros (2,019 GB em Q4_K_M) diretamente na DRAM compartilhada (`n_slots = 1, n_ctx_slot = 32768`) e prontidão do endpoint HTTP loopback.
 
 ---
 
@@ -134,6 +138,7 @@ Benchmark 2: ./tools/node/bin/node ./benchmark/openclaw_orch.mjs --version
 Summary:
   PicoClaw ran 3.81 times faster (mean) and 3.46 times faster (median) than OpenClaw
 ```
+*Fonte do Log Real / Real Log Source:* `results/publication_campaign/hyperfine_cold_start.json` (e `results/publication_campaign/hyperfine_worker_version.json`).  
 *Legenda Técnica:* No par equivalente de checagem de versão (`hyperfine_cold_start.json`), o PicoClaw (Go nativo) inicializa em **$9{,}74\text{ ms}$** de média (**$9{,}67\text{ ms}$** de mediana) vs. **$37{,}15\text{ ms}$** de média (**$33{,}48\text{ ms}$** de mediana) no OpenClaw (Node.js/V8), comprovando vantagem de inicialização de **$3{,}81\times$ na média ($3{,}46\times$ na mediana)** a favor do Go (e **$3{,}04\text{ ms}$ vs. $22{,}15\text{ ms}$ [$7{,}29\times$]** nos workers isomórficos em `hyperfine_worker_version.json`).
 
 ---
@@ -186,13 +191,18 @@ Amostragem dos sensores de potência física do silício M4 via SMC:
 sudo powermetrics -i 50 -n 10 --samplers cpu_power,gpu_power
 ```
 ```text
-*** Sampled system activity (Mon Nov 10 20:00:00 2026 -0300) (50.12ms elapsed) ***
-CPU Power: 2840 mW
-GPU Power: 12650 mW
+Machine model: Mac16,10
+OS version: 25G83
+*** Sampled system activity (Thu Nov 12 18:28:01 2026 -0300) (55.28ms elapsed) ***
+E-Cluster HW active frequency: 2208 MHz
+E-Cluster HW active residency:  51.33%
+CPU Power: 669 mW
+GPU Power: 90 mW
 ANE Power: 0 mW
-Combined Power (CPU + GPU + ANE): 15490 mW
+Combined Power (CPU + GPU + ANE): 760 mW
 ```
-*Legenda Técnica:* Leitura em tempo real dos shunts elétricos do Apple M4 SoC a cada 50 ms revelando dissipação de **12,6 W na GPU Metal** e **2,8 W na CPU** sob carga de geração de tokens.
+*Fonte do Log Real / Real Log Source:* `results/publication_campaign/powermetrics_publication_sample.txt` (Linhas 1–56).  
+*Legenda Técnica:* Leitura física real dos shunts elétricos do Apple M4 SoC (`Mac16,10`, OS `25G83`) a cada 50 ms via `powermetrics`.
 
 ---
 
@@ -217,20 +227,11 @@ Execução da campanha em blocos isolados com persistência determinística de p
 ```bash
 sudo -E ./tools/.venv/bin/python scripts/run_warm_cache_campaign.py
 ```
-*(Exemplo Ilustrativo da Estrutura de Saída do Runner / Illustrative Runner Output Format)*
 ```text
-========================================================================
- 🚀 Full Warm-Cache Benchmark Campaign (Apple Silicon M4)
-    Regime B: Realistic KV-Cache Reuse (BENCH_CACHE_PROMPT=true)
-========================================================================
-⚡ [INFO] Apple SMC hardware telemetry active (root powermetrics shunts).
-▶️  Dispatching 20 randomized blocks (30 evaluations + 3 primings per block = 600 evals, 60 primings)...
-📦 [Block 01/20] Condition: neural_baseline on W4 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] neural_baseline  W4: Task=8395.98ms, Prompt=23255, Cached=22630 (97.3%)
-   [Priming 2/3] neural_baseline  W4: Task=8282.87ms, Prompt=23255, Cached=22687 (97.6%)
-   [010/600] neural_baseline  W4 Rep 10: Task=8182.4ms, Orch= 0.00ms, CacheHit= 97.6%, NetE=119.58J
+{"timestamp_iso": "2026-11-12T22:48:23Z", "agent_key": "picoclaw", "workload": "W2", "rep": 1, "is_warmup": false, "t_task_ms": 741.84, "t_neural_ms": 736.7, "t_orch_ms": 5.14, "ttft_ms": 235.12, "itl_ms": 17.91, "prompt_ms": 235.12, "predicted_ms": 501.58, "proc_peak_phys_mb": 4.73, "prompt_tokens": 2177, "cached_tokens": 2176, "uncached_prompt_tokens": 1, "cache_hit_pct": 99.95, "energy_net_above_idle_j": 8.87, "session_id": "S1_REGIME_B_UNIFIED_20261113", "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)"}
 ```
-*Legenda Técnica:* Execução em blocos isolados no `llama-server` (`-np 1`), garantindo taxa de retenção de prefixo determinística ($\text{Cache Hit } \ge 97{,}6\%$ em W4) e comprovando a redução da latência global ponta a ponta com amostragem física de energia líquida via Apple SMC.
+*Fonte do Log Real / Real Log Source:* `results/publication_campaign/warm_cache_trials.jsonl`.  
+*Legenda Técnica:* Registro real extraído de `warm_cache_trials.jsonl` comprovando retenção de prefixo no `llama-server` (`cached_tokens = 2176 / 2177`, `cache_hit_pct = 99.95%`), latência sub-segundo (`741.84 ms`), `Peak Physical Footprint` (`4.73 MB`) e energia líquida via Apple SMC (`8.87 J`).
 
 ---
 
@@ -299,12 +300,16 @@ To ground evaluation in realistic operating system activity beyond conversationa
   -c 32768 -np 1 -ngl 99 --host 127.0.0.1 --port 8080 -t 4
 ```
 ```text
-llama_server: model loaded: Llama-3.2-3B-Instruct-Q4_K_M.gguf (1.92 GiB)
-llama_server: Metal GPU slots allocated: 1 (10 GPU cores active)
-llama_server: listening on http://127.0.0.1:8080
-HTTP GET /health -> 200 OK {"status": "ok"}
+0.04.154.161 I srv  llama_server: initializing ...
+0.04.154.169 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.04.156.027 I srv    load_model: loading model './models/Llama-3.2-3B-Instruct-Q4_K_M.gguf'
+0.05.841.379 I cmn          init: llama threadpool init, n_threads = 4
+0.06.149.561 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 32768, kv_unified = 'false'
+0.06.152.620 I srv  server_run_i: model loaded
+0.06.152.626 I srv  server_on_li: listening on http://127.0.0.1:8080
 ```
-*Technical Caption:* Initialization of `llama-server` (build b11887) on Apple M4 (`Mac16,10`), allocating 3.21B parameters (1.92 GiB in Q4_K_M) across Unified Memory Architecture (UMA) in 347 ms.
+*Real Log Source:* `results/publication_campaign/llama_server_publication.log` (Lines 1–8).  
+*Technical Caption:* Initialization of `llama-server` (build b11887) on Apple M4 (`Mac16,10`). Notice the allocation of 3.21B parameters (2.019 GB in Q4_K_M) directly in shared DRAM (`n_slots = 1, n_ctx_slot = 32768`) and endpoint readiness on HTTP loopback.
 
 ---
 
@@ -358,6 +363,7 @@ Benchmark 2: ./tools/node/bin/node ./benchmark/openclaw_orch.mjs --version
 Summary:
   PicoClaw ran 3.81 times faster (mean) and 3.46 times faster (median) than OpenClaw
 ```
+*Real Log Source:* `results/publication_campaign/hyperfine_cold_start.json` (and `results/publication_campaign/hyperfine_worker_version.json`).  
 *Technical Caption:* Hyperfine statistical benchmarking (`hyperfine_cold_start.json`) proving PicoClaw launches in **$9.74\text{ ms}$** mean (**$9.67\text{ ms}$** median) vs. OpenClaw's **$37.15\text{ ms}$** mean (**$33.48\text{ ms}$** median), a **$3.81\times$ mean ($3.46\times$ median)** speedup (and **$3.04\text{ ms}$ vs. $22.15\text{ ms}$ [$7.29\times$]** across the isomorphic workers in `hyperfine_worker_version.json`).
 
 ---
@@ -409,13 +415,18 @@ Loaded 40 evaluated trial records.
 sudo powermetrics -i 50 -n 10 --samplers cpu_power,gpu_power
 ```
 ```text
-*** Sampled system activity (Mon Nov 10 20:00:00 2026 -0300) (50.12ms elapsed) ***
-CPU Power: 2840 mW
-GPU Power: 12650 mW
+Machine model: Mac16,10
+OS version: 25G83
+*** Sampled system activity (Thu Nov 12 18:28:01 2026 -0300) (55.28ms elapsed) ***
+E-Cluster HW active frequency: 2208 MHz
+E-Cluster HW active residency:  51.33%
+CPU Power: 669 mW
+GPU Power: 90 mW
 ANE Power: 0 mW
-Combined Power (CPU + GPU + ANE): 15490 mW
+Combined Power (CPU + GPU + ANE): 760 mW
 ```
-*Technical Caption:* Real-time Apple M4 SoC power rail telemetry sampling via SMC at 50 ms intervals, indicating **12.6 W Metal GPU** and **2.8 W CPU** power draw during token generation.
+*Real Log Source:* `results/publication_campaign/powermetrics_publication_sample.txt` (Lines 1–56).  
+*Technical Caption:* Real physical readout from Apple M4 SoC electrical shunts (`Mac16,10`, OS `25G83`) at 50 ms intervals via `powermetrics`.
 
 ---
 
@@ -440,17 +451,8 @@ Executing the block-isolated campaign evaluating persistent prefix caching (`BEN
 ```bash
 sudo -E ./tools/.venv/bin/python scripts/run_warm_cache_campaign.py
 ```
-*(Illustrative Runner Output Format / Exemplo Ilustrativo da Estrutura de Saída do Runner)*
 ```text
-========================================================================
- 🚀 Full Warm-Cache Benchmark Campaign (Apple Silicon M4)
-    Regime B: Realistic KV-Cache Reuse (BENCH_CACHE_PROMPT=true)
-========================================================================
-⚡ [INFO] Apple SMC hardware telemetry active (root powermetrics shunts).
-▶️  Dispatching 20 randomized blocks (30 evaluations + 3 primings per block = 600 evals, 60 primings)...
-📦 [Block 01/20] Condition: neural_baseline on W4 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] neural_baseline  W4: Task=8395.98ms, Prompt=23255, Cached=22630 (97.3%)
-   [Priming 2/3] neural_baseline  W4: Task=8282.87ms, Prompt=23255, Cached=22687 (97.6%)
-   [010/600] neural_baseline  W4 Rep 10: Task=8182.4ms, Orch= 0.00ms, CacheHit= 97.6%, NetE=119.58J
+{"timestamp_iso": "2026-11-12T22:48:23Z", "agent_key": "picoclaw", "workload": "W2", "rep": 1, "is_warmup": false, "t_task_ms": 741.84, "t_neural_ms": 736.7, "t_orch_ms": 5.14, "ttft_ms": 235.12, "itl_ms": 17.91, "prompt_ms": 235.12, "predicted_ms": 501.58, "proc_peak_phys_mb": 4.73, "prompt_tokens": 2177, "cached_tokens": 2176, "uncached_prompt_tokens": 1, "cache_hit_pct": 99.95, "energy_net_above_idle_j": 8.87, "session_id": "S1_REGIME_B_UNIFIED_20261113", "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)"}
 ```
-*Technical Caption:* Block-isolated execution in `llama-server` (`-np 1`), guaranteeing deterministic prefix retention ($\text{Cache Hit } \ge 97.6\%$ in W4) and validating overall task latency reductions under physical Apple SMC telemetry.
+*Real Log Source:* `results/publication_campaign/warm_cache_trials.jsonl`.  
+*Technical Caption:* Real record extracted from `warm_cache_trials.jsonl` proving deterministic prefix retention in `llama-server` (`cached_tokens = 2176 / 2177`, `cache_hit_pct = 99.95%`), sub-second task latency (`741.84 ms`), `Peak Physical Footprint` (`4.73 MB`), and net energy via Apple SMC (`8.87 J`).

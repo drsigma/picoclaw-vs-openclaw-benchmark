@@ -26,6 +26,7 @@ ADAPTER_REGISTRY: Dict[str, Callable[[str], AgentOrchestratorAdapter]] = {
     # Canonical Neutral Architecture Keys
     "go_orchestrator": lambda repo_dir: GoNativeOrchestratorAdapter(repo_dir),
     "go_orchestrator_tool_rag": lambda repo_dir: GoNativeOrchestratorAdapter(repo_dir, mode="tool_rag"),
+    "node_orchestrator": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="minimal"),
     "node_orchestrator_minimal": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="minimal"),
     "node_orchestrator_full": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="full"),
     "node_orchestrator_tool_rag": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="tool_rag"),

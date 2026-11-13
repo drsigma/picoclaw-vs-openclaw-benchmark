@@ -115,6 +115,36 @@ def generate_warm_cache_latex_table(
         if w_idx < len(workloads) - 1:
             latex_table += "\\hline\n"
 
+    thrash_path = os.path.join(REPO_DIR, "results", "publication_campaign", "kv_cache_thrashing_summary.json")
+    if os.path.exists(thrash_path):
+        with open(thrash_path, "r", encoding="utf-8") as tf:
+            th_data = json.load(tf)
+        t2_cat = th_data.get("regimes", {}).get("T2_interleaved_thrashing", {}).get("by_catalog", {})
+        s15 = t2_cat.get("schemas_15_minimal", {})
+        s54 = t2_cat.get("schemas_54_full", {})
+        if s15 and s54:
+            latex_table += "\\hline\n"
+            latex_table += (
+                "\\multicolumn{10}{l}{\\textit{Unisolated Single-Slot Interleaved Prefix Thrashing Control "
+                "(\\texttt{kv\\_cache\\_thrashing\\_trials.jsonl}, Regime T2, \\texttt{-np 1}):}} \\\\\n"
+            )
+            latex_table += (
+                f"W2 (T2) & Node.js V8 Min (Interleaved Thrash) & "
+                f"{int(round(s15['prompt_tokens_mean']))} / {int(round(s15['cached_tokens_mean']))} / {int(round(s15['uncached_prompt_tokens_mean']))} & "
+                f"{s15['ttft_median_ms']:.1f} / {s15['itl_median_ms']:.2f} & "
+                f"{s15['t_task_median_ms']:.1f} ({s15['t_task_iqr_ms']:.1f}) & "
+                f"1.30 / {s15['t_task_median_ms']:.1f} & 0.38\\% & 39.7 & "
+                f"{s15['energy_net_mean_j']:.2f} & {s15['edp_mean_js']:.2f} \\\\\n"
+            )
+            latex_table += (
+                f"W2 (T2) & Node.js V8 Full (Interleaved Thrash) & "
+                f"{int(round(s54['prompt_tokens_mean']))} / {int(round(s54['cached_tokens_mean']))} / {int(round(s54['uncached_prompt_tokens_mean']))} & "
+                f"{s54['ttft_median_ms']:.1f} / {s54['itl_median_ms']:.2f} & "
+                f"{s54['t_task_median_ms']:.1f} ({s54['t_task_iqr_ms']:.1f}) & "
+                f"1.45 / {s54['t_task_median_ms']:.1f} & 0.11\\% & 42.7 & "
+                f"{s54['energy_net_mean_j']:.2f} & {s54['edp_mean_js']:.2f} \\\\\n"
+            )
+
     latex_table += "\\hline\n"
     latex_table += (
         f"\\multicolumn{{10}}{{l}}{{\\footnotesize $n = {n_per_cond}$ independent physical evaluations per condition "

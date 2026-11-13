@@ -32,6 +32,10 @@ W4 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 22980 / 22457 / 523 & 250.8 /
 W4 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 72120 / 71597 / 523 & 306.1 / 22.04 & 11046.8 (72.5) & 10.43 / 124.05 & 1.22\% & 40.1 & 159.48 & 1760.40 \\
 W4 & Python 3.12 Reference Agent & 22980 / 22457 / 523 & 241.3 / 17.86 & 8530.0 (40.7) & 14.33 / 49.81 & 0.75\% & 24.1 & 117.91 & 1004.28 \\
 \hline
+\multicolumn{10}{l}{\textit{Unisolated Single-Slot Interleaved Prefix Thrashing Control (\texttt{kv\_cache\_thrashing\_trials.jsonl}, Regime T2, \texttt{-np 1}):}} \\
+W2 (T2) & Node.js V8 Min (Interleaved Thrash) & 2177 / 32 / 2145 & 4961.5 / 11.73 & 5472.9 (275.2) & 1.30 / 5472.9 & 0.38\% & 39.7 & 89.57 & 484.88 \\
+W2 (T2) & Node.js V8 Full (Interleaved Thrash) & 7091 / 32 / 7059 & 17916.2 / 20.89 & 18551.4 (911.5) & 1.45 / 18551.4 & 0.11\% & 42.7 & 313.07 & 5715.88 \\
+\hline
 \multicolumn{10}{l}{\footnotesize $n = 30$ independent physical evaluations per condition (600 total evaluations, 60 priming warmups excluded).} \\
 \multicolumn{10}{l}{\footnotesize Telemetry Backend: Apple Silicon SMC (\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \texttt{libproc}. Data Source: \texttt{measured\_hardware\_warm\_cache}.} \\
 \hline

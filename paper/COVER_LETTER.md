@@ -5,7 +5,7 @@ The Editor-in-Chief
 *SoftwareX*, Elsevier  
 
 **Subject:** Submission of Original Software Article:  
-*"A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"*
+*"A Reproducible Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and KV-Cache Dynamics in Local LLM Agents on Apple Silicon"*
 
 **Author:**  
 Rafael Paniccia Cassetta  
@@ -17,7 +17,7 @@ Email: `rafael.paniccia@aluno.ufabc.edu.br`
 
 Dear Editor-in-Chief and Editorial Board of *SoftwareX*,
 
-I am pleased to submit our original software manuscript titled **"A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"** for consideration as an original research software article in *SoftwareX*.
+I am pleased to submit our original software manuscript titled **"A Reproducible Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and KV-Cache Dynamics in Local LLM Agents on Apple Silicon"** for consideration as an original research software article in *SoftwareX*.
 
 ### Originality and Scientific Contribution
 With the rapid migration of autonomous AI agents from remote cloud endpoints to local client devices, execution runtime bottlenecks have become a defining constraint. On unified memory architectures such as Apple Silicon (UMA @ 120 GB/s), agent orchestrators compete directly with quantized neural weights (`llama.cpp`) for memory bus bandwidth and compute cycles.

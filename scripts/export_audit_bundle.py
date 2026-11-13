@@ -122,6 +122,10 @@ def dump_file(rel_path: str) -> str:
         "results/publication_campaign/tool_rag_mitigation_summary.json",
         "results/publication_campaign/summary_statistics.json",
         "results/publication_campaign/warm_cache_summary.json",
+        "results/publication_campaign/kv_cache_thrashing_summary.json",
+        "results/publication_campaign/sensitivity_and_outlier_analysis.json",
+        "results/publication_campaign/independent_validation_report.json",
+        "results/publication_campaign/cross_hardware_and_independent_validation.json",
     ]:
         content = format_compact_json_dict(content)
 
@@ -236,6 +240,8 @@ def generate_bundle():
         # Active Scripts
         "scripts/run_tool_rag_mitigation_experiment.py",
         "scripts/run_warm_cache_campaign.py",
+        "scripts/run_kv_cache_thrashing_ablation.py",
+        "scripts/run_independent_validation_suite.py",
         "scripts/run_regime_b_w2_w4_unified_session.py",
         "scripts/run_prefill_ablation.py",
         "scripts/run_w2_resample.py",
@@ -257,6 +263,10 @@ def generate_bundle():
         "results/publication_campaign/uma_energy_bandwidth_attribution.json",
         "results/publication_campaign/inter_session_replication.json",
         "results/publication_campaign/tool_rag_mitigation_summary.json",
+        "results/publication_campaign/kv_cache_thrashing_summary.json",
+        "results/publication_campaign/sensitivity_and_outlier_analysis.json",
+        "results/publication_campaign/independent_validation_report.json",
+        "results/publication_campaign/cross_hardware_and_independent_validation.json",
         "results/publication_campaign/prefill_regression_fit.json",
         "results/publication_campaign/spearman_correlation_matrix.json",
         "results/publication_campaign/pca_variance_decomposition.json",
@@ -306,6 +316,7 @@ def export_raw_jsonl_dataset():
         "results/publication_campaign/warm_cache_trials.jsonl",
         "results/publication_campaign/inter_session_trials.jsonl",
         "results/publication_campaign/tool_rag_mitigation_trials.jsonl",
+        "results/publication_campaign/kv_cache_thrashing_trials.jsonl",
         "results/publication_campaign/prefill_ablation.jsonl",
         "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
     ]

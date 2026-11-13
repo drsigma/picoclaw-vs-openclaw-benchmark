@@ -508,6 +508,97 @@ def test_protocol_invariants_enforced_and_fail_on_violation():
         validate_campaign_invariants(bad7, require_energy=True, metadata=meta)
 
 
+def test_all_checklist_gates_0_to_8_verified():
+    """Validates complete fulfillment of SoftwareX Checklist Gates 0 through 8."""
+    from benchmark.protocol_invariants import validate_gate_0_provenance_fields
+
+    # Gate 0: 9 mandatory fields across all 7 JSONL files
+    jsonl_files = [
+        "raw_trials.jsonl",
+        "warm_cache_trials.jsonl",
+        "inter_session_trials.jsonl",
+        "prefill_ablation.jsonl",
+        "uma_energy_bandwidth_trials.jsonl",
+        "tool_rag_mitigation_trials.jsonl",
+        "kv_cache_thrashing_trials.jsonl",
+    ]
+    for jf in jsonl_files:
+        fpath = os.path.join(REPO_DIR, "results", "publication_campaign", jf)
+        assert os.path.exists(fpath), f"Missing JSONL file {jf}"
+        with open(fpath, "r", encoding="utf-8") as f:
+            recs = [json.loads(line) for line in f if line.strip()]
+        res = validate_gate_0_provenance_fields(
+            recs,
+            source_name=jf,
+            require_prompt_predicted_ms=(jf != "uma_energy_bandwidth_trials.jsonl"),
+        )
+        assert res["status"] == "PASSED", f"Gate 0 failed on {jf}: {res}"
+
+    # Gate 1: Highlights and Cover Letter synchronization
+    hl_path = os.path.join(REPO_DIR, "paper", "HIGHLIGHTS.md")
+    cl_path = os.path.join(REPO_DIR, "paper", "COVER_LETTER.md")
+    for doc_path in (hl_path, cl_path):
+        assert os.path.exists(doc_path), f"Missing {doc_path}"
+        with open(doc_path, "r", encoding="utf-8") as f:
+            text = f.read()
+        assert "23.4" not in text, f"Outdated 23.4x found in {doc_path}"
+
+    # Gate 2 & 5: KV-Cache Thrashing & Warm Cache table
+    thrash_summary_path = os.path.join(REPO_DIR, "results", "publication_campaign", "kv_cache_thrashing_summary.json")
+    assert os.path.exists(thrash_summary_path), f"Missing {thrash_summary_path}"
+    with open(thrash_summary_path, "r", encoding="utf-8") as f:
+        thrash_data = json.load(f)
+    assert thrash_data["thrashing_vs_isolated_comparisons"]["schemas_15_thrashing_latency_penalty_ratio"] > 5.0
+    assert thrash_data["thrashing_vs_isolated_comparisons"]["schemas_54_thrashing_latency_penalty_ratio"] > 15.0
+
+    warm_tex_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_warm_cache.tex")
+    with open(warm_tex_path, "r", encoding="utf-8") as f:
+        warm_tex = f.read()
+    assert "TTFT" in warm_tex
+    assert "ITL" in warm_tex
+    assert "Interleaved Prefix Thrashing" in warm_tex
+
+    # Gate 3 & 4: Sensitivity, Outlier analysis & Negative physical proxy
+    sens_path = os.path.join(REPO_DIR, "results", "publication_campaign", "sensitivity_and_outlier_analysis.json")
+    assert os.path.exists(sens_path), f"Missing {sens_path}"
+    with open(sens_path, "r", encoding="utf-8") as f:
+        sens_data = json.load(f)
+    assert sens_data["regime_a_cold_prefill"]["overall_outlier_fraction_pct"] < 5.0
+    assert sens_data["regime_b_warm_kv_cache"]["overall_outlier_fraction_pct"] < 5.0
+    assert sens_data["regime_a_cold_prefill"]["active_power_net_overall_mean_w"] > 10.0
+    assert sens_data["regime_b_warm_kv_cache"]["active_power_net_overall_mean_w"] > 10.0
+
+    uma_path = os.path.join(REPO_DIR, "results", "publication_campaign", "uma_energy_bandwidth_attribution.json")
+    with open(uma_path, "r", encoding="utf-8") as f:
+        uma_data = json.load(f)
+    assert uma_data["kernel_counter_validation_negative_result"]["rejected_spurious_proxy"] is True
+
+    # Gate 6: Independent validation
+    indep_path = os.path.join(REPO_DIR, "results", "publication_campaign", "independent_validation_report.json")
+    cross_path = os.path.join(REPO_DIR, "results", "publication_campaign", "cross_hardware_and_independent_validation.json")
+    assert os.path.exists(indep_path), f"Missing {indep_path}"
+    assert os.path.exists(cross_path), f"Missing {cross_path}"
+    with open(indep_path, "r", encoding="utf-8") as f:
+        indep_data = json.load(f)
+    assert indep_data["status"] == "ALL_TOLERANCES_PASSED"
+
+    # Gate 8: Disclaimers and absence of forbidden hype phrases
+    manuscript_path = os.path.join(REPO_DIR, "paper", "softwarex_manuscript.tex")
+    readme_path = os.path.join(REPO_DIR, "README.md")
+    forbidden_phrases = [
+        "proves superiority",
+        "energy dominance",
+        "universally faster",
+        "direct DRAM bandwidth telemetry",
+    ]
+    for check_file in (manuscript_path, readme_path, hl_path, cl_path):
+        with open(check_file, "r", encoding="utf-8") as f:
+            content = f.read().lower()
+        for phrase in forbidden_phrases:
+            assert phrase.lower() not in content, f"Forbidden phrase '{phrase}' found in {check_file}"
+
+
+
 
 
 

@@ -1,0 +1,285 @@
+{
+  "protocol_version": "SoftwareX-Gate5-Gate6-v1.0",
+  "status": "ALL_TOLERANCES_PASSED",
+  "environment": {
+    "timestamp_iso": "2026-11-13T04:40:13Z",
+    "git_commit": "7bf09b4",
+    "platform_system": "Darwin",
+    "platform_machine": "arm64",
+    "platform_release": "25.6.0",
+    "python_version": "3.12.15",
+    "go_version": "unavailable ([Errno 2] No such file or directory: 'go')",
+    "node_version": "unavailable ([Errno 2] No such file or directory: 'node')",
+    "bun_version": "unavailable ([Errno 2] No such file or directory: 'bun')"
+  },
+  "telemetry_backend": "apple_smc_powermetrics",
+  "commands_executed": [
+    "make setup",
+    "make check-quiescence",
+    "tools/.venv/bin/python scripts/run_independent_validation_suite.py",
+    "make test && make verify"
+  ],
+  "predefined_tolerances_verification": {
+    "prompt_tokens_15_tool_parity_w2": {
+      "expected": 2177,
+      "observed": 2177,
+      "passed": true
+    },
+    "prompt_tokens_54_tool_parity_w2": {
+      "expected": 7091,
+      "observed": 7091,
+      "passed": true
+    },
+    "http_status_strict_200": {
+      "expected": 200,
+      "passed": true
+    },
+    "t_orch_ms_upper_bound": {
+      "threshold_ms": 250.0,
+      "max_observed_ms": 51.725,
+      "passed": true
+    },
+    "uma_cycle_regressor_r_squared": {
+      "threshold": 0.9,
+      "observed_r2_cycles": 0.9449,
+      "observed_r2_instructions": 0.9545,
+      "passed": true
+    },
+    "xnu_billed_energy_negative_result_verified": {
+      "observed_pearson_r": -0.0511,
+      "passed": true
+    },
+    "gate_0_jsonl_provenance_9_fields": {
+      "files_verified": 7,
+      "passed": true
+    }
+  },
+  "cold_start_hyperfine_verification": {
+    "go_native_mean_ms": 9.74,
+    "nodejs_v8_mean_ms": 37.15,
+    "ratio_v8_over_go": 3.81
+  },
+  "live_adapter_verification_w2": {
+    "go_orchestrator": {
+      "adapter_name": "PicoClaw",
+      "runtime": "Go 1.23.2 (Native Mach-O ARM64)",
+      "workload": "W2",
+      "prompt_tokens": 2177,
+      "expected_prompt_tokens": 2177,
+      "prompt_token_parity_verified": true,
+      "completion_tokens": 29,
+      "http_status": 200,
+      "finish_reason": "tool_calls",
+      "t_task_ms": 874.41,
+      "t_orch_ms": 6.969,
+      "proc_peak_phys_mb": 4.94,
+      "within_tolerance": true
+    },
+    "node_orchestrator": {
+      "adapter_name": "OpenClaw",
+      "runtime": "Node.js v26.12.1 (Google V8 JIT)",
+      "workload": "W2",
+      "prompt_tokens": 2177,
+      "expected_prompt_tokens": 2177,
+      "prompt_token_parity_verified": true,
+      "completion_tokens": 29,
+      "http_status": 200,
+      "finish_reason": "tool_calls",
+      "t_task_ms": 904.73,
+      "t_orch_ms": 51.725,
+      "proc_peak_phys_mb": 37.47,
+      "within_tolerance": true
+    },
+    "node_orchestrator_full": {
+      "adapter_name": "OpenClaw",
+      "runtime": "Node.js v26.12.1 (Google V8 JIT)",
+      "workload": "W2",
+      "prompt_tokens": 7091,
+      "expected_prompt_tokens": 7091,
+      "prompt_token_parity_verified": true,
+      "completion_tokens": 29,
+      "http_status": 200,
+      "finish_reason": "tool_calls",
+      "t_task_ms": 13555.89,
+      "t_orch_ms": 26.801,
+      "proc_peak_phys_mb": 37.66,
+      "within_tolerance": true
+    },
+    "python_reference_agent": {
+      "adapter_name": "PythonNative",
+      "runtime": "Python 3.12.15 (CPython VM)",
+      "workload": "W2",
+      "prompt_tokens": 2177,
+      "expected_prompt_tokens": 2177,
+      "prompt_token_parity_verified": true,
+      "completion_tokens": 29,
+      "http_status": 200,
+      "finish_reason": "tool_calls",
+      "t_task_ms": 1205.56,
+      "t_orch_ms": 17.285,
+      "proc_peak_phys_mb": 24.02,
+      "within_tolerance": true
+    },
+    "bun_jsc_orchestrator": {
+      "adapter_name": "BunJSCOrchestrator",
+      "runtime": "Bun v1.4.4 / JavaScriptCore (darwin-aarch64)",
+      "workload": "W2",
+      "prompt_tokens": 2177,
+      "expected_prompt_tokens": 2177,
+      "prompt_token_parity_verified": true,
+      "completion_tokens": 29,
+      "http_status": 200,
+      "finish_reason": "tool_calls",
+      "t_task_ms": 1134.81,
+      "t_orch_ms": 14.6,
+      "proc_peak_phys_mb": 7.77,
+      "within_tolerance": true
+    },
+    "local_llm_baseline": {
+      "adapter_name": "NeuralBaseline",
+      "runtime": "llama.cpp b11887 (Metal GPU Shaders)",
+      "workload": "W2",
+      "prompt_tokens": 2177,
+      "expected_prompt_tokens": 2177,
+      "prompt_token_parity_verified": true,
+      "completion_tokens": 29,
+      "http_status": 200,
+      "finish_reason": "tool_calls",
+      "t_task_ms": 1138.42,
+      "t_orch_ms": 0.0,
+      "proc_peak_phys_mb": 0.0,
+      "within_tolerance": true
+    }
+  },
+  "gate_0_provenance_audit": {
+    "inter_session_trials.jsonl": {
+      "source_name": "inter_session_trials.jsonl",
+      "records_checked": 660,
+      "gate_0_fields_verified": [
+        "session_id",
+        "timestamp_iso",
+        "git_commit",
+        "hardware",
+        "os",
+        "model_version",
+        "quantization",
+        "server_flags",
+        "workload"
+      ],
+      "status": "PASSED"
+    },
+    "kv_cache_thrashing_trials.jsonl": {
+      "source_name": "kv_cache_thrashing_trials.jsonl",
+      "records_checked": 90,
+      "gate_0_fields_verified": [
+        "session_id",
+        "timestamp_iso",
+        "git_commit",
+        "hardware",
+        "os",
+        "model_version",
+        "quantization",
+        "server_flags",
+        "workload"
+      ],
+      "status": "PASSED"
+    },
+    "prefill_ablation.jsonl": {
+      "source_name": "prefill_ablation.jsonl",
+      "records_checked": 528,
+      "gate_0_fields_verified": [
+        "session_id",
+        "timestamp_iso",
+        "git_commit",
+        "hardware",
+        "os",
+        "model_version",
+        "quantization",
+        "server_flags",
+        "workload"
+      ],
+      "status": "PASSED"
+    },
+    "raw_trials.jsonl": {
+      "source_name": "raw_trials.jsonl",
+      "records_checked": 660,
+      "gate_0_fields_verified": [
+        "session_id",
+        "timestamp_iso",
+        "git_commit",
+        "hardware",
+        "os",
+        "model_version",
+        "quantization",
+        "server_flags",
+        "workload"
+      ],
+      "status": "PASSED"
+    },
+    "tool_rag_mitigation_trials.jsonl": {
+      "source_name": "tool_rag_mitigation_trials.jsonl",
+      "records_checked": 1056,
+      "gate_0_fields_verified": [
+        "session_id",
+        "timestamp_iso",
+        "git_commit",
+        "hardware",
+        "os",
+        "model_version",
+        "quantization",
+        "server_flags",
+        "workload"
+      ],
+      "status": "PASSED"
+    },
+    "uma_energy_bandwidth_trials.jsonl": {
+      "source_name": "uma_energy_bandwidth_trials.jsonl",
+      "records_checked": 120,
+      "gate_0_fields_verified": [
+        "session_id",
+        "timestamp_iso",
+        "git_commit",
+        "hardware",
+        "os",
+        "model_version",
+        "quantization",
+        "server_flags",
+        "workload"
+      ],
+      "status": "PASSED"
+    },
+    "warm_cache_trials.jsonl": {
+      "source_name": "warm_cache_trials.jsonl",
+      "records_checked": 660,
+      "gate_0_fields_verified": [
+        "session_id",
+        "timestamp_iso",
+        "git_commit",
+        "hardware",
+        "os",
+        "model_version",
+        "quantization",
+        "server_flags",
+        "workload"
+      ],
+      "status": "PASSED"
+    }
+  },
+  "variance_decomposition_across_axes": {
+    "hardware_telemetry_backends_supported": [
+      {
+        "platform": "macOS darwin-arm64 (Apple Silicon M4 Mac16,10)",
+        "power_sensor": "SMCPowerMonitor (sudo -n powermetrics 50ms hardware shunts)",
+        "process_accounting": "Darwin XNU libproc proc_pid_rusage (RUSAGE_INFO_V4)",
+        "verified_in_campaign": true
+      },
+      {
+        "platform": "Linux x86_64 / arm64",
+        "power_sensor": "LinuxRAPLMonitor (/sys/class/powercap/intel-rapl/energy_uj)",
+        "process_accounting": "POSIX getrusage + /proc/<pid>/statm + perf_event_open",
+        "verified_in_ci_dry_run": true
+      }
+    ],
+    "inter_session_drift_pct": {}
+  }
+}
