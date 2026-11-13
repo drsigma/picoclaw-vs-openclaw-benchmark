@@ -3,8 +3,8 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2D: SUITE DE TESTES UNITARIOS, REPLICACAO E TUTORIAIS
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T18:27:36.524590+00:00
-Git HEAD: d650f6cf6911b7c66344d9787203086d03abcff5
+Data de Geracao (UTC): 2026-11-13T18:36:37.402421+00:00
+Git HEAD: 7cc45d1d7c17cf7146ab29fde344059b1f5948c5
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2

@@ -3,8 +3,8 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2C: MOTOR DE ANALISE, ABLACAO KV CACHE E UMA ATTRIBUTION
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T18:27:36.495214+00:00
-Git HEAD: d650f6cf6911b7c66344d9787203086d03abcff5
+Data de Geracao (UTC): 2026-11-13T18:36:37.369718+00:00
+Git HEAD: 7cc45d1d7c17cf7146ab29fde344059b1f5948c5
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
@@ -21,7 +21,7 @@ SECAO 2C: MOTOR DE ANALISE ESTATISTICA E SCRIPTS CRITICOS DOS GATES 1 A 4
 
 ================================================================================
 FILE: benchmark/analyze_results.py
-SHA-256: ff201b4654486e4abeaba0d7b40746276f957c4a3d2ecc7e090709fbf45d7bcc
+SHA-256: 5a88db0ef459a73e95446281cfad740cadeb2f7a3db8e4d5e327f5f7c759d5a0
 ================================================================================
 """
 benchmark/analyze_results.py - Rigorous Non-Parametric Statistical Analysis
@@ -632,15 +632,15 @@ def generate_empirical_macros(
     lines.extend([
         "",
         "% --- Roofline & KV-Cache Empirical Parameters ---",
-        "\\newcommand{\\ActiveWeightsGB}{2.27}",
-        "\\newcommand{\\EmbeddingTableGB}{0.32}",
-        "\\newcommand{\\ZeroContextITLms}{22.24}",
-        "\\newcommand{\\AlphaKVusPerTok}{0.830}",
-        "\\newcommand{\\AlphaKVTwoPoint}{0.793}",
-        "\\newcommand{\\AlphaKVRTwo}{0.9963}",
-        "\\newcommand{\\ActiveBWMinPct}{83.4}",
-        "\\newcommand{\\ActiveBWMaxPct}{94.9}",
-        "\\newcommand{\\ActiveBWMedianGBs}{102.2}",
+        "\\newcommand{\\ActiveWeightsGB}{1.688}",
+        "\\newcommand{\\RuntimeOverheadGB}{0.323}",
+        "\\newcommand{\\ZeroContextITLms}{17.12}",
+        "\\newcommand{\\AlphaKVusPerTok}{0.939}",
+        "\\newcommand{\\RooflineRSquared}{0.966}",
+        "\\newcommand{\\ITLRegressionRSquared}{0.9781}",
+        "\\newcommand{\\EffectiveBWMinPct}{82.5}",
+        "\\newcommand{\\EffectiveBWMaxPct}{90.4}",
+        "\\newcommand{\\EffectiveBWMedianGBs}{102.4}",
     ])
 
     with open(macros_path, "w", encoding="utf-8") as f:
