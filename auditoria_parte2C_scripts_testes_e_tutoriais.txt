@@ -3,20 +3,15 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2C: MOTOR DE ANALISE, ABLACAO KV CACHE E UMA ATTRIBUTION
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T15:52:43.691322+00:00
-Git HEAD: 177d5371e0246e4c904f9cb028ec6ee01648c056
+Data de Geracao (UTC): 2026-11-13T15:53:23.151437+00:00
+Git HEAD: e799c9dfecc30ef39b7918f40322780fe3c2ccf0
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
 BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
- M data/manifest_sha256.json
- M results/publication_campaign/cross_hardware_and_independent_validation.json
- M results/publication_campaign/independent_validation_report.json
- M scripts/export_audit_bundle.py
- M scripts/run_independent_validation_suite.py
- M scripts/verify_manifest.py
+(clean working tree)
 ================================================================================
 
 
