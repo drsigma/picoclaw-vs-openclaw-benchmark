@@ -1,0 +1,3844 @@
+================================================================================
+PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
+PARTE 2A: CODIGO-FONTE NUCLEO, ADAPTADORES E TESTES UNITARIOS
+Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
+================================================================================
+Data de Geracao (UTC): 2026-11-13T15:24:40.543604+00:00
+Git HEAD: 6b97fc3897a3e12f4ce12a7fa1697e91dc1553de
+Hardware Host: Apple Silicon M4 (Apple M4)
+Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
+ProductVersion:		26.6.2
+BuildVersion:		25G83)
+Python Version: 3.12.15
+Status Git:
+ M data/manifest_sha256.json
+ M scripts/export_audit_bundle.py
+================================================================================
+
+
+================================================================================
+SECAO 2A: CI/CD, BUILD, INVARIANTES FORMALIZADOS, ORQUESTRADORES, ADAPTADORES E TESTES
+================================================================================
+
+================================================================================
+FILE: .github/workflows/ci.yml
+SHA-256: 25c8cdb376728bccee03ef04a50eff9273e8f5c005c237a137c6403e5cbb6345
+================================================================================
+name: Benchmark Suite CI / CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test & Verify (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff pytest numpy scipy matplotlib python-docx dulwich psutil
+
+      - name: Run Ruff Linter
+        run: |
+          ruff check benchmark/ tests/ scripts/
+
+      - name: Run Pytest Suite
+        run: |
+          pytest -v tests/
+
+      - name: Run Reviewer Fast Dry-Run Integration Test
+        run: |
+          python3 benchmark/run_unified_benchmark.py --dry-run --output-dir /tmp/ci_dry_run
+
+      - name: Run Cryptographic Manifest Verification
+        run: |
+          python3 scripts/verify_manifest.py
+
+================================================================================
+END FILE: .github/workflows/ci.yml
+================================================================================
+
+
+================================================================================
+FILE: Makefile
+SHA-256: 6ab2186272578a5912f96e00eff35d8baa31c988ec4fbe119a84edc1f79839d2
+================================================================================
+# ==============================================================================
+# PicoClaw vs. OpenClaw Benchmark Suite — Unified Automation Makefile
+# Suíte de Benchmark PicoClaw vs. OpenClaw — Makefile de Automação Unificada
+#
+# Author / Autor: Rafael Paniccia Cassetta (UFABC)
+# Platform / Plataforma: Apple Silicon M4 (macOS darwin-arm64)
+# ==============================================================================
+
+SHELL := /bin/bash
+VENV_PY := $(shell if [ -f tools/.venv/bin/python ]; then echo tools/.venv/bin/python; else echo python3; fi)
+
+.PHONY: help setup check-quiescence test verify dry-run simulate-campaign benchmark benchmark-full-smc reproduce-figures clean
+
+help:
+	@echo "========================================================================"
+	@echo " 🚀 PicoClaw vs. OpenClaw: Comandos do Makefile / Makefile Targets"
+	@echo "========================================================================"
+	@echo " [PT-BR] Comandos disponíveis:"
+	@echo "   make setup              - Configura venv Python, Node.js e ferramentas embarcadas"
+	@echo "   make check-quiescence   - Audita estado térmico, CPU idle e modo anti-sono caffeinate"
+	@echo "   make test               - Executa linter (ruff) e testes unitários automatizados"
+	@echo "   make verify             - Valida integridade criptográfica dos artefatos (SHA-256)"
+	@echo "   make dry-run            - Verificação rápida portátil para revisores (Modo Dry-Run / CI)"
+	@echo "   make benchmark          - Executa campanha experimental completa (espaço de usuário comum)"
+	@echo "   make benchmark-full-smc - Executa com sudo powermetrics para telemetria elétrica completa do SMC"
+	@echo "   make reproduce-figures  - Regenera todas as figuras científicas em 300 DPI"
+	@echo "   make clean              - Remove caches e arquivos temporários de execução"
+	@echo ""
+	@echo " [EN-US] Available targets:"
+	@echo "   make setup              - Provisions isolated Python venv, Node.js, and embedded tools"
+	@echo "   make check-quiescence   - Audits thermal state, CPU idle, and caffeinate anti-sleep"
+	@echo "   make test               - Runs linter (ruff) and automated unit test suite"
+	@echo "   make verify             - Validates cryptographic artifact integrity (SHA-256)"
+	@echo "   make dry-run            - Reviewer fast portable dry-run verification (No Sudo / CI)"
+	@echo "   make benchmark          - Runs publication-grade campaign (standard unprivileged user mode)"
+	@echo "   make benchmark-full-smc - Runs with sudo powermetrics for full hardware electrical SMC telemetry"
+	@echo "   make reproduce-figures  - Recompiles all 300-DPI scientific publication figures"
+	@echo "   make clean              - Purges Python/Node caches and temporary execution files"
+	@echo "========================================================================"
+
+setup:
+	@echo "📦 [PT-BR] Provisionando ambiente de teste..."
+	@echo "   [EN-US] Provisioning testbed environment..."
+	./scripts/setup_environment.sh
+
+check-quiescence:
+	@./scripts/check_quiescence.sh
+
+test:
+	@echo "🧪 [PT-BR] Executando linter (ruff) e testes unitários automatizados (pytest)..."
+	@echo "   [EN-US] Running linter (ruff) and automated unit test suite (pytest)..."
+	$(VENV_PY) -m ruff check benchmark/ tests/ scripts/
+	$(VENV_PY) -m pytest -v tests/
+
+verify:
+	@$(VENV_PY) scripts/verify_manifest.py
+
+dry-run:
+	@echo "🧪 [PT-BR] Executando verificação rápida portátil para revisores (Modo Dry-Run)..."
+	@echo "   [EN-US] Running fast reviewer portable dry-run verification..."
+	$(VENV_PY) benchmark/run_unified_benchmark.py --dry-run
+
+simulate-campaign: dry-run
+
+benchmark:
+	@echo "⚡ [PT-BR] Disparando campanha de benchmark em espaço de usuário comum..."
+	@echo "   [EN-US] Dispatching benchmark campaign in unprivileged user space..."
+	$(VENV_PY) benchmark/run_unified_benchmark.py
+
+benchmark-full-smc: check-quiescence
+	@echo "⚡ [PT-BR] Validando privilégios sudo para o leitor de sensores SMC..."
+	@echo "   [EN-US] Validating sudo credentials for SMC powermetrics reader..."
+	@sudo -n powermetrics -i 50 -n 1 >/dev/null 2>&1 || sudo -v
+	@echo "⚡ [PT-BR] Disparando campanha com telemetria elétrica do Apple SMC em espaço de usuário comum..."
+	@echo "   [EN-US] Dispatching full physical benchmark campaign in unprivileged user space..."
+	$(VENV_PY) benchmark/run_unified_benchmark.py --reps 30
+
+reproduce-figures:
+	@echo "📊 [PT-BR] Regenerando figuras científicas em 300 DPI..."
+	@echo "   [EN-US] Re-rendering 300-DPI scientific publication figures..."
+	$(VENV_PY) benchmark/generate_charts.py
+
+clean:
+	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	@echo "🧹 [PT-BR] Caches temporários limpos."
+	@echo "   [EN-US] Temporary caches purged."
+
+================================================================================
+END FILE: Makefile
+================================================================================
+
+
+================================================================================
+FILE: pyproject.toml
+SHA-256: 968c81a365bf5b593749ba710f8a42918045462c763f7717bed4584bd8efc9cd
+================================================================================
+[project]
+name = "picoclaw-vs-openclaw-benchmark"
+version = "1.0.0"
+description = "Performance Evaluation of Go and TypeScript AI Agent Architectures on Apple Silicon M4"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy>=1.26.0",
+    "scipy>=1.11.0",
+    "matplotlib>=3.8.0",
+    "pytest>=8.0.0",
+    "ruff>=0.3.0",
+    "dulwich>=0.21.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+cache-dir = "/tmp/ruff_cache"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = ["E501"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+pythonpath = ["."]
+
+================================================================================
+END FILE: pyproject.toml
+================================================================================
+
+
+================================================================================
+FILE: benchmark/protocol_invariants.py
+SHA-256: 976cf3198799b7906f4da25fa1ba99c9089cc3c353fd82dfaa6edd7945797397
+================================================================================
+"""
+benchmark/protocol_invariants.py - Automated Protocol Invariant Validator
+Validador Automático de Invariantes do Protocolo Experimental (Gate 0 & Gate 7)
+
+Enforces strict fail-fast validation across all benchmark campaigns:
+  0. Presence of all 9 mandatory Gate 0 provenance fields in every JSONL trial record:
+     - session_id, timestamp_iso, git_commit, hardware, os, model_version, quantization, server_flags, workload
+  1. prompt_tokens > 0 and completion_tokens > 0 on every evaluated trial;
+  2. Strict prompt_tokens parity across all 15-tool arms within each workload (when require_equalized_tokens=True);
+  3. Non-empty finish_reason in {"stop", "tool_calls", "length"};
+  4. HTTP status strictly equal to 200;
+  5. Exact total evaluated trial count (e.g. 600) and balanced per-cell count (e.g. n=30);
+  6. Non-empty session_id and git_commit provenance in campaign metadata / trial records;
+  7. Positive physical net energy (energy_net_above_idle_j > 0) when require_energy=True;
+  8. Explicit separation of prompt_ms (neural prefill) and predicted_ms (autoregressive decode) in trial records.
+
+Author: Rafael Paniccia Cassetta (UFABC)
+"""
+
+from __future__ import annotations
+
+from collections import defaultdict
+from typing import Any, Mapping, Sequence
+
+VALID_FINISH_REASONS = frozenset({"stop", "tool_calls", "length"})
+
+GATE_0_REQUIRED_FIELDS: tuple[str, ...] = (
+    "session_id",
+    "timestamp_iso",
+    "git_commit",
+    "hardware",
+    "os",
+    "model_version",
+    "quantization",
+    "server_flags",
+    "workload",
+)
+
+EQUALIZED_15_TOOL_ARMS = frozenset(
+    {
+        "picoclaw",
+        "go_orchestrator",
+        "openclaw_minimal",
+        "node_orchestrator",
+        "node_orchestrator_minimal",
+        "python_native",
+        "python_reference_agent",
+        "neural_baseline",
+        "local_llm_baseline",
+        "bun_minimal",
+        "bun_jsc_orchestrator",
+    }
+)
+
+
+def validate_gate_0_provenance_fields(
+    records: Sequence[Mapping[str, Any]],
+    source_name: str = "jsonl",
+    require_prompt_predicted_ms: bool = False,
+) -> dict[str, Any]:
+    """
+    Validate that 100% of records in a JSONL file contain all 9 mandatory Gate 0 root fields
+    (and optionally prompt_ms / predicted_ms). Raises ValueError immediately on any missing/empty field.
+    """
+    if not records:
+        raise ValueError(f"Gate 0 Invariant violated in {source_name}: empty records sequence.")
+
+    for idx, r in enumerate(records):
+        for field in GATE_0_REQUIRED_FIELDS:
+            val = r.get(field)
+            if not isinstance(val, str) or not val.strip():
+                raise ValueError(
+                    f"Gate 0 Invariant violated in {source_name} at line #{idx + 1}: "
+                    f"missing or empty required provenance field {field!r} (got {val!r})."
+                )
+        if require_prompt_predicted_ms:
+            for timing_field in ("prompt_ms", "predicted_ms"):
+                t_val = r.get(timing_field)
+                if t_val is None or float(t_val) < 0.0:
+                    raise ValueError(
+                        f"Gate 4 Invariant violated in {source_name} at line #{idx + 1}: "
+                        f"missing or negative {timing_field!r} (got {t_val!r})."
+                    )
+
+    return {
+        "source_name": source_name,
+        "records_checked": len(records),
+        "gate_0_fields_verified": list(GATE_0_REQUIRED_FIELDS),
+        "status": "PASSED",
+    }
+
+
+def validate_campaign_invariants(
+    records: Sequence[Mapping[str, Any]],
+    expected_eval_count: int | None = 600,
+    require_equalized_tokens: bool = True,
+    require_energy: bool = True,
+    metadata: Mapping[str, Any] | None = None,
+    expected_reps_per_cell: int | None = 30,
+    require_gate_0_fields: bool = False,
+) -> dict[str, Any]:
+    """
+    Validate all experimental protocol invariants on campaign records and metadata.
+    Raises ValueError immediately on any violation (zero silent fallbacks).
+    """
+    if not records:
+        raise ValueError("Protocol Invariant #5 violated: empty records sequence provided.")
+
+    if require_gate_0_fields:
+        validate_gate_0_provenance_fields(records, source_name="campaign_records")
+
+    eval_recs = [r for r in records if not r.get("is_warmup", False)]
+
+    # Invariant 5: Exact sample count and balanced cell repetitions
+    if expected_eval_count is not None and len(eval_recs) != expected_eval_count:
+        raise ValueError(
+            f"Protocol Invariant #5 violated: expected {expected_eval_count} evaluated records, "
+            f"got {len(eval_recs)}."
+        )
+
+    cell_counts: dict[tuple[str, str], int] = defaultdict(int)
+    for r in eval_recs:
+        ak = str(r.get("agent_key", ""))
+        w = str(r.get("workload", ""))
+        cell_counts[(ak, w)] += 1
+
+    if expected_reps_per_cell is not None:
+        for (ak, w), cnt in cell_counts.items():
+            if cnt != expected_reps_per_cell:
+                raise ValueError(
+                    f"Protocol Invariant #5 violated: cell ({ak!r}, {w!r}) has {cnt} evaluated records, "
+                    f"expected {expected_reps_per_cell}."
+                )
+
+    # Invariant 6 (metadata level): session_id and git_commit provenance
+    if metadata is not None:
+        sid = metadata.get("session_id")
+        gcommit = metadata.get("git_commit")
+        if not isinstance(sid, str) or not sid.strip():
+            raise ValueError("Protocol Invariant #6 violated: missing or empty 'session_id' in campaign metadata.")
+        if not isinstance(gcommit, str) or not gcommit.strip():
+            raise ValueError("Protocol Invariant #6 violated: missing or empty 'git_commit' in campaign metadata.")
+
+    workload_arm_tokens: dict[str, dict[str, set[int]]] = defaultdict(lambda: defaultdict(set))
+
+    for idx, r in enumerate(eval_recs):
+        ak = str(r.get("agent_key", "unknown"))
+        w = str(r.get("workload", "unknown"))
+
+        # Invariant 1: Positive prompt_tokens and completion_tokens
+        pt = r.get("prompt_tokens")
+        ct = r.get("completion_tokens", r.get("output_tokens"))
+        if pt is None or int(pt) <= 0:
+            raise ValueError(
+                f"Protocol Invariant #1 violated at record #{idx} ({ak}, {w}): prompt_tokens={pt!r} must be > 0."
+            )
+        if ct is None or int(ct) <= 0:
+            raise ValueError(
+                f"Protocol Invariant #1 violated at record #{idx} ({ak}, {w}): completion_tokens={ct!r} must be > 0."
+            )
+
+        # Invariant 3: Valid finish_reason
+        fr = r.get("finish_reason")
+        if not isinstance(fr, str) or fr.strip() not in VALID_FINISH_REASONS:
+            raise ValueError(
+                f"Protocol Invariant #3 violated at record #{idx} ({ak}, {w}): "
+                f"finish_reason={fr!r} not in {sorted(VALID_FINISH_REASONS)}."
+            )
+
+        # Invariant 4: HTTP status == 200
+        http_st = r.get("http_status")
+        if http_st != 200:
+            raise ValueError(
+                f"Protocol Invariant #4 violated at record #{idx} ({ak}, {w}): http_status={http_st!r} != 200."
+            )
+
+        # Invariant 6 (record level): session_id and git_commit provenance
+        if metadata is None:
+            r_sid = r.get("session_id")
+            r_gc = r.get("git_commit")
+            if not isinstance(r_sid, str) or not r_sid.strip():
+                raise ValueError(
+                    f"Protocol Invariant #6 violated at record #{idx} ({ak}, {w}): missing or empty 'session_id'."
+                )
+            if not isinstance(r_gc, str) or not r_gc.strip():
+                raise ValueError(
+                    f"Protocol Invariant #6 violated at record #{idx} ({ak}, {w}): missing or empty 'git_commit'."
+                )
+        else:
+            if "session_id" in r and (not isinstance(r["session_id"], str) or not r["session_id"].strip()):
+                raise ValueError(
+                    f"Protocol Invariant #6 violated at record #{idx} ({ak}, {w}): empty 'session_id' in record."
+                )
+            if "git_commit" in r and (not isinstance(r["git_commit"], str) or not r["git_commit"].strip()):
+                raise ValueError(
+                    f"Protocol Invariant #6 violated at record #{idx} ({ak}, {w}): empty 'git_commit' in record."
+                )
+
+        # Invariant 7: Physical energy > 0 when require_energy=True
+        if require_energy:
+            en = r.get("energy_net_above_idle_j")
+            if en is None or float(en) <= 0.0:
+                raise ValueError(
+                    f"Protocol Invariant #7 violated at record #{idx} ({ak}, {w}): "
+                    f"energy_net_above_idle_j={en!r} must be > 0 when require_energy=True."
+                )
+
+        if ak in EQUALIZED_15_TOOL_ARMS:
+            workload_arm_tokens[w][ak].add(int(pt))
+
+    # Invariant 2: Equalized prompt_tokens across all 15-tool arms per workload
+    if require_equalized_tokens:
+        for w, arm_map in workload_arm_tokens.items():
+            all_pts: set[int] = set()
+            for pts_set in arm_map.values():
+                all_pts.update(pts_set)
+            if len(all_pts) > 1:
+                formatted = {k: sorted(v) for k, v in arm_map.items()}
+                raise ValueError(
+                    f"Protocol Invariant #2 violated in workload {w}: 15-tool arms diverged in prompt_tokens: {formatted}"
+                )
+
+    return {
+        "validated_records": len(eval_recs),
+        "cells_validated": len(cell_counts),
+        "require_equalized_tokens": require_equalized_tokens,
+        "require_energy": require_energy,
+        "status": "PASSED",
+    }
+
+================================================================================
+END FILE: benchmark/protocol_invariants.py
+================================================================================
+
+
+================================================================================
+FILE: benchmark/bun_jsc_agent.mjs
+SHA-256: 97363835471ecfee7cd589bb801bed2fa2f246442c4208f0a83442ff4b9a2713
+================================================================================
+#!/usr/bin/env bun
+/**
+ * benchmark/bun_jsc_agent.mjs - Independent Bun / JavaScriptCore Orchestrator Worker
+ * Evaluates Apple WebKit JavaScriptCore (JSC) JIT compilation, Zig-backed I/O (Bun.file),
+ * nanosecond monotonic timing (Bun.nanoseconds), and native fetch streaming across W1-W4.
+ *
+ * Author: Rafael Paniccia Cassetta (UFABC)
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const rawArgs = typeof Bun !== "undefined" ? Bun.argv.slice(2) : process.argv.slice(2);
+if (rawArgs.length > 0 && (rawArgs[0] === "--version" || rawArgs[0] === "version" || rawArgs[0] === "--help")) {
+  console.log("bun_jsc_agent v1.0.0");
+  process.exit(0);
+}
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const REPO_DIR = path.resolve(__dirname, "..");
+const ENV = typeof Bun !== "undefined" ? Bun.env : process.env;
+const API_URL = ENV.LLAMA_API_URL || "http://127.0.0.1:8080/v1/chat/completions";
+const BASE_DIR = ENV.WORKLOAD_DATA_DIR || path.join(REPO_DIR, "data", "workload_data");
+
+function nowMs() {
+  if (typeof Bun !== "undefined" && typeof Bun.nanoseconds === "function") {
+    return Bun.nanoseconds() / 1e6;
+  }
+  return performance.now();
+}
+
+function readResidentMemoryMB() {
+  return process.memoryUsage().rss / (1024.0 * 1024.0);
+}
+
+function synthesizeToolDescriptors(count = 15) {
+  const descriptors = new Array(count);
+  for (let idx = 0; idx < count; idx++) {
+    descriptors[idx] = {
+      type: "function",
+      function: {
+        name: `system_tool_${idx}`,
+        description: `Standard system tool descriptor #${idx} for agent runtime evaluation.`,
+        parameters: {
+          type: "object",
+          properties: {
+            action: { type: "string", description: "Action to execute" },
+            target: { type: "string", description: "Target parameter or file path" }
+          },
+          required: ["action", "target"]
+        }
+      }
+    };
+  }
+  return JSON.parse(JSON.stringify(descriptors));
+}
+
+async function readBinaryFloat32(filePath, expectedFloatCount) {
+  let buf;
+  if (typeof Bun !== "undefined" && typeof Bun.file === "function") {
+    const ab = await Bun.file(filePath).arrayBuffer();
+    buf = new Float32Array(ab);
+  } else {
+    const raw = fs.readFileSync(filePath);
+    buf = new Float32Array(raw.buffer, raw.byteOffset, raw.byteLength / 4);
+  }
+  if (buf.length !== expectedFloatCount) {
+    throw new Error(`FATAL: Binary tensor ${filePath} has ${buf.length} floats, expected ${expectedFloatCount}`);
+  }
+  return buf;
+}
+
+async function readTextFast(filePath) {
+  if (typeof Bun !== "undefined" && typeof Bun.file === "function") {
+    return await Bun.file(filePath).text();
+  }
+  return fs.readFileSync(filePath, "utf-8");
+}
+
+function inspectDirectory(mockDir) {
+  const names = fs.readdirSync(mockDir);
+  const formatted = names.map((entry) => {
+    const stat = fs.statSync(path.join(mockDir, entry));
+    return `${entry}:${stat.size}`;
+  });
+  return JSON.stringify({ count: formatted.length, files: formatted.slice(0, 10) });
+}
+
+async function filterSystemLogs(logFile) {
+  const text = await readTextFast(logFile);
+  const lines = text.split("\n");
+  const pattern = /"subsystem":\s*"UMA_BUS_CONTROLLER"/;
+  const latencies = [];
+  for (let i = 0; i < lines.length; i++) {
+    const row = lines[i];
+    if (pattern.test(row)) {
+      const parsed = JSON.parse(row);
+      if (typeof parsed.latency_ms === "number") {
+        latencies.push(parsed.latency_ms);
+      }
+    }
+  }
+  return {
+    latencies,
+    summaryJson: JSON.stringify({ matched_records: latencies.length, sample: latencies.slice(0, 5) })
+  };
+}
+
+function computeSummaryStats(values) {
+  const n = values.length;
+  if (n === 0) {
+    throw new Error("FATAL: Empty latency array in computeSummaryStats");
+  }
+  let sum = 0.0;
+  for (let i = 0; i < n; i++) sum += values[i];
+  const mean = sum / n;
+  let sqDiff = 0.0;
+  for (let i = 0; i < n; i++) {
+    const d = values[i] - mean;
+    sqDiff += d * d;
+  }
+  const variance = n > 1 ? sqDiff / (n - 1) : 0.0;
+  return JSON.stringify({ n, mean, variance, stddev: Math.sqrt(variance) });
+}
+
+async function runJscVectorRetrieval(baseDir) {
+  const inDim = 256;
+  const outDim = 384;
+  const nDocs = 10000;
+
+  const wProj = await readBinaryFloat32(path.join(baseDir, "w_proj.bin"), inDim * outDim);
+  const bProj = await readBinaryFloat32(path.join(baseDir, "b_proj.bin"), outDim);
+  const docMatrix = await readBinaryFloat32(path.join(baseDir, "doc_embeddings.bin"), nDocs * outDim);
+
+  const qRaw = new Float32Array(inDim);
+  for (let d = 0; d < inDim; d++) {
+    qRaw[d] = Math.sin(d * 0.17) * 0.05;
+  }
+
+  const qProj = new Float32Array(outDim);
+  let normSq = 0.0;
+  for (let j = 0; j < outDim; j++) {
+    let acc = bProj[j];
+    for (let i = 0; i < inDim; i++) {
+      acc += qRaw[i] * wProj[i * outDim + j];
+    }
+    qProj[j] = acc;
+    normSq += acc * acc;
+  }
+
+  const invNorm = 1.0 / (Math.sqrt(normSq) + 1e-8);
+  for (let j = 0; j < outDim; j++) {
+    qProj[j] *= invNorm;
+  }
+
+  const ranked = new Array(nDocs);
+  for (let docIdx = 0; docIdx < nDocs; docIdx++) {
+    const offset = docIdx * outDim;
+    let dot = 0.0;
+    for (let j = 0; j < outDim; j++) {
+      dot += qProj[j] * docMatrix[offset + j];
+    }
+    ranked[docIdx] = { idx: docIdx, score: dot };
+  }
+
+  ranked.sort((a, b) => b.score - a.score);
+
+  const chunksText = await readTextFast(path.join(baseDir, "rag_chunks_10k.json"));
+  const chunksMap = JSON.parse(chunksText);
+
+  let contextBlock = "";
+  for (let k = 0; k < 5; k++) {
+    const docId = String(ranked[k].idx);
+    contextBlock += (chunksMap[docId] || `[Chunk #${docId}] Context reference document.`) + "\n";
+  }
+  return contextBlock;
+}
+
+async function streamCompletionJSC(messages, tools, maxTokens) {
+  const bodyStr = JSON.stringify({
+    model: "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    messages,
+    tools,
+    max_tokens: maxTokens,
+    temperature: 0.0,
+    seed: 42,
+    stream: true,
+    cache_prompt: ENV.BENCH_CACHE_PROMPT === "true"
+  });
+
+  const tReq0 = nowMs();
+  const response = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: bodyStr
+  });
+
+  if (response.status !== 200) {
+    const errBody = await response.text();
+    throw new Error(`FATAL: llama-server HTTP ${response.status}: ${errBody}`);
+  }
+
+  let ttftMs = 0.0;
+  let promptMs = 0.0;
+  let predictedMs = 0.0;
+  let hasTimings = false;
+  let awaitingFirstToken = true;
+  let deltaCount = 0;
+  let cachedTokens = 0;
+  let uncachedTokens = 0;
+  let usagePromptTokens = 0;
+  let completionTokens = 0;
+  let finishReason = "";
+  let assistantText = "";
+
+  const decoder = new TextDecoder();
+  let streamBuf = "";
+  let done = false;
+
+  for await (const chunk of response.body) {
+    if (done) break;
+    streamBuf += decoder.decode(chunk, { stream: true });
+    const lines = streamBuf.split("\n");
+    streamBuf = lines.pop() || "";
+    for (let rawLine of lines) {
+      const line = rawLine.trim();
+      if (!line.startsWith("data: ")) continue;
+      const payload = line.slice(6);
+      if (payload === "[DONE]") {
+        done = true;
+        break;
+      }
+      const frame = JSON.parse(payload);
+      if (frame.timings) {
+        if (typeof frame.timings.prompt_ms === "number") {
+          promptMs = frame.timings.prompt_ms;
+          hasTimings = true;
+        }
+        if (typeof frame.timings.predicted_ms === "number") {
+          predictedMs = frame.timings.predicted_ms;
+          hasTimings = true;
+        }
+        if (typeof frame.timings.cache_n === "number" && frame.timings.cache_n >= 0) {
+          cachedTokens = frame.timings.cache_n;
+        }
+        if (typeof frame.timings.prompt_n === "number" && frame.timings.prompt_n >= 0) {
+          uncachedTokens = frame.timings.prompt_n;
+        }
+        if (typeof frame.timings.predicted_n === "number" && frame.timings.predicted_n > 0) {
+          completionTokens = frame.timings.predicted_n;
+        }
+      }
+      if (frame.usage) {
+        if (typeof frame.usage.prompt_tokens === "number" && frame.usage.prompt_tokens > 0) {
+          usagePromptTokens = frame.usage.prompt_tokens;
+        }
+        if (typeof frame.usage.completion_tokens === "number" && frame.usage.completion_tokens > 0) {
+          completionTokens = frame.usage.completion_tokens;
+        }
+      }
+      const choice = frame.choices?.[0];
+      if (choice) {
+        if (typeof choice.finish_reason === "string" && choice.finish_reason.length > 0) {
+          finishReason = choice.finish_reason;
+        }
+        const delta = choice.delta;
+        if (delta) {
+          let emitted = false;
+          if (delta.content && delta.content.length > 0) {
+            emitted = true;
+            deltaCount++;
+            assistantText += delta.content;
+          }
+          if (delta.tool_calls && delta.tool_calls.length > 0) {
+            emitted = true;
+            deltaCount += delta.tool_calls.length;
+          }
+          if (emitted && awaitingFirstToken) {
+            ttftMs = nowMs() - tReq0;
+            awaitingFirstToken = false;
+          }
+        }
+      }
+    }
+  }
+
+  const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedTokens);
+  const neuralMs = hasTimings ? (promptMs + predictedMs) : (nowMs() - tReq0);
+  const finalPromptMs = hasTimings ? promptMs : ttftMs;
+  const finalPredictedMs = hasTimings ? predictedMs : Math.max(0.0, neuralMs - ttftMs);
+  if (completionTokens === 0) completionTokens = deltaCount;
+  if (!finishReason) finishReason = "stop";
+  const itlMs = completionTokens > 1 ? Math.max(0.0, (neuralMs - ttftMs) / (completionTokens - 1)) : 0.0;
+
+  return {
+    neuralMs,
+    promptMs: finalPromptMs,
+    predictedMs: finalPredictedMs,
+    ttftMs,
+    itlMs,
+    promptTokens,
+    completionTokens,
+    cachedTokens,
+    uncachedTokens,
+    finishReason,
+    httpStatus: response.status,
+    assistantText
+  };
+}
+
+async function executeWorkloadTier(tier, warmth, rssIdle) {
+  const tStart = nowMs();
+  const tCat0 = nowMs();
+  const toolCatalog = synthesizeToolDescriptors(15);
+  const tCatMs = nowMs() - tCat0;
+
+  const mockDir = path.join(BASE_DIR, "mock_files");
+  const logFile = path.join(BASE_DIR, "system_logs.jsonl");
+
+  let tNeuralTotal = 0.0;
+  let totalPromptMs = 0.0;
+  let totalPredictedMs = 0.0;
+  let ttftFirst = 0.0;
+  let itlAvg = 0.0;
+  let tDispatchTotal = tCatMs;
+  let totalPromptTokens = 0;
+  let totalCompletionTokens = 0;
+  let totalCachedTokens = 0;
+  let totalUncachedTokens = 0;
+  let toolCalls = 0;
+  let finishReason = "";
+  let httpStatus = 200;
+
+  if (tier === "W1") {
+    const prompt =
+      "Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. ".repeat(8) +
+      "Summarize the primary latency determinant in two concise sentences.";
+    const messages = [
+      { role: "system", content: "You are a concise technical systems assistant." },
+      { role: "user", content: prompt }
+    ];
+    const r = await streamCompletionJSC(messages, toolCatalog, 64);
+    tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
+    ttftFirst = r.ttftMs;
+    itlAvg = r.itlMs;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedTokens = r.uncachedTokens;
+    finishReason = r.finishReason;
+    httpStatus = r.httpStatus;
+  } else if (tier === "W2") {
+    const tTool0 = nowMs();
+    const dirSummary = inspectDirectory(mockDir);
+    const { latencies, summaryJson } = await filterSystemLogs(logFile);
+    const statsJson = computeSummaryStats(latencies);
+    tDispatchTotal += nowMs() - tTool0;
+    toolCalls = 3;
+
+    const prompt = `System Tool Chain Results:\n1. list_dir: ${dirSummary}\n2. grep_logs: ${summaryJson}\n3. calc_stats: ${statsJson}\nEvaluate the bus latency metrics and execute the next diagnostic step.`;
+    const messages = [
+      { role: "system", content: "You are a concise technical systems assistant." },
+      { role: "user", content: prompt }
+    ];
+    const r = await streamCompletionJSC(messages, toolCatalog, 128);
+    tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
+    ttftFirst = r.ttftMs;
+    itlAvg = r.itlMs;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedTokens = r.uncachedTokens;
+    finishReason = r.finishReason;
+    httpStatus = r.httpStatus;
+  } else if (tier === "W3") {
+    const tTool0 = nowMs();
+    const ragContext = await runJscVectorRetrieval(BASE_DIR);
+    tDispatchTotal += nowMs() - tTool0;
+    toolCalls = 1;
+
+    const messages = [
+      { role: "system", content: "You are a concise technical systems assistant." },
+      { role: "user", content: "Retrieved Context:\n" + ragContext + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?" }
+    ];
+    const r = await streamCompletionJSC(messages, toolCatalog, 256);
+    tNeuralTotal = r.neuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
+    ttftFirst = r.ttftMs;
+    itlAvg = r.itlMs;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedTokens = r.uncachedTokens;
+    finishReason = r.finishReason;
+    httpStatus = r.httpStatus;
+  } else if (tier === "W4") {
+    toolCalls = 10;
+    let itlSum = 0.0;
+    const history = [{ role: "system", content: "You are a concise technical systems assistant." }];
+    for (let step = 1; step <= 10; step++) {
+      const tTool0 = nowMs();
+      inspectDirectory(mockDir);
+      const { latencies } = await filterSystemLogs(logFile);
+      const statsJson = computeSummaryStats(latencies);
+      tDispatchTotal += nowMs() - tTool0;
+
+      history.push({
+        role: "user",
+        content: `Turn ${step} Observation: ${statsJson}. State next brief diagnostic action.`
+      });
+      const r = await streamCompletionJSC(history, toolCatalog, 64);
+      tNeuralTotal += r.neuralMs;
+      totalPromptMs += r.promptMs;
+      totalPredictedMs += r.predictedMs;
+      if (step === 1) ttftFirst = r.ttftMs;
+      itlSum += r.itlMs;
+      totalPromptTokens += r.promptTokens;
+      totalCompletionTokens += r.completionTokens;
+      totalCachedTokens += r.cachedTokens;
+      totalUncachedTokens += r.uncachedTokens;
+      finishReason = r.finishReason;
+      httpStatus = r.httpStatus;
+      history.push({ role: "assistant", content: r.assistantText });
+    }
+    itlAvg = itlSum / 10.0;
+  } else {
+    throw new Error(`FATAL: Unsupported workload tier: ${tier}`);
+  }
+
+  if (totalPromptTokens <= 0 || totalCompletionTokens <= 0) {
+    throw new Error(`FATAL: Invalid token counts in BunJSC worker (prompt=${totalPromptTokens}, completion=${totalCompletionTokens})`);
+  }
+
+  const tTaskMs = nowMs() - tStart;
+  const tOrchMs = Math.max(0.0, tTaskMs - tNeuralTotal);
+  const tHttpMs = Math.max(0.0, tOrchMs - tDispatchTotal);
+  const phiOrch = tTaskMs > 0 ? (tOrchMs / tTaskMs) * 100.0 : 0.0;
+  const rTool = toolCalls > 0 && tDispatchTotal > 0 ? toolCalls / (tDispatchTotal / 1000.0) : 0.0;
+  const rssPeak = Math.max(rssIdle, readResidentMemoryMB());
+  const cacheHitPct = totalPromptTokens > 0 ? (totalCachedTokens / totalPromptTokens) * 100.0 : 0.0;
+  const bunVer = typeof Bun !== "undefined" ? Bun.version : "node-compat";
+
+  return {
+    architecture: `Bun JSC Orchestrator (Bun v${bunVer} / JavaScriptCore)`,
+    workload: tier,
+    warmth,
+    t_task_ms: tTaskMs,
+    t_neural_ms: tNeuralTotal,
+    prompt_ms: totalPromptMs,
+    predicted_ms: totalPredictedMs,
+    t_orch_ms: tOrchMs,
+    phi_orch_pct: phiOrch,
+    ttft_ms: ttftFirst,
+    itl_ms: itlAvg,
+    t_dispatch_ms: tDispatchTotal,
+    t_prune_ms: 0.0,
+    t_http_ms: tHttpMs,
+    r_tool_ops_sec: rTool,
+    rss_idle_mb: rssIdle,
+    rss_peak_mb: rssPeak,
+    alpha_mem: rssPeak / Math.max(1.0, rssIdle),
+    prompt_tokens: totalPromptTokens,
+    completion_tokens: totalCompletionTokens,
+    output_tokens: totalCompletionTokens,
+    cached_tokens: totalCachedTokens,
+    uncached_prompt_tokens: totalUncachedTokens,
+    cache_hit_pct: cacheHitPct,
+    tool_calls: toolCalls,
+    http_status: httpStatus,
+    finish_reason: finishReason
+  };
+}
+
+async function main() {
+  const tier = rawArgs[0] || "W1";
+  const warmth = rawArgs[1] || "Cold";
+  const reps = parseInt(rawArgs[2] || "1", 10);
+  const rssIdle = readResidentMemoryMB();
+  const out = [];
+  for (let i = 0; i < reps; i++) {
+    out.push(await executeWorkloadTier(tier, warmth, rssIdle));
+  }
+  console.log(JSON.stringify(out));
+}
+
+main().catch((err) => {
+  console.error("Bun JSC Orchestrator Fatal Error:", err);
+  process.exit(1);
+});
+
+================================================================================
+END FILE: benchmark/bun_jsc_agent.mjs
+================================================================================
+
+
+================================================================================
+FILE: benchmark/picoclaw_orch.go
+SHA-256: 93cf068ecbed1e18803f026036e828938480782d0b7dc9f388ac82c11e17b592
+================================================================================
+package main
+
+import (
+	"bufio"
+	"bytes"
+	"encoding/binary"
+	"encoding/json"
+	"fmt"
+	"io"
+	"math"
+	"net/http"
+	"os"
+	"path/filepath"
+	"regexp"
+	"runtime"
+	"sort"
+	"strings"
+	"syscall"
+	"time"
+)
+
+type FunctionParameterProp struct {
+	Type        string `json:"type"`
+	Description string `json:"description,omitempty"`
+}
+
+type FunctionParameters struct {
+	Type       string                           `json:"type"`
+	Properties map[string]FunctionParameterProp `json:"properties"`
+	Required   []string                         `json:"required"`
+}
+
+type ToolFunction struct {
+	Name        string             `json:"name"`
+	Description string             `json:"description"`
+	Parameters  FunctionParameters `json:"parameters"`
+}
+
+type ToolDefinition struct {
+	Type     string       `json:"type"`
+	Function ToolFunction `json:"function"`
+}
+
+type ChatMessage struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type ChatRequest struct {
+	Model       string           `json:"model"`
+	Messages    []ChatMessage    `json:"messages"`
+	Tools       []ToolDefinition `json:"tools,omitempty"`
+	MaxTokens   int              `json:"max_tokens"`
+	Temperature float64          `json:"temperature"`
+	Seed        int              `json:"seed"`
+	Stream      bool             `json:"stream"`
+	CachePrompt bool             `json:"cache_prompt"`
+}
+
+type TrialResult struct {
+	Architecture     string  `json:"architecture"`
+	Workload         string  `json:"workload"`
+	Warmth           string  `json:"warmth"`
+	TTaskMs          float64 `json:"t_task_ms"`
+	TNeuralMs        float64 `json:"t_neural_ms"`
+	PromptMs         float64 `json:"prompt_ms"`
+	PredictedMs      float64 `json:"predicted_ms"`
+	TOrchMs          float64 `json:"t_orch_ms"`
+	PhiOrchPct       float64 `json:"phi_orch_pct"`
+	TTFTMs           float64 `json:"ttft_ms"`
+	ITLMs            float64 `json:"itl_ms"`
+	TDispatchMs      float64 `json:"t_dispatch_ms"`
+	TPruneMs         float64 `json:"t_prune_ms"`
+	THttpMs          float64 `json:"t_http_ms"`
+	RToolOpsSec      float64 `json:"r_tool_ops_sec"`
+	RSSIdleMB        float64 `json:"rss_idle_mb"`
+	RSSPeakMB        float64 `json:"rss_peak_mb"`
+	AlphaMem         float64 `json:"alpha_mem"`
+	PromptTokens     int     `json:"prompt_tokens"`
+	CompletionTokens int     `json:"completion_tokens"`
+	OutputTokens     int     `json:"output_tokens"`
+	CachedTokens     int     `json:"cached_tokens"`
+	UncachedPromptTokens int `json:"uncached_prompt_tokens"`
+	CacheHitPct      float64 `json:"cache_hit_pct"`
+	ToolCalls        int     `json:"tool_calls"`
+	HttpStatus       int     `json:"http_status"`
+	FinishReason     string  `json:"finish_reason"`
+}
+
+func minInt(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func getRSSMB() float64 {
+	var rusage syscall.Rusage
+	if err := syscall.Getrusage(syscall.RUSAGE_SELF, &rusage); err == nil {
+		if runtime.GOOS == "darwin" {
+			return float64(rusage.Maxrss) / (1024.0 * 1024.0)
+		}
+		return float64(rusage.Maxrss) / 1024.0
+	}
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+	return float64(m.Sys) / (1024.0 * 1024.0)
+}
+
+func buildStandardToolCatalog(count int) []ToolDefinition {
+	tools := make([]ToolDefinition, count)
+	for i := 0; i < count; i++ {
+		tools[i] = ToolDefinition{
+			Type: "function",
+			Function: ToolFunction{
+				Name:        fmt.Sprintf("system_tool_%d", i),
+				Description: fmt.Sprintf("Standard system tool descriptor #%d for agent runtime evaluation.", i),
+				Parameters: FunctionParameters{
+					Type: "object",
+					Properties: map[string]FunctionParameterProp{
+						"action": {Type: "string", Description: "Action to execute"},
+						"target": {Type: "string", Description: "Target parameter or file path"},
+					},
+					Required: []string{"action", "target"},
+				},
+			},
+		}
+	}
+	return tools
+}
+
+func buildToolEmbeddings(nTools int) []float32 {
+	const dim = 384
+	mat := make([]float32, nTools*dim)
+	for i := 0; i < nTools; i++ {
+		var tNormSq float64
+		rowOffset := i * dim
+		for d := 0; d < dim; d++ {
+			v := math.Sin(float64(i+1)*0.31 + float64(d)*0.13)
+			mat[rowOffset+d] = float32(v)
+			tNormSq += v * v
+		}
+		tNorm := float32(math.Sqrt(tNormSq) + 1e-8)
+		for d := 0; d < dim; d++ {
+			mat[rowOffset+d] /= tNorm
+		}
+	}
+	return mat
+}
+
+func pruneToolsVectorRAG(catalog []ToolDefinition, toolEmb []float32, tier string, topK int) ([]ToolDefinition, float64) {
+	t0 := time.Now()
+	const dim = 384
+	nTools := len(catalog)
+	if nTools <= topK {
+		return catalog, 0.0
+	}
+	tierSeed := 1.0
+	switch tier {
+	case "W2":
+		tierSeed = 2.0
+	case "W3":
+		tierSeed = 3.0
+	case "W4":
+		tierSeed = 4.0
+	}
+
+	qVec := make([]float32, dim)
+	var qNormSq float64
+	for d := 0; d < dim; d++ {
+		val := math.Cos(tierSeed*0.37 + float64(d)*0.19)
+		qVec[d] = float32(val)
+		qNormSq += val * val
+	}
+	qNorm := float32(math.Sqrt(qNormSq) + 1e-8)
+	for d := 0; d < dim; d++ {
+		qVec[d] /= qNorm
+	}
+
+	scores := make([]docScore, nTools)
+	for i := 0; i < nTools; i++ {
+		rowOffset := i * dim
+		var dot float32
+		for d := 0; d < dim; d++ {
+			dot += toolEmb[rowOffset+d] * qVec[d]
+		}
+		scores[i] = docScore{idx: i, score: dot}
+	}
+
+	sort.Slice(scores, func(a, b int) bool {
+		if scores[a].score == scores[b].score {
+			return scores[a].idx < scores[b].idx
+		}
+		return scores[a].score > scores[b].score
+	})
+
+	topIndices := make([]int, topK)
+	for k := 0; k < topK; k++ {
+		topIndices[k] = scores[k].idx
+	}
+	sort.Ints(topIndices)
+
+	pruned := make([]ToolDefinition, topK)
+	for k, idx := range topIndices {
+		pruned[k] = catalog[idx]
+	}
+	elapsedMs := float64(time.Since(t0).Nanoseconds()) / 1e6
+	return pruned, elapsedMs
+}
+
+func executeToolListDir(mockDir string) (string, error) {
+	entries, err := os.ReadDir(mockDir)
+	if err != nil {
+		return "", err
+	}
+	var names []string
+	for _, e := range entries {
+		info, _ := e.Info()
+		sz := int64(0)
+		if info != nil {
+			sz = info.Size()
+		}
+		names = append(names, fmt.Sprintf("%s:%d", e.Name(), sz))
+	}
+	k := minInt(10, len(names))
+	out, _ := json.Marshal(map[string]interface{}{
+		"count": len(names),
+		"files": names[:k],
+	})
+	return string(out), nil
+}
+
+func executeToolGrepLogs(logFile string) ([]float64, string, error) {
+	f, err := os.Open(logFile)
+	if err != nil {
+		return nil, "", err
+	}
+	defer f.Close()
+	re := regexp.MustCompile(`"subsystem":\s*"UMA_BUS_CONTROLLER"`)
+	var vals []float64
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		line := scanner.Text()
+		if re.MatchString(line) {
+			var obj map[string]interface{}
+			if err := json.Unmarshal([]byte(line), &obj); err == nil {
+				if v, ok := obj["latency_ms"].(float64); ok {
+					vals = append(vals, v)
+				}
+			}
+		}
+	}
+	k := minInt(5, len(vals))
+	sample := []float64{}
+	if k > 0 {
+		sample = vals[:k]
+	}
+	out, _ := json.Marshal(map[string]interface{}{
+		"matched_records": len(vals),
+		"sample":          sample,
+	})
+	return vals, string(out), nil
+}
+
+func executeToolCalcStats(vals []float64) string {
+	n := len(vals)
+	if n == 0 {
+		return "{}"
+	}
+	sum := 0.0
+	for _, v := range vals {
+		sum += v
+	}
+	mean := sum / float64(n)
+	varSq := 0.0
+	for _, v := range vals {
+		d := v - mean
+		varSq += d * d
+	}
+	variance := 0.0
+	if n > 1 {
+		variance = varSq / float64(n-1)
+	}
+	out, _ := json.Marshal(map[string]interface{}{
+		"n":        n,
+		"mean":     mean,
+		"variance": variance,
+		"stddev":   math.Sqrt(variance),
+	})
+	return string(out)
+}
+
+type docScore struct {
+	idx   int
+	score float32
+}
+
+type StreamResult struct {
+	TotalNeuralMs        float64
+	PromptMs             float64
+	PredictedMs          float64
+	TTFTMs               float64
+	ITLMs                float64
+	PromptTokens         int
+	CompletionTokens     int
+	CachedTokens         int
+	UncachedPromptTokens int
+	FinishReason         string
+	HttpStatus           int
+	OutputText           string
+}
+
+func executeVectorRAG(baseDir string) string {
+	const inDim = 256
+	const outDim = 384
+	const nDocs = 10000
+
+	wProj := make([]float32, inDim*outDim)
+	bProj := make([]float32, outDim)
+	docMatrix := make([]float32, nDocs*outDim)
+
+	wFile := filepath.Join(baseDir, "w_proj.bin")
+	bFile := filepath.Join(baseDir, "b_proj.bin")
+	docsBinFile := filepath.Join(baseDir, "doc_embeddings.bin")
+
+	wBytes, errW := os.ReadFile(wFile)
+	bBytes, errB := os.ReadFile(bFile)
+	docBytes, errDoc := os.ReadFile(docsBinFile)
+	if errW != nil || errB != nil || errDoc != nil ||
+		len(wBytes) != inDim*outDim*4 || len(bBytes) != outDim*4 || len(docBytes) != nDocs*outDim*4 {
+		panic(fmt.Sprintf("FATAL: Required RAG binary datasets missing or corrupted in %s (w_proj.bin, b_proj.bin, doc_embeddings.bin)", baseDir))
+	}
+
+	for i := 0; i < inDim*outDim; i++ {
+		wProj[i] = math.Float32frombits(binary.LittleEndian.Uint32(wBytes[i*4 : (i+1)*4]))
+	}
+	for i := 0; i < outDim; i++ {
+		bProj[i] = math.Float32frombits(binary.LittleEndian.Uint32(bBytes[i*4 : (i+1)*4]))
+	}
+	for i := 0; i < nDocs*outDim; i++ {
+		docMatrix[i] = math.Float32frombits(binary.LittleEndian.Uint32(docBytes[i*4 : (i+1)*4]))
+	}
+
+	// 1. Query vector initialization and linear projection (256 -> 384)
+	qRaw := make([]float32, inDim)
+	for d := 0; d < inDim; d++ {
+		qRaw[d] = float32(math.Sin(float64(d)*0.17)) * 0.05
+	}
+
+	qProj := make([]float32, outDim)
+	for j := 0; j < outDim; j++ {
+		sum := bProj[j]
+		for i := 0; i < inDim; i++ {
+			sum += qRaw[i] * wProj[i*outDim+j]
+		}
+		qProj[j] = sum
+	}
+
+	// 2. L2 Normalization of projected query vector
+	var normSq float32
+	for j := 0; j < outDim; j++ {
+		normSq += qProj[j] * qProj[j]
+	}
+	norm := float32(math.Sqrt(float64(normSq))) + 1e-8
+	for j := 0; j < outDim; j++ {
+		qProj[j] /= norm
+	}
+
+	// 3. Cosine similarity against all 10,000 document vectors
+	scores := make([]docScore, nDocs)
+	for i := 0; i < nDocs; i++ {
+		var dot float32
+		rowOffset := i * outDim
+		for j := 0; j < outDim; j++ {
+			dot += qProj[j] * docMatrix[rowOffset+j]
+		}
+		scores[i] = docScore{idx: i, score: dot}
+	}
+
+	// 4. Descending sort to select Top-5 chunks
+	sort.Slice(scores, func(a, b int) bool {
+		return scores[a].score > scores[b].score
+	})
+
+	docsFile := filepath.Join(baseDir, "rag_chunks_10k.json")
+	raw, errChunks := os.ReadFile(docsFile)
+	if errChunks != nil {
+		panic(fmt.Sprintf("FATAL: rag_chunks_10k.json missing in %s: %v", baseDir, errChunks))
+	}
+	var chunks map[string]string
+	_ = json.Unmarshal(raw, &chunks)
+
+	var sb strings.Builder
+	for k := 0; k < 5; k++ {
+		topIdx := scores[k].idx
+		if text, ok := chunks[fmt.Sprintf("%d", topIdx)]; ok {
+			sb.WriteString(text)
+		} else {
+			sb.WriteString(fmt.Sprintf("[Chunk #%04d] Context reference document.", topIdx))
+		}
+		sb.WriteString("\n")
+	}
+	return sb.String()
+}
+
+func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage, tools []ToolDefinition, maxTokens int) StreamResult {
+	reqBody := ChatRequest{
+		Model:       "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+		Messages:    messages,
+		Tools:       tools,
+		MaxTokens:   maxTokens,
+		Temperature: 0.0,
+		Seed:        42,
+		Stream:      true,
+		CachePrompt: os.Getenv("BENCH_CACHE_PROMPT") == "true",
+	}
+	payload, _ := json.Marshal(reqBody)
+	t0 := time.Now()
+	req, _ := http.NewRequest("POST", apiURL, bytes.NewReader(payload))
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(fmt.Sprintf("FATAL: HTTP request to llama-server failed: %v", err))
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		bodyBytes, _ := io.ReadAll(resp.Body)
+		panic(fmt.Sprintf("FATAL: llama-server returned HTTP %d: %s", resp.StatusCode, string(bodyBytes)))
+	}
+
+	var ttftMs float64
+	var promptMs, predictedMs float64
+	hasServerTimings := false
+	firstChunk := true
+	tokenCount := 0
+	var cachedTokens, uncachedPromptTokens, usagePromptTokens, completionTokens int
+	var finishReason string
+	var outText strings.Builder
+	reader := bufio.NewReader(resp.Body)
+
+	for {
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			break
+		}
+		line = strings.TrimSpace(line)
+		if strings.HasPrefix(line, "data: ") {
+			dataStr := strings.TrimPrefix(line, "data: ")
+			if dataStr == "[DONE]" {
+				break
+			}
+			var chunk map[string]interface{}
+			if err := json.Unmarshal([]byte(dataStr), &chunk); err == nil {
+				if timings, ok := chunk["timings"].(map[string]interface{}); ok {
+					if pMs, ok := timings["prompt_ms"].(float64); ok {
+						promptMs = pMs
+						hasServerTimings = true
+					}
+					if predMs, ok := timings["predicted_ms"].(float64); ok {
+						predictedMs = predMs
+						hasServerTimings = true
+					}
+					if cn, ok := timings["cache_n"].(float64); ok && cn >= 0 {
+						cachedTokens = int(cn)
+					}
+					if pn, ok := timings["prompt_n"].(float64); ok && pn >= 0 {
+						uncachedPromptTokens = int(pn)
+					}
+					if predN, ok := timings["predicted_n"].(float64); ok && predN > 0 {
+						completionTokens = int(predN)
+					}
+				}
+				if usage, ok := chunk["usage"].(map[string]interface{}); ok {
+					if pt, ok := usage["prompt_tokens"].(float64); ok && pt > 0 {
+						usagePromptTokens = int(pt)
+					}
+					if ct, ok := usage["completion_tokens"].(float64); ok && ct > 0 {
+						completionTokens = int(ct)
+					}
+				}
+				if choices, ok := chunk["choices"].([]interface{}); ok && len(choices) > 0 {
+					if c0, ok := choices[0].(map[string]interface{}); ok {
+						if fr, ok := c0["finish_reason"].(string); ok && fr != "" {
+							finishReason = fr
+						}
+						if delta, ok := c0["delta"].(map[string]interface{}); ok {
+							hasData := false
+							if content, ok := delta["content"].(string); ok && len(content) > 0 {
+								hasData = true
+								tokenCount++
+								outText.WriteString(content)
+							}
+							if toolCalls, ok := delta["tool_calls"].([]interface{}); ok && len(toolCalls) > 0 {
+								hasData = true
+								tokenCount += len(toolCalls)
+							}
+							if hasData && firstChunk {
+								ttftMs = float64(time.Since(t0).Nanoseconds()) / 1e6
+								firstChunk = false
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	var totalNeuralMs float64
+	if hasServerTimings {
+		totalNeuralMs = promptMs + predictedMs
+	} else {
+		totalNeuralMs = float64(time.Since(t0).Nanoseconds()) / 1e6
+	}
+
+	promptTokens := 0
+	if usagePromptTokens > 0 {
+		promptTokens = usagePromptTokens
+	} else {
+		promptTokens = cachedTokens + uncachedPromptTokens
+	}
+
+	if completionTokens == 0 {
+		completionTokens = tokenCount
+	}
+	if finishReason == "" {
+		finishReason = "stop"
+	}
+
+	itlMs := 0.0
+	if completionTokens > 1 {
+		itlMs = (totalNeuralMs - ttftMs) / float64(completionTokens-1)
+	}
+
+	if !hasServerTimings {
+		promptMs = ttftMs
+		predictedMs = math.Max(0.0, totalNeuralMs-ttftMs)
+	}
+
+	return StreamResult{
+		TotalNeuralMs:        totalNeuralMs,
+		PromptMs:             promptMs,
+		PredictedMs:          predictedMs,
+		TTFTMs:               ttftMs,
+		ITLMs:                itlMs,
+		PromptTokens:         promptTokens,
+		CompletionTokens:     completionTokens,
+		CachedTokens:         cachedTokens,
+		UncachedPromptTokens: uncachedPromptTokens,
+		FinishReason:         finishReason,
+		HttpStatus:           resp.StatusCode,
+		OutputText:           outText.String(),
+	}
+}
+
+func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssIdle float64) TrialResult {
+	tStart := time.Now()
+	var tNeuralTotal, totalPromptMs, totalPredictedMs, ttftFirst, itlAvg, tDispatchTotal, tPruneTotal float64
+	var totalPromptTokens, totalCompletionTokens, totalCachedTokens, totalUncachedPromptTokens, toolCalls int
+	var lastFinishReason string
+	lastHttpStatus := 200
+
+	isToolRag := os.Getenv("OPENCLAW_MODE") == "tool_rag" || os.Getenv("PICOCLAW_MODE") == "tool_rag" || os.Getenv("TOOL_RAG_MODE") == "true"
+
+	// Equalized tool definitions sent in request (15 tools for minimal/picoclaw parity, or 54 -> Top-5 in tool_rag mode)
+	tToolCatalog0 := time.Now()
+	var fullCatalog []ToolDefinition
+	var toolEmb []float32
+	var toolCatalog []ToolDefinition
+	if isToolRag {
+		fullCatalog = buildStandardToolCatalog(54)
+		toolEmb = buildToolEmbeddings(54)
+		pruned, tpMs := pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5)
+		toolCatalog = pruned
+		tPruneTotal += tpMs
+	} else {
+		toolCatalog = buildStandardToolCatalog(15)
+	}
+	tCatalogMs := float64(time.Since(tToolCatalog0).Nanoseconds()) / 1e6
+
+	mockDir := filepath.Join(baseDir, "mock_files")
+	logFile := filepath.Join(baseDir, "system_logs.jsonl")
+
+	switch tier {
+	case "W1":
+		tDispatchTotal = tCatalogMs
+		prompt := strings.Repeat("Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. ", 8) +
+			"Summarize the primary latency determinant in two concise sentences."
+		msgs := []ChatMessage{
+			{Role: "system", Content: "You are a concise technical systems assistant."},
+			{Role: "user", Content: prompt},
+		}
+		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 64)
+		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
+		ttftFirst = sr.TTFTMs
+		itlAvg = sr.ITLMs
+		totalPromptTokens = sr.PromptTokens
+		totalCompletionTokens = sr.CompletionTokens
+		totalCachedTokens = sr.CachedTokens
+		totalUncachedPromptTokens = sr.UncachedPromptTokens
+		lastFinishReason = sr.FinishReason
+		lastHttpStatus = sr.HttpStatus
+		toolCalls = 0
+
+	case "W2":
+		tTool0 := time.Now()
+		res1, err1 := executeToolListDir(mockDir)
+		if err1 != nil {
+			panic(fmt.Sprintf("W2 executeToolListDir failed: %v", err1))
+		}
+		vals, res2, err2 := executeToolGrepLogs(logFile)
+		if err2 != nil {
+			panic(fmt.Sprintf("W2 executeToolGrepLogs failed: %v", err2))
+		}
+		res3 := executeToolCalcStats(vals)
+		tDispatchTotal = tCatalogMs + float64(time.Since(tTool0).Nanoseconds())/1e6
+		toolCalls = 3
+
+		prompt := fmt.Sprintf("System Tool Chain Results:\n1. list_dir: %s\n2. grep_logs: %s\n3. calc_stats: %s\nEvaluate the bus latency metrics and execute the next diagnostic step.", res1, res2, res3)
+		msgs := []ChatMessage{
+			{Role: "system", Content: "You are a concise technical systems assistant."},
+			{Role: "user", Content: prompt},
+		}
+		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 128)
+		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
+		ttftFirst = sr.TTFTMs
+		itlAvg = sr.ITLMs
+		totalPromptTokens = sr.PromptTokens
+		totalCompletionTokens = sr.CompletionTokens
+		totalCachedTokens = sr.CachedTokens
+		totalUncachedPromptTokens = sr.UncachedPromptTokens
+		lastFinishReason = sr.FinishReason
+		lastHttpStatus = sr.HttpStatus
+
+	case "W3":
+		tTool0 := time.Now()
+		ragContext := executeVectorRAG(baseDir)
+		tDispatchTotal = tCatalogMs + float64(time.Since(tTool0).Nanoseconds())/1e6
+		toolCalls = 1
+
+		msgs := []ChatMessage{
+			{Role: "system", Content: "You are a concise technical systems assistant."},
+			{Role: "user", Content: "Retrieved Context:\n" + ragContext + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
+		}
+		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 256)
+		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
+		ttftFirst = sr.TTFTMs
+		itlAvg = sr.ITLMs
+		totalPromptTokens = sr.PromptTokens
+		totalCompletionTokens = sr.CompletionTokens
+		totalCachedTokens = sr.CachedTokens
+		totalUncachedPromptTokens = sr.UncachedPromptTokens
+		lastFinishReason = sr.FinishReason
+		lastHttpStatus = sr.HttpStatus
+
+	case "W4":
+		toolCalls = 10
+		var itlSum float64
+		history := []ChatMessage{
+			{Role: "system", Content: "You are a concise technical systems assistant."},
+		}
+		tDispatchTotal = tCatalogMs
+		for step := 1; step <= 10; step++ {
+			tTool0 := time.Now()
+			if isToolRag && step > 1 {
+				pruned, tpMs := pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5)
+				toolCatalog = pruned
+				tPruneTotal += tpMs
+			}
+			_, _ = executeToolListDir(mockDir)
+			vals, _, _ := executeToolGrepLogs(logFile)
+			statStr := executeToolCalcStats(vals)
+			tDispatchTotal += float64(time.Since(tTool0).Nanoseconds()) / 1e6
+
+			history = append(history, ChatMessage{
+				Role:    "user",
+				Content: fmt.Sprintf("Turn %d Observation: %s. State next brief diagnostic action.", step, statStr),
+			})
+			sr := callLlamaStream(client, apiURL, history, toolCatalog, 64)
+			tNeuralTotal += sr.TotalNeuralMs
+			totalPromptMs += sr.PromptMs
+			totalPredictedMs += sr.PredictedMs
+			if step == 1 {
+				ttftFirst = sr.TTFTMs
+			}
+			itlSum += sr.ITLMs
+			totalPromptTokens += sr.PromptTokens
+			totalCompletionTokens += sr.CompletionTokens
+			totalCachedTokens += sr.CachedTokens
+			totalUncachedPromptTokens += sr.UncachedPromptTokens
+			lastFinishReason = sr.FinishReason
+			lastHttpStatus = sr.HttpStatus
+			history = append(history, ChatMessage{Role: "assistant", Content: sr.OutputText})
+		}
+		itlAvg = itlSum / 10.0
+	}
+
+	if totalPromptTokens <= 0 || totalCompletionTokens <= 0 {
+		panic(fmt.Sprintf("FATAL: Validation failed - prompt_tokens (%d) <= 0 or completion_tokens (%d) <= 0", totalPromptTokens, totalCompletionTokens))
+	}
+
+	tTaskMs := float64(time.Since(tStart).Nanoseconds()) / 1e6
+	tHttpMs := math.Max(0.0, tTaskMs-tNeuralTotal-tDispatchTotal)
+	tOrchMs := math.Max(0.0, tTaskMs-tNeuralTotal)
+	phiOrch := 0.0
+	if tTaskMs > 0 {
+		phiOrch = (tOrchMs / tTaskMs) * 100.0
+	}
+	rTool := 0.0
+	if toolCalls > 0 && tDispatchTotal > 0 {
+		rTool = float64(toolCalls) / (tDispatchTotal / 1000.0)
+	}
+	rssPeak := getRSSMB()
+	if rssPeak < rssIdle {
+		rssPeak = rssIdle
+	}
+
+	cacheHitPct := 0.0
+	if totalPromptTokens > 0 {
+		cacheHitPct = (float64(totalCachedTokens) / float64(totalPromptTokens)) * 100.0
+	}
+
+	archName := "PicoClaw (Go 1.23)"
+	if isToolRag {
+		archName = "PicoClaw [tool_rag] (Go 1.23)"
+	}
+
+	return TrialResult{
+		Architecture:         archName,
+		Workload:             tier,
+		Warmth:               warmth,
+		TTaskMs:              tTaskMs,
+		TNeuralMs:            tNeuralTotal,
+		PromptMs:             totalPromptMs,
+		PredictedMs:          totalPredictedMs,
+		TOrchMs:              tOrchMs,
+		PhiOrchPct:           phiOrch,
+		TTFTMs:               ttftFirst,
+		ITLMs:                itlAvg,
+		TDispatchMs:          tDispatchTotal,
+		TPruneMs:             tPruneTotal,
+		THttpMs:              tHttpMs,
+		RToolOpsSec:          rTool,
+		RSSIdleMB:            rssIdle,
+		RSSPeakMB:            rssPeak,
+		AlphaMem:             rssPeak / math.Max(1.0, rssIdle),
+		PromptTokens:         totalPromptTokens,
+		CompletionTokens:     totalCompletionTokens,
+		OutputTokens:         totalCompletionTokens,
+		CachedTokens:         totalCachedTokens,
+		UncachedPromptTokens: totalUncachedPromptTokens,
+		CacheHitPct:          cacheHitPct,
+		ToolCalls:            toolCalls,
+		HttpStatus:           lastHttpStatus,
+		FinishReason:         lastFinishReason,
+	}
+}
+
+type LocalToolResult struct {
+	Workload   string  `json:"workload"`
+	Iterations int     `json:"iterations"`
+	TotalOps   int     `json:"total_ops"`
+	TExecMs    float64 `json:"t_exec_ms"`
+}
+
+func runLocalToolsBenchmark(baseDir, tier string, iterations int) LocalToolResult {
+	mockDir := filepath.Join(baseDir, "mock_files")
+	logFile := filepath.Join(baseDir, "system_logs.jsonl")
+	t0 := time.Now()
+	totalOps := 0
+	if tier == "W2" {
+		for i := 0; i < iterations; i++ {
+			buildStandardToolCatalog(15)
+			executeToolListDir(mockDir)
+			vals, _, _ := executeToolGrepLogs(logFile)
+			executeToolCalcStats(vals)
+			totalOps += 3
+		}
+	} else if tier == "W3" {
+		for i := 0; i < iterations; i++ {
+			buildStandardToolCatalog(15)
+			executeVectorRAG(baseDir)
+			totalOps += 1
+		}
+	} else {
+		panic(fmt.Sprintf("Unsupported tier for local tools: %s", tier))
+	}
+	elapsedMs := float64(time.Since(t0).Microseconds()) / 1000.0
+	return LocalToolResult{
+		Workload:   tier,
+		Iterations: iterations,
+		TotalOps:   totalOps,
+		TExecMs:    elapsedMs,
+	}
+}
+
+func main() {
+	if len(os.Args) > 1 && (os.Args[1] == "--version" || os.Args[1] == "version" || os.Args[1] == "--help") {
+		fmt.Println("picoclaw_orch v1.0.0")
+		os.Exit(0)
+	}
+	tier := "W1"
+	warmth := "Cold"
+	reps := 1
+	apiURL := "http://127.0.0.1:8080/v1/chat/completions"
+	if envURL := os.Getenv("LLAMA_API_URL"); envURL != "" {
+		apiURL = envURL
+	}
+	baseDir := os.Getenv("WORKLOAD_DATA_DIR")
+	if baseDir == "" {
+		candidates := []string{
+			"./data/workload_data",
+			"../data/workload_data",
+		}
+		for _, c := range candidates {
+			if _, err := os.Stat(c); err == nil {
+				baseDir = c
+				break
+			}
+		}
+	}
+	if baseDir == "" {
+		baseDir = "./data/workload_data"
+	}
+	if len(os.Args) > 1 && os.Args[1] == "--local-tools" {
+		localTier := "W2"
+		localIter := 200
+		if len(os.Args) > 2 {
+			localTier = os.Args[2]
+		}
+		if len(os.Args) > 3 {
+			fmt.Sscanf(os.Args[3], "%d", &localIter)
+		}
+		res := runLocalToolsBenchmark(baseDir, localTier, localIter)
+		out, _ := json.Marshal([]LocalToolResult{res})
+		fmt.Println(string(out))
+		return
+	}
+	if len(os.Args) > 1 {
+		tier = os.Args[1]
+	}
+	if len(os.Args) > 2 {
+		warmth = os.Args[2]
+	}
+	if len(os.Args) > 3 {
+		fmt.Sscanf(os.Args[3], "%d", &reps)
+	}
+	rssIdle := getRSSMB()
+	client := &http.Client{Timeout: 120 * time.Second}
+	var results []TrialResult
+	for i := 0; i < reps; i++ {
+		res := runWorkload(client, apiURL, baseDir, tier, warmth, rssIdle)
+		results = append(results, res)
+	}
+	out, _ := json.Marshal(results)
+	fmt.Println(string(out))
+}
+
+================================================================================
+END FILE: benchmark/picoclaw_orch.go
+================================================================================
+
+
+================================================================================
+FILE: benchmark/openclaw_orch.mjs
+SHA-256: 6f47ae815bf3c9fac0c92122c9698f467f4f7cc03b02477e20eca16ffdf1dc34
+================================================================================
+#!/usr/bin/env node
+/**
+ * OpenClaw TypeScript/Node.js Orchestrator Benchmark Worker
+ * Evaluates V8 dynamic module loading, JSON schema validation, object allocation,
+ * generational GC pressure, and tool dispatch under equalized neural workloads.
+ */
+import fs from "node:fs";
+import path from "node:path";
+import { performance } from "node:perf_hooks";
+import { fileURLToPath } from "node:url";
+import v8 from "node:v8";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const REPO_DIR = path.resolve(__dirname, "..");
+const API_URL = process.env.LLAMA_API_URL || "http://127.0.0.1:8080/v1/chat/completions";
+const BASE_DIR = process.env.WORKLOAD_DATA_DIR || path.join(REPO_DIR, "data", "workload_data");
+
+function getRSSMB() {
+  return process.memoryUsage().rss / (1024.0 * 1024.0);
+}
+
+// Build OpenClaw's tool schema catalog & prompt context builder
+// Supports ablation modes: "full" (54 tools stock enterprise), "minimal" (15 tools equalized), and "tool_rag" (54 -> Top-5)
+function buildOpenClawToolCatalog(overrideCount = null) {
+  const mode = process.env.OPENCLAW_MODE || "minimal";
+  const toolCount = overrideCount !== null ? overrideCount : ((mode === "full" || mode === "tool_rag") ? 54 : 15);
+  const catalog = [];
+  for (let i = 0; i < toolCount; i++) {
+    catalog.push({
+      type: "function",
+      function: {
+        name: `system_tool_${i}`,
+        description: `Standard system tool descriptor #${i} for agent runtime evaluation.`,
+        parameters: {
+          type: "object",
+          properties: {
+            action: { type: "string", description: "Action to execute" },
+            target: { type: "string", description: "Target parameter or file path" }
+          },
+          required: ["action", "target"]
+        }
+      }
+    });
+  }
+  // V8 object allocation and schema serialization pass
+  const serialized = JSON.stringify(catalog);
+  return JSON.parse(serialized);
+}
+
+function buildToolEmbeddings(nTools) {
+  const dim = 384;
+  const mat = new Float32Array(nTools * dim);
+  for (let i = 0; i < nTools; i++) {
+    let tNormSq = 0.0;
+    const rowOffset = i * dim;
+    for (let d = 0; d < dim; d++) {
+      const v = Math.sin((i + 1) * 0.31 + d * 0.13);
+      mat[rowOffset + d] = v;
+      tNormSq += v * v;
+    }
+    const tNorm = Math.fround(Math.sqrt(tNormSq) + 1e-8);
+    for (let d = 0; d < dim; d++) {
+      mat[rowOffset + d] = Math.fround(mat[rowOffset + d] / tNorm);
+    }
+  }
+  return mat;
+}
+
+function pruneToolsVectorRAG(catalog, toolEmb, tier, topK = 5) {
+  const t0 = performance.now();
+  const dim = 384;
+  const nTools = catalog.length;
+  if (nTools <= topK) {
+    return { pruned: catalog, elapsedMs: 0.0 };
+  }
+  let tierSeed = 1.0;
+  if (tier === "W2") tierSeed = 2.0;
+  else if (tier === "W3") tierSeed = 3.0;
+  else if (tier === "W4") tierSeed = 4.0;
+
+  const qVec = new Float32Array(dim);
+  let qNormSq = 0.0;
+  for (let d = 0; d < dim; d++) {
+    const val = Math.cos(tierSeed * 0.37 + d * 0.19);
+    qVec[d] = val;
+    qNormSq += val * val;
+  }
+  const qNorm = Math.fround(Math.sqrt(qNormSq) + 1e-8);
+  for (let d = 0; d < dim; d++) {
+    qVec[d] = Math.fround(qVec[d] / qNorm);
+  }
+
+  const scores = new Array(nTools);
+  for (let i = 0; i < nTools; i++) {
+    const rowOffset = i * dim;
+    let dot = 0.0;
+    for (let d = 0; d < dim; d++) {
+      dot = Math.fround(dot + Math.fround(toolEmb[rowOffset + d] * qVec[d]));
+    }
+    scores[i] = { idx: i, score: dot };
+  }
+
+  scores.sort((a, b) => {
+    if (b.score === a.score) return a.idx - b.idx;
+    return b.score - a.score;
+  });
+
+  const topIndices = scores.slice(0, topK).map((s) => s.idx).sort((a, b) => a - b);
+  const pruned = topIndices.map((idx) => catalog[idx]);
+  const elapsedMs = performance.now() - t0;
+  return { pruned, elapsedMs };
+}
+
+function executeToolListDir(mockDir) {
+  const entries = fs.readdirSync(mockDir);
+  const files = entries.map((name) => {
+    try {
+      const st = fs.statSync(path.join(mockDir, name));
+      return `${name}:${st.size}`;
+    } catch {
+      return `${name}:0`;
+    }
+  });
+  return JSON.stringify({ count: files.length, files: files.slice(0, 10) });
+}
+
+function executeToolGrepLogs(logFile) {
+  const raw = fs.readFileSync(logFile, "utf-8");
+  const lines = raw.split("\n");
+  const re = /"subsystem":\s*"UMA_BUS_CONTROLLER"/;
+  const vals = [];
+  for (const line of lines) {
+    if (re.test(line)) {
+      try {
+        const obj = JSON.parse(line);
+        if (typeof obj.latency_ms === "number") {
+          vals.push(obj.latency_ms);
+        }
+      } catch {}
+    }
+  }
+  return {
+    vals,
+    summary: JSON.stringify({ matched_records: vals.length, sample: vals.slice(0, 5) })
+  };
+}
+
+function executeToolCalcStats(vals) {
+  const n = vals.length;
+  if (n === 0) return "{}";
+  const mean = vals.reduce((a, b) => a + b, 0) / n;
+  let variance = 0.0;
+  if (n > 1) {
+    variance = vals.reduce((a, v) => a + (v - mean) ** 2, 0) / (n - 1);
+  }
+  return JSON.stringify({ n, mean, variance, stddev: Math.sqrt(variance) });
+}
+
+function executeVectorRAG(baseDir) {
+  const inDim = 256;
+  const outDim = 384;
+  const nDocs = 10000;
+
+  const wFile = path.join(baseDir, "w_proj.bin");
+  const bFile = path.join(baseDir, "b_proj.bin");
+  const docsBinFile = path.join(baseDir, "doc_embeddings.bin");
+
+  const wBuf = fs.readFileSync(wFile);
+  const bBuf = fs.readFileSync(bFile);
+  const docBuf = fs.readFileSync(docsBinFile);
+
+  if (wBuf.length !== inDim * outDim * 4 || bBuf.length !== outDim * 4 || docBuf.length !== nDocs * outDim * 4) {
+    throw new Error(`FATAL: Required RAG binary datasets corrupted or incomplete in ${baseDir}`);
+  }
+
+  const wProj = new Float32Array(wBuf.buffer, wBuf.byteOffset, inDim * outDim);
+  const bProj = new Float32Array(bBuf.buffer, bBuf.byteOffset, outDim);
+  const docMatrix = new Float32Array(docBuf.buffer, docBuf.byteOffset, nDocs * outDim);
+
+  // 1. Query vector initialization and linear projection (256 -> 384)
+  const qRaw = new Float32Array(inDim);
+  for (let d = 0; d < inDim; d++) {
+    qRaw[d] = Math.sin(d * 0.17) * 0.05;
+  }
+
+  const qProj = new Float32Array(outDim);
+  for (let j = 0; j < outDim; j++) {
+    let sum = bProj[j];
+    for (let i = 0; i < inDim; i++) {
+      sum += qRaw[i] * wProj[i * outDim + j];
+    }
+    qProj[j] = sum;
+  }
+
+  // 2. L2 Normalization of projected query vector
+  let normSq = 0.0;
+  for (let j = 0; j < outDim; j++) {
+    normSq += qProj[j] * qProj[j];
+  }
+  const norm = Math.sqrt(normSq) + 1e-8;
+  for (let j = 0; j < outDim; j++) {
+    qProj[j] /= norm;
+  }
+
+  // 3. Cosine similarity against all 10,000 document vectors
+  const scores = new Array(nDocs);
+  for (let i = 0; i < nDocs; i++) {
+    let dot = 0.0;
+    const rowOffset = i * outDim;
+    for (let j = 0; j < outDim; j++) {
+      dot += qProj[j] * docMatrix[rowOffset + j];
+    }
+    scores[i] = { idx: i, score: dot };
+  }
+
+  // 4. Descending sort to select Top-5 chunks
+  scores.sort((a, b) => b.score - a.score);
+
+  const chunksRaw = fs.readFileSync(path.join(baseDir, "rag_chunks_10k.json"), "utf-8");
+  const chunks = JSON.parse(chunksRaw);
+
+  let out = "";
+  for (let k = 0; k < 5; k++) {
+    const topIdx = scores[k].idx;
+    out += (chunks[String(topIdx)] || `[Chunk #${topIdx}] Context reference document.`) + "\n";
+  }
+  return out;
+}
+
+async function callLlamaStream(messages, tools, maxTokens) {
+  const payload = JSON.stringify({
+    model: "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    messages,
+    tools,
+    max_tokens: maxTokens,
+    temperature: 0.0,
+    seed: 42,
+    stream: true,
+    cache_prompt: process.env.BENCH_CACHE_PROMPT === "true"
+  });
+  const t0 = performance.now();
+  const resp = await fetch(API_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload
+  });
+
+  if (resp.status !== 200) {
+    const errText = await resp.text();
+    throw new Error(`FATAL: llama-server returned HTTP ${resp.status}: ${errText}`);
+  }
+
+  let ttftMs = 0.0;
+  let promptMs = 0.0;
+  let predictedMs = 0.0;
+  let hasServerTimings = false;
+  let firstChunk = true;
+  let tokenCount = 0;
+  let cachedTokens = 0;
+  let uncachedPromptTokens = 0;
+  let usagePromptTokens = 0;
+  let completionTokens = 0;
+  let finishReason = "";
+  let outText = "";
+  const decoder = new TextDecoder();
+  let buf = "";
+
+  let isDone = false;
+  for await (const chunk of resp.body) {
+    if (isDone) break;
+    buf += decoder.decode(chunk, { stream: true });
+    const lines = buf.split("\n");
+    buf = lines.pop() || "";
+    for (let line of lines) {
+      line = line.trim();
+      if (line.startsWith("data: ")) {
+        const dataStr = line.slice(6);
+        if (dataStr === "[DONE]") {
+          isDone = true;
+          break;
+        }
+        try {
+          const parsed = JSON.parse(dataStr);
+          if (parsed.timings) {
+            if (typeof parsed.timings.prompt_ms === "number") {
+              promptMs = parsed.timings.prompt_ms;
+              hasServerTimings = true;
+            }
+            if (typeof parsed.timings.predicted_ms === "number") {
+              predictedMs = parsed.timings.predicted_ms;
+              hasServerTimings = true;
+            }
+            if (typeof parsed.timings.cache_n === "number" && parsed.timings.cache_n >= 0) {
+              cachedTokens = parsed.timings.cache_n;
+            }
+            if (typeof parsed.timings.prompt_n === "number" && parsed.timings.prompt_n >= 0) {
+              uncachedPromptTokens = parsed.timings.prompt_n;
+            }
+            if (typeof parsed.timings.predicted_n === "number" && parsed.timings.predicted_n > 0) {
+              completionTokens = parsed.timings.predicted_n;
+            }
+          }
+          if (parsed.usage) {
+            if (typeof parsed.usage.prompt_tokens === "number" && parsed.usage.prompt_tokens > 0) {
+              usagePromptTokens = parsed.usage.prompt_tokens;
+            }
+            if (typeof parsed.usage.completion_tokens === "number" && parsed.usage.completion_tokens > 0) {
+              completionTokens = parsed.usage.completion_tokens;
+            }
+          }
+          const c0 = parsed.choices?.[0];
+          if (c0) {
+            if (c0.finish_reason && typeof c0.finish_reason === "string") {
+              finishReason = c0.finish_reason;
+            }
+            const delta = c0.delta;
+            if (delta) {
+              let hasData = false;
+              if (delta.content && delta.content.length > 0) {
+                hasData = true;
+                tokenCount++;
+                outText += delta.content;
+              }
+              if (delta.tool_calls && delta.tool_calls.length > 0) {
+                hasData = true;
+                tokenCount += delta.tool_calls.length;
+              }
+              if (hasData && firstChunk) {
+                ttftMs = performance.now() - t0;
+                firstChunk = false;
+              }
+            }
+          }
+        } catch {}
+      }
+    }
+  }
+
+  const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedPromptTokens);
+  const totalNeuralMs = hasServerTimings ? (promptMs + predictedMs) : (performance.now() - t0);
+  const finalPromptMs = hasServerTimings ? promptMs : ttftMs;
+  const finalPredictedMs = hasServerTimings ? predictedMs : Math.max(0.0, totalNeuralMs - ttftMs);
+  if (completionTokens === 0) completionTokens = tokenCount;
+  if (!finishReason) finishReason = "stop";
+  const itlMs = completionTokens > 1 ? (totalNeuralMs - ttftMs) / (completionTokens - 1) : 0.0;
+  return {
+    totalNeuralMs,
+    promptMs: finalPromptMs,
+    predictedMs: finalPredictedMs,
+    ttftMs,
+    itlMs,
+    promptTokens,
+    completionTokens,
+    cachedTokens,
+    uncachedPromptTokens,
+    finishReason,
+    httpStatus: resp.status,
+    outText
+  };
+}
+
+async function runWorkload(tier, warmth, rssIdle) {
+  const tStart = performance.now();
+  let tNeuralTotal = 0.0;
+  let totalPromptMs = 0.0;
+  let totalPredictedMs = 0.0;
+  let ttftFirst = 0.0;
+  let itlAvg = 0.0;
+  let tDispatchTotal = 0.0;
+  let tPruneTotal = 0.0;
+  let totalPromptTokens = 0;
+  let totalCompletionTokens = 0;
+  let totalCachedTokens = 0;
+  let totalUncachedPromptTokens = 0;
+  let toolCalls = 0;
+  let lastFinishReason = "";
+  let lastHttpStatus = 200;
+
+  const mode = process.env.OPENCLAW_MODE || "minimal";
+  const isToolRag = mode === "tool_rag" || process.env.TOOL_RAG_MODE === "true";
+
+  const tCatalog0 = performance.now();
+  const fullCatalog = buildOpenClawToolCatalog(isToolRag ? 54 : null);
+  const toolEmb = isToolRag ? buildToolEmbeddings(fullCatalog.length) : null;
+  let toolCatalog = fullCatalog;
+  if (isToolRag) {
+    pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
+    const { pruned, elapsedMs } = pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
+    toolCatalog = pruned;
+    tPruneTotal += elapsedMs;
+  }
+  const tCatalogMs = performance.now() - tCatalog0;
+
+  const mockDir = path.join(BASE_DIR, "mock_files");
+  const logFile = path.join(BASE_DIR, "system_logs.jsonl");
+
+  if (tier === "W1") {
+    tDispatchTotal = tCatalogMs;
+    const prompt =
+      "Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. ".repeat(8) +
+      "Summarize the primary latency determinant in two concise sentences.";
+    const msgs = [
+      { role: "system", content: "You are a concise technical systems assistant." },
+      { role: "user", content: prompt }
+    ];
+    const r = await callLlamaStream(msgs, toolCatalog, 64);
+    tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
+    ttftFirst = r.ttftMs;
+    itlAvg = r.itlMs;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedPromptTokens = r.uncachedPromptTokens;
+    lastFinishReason = r.finishReason;
+    lastHttpStatus = r.httpStatus;
+    toolCalls = 0;
+  } else if (tier === "W2") {
+    const tTool0 = performance.now();
+    const res1 = executeToolListDir(mockDir);
+    const { vals, summary: res2 } = executeToolGrepLogs(logFile);
+    const res3 = executeToolCalcStats(vals);
+    tDispatchTotal = tCatalogMs + (performance.now() - tTool0);
+    toolCalls = 3;
+
+    const prompt = `System Tool Chain Results:\n1. list_dir: ${res1}\n2. grep_logs: ${res2}\n3. calc_stats: ${res3}\nEvaluate the bus latency metrics and execute the next diagnostic step.`;
+    const msgs = [
+      { role: "system", content: "You are a concise technical systems assistant." },
+      { role: "user", content: prompt }
+    ];
+    const r = await callLlamaStream(msgs, toolCatalog, 128);
+    tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
+    ttftFirst = r.ttftMs;
+    itlAvg = r.itlMs;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedPromptTokens = r.uncachedPromptTokens;
+    lastFinishReason = r.finishReason;
+    lastHttpStatus = r.httpStatus;
+  } else if (tier === "W3") {
+    const tTool0 = performance.now();
+    const ragContext = executeVectorRAG(BASE_DIR);
+    tDispatchTotal = tCatalogMs + (performance.now() - tTool0);
+    toolCalls = 1;
+
+    const msgs = [
+      { role: "system", content: "You are a concise technical systems assistant." },
+      { role: "user", content: "Retrieved Context:\n" + ragContext + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?" }
+    ];
+    const r = await callLlamaStream(msgs, toolCatalog, 256);
+    tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
+    ttftFirst = r.ttftMs;
+    itlAvg = r.itlMs;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedPromptTokens = r.uncachedPromptTokens;
+    lastFinishReason = r.finishReason;
+    lastHttpStatus = r.httpStatus;
+  } else if (tier === "W4") {
+    toolCalls = 10;
+    let itlSum = 0.0;
+    const history = [
+      { role: "system", content: "You are a concise technical systems assistant." }
+    ];
+    tDispatchTotal = tCatalogMs;
+    for (let step = 1; step <= 10; step++) {
+      const tTool0 = performance.now();
+      if (isToolRag && step > 1) {
+        const { pruned, elapsedMs } = pruneToolsVectorRAG(fullCatalog, toolEmb, tier, 5);
+        toolCatalog = pruned;
+        tPruneTotal += elapsedMs;
+      }
+      executeToolListDir(mockDir);
+      const { vals } = executeToolGrepLogs(logFile);
+      const statStr = executeToolCalcStats(vals);
+      tDispatchTotal += (performance.now() - tTool0);
+
+      history.push({
+        role: "user",
+        content: `Turn ${step} Observation: ${statStr}. State next brief diagnostic action.`
+      });
+      const r = await callLlamaStream(history, toolCatalog, 64);
+      tNeuralTotal += r.totalNeuralMs;
+      totalPromptMs += r.promptMs;
+      totalPredictedMs += r.predictedMs;
+      if (step === 1) ttftFirst = r.ttftMs;
+      itlSum += r.itlMs;
+      totalPromptTokens += r.promptTokens;
+      totalCompletionTokens += r.completionTokens;
+      totalCachedTokens += r.cachedTokens;
+      totalUncachedPromptTokens += r.uncachedPromptTokens;
+      lastFinishReason = r.finishReason;
+      lastHttpStatus = r.httpStatus;
+      history.push({ role: "assistant", content: r.outText });
+    }
+    itlAvg = itlSum / 10.0;
+  }
+
+  if (totalPromptTokens <= 0 || totalCompletionTokens <= 0) {
+    throw new Error(`FATAL: Validation failed - prompt_tokens (${totalPromptTokens}) <= 0 or completion_tokens (${totalCompletionTokens}) <= 0`);
+  }
+
+  const tTaskMs = performance.now() - tStart;
+  const tHttpMs = Math.max(0.0, tTaskMs - tNeuralTotal - tDispatchTotal);
+  const tOrchMs = Math.max(0.0, tTaskMs - tNeuralTotal);
+  const phiOrch = tTaskMs > 0 ? (tOrchMs / tTaskMs) * 100.0 : 0.0;
+  const rTool = toolCalls > 0 && tDispatchTotal > 0 ? toolCalls / (tDispatchTotal / 1000.0) : 0.0;
+  const rssPeak = Math.max(rssIdle, getRSSMB());
+  const alphaMem = rssPeak / Math.max(1.0, rssIdle);
+  const v8UsedHeapMb = typeof v8?.getHeapStatistics === "function"
+    ? v8.getHeapStatistics().used_heap_size / (1024.0 * 1024.0)
+    : process.memoryUsage().heapUsed / (1024.0 * 1024.0);
+  const cacheHitPct = totalPromptTokens > 0 ? (totalCachedTokens / totalPromptTokens) * 100.0 : 0.0;
+
+  return {
+    architecture: `OpenClaw [${mode}] (Node.js v26.12)`,
+    workload: tier,
+    warmth: warmth,
+    t_task_ms: tTaskMs,
+    t_neural_ms: tNeuralTotal,
+    prompt_ms: totalPromptMs,
+    predicted_ms: totalPredictedMs,
+    t_orch_ms: tOrchMs,
+    phi_orch_pct: phiOrch,
+    ttft_ms: ttftFirst,
+    itl_ms: itlAvg,
+    t_dispatch_ms: tDispatchTotal,
+    t_prune_ms: tPruneTotal,
+    t_http_ms: tHttpMs,
+    r_tool_ops_sec: rTool,
+    rss_idle_mb: rssIdle,
+    rss_peak_mb: rssPeak,
+    v8_used_heap_mb: v8UsedHeapMb,
+    alpha_mem: alphaMem,
+    prompt_tokens: totalPromptTokens,
+    completion_tokens: totalCompletionTokens,
+    output_tokens: totalCompletionTokens,
+    cached_tokens: totalCachedTokens,
+    uncached_prompt_tokens: totalUncachedPromptTokens,
+    cache_hit_pct: cacheHitPct,
+    tool_calls: toolCalls,
+    http_status: lastHttpStatus,
+    finish_reason: lastFinishReason
+  };
+}
+
+function runLocalToolsBenchmark(tier, iterations) {
+  const mockDir = path.join(BASE_DIR, "mock_files");
+  const logFile = path.join(BASE_DIR, "system_logs.jsonl");
+  const t0 = performance.now();
+  let totalOps = 0;
+  if (tier === "W2") {
+    for (let i = 0; i < iterations; i++) {
+      buildOpenClawToolCatalog();
+      executeToolListDir(mockDir);
+      const { vals } = executeToolGrepLogs(logFile);
+      executeToolCalcStats(vals);
+      totalOps += 3;
+    }
+  } else if (tier === "W3") {
+    for (let i = 0; i < iterations; i++) {
+      buildOpenClawToolCatalog();
+      executeVectorRAG(BASE_DIR);
+      totalOps += 1;
+    }
+  } else {
+    throw new Error(`Unsupported tier for local tools: ${tier}`);
+  }
+  const elapsedMs = performance.now() - t0;
+  return {
+    workload: tier,
+    iterations: iterations,
+    total_ops: totalOps,
+    t_exec_ms: Math.round(elapsedMs * 1000) / 1000,
+  };
+}
+
+async function main() {
+  const args = process.argv.slice(2);
+  if (args.length > 0 && (args[0] === "--version" || args[0] === "version" || args[0] === "--help")) {
+    console.log("openclaw_orch v1.0.0");
+    process.exit(0);
+  }
+  if (args[0] === "--local-tools") {
+    const tier = args[1] || "W2";
+    const iterations = parseInt(args[2] || "200", 10);
+    const res = runLocalToolsBenchmark(tier, iterations);
+    console.log(JSON.stringify([res]));
+    return;
+  }
+  const tier = args[0] || "W1";
+  const warmth = args[1] || "Cold";
+  const reps = parseInt(args[2] || "1", 10);
+  const rssIdle = getRSSMB();
+  const results = [];
+  for (let i = 0; i < reps; i++) {
+    const res = await runWorkload(tier, warmth, rssIdle);
+    results.push(res);
+  }
+  console.log(JSON.stringify(results));
+}
+
+main().catch((err) => {
+  console.error("OpenClaw Worker Error:", err);
+  process.exit(1);
+});
+
+================================================================================
+END FILE: benchmark/openclaw_orch.mjs
+================================================================================
+
+
+================================================================================
+FILE: benchmark/python_orch.py
+SHA-256: de0daf4b27e04e80147d71f9bb0ad948e00e9d38352bed843ef4aff2a8ba9f27
+================================================================================
+#!/usr/bin/env python3
+"""
+benchmark/python_orch.py - Reference Python 3.12 Agent Worker
+Evaluates CPython VM dynamic interpretation, memory overhead, JSON serialization,
+and tool dispatch under workloads identical to Go and Node.js workers.
+"""
+from __future__ import annotations
+
+import json
+import math
+import os
+import re
+import sys
+import time
+import urllib.request
+
+import numpy as np
+
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+API_URL = os.environ.get("LLAMA_API_URL", "http://127.0.0.1:8080/v1/chat/completions")
+BASE_DIR = os.environ.get("WORKLOAD_DATA_DIR", os.path.join(REPO_DIR, "data", "workload_data"))
+
+
+def get_rss_mb() -> float:
+    try:
+        import resource
+        rusage = resource.getrusage(resource.RUSAGE_SELF)
+        if sys.platform == "darwin":
+            return rusage.ru_maxrss / (1024.0 * 1024.0)
+        return rusage.ru_maxrss / 1024.0
+    except Exception:
+        return 0.0
+
+
+def build_tool_catalog(count: int = 15) -> list[dict]:
+    catalog = []
+    for i in range(count):
+        catalog.append({
+            "type": "function",
+            "function": {
+                "name": f"system_tool_{i}",
+                "description": f"Standard system tool descriptor #{i} for agent runtime evaluation.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "action": {"type": "string", "description": "Action to execute"},
+                        "target": {"type": "string", "description": "Target parameter or file path"},
+                    },
+                    "required": ["action", "target"],
+                },
+            },
+        })
+    # Serialization pass
+    return json.loads(json.dumps(catalog))
+
+
+def build_tool_embeddings(n_tools: int = 54) -> np.ndarray:
+    dim = 384
+    d_idx = np.arange(dim, dtype=np.float64)[None, :]
+    i_idx = np.arange(1, n_tools + 1, dtype=np.float64)[:, None]
+    mat = np.sin(i_idx * 0.31 + d_idx * 0.13).astype(np.float32)
+    norms = np.linalg.norm(mat, axis=1, keepdims=True) + 1e-8
+    return mat / norms
+
+
+def prune_tools_vector_rag(catalog: list[dict], tool_emb: np.ndarray, tier: str, top_k: int = 5) -> tuple[list[dict], float]:
+    t0 = time.monotonic()
+    dim = 384
+    n_tools = len(catalog)
+    if n_tools <= top_k:
+        return catalog, 0.0
+    tier_seed = {"W1": 1.0, "W2": 2.0, "W3": 3.0, "W4": 4.0}.get(tier, 1.0)
+
+    d_idx = np.arange(dim, dtype=np.float64)
+    q_vec = np.cos(tier_seed * 0.37 + d_idx * 0.19).astype(np.float32)
+    q_vec = q_vec / (np.linalg.norm(q_vec) + 1e-8)
+
+    scores = np.dot(tool_emb, q_vec)
+    top_indices = sorted(int(idx) for idx in np.argsort(scores)[::-1][:top_k])
+    pruned = [catalog[idx] for idx in top_indices]
+    elapsed_ms = (time.monotonic() - t0) * 1000.0
+    return pruned, elapsed_ms
+
+
+def execute_tool_list_dir(mock_dir: str) -> str:
+    entries = sorted(os.listdir(mock_dir))
+    files = []
+    for name in entries:
+        try:
+            sz = os.path.getsize(os.path.join(mock_dir, name))
+            files.append(f"{name}:{sz}")
+        except Exception:
+            files.append(f"{name}:0")
+    return json.dumps({"count": len(files), "files": files[:10]}, separators=(",", ":"))
+
+
+def execute_tool_grep_logs(log_file: str) -> tuple[list[float], str]:
+    vals: list[float] = []
+    pattern = re.compile(r'"subsystem":\s*"UMA_BUS_CONTROLLER"')
+    with open(log_file, "r", encoding="utf-8") as f:
+        for line in f:
+            if pattern.search(line):
+                try:
+                    obj = json.loads(line)
+                    lat = obj.get("latency_ms")
+                    if isinstance(lat, (int, float)):
+                        vals.append(float(lat))
+                except Exception:
+                    pass
+    summary = json.dumps({"matched_records": len(vals), "sample": vals[:5]}, separators=(",", ":"))
+    return vals, summary
+
+
+def execute_tool_calc_stats(vals: list[float]) -> str:
+    n = len(vals)
+    if n == 0:
+        return "{}"
+    sum_val = 0.0
+    for v in vals:
+        sum_val += v
+    mean = sum_val / float(n)
+    var = 0.0
+    for v in vals:
+        var += (v - mean) ** 2
+    variance = var / float(n - 1) if n > 1 else 0.0
+    return json.dumps({"n": n, "mean": mean, "variance": variance, "stddev": math.sqrt(variance)}, separators=(",", ":"))
+
+
+def execute_vector_rag(base_dir: str) -> str:
+    in_dim = 256
+    out_dim = 384
+    n_docs = 10000
+
+    w_file = os.path.join(base_dir, "w_proj.bin")
+    b_file = os.path.join(base_dir, "b_proj.bin")
+    docs_bin = os.path.join(base_dir, "doc_embeddings.bin")
+
+    if not (os.path.exists(w_file) and os.path.exists(b_file) and os.path.exists(docs_bin)):
+        raise FileNotFoundError(f"FATAL: Required RAG binary datasets missing in {base_dir}")
+
+    w_proj = np.fromfile(w_file, dtype=np.float32).reshape(in_dim, out_dim)
+    b_proj = np.fromfile(b_file, dtype=np.float32)
+    doc_matrix = np.fromfile(docs_bin, dtype=np.float32).reshape(n_docs, out_dim)
+
+    # 1. Query vector initialization & linear projection
+    d_idx = np.arange(in_dim, dtype=np.float32)
+    q_raw = np.sin(d_idx * 0.17) * 0.05
+    q_proj = np.dot(q_raw, w_proj) + b_proj
+
+    # 2. L2 Normalization of projected query vector
+    q_norm = q_proj / (np.linalg.norm(q_proj) + 1e-8)
+
+    # 3. Cosine similarity against all 10,000 document vectors
+    scores = np.dot(doc_matrix, q_norm)
+
+    # 4. Descending sort to select Top-5 chunks
+    top5_indices = np.argsort(scores)[::-1][:5]
+
+    chunks_file = os.path.join(base_dir, "rag_chunks_10k.json")
+    if not os.path.exists(chunks_file):
+        raise FileNotFoundError(f"FATAL: rag_chunks_10k.json missing in {base_dir}")
+
+    with open(chunks_file, "r", encoding="utf-8") as f:
+        chunks = json.load(f)
+
+    out_lines = []
+    for idx in top5_indices:
+        text = chunks.get(str(idx), f"[Chunk #{idx:04d}] Context reference document.")
+        out_lines.append(text)
+    return "\n".join(out_lines) + "\n"
+
+
+def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) -> tuple[float, float, float, int, int, str, int, str]:
+    payload = json.dumps({
+        "model": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+        "messages": messages,
+        "tools": tools,
+        "max_tokens": max_tokens,
+        "temperature": 0.0,
+        "seed": 42,
+        "stream": True,
+        "cache_prompt": os.environ.get("BENCH_CACHE_PROMPT", "false").lower() == "true",
+    }, separators=(",", ":")).encode("utf-8")
+
+    t0 = time.monotonic()
+    req = urllib.request.Request(API_URL, data=payload, headers={"Content-Type": "application/json"})
+    prompt_ms = 0.0
+    predicted_ms = 0.0
+    has_server_timings = False
+    ttft_ms = 0.0
+    first_chunk = True
+    token_count = 0
+    cached_tokens = 0
+    uncached_prompt_tokens = 0
+    usage_prompt_tokens = 0
+    completion_tokens = 0
+    finish_reason = ""
+    out_text = []
+
+    with urllib.request.urlopen(req, timeout=120) as resp:
+        if resp.status != 200:
+            raise RuntimeError(f"FATAL: llama-server returned HTTP {resp.status}")
+        http_status = resp.status
+
+        for raw_line in resp:
+            line = raw_line.decode("utf-8").strip()
+            if not line.startswith("data: "):
+                continue
+            data_str = line[6:]
+            if data_str == "[DONE]":
+                break
+            try:
+                chunk = json.loads(data_str)
+                timings = chunk.get("timings")
+                if isinstance(timings, dict):
+                    if "prompt_ms" in timings:
+                        prompt_ms = float(timings["prompt_ms"])
+                        has_server_timings = True
+                    if "predicted_ms" in timings:
+                        predicted_ms = float(timings["predicted_ms"])
+                        has_server_timings = True
+                    if "cache_n" in timings and int(timings["cache_n"]) >= 0:
+                        cached_tokens = int(timings["cache_n"])
+                    if "prompt_n" in timings and int(timings["prompt_n"]) >= 0:
+                        uncached_prompt_tokens = int(timings["prompt_n"])
+                    if "predicted_n" in timings and int(timings["predicted_n"]) > 0:
+                        completion_tokens = int(timings["predicted_n"])
+
+                usage = chunk.get("usage")
+                if isinstance(usage, dict):
+                    if "prompt_tokens" in usage and int(usage["prompt_tokens"]) > 0:
+                        usage_prompt_tokens = int(usage["prompt_tokens"])
+                    if "completion_tokens" in usage and int(usage["completion_tokens"]) > 0:
+                        completion_tokens = int(usage["completion_tokens"])
+
+                choices = chunk.get("choices")
+                if choices and len(choices) > 0:
+                    c0 = choices[0]
+                    fr = c0.get("finish_reason")
+                    if fr:
+                        finish_reason = str(fr)
+                    delta = c0.get("delta", {})
+                    has_data = False
+                    content = delta.get("content")
+                    if content:
+                        has_data = True
+                        token_count += 1
+                        out_text.append(content)
+                    tool_calls = delta.get("tool_calls")
+                    if tool_calls:
+                        has_data = True
+                        token_count += len(tool_calls)
+                    if has_data and first_chunk:
+                        ttft_ms = (time.monotonic() - t0) * 1000.0
+                        first_chunk = False
+            except Exception:
+                pass
+
+    prompt_tokens = usage_prompt_tokens if usage_prompt_tokens > 0 else (cached_tokens + uncached_prompt_tokens)
+    if has_server_timings:
+        total_neural_ms = prompt_ms + predicted_ms
+    else:
+        total_neural_ms = (time.monotonic() - t0) * 1000.0
+        prompt_ms = ttft_ms
+        predicted_ms = max(0.0, total_neural_ms - ttft_ms)
+
+    if completion_tokens == 0:
+        completion_tokens = token_count
+    if not finish_reason:
+        finish_reason = "stop"
+
+    itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
+    return total_neural_ms, prompt_ms, predicted_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
+
+
+def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
+    t_start = time.monotonic()
+    t_neural_total = 0.0
+    total_prompt_ms = 0.0
+    total_predicted_ms = 0.0
+    ttft_first = 0.0
+    itl_avg = 0.0
+    t_dispatch_total = 0.0
+    t_prune_total = 0.0
+    total_prompt_tokens = 0
+    total_completion_tokens = 0
+    total_cached_tokens = 0
+    total_uncached_prompt_tokens = 0
+    tool_calls = 0
+    last_finish_reason = ""
+    last_http_status = 200
+
+    is_tool_rag = (
+        os.environ.get("OPENCLAW_MODE") == "tool_rag"
+        or os.environ.get("PICOCLAW_MODE") == "tool_rag"
+        or os.environ.get("TOOL_RAG_MODE") == "true"
+    )
+
+    t_cat0 = time.monotonic()
+    if is_tool_rag:
+        full_catalog = build_tool_catalog(54)
+        tool_emb = build_tool_embeddings(54)
+        tool_catalog, tp_ms = prune_tools_vector_rag(full_catalog, tool_emb, tier, 5)
+        t_prune_total += tp_ms
+    else:
+        full_catalog = []
+        tool_emb = np.empty((0, 384), dtype=np.float32)
+        tool_catalog = build_tool_catalog(15)
+    t_cat_ms = (time.monotonic() - t_cat0) * 1000.0
+
+    mock_dir = os.path.join(BASE_DIR, "mock_files")
+    log_file = os.path.join(BASE_DIR, "system_logs.jsonl")
+
+    if tier == "W1":
+        t_dispatch_total = t_cat_ms
+        prompt = (
+            "Analyze Apple Silicon M4 Unified Memory Architecture cache coherence and LPDDR5X bandwidth allocation. " * 8
+            + "Summarize the primary latency determinant in two concise sentences."
+        )
+        msgs = [
+            {"role": "system", "content": "You are a concise technical systems assistant."},
+            {"role": "user", "content": prompt},
+        ]
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 64)
+        t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
+        ttft_first = ttft
+        itl_avg = itl
+        total_prompt_tokens = ptok
+        total_completion_tokens = ctok
+        total_cached_tokens = c_tok
+        total_uncached_prompt_tokens = unc_tok
+        last_finish_reason = fr
+        last_http_status = hstatus
+        tool_calls = 0
+
+    elif tier == "W2":
+        t0_tool = time.monotonic()
+        res1 = execute_tool_list_dir(mock_dir)
+        vals, res2 = execute_tool_grep_logs(log_file)
+        res3 = execute_tool_calc_stats(vals)
+        t_dispatch_total = t_cat_ms + (time.monotonic() - t0_tool) * 1000.0
+        tool_calls = 3
+
+        prompt = f"System Tool Chain Results:\n1. list_dir: {res1}\n2. grep_logs: {res2}\n3. calc_stats: {res3}\nEvaluate the bus latency metrics and execute the next diagnostic step."
+        msgs = [
+            {"role": "system", "content": "You are a concise technical systems assistant."},
+            {"role": "user", "content": prompt},
+        ]
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 128)
+        t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
+        ttft_first = ttft
+        itl_avg = itl
+        total_prompt_tokens = ptok
+        total_completion_tokens = ctok
+        total_cached_tokens = c_tok
+        total_uncached_prompt_tokens = unc_tok
+        last_finish_reason = fr
+        last_http_status = hstatus
+
+    elif tier == "W3":
+        t0_tool = time.monotonic()
+        rag_context = execute_vector_rag(BASE_DIR)
+        t_dispatch_total = t_cat_ms + (time.monotonic() - t0_tool) * 1000.0
+        tool_calls = 1
+
+        msgs = [
+            {"role": "system", "content": "You are a concise technical systems assistant."},
+            {"role": "user", "content": "Retrieved Context:\n" + rag_context + "\nQuestion: How do UMA bandwidth and runtime GC interact during local agent execution?"},
+        ]
+        tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
+        t_neural_total = tn
+        total_prompt_ms = p_ms
+        total_predicted_ms = pred_ms
+        ttft_first = ttft
+        itl_avg = itl
+        total_prompt_tokens = ptok
+        total_completion_tokens = ctok
+        total_cached_tokens = c_tok
+        total_uncached_prompt_tokens = unc_tok
+        last_finish_reason = fr
+        last_http_status = hstatus
+
+    elif tier == "W4":
+        tool_calls = 10
+        itl_sum = 0.0
+        history = [
+            {"role": "system", "content": "You are a concise technical systems assistant."},
+        ]
+        t_dispatch_total = t_cat_ms
+        for step in range(1, 11):
+            t0_tool = time.monotonic()
+            if is_tool_rag and step > 1:
+                tool_catalog, tp_ms = prune_tools_vector_rag(full_catalog, tool_emb, tier, 5)
+                t_prune_total += tp_ms
+            execute_tool_list_dir(mock_dir)
+            vals, _ = execute_tool_grep_logs(log_file)
+            stat_str = execute_tool_calc_stats(vals)
+            t_dispatch_total += (time.monotonic() - t0_tool) * 1000.0
+
+            history.append({
+                "role": "user",
+                "content": f"Turn {step} Observation: {stat_str}. State next brief diagnostic action.",
+            })
+            tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, reply = call_llama_stream(history, tool_catalog, 64)
+            t_neural_total += tn
+            total_prompt_ms += p_ms
+            total_predicted_ms += pred_ms
+            if step == 1:
+                ttft_first = ttft
+            itl_sum += itl
+            total_prompt_tokens += ptok
+            total_completion_tokens += ctok
+            total_cached_tokens += c_tok
+            total_uncached_prompt_tokens += unc_tok
+            last_finish_reason = fr
+            last_http_status = hstatus
+            history.append({"role": "assistant", "content": reply})
+        itl_avg = itl_sum / 10.0
+
+    if total_prompt_tokens <= 0 or total_completion_tokens <= 0:
+        raise RuntimeError(f"FATAL: Validation failed - prompt_tokens ({total_prompt_tokens}) <= 0 or completion_tokens ({total_completion_tokens}) <= 0")
+
+    t_task_ms = (time.monotonic() - t_start) * 1000.0
+    t_http_ms = max(0.0, t_task_ms - t_neural_total - t_dispatch_total)
+    t_orch_ms = max(0.0, t_task_ms - t_neural_total)
+    phi_orch = (t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0
+    r_tool = (tool_calls / (t_dispatch_total / 1000.0)) if (tool_calls > 0 and t_dispatch_total > 0) else 0.0
+    rss_peak = max(rss_idle, get_rss_mb())
+    alpha_mem = rss_peak / max(1.0, rss_idle)
+    cache_hit_pct = (total_cached_tokens / total_prompt_tokens * 100.0) if total_prompt_tokens > 0 else 0.0
+
+    return {
+        "architecture": "PythonNative (CPython 3.12)",
+        "workload": tier,
+        "warmth": warmth,
+        "t_task_ms": t_task_ms,
+        "t_neural_ms": t_neural_total,
+        "prompt_ms": total_prompt_ms,
+        "predicted_ms": total_predicted_ms,
+        "t_orch_ms": t_orch_ms,
+        "phi_orch_pct": phi_orch,
+        "ttft_ms": ttft_first,
+        "itl_ms": itl_avg,
+        "t_dispatch_ms": t_dispatch_total,
+        "t_prune_ms": t_prune_total,
+        "t_http_ms": t_http_ms,
+        "r_tool_ops_sec": r_tool,
+        "rss_idle_mb": rss_idle,
+        "rss_peak_mb": rss_peak,
+        "alpha_mem": alpha_mem,
+        "prompt_tokens": total_prompt_tokens,
+        "completion_tokens": total_completion_tokens,
+        "output_tokens": total_completion_tokens,
+        "cached_tokens": total_cached_tokens,
+        "uncached_prompt_tokens": total_uncached_prompt_tokens,
+        "cache_hit_pct": cache_hit_pct,
+        "tool_calls": tool_calls,
+        "http_status": last_http_status,
+        "finish_reason": last_finish_reason,
+    }
+
+
+def run_local_tools_benchmark(tier: str, iterations: int) -> dict:
+    mock_dir = os.path.join(BASE_DIR, "mock_files")
+    log_file = os.path.join(BASE_DIR, "system_logs.jsonl")
+    total_ops = 0
+    t0 = time.monotonic()
+    if tier == "W2":
+        for _ in range(iterations):
+            build_tool_catalog(15)
+            execute_tool_list_dir(mock_dir)
+            vals, _ = execute_tool_grep_logs(log_file)
+            execute_tool_calc_stats(vals)
+            total_ops += 3
+    elif tier == "W3":
+        for _ in range(iterations):
+            build_tool_catalog(15)
+            execute_vector_rag(BASE_DIR)
+            total_ops += 1
+    else:
+        raise ValueError(f"Unsupported tier for local tools: {tier}")
+    elapsed_ms = (time.monotonic() - t0) * 1000.0
+    return {
+        "workload": tier,
+        "iterations": iterations,
+        "total_ops": total_ops,
+        "t_exec_ms": round(elapsed_ms, 3),
+    }
+
+
+def main():
+    if len(sys.argv) > 1 and sys.argv[1] in ("--version", "version", "--help"):
+        print("python_orch v1.0.0")
+        sys.exit(0)
+    if len(sys.argv) > 1 and sys.argv[1] == "--local-tools":
+        tier = sys.argv[2] if len(sys.argv) > 2 else "W2"
+        iterations = int(sys.argv[3]) if len(sys.argv) > 3 else 200
+        res = run_local_tools_benchmark(tier, iterations)
+        print(json.dumps([res]))
+        return
+    tier = sys.argv[1] if len(sys.argv) > 1 else "W1"
+    warmth = sys.argv[2] if len(sys.argv) > 2 else "Cold"
+    reps = int(sys.argv[3]) if len(sys.argv) > 3 else 1
+    rss_idle = get_rss_mb()
+    results = []
+    for _ in range(reps):
+        res = run_workload(tier, warmth, rss_idle)
+        results.append(res)
+    print(json.dumps(results))
+
+
+if __name__ == "__main__":
+    main()
+
+================================================================================
+END FILE: benchmark/python_orch.py
+================================================================================
+
+
+================================================================================
+FILE: benchmark/adapters/base.py
+SHA-256: 65a4f485692ead175d82a48631f69051ed2caff44fa844a7c871db0ed4092098
+================================================================================
+"""
+Base Abstract Adapter for AI Agent Orchestrators
+Interface Base Abstrata para Adaptadores de Orquestradores de Agentes de IA
+
+Author / Autor: Rafael Paniccia Cassetta (UFABC)
+Language / Idioma: Python 3.12+ (English source code, bilingual docstrings)
+"""
+
+from abc import ABC, abstractmethod
+from typing import Any, Dict, List
+
+
+class AgentOrchestratorAdapter(ABC):
+    """
+    Abstract Base Class defining the contract for benchmarking AI agent orchestrators.
+    Classe Base Abstrata que define o contrato para benchmark de orquestradores de agentes de IA.
+    """
+
+    def __init__(self, name: str, runtime: str, language: str, mode: str = "standard"):
+        self.name = name
+        self.runtime = runtime
+        self.language = language
+        self.mode = mode
+
+    @abstractmethod
+    def setup(self) -> bool:
+        """
+        Verify prerequisites, compile binaries or install dependencies.
+        Verifica pré-requisitos, compila binários ou instala dependências.
+        """
+        pass
+
+    @abstractmethod
+    def cold_start_cmd(self) -> List[str]:
+        """
+        Return the CLI command used for cold-start latency measurement via hyperfine.
+        Retorna o comando CLI usado para medição de cold-start via hyperfine.
+        """
+        pass
+
+    @abstractmethod
+    def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> Dict[str, Any]:
+        """
+        Execute a standardized workload (W1-W4) and return structured telemetry.
+        Executa uma carga de trabalho padronizada (W1-W4) e retorna telemetria estruturada.
+        """
+        pass
+
+    @abstractmethod
+    def teardown(self) -> None:
+        """
+        Cleanup temporary session files, caches, or background processes.
+        Limpa arquivos temporários de sessão, caches ou processos em segundo plano.
+        """
+        pass
+
+    @abstractmethod
+    def metadata(self) -> Dict[str, Any]:
+        """
+        Return architectural and environment metadata for provenance tracking.
+        Retorna metadados arquiteturais e de ambiente para rastreabilidade de proveniência.
+        """
+        pass
+
+================================================================================
+END FILE: benchmark/adapters/base.py
+================================================================================
+
+
+================================================================================
+FILE: benchmark/adapters/picoclaw_adapter.py
+SHA-256: 750f4f4b67d84006ecbdd22ac8208ae3f891301d8d895cc0a0c8adb397e77975
+================================================================================
+"""
+PicoClaw Orchestrator Adapter (Go 1.23.2 Mach-O ARM64)
+Adaptador do Orquestrador PicoClaw (Go 1.23.2 Mach-O ARM64)
+
+Author / Autor: Rafael Paniccia Cassetta (UFABC)
+"""
+
+import json
+import os
+import subprocess
+from typing import Any, Dict, List
+
+from benchmark.adapters.base import AgentOrchestratorAdapter
+from benchmark.telemetry import run_subprocess_with_rusage
+
+
+class PicoClawAdapter(AgentOrchestratorAdapter):
+    """
+    Adapter for Sipeed PicoClaw compiled native Mach-O ARM64 Go binary.
+    Adaptador para o binário nativo Go Mach-O ARM64 compilado do Sipeed PicoClaw.
+    """
+
+    def __init__(self, repo_dir: str, mode: str = "native_static"):
+        super().__init__(
+            name="PicoClaw" if mode != "tool_rag" else "PicoClawToolRAG",
+            runtime="Go 1.23.2 (Native Mach-O ARM64)",
+            language="Go",
+            mode=mode
+        )
+        self.repo_dir = repo_dir
+        self.bin_path = os.path.join(repo_dir, "benchmark", "picoclaw_orch")
+        self.cli_path = os.path.join(repo_dir, "tools", "picoclaw", "picoclaw")
+
+    def setup(self) -> bool:
+        if not os.path.exists(self.bin_path):
+            go_src = os.path.join(self.repo_dir, "benchmark", "picoclaw_orch.go")
+            go_bin = os.path.join(self.repo_dir, "tools", "go", "bin", "go")
+            go_cmd = go_bin if os.path.exists(go_bin) else "go"
+            if os.path.exists(go_src):
+                subprocess.run(
+                    [go_cmd, "build", "-o", self.bin_path, go_src],
+                    cwd=os.path.join(self.repo_dir, "benchmark"),
+                    check=True
+                )
+        return os.path.exists(self.bin_path)
+
+    def cold_start_cmd(self) -> List[str]:
+        if os.path.exists(self.cli_path):
+            return [self.cli_path, "version"]
+        return [self.bin_path, "version"]
+
+    def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> Dict[str, Any]:
+        env = os.environ.copy()
+        if self.mode == "tool_rag":
+            env["PICOCLAW_MODE"] = "tool_rag"
+            env["OPENCLAW_MODE"] = "tool_rag"
+        cmd = [self.bin_path, workload_id]
+        stdout, stderr, rc, hw_stats = run_subprocess_with_rusage(cmd, cwd=self.repo_dir, env=env)
+        if rc != 0:
+            raise RuntimeError(f"PicoClaw execution failed (code {rc}): {stderr}")
+        raw_output = stdout.strip()
+        data = json.loads(raw_output)
+        if isinstance(data, list) and len(data) > 0:
+            res = data[0]
+        else:
+            res = data
+        res["proc_instructions"] = hw_stats.get("proc_instructions", 0)
+        res["proc_cycles"] = hw_stats.get("proc_cycles", 0)
+        res["proc_billed_energy"] = hw_stats.get("proc_billed_energy", 0)
+        res["proc_peak_phys_mb"] = hw_stats.get("proc_peak_phys_mb", 0.0)
+        if res.get("rss_peak_mb", 0.0) == 0.0 and hw_stats.get("proc_rss_mb", 0.0) > 0.0:
+            res["rss_peak_mb"] = hw_stats["proc_rss_mb"]
+        return res
+
+    def teardown(self) -> None:
+        pass
+
+    def metadata(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "runtime": self.runtime,
+            "language": self.language,
+            "mode": self.mode,
+            "binary_path": self.bin_path,
+            "gc_architecture": "Non-generational tri-color concurrent mark-sweep",
+            "concurrency_model": "M:N lightweight Goroutines (~2 KB initial stack)"
+        }
+
+================================================================================
+END FILE: benchmark/adapters/picoclaw_adapter.py
+================================================================================
+
+
+================================================================================
+FILE: benchmark/adapters/openclaw_adapter.py
+SHA-256: 336c38edb449a86a05ebf46a9be35e59f985e437daa11efb008a460be6854ff4
+================================================================================
+"""
+OpenClaw Orchestrator Adapter (Node.js v26 / TypeScript on Google V8)
+Adaptador do Orquestrador OpenClaw (Node.js v26 / TypeScript sobre Google V8)
+
+Author / Autor: Rafael Paniccia Cassetta (UFABC)
+"""
+
+import json
+import os
+from typing import Any, Dict, List
+
+from benchmark.adapters.base import AgentOrchestratorAdapter
+from benchmark.telemetry import run_subprocess_with_rusage
+
+
+class OpenClawAdapter(AgentOrchestratorAdapter):
+    """
+    Adapter for OpenClaw orchestrator executing atop Node.js V8.
+    Supports ablation modes: 'minimal' (equalized 3 tools) and 'full' (54 tools stock enterprise).
+    """
+
+    def __init__(self, repo_dir: str, mode: str = "minimal"):
+        super().__init__(
+            name="OpenClaw",
+            runtime="Node.js v26.12.1 (Google V8 JIT)",
+            language="TypeScript / JavaScript",
+            mode=mode
+        )
+        self.repo_dir = repo_dir
+        self.script_path = os.path.join(repo_dir, "benchmark", "openclaw_orch.mjs")
+
+        # Locate node binary
+        embedded_node = os.path.join(repo_dir, "tools", "node", "bin", "node")
+        if os.path.exists(embedded_node):
+            self.node_bin = embedded_node
+        else:
+            self.node_bin = "node"
+
+    def setup(self) -> bool:
+        return os.path.exists(self.script_path) and (os.path.exists(self.node_bin) or self.node_bin == "node")
+
+    def cold_start_cmd(self) -> List[str]:
+        return [self.node_bin, self.script_path, "--version"]
+
+    def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> Dict[str, Any]:
+        env = os.environ.copy()
+        env["OPENCLAW_MODE"] = self.mode
+        cmd = [self.node_bin, self.script_path, workload_id]
+        stdout, stderr, rc, hw_stats = run_subprocess_with_rusage(cmd, cwd=self.repo_dir, env=env)
+        if rc != 0:
+            raise RuntimeError(f"OpenClaw execution failed (code {rc}): {stderr}")
+        raw_output = stdout.strip()
+        data = json.loads(raw_output)
+        if isinstance(data, list) and len(data) > 0:
+            res = data[0]
+        else:
+            res = data
+        res["proc_instructions"] = hw_stats.get("proc_instructions", 0)
+        res["proc_cycles"] = hw_stats.get("proc_cycles", 0)
+        res["proc_billed_energy"] = hw_stats.get("proc_billed_energy", 0)
+        res["proc_peak_phys_mb"] = hw_stats.get("proc_peak_phys_mb", 0.0)
+        if res.get("rss_peak_mb", 0.0) == 0.0 and hw_stats.get("proc_rss_mb", 0.0) > 0.0:
+            res["rss_peak_mb"] = hw_stats["proc_rss_mb"]
+        return res
+
+    def teardown(self) -> None:
+        pass
+
+    def metadata(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "runtime": self.runtime,
+            "language": self.language,
+            "mode": self.mode,
+            "tool_catalog_size": 54 if self.mode == "full" else 15,
+            "node_binary": self.node_bin,
+            "gc_architecture": "Generational mark-compact (Scavenger + Old Space)",
+            "schema_validator": "TypeBox (@sinclair/typebox JSON-Schema)"
+        }
+
+================================================================================
+END FILE: benchmark/adapters/openclaw_adapter.py
+================================================================================
+
+
+================================================================================
+FILE: benchmark/adapters/python_native_adapter.py
+SHA-256: 3b9478209f3d808d70ad61fba8da27b7baa1fe7795355da84be7f188c544a3a6
+================================================================================
+"""
+Python Native Reference Orchestrator Adapter (CPython 3.12 VM)
+Adaptador do Orquestrador de Referência Nativo em Python (CPython 3.12 VM)
+
+Author / Autor: Rafael Paniccia Cassetta (UFABC)
+"""
+from __future__ import annotations
+
+import json
+import os
+import sys
+from typing import Any
+
+from benchmark.adapters.base import AgentOrchestratorAdapter
+from benchmark.telemetry import run_subprocess_with_rusage
+
+
+class PythonNativeAdapter(AgentOrchestratorAdapter):
+    """
+    Adapter for Python 3.12 reference agent orchestrator.
+    Evaluates CPython VM interpretation, memory layout, and tool dispatch.
+    """
+
+    def __init__(self, repo_dir: str, mode: str = "python_stdlib"):
+        super().__init__(
+            name="PythonNative",
+            runtime=f"Python {sys.version.split()[0]} (CPython VM)",
+            language="Python",
+            mode=mode,
+        )
+        self.repo_dir = repo_dir
+        self.script_path = os.path.join(repo_dir, "benchmark", "python_orch.py")
+        venv_py = os.path.join(repo_dir, "tools", ".venv", "bin", "python")
+        if os.path.exists(venv_py):
+            self.py_bin = venv_py
+        else:
+            self.py_bin = sys.executable
+
+    def setup(self) -> bool:
+        return os.path.exists(self.script_path) and os.path.exists(self.py_bin)
+
+    def cold_start_cmd(self) -> list[str]:
+        return [self.py_bin, "-c", "import sys; print(sys.version)"]
+
+    def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> dict[str, Any]:
+        cmd = [self.py_bin, self.script_path, workload_id, "Warm", str(iterations)]
+        stdout, stderr, rc, hw_stats = run_subprocess_with_rusage(cmd, cwd=self.repo_dir)
+        if rc != 0:
+            raise RuntimeError(f"PythonNative execution failed (code {rc}): {stderr}")
+        raw_output = stdout.strip()
+        data = json.loads(raw_output)
+        if isinstance(data, list) and len(data) > 0:
+            res = data[0]
+        else:
+            res = data
+        res["proc_instructions"] = hw_stats.get("proc_instructions", 0)
+        res["proc_cycles"] = hw_stats.get("proc_cycles", 0)
+        res["proc_billed_energy"] = hw_stats.get("proc_billed_energy", 0)
+        res["proc_peak_phys_mb"] = hw_stats.get("proc_peak_phys_mb", 0.0)
+        if res.get("rss_peak_mb", 0.0) == 0.0 and hw_stats.get("proc_rss_mb", 0.0) > 0.0:
+            res["rss_peak_mb"] = hw_stats["proc_rss_mb"]
+        return res
+
+    def teardown(self) -> None:
+        pass
+
+    def metadata(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "runtime": self.runtime,
+            "language": self.language,
+            "mode": self.mode,
+            "tool_catalog_size": 15,
+            "interpreter_path": self.py_bin,
+            "gc_architecture": "Reference Counting + Cyclic Garbage Collector",
+            "concurrency_model": "1:1 OS Threads (GIL bound)",
+        }
+
+================================================================================
+END FILE: benchmark/adapters/python_native_adapter.py
+================================================================================
+
+
+================================================================================
+FILE: benchmark/adapters/bun_minimal_adapter.py
+SHA-256: 1619f81b887b7d5559ccacb1eab2cf6e92a8481cab0c7f9a9796d9f38bc1acad
+================================================================================
+"""
+Bun / JavaScriptCore Orchestrator Adapter (Independent 4th Runtime Adapter)
+Adaptador Independente Bun / JavaScriptCore executando benchmark/bun_jsc_agent.mjs
+
+Author / Autor: Rafael Paniccia Cassetta (UFABC)
+"""
+
+import json
+import os
+import shutil
+from typing import Any, Dict, List
+
+from benchmark.adapters.base import AgentOrchestratorAdapter
+from benchmark.telemetry import run_subprocess_with_rusage
+
+
+class BunJSCOrchestratorAdapter(AgentOrchestratorAdapter):
+    """Independent 4th runtime adapter executing benchmark/bun_jsc_agent.mjs atop native Bun / JavaScriptCore."""
+
+    def __init__(self, repo_dir: str):
+        super().__init__(
+            name="BunJSCOrchestrator",
+            runtime="Bun v1.4.4 / JavaScriptCore (darwin-aarch64)",
+            language="JavaScript (ES2024 / Bun JSC Native APIs)",
+            mode="minimal",
+        )
+        self.repo_dir = repo_dir
+        self.script_path = os.path.join(repo_dir, "benchmark", "bun_jsc_agent.mjs")
+        local_bun = os.path.join(repo_dir, "tools", "bun", "bin", "bun")
+        local_node = os.path.join(repo_dir, "tools", "node", "bin", "node")
+        self.runner_bin = (
+            local_bun
+            if os.path.exists(local_bun)
+            else (
+                shutil.which("bun")
+                or (local_node if os.path.exists(local_node) else "node")
+            )
+        )
+
+    def setup(self) -> bool:
+        return os.path.exists(self.script_path)
+
+    def cold_start_cmd(self) -> List[str]:
+        return [self.runner_bin, "run", self.script_path, "--version"]
+
+    def teardown(self) -> None:
+        pass
+
+    def metadata(self) -> Dict[str, Any]:
+        return {
+            "name": self.name,
+            "runtime": self.runtime,
+            "language": self.language,
+            "mode": self.mode,
+            "worker_script": "benchmark/bun_jsc_agent.mjs",
+            "runner_binary_used": os.path.basename(self.runner_bin),
+            "is_fallback_node": "bun" not in os.path.basename(self.runner_bin),
+        }
+
+    def run_workload(
+        self, workload_id: str, prompt: str = "", iterations: int = 1
+    ) -> Dict[str, Any]:
+        runner_base = os.path.basename(self.runner_bin)
+        is_bun = "bun" in runner_base
+        cmd = [self.runner_bin]
+        if is_bun:
+            cmd.append("run")
+        cmd.extend([self.script_path, workload_id, "Warm", str(iterations)])
+
+        stdout, stderr, rc, hw = run_subprocess_with_rusage(
+            cmd,
+            cwd=self.repo_dir,
+            env={**os.environ},
+        )
+        if rc != 0:
+            raise RuntimeError(f"BunJSCOrchestrator execution failed (code {rc}): {stderr}")
+
+        res = json.loads(stdout.strip())
+        res = res[0] if isinstance(res, list) and res else res
+        res.update(
+            {
+                k: hw.get(k, 0)
+                for k in (
+                    "proc_instructions",
+                    "proc_cycles",
+                    "proc_billed_energy",
+                    "proc_peak_phys_mb",
+                )
+            }
+        )
+        res["runner_binary_used"] = runner_base
+        res["is_fallback_node"] = not is_bun
+        res["worker_script"] = "benchmark/bun_jsc_agent.mjs"
+        return res
+
+
+# Backward-compatible alias
+BunMinimalAdapter = BunJSCOrchestratorAdapter
+
+================================================================================
+END FILE: benchmark/adapters/bun_minimal_adapter.py
+================================================================================
+
+
+================================================================================
+FILE: benchmark/adapters/__init__.py
+SHA-256: 8597048a836553ec48192a65522c466f371e9ae52d0d5dc919cf9e9454674d45
+================================================================================
+"""
+Adapters Package Initialization and Factory Function
+Inicialização do Pacote de Adaptadores e Função Factory
+
+Author / Autor: Rafael Paniccia Cassetta (UFABC)
+"""
+from typing import Callable, Dict
+
+from benchmark.adapters.base import AgentOrchestratorAdapter
+from benchmark.adapters.bun_minimal_adapter import (
+    BunJSCOrchestratorAdapter,
+    BunMinimalAdapter,
+)
+from benchmark.adapters.neural_baseline_adapter import NeuralBaselineAdapter
+from benchmark.adapters.openclaw_adapter import OpenClawAdapter
+from benchmark.adapters.picoclaw_adapter import PicoClawAdapter
+from benchmark.adapters.python_native_adapter import PythonNativeAdapter
+
+# Neutral Architecture-First Class Aliases
+GoNativeOrchestratorAdapter = PicoClawAdapter
+NodeV8OrchestratorAdapter = OpenClawAdapter
+PythonReferenceAdapter = PythonNativeAdapter
+LocalLLMBaselineAdapter = NeuralBaselineAdapter
+
+ADAPTER_REGISTRY: Dict[str, Callable[[str], AgentOrchestratorAdapter]] = {
+    # Canonical Neutral Architecture Keys
+    "go_orchestrator": lambda repo_dir: GoNativeOrchestratorAdapter(repo_dir),
+    "go_orchestrator_tool_rag": lambda repo_dir: GoNativeOrchestratorAdapter(repo_dir, mode="tool_rag"),
+    "node_orchestrator": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="minimal"),
+    "node_orchestrator_minimal": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="minimal"),
+    "node_orchestrator_full": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="full"),
+    "node_orchestrator_tool_rag": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="tool_rag"),
+    "python_reference_agent": lambda repo_dir: PythonReferenceAdapter(repo_dir),
+    "local_llm_baseline": lambda repo_dir: LocalLLMBaselineAdapter(),
+    "bun_jsc_orchestrator": lambda repo_dir: BunJSCOrchestratorAdapter(repo_dir),
+    # Compatible Product-Reference Aliases
+    "picoclaw": lambda repo_dir: GoNativeOrchestratorAdapter(repo_dir),
+    "picoclaw_tool_rag": lambda repo_dir: GoNativeOrchestratorAdapter(repo_dir, mode="tool_rag"),
+    "openclaw_minimal": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="minimal"),
+    "openclaw_full": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="full"),
+    "openclaw_tool_rag": lambda repo_dir: NodeV8OrchestratorAdapter(repo_dir, mode="tool_rag"),
+    "python_native": lambda repo_dir: PythonReferenceAdapter(repo_dir),
+    "neural_baseline": lambda repo_dir: LocalLLMBaselineAdapter(),
+    "bun_minimal": lambda repo_dir: BunJSCOrchestratorAdapter(repo_dir),
+}
+
+
+def get_adapter(name: str, repo_dir: str) -> AgentOrchestratorAdapter:
+    """
+    Instantiate and return an orchestrator adapter by registry key.
+    Instancia e retorna um adaptador de orquestrador pela chave de registro.
+    """
+    key = name.lower()
+    if key not in ADAPTER_REGISTRY:
+        raise ValueError(f"Unknown adapter '{name}'. Available: {list(ADAPTER_REGISTRY.keys())}")
+    factory = ADAPTER_REGISTRY[key]
+    return factory(repo_dir)
+
+
+__all__ = [
+    "AgentOrchestratorAdapter",
+    "GoNativeOrchestratorAdapter",
+    "NodeV8OrchestratorAdapter",
+    "PythonReferenceAdapter",
+    "LocalLLMBaselineAdapter",
+    "BunJSCOrchestratorAdapter",
+    "PicoClawAdapter",
+    "OpenClawAdapter",
+    "PythonNativeAdapter",
+    "NeuralBaselineAdapter",
+    "BunMinimalAdapter",
+    "get_adapter",
+    "ADAPTER_REGISTRY",
+]
+
+================================================================================
+END FILE: benchmark/adapters/__init__.py
+================================================================================
+
+
+================================================================================
+FILE: tests/test_adapters_and_failfast.py
+SHA-256: 4c5c63dbe8db84e58939fd09b69f2967592996b787c2ecc8cde4ef86f3a25b46
+================================================================================
+"""
+Unit Tests for Adapter Registry & Fail-Fast Architecture
+Testes Unitários para Registro de Adaptadores e Arquitetura Fail-Fast
+
+Author / Autor: Rafael Paniccia Cassetta (UFABC)
+Language / Idioma: Bilingual (PT-BR & EN-US comments, English code)
+"""
+
+import os
+
+import pytest
+
+from benchmark.adapters import ADAPTER_REGISTRY, get_adapter
+from benchmark.adapters.base import AgentOrchestratorAdapter
+from benchmark.run_unified_benchmark import (
+    check_server_health,
+    run_campaign,
+    start_mock_server_if_needed,
+)
+
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+def test_adapter_registry_contains_all_registered_agents():
+    """Verify both neutral architecture keys and compatible product-reference aliases are registered in ADAPTER_REGISTRY."""
+    expected_agents = {
+        "go_orchestrator",
+        "node_orchestrator_minimal",
+        "node_orchestrator_full",
+        "python_reference_agent",
+        "local_llm_baseline",
+        "bun_jsc_orchestrator",
+        "picoclaw",
+        "openclaw_minimal",
+        "openclaw_full",
+        "python_native",
+        "neural_baseline",
+        "bun_minimal",
+    }
+    registered = set(ADAPTER_REGISTRY.keys())
+    assert expected_agents.issubset(registered), f"Missing agents: {expected_agents - registered}"
+
+
+def test_bun_minimal_adapter_metadata_and_execution(monkeypatch):
+    """Verify BunJSCOrchestratorAdapter executes dedicated benchmark/bun_jsc_agent.mjs and conforms to interface."""
+    mock_port = 8088
+    start_mock_server_if_needed(mock_port)
+    monkeypatch.setenv("LLAMA_API_URL", f"http://127.0.0.1:{mock_port}/v1/chat/completions")
+
+    adapter = get_adapter("bun_jsc_orchestrator", REPO_DIR)
+    meta = adapter.metadata()
+    assert meta.get("worker_script") == "benchmark/bun_jsc_agent.mjs"
+    assert "runner_binary_used" in meta
+    assert "is_fallback_node" in meta
+    assert isinstance(meta["is_fallback_node"], bool)
+    assert meta["mode"] == "minimal"
+    assert meta["runner_binary_used"] in ("bun", "node")
+
+    for w in ("W1", "W2", "W3"):
+        res = adapter.run_workload(w)
+        assert res.get("prompt_tokens", 0) > 0
+        assert res.get("completion_tokens", 0) > 0
+        assert res.get("t_task_ms", 0.0) > 0.0
+        assert res.get("worker_script") == "benchmark/bun_jsc_agent.mjs"
+
+
+def test_adapter_instances_subclass_base_adapter():
+    """Verify every registered adapter conforms to AgentOrchestratorAdapter interface."""
+    for name in ADAPTER_REGISTRY:
+        adapter = get_adapter(name, REPO_DIR)
+        assert isinstance(adapter, AgentOrchestratorAdapter)
+        assert hasattr(adapter, "run_workload")
+        assert hasattr(adapter, "setup")
+        assert hasattr(adapter, "cold_start_cmd")
+        assert hasattr(adapter, "name")
+        assert hasattr(adapter, "language")
+        assert hasattr(adapter, "runtime")
+
+
+def test_adapter_run_workload_across_targets(monkeypatch):
+    """Verify each adapter runs workload W1 deterministically in standard test environment."""
+    mock_port = 8088
+    start_mock_server_if_needed(mock_port)
+    monkeypatch.setenv("LLAMA_API_URL", f"http://127.0.0.1:{mock_port}/v1/chat/completions")
+
+    for name in ADAPTER_REGISTRY:
+        adapter = get_adapter(name, REPO_DIR)
+        result = adapter.run_workload("W1")
+        assert isinstance(result, dict)
+        assert len(result) > 0
+
+
+def test_fail_fast_on_unreachable_server(monkeypatch):
+    """
+    Verify fail-fast policy: when dry_run=False and the neural server port is offline,
+    the pipeline immediately raises RuntimeError instead of generating synthetic data.
+    """
+    # Test health check against an offline loopback port (59999)
+    offline_url = "http://127.0.0.1:59999/health"
+    is_healthy = check_server_health(url=offline_url, timeout=0.2)
+    assert is_healthy is False
+
+    # Point LLAMA_HEALTH_URL to the offline port
+    monkeypatch.setenv("LLAMA_HEALTH_URL", offline_url)
+
+    # Verify run_campaign fails fast with RuntimeError when target port is offline
+    with pytest.raises(RuntimeError) as exc_info:
+        run_campaign(reps_per_condition=1, dry_run=False)
+
+    assert "llama-server not reachable" in str(exc_info.value)
+
+================================================================================
+END FILE: tests/test_adapters_and_failfast.py
+================================================================================
+
+
+================================================================================
+FILE: tests/test_dataset_generator.py
+SHA-256: 66a08eaed0f641aaad41aadfbcd241aa09a157549884fdf6dfe89f914dae5bf9
+================================================================================
+"""
+Unit Tests for Deterministic Workload Datasets
+Testes Unitários para Datasets Determinísticos dos Workloads
+
+Author / Autor: Rafael Paniccia Cassetta (UFABC)
+"""
+
+import json
+import os
+
+import numpy as np
+
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(REPO_DIR, "data", "workload_data")
+
+
+def test_mock_files_directory_structure():
+    """Verify mock_files contains exactly 50 synthetic deterministic files."""
+    mock_dir = os.path.join(DATA_DIR, "mock_files")
+    assert os.path.exists(mock_dir), f"Directory {mock_dir} does not exist"
+    files = [f for f in os.listdir(mock_dir) if not f.startswith(".")]
+    assert len(files) == 50, f"Expected 50 mock files, found {len(files)}"
+    for f in files:
+        full_p = os.path.join(mock_dir, f)
+        assert os.path.getsize(full_p) > 0, f"File {f} is empty"
+
+
+def test_system_logs_schema_and_record_count():
+    """Verify system_logs.jsonl contains 750 valid JSON lines with required fields."""
+    log_file = os.path.join(DATA_DIR, "system_logs.jsonl")
+    assert os.path.exists(log_file), f"Log file {log_file} does not exist"
+
+    count = 0
+    with open(log_file, "r", encoding="utf-8") as f:
+        for idx, line in enumerate(f):
+            count += 1
+            record = json.loads(line)
+            assert "timestamp" in record, f"Line {idx} missing timestamp"
+            assert "subsystem" in record, f"Line {idx} missing subsystem"
+            assert "level" in record, f"Line {idx} missing level"
+            assert "latency_ms" in record, f"Line {idx} missing latency_ms"
+            assert isinstance(record["latency_ms"], (int, float)), f"Line {idx} latency_ms not numeric"
+
+    assert count == 750, f"Expected 750 log entries, counted {count}"
+
+
+def test_rag_chunks_count_and_format():
+    """Verify rag_chunks_10k.json contains valid text chunks with index keys."""
+    rag_file = os.path.join(DATA_DIR, "rag_chunks_10k.json")
+    assert os.path.exists(rag_file), f"RAG chunks file {rag_file} does not exist"
+
+    with open(rag_file, "r", encoding="utf-8") as f:
+        chunks = json.load(f)
+
+    assert len(chunks) >= 100, f"Expected at least 100 chunks, found {len(chunks)}"
+    assert "0" in chunks, "Index 0 missing in chunks"
+    assert isinstance(chunks["0"], str) and len(chunks["0"]) > 50
+
+
+def test_embedding_head_matrix_dimensions():
+    """Verify embedding_head_100k.npz contains the dense projection matrix."""
+    emb_file = os.path.join(DATA_DIR, "embedding_head_100k.npz")
+    assert os.path.exists(emb_file), f"Embedding weights {emb_file} missing"
+
+    data = np.load(emb_file)
+    assert len(data.files) > 0
+    key = data.files[0]
+    mat = data[key]
+    assert mat.dtype in (np.float32, np.float64)
+    assert mat.size >= 98000, f"Matrix size {mat.size} below expected ~98k parameters"
+
+================================================================================
+END FILE: tests/test_dataset_generator.py
+================================================================================
+
+
+================================================================================
+FILE: tests/test_telemetry_parser.py
+SHA-256: ea835745da8b243370f60f7a36a8a87290fda156768e1328381bb7d8f79e1b2d
+================================================================================
+"""
+Unit Tests for Hardware Telemetry & Powermetrics Parsing
+Testes Unitários para Telemetria de Hardware e Parser do Powermetrics
+
+Author / Autor: Rafael Paniccia Cassetta (UFABC)
+Language / Idioma: Bilingual (PT-BR & EN-US comments, English code)
+"""
+
+import sys
+
+import pytest
+
+from benchmark.telemetry import (
+    LinuxRAPLMonitor,
+    SMCPowerMonitor,
+    get_process_rusage_v4,
+    integrate_energy_trapezoidal,
+    parse_powermetrics_sample,
+)
+
+
+def test_parse_sample_block():
+    """Verify powermetrics sample parsing into CPU, GPU, ANE and package power."""
+    sample_raw = """
+    *** Sampled system activity (Mon Nov 10 20:00:00 2026 -0300) (100.12ms elapsed) ***
+
+    CPU Power: 1250 mW
+    GPU Power: 11400 mW
+    ANE Power: 0 mW
+    Combined Power (CPU + GPU + ANE): 12650 mW
+    """
+    parsed = parse_powermetrics_sample(sample_raw)
+    assert parsed["cpu_mw"] == 1250.0
+    assert parsed["gpu_mw"] == 11400.0
+    assert parsed["ane_mw"] == 0.0
+    assert parsed["package_mw"] == 12650.0
+
+
+def test_parse_sample_fallback_combined():
+    """Verify fallback summation if Combined Power header is absent."""
+    sample_raw = """
+    CPU Power: 2000 mW
+    GPU Power: 3000 mW
+    """
+    parsed = parse_powermetrics_sample(sample_raw)
+    assert parsed["cpu_mw"] == 2000.0
+    assert parsed["gpu_mw"] == 3000.0
+    assert parsed["package_mw"] == 5000.0
+
+
+def test_integrate_energy_trapezoidal():
+    """Verify trapezoidal numerical integration of power samples over monotonic timestamps."""
+    # 0.0s: 10 W (10000 mW)
+    # 1.0s: 20 W (20000 mW) -> trapezoid area = 1.0 * (10 + 20) / 2 = 15 J
+    # 2.0s: 20 W (20000 mW) -> rectangle area = 1.0 * (20 + 20) / 2 = 20 J
+    # Total expected: 35.0 J
+    samples = [
+        {"timestamp_ns": 0, "package_mw": 10000.0, "cpu_mw": 6000.0, "gpu_mw": 4000.0, "ane_mw": 0.0},
+        {"timestamp_ns": 1_000_000_000, "package_mw": 20000.0, "cpu_mw": 12000.0, "gpu_mw": 8000.0, "ane_mw": 0.0},
+        {"timestamp_ns": 2_000_000_000, "package_mw": 20000.0, "cpu_mw": 12000.0, "gpu_mw": 8000.0, "ane_mw": 0.0},
+    ]
+    summary = integrate_energy_trapezoidal(samples)
+    assert pytest.approx(summary["energy_total_j"], 0.001) == 35.0
+    assert summary["duration_s"] == 2.0
+
+
+def test_integrate_energy_empty_or_single():
+    """Verify empty sample list yields 0.0 Joules."""
+    res_empty = integrate_energy_trapezoidal([])
+    assert res_empty["energy_total_j"] == 0.0
+
+    res_single = integrate_energy_trapezoidal([{
+        "timestamp_ns": 0,
+        "elapsed_ms": 100.0,
+        "package_mw": 5000.0,
+        "cpu_mw": 2000.0,
+        "gpu_mw": 3000.0,
+        "ane_mw": 0.0
+    }])
+    assert res_single["energy_total_j"] > 0.0
+
+
+def test_get_process_rusage_v4():
+    """Verify Darwin libproc hardware counters on macOS, or None fallback on Linux."""
+    res = get_process_rusage_v4()
+    if sys.platform == "darwin":
+        assert res is not None
+        assert "proc_instructions" in res
+        assert "proc_cycles" in res
+        assert "proc_rss_mb" in res
+        assert isinstance(res["proc_instructions"], int)
+        assert isinstance(res["proc_cycles"], int)
+    else:
+        # On Linux without libproc, either returns psutil dict or None
+        assert res is None or "proc_rss_mb" in res
+
+
+def test_smc_monitor_no_sudo_degradation():
+    """Verify SMCPowerMonitor non-root graceful degradation without crashing."""
+    monitor = SMCPowerMonitor()
+    monitor.start()
+    res = monitor.stop()
+    assert res is None or isinstance(res, dict)
+
+
+def test_rapl_monitor_graceful_handling():
+    """Verify LinuxRAPLMonitor graceful fallback when sysfs nodes are unavailable."""
+    monitor = LinuxRAPLMonitor()
+    monitor.start()
+    res = monitor.stop()
+    assert res is None or isinstance(res, dict)
+
+================================================================================
+END FILE: tests/test_telemetry_parser.py
+================================================================================
+
+
+================================================================================
+FIM DA PARTE 2A DO PACOTE DE AUDITORIA (100% INTEGRAL SEM TRUNCAMENTO)
+================================================================================

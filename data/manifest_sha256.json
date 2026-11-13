@@ -176,7 +176,7 @@
   "results/publication_campaign/warm_cache_summary.json": "0ec60a0651ddf22cce99fca88003793f7227b95a0c48b3f65935b29c4981a547",
   "results/publication_campaign/warm_cache_trials.jsonl": "6e9156ffd3fbf0a424924c3c7b4710174f00f6b9fb363cfb2d0b0af73c5ad192",
   "scripts/check_quiescence.sh": "0ff1490279dfb91c9c2d863f6def7e1d93090e4801cfdaae5e207e547c0afcdb",
-  "scripts/export_audit_bundle.py": "05797353ffbd20cca38d1afb37ecf095483a349182774473c12b0aeb26af0e75",
+  "scripts/export_audit_bundle.py": "5ca225d538e178d722813b0178e3a1e2344cf010ce719219e1e15c3b07fa5a66",
   "scripts/legacy/compare_campaigns.py": "a1b607b6a9a9c215f314ce53f3fa799fc64630907e28be1a188b8803961014ff",
   "scripts/legacy/run_all_experiments.py": "5aef890f6079b07a57abe2cb281a02f1585eea33251ef76b3697974ce5e3b9a2",
   "scripts/legacy/run_full_campaign.sh": "3409ceaf3719c3b0d86593dc8922d03758502482d0815beda0751b8b53c20ae5",

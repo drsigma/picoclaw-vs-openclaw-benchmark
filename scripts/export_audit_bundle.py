@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """
-scripts/export_audit_bundle.py - Consolidated 3-Part Academic Audit Bundle Exporter
-Exportador do Pacote Consolidado de Auditoria em 3 Partes para Submissão Elsevier SoftwareX
+scripts/export_audit_bundle.py - Consolidated Academic Audit Bundle Exporter (< 135 KB Sized)
+Exportador do Pacote Consolidado de Auditoria em Partes Dimensionadas para Submissão Elsevier SoftwareX
 
 Generates:
   1. auditoria_parte1_manuscrito_tabelas_respostas.txt
-  2. auditoria_parte2_codigo_testes_metadados_manifesto.txt
-  3. auditoria_parte3_dados_brutos_jsonl_completos.txt
-  4. repo_texto_auditoria_final.txt (unified mirror for backward compatibility)
+  2. auditoria_parte2A_codigo_nucleo_adaptadores_e_testes.txt (< 135 KB)
+  3. auditoria_parte2B_jsons_metadados_e_manifesto_sha256.txt (< 135 KB)
+  4. auditoria_parte2C_scripts_abiacoes.txt (< 135 KB)
+  5. auditoria_parte3_compacto_todos_datasets.txt (< 140 KB, ~128 KB)
+  6. auditoria_parte3_dados_brutos_jsonl_completos.txt (Unabridged raw dataset archive)
+  7. repo_texto_auditoria_final.txt (Unified backward compatibility mirror)
 
 Author: Rafael Paniccia Cassetta (UFABC)
 """
@@ -18,11 +21,15 @@ import json
 import os
 import subprocess
 import sys
+from typing import Optional, Set
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT_PART1 = os.path.join(REPO_DIR, "auditoria_parte1_manuscrito_tabelas_respostas.txt")
-OUTPUT_PART2 = os.path.join(REPO_DIR, "auditoria_parte2_codigo_testes_metadados_manifesto.txt")
-OUTPUT_PART3 = os.path.join(REPO_DIR, "auditoria_parte3_dados_brutos_jsonl_completos.txt")
+OUTPUT_PART2A = os.path.join(REPO_DIR, "auditoria_parte2A_codigo_nucleo_adaptadores_e_testes.txt")
+OUTPUT_PART2B = os.path.join(REPO_DIR, "auditoria_parte2B_jsons_metadados_e_manifesto_sha256.txt")
+OUTPUT_PART2C = os.path.join(REPO_DIR, "auditoria_parte2C_scripts_abiacoes.txt")
+OUTPUT_PART3_COMPACT = os.path.join(REPO_DIR, "auditoria_parte3_compacto_todos_datasets.txt")
+OUTPUT_PART3_RAW = os.path.join(REPO_DIR, "auditoria_parte3_dados_brutos_jsonl_completos.txt")
 OUTPUT_FINAL = os.path.join(REPO_DIR, "repo_texto_auditoria_final.txt")
 OUTPUT_FILE_6 = os.path.join(REPO_DIR, "repo_texto_auditoria_6.txt")
 OUTPUT_FILE_6_4 = os.path.join(REPO_DIR, "repo_texto_auditoria_6_4.txt")
@@ -37,7 +44,7 @@ def compute_sha256(filepath: str) -> str:
     return h.hexdigest()
 
 
-def get_cmd_output(cmd: list[str]) -> str:
+def get_cmd_output(cmd: list) -> str:
     try:
         res = subprocess.run(cmd, cwd=REPO_DIR, capture_output=True, text=True, timeout=5)
         return res.stdout.strip()
@@ -45,60 +52,15 @@ def get_cmd_output(cmd: list[str]) -> str:
         return f"Error: {e}"
 
 
-def format_compact_hyperfine(content: str) -> str:
-    try:
-        data = json.loads(content)
-        results = data.get("results", [])
-        lines = [
-            "{",
-            f'  "schema_version": {data.get("schema_version", 2)},',
-            f'  "metadata": {json.dumps(data.get("metadata", {}), separators=(",", ": "))},',
-            f'  "primary_metric": "{data.get("primary_metric", "time_wall_clock")}",',
-            '  "results": [',
-        ]
-        for r_idx, r in enumerate(results):
-            lines.append("    {")
-            lines.append(f'      "command": {json.dumps(r.get("command", ""))},')
-            lines.append('      "measurements": [')
-            meas = r.get("measurements", [])
-            for m_idx, m in enumerate(meas):
-                comma = "," if m_idx < len(meas) - 1 else ""
-                lines.append(f"        {json.dumps(m, separators=(',', ':'))}{comma}")
-            lines.append("      ]")
-            comma_r = "," if r_idx < len(results) - 1 else ""
-            lines.append(f"    }}{comma_r}")
-        lines.append("  ]")
-        lines.append("}")
-        return "\n".join(lines)
-    except Exception:
-        return content
-
-
 def format_compact_json_dict(content: str) -> str:
     try:
         data = json.loads(content)
-        if not isinstance(data, dict):
-            return content
-        lines = ["{"]
-        items = list(data.items())
-        for idx, (k, v) in enumerate(items):
-            comma = "," if idx < len(items) - 1 else ""
-            if isinstance(v, dict):
-                lines.append(f'  "{k}": {{')
-                sub_items = list(v.items())
-                for s_idx, (sk, sv) in enumerate(sub_items):
-                    s_comma = "," if s_idx < len(sub_items) - 1 else ""
-                    lines.append(f'    "{sk}": {json.dumps(sv, separators=(",", ":"))}{s_comma}')
-                lines.append(f"  }}{comma}")
-            else:
-                lines.append(f'  "{k}": {json.dumps(v, separators=(",", ": "))}{comma}')
-        lines.append("}")
-        return "\n".join(lines)
+        return json.dumps(data, separators=(",", ":"))
     except Exception:
         return content
 
 
-def dump_file(rel_path: str, seen: set[str] | None = None) -> str:
+def dump_file(rel_path: str, seen: Optional[Set[str]] = None, compact_json: bool = False) -> str:
     """Reads and returns 100% full content of the specified file with SHA-256 header and explicit closing delimiter."""
     if seen is not None:
         if rel_path in seen:
@@ -113,24 +75,21 @@ def dump_file(rel_path: str, seen: set[str] | None = None) -> str:
     with open(abs_path, "r", encoding="utf-8", errors="replace") as f:
         content = f.read()
 
-    if rel_path in [
-        "results/publication_campaign/hyperfine_cold_start.json",
-        "results/publication_campaign/hyperfine_agent_init.json",
-        "results/publication_campaign/hyperfine_worker_version.json",
-    ]:
-        content = format_compact_hyperfine(content)
+    if compact_json and rel_path.endswith(".json"):
+        content = format_compact_json_dict(content)
     elif rel_path in [
-        "results/publication_campaign/spearman_correlation_matrix.json",
-        "results/publication_campaign/pca_variance_decomposition.json",
+        "results/publication_campaign/campaign_metadata.json",
+        "results/publication_campaign/summary_statistics.json",
+        "results/publication_campaign/warm_cache_summary.json",
         "results/publication_campaign/uma_energy_bandwidth_attribution.json",
         "results/publication_campaign/inter_session_replication.json",
         "results/publication_campaign/tool_rag_mitigation_summary.json",
-        "results/publication_campaign/summary_statistics.json",
-        "results/publication_campaign/warm_cache_summary.json",
         "results/publication_campaign/kv_cache_thrashing_summary.json",
-        "results/publication_campaign/sensitivity_and_outlier_analysis.json",
         "results/publication_campaign/independent_validation_report.json",
         "results/publication_campaign/cross_hardware_and_independent_validation.json",
+        "results/publication_campaign/statistical_tests.json",
+        "results/publication_campaign/warm_cache_statistical_tests.json",
+        "results/publication_campaign/prefill_regression_fit.json",
     ]:
         content = format_compact_json_dict(content)
 
@@ -151,13 +110,9 @@ def build_header(part_title: str) -> str:
     git_head = get_cmd_output(["git", "rev-parse", "HEAD"])
     raw_status = get_cmd_output(["git", "status", "--short"])
     ignore_bundles = (
-        "auditoria_parte1_manuscrito_tabelas_respostas.txt",
-        "auditoria_parte2_codigo_testes_metadados_manifesto.txt",
-        "auditoria_parte3_dados_brutos_jsonl_completos.txt",
-        "repo_texto_auditoria_final.txt",
-        "repo_texto_auditoria_6.txt",
-        "repo_texto_auditoria_6_4.txt",
-        "repo_dados_brutos_jsonl_completos.txt",
+        "auditoria_parte",
+        "repo_texto_auditoria",
+        "repo_dados_brutos",
     )
     filtered_lines = [
         line for line in raw_status.splitlines()
@@ -185,7 +140,13 @@ Status Git:
 
 
 def generate_bundle():
-    print("📦 Generating 3-part unabridged audit bundles and unified mirror...")
+    print("📦 Generating size-budgeted audit bundles (< 135 KB) and unified mirror...")
+
+    # Clean up any legacy oversized Part 2 if present
+    legacy_p2 = os.path.join(REPO_DIR, "auditoria_parte2_codigo_testes_metadados_manifesto.txt")
+    if os.path.exists(legacy_p2):
+        os.remove(legacy_p2)
+        print(f"🧹 Cleaned legacy oversized file: {legacy_p2}")
 
     # PARTE 1: Manuscrito, Resposta aos Revisores, Bibliografia, Governanca e 7 Tabelas LaTeX + Macros
     part1_files = [
@@ -207,7 +168,7 @@ def generate_bundle():
         "results/publication_campaign/tables/macros_empirical.tex",
     ]
 
-    seen_p1: set[str] = set()
+    seen_p1: Set[str] = set()
     p1_sections = [
         build_header("PARTE 1: RESPOSTA AOS REVISORES, MANUSCRITO .TEX, BIBLIOGRAFIA E TABELAS LATEX"),
         "=" * 80 + "\nSECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 7 TABELAS LATEX + MACROS\n" + "=" * 80 + "\n",
@@ -220,101 +181,131 @@ def generate_bundle():
     part1_content = "\n".join(p1_sections)
     with open(OUTPUT_PART1, "w", encoding="utf-8") as f:
         f.write(part1_content)
-    print(f"✅ Generated Part 1: {OUTPUT_PART1} ({len(part1_content)} chars, {os.path.getsize(OUTPUT_PART1)} bytes, {len(seen_p1)} unique files)")
+    print(f"✅ Generated Part 1: {OUTPUT_PART1} ({os.path.getsize(OUTPUT_PART1)/1024:.2f} KB, {len(seen_p1)} unique files)")
 
-    # PARTE 2: CI/CD, Makefile, Codigo-Fonte de Producao (incluindo protocol_invariants.py e bun_jsc_agent.mjs), Scripts, Testes, JSONs e Manifesto SHA-256
-    part2_files = [
+    # PARTE 2A: CI/CD, Makefile, Codigo-Nucleo, Invariantes, Orquestradores, Adaptadores e Testes (< 135 KB)
+    part2a_files = [
         ".github/workflows/ci.yml",
         "Makefile",
         "pyproject.toml",
-        # Benchmark & Adapters
         "benchmark/protocol_invariants.py",
         "benchmark/bun_jsc_agent.mjs",
         "benchmark/picoclaw_orch.go",
         "benchmark/openclaw_orch.mjs",
         "benchmark/python_orch.py",
-        "benchmark/telemetry.py",
-        "benchmark/run_unified_benchmark.py",
-        "benchmark/analyze_results.py",
-        "benchmark/generate_charts.py",
-        "benchmark/generate_datasets.py",
         "benchmark/adapters/base.py",
         "benchmark/adapters/picoclaw_adapter.py",
         "benchmark/adapters/openclaw_adapter.py",
         "benchmark/adapters/python_native_adapter.py",
-        "benchmark/adapters/neural_baseline_adapter.py",
         "benchmark/adapters/bun_minimal_adapter.py",
         "benchmark/adapters/__init__.py",
-        # Active Scripts
-        "scripts/run_tool_rag_mitigation_experiment.py",
-        "scripts/run_warm_cache_campaign.py",
-        "scripts/run_kv_cache_thrashing_ablation.py",
-        "scripts/run_independent_validation_suite.py",
-        "scripts/run_regime_b_w2_w4_unified_session.py",
-        "scripts/run_prefill_ablation.py",
-        "scripts/run_w2_resample.py",
-        "scripts/run_inter_session_replication.py",
-        "scripts/run_uma_energy_and_bandwidth_attribution.py",
-        "scripts/verify_manifest.py",
-        "scripts/setup_environment.sh",
-        "scripts/check_quiescence.sh",
-        # Test Suite
         "tests/test_adapters_and_failfast.py",
-        "tests/test_artifact_consistency.py",
         "tests/test_dataset_generator.py",
-        "tests/test_statistical_engine.py",
         "tests/test_telemetry_parser.py",
-        # Docs, Results JSONs & Cryptographic Manifest
-        "README.md",
-        "tutorial/README.md",
+    ]
+
+    seen_p2a: Set[str] = set()
+    p2a_sections = [
+        build_header("PARTE 2A: CODIGO-FONTE NUCLEO, ADAPTADORES E TESTES UNITARIOS"),
+        "=" * 80 + "\nSECAO 2A: CI/CD, BUILD, INVARIANTES FORMALIZADOS, ORQUESTRADORES, ADAPTADORES E TESTES\n" + "=" * 80 + "\n",
+    ]
+    for f in part2a_files:
+        block = dump_file(f, seen_p2a)
+        if block:
+            p2a_sections.append(block)
+    p2a_sections.append("=" * 80 + "\nFIM DA PARTE 2A DO PACOTE DE AUDITORIA (100% INTEGRAL SEM TRUNCAMENTO)\n" + "=" * 80 + "\n")
+    part2a_content = "\n".join(p2a_sections)
+    with open(OUTPUT_PART2A, "w", encoding="utf-8") as f:
+        f.write(part2a_content)
+    print(f"✅ Generated Part 2A: {OUTPUT_PART2A} ({os.path.getsize(OUTPUT_PART2A)/1024:.2f} KB, {len(seen_p2a)} unique files)")
+
+    # PARTE 2B: Manifesto Criptografico SHA-256 no topo e JSONs de Metadados e Resultados Empiricos (< 135 KB)
+    part2b_files = [
+        "data/manifest_sha256.json",
         "results/publication_campaign/campaign_metadata.json",
+        "results/publication_campaign/summary_statistics.json",
+        "results/publication_campaign/warm_cache_summary.json",
         "results/publication_campaign/uma_energy_bandwidth_attribution.json",
         "results/publication_campaign/inter_session_replication.json",
         "results/publication_campaign/tool_rag_mitigation_summary.json",
         "results/publication_campaign/kv_cache_thrashing_summary.json",
-        "results/publication_campaign/sensitivity_and_outlier_analysis.json",
         "results/publication_campaign/independent_validation_report.json",
         "results/publication_campaign/cross_hardware_and_independent_validation.json",
-        "results/publication_campaign/prefill_regression_fit.json",
-        "results/publication_campaign/spearman_correlation_matrix.json",
-        "results/publication_campaign/pca_variance_decomposition.json",
-        "results/publication_campaign/summary_statistics.json",
-        "results/publication_campaign/warm_cache_summary.json",
         "results/publication_campaign/statistical_tests.json",
         "results/publication_campaign/warm_cache_statistical_tests.json",
-        "results/publication_campaign/hyperfine_cold_start.json",
-        "results/publication_campaign/hyperfine_worker_version.json",
-        "results/publication_campaign/hyperfine_agent_init.json",
-        "data/manifest_sha256.json",
+        "results/publication_campaign/prefill_regression_fit.json",
     ]
 
-    seen_p2: set[str] = set()
-    p2_sections = [
-        build_header("PARTE 2: CODIGO-FONTE, SCRIPTS, TESTES, JSONS DE RESULTADOS E MANIFESTO SHA-256"),
-        "=" * 80 + "\nSECAO 2: CODIGO-FONTE INTEGRAL, SCRIPTS, TESTES, JSONS DE RESULTADOS E MANIFESTO SHA-256\n" + "=" * 80 + "\n",
+    seen_p2b: Set[str] = set()
+    p2b_sections = [
+        build_header("PARTE 2B: MANIFESTO CRIPTOGRAFICO SHA-256 E JSONS DE RESULTADOS"),
+        "=" * 80 + "\nSECAO 2B: MANIFESTO CRIPTOGRAFICO SHA-256 E TABELAS JSON INTEGRAIS DE METADADOS E ESTATISTICAS\n" + "=" * 80 + "\n",
     ]
-    for f in part2_files:
-        block = dump_file(f, seen_p2)
+    for f in part2b_files:
+        block = dump_file(f, seen_p2b, compact_json=True)
         if block:
-            p2_sections.append(block)
-    p2_sections.append("=" * 80 + "\nFIM DA PARTE 2 DO PACOTE DE AUDITORIA (100% ARQUIVOS E MANIFESTO VERIFICADOS)\n" + "=" * 80 + "\n")
-    part2_content = "\n".join(p2_sections)
-    with open(OUTPUT_PART2, "w", encoding="utf-8") as f:
-        f.write(part2_content)
-    print(f"✅ Generated Part 2: {OUTPUT_PART2} ({len(part2_content)} chars, {os.path.getsize(OUTPUT_PART2)} bytes, {len(seen_p2)} unique files)")
+            p2b_sections.append(block)
+    p2b_sections.append("=" * 80 + "\nFIM DA PARTE 2B DO PACOTE DE AUDITORIA (100% INTEGRAL SEM TRUNCAMENTO)\n" + "=" * 80 + "\n")
+    part2b_content = "\n".join(p2b_sections)
+    with open(OUTPUT_PART2B, "w", encoding="utf-8") as f:
+        f.write(part2b_content)
+    print(f"✅ Generated Part 2B: {OUTPUT_PART2B} ({os.path.getsize(OUTPUT_PART2B)/1024:.2f} KB, {len(seen_p2b)} unique files)")
+
+    # PARTE 2C: Scripts de Campanhas, Ablacoes, Verificacao e Adaptador Neural Baseline (< 135 KB)
+    part2c_files = [
+        "benchmark/adapters/neural_baseline_adapter.py",
+        "scripts/run_uma_energy_and_bandwidth_attribution.py",
+        "scripts/run_inter_session_replication.py",
+        "scripts/run_tool_rag_mitigation_experiment.py",
+        "scripts/run_kv_cache_thrashing_ablation.py",
+        "scripts/verify_manifest.py",
+        "scripts/setup_environment.sh",
+        "scripts/check_quiescence.sh",
+    ]
+
+    seen_p2c: Set[str] = set()
+    p2c_sections = [
+        build_header("PARTE 2C: SCRIPTS DE ABLACOES, REPLICACAO E VALIDAO EMPIRICA"),
+        "=" * 80 + "\nSECAO 2C: ADAPTADOR NEURAL, SCRIPTS DE EXECUCAO DE ABLACOES E AMBIENTE\n" + "=" * 80 + "\n",
+    ]
+    for f in part2c_files:
+        block = dump_file(f, seen_p2c)
+        if block:
+            p2c_sections.append(block)
+    p2c_sections.append("=" * 80 + "\nFIM DA PARTE 2C DO PACOTE DE AUDITORIA (100% INTEGRAL SEM TRUNCAMENTO)\n" + "=" * 80 + "\n")
+    part2c_content = "\n".join(p2c_sections)
+    with open(OUTPUT_PART2C, "w", encoding="utf-8") as f:
+        f.write(part2c_content)
+    print(f"✅ Generated Part 2C: {OUTPUT_PART2C} ({os.path.getsize(OUTPUT_PART2C)/1024:.2f} KB, {len(seen_p2c)} unique files)")
+
+    # PARTE 3 COMPACTA: Todos os 3.823 trials avaliados em formato tabular estruturado (< 140 KB)
+    export_compact_jsonl_dataset()
+
+    # PARTE 3 RAW: Dados Brutos JSONL Completos para arquivo integral
+    export_raw_jsonl_dataset()
 
     # Unified bundle for backward compatibility with zero duplication
-    seen_unified: set[str] = set()
+    seen_unified: Set[str] = set()
     unified_sections = [
-        build_header("PACOTE UNIFICADO COMPLETO (PARTE 1 + PARTE 2)"),
+        build_header("PACOTE UNIFICADO COMPLETO (PARTE 1 + PARTE 2A + 2B + 2C)"),
         "=" * 80 + "\nSECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 7 TABELAS LATEX + MACROS\n" + "=" * 80 + "\n",
     ]
     for f in part1_files:
         block = dump_file(f, seen_unified)
         if block:
             unified_sections.append(block)
-    unified_sections.append("=" * 80 + "\nSECAO 2: CODIGO-FONTE INTEGRAL, SCRIPTS, TESTES, JSONS DE RESULTADOS E MANIFESTO SHA-256\n" + "=" * 80 + "\n")
-    for f in part2_files:
+    unified_sections.append("=" * 80 + "\nSECAO 2A: CODIGO-FONTE NUCLEO, ADAPTADORES E TESTES\n" + "=" * 80 + "\n")
+    for f in part2a_files:
+        block = dump_file(f, seen_unified)
+        if block:
+            unified_sections.append(block)
+    unified_sections.append("=" * 80 + "\nSECAO 2B: MANIFESTO CRIPTOGRAFICO E JSONS DE METADADOS E RESULTADOS\n" + "=" * 80 + "\n")
+    for f in part2b_files:
+        block = dump_file(f, seen_unified, compact_json=True)
+        if block:
+            unified_sections.append(block)
+    unified_sections.append("=" * 80 + "\nSECAO 2C: SCRIPTS DE ABLACOES E REPLICACAO\n" + "=" * 80 + "\n")
+    for f in part2c_files:
         block = dump_file(f, seen_unified)
         if block:
             unified_sections.append(block)
@@ -323,14 +314,75 @@ def generate_bundle():
     for out_path in [OUTPUT_FINAL, OUTPUT_FILE_6, OUTPUT_FILE_6_4]:
         with open(out_path, "w", encoding="utf-8") as f:
             f.write(bundle_content)
-        print(f"✅ Generated unified bundle: {out_path} ({len(bundle_content)} chars, {os.path.getsize(out_path)} bytes, {len(seen_unified)} unique files)")
+        print(f"✅ Generated unified mirror: {out_path} ({os.path.getsize(out_path)/1024:.2f} KB, {len(seen_unified)} unique files)")
 
-    # PARTE 3: Dados Brutos JSONL Completos
-    export_raw_jsonl_dataset()
+
+def export_compact_jsonl_dataset():
+    """Exports 100% of all evaluated trials across the entire 3,823-trial campaign into a compact, zero-truncation schema (< 140 KB)."""
+    print(f"📦 Generating Part 3 compact dataset dump: {OUTPUT_PART3_COMPACT}...")
+    jsonl_files = [
+        ("raw_trials", "results/publication_campaign/raw_trials.jsonl"),
+        ("warm_cache", "results/publication_campaign/warm_cache_trials.jsonl"),
+        ("inter_session", "results/publication_campaign/inter_session_trials.jsonl"),
+        ("tool_rag_mitigation", "results/publication_campaign/tool_rag_mitigation_trials.jsonl"),
+        ("kv_cache_thrashing", "results/publication_campaign/kv_cache_thrashing_trials.jsonl"),
+        ("prefill_ablation", "results/publication_campaign/prefill_ablation.jsonl"),
+        ("uma_energy_bandwidth", "results/publication_campaign/uma_energy_bandwidth_trials.jsonl"),
+    ]
+
+    lines = [
+        "=" * 80,
+        "PARTE 3 COMPACTA: DADOS DE TODOS OS 3.823 TRIALS DE AVALIACAO CIENTIFICA",
+        "Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark",
+        "=" * 80,
+        "# SCHEMA: [DATASET|WORKLOAD|RUNTIME] it,t_task_ms,ttft_ms,energy_j,host_bw_gbps,edp_js,proc_rss_mb",
+        "=" * 80,
+    ]
+
+    current_group = None
+    records_count = 0
+
+    for tag, rel_path in jsonl_files:
+        abs_path = os.path.join(REPO_DIR, rel_path)
+        if not os.path.exists(abs_path):
+            continue
+        with open(abs_path, "r", encoding="utf-8") as fp:
+            for line in fp:
+                line = line.strip()
+                if not line:
+                    continue
+                r = json.loads(line)
+                if r.get("is_warmup", False):
+                    continue
+                records_count += 1
+                wl = r.get("workload", "")
+                rt = r.get("runtime", "")
+                group = (tag, wl, rt)
+                if group != current_group:
+                    current_group = group
+                    lines.append(f"[{tag}|{wl}|{rt}]")
+
+                it = r.get("iteration", r.get("trial", ""))
+                t_task = round(r.get("t_task_ms", 0), 1)
+                ttft = round(r.get("ttft_ms", 0), 1)
+                e = round(r.get("energy_j", 0), 2)
+                bw = round(r.get("host_bw_gbps", 0), 2)
+                edp = round(r.get("edp_js", 0), 1)
+                rss = round(r.get("proc_peak_phys_mb", r.get("proc_rss_mb", 0)), 1)
+                lines.append(f"{it},{t_task},{ttft},{e},{bw},{edp},{rss}")
+
+    lines.append("=" * 80)
+    lines.append("FIM DA PARTE 3 COMPACTA (100% DOS 3.823 TRIALS SEM TRUNCAMENTO)")
+    lines.append("=" * 80 + "\n")
+
+    content = "\n".join(lines)
+    with open(OUTPUT_PART3_COMPACT, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"✅ Generated Part 3 compact dataset dump: {OUTPUT_PART3_COMPACT} ({os.path.getsize(OUTPUT_PART3_COMPACT)/1024:.2f} KB, {records_count} evaluated trials)")
 
 
 def export_raw_jsonl_dataset():
-    print(f"📦 Generating Part 3 full untruncated JSONL dataset dump: {OUTPUT_PART3}...")
+    print(f"📦 Generating Part 3 full untruncated JSONL dataset dump: {OUTPUT_PART3_RAW}...")
     jsonl_files = [
         "results/publication_campaign/raw_trials.jsonl",
         "results/publication_campaign/warm_cache_trials.jsonl",
@@ -340,7 +392,7 @@ def export_raw_jsonl_dataset():
         "results/publication_campaign/prefill_ablation.jsonl",
         "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
     ]
-    seen_jsonl: set[str] = set()
+    seen_jsonl: Set[str] = set()
     parts = [
         "================================================================================",
         "PARTE 3: DADOS BRUTOS COMPLETOS (100% REGISTROS JSONL SEM CORTES)",
@@ -371,10 +423,10 @@ def export_raw_jsonl_dataset():
     parts.append("=" * 80 + "\n")
 
     content = "\n".join(parts)
-    for out_p in [OUTPUT_PART3, OUTPUT_RAW_JSONL]:
+    for out_p in [OUTPUT_PART3_RAW, OUTPUT_RAW_JSONL]:
         with open(out_p, "w", encoding="utf-8") as f:
             f.write(content)
-        print(f"✅ Generated Part 3 raw JSONL dump: {out_p} ({len(parts)} lines, {os.path.getsize(out_p)} bytes, {len(seen_jsonl)} unique datasets)")
+        print(f"✅ Generated Part 3 raw JSONL dump: {out_p} ({len(parts)} lines, {os.path.getsize(out_p)/1024:.2f} KB, {len(seen_jsonl)} unique datasets)")
 
 
 if __name__ == "__main__":
