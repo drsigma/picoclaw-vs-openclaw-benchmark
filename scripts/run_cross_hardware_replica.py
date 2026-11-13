@@ -67,6 +67,18 @@ def detect_system_hardware() -> Dict[str, str]:
             gpu_info = "Apple Integrated Metal GPU"
         except Exception:
             pass
+    elif system == "Windows":
+        cpu_info = platform.processor() or "x86_64 CPU"
+        if shutil.which("nvidia-smi"):
+            try:
+                out = subprocess.check_output(
+                    ["nvidia-smi", "--query-gpu=name,driver_version,memory.total", "--format=csv,noheader"],
+                    text=True,
+                    timeout=5,
+                )
+                gpu_info = out.strip().split("\n")[0]
+            except Exception:
+                gpu_info = "NVIDIA GPU (nvidia-smi error)"
 
     return {
         "system": system,

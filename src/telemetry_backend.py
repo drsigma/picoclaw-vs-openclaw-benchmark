@@ -40,6 +40,7 @@ class UnifiedTelemetryBackend:
         # Capabilities detection
         self.is_darwin_arm64 = (self.system == "Darwin" and self.machine == "arm64")
         self.is_linux_x86_64 = (self.system == "Linux" and self.machine in ("x86_64", "amd64"))
+        self.is_windows = (self.system == "Windows")
 
         # Linux RAPL detection
         self.rapl_path = self._detect_rapl_path()
@@ -51,6 +52,8 @@ class UnifiedTelemetryBackend:
         # Telemetry backend identifier
         if self.is_darwin_arm64:
             self.backend_name = "apple_smc_powermetrics"
+        elif self.is_windows:
+            self.backend_name = "windows_win32_and_nvidia_nvml" if self.has_nvidia_gpu else "windows_win32_psutil"
         elif self.has_rapl and self.has_nvidia_gpu:
             self.backend_name = "linux_rapl_and_nvidia_nvml"
         elif self.has_rapl:
@@ -106,6 +109,8 @@ class UnifiedTelemetryBackend:
         if self.is_darwin_arm64:
             from benchmark.telemetry import run_subprocess_with_rusage
             return run_subprocess_with_rusage(cmd, cwd=cwd)
+        elif self.is_windows:
+            return run_windows_subprocess_with_psutil(cmd, cwd=cwd)
         else:
             return run_linux_subprocess_with_status(cmd, cwd=cwd)
 
@@ -207,6 +212,41 @@ def run_linux_subprocess_with_status(cmd: List[str], cwd: Optional[str] = None) 
         "t_exec_ms": round(t_elapsed_ms, 2),
     }
 
+    return stdout, stderr, ret, hw_stats
+
+
+def run_windows_subprocess_with_psutil(cmd: List[str], cwd: Optional[str] = None) -> Tuple[str, str, int, Dict[str, Any]]:
+    """Runs child process on Windows, collecting peak_wset (Peak Working Set) via psutil."""
+    import psutil
+    t0 = time.monotonic()
+    p = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    peak_wset_bytes = 0
+    try:
+        proc = psutil.Process(p.pid)
+        while p.poll() is None:
+            try:
+                mem = proc.memory_info()
+                if hasattr(mem, "peak_wset"):
+                    peak_wset_bytes = max(peak_wset_bytes, mem.peak_wset)
+                else:
+                    peak_wset_bytes = max(peak_wset_bytes, mem.rss)
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                break
+            time.sleep(0.01)
+    except Exception:
+        pass
+    stdout, stderr = p.communicate()
+    ret = p.returncode
+    t_elapsed_ms = (time.monotonic() - t0) * 1000.0
+    peak_mb = peak_wset_bytes / (1024.0 * 1024.0)
+    hw_stats = {
+        "proc_peak_phys_mb": round(peak_mb, 2),
+        "proc_rss_mb": round(peak_mb, 2),
+        "proc_instructions": 0,
+        "proc_cycles": 0,
+        "proc_billed_energy": 0,
+        "t_exec_ms": round(t_elapsed_ms, 2),
+    }
     return stdout, stderr, ret, hw_stats
 
 

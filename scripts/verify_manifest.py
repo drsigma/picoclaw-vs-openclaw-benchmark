@@ -96,7 +96,17 @@ def update_manifest() -> int:
         "scripts/measure_harness_self_overhead.py",
         "scripts/run_cross_hardware_replica.py",
         "scripts/run_cross_hardware_replica.sh",
+        "scripts/run_cross_hardware_replica.ps1",
         "scripts/run_external_framework_langchain_benchmark.py",
+        "benchmark/mcp_server.py",
+        "scripts/run_mcp_live_transport_ablation.py",
+        "scripts/run_quantization_scaling_ablation.py",
+        "scripts/audit_submission_gatekeeper.py",
+        "data/mcp_live_transport_ablation.json",
+        "data/quantization_scaling_ablation.json",
+        "data/gatekeeper_audit_certificate.json",
+        "results/publication_campaign/tables/table_mcp_transport_ablation.tex",
+        "results/publication_campaign/tables/table_quantization_scaling.tex",
     ]
     for rel_path in additional:
         abs_path = os.path.join(REPO_DIR, rel_path)

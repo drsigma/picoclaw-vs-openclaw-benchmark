@@ -677,6 +677,65 @@ def test_external_framework_langchain_summary():
     assert w2_warm["t_task_median_ms"] > 1500.0
 
 
+def test_mcp_live_transport_ablation_artifacts():
+    """Gate R10: Verifies live Model Context Protocol (MCP) transport ablation."""
+    json_path = os.path.join(REPO_DIR, "data", "mcp_live_transport_ablation.json")
+    tex_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_mcp_transport_ablation.tex")
+
+    assert os.path.exists(json_path), f"Missing {json_path}"
+    assert os.path.exists(tex_path), f"Missing {tex_path}"
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    res = data["results"]
+    assert "go_orchestrator" in res
+    assert "node_orchestrator" in res
+
+    # Stdio IPC overhead must be sub-5ms across runtimes
+    go_stdio = res["go_orchestrator"]["transports"]["mcp_stdio_server"]
+    assert 0.5 <= go_stdio["t_mcp_ipc_median_ms"] <= 5.0
+    assert go_stdio["phi_orch_median_pct"] < 1.0
+
+
+def test_quantization_scaling_ablation_artifacts():
+    """Gate R10: Verifies extreme quantization scaling ablation."""
+    json_path = os.path.join(REPO_DIR, "data", "quantization_scaling_ablation.json")
+    tex_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_quantization_scaling.tex")
+
+    assert os.path.exists(json_path), f"Missing {json_path}"
+    assert os.path.exists(tex_path), f"Missing {tex_path}"
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    quants = {p["quantization"]: p for p in data["quantization_profiles"]}
+    assert "Q2_K" in quants
+    assert "Q3_K_M" in quants
+    assert "Q4_K_M" in quants
+
+    # Decode throughput of Q2_K must be higher than Q4_K_M
+    assert quants["Q2_K"]["generation_throughput_tok_s"] > quants["Q4_K_M"]["generation_throughput_tok_s"]
+    # All must stay within physical memory bandwidth limits (< 120 GB/s)
+    for q, prof in quants.items():
+        assert prof["active_bandwidth_gbs"] < 120.0
+        assert prof["is_within_physical_limits"] is True
+
+
+def test_gatekeeper_audit_certificate_verified():
+    """Gate R10: Verifies automated submission gatekeeper cryptographic certificate."""
+    cert_path = os.path.join(REPO_DIR, "data", "gatekeeper_audit_certificate.json")
+    assert os.path.exists(cert_path), f"Missing {cert_path}"
+
+    with open(cert_path, "r", encoding="utf-8") as f:
+        cert = json.load(f)
+
+    assert cert["gatekeeper_verdict"] == "CERTIFIED_VALID"
+    assert cert["total_records_verified"] >= 3700
+    assert cert["total_datasets_audited"] >= 7
+
+
+
 
 
 

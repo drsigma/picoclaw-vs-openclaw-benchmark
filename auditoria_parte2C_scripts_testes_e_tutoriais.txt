@@ -3,8 +3,8 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2C: MOTOR DE ANALISE, ABLACAO KV CACHE E UMA ATTRIBUTION
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T17:07:58.142212+00:00
-Git HEAD: 32b16d92b7c9df80dc1afbf19b3275b3b7d09c56
+Data de Geracao (UTC): 2026-11-13T17:23:41.027011+00:00
+Git HEAD: f4b6a40d6199c8c2930d88d2439e841097f2c3ec
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
@@ -13,33 +13,25 @@ Python Version: 3.12.15
 Status Git:
  M data/manifest_sha256.json
  M paper/softwarex_manuscript.tex
- M pyproject.toml
- M results/publication_campaign/prefill_ablation.jsonl
- M results/publication_campaign/tables/macros_empirical.tex
- M results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
- M results/publication_campaign/tool_rag_mitigation_trials.jsonl
- M results/publication_campaign/uma_energy_bandwidth_trials.jsonl
- M scripts/run_prefill_ablation.py
- M scripts/run_tool_rag_mitigation_experiment.py
- M scripts/run_uma_energy_and_bandwidth_attribution.py
+ M references.bib
+ M scripts/run_cross_hardware_replica.py
  M scripts/verify_manifest.py
+ M src/telemetry_backend.py
  M tests/test_artifact_consistency.py
- M tests/test_telemetry_parser.py
-?? data/external_framework_langchain_summary.json
-?? data/external_framework_langchain_trials.jsonl
-?? data/harness_self_overhead.json
-?? data/roofline_kv_affine_model.json
-?? extensions/
-?? results/publication_campaign/external_framework_langchain_summary.json
-?? results/publication_campaign/external_framework_langchain_trials.jsonl
-?? results/publication_campaign/harness_self_overhead.json
-?? results/publication_campaign/roofline_kv_affine_model.json
-?? scripts/analyze_roofline_and_kv_scaling.py
-?? scripts/measure_harness_self_overhead.py
-?? scripts/run_cross_hardware_replica.py
-?? scripts/run_cross_hardware_replica.sh
-?? scripts/run_external_framework_langchain_benchmark.py
-?? src/
+?? benchmark/mcp_server.py
+?? data/gatekeeper_audit_certificate.json
+?? data/mcp_live_transport_ablation.json
+?? data/mcp_live_transport_trials.jsonl
+?? data/quantization_scaling_ablation.json
+?? results/publication_campaign/gatekeeper_audit_certificate.json
+?? results/publication_campaign/mcp_live_transport_ablation.json
+?? results/publication_campaign/quantization_scaling_ablation.json
+?? results/publication_campaign/tables/table_mcp_transport_ablation.tex
+?? results/publication_campaign/tables/table_quantization_scaling.tex
+?? scripts/audit_submission_gatekeeper.py
+?? scripts/run_cross_hardware_replica.ps1
+?? scripts/run_mcp_live_transport_ablation.py
+?? scripts/run_quantization_scaling_ablation.py
 ================================================================================
 
 

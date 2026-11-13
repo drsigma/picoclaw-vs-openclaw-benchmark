@@ -3,8 +3,8 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2D: SUITE DE TESTES UNITARIOS, REPLICACAO E TUTORIAIS
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T17:07:58.169846+00:00
-Git HEAD: 32b16d92b7c9df80dc1afbf19b3275b3b7d09c56
+Data de Geracao (UTC): 2026-11-13T17:23:41.056185+00:00
+Git HEAD: f4b6a40d6199c8c2930d88d2439e841097f2c3ec
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
@@ -13,33 +13,25 @@ Python Version: 3.12.15
 Status Git:
  M data/manifest_sha256.json
  M paper/softwarex_manuscript.tex
- M pyproject.toml
- M results/publication_campaign/prefill_ablation.jsonl
- M results/publication_campaign/tables/macros_empirical.tex
- M results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
- M results/publication_campaign/tool_rag_mitigation_trials.jsonl
- M results/publication_campaign/uma_energy_bandwidth_trials.jsonl
- M scripts/run_prefill_ablation.py
- M scripts/run_tool_rag_mitigation_experiment.py
- M scripts/run_uma_energy_and_bandwidth_attribution.py
+ M references.bib
+ M scripts/run_cross_hardware_replica.py
  M scripts/verify_manifest.py
+ M src/telemetry_backend.py
  M tests/test_artifact_consistency.py
- M tests/test_telemetry_parser.py
-?? data/external_framework_langchain_summary.json
-?? data/external_framework_langchain_trials.jsonl
-?? data/harness_self_overhead.json
-?? data/roofline_kv_affine_model.json
-?? extensions/
-?? results/publication_campaign/external_framework_langchain_summary.json
-?? results/publication_campaign/external_framework_langchain_trials.jsonl
-?? results/publication_campaign/harness_self_overhead.json
-?? results/publication_campaign/roofline_kv_affine_model.json
-?? scripts/analyze_roofline_and_kv_scaling.py
-?? scripts/measure_harness_self_overhead.py
-?? scripts/run_cross_hardware_replica.py
-?? scripts/run_cross_hardware_replica.sh
-?? scripts/run_external_framework_langchain_benchmark.py
-?? src/
+?? benchmark/mcp_server.py
+?? data/gatekeeper_audit_certificate.json
+?? data/mcp_live_transport_ablation.json
+?? data/mcp_live_transport_trials.jsonl
+?? data/quantization_scaling_ablation.json
+?? results/publication_campaign/gatekeeper_audit_certificate.json
+?? results/publication_campaign/mcp_live_transport_ablation.json
+?? results/publication_campaign/quantization_scaling_ablation.json
+?? results/publication_campaign/tables/table_mcp_transport_ablation.tex
+?? results/publication_campaign/tables/table_quantization_scaling.tex
+?? scripts/audit_submission_gatekeeper.py
+?? scripts/run_cross_hardware_replica.ps1
+?? scripts/run_mcp_live_transport_ablation.py
+?? scripts/run_quantization_scaling_ablation.py
 ================================================================================
 
 
@@ -49,7 +41,7 @@ SECAO 2D: SUITE INTEGRAL DE TESTES UNITARIOS, REPLICACAO INDEPENDENTE E GUIA DE 
 
 ================================================================================
 FILE: tests/test_artifact_consistency.py
-SHA-256: 56711e5a9ca6e01d68a81f5c247f38ca07d30460a684bd1c7edfe4109df4a5b7
+SHA-256: 20bec6f65f204f0fefc3861d3ecccfc42663398b6dac34cef62f28571985a0cc
 ================================================================================
 """
 Automated Cross-Artifact Numerical Consistency Verification Test
@@ -728,6 +720,65 @@ def test_external_framework_langchain_summary():
     w2_warm = data["regime_b_warm"]["W2"]
     assert 50.0 <= w2_warm["proc_peak_phys_mb_median"] <= 80.0
     assert w2_warm["t_task_median_ms"] > 1500.0
+
+
+def test_mcp_live_transport_ablation_artifacts():
+    """Gate R10: Verifies live Model Context Protocol (MCP) transport ablation."""
+    json_path = os.path.join(REPO_DIR, "data", "mcp_live_transport_ablation.json")
+    tex_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_mcp_transport_ablation.tex")
+
+    assert os.path.exists(json_path), f"Missing {json_path}"
+    assert os.path.exists(tex_path), f"Missing {tex_path}"
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    res = data["results"]
+    assert "go_orchestrator" in res
+    assert "node_orchestrator" in res
+
+    # Stdio IPC overhead must be sub-5ms across runtimes
+    go_stdio = res["go_orchestrator"]["transports"]["mcp_stdio_server"]
+    assert 0.5 <= go_stdio["t_mcp_ipc_median_ms"] <= 5.0
+    assert go_stdio["phi_orch_median_pct"] < 1.0
+
+
+def test_quantization_scaling_ablation_artifacts():
+    """Gate R10: Verifies extreme quantization scaling ablation."""
+    json_path = os.path.join(REPO_DIR, "data", "quantization_scaling_ablation.json")
+    tex_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_quantization_scaling.tex")
+
+    assert os.path.exists(json_path), f"Missing {json_path}"
+    assert os.path.exists(tex_path), f"Missing {tex_path}"
+
+    with open(json_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    quants = {p["quantization"]: p for p in data["quantization_profiles"]}
+    assert "Q2_K" in quants
+    assert "Q3_K_M" in quants
+    assert "Q4_K_M" in quants
+
+    # Decode throughput of Q2_K must be higher than Q4_K_M
+    assert quants["Q2_K"]["generation_throughput_tok_s"] > quants["Q4_K_M"]["generation_throughput_tok_s"]
+    # All must stay within physical memory bandwidth limits (< 120 GB/s)
+    for q, prof in quants.items():
+        assert prof["active_bandwidth_gbs"] < 120.0
+        assert prof["is_within_physical_limits"] is True
+
+
+def test_gatekeeper_audit_certificate_verified():
+    """Gate R10: Verifies automated submission gatekeeper cryptographic certificate."""
+    cert_path = os.path.join(REPO_DIR, "data", "gatekeeper_audit_certificate.json")
+    assert os.path.exists(cert_path), f"Missing {cert_path}"
+
+    with open(cert_path, "r", encoding="utf-8") as f:
+        cert = json.load(f)
+
+    assert cert["gatekeeper_verdict"] == "CERTIFIED_VALID"
+    assert cert["total_records_verified"] >= 3700
+    assert cert["total_datasets_audited"] >= 7
+
 
 
 
@@ -2378,7 +2429,7 @@ END FILE: scripts/run_tool_rag_mitigation_experiment.py
 
 ================================================================================
 FILE: scripts/verify_manifest.py
-SHA-256: 776c66609e5f5c05abe685923b0a22b249dc20cfc7e29e261405b1807ac363d2
+SHA-256: 4a714624bb2d9680ee2bc4ff1dc10ea937f29462b792db387694ef7a7d3ec190
 ================================================================================
 #!/usr/bin/env python3
 """
@@ -2478,7 +2529,17 @@ def update_manifest() -> int:
         "scripts/measure_harness_self_overhead.py",
         "scripts/run_cross_hardware_replica.py",
         "scripts/run_cross_hardware_replica.sh",
+        "scripts/run_cross_hardware_replica.ps1",
         "scripts/run_external_framework_langchain_benchmark.py",
+        "benchmark/mcp_server.py",
+        "scripts/run_mcp_live_transport_ablation.py",
+        "scripts/run_quantization_scaling_ablation.py",
+        "scripts/audit_submission_gatekeeper.py",
+        "data/mcp_live_transport_ablation.json",
+        "data/quantization_scaling_ablation.json",
+        "data/gatekeeper_audit_certificate.json",
+        "results/publication_campaign/tables/table_mcp_transport_ablation.tex",
+        "results/publication_campaign/tables/table_quantization_scaling.tex",
     ]
     for rel_path in additional:
         abs_path = os.path.join(REPO_DIR, rel_path)
