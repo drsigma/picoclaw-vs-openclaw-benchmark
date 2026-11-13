@@ -3,8 +3,8 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PACOTE UNIFICADO COMPLETO (PARTE 1 + PARTE 2)
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T12:06:47.470259+00:00
-Git HEAD: fd44d1ac391317e46e019d21fd93646505a750b6
+Data de Geracao (UTC): 2026-11-13T12:16:47.769699+00:00
+Git HEAD: 71d3cf7c4648ab2dcfa623b92ce5b75347f9c7b9
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
@@ -21,15 +21,46 @@ SECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA 
 
 ================================================================================
 FILE: paper/RESPONSE_TO_REVIEWERS.md
-SHA-256: 4925a1fa661b46cde51f7b46856435329cf5b4aa58ffb11ded44d49bc9a8f01a
+SHA-256: 18d5e9d565fec49f0cc9ba36a81b794e007ae2669b27aabe78eb11a72a35fac8
 ================================================================================
 # Point-by-Point Response to Reviewers (Elsevier SoftwareX — Revision R9)
 
-**Manuscript Title:** *"A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"*  
+**Manuscript Title:** *"A Reproducible Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and KV-Cache Dynamics in Local LLM Agents on Apple Silicon"*  
 **Author:** Rafael Paniccia Cassetta (Universidade Federal do ABC — UFABC, Brazil)  
 **Hardware Testbed:** Apple Mac mini M4 (`Mac16,10`, 10-Core CPU, 10-Core Metal GPU, 24 GB Unified LPDDR5X @ 120 GB/s)  
 
 We thank Reviewers 1, 2, and 3 for their exceptionally thorough, constructive, and technically rigorous evaluation of our software manuscript and repository. Every single critique (M1–M9, X1–X10, C1–C8) has been resolved through new physical experiments on the Apple Silicon M4 testbed, software engineering upgrades, and complete bibliographic and mathematical alignment.
+
+---
+
+## SoftwareX Audit Checklist Verification Matrix (Gates 0 to 8 — 100% Verified)
+
+The table below maps every single gate of the Elsevier SoftwareX Reviewer & Author Audit Checklist directly to its verifiable implementation, physical artifact, source code file, and automated test:
+
+| Gate & Scope | Criterion / Evaluated Property | Status | Concrete Artifact / Source Code Evidence |
+|---|---|---|---|
+| **Gate 0: Provenance** | 9 root fields in 100% JSONL trials | **VERIFIED** | `results/publication_campaign/*.jsonl` (3,823 lines across all 7 datasets); `benchmark/protocol_invariants.py` (`validate_gate_0_provenance_fields`, lines 45–95). |
+| **Gate 0: Provenance** | Hardware & session metadata | **VERIFIED** | `results/publication_campaign/campaign_metadata.json` (lines 1–25); `results/publication_campaign/raw_trials.jsonl`. |
+| **Gate 1: Governance** | Metric synchronization across docs | **VERIFIED** | `paper/HIGHLIGHTS.md` (lines 1–6); `paper/COVER_LETTER.md` (lines 1–45); zero outdated $23.4\times$ references. |
+| **Gate 1: Governance** | Dual licensing & citation metadata | **VERIFIED** | `LICENSE` (Apache 2.0); `DATA_LICENSE` (CC-BY 4.0); `CITATION.cff` (v1.2.0 metadata). |
+| **Gate 2: Failures & Thrashing** | Zero silent fallbacks or mocks | **VERIFIED** | `benchmark/adapters/bun_minimal_adapter.py` (lines 20–35); `benchmark/telemetry.py` (fail-fast exceptions). |
+| **Gate 2: Failures & Thrashing** | Physical KV-Cache Thrashing ablation | **VERIFIED** | `scripts/run_kv_cache_thrashing_ablation.py`; `results/publication_campaign/kv_cache_thrashing_trials.jsonl` ($n=90$). |
+| **Gate 2: Failures & Thrashing** | Degraded mode quantified ($19.91\times$ penalty) | **VERIFIED** | `results/publication_campaign/kv_cache_thrashing_summary.json` (lines 153–158: $0.45\%$ cache hit, $531.33\times$ prefill penalty); `paper/softwarex_manuscript.tex` (Section 4.5). |
+| **Gate 3: Sensitivity & Outliers** | Tukey $1.5\times\text{IQR}$ & 5% Trimmed Mean | **VERIFIED** | `benchmark/analyze_results.py` (`compute_sensitivity_and_outlier_analysis`); `results/publication_campaign/sensitivity_and_outlier_analysis.json` ($< 0.095\%$ median shift). |
+| **Gate 4: Power & Footprint** | Active net power decomposition | **VERIFIED** | `results/publication_campaign/sensitivity_and_outlier_analysis.json` ($\bar{P}_{\text{net}} = 15.86\text{ W}$ in A vs. $13.04\text{ W}$ in B; `prompt_ms` vs. `predicted_ms` separated). |
+| **Gate 4: Power & Footprint** | Unified Peak Physical Footprint | **VERIFIED** | `paper/softwarex_manuscript.tex` (Section 2.3, 4.3, 4.5; `proc_peak_phys_mb` via Darwin `libproc` `RUSAGE_INFO_V4`); `README.md`. |
+| **Gate 4: Power & Footprint** | Negative validation of `ri_billed_energy` | **VERIFIED** | `results/publication_campaign/uma_energy_bandwidth_attribution.json` ($r = -0.051$, $R^2 = -0.676$ rejected); physical regressors validated ($R^2 \ge 0.94$). |
+| **Gate 5: Tabular Transparency** | TTFT, ITL, Cached vs. Uncached tokens | **VERIFIED** | `results/publication_campaign/tables/table_warm_cache.tex` (lines 1–40); `results/publication_campaign/warm_cache_summary.json`. |
+| **Gate 5: Tabular Transparency** | Thrashing control rows in LaTeX table | **VERIFIED** | `results/publication_campaign/tables/table_warm_cache.tex` (rows `W2 (T2)` for 15-tool and 54-tool). |
+| **Gate 6: Independent Validation** | Automated report with tolerances | **VERIFIED** | `scripts/run_independent_validation_suite.py`; `results/publication_campaign/independent_validation_report.json` (`ALL_TOLERANCES_PASSED`). |
+| **Gate 6: Independent Validation** | 4 isomorphic runtimes tested | **VERIFIED** | `results/publication_campaign/cross_hardware_and_independent_validation.json` (Go, CPython, Node.js V8, Bun JSC). |
+| **Gate 7: Tutorial Logs** | Verifiable physical terminal outputs | **VERIFIED** | `tutorial/README.md` (Steps 1, 4, 7, 9 in PT-BR & EN-US with real line-by-line excerpts and source citations). |
+| **Gate 7: Automated Test** | Full Gate 0–8 automated check | **VERIFIED** | `tests/test_artifact_consistency.py` (`test_all_checklist_gates_0_to_8_verified`, lines 513–575). |
+| **Gate 8: Hype-Free & References** | Eradication of hype superlatives | **VERIFIED** | Zero occurrences of forbidden phrases (`proves superiority`, `energy dominance`, `universally faster`, `direct DRAM bandwidth telemetry`) across all manuscript and summary files. |
+| **Gate 8: Literature Integration** | 6 checklist-inspired papers cited | **VERIFIED** | `references.bib` & `paper/softwarex_manuscript.tex` Table 2 & Section 1: `budgetbench2025`, `openmcp2025`, `edgepi2025`, `reprodataagents2025`, `mcpgranite2025`, `agentware2025`. |
+| **Gate 8: Threats to Validity** | Explicit dedicated limitation section | **VERIFIED** | `paper/softwarex_manuscript.tex` Section 5.2 (`Threats to Validity and Methodological Limitations` covering 6 explicit validity boundaries). |
+
+---
 
 Below we summarize the **five core methodological and software upgrades** before providing a point-by-point mapping:
 
@@ -15897,7 +15928,7 @@ END FILE: results/publication_campaign/hyperfine_agent_init.json
 
 ================================================================================
 FILE: data/manifest_sha256.json
-SHA-256: 18bf259cca9e611a4830b2be9ca9237eab5fbc9367587c26725fecc1a158f403
+SHA-256: 6e8126b097beec17abccd4c39e085850ff5ea8f3d52ae3b9fe9449e4e4a057ca
 ================================================================================
 {
   ".gitignore": "c1ec473fa2d005bc84ce26bba4f90a4d5bdb9ea5c9b229870099d0fc55521da8",
@@ -16018,7 +16049,7 @@ SHA-256: 18bf259cca9e611a4830b2be9ca9237eab5fbc9367587c26725fecc1a158f403
   "figures/fig6_pmc_hardware_counters.png": "da69393a656d6d97282847581375ac43a218cc762d34bb30a5ef31672e59c704",
   "paper/COVER_LETTER.md": "2edbbae72ed6ba287bab6ca8c7e8687395c1bb58fb1bc987734bd7e1023938b3",
   "paper/HIGHLIGHTS.md": "1126184563f2e008481a847fd2de138ffe125d7894b0cf46fd76e9de1cb37216",
-  "paper/RESPONSE_TO_REVIEWERS.md": "4925a1fa661b46cde51f7b46856435329cf5b4aa58ffb11ded44d49bc9a8f01a",
+  "paper/RESPONSE_TO_REVIEWERS.md": "18d5e9d565fec49f0cc9ba36a81b794e007ae2669b27aabe78eb11a72a35fac8",
   "paper/softwarex_manuscript.tex": "a3c42e3c7615f28643762add9cfb4205ce75fb75873541e05ddf6497616c0269",
   "pyproject.toml": "968c81a365bf5b593749ba710f8a42918045462c763f7717bed4584bd8efc9cd",
   "references.bib": "e2c76702f8093ba56d9a0df35e9a9d14518fb0128502439580e81a77431a5e5a",

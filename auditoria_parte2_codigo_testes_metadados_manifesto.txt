@@ -3,8 +3,8 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2: CODIGO-FONTE, SCRIPTS, TESTES, JSONS DE RESULTADOS E MANIFESTO SHA-256
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T12:06:47.435549+00:00
-Git HEAD: fd44d1ac391317e46e019d21fd93646505a750b6
+Data de Geracao (UTC): 2026-11-13T12:16:47.734175+00:00
+Git HEAD: 71d3cf7c4648ab2dcfa623b92ce5b75347f9c7b9
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
@@ -14329,7 +14329,7 @@ END FILE: results/publication_campaign/hyperfine_agent_init.json
 
 ================================================================================
 FILE: data/manifest_sha256.json
-SHA-256: 18bf259cca9e611a4830b2be9ca9237eab5fbc9367587c26725fecc1a158f403
+SHA-256: 6e8126b097beec17abccd4c39e085850ff5ea8f3d52ae3b9fe9449e4e4a057ca
 ================================================================================
 {
   ".gitignore": "c1ec473fa2d005bc84ce26bba4f90a4d5bdb9ea5c9b229870099d0fc55521da8",
@@ -14450,7 +14450,7 @@ SHA-256: 18bf259cca9e611a4830b2be9ca9237eab5fbc9367587c26725fecc1a158f403
   "figures/fig6_pmc_hardware_counters.png": "da69393a656d6d97282847581375ac43a218cc762d34bb30a5ef31672e59c704",
   "paper/COVER_LETTER.md": "2edbbae72ed6ba287bab6ca8c7e8687395c1bb58fb1bc987734bd7e1023938b3",
   "paper/HIGHLIGHTS.md": "1126184563f2e008481a847fd2de138ffe125d7894b0cf46fd76e9de1cb37216",
-  "paper/RESPONSE_TO_REVIEWERS.md": "4925a1fa661b46cde51f7b46856435329cf5b4aa58ffb11ded44d49bc9a8f01a",
+  "paper/RESPONSE_TO_REVIEWERS.md": "18d5e9d565fec49f0cc9ba36a81b794e007ae2669b27aabe78eb11a72a35fac8",
   "paper/softwarex_manuscript.tex": "a3c42e3c7615f28643762add9cfb4205ce75fb75873541e05ddf6497616c0269",
   "pyproject.toml": "968c81a365bf5b593749ba710f8a42918045462c763f7717bed4584bd8efc9cd",
   "references.bib": "e2c76702f8093ba56d9a0df35e9a9d14518fb0128502439580e81a77431a5e5a",
