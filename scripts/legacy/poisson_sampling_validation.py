@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
 DATA_DIR = os.path.join(REPO_DIR, "data")
 FIG_DIR = os.path.join(REPO_DIR, "figures")

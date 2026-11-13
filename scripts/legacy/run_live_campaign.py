@@ -16,7 +16,7 @@ import time
 import numpy as np
 from scipy import stats
 
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
 TOOLS_DIR = os.path.join(REPO_DIR, "tools")
 PICOCLAW_BIN = os.path.join(BENCH_DIR, "picoclaw_orch")

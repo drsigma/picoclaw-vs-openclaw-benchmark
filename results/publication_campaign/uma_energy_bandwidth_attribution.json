@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "timestamp_utc": "2026-11-13T00:36:12.569572+00:00",
+    "timestamp_utc": "2026-11-13T00:43:44.956461+00:00",
     "hardware": "Apple Mac mini M4 (Mac16,10, 10-core GPU, darwin-arm64)",
     "telemetry_source": "Apple SMC powermetrics 50ms + Darwin XNU libproc RUSAGE_INFO_V4",
     "integrity_rule": "100% Physical Telemetry (Zero synthetic or mock data)"

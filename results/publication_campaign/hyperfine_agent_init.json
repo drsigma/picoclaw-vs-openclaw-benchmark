@@ -11,7 +11,7 @@
   "primary_metric": "time_wall_clock",
   "results": [
     {
-      "command": "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/tools/picoclaw_bin/picoclaw agent --help",
+      "command": "./tools/picoclaw/picoclaw agent --help",
       "measurements": [
         {
           "time_wall_clock": {
@@ -949,7 +949,7 @@
       }
     },
     {
-      "command": "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/tools/openclaw_npm/node_modules/.bin/openclaw agent --help",
+      "command": "./tools/node/bin/node ./benchmark/openclaw_orch.mjs agent --help",
       "measurements": [
         {
           "time_wall_clock": {

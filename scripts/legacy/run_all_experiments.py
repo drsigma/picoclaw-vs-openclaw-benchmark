@@ -15,7 +15,7 @@ import urllib.request
 import numpy as np
 from scipy import stats
 
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 DATA_DIR = os.path.join(REPO_DIR, "data", "workload_data")
 BENCH_DIR = os.path.join(REPO_DIR, "benchmark")
 WORKSPACE = os.path.join(REPO_DIR, "results", "exploratory_campaigns", "campaign_run_1")

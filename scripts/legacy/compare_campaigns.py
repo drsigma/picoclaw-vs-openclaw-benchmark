@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 
-REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 COMP_DIR = os.path.join(REPO_DIR, "campaign_comparison")
 FIG_DIR = os.path.join(REPO_DIR, "figures")
 

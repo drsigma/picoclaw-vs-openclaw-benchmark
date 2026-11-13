@@ -3,9 +3,9 @@
 scripts/export_audit_bundle.py - Consolidated Academic Audit Bundle Exporter
 Exportador do Pacote Consolidado de Auditoria para Submissão Elsevier SoftwareX
 
-Generates repo_texto_auditoria_6.txt containing full audit proofs, file contents,
-cryptographic SHA-256 signatures, licenses, CI workflow, and telemetry summaries.
-Ordered with manuscript, tables, and code upfront to guarantee complete AI context visibility.
+Generates repo_texto_auditoria_final.txt (and mirrors) containing 100% integral contents:
+manuscript, governance, all 6 LaTeX tables and macros, consolidated results JSONs,
+and full unabridged production source code and test suite (ZERO truncation).
 
 Author: Rafael Paniccia Cassetta (UFABC)
 """
@@ -18,8 +18,9 @@ import subprocess
 import sys
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-OUTPUT_FILE = os.path.join(REPO_DIR, "repo_texto_auditoria_6.txt")
-OUTPUT_FILE_ALT = os.path.join(REPO_DIR, "repo_texto_auditoria_6_4.txt")
+OUTPUT_FINAL = os.path.join(REPO_DIR, "repo_texto_auditoria_final.txt")
+OUTPUT_FILE_6 = os.path.join(REPO_DIR, "repo_texto_auditoria_6.txt")
+OUTPUT_FILE_6_4 = os.path.join(REPO_DIR, "repo_texto_auditoria_6_4.txt")
 OUTPUT_RAW_JSONL = os.path.join(REPO_DIR, "repo_dados_brutos_jsonl_completos.txt")
 
 
@@ -37,37 +38,6 @@ def get_cmd_output(cmd: list[str]) -> str:
         return res.stdout.strip()
     except Exception as e:
         return f"Error: {e}"
-
-
-def get_jsonl_summary(rel_path: str) -> str:
-    abs_path = os.path.join(REPO_DIR, rel_path)
-    if not os.path.exists(abs_path):
-        return f"[FILE MISSING: {rel_path}]\n"
-
-    sha = compute_sha256(abs_path)
-    size_bytes = os.path.getsize(abs_path)
-
-    with open(abs_path, "r", encoding="utf-8") as f:
-        lines = [line.strip() for line in f if line.strip()]
-
-    n_lines = len(lines)
-    first_3 = lines[:3]
-    last_3 = lines[-3:] if n_lines >= 3 else lines
-
-    out = [
-        f"--- File: {rel_path} ---",
-        f"SHA-256: {sha}",
-        f"Size: {size_bytes} bytes | Line Count: {n_lines} records",
-        "First 3 records:",
-    ]
-    for r in first_3:
-        out.append(f"  {r}")
-    if n_lines > 3:
-        out.append("Last 3 records:")
-        for r in last_3:
-            out.append(f"  {r}")
-    out.append("")
-    return "\n".join(out)
 
 
 def format_compact_hyperfine(content: str) -> str:
@@ -144,6 +114,7 @@ def format_compact_pca(content: str) -> str:
 
 
 def dump_file(rel_path: str) -> str:
+    """Reads and returns 100% full content of the specified file with SHA-256 header (ZERO truncation)."""
     abs_path = os.path.join(REPO_DIR, rel_path)
     if not os.path.exists(abs_path):
         return f"=== FILE: {rel_path} (MISSING) ===\n\n"
@@ -166,7 +137,7 @@ def dump_file(rel_path: str) -> str:
 
 
 def generate_bundle():
-    print(f"📦 Generating prioritized audit bundle: {OUTPUT_FILE}...")
+    print(f"📦 Generating unabridged audit bundle: {OUTPUT_FINAL}...")
 
     now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
     git_head = get_cmd_output(["git", "rev-parse", "HEAD"])
@@ -175,7 +146,7 @@ def generate_bundle():
     sysctl_cpu = get_cmd_output(["sysctl", "-n", "machdep.cpu.brand_string"])
 
     header = f"""================================================================================
-PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA - REVISAO 6
+PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
 Data de Geracao (UTC): {now_iso}
@@ -191,25 +162,27 @@ Status Git:
 
     sections = [header]
 
-    # SECAO 1: MANUSCRITO, BIBLIOGRAFIA, LICENCAS, CI/CD E DOCUMENTACAO
-    sections.append("=" * 80 + "\nSECAO 1: MANUSCRITO CIENTIFICO, REFERENCIAS, CITACAO, GOVERNANCA E LICENCAS\n" + "=" * 80 + "\n")
+    # SECAO 1: ARTIGO, BIBLIOGRAFIA, LICENCAS, CI/CD E GOVERNANCA (100% INTEGRAL)
+    sections.append("=" * 80 + "\nSECAO 1: MANUSCRITO CIENTIFICO, REFERENCIAS, CITACAO, GOVERNANCA E LICENCAS (100% INTEGRAL)\n" + "=" * 80 + "\n")
     priority_docs = [
         "paper/softwarex_manuscript.tex",
         "references.bib",
+        "paper/HIGHLIGHTS.md",
+        "paper/COVER_LETTER.md",
         "CITATION.cff",
         "LICENSE",
         "DATA_LICENSE",
         ".github/workflows/ci.yml",
+        "Makefile",
+        "pyproject.toml",
         "README.md",
-        "paper/COVER_LETTER.md",
-        "paper/HIGHLIGHTS.md",
         "tutorial/README.md",
     ]
     for doc in priority_docs:
         sections.append(dump_file(doc))
 
-    # SECAO 2: TABELAS LATEX E MACROS EMPIRICAS CONSOLIDADAS
-    sections.append("=" * 80 + "\nSECAO 2: TABELAS LATEX PRINCIPAIS E MACROS EMPIRICAS\n" + "=" * 80 + "\n")
+    # SECAO 2: TODAS AS 6 TABELAS LATEX E MACROS (100% INTEGRAL)
+    sections.append("=" * 80 + "\nSECAO 2: TODAS AS 6 TABELAS LATEX E MACROS (100% INTEGRAL)\n" + "=" * 80 + "\n")
     latex_tables = [
         "results/publication_campaign/tables/table_journal_ablation.tex",
         "results/publication_campaign/tables/table_warm_cache.tex",
@@ -222,9 +195,38 @@ Status Git:
     for lt in latex_tables:
         sections.append(dump_file(lt))
 
-    # SECAO 3: CODIGO-FONTE DOS ORQUESTRADORES, ADAPTADORES, SCRIPTS E TESTES
-    sections.append("=" * 80 + "\nSECAO 3: CODIGO-FONTE DOS ORQUESTRADORES, ADAPTADORES, SCRIPTS E TESTES\n" + "=" * 80 + "\n")
-    code_and_test_files = [
+    # SECAO 3: TODOS OS JSONS DE RESULTADOS E METADADOS
+    sections.append("=" * 80 + "\nSECAO 3: TODOS OS JSONS DE RESULTADOS E METADADOS (COMPACTADOS SEM PERDA DE DADOS)\n" + "=" * 80 + "\n")
+    meta_files = [
+        "results/publication_campaign/campaign_metadata.json",
+        "results/publication_campaign/prefill_regression_fit.json",
+        "results/publication_campaign/uma_energy_bandwidth_attribution.json",
+        "results/publication_campaign/inter_session_replication.json",
+        "results/publication_campaign/pca_variance_decomposition.json",
+        "results/publication_campaign/spearman_correlation_matrix.json",
+        "results/publication_campaign/summary_statistics.json",
+        "results/publication_campaign/warm_cache_summary.json",
+        "results/publication_campaign/statistical_tests.json",
+        "results/publication_campaign/warm_cache_statistical_tests.json",
+        "results/publication_campaign/hyperfine_cold_start.json",
+        "results/publication_campaign/hyperfine_agent_init.json",
+        "data/manifest_sha256.json",
+    ]
+    for mf in meta_files:
+        sections.append(dump_file(mf))
+
+    # SECAO 4: TODO O CODIGO-FONTE DE PRODUCAO E TESTES (100% INTEGRAL SEM TRUNCAMENTO)
+    sections.append("=" * 80 + "\nSECAO 4: TODO O CODIGO-FONTE DE PRODUCAO E TESTES (100% INTEGRAL - ZERO TRUNCAMENTO)\n" + "=" * 80 + "\n")
+    source_files = [
+        # Benchmark & Adapters
+        "benchmark/picoclaw_orch.go",
+        "benchmark/openclaw_orch.mjs",
+        "benchmark/python_orch.py",
+        "benchmark/telemetry.py",
+        "benchmark/run_unified_benchmark.py",
+        "benchmark/analyze_results.py",
+        "benchmark/generate_charts.py",
+        "benchmark/generate_datasets.py",
         "benchmark/adapters/base.py",
         "benchmark/adapters/picoclaw_adapter.py",
         "benchmark/adapters/openclaw_adapter.py",
@@ -232,70 +234,30 @@ Status Git:
         "benchmark/adapters/neural_baseline_adapter.py",
         "benchmark/adapters/bun_minimal_adapter.py",
         "benchmark/adapters/__init__.py",
-        "benchmark/picoclaw_orch.go",
-        "benchmark/openclaw_orch.mjs",
-        "benchmark/python_orch.py",
-        "benchmark/telemetry.py",
-        "benchmark/run_unified_benchmark.py",
-        "benchmark/analyze_results.py",
-        "scripts/run_prefill_ablation.py",
+        # Active Scripts
         "scripts/run_warm_cache_campaign.py",
-        "scripts/run_regime_a_equalized_update.py",
+        "scripts/run_prefill_ablation.py",
+        "scripts/run_w2_resample.py",
         "scripts/run_inter_session_replication.py",
         "scripts/run_uma_energy_and_bandwidth_attribution.py",
-        "scripts/export_audit_bundle.py",
         "scripts/verify_manifest.py",
+        "scripts/setup_environment.sh",
+        "scripts/check_quiescence.sh",
+        # Test Suite
         "tests/test_adapters_and_failfast.py",
         "tests/test_artifact_consistency.py",
+        "tests/test_dataset_generator.py",
         "tests/test_statistical_engine.py",
         "tests/test_telemetry_parser.py",
-        "tests/test_dataset_generator.py",
-        "Makefile",
-        "pyproject.toml",
     ]
-    for cf in code_and_test_files:
-        sections.append(dump_file(cf))
-
-    # SECAO 4: RESUMO AUDITAVEL DE DADOS BRUTOS FISICOS (JSONL HASHES & SAMPLES)
-    sections.append("=" * 80 + "\nSECAO 4: RESUMO AUDITAVEL DE DADOS BRUTOS FISICOS (JSONL HASHES & SAMPLES)\n" + "=" * 80 + "\n")
-    jsonl_files = [
-        "results/publication_campaign/raw_trials.jsonl",
-        "results/publication_campaign/warm_cache_trials.jsonl",
-        "results/publication_campaign/prefill_ablation.jsonl",
-        "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
-    ]
-    for jf in jsonl_files:
-        sections.append(get_jsonl_summary(jf))
-
-    # SECAO 5: RESUMOS ESTATISTICOS CONSOLIDADOS E METADADOS DE EXECUCAO
-    sections.append("=" * 80 + "\nSECAO 5: RESUMOS ESTATISTICOS CONSOLIDADOS E METADADOS DE EXECUCAO\n" + "=" * 80 + "\n")
-    meta_files = [
-        "results/publication_campaign/campaign_metadata.json",
-        "results/publication_campaign/prefill_regression_fit.json",
-        "results/publication_campaign/summary_statistics.json",
-        "results/publication_campaign/warm_cache_summary.json",
-        "results/publication_campaign/warm_cache_statistical_tests.json",
-        "results/publication_campaign/inter_session_replication.json",
-        "results/publication_campaign/uma_energy_bandwidth_attribution.json",
-        "data/manifest_sha256.json",
-        "results/publication_campaign/hyperfine_cold_start.json",
-        "results/publication_campaign/hyperfine_agent_init.json",
-        "results/publication_campaign/spearman_correlation_matrix.json",
-        "results/publication_campaign/pca_variance_decomposition.json",
-        "results/publication_campaign/llama_server_publication.log",
-        "results/publication_campaign/powermetrics_publication_sample.txt",
-    ]
-    for mf in meta_files:
-        sections.append(dump_file(mf))
+    for sf in source_files:
+        sections.append(dump_file(sf))
 
     bundle_content = "\n".join(sections)
-    with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
-        f.write(bundle_content)
-    with open(OUTPUT_FILE_ALT, "w", encoding="utf-8") as f:
-        f.write(bundle_content)
-
-    print(f"✅ Generated prioritized audit bundle: {OUTPUT_FILE} ({len(bundle_content)} characters, {os.path.getsize(OUTPUT_FILE)} bytes)")
-    print(f"✅ Replicated audit bundle to: {OUTPUT_FILE_ALT}")
+    for out_path in [OUTPUT_FINAL, OUTPUT_FILE_6, OUTPUT_FILE_6_4]:
+        with open(out_path, "w", encoding="utf-8") as f:
+            f.write(bundle_content)
+        print(f"✅ Generated bundle: {out_path} ({len(bundle_content)} characters, {os.path.getsize(out_path)} bytes)")
 
     # Export complete raw JSONL dataset dump without truncation
     export_raw_jsonl_dataset()

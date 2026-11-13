@@ -36,7 +36,7 @@ Both orchestrators interface via local loopback (`127.0.0.1:8080`) with a unifie
 * **🇺🇸 EN-US:** This benchmark evaluates clean-room, isomorphic reference implementations in Go (`picoclaw_orch.go`), Node.js/TypeScript (`openclaw_orch.mjs`), and Python (`python_orch.py`) designed to isolate systems runtime overhead (native compiled vs. JIT/interpreted) under strictly identical prompts and tool schemas. PicoClaw and OpenClaw are trademarks of their respective owners; this software is an independent academic performance benchmark not affiliated with or endorsed by upstream project maintainers.
 
 > [!WARNING]
-> **Provenance Notice / Aviso de Proveniência:** All empirical findings, statistical analyses, and LaTeX tables reported in the *SoftwareX* manuscript derive strictly from physical, hardware-instrumented trials in `results/publication_campaign/` (1,320 trials across Regime A and Regime B, plus 528 prefill ablation trials on Apple Silicon M4). Legacy exploratory files in `results/exploratory_campaigns/` (including early calibration runs, Poisson synthetic checks in `poisson_results.json`, and exploratory figures `fig7_poisson_arrival_timeline.png`, `fig8_poisson_energy_dispersion.png`) represent historical engineering milestones prior to full protocol standardization and are preserved strictly for chronological auditability; they are excluded from publication claims, canonical manifests, and peer-reviewed summary tables.
+> **Provenance Notice / Aviso de Proveniência:** All empirical findings, statistical analyses, and LaTeX tables reported in the *SoftwareX* manuscript derive strictly from physical, hardware-instrumented trials in `results/publication_campaign/` (1,320 trials across Regime A and Regime B, plus 528 prefill ablation trials on Apple Silicon M4). Legacy exploratory files in `results/exploratory_campaigns/` (including early calibration runs, Poisson synthetic checks in `poisson_results.json`, and exploratory figures `fig7_poisson_assertiveness.png`, `fig8_three_campaigns_reproducibility.png`) represent historical engineering milestones prior to full protocol standardization and are preserved strictly for chronological auditability; they are excluded from publication claims, canonical manifests, and peer-reviewed summary tables.
 
 ---
 
@@ -180,7 +180,7 @@ Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tut
 | **Passo 2** | Inspeção física dos datasets determinísticos em `data/workload_data/`. |
 | **Passo 3** | Execução ao vivo dos traces W1 a W4 com cálculo de $\Delta\text{RSS}$ e latência. |
 | **Passo 4** | Medição estatística de cold-start via `hyperfine` com vantagem de $23{,}4\times$ para o Go. |
-| **Passo 5** | Verificação de integridade criptográfica SHA-256 de todos os 185 arquivos (`make verify`). |
+| **Passo 5** | Verificação de integridade criptográfica SHA-256 de todos os 191 arquivos (`make verify`). |
 | **Passo 6** | Modo Dry-Run portátil de validação completa do pipeline (`make dry-run`). |
 | **Passo 7** | Leitura dos shunts elétricos do chip M4 via Apple SMC (`powermetrics -i 50`). |
 | **Passo 8** | Protocolo de quiescência operacional do macOS (`caffeinate -dims`). |
@@ -255,7 +255,9 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 │   ├── run_prefill_ablation.py                <- Caracterização de prefill e ajuste polinomial (Metal GPU)
 │   ├── run_warm_cache_campaign.py             <- Campanha do Regime B com isolamento de blocos (KV-cache ativo)
 │   ├── run_w2_resample.py                     <- Script auditável de reamostragem focada de W2 com backup
-│   ├── verify_manifest.py                     <- Validador criptográfico de integridade SHA-256 (185 arquivos)
+│   ├── run_inter_session_replication.py       <- Validação de replicação inter-sessão física independente
+│   ├── run_uma_energy_and_bandwidth_attribution.py <- Deconvolução SMC/libproc e telemetria de banda UMA
+│   ├── verify_manifest.py                     <- Validador criptográfico de integridade SHA-256 (191 arquivos)
 │   ├── check_quiescence.sh                    <- Auditoria de quiescência operacional
 │   └── legacy/                                <- Scripts exploratórios arquivados
 ├── tests/                                     <- Suíte de testes unitários automatizados (pytest)
@@ -270,14 +272,17 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 │   │   ├── raw_trials.jsonl                   <- Traces JSONL do Regime A (660 ensaios: 60 warmups + 600 avaliações)
 │   │   ├── warm_cache_trials.jsonl            <- Traces JSONL do Regime B (660 ensaios com reuso determinístico de KV-cache)
 │   │   ├── prefill_ablation.jsonl             <- Ensaios de ablação de catálogos (8 níveis: 0, 5, 10, 15, 25, 40, 54, 100 ferramentas)
+│   │   ├── uma_energy_bandwidth_trials.jsonl  <- Ensaios físicos de deconvolução SMC e banda de memória UMA (120 trials)
 │   │   ├── prefill_regression_fit.json        <- Ajustes Linear, Quadrático e Power-Law com AICc e Bootstrap 95% CIs
 │   │   ├── campaign_metadata.json             <- Metadados completos do ambiente, flags de hardware e auditoria
 │   │   ├── summary_statistics.json            <- Médias, desvios, p50/p95/p99 e métricas de EDP
 │   │   ├── statistical_tests.json             <- Testes Mann-Whitney U, Cliff's Delta e Vargha-Delaney
 │   │   ├── warm_cache_summary.json            <- Estatísticas sumárias do Regime B (Warm Cache)
 │   │   ├── warm_cache_statistical_tests.json  <- Testes estatísticos de hipótese do Regime B
+│   │   ├── inter_session_replication.json     <- Métricas de replicação inter-sessão (CV < 11%)
 │   │   ├── spearman_correlation_matrix.json   <- Matriz de correlação de postos de Spearman (12 dimensões)
 │   │   ├── pca_variance_decomposition.json    <- Decomposição de variância e loadings de PCA (PC1, PC2, PC3)
+│   │   ├── uma_energy_bandwidth_attribution.json <- Atribuição quantitativa de energia e banda efetiva UMA
 │   │   └── tables/                            <- Tabelas formatadas em LaTeX (.tex) e CSV (.csv)
 │   └── exploratory_campaigns/                 <- Campanhas 1 a 5 preservadas com proveniência total
 │       ├── CHANGELOG_CAMPAIGNS.md             <- Histórico de evolução metodológica
@@ -288,7 +293,6 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── docs/                                      <- 12 pares de documentação acadêmica detalhada (PT/EN)
 ├── figures/                                   <- Figuras científicas em 300 DPI (Figuras 1 a 8)
 ├── reports/                                   <- Relatórios acadêmicos submetidos à UFABC (.docx / .pdf)
-├── scripts/                                   <- Scripts utilitários (check_quiescence.sh)
 └── tools/                                     <- Toolchain embarcada portátil (llama_cpp, hyperfine, uv)
 ```
 
@@ -312,7 +316,7 @@ make dry-run
 # 1. Configurar o ambiente isolado automaticamente (Python venv, Node.js e ferramentas)
 make setup
 
-# 2. Auditar a integridade e executar os 31 testes unitários automatizados da suíte (pytest e ruff linter) / 31 automated unit tests
+# 2. Auditar a integridade e executar os 32 testes unitários automatizados da suíte (pytest e ruff linter) / 32 automated unit tests
 make test
 
 # 3. Execução em espaço de usuário comum (Sem Sudo / Degradação Graciosa)
