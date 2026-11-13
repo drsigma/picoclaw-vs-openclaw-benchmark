@@ -45,18 +45,28 @@ def test_summary_statistics_matches_csv_table():
 
 
 def test_latex_table_contains_summary_data():
-    """Verify table_journal_ablation.tex reflects all 4 workloads and registered agent configurations."""
+    """Verify table_journal_ablation.tex and table_warm_cache.tex reflect neutral architecture names and TTFT/ITL/Uncached columns."""
     tex_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_journal_ablation.tex")
+    warm_tex_path = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_warm_cache.tex")
     assert os.path.exists(tex_path), f"Missing {tex_path}"
+    assert os.path.exists(warm_tex_path), f"Missing {warm_tex_path}"
 
     with open(tex_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    assert "W1 & PicoClaw (Go Native)" in content
-    assert "W4 & PicoClaw (Go Native)" in content
-    assert "W4 & OpenClaw (Node.js Full 54-Tool)" in content
-    assert "W4 & PythonNative (CPython Reference)" in content
-    assert "Neural Baseline" in content
+    assert "W1 & Go Native Orchestrator (PicoClaw Ref.)" in content
+    assert "W4 & Go Native Orchestrator (PicoClaw Ref.)" in content
+    assert "W4 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool)" in content
+    assert "W4 & Python 3.12 Reference Agent" in content
+    assert "Direct Local LLM Baseline" in content
+
+    with open(warm_tex_path, "r", encoding="utf-8") as f:
+        warm_content = f.read()
+
+    assert "Prompt (Tot / Cached / New)" in warm_content
+    assert "TTFT / ITL [ms]" in warm_content
+    assert "2177 / 2176 / 1" in warm_content
+    assert "22980 / 22457 / 523" in warm_content
 
 
 def test_figures_exist_and_non_empty():
@@ -427,6 +437,76 @@ def test_tool_rag_mitigation_and_worker_version_artifacts():
                 else:
                     assert st["latency_reduction_vs_full_54_pct"] > 15.0
                     assert st["latency_reduction_vs_minimal_15_pct"] > 0.0
+
+
+def test_protocol_invariants_enforced_and_fail_on_violation():
+    """Verify validate_campaign_invariants passes on real datasets and raises ValueError on each of the 7 violations."""
+    import copy
+
+    import pytest
+
+    from benchmark.protocol_invariants import validate_campaign_invariants
+
+    warm_path = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
+    inter_path = os.path.join(REPO_DIR, "results", "publication_campaign", "inter_session_trials.jsonl")
+    meta_path = os.path.join(REPO_DIR, "results", "publication_campaign", "campaign_metadata.json")
+
+    with open(warm_path, "r", encoding="utf-8") as f:
+        warm_recs = [json.loads(line) for line in f if line.strip()]
+    with open(inter_path, "r", encoding="utf-8") as f:
+        inter_recs = [json.loads(line) for line in f if line.strip()]
+    with open(meta_path, "r", encoding="utf-8") as f:
+        meta = json.load(f)
+
+    # Must pass on real Regime B and Session 2 datasets
+    res_warm = validate_campaign_invariants(warm_recs, expected_eval_count=600, require_equalized_tokens=True, require_energy=True, metadata=meta)
+    assert res_warm["status"] == "PASSED"
+    res_inter = validate_campaign_invariants(inter_recs, expected_eval_count=600, require_equalized_tokens=True, require_energy=True)
+    assert res_inter["status"] == "PASSED"
+
+    eval_only = [copy.deepcopy(r) for r in warm_recs if not r.get("is_warmup", False)]
+
+    # 1. Violation of Invariant #1: prompt_tokens <= 0
+    bad1 = copy.deepcopy(eval_only)
+    bad1[0]["prompt_tokens"] = 0
+    with pytest.raises(ValueError, match="Invariant #1"):
+        validate_campaign_invariants(bad1, metadata=meta)
+
+    # 2. Violation of Invariant #2: unequal prompt_tokens across 15-tool arms
+    bad2 = copy.deepcopy(eval_only)
+    for r in bad2:
+        if r["agent_key"] == "picoclaw" and r["workload"] == "W2":
+            r["prompt_tokens"] = 9999
+            break
+    with pytest.raises(ValueError, match="Invariant #2"):
+        validate_campaign_invariants(bad2, require_equalized_tokens=True, metadata=meta)
+
+    # 3. Violation of Invariant #3: invalid finish_reason
+    bad3 = copy.deepcopy(eval_only)
+    bad3[0]["finish_reason"] = "error_timeout"
+    with pytest.raises(ValueError, match="Invariant #3"):
+        validate_campaign_invariants(bad3, metadata=meta)
+
+    # 4. Violation of Invariant #4: http_status != 200
+    bad4 = copy.deepcopy(eval_only)
+    bad4[0]["http_status"] = 500
+    with pytest.raises(ValueError, match="Invariant #4"):
+        validate_campaign_invariants(bad4, metadata=meta)
+
+    # 5. Violation of Invariant #5: sample count mismatch
+    with pytest.raises(ValueError, match="Invariant #5"):
+        validate_campaign_invariants(eval_only[:-1], expected_eval_count=600, metadata=meta)
+
+    # 6. Violation of Invariant #6: missing session_id / git_commit
+    with pytest.raises(ValueError, match="Invariant #6"):
+        validate_campaign_invariants(eval_only, metadata={"session_id": "", "git_commit": "abc"})
+
+    # 7. Violation of Invariant #7: missing or non-positive energy when require_energy=True
+    bad7 = copy.deepcopy(eval_only)
+    bad7[0]["energy_net_above_idle_j"] = None
+    with pytest.raises(ValueError, match="Invariant #7"):
+        validate_campaign_invariants(bad7, require_energy=True, metadata=meta)
+
 
 
 

@@ -1,35 +1,36 @@
 \begin{table*}[t]
 \centering
-\caption{Controlled Performance Evaluation under Realistic KV-Cache Reuse Regime (\texttt{cache\_prompt=true}) on Apple Silicon M4. When prompt prefill is amortized via deterministic block-isolated KV-cache retention, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) becomes directly measurable in I/O and vector-intensive workloads (W2--W3) while remaining within server timing noise ($\pm 1\text{--}2\%$) in W1 and W4. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution. Peak Phys RAM denotes lifetime maximum resident physical footprint via Darwin kernel \texttt{libproc}.}
+\caption{Controlled Performance Evaluation under Realistic KV-Cache Reuse Regime (\texttt{cache\_prompt=true}) on Apple Silicon M4. Columns explicitly decompose total prompt tokens into cached prefix and uncached (newly evaluated) tokens (\texttt{Tot / Cached / New}), alongside median Time-To-First-Token and Inter-Token Latency (\texttt{TTFT / ITL}) and end-to-end task latency ($T_{\text{task}}$). When prompt prefill is amortized via deterministic block-isolated KV-cache retention, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) becomes directly measurable in I/O and vector-intensive workloads (W2--W3) while remaining within server timing noise ($\pm 1\text{--}2\%$) in W1 and W4. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution.}
 \label{tab:evaluation_warm_cache_m4}
-\small
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{l l c r r r r r r r}
 \hline
-\textbf{Workload} & \textbf{Configuration} & \textbf{Prompt (Tot/Cache)} & \textbf{Cache Hit [\%]} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Orch Share $\Phi_{\text{orch}}$ [\%]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} \\
+\textbf{Workload} & \textbf{Architecture (Ref.)} & \textbf{Prompt (Tot / Cached / New)} & \textbf{TTFT / ITL [ms]} & \textbf{Task Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Orch Share $\Phi_{\text{orch}}$ [\%]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} \\
 \hline
-W1 & Neural Baseline (Direct) & 2153 / 2152 & 99.9\% & 1034.9 (8.1) & 0.00 / 0.00 & 0.00\% & 0.0 & 13.77 & 14.28 \\
-W1 & PicoClaw (Go Native) & 2153 / 2152 & 99.9\% & 1031.2 (16.5) & 0.02 / 3.78 & 0.37\% & 4.2 & 13.42 & 13.85 \\
-W1 & OpenClaw (Node.js Minimal) & 2153 / 2152 & 99.9\% & 1033.5 (9.7) & 0.10 / 20.12 & 1.96\% & 37.6 & 13.58 & 14.04 \\
-W1 & OpenClaw (Node.js Full 54-Tool) & 7067 / 7066 & 100.0\% & 1341.2 (11.7) & 0.16 / 24.15 & 1.81\% & 37.5 & 17.24 & 23.14 \\
-W1 & PythonNative (CPython Reference) & 2153 / 2152 & 99.9\% & 1025.4 (9.4) & 0.07 / 9.82 & 0.96\% & 23.7 & 13.75 & 14.09 \\
+W1 & Direct Local LLM Baseline & 2153 / 2152 / 1 & 233.7 / 20.14 & 1034.9 (8.1) & 0.00 / 0.00 & 0.00\% & 0.0 & 13.77 & 14.28 \\
+W1 & Go Native Orchestrator (PicoClaw Ref.) & 2153 / 2152 / 1 & 232.4 / 19.88 & 1031.2 (16.5) & 0.02 / 3.78 & 0.37\% & 4.2 & 13.42 & 13.85 \\
+W1 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2153 / 2152 / 1 & 243.6 / 19.24 & 1033.5 (9.7) & 0.10 / 20.12 & 1.96\% & 37.6 & 13.58 & 14.04 \\
+W1 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7067 / 7066 / 1 & 309.2 / 24.62 & 1341.2 (11.7) & 0.16 / 24.15 & 1.81\% & 37.5 & 17.24 & 23.14 \\
+W1 & Python 3.12 Reference Agent & 2153 / 2152 / 1 & 233.8 / 19.54 & 1025.4 (9.4) & 0.07 / 9.82 & 0.96\% & 23.7 & 13.75 & 14.09 \\
 \hline
-W2 & Neural Baseline (Direct) & 2177 / 2176 & 99.9\% & 739.6 (15.9) & 0.00 / 0.00 & 0.00\% & 0.0 & 9.04 & 6.71 \\
-W2 & PicoClaw (Go Native) & 2177 / 2176 & 99.9\% & 741.2 (14.2) & 1.78 / 3.36 & 0.69\% & 5.0 & 9.77 & 7.27 \\
-W2 & OpenClaw (Node.js Minimal) & 2177 / 2176 & 99.9\% & 752.8 (17.5) & 1.25 / 19.02 & 2.69\% & 37.8 & 9.42 & 7.09 \\
-W2 & OpenClaw (Node.js Full 54-Tool) & 7091 / 7090 & 100.0\% & 937.7 (13.5) & 1.30 / 22.95 & 2.58\% & 37.9 & 11.74 & 11.03 \\
-W2 & PythonNative (CPython Reference) & 2177 / 2176 & 99.9\% & 743.4 (11.5) & 1.04 / 9.85 & 1.46\% & 24.0 & 9.88 & 7.35 \\
+W2 & Direct Local LLM Baseline & 2177 / 2176 / 1 & 236.0 / 18.13 & 739.6 (15.9) & 0.00 / 0.00 & 0.00\% & 0.0 & 9.04 & 6.71 \\
+W2 & Go Native Orchestrator (PicoClaw Ref.) & 2177 / 2176 / 1 & 234.3 / 18.02 & 741.2 (14.2) & 1.78 / 3.36 & 0.69\% & 5.0 & 9.77 & 7.27 \\
+W2 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2177 / 2176 / 1 & 247.4 / 17.27 & 752.8 (17.5) & 1.25 / 19.02 & 2.69\% & 37.8 & 9.42 & 7.09 \\
+W2 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7091 / 7090 / 1 & 309.2 / 21.70 & 937.7 (13.5) & 1.30 / 22.95 & 2.58\% & 37.9 & 11.74 & 11.03 \\
+W2 & Python 3.12 Reference Agent & 2177 / 2176 / 1 & 238.6 / 17.67 & 743.4 (11.5) & 1.04 / 9.85 & 1.46\% & 24.0 & 9.88 & 7.35 \\
 \hline
-W3 & Neural Baseline (Direct) & 2410 / 2409 & 100.0\% & 730.4 (7.6) & 0.00 / 0.00 & 0.00\% & 0.0 & 9.05 & 6.60 \\
-W3 & PicoClaw (Go Native) & 2410 / 2409 & 100.0\% & 773.0 (14.9) & 31.12 / 3.22 & 4.45\% & 44.8 & 9.64 & 7.45 \\
-W3 & OpenClaw (Node.js Minimal) & 2410 / 2409 & 100.0\% & 759.5 (9.4) & 15.44 / 19.99 & 4.65\% & 67.1 & 9.38 & 7.14 \\
-W3 & OpenClaw (Node.js Full 54-Tool) & 7324 / 7323 & 100.0\% & 1191.6 (11.3) & 15.28 / 24.31 & 3.33\% & 67.2 & 14.74 & 17.55 \\
-W3 & PythonNative (CPython Reference) & 2410 / 2409 & 100.0\% & 754.9 (9.6) & 9.98 / 10.39 & 2.70\% & 55.1 & 9.92 & 7.50 \\
+W3 & Direct Local LLM Baseline & 2410 / 2409 / 1 & 257.1 / 16.88 & 730.4 (7.6) & 0.00 / 0.00 & 0.00\% & 0.0 & 9.05 & 6.60 \\
+W3 & Go Native Orchestrator (PicoClaw Ref.) & 2410 / 2409 / 1 & 258.9 / 17.10 & 773.0 (14.9) & 31.12 / 3.22 & 4.45\% & 44.8 & 9.64 & 7.45 \\
+W3 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2410 / 2409 / 1 & 269.5 / 16.24 & 759.5 (9.4) & 15.44 / 19.99 & 4.65\% & 67.1 & 9.38 & 7.14 \\
+W3 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7324 / 7323 / 1 & 304.7 / 23.54 & 1191.6 (11.3) & 15.28 / 24.31 & 3.33\% & 67.2 & 14.74 & 17.55 \\
+W3 & Python 3.12 Reference Agent & 2410 / 2409 / 1 & 264.6 / 16.82 & 754.9 (9.6) & 9.98 / 10.39 & 2.70\% & 55.1 & 9.92 & 7.50 \\
 \hline
-W4 & Neural Baseline (Direct) & 22980 / 22457 & 97.7\% & 8503.6 (48.5) & 0.00 / 0.00 & 0.00\% & 0.0 & 111.96 & 952.28 \\
-W4 & PicoClaw (Go Native) & 22980 / 22457 & 97.7\% & 8458.6 (128.9) & 20.03 / 42.81 & 0.74\% & 9.6 & 121.22 & 1027.76 \\
-W4 & OpenClaw (Node.js Minimal) & 22980 / 22457 & 97.7\% & 8605.5 (59.0) & 9.90 / 70.77 & 0.94\% & 40.2 & 112.51 & 967.24 \\
-W4 & OpenClaw (Node.js Full 54-Tool) & 72120 / 71597 & 99.3\% & 11046.8 (72.5) & 10.43 / 124.05 & 1.22\% & 40.1 & 159.48 & 1760.40 \\
-W4 & PythonNative (CPython Reference) & 22980 / 22457 & 97.7\% & 8530.0 (40.7) & 14.33 / 49.81 & 0.75\% & 24.1 & 117.91 & 1004.28 \\
+W4 & Direct Local LLM Baseline & 22980 / 22457 / 523 & 235.1 / 17.92 & 8503.6 (48.5) & 0.00 / 0.00 & 0.00\% & 0.0 & 111.96 & 952.28 \\
+W4 & Go Native Orchestrator (PicoClaw Ref.) & 22980 / 22457 / 523 & 235.8 / 17.86 & 8458.6 (128.9) & 20.03 / 42.81 & 0.74\% & 9.6 & 121.22 & 1027.76 \\
+W4 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 22980 / 22457 / 523 & 250.8 / 17.87 & 8605.5 (59.0) & 9.90 / 70.77 & 0.94\% & 40.2 & 112.51 & 967.24 \\
+W4 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 72120 / 71597 / 523 & 306.1 / 22.04 & 11046.8 (72.5) & 10.43 / 124.05 & 1.22\% & 40.1 & 159.48 & 1760.40 \\
+W4 & Python 3.12 Reference Agent & 22980 / 22457 / 523 & 241.3 / 17.86 & 8530.0 (40.7) & 14.33 / 49.81 & 0.75\% & 24.1 & 117.91 & 1004.28 \\
 \hline
 \multicolumn{10}{l}{\footnotesize $n = 30$ independent physical evaluations per condition (600 total evaluations, 60 priming warmups excluded).} \\
 \multicolumn{10}{l}{\footnotesize Telemetry Backend: Apple Silicon SMC (\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \texttt{libproc}. Data Source: \texttt{measured\_hardware\_warm\_cache}.} \\

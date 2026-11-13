@@ -34,6 +34,7 @@ from benchmark.analyze_results import (  # noqa: E402
     holm_bonferroni_adjust,
     vargha_delaney_a12,
 )
+from benchmark.protocol_invariants import validate_campaign_invariants  # noqa: E402
 from benchmark.run_unified_benchmark import collect_host_metadata  # noqa: E402
 from benchmark.telemetry import SMCPowerMonitor  # noqa: E402
 
@@ -58,21 +59,22 @@ def generate_warm_cache_latex_table(
 ) -> str:
     workloads = ["W1", "W2", "W3", "W4"]
     configs = [
-        ("neural_baseline", "Neural Baseline (Direct)"),
-        ("picoclaw", "PicoClaw (Go Native)"),
-        ("openclaw_minimal", "OpenClaw (Node.js Minimal)"),
-        ("openclaw_full", "OpenClaw (Node.js Full 54-Tool)"),
-        ("python_native", "PythonNative (CPython Reference)"),
+        ("neural_baseline", "Direct Local LLM Baseline"),
+        ("picoclaw", "Go Native Orchestrator (PicoClaw Ref.)"),
+        ("openclaw_minimal", "Node.js V8 Orchestrator (OpenClaw Min Ref.)"),
+        ("openclaw_full", "Node.js V8 Orchestrator (OpenClaw Full 54-Tool)"),
+        ("python_native", "Python 3.12 Reference Agent"),
     ]
 
     latex_table = r"""\begin{table*}[t]
 \centering
-\caption{Controlled Performance Evaluation under Realistic KV-Cache Reuse Regime (\texttt{cache\_prompt=true}) on Apple Silicon M4. When prompt prefill is amortized via deterministic block-isolated KV-cache retention, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) becomes directly measurable in I/O and vector-intensive workloads (W2--W3) while remaining within server timing noise ($\pm 1\text{--}2\%$) in W1 and W4. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution. Peak Phys RAM denotes lifetime maximum resident physical footprint via Darwin kernel \texttt{libproc}.}
+\caption{Controlled Performance Evaluation under Realistic KV-Cache Reuse Regime (\texttt{cache\_prompt=true}) on Apple Silicon M4. Columns explicitly decompose total prompt tokens into cached prefix and uncached (newly evaluated) tokens (\texttt{Tot / Cached / New}), alongside median Time-To-First-Token and Inter-Token Latency (\texttt{TTFT / ITL}) and end-to-end task latency ($T_{\text{task}}$). When prompt prefill is amortized via deterministic block-isolated KV-cache retention, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) becomes directly measurable in I/O and vector-intensive workloads (W2--W3) while remaining within server timing noise ($\pm 1\text{--}2\%$) in W1 and W4. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution.}
 \label{tab:evaluation_warm_cache_m4}
-\small
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
 \begin{tabular}{l l c r r r r r r r}
 \hline
-\textbf{Workload} & \textbf{Configuration} & \textbf{Prompt (Tot/Cache)} & \textbf{Cache Hit [\%]} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Orch Share $\Phi_{\text{orch}}$ [\%]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} \\
+\textbf{Workload} & \textbf{Architecture (Ref.)} & \textbf{Prompt (Tot / Cached / New)} & \textbf{TTFT / ITL [ms]} & \textbf{Task Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Orch Share $\Phi_{\text{orch}}$ [\%]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} \\
 \hline
 """
 
@@ -81,10 +83,12 @@ def generate_warm_cache_latex_table(
             s = summary_stats.get(ak, {}).get(w, {})
             pt = int(round(s.get("prompt_tokens_mean", 0)))
             cached_t = int(round(s.get("cached_tokens_mean", 0)))
-            tokens_str = f"{pt} / {cached_t}"
+            uncached_t = int(round(s.get("uncached_prompt_tokens_mean", max(0, pt - cached_t))))
+            tokens_str = f"{pt} / {cached_t} / {uncached_t}"
 
-            cache_hit = s.get("cache_hit_pct_mean", 0.0)
-            cache_hit_str = f"{cache_hit:.1f}\\%"
+            ttft_med = s.get("ttft_median_ms", 0.0)
+            itl_med = s.get("itl_median_ms", 0.0)
+            ttft_itl_str = f"{ttft_med:.1f} / {itl_med:.2f}"
 
             task_med = s.get("t_task_median_ms", 0.0)
             task_iqr = s.get("t_task_iqr_ms", 0.0)
@@ -106,7 +110,7 @@ def generate_warm_cache_latex_table(
             edp = s.get("edp_net_mean_js")
             edp_str = f"{edp:.2f}" if edp is not None else r"\textbf{N/A}"
 
-            latex_table += f"{w} & {label} & {tokens_str} & {cache_hit_str} & {lat_str} & {disp_http_str} & {phi_str} & {phys_str} & {e_str} & {edp_str} \\\\\n"
+            latex_table += f"{w} & {label} & {tokens_str} & {ttft_itl_str} & {lat_str} & {disp_http_str} & {phi_str} & {phys_str} & {e_str} & {edp_str} \\\\\n"
 
         if w_idx < len(workloads) - 1:
             latex_table += "\\hline\n"
@@ -372,6 +376,8 @@ def main():
             tasks = [r["t_task_ms"] for r in subset]
             orchs = [r["t_orch_ms"] for r in subset]
             phis = [r["phi_orch_pct"] for r in subset]
+            ttfts = [r.get("ttft_ms", 0.0) for r in subset]
+            itls = [r.get("itl_ms", 0.0) for r in subset]
             disps = [r["t_dispatch_ms"] for r in subset]
             https = [r["t_http_ms"] for r in subset]
             phys = [r.get("proc_peak_phys_mb", r["rss_peak_mb"]) for r in subset]
@@ -394,6 +400,10 @@ def main():
                 "t_task_mean_ms": float(np.mean(tasks)),
                 "t_task_std_ms": float(np.std(tasks, ddof=1)),
                 "t_task_p95_ms": float(np.percentile(tasks, 95)),
+                "ttft_median_ms": float(np.median(ttfts)),
+                "ttft_mean_ms": float(np.mean(ttfts)),
+                "itl_median_ms": float(np.median(itls)),
+                "itl_mean_ms": float(np.mean(itls)),
                 "t_orch_median_ms": float(np.median(orchs)),
                 "t_orch_iqr_ms": float(np.percentile(orchs, 75) - np.percentile(orchs, 25)),
                 "t_orch_mean_ms": float(np.mean(orchs)),
@@ -490,6 +500,8 @@ def main():
                             total_net_energy_j += float(e_val)
 
     metadata = {
+        "session_id": "session_1_primary_publication_m4",
+        "git_commit": "c251847",
         "model": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
         "model_architecture": "Llama-3.2 (3B parameters, GGUF Q4_K_M)",
         "server": {
@@ -544,6 +556,18 @@ def main():
             "telemetry": "Apple Silicon SMC (powermetrics 50 ms current shunts) + Darwin XNU libproc (RUSAGE_INFO_V4)",
         },
     }
+
+    # Validate all 7 protocol invariants on Regime B warm_cache_trials.jsonl!
+    inv_res = validate_campaign_invariants(
+        eval_records,
+        expected_eval_count=total_evals,
+        require_equalized_tokens=True,
+        require_energy=True,
+        metadata=metadata,
+        expected_reps_per_cell=reps_per_condition,
+    )
+    metadata["protocol_invariants_validation"] = inv_res
+
     with open(meta_path, "w", encoding="utf-8") as f:
         json.dump(metadata, f, indent=2)
     print(f"✅ Generated campaign metadata JSON: {meta_path}")

@@ -544,10 +544,10 @@ def generate_latex_table(
 \\textbf{{Runtime / Agent}} & \\textbf{{W2 Pure CPU}} & \\textbf{{W3 Vector RAG}} & \\textbf{{Host BW (W3)}} & \\textbf{{Regime B $\\Phi_{{\\text{{energy, orch}}}}$}} \\\\
 & \\textbf{{(mJ / tool op)}} & \\textbf{{(mJ / RAG op)}} & \\textbf{{(GB/s)}} & \\textbf{{(W2 / W3)}} \\\\
 \\midrule
-\\textbf{{PicoClaw (Go Native)}} & {mj_ops.get(('picoclaw', 'W2'), 0.0):.3f} & {mj_ops.get(('picoclaw', 'W3'), 0.0):.2f} & {pico_bw:.2f} & {pico_phi_w2:.2f}\\% / {pico_phi_w3:.2f}\\% \\\\
-\\textbf{{PythonNative (CPython)}} & {mj_ops.get(('python_native', 'W2'), 0.0):.3f} & {mj_ops.get(('python_native', 'W3'), 0.0):.2f} & {py_bw:.2f} & {py_phi_w2:.2f}\\% / {py_phi_w3:.2f}\\% \\\\
-\\textbf{{OpenClaw Minimal (V8)}} & {mj_ops.get(('openclaw_minimal', 'W2'), 0.0):.3f} & {mj_ops.get(('openclaw_minimal', 'W3'), 0.0):.2f} & {min_bw:.2f} & {min_phi_w2:.2f}\\% / {min_phi_w3:.2f}\\% \\\\
-\\textbf{{OpenClaw Full (V8)}} & {mj_ops.get(('openclaw_full', 'W2'), 0.0):.3f} & {mj_ops.get(('openclaw_full', 'W3'), 0.0):.2f} & {full_bw:.2f} & {full_phi_w2:.2f}\\% / {full_phi_w3:.2f}\\% \\\\
+\\textbf{{Go Native Orchestrator (PicoClaw Ref.)}} & {mj_ops.get(('picoclaw', 'W2'), 0.0):.3f} & {mj_ops.get(('picoclaw', 'W3'), 0.0):.2f} & {pico_bw:.2f} & {pico_phi_w2:.2f}\\% / {pico_phi_w3:.2f}\\% \\\\
+\\textbf{{Python 3.12 Reference Agent}} & {mj_ops.get(('python_native', 'W2'), 0.0):.3f} & {mj_ops.get(('python_native', 'W3'), 0.0):.2f} & {py_bw:.2f} & {py_phi_w2:.2f}\\% / {py_phi_w3:.2f}\\% \\\\
+\\textbf{{Node.js V8 Orchestrator (OpenClaw Min Ref.)}} & {mj_ops.get(('openclaw_minimal', 'W2'), 0.0):.3f} & {mj_ops.get(('openclaw_minimal', 'W3'), 0.0):.2f} & {min_bw:.2f} & {min_phi_w2:.2f}\\% / {min_phi_w3:.2f}\\% \\\\
+\\textbf{{Node.js V8 Orchestrator (OpenClaw Full Ref.)}} & {mj_ops.get(('openclaw_full', 'W2'), 0.0):.3f} & {mj_ops.get(('openclaw_full', 'W3'), 0.0):.2f} & {full_bw:.2f} & {full_phi_w2:.2f}\\% / {full_phi_w3:.2f}\\% \\\\
 \\midrule
 \\multicolumn{{5}}{{l}}{{\\textbf{{Apple Silicon M4 Physical Energy Validation and Analytical \\& Empirical Bandwidth Estimation:}}}} \\\\
 \\multicolumn{{5}}{{l}}{{$\\bullet$ Validated CPU Proxies: $T_{{\\text{{exec}}}}$ ($R^2 = 0.949$), Instructions ($R^2 = 0.954$), Cycles ($R^2 = 0.945$); XNU \\texttt{{ri\\_billed\\_energy}} rejected ($r = -0.051$, $R^2 = -0.676$; $\\hat{{\\kappa}}_{{\\text{{M4}}}} = {calib['kappa_mj_per_unit']:.4f}\\text{{ mJ/unit}}$)}} \\\\

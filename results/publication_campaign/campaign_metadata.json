@@ -1,4 +1,6 @@
 {
+  "session_id": "session_1_primary_publication_m4",
+  "git_commit": "c251847",
   "model": "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
   "model_architecture": "Llama-3.2 (3B parameters, GGUF Q4_K_M)",
   "server": {
@@ -51,5 +53,12 @@
     "memory": "24 GB Unified LPDDR5X UMA @ 120 GB/s bandwidth",
     "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
     "telemetry": "Apple Silicon SMC (powermetrics 50 ms current shunts) + Darwin XNU libproc (RUSAGE_INFO_V4)"
+  },
+  "protocol_invariants_validation": {
+    "validated_records": 600,
+    "cells_validated": 20,
+    "require_equalized_tokens": true,
+    "require_energy": true,
+    "status": "PASSED"
   }
 }

@@ -41,6 +41,8 @@ def update_manifest() -> int:
     # Also track additional core files if present
     additional = [
         "paper/RESPONSE_TO_REVIEWERS.md",
+        "benchmark/protocol_invariants.py",
+        "benchmark/bun_jsc_agent.mjs",
         "benchmark/adapters/bun_minimal_adapter.py",
         "scripts/run_prefill_ablation.py",
         "scripts/run_w2_resample.py",

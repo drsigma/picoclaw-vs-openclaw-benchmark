@@ -99,10 +99,10 @@ def generate_latex_table(summary: dict[str, Any]) -> None:
     ]
 
     arm_labels = [
-        ("openclaw_full", "OpenClaw Full (Stock)"),
-        ("openclaw_minimal", "OpenClaw Minimal (Static)"),
-        ("openclaw_tool_rag", "OpenClaw Tool-RAG (V8)"),
-        ("picoclaw_tool_rag", "PicoClaw Tool-RAG (Go)"),
+        ("openclaw_full", "Node.js V8 Full (OpenClaw Ref.)"),
+        ("openclaw_minimal", "Node.js V8 Min (OpenClaw Ref.)"),
+        ("openclaw_tool_rag", "Node.js V8 Tool-RAG (OpenClaw Ref.)"),
+        ("picoclaw_tool_rag", "Go Native Tool-RAG (PicoClaw Ref.)"),
     ]
     schema_str = {
         "openclaw_full": "54 (Static)",

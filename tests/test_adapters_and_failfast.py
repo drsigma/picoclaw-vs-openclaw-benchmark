@@ -22,8 +22,14 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def test_adapter_registry_contains_all_registered_agents():
-    """Verify all 6 evaluation targets including bun_minimal are registered in ADAPTER_REGISTRY."""
+    """Verify both neutral architecture keys and compatible product-reference aliases are registered in ADAPTER_REGISTRY."""
     expected_agents = {
+        "go_orchestrator",
+        "node_orchestrator_minimal",
+        "node_orchestrator_full",
+        "python_reference_agent",
+        "local_llm_baseline",
+        "bun_jsc_orchestrator",
         "picoclaw",
         "openclaw_minimal",
         "openclaw_full",
@@ -36,23 +42,26 @@ def test_adapter_registry_contains_all_registered_agents():
 
 
 def test_bun_minimal_adapter_metadata_and_execution(monkeypatch):
-    """Verify bun_minimal adapter properly exposes runner metadata, executes against mock server, and conforms to interface."""
+    """Verify BunJSCOrchestratorAdapter executes dedicated benchmark/bun_jsc_agent.mjs and conforms to interface."""
     mock_port = 8088
     start_mock_server_if_needed(mock_port)
     monkeypatch.setenv("LLAMA_API_URL", f"http://127.0.0.1:{mock_port}/v1/chat/completions")
 
-    adapter = get_adapter("bun_minimal", REPO_DIR)
+    adapter = get_adapter("bun_jsc_orchestrator", REPO_DIR)
     meta = adapter.metadata()
+    assert meta.get("worker_script") == "benchmark/bun_jsc_agent.mjs"
     assert "runner_binary_used" in meta
     assert "is_fallback_node" in meta
     assert isinstance(meta["is_fallback_node"], bool)
     assert meta["mode"] == "minimal"
     assert meta["runner_binary_used"] in ("bun", "node")
 
-    res = adapter.run_workload("W1")
-    assert res.get("prompt_tokens", 0) > 0
-    assert res.get("completion_tokens", 0) > 0
-    assert res.get("t_task_ms", 0.0) > 0.0
+    for w in ("W1", "W2", "W3"):
+        res = adapter.run_workload(w)
+        assert res.get("prompt_tokens", 0) > 0
+        assert res.get("completion_tokens", 0) > 0
+        assert res.get("t_task_ms", 0.0) > 0.0
+        assert res.get("worker_script") == "benchmark/bun_jsc_agent.mjs"
 
 
 def test_adapter_instances_subclass_base_adapter():

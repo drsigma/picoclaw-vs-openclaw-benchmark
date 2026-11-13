@@ -8,10 +8,10 @@
 \textbf{Runtime / Agent} & \textbf{W2 Pure CPU} & \textbf{W3 Vector RAG} & \textbf{Host BW (W3)} & \textbf{Regime B $\Phi_{\text{energy, orch}}$} \\
 & \textbf{(mJ / tool op)} & \textbf{(mJ / RAG op)} & \textbf{(GB/s)} & \textbf{(W2 / W3)} \\
 \midrule
-\textbf{PicoClaw (Go Native)} & 1.252 & 136.62 & 0.67 & 0.04\% / 1.42\% \\
-\textbf{PythonNative (CPython)} & 1.000 & 34.08 & 2.04 & 0.03\% / 0.34\% \\
-\textbf{OpenClaw Minimal (V8)} & 0.196 & 45.67 & 1.80 & 0.01\% / 0.49\% \\
-\textbf{OpenClaw Full (V8)} & 0.178 & 44.36 & 1.82 & 0.01\% / 0.30\% \\
+\textbf{Go Native Orchestrator (PicoClaw Ref.)} & 1.252 & 136.62 & 0.67 & 0.04\% / 1.42\% \\
+\textbf{Python 3.12 Reference Agent} & 1.000 & 34.08 & 2.04 & 0.03\% / 0.34\% \\
+\textbf{Node.js V8 Orchestrator (OpenClaw Min Ref.)} & 0.196 & 45.67 & 1.80 & 0.01\% / 0.49\% \\
+\textbf{Node.js V8 Orchestrator (OpenClaw Full Ref.)} & 0.178 & 44.36 & 1.82 & 0.01\% / 0.30\% \\
 \midrule
 \multicolumn{5}{l}{\textbf{Apple Silicon M4 Physical Energy Validation and Analytical \& Empirical Bandwidth Estimation:}} \\
 \multicolumn{5}{l}{$\bullet$ Validated CPU Proxies: $T_{\text{exec}}$ ($R^2 = 0.949$), Instructions ($R^2 = 0.954$), Cycles ($R^2 = 0.945$); XNU \texttt{ri\_billed\_energy} rejected ($r = -0.051$, $R^2 = -0.676$; $\hat{\kappa}_{\text{M4}} = 0.0573\text{ mJ/unit}$)} \\

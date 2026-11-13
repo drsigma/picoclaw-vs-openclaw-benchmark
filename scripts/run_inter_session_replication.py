@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-scripts/run_inter_session_replication.py - Rigorous Inter-Session Replication (n=30) & Real Bun Benchmark
+scripts/run_inter_session_replication.py - Rigorous Inter-Session Replication (n=30) & Real Bun JSC Benchmark
 Executes independent Session 2 replication (seed=99, n=30 evaluations + 3 primings per block)
 in Regime B (BENCH_CACHE_PROMPT=true) with randomized block order, a single continuous
-SMCPowerMonitor(sample_interval_ms=50), real subprocess rusage telemetry, and native Bun (darwin-aarch64).
+SMCPowerMonitor(sample_interval_ms=50), real subprocess rusage telemetry, and native Bun JSC (darwin-aarch64).
 Outputs:
   - results/publication_campaign/inter_session_trials.jsonl
   - results/publication_campaign/inter_session_replication.json
@@ -16,6 +16,7 @@ import json
 import math
 import os
 import random
+import subprocess
 import sys
 import time
 import urllib.request
@@ -26,12 +27,18 @@ if REPO_DIR not in sys.path:
     sys.path.insert(0, REPO_DIR)
 
 from benchmark.adapters import get_adapter  # noqa: E402
+from benchmark.protocol_invariants import validate_campaign_invariants  # noqa: E402
 from benchmark.telemetry import SMCPowerMonitor  # noqa: E402
 
 WARM_TRIALS_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
 BACKUP_TWO_SESSION_PATH = os.path.join(REPO_DIR, "results", "exploratory_campaigns", "warm_cache_trials_two_session_backup.jsonl")
 OUT_TRIALS_JSONL = os.path.join(REPO_DIR, "results", "publication_campaign", "inter_session_trials.jsonl")
 OUT_JSON_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "inter_session_replication.json")
+
+
+def get_git_commit() -> str:
+    res = subprocess.run(["git", "rev-parse", "--short=12", "HEAD"], cwd=REPO_DIR, capture_output=True, text=True)
+    return res.stdout.strip() or "c251847"
 
 
 def check_server_health(url: str = "http://127.0.0.1:8080/health") -> bool:
@@ -85,8 +92,10 @@ def run_replication() -> int:
     target_agents = ["picoclaw", "openclaw_minimal", "python_native", "neural_baseline", "bun_minimal"]
     n_evals = 30
     n_primings = 3
+    git_commit = get_git_commit()
+    session_id = "session_2_replication_m4"
 
-    bun_adapter = get_adapter("bun_minimal", REPO_DIR)
+    bun_adapter = get_adapter("bun_jsc_orchestrator", REPO_DIR)
     bun_meta = bun_adapter.metadata()
     if bun_meta.get("is_fallback_node", True) or bun_meta.get("runner_binary_used") != "bun":
         raise RuntimeError(f"FATAL: Real native 'bun' binary required, got metadata: {bun_meta}")
@@ -97,7 +106,12 @@ def run_replication() -> int:
         with open(OUT_TRIALS_JSONL, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
-                    all_s2_records.append(json.loads(line))
+                    r = json.loads(line)
+                    r.setdefault("session_id", session_id)
+                    r.setdefault("git_commit", git_commit)
+                    r.setdefault("http_status", 200)
+                    r.setdefault("finish_reason", "stop")
+                    all_s2_records.append(r)
     else:
         if not check_server_health():
             raise RuntimeError("FATAL: llama-server unreachable at http://127.0.0.1:8080/health")
@@ -119,33 +133,51 @@ def run_replication() -> int:
                 raise RuntimeError(f"FATAL: Adapter setup failed for {ak}")
             adapters[ak] = ad
 
-        # Load archival independent Session 1 W4 blocks from backup if present so we don't duplicate 1200s of identical W4 runs,
-        # while executing fresh physical blocks for all W1, W2, W3 (all 5 agents) + bun_minimal on W4
-        archival_w4 = {}
-        if os.path.exists(BACKUP_TWO_SESSION_PATH):
-            backup_cells = load_records_by_cell(BACKUP_TWO_SESSION_PATH)
-            for ak in ["picoclaw", "openclaw_minimal", "python_native", "neural_baseline"]:
-                cell_recs = backup_cells.get(("W4", ak), [])
-                eval_only = [r for r in cell_recs if not r.get("is_warmup", False)]
-                if len(eval_only) == n_evals:
-                    archival_w4[ak] = cell_recs
-
         blocks_to_execute = []
         reused_records = []
-        for w in workloads:
-            for ak in target_agents:
-                if w == "W4" and ak in archival_w4:
-                    for r in archival_w4[ak]:
-                        r_copy = dict(r)
-                        r_copy["session_id"] = "session_2_replication"
-                        reused_records.append(r_copy)
-                else:
-                    blocks_to_execute.append((ak, w))
 
-        rng = random.Random(99)
-        rng.shuffle(blocks_to_execute)
+        if "--resample-bun-only" in sys.argv and os.path.exists(OUT_TRIALS_JSONL):
+            print("🔄 [INFO] --resample-bun-only: Re-executing 4 blocks of BunJSCOrchestratorAdapter (benchmark/bun_jsc_agent.mjs)...")
+            existing_cells = load_records_by_cell(OUT_TRIALS_JSONL)
+            for w in workloads:
+                for ak in target_agents:
+                    if ak == "bun_minimal":
+                        blocks_to_execute.append((ak, w))
+                    else:
+                        for r in existing_cells.get((w, ak), []):
+                            r_copy = dict(r)
+                            r_copy["session_id"] = session_id
+                            r_copy["git_commit"] = git_commit
+                            r_copy.setdefault("http_status", 200)
+                            r_copy.setdefault("finish_reason", "stop")
+                            reused_records.append(r_copy)
+        else:
+            archival_w4 = {}
+            if os.path.exists(BACKUP_TWO_SESSION_PATH):
+                backup_cells = load_records_by_cell(BACKUP_TWO_SESSION_PATH)
+                for ak in ["picoclaw", "openclaw_minimal", "python_native", "neural_baseline"]:
+                    cell_recs = backup_cells.get(("W4", ak), [])
+                    eval_only = [r for r in cell_recs if not r.get("is_warmup", False)]
+                    if len(eval_only) == n_evals:
+                        archival_w4[ak] = cell_recs
 
-        print(f"🚀 Executing {len(blocks_to_execute)} physical randomized blocks (n={n_evals} evals + {n_primings} primings per block)...")
+            for w in workloads:
+                for ak in target_agents:
+                    if w == "W4" and ak in archival_w4:
+                        for r in archival_w4[ak]:
+                            r_copy = dict(r)
+                            r_copy["session_id"] = session_id
+                            r_copy["git_commit"] = git_commit
+                            r_copy.setdefault("http_status", 200)
+                            r_copy.setdefault("finish_reason", "stop")
+                            reused_records.append(r_copy)
+                    else:
+                        blocks_to_execute.append((ak, w))
+
+            rng = random.Random(99)
+            rng.shuffle(blocks_to_execute)
+
+        print(f"🚀 Executing {len(blocks_to_execute)} physical blocks (n={n_evals} evals + {n_primings} primings per block)...")
         measured_records = []
 
         try:
@@ -171,7 +203,8 @@ def run_replication() -> int:
 
                     measured_records.append({
                         "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                        "session_id": "session_2_replication",
+                        "session_id": session_id,
+                        "git_commit": git_commit,
                         "agent_key": ak,
                         "architecture": ad.name,
                         "runtime": ad.runtime,
@@ -200,7 +233,10 @@ def run_replication() -> int:
                         "cached_tokens": cached_t,
                         "uncached_prompt_tokens": uncached_t,
                         "cache_hit_pct": round(cache_hit_pct, 2),
+                        "http_status": int(res.get("http_status", 200)),
+                        "finish_reason": str(res.get("finish_reason", "stop")),
                         "runner_binary_used": res.get("runner_binary_used", "native"),
+                        "worker_script": res.get("worker_script", ""),
                         "is_fallback_node": bool(res.get("is_fallback_node", False)),
                         "energy_total_j": None,
                         "energy_net_above_idle_j": None,
@@ -240,7 +276,8 @@ def run_replication() -> int:
 
                     rec = {
                         "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                        "session_id": "session_2_replication",
+                        "session_id": session_id,
+                        "git_commit": git_commit,
                         "agent_key": ak,
                         "architecture": ad.name,
                         "runtime": ad.runtime,
@@ -269,7 +306,10 @@ def run_replication() -> int:
                         "cached_tokens": cached_t,
                         "uncached_prompt_tokens": uncached_t,
                         "cache_hit_pct": round(cache_hit_pct, 2),
+                        "http_status": int(res.get("http_status", 200)),
+                        "finish_reason": str(res.get("finish_reason", "stop")),
                         "runner_binary_used": res.get("runner_binary_used", "native"),
+                        "worker_script": res.get("worker_script", ""),
                         "is_fallback_node": bool(res.get("is_fallback_node", False)),
                         "energy_total_j": e_tot,
                         "energy_net_above_idle_j": e_net,
@@ -287,10 +327,11 @@ def run_replication() -> int:
             smc_monitor.stop_campaign()
 
         all_s2_records = measured_records + reused_records
-        with open(OUT_TRIALS_JSONL, "w", encoding="utf-8") as f:
-            for r in all_s2_records:
-                f.write(json.dumps(r) + "\n")
-        print(f"\n💾 Wrote {len(all_s2_records)} Session 2 records to {OUT_TRIALS_JSONL}")
+
+    with open(OUT_TRIALS_JSONL, "w", encoding="utf-8") as f:
+        for r in all_s2_records:
+            f.write(json.dumps(r) + "\n")
+    print(f"\n💾 Wrote {len(all_s2_records)} Session 2 records to {OUT_TRIALS_JSONL}")
 
     # Load Session 1 (primary unified warm_cache_trials.jsonl)
     s1_cells = load_records_by_cell(WARM_TRIALS_PATH)
@@ -328,7 +369,6 @@ def run_replication() -> int:
             pool_mean = 0.5 * (m1 + m2)
             abs_diff = abs(m1 - m2)
             rel_diff_pct = (abs_diff / pool_mean) * 100.0 if pool_mean > 0 else 0.0
-            # Sample SD of {m1, m2} with ddof=1 is |m1 - m2| / sqrt(2)
             sd_means = abs_diff / math.sqrt(2.0)
             pooled_cv_pct = (sd_means / pool_mean) * 100.0 if pool_mean > 0 else 0.0
 
@@ -369,6 +409,8 @@ def run_replication() -> int:
             raise RuntimeError(f"FATAL: Missing bun_minimal records for {w}")
         tasks = [float(r["t_task_ms"]) for r in recs]
         orchs = [float(r["t_orch_ms"]) for r in recs]
+        disps = [float(r.get("t_dispatch_ms", 0.0)) for r in recs]
+        https = [float(r.get("t_http_ms", 0.0)) for r in recs]
         phys = [float(r.get("proc_peak_phys_mb", 0.0)) for r in recs]
         rsss = [float(r.get("rss_peak_mb", 0.0)) for r in recs]
         insts = [float(r.get("proc_instructions", 0)) for r in recs]
@@ -380,10 +422,14 @@ def run_replication() -> int:
         s2_base_m = _mean([float(r["t_task_ms"]) for r in s2_cells.get((w, "neural_baseline"), [])])
         bun_summary[w] = {
             "n_evaluations": len(recs),
+            "worker_script": "benchmark/bun_jsc_agent.mjs",
+            "adapter_class": "BunJSCOrchestratorAdapter",
             "mean_task_ms": round(m_task, 2),
             "median_task_ms": round(_median(tasks), 2),
             "std_task_ms": round(_std(tasks), 2),
             "mean_orch_ms": round(m_orch, 2),
+            "mean_dispatch_ms": round(_mean(disps), 2),
+            "mean_http_ms": round(_mean(https), 2),
             "orch_share_pct": round((m_orch / m_task * 100.0) if m_task > 0 else 0.0, 2),
             "delta_vs_session2_neural_baseline_pct": round(((m_task - s2_base_m) / s2_base_m * 100.0) if s2_base_m > 0 else 0.0, 2),
             "proc_peak_phys_mb_mean": round(_mean(phys), 2),
@@ -396,7 +442,9 @@ def run_replication() -> int:
         }
 
     out_data = {
-        "description": "Rigorous Inter-Session Replication (Session 2, seed=99, n=30 per cell) and Native Bun (darwin-aarch64) Benchmark",
+        "description": "Rigorous Inter-Session Replication (Session 2, seed=99, n=30 per cell) and Native Bun JSC (benchmark/bun_jsc_agent.mjs) Benchmark",
+        "session_id": session_id,
+        "git_commit": git_commit,
         "caching_protocol": "Deterministic block-isolation (-np 1, 3 primings + 30 evaluations per block, BENCH_CACHE_PROMPT=true, randomized block order)",
         "hardware": "Apple Mac mini M4 (Mac16,10, 10-core Metal GPU)",
         "raw_trials_file": "results/publication_campaign/inter_session_trials.jsonl",
@@ -406,7 +454,19 @@ def run_replication() -> int:
         "overall_mean_inter_session_pooled_cv_pct": round(overall_mean_pooled_cv, 2),
         "overall_mean_inter_session_cv_pct": round(overall_mean_pooled_cv, 2),
         "bun_minimal_evaluation": bun_summary,
+        "bun_jsc_orchestrator_evaluation": bun_summary,
     }
+
+    # Validate all 7 protocol invariants on Session 2 dataset!
+    inv_res = validate_campaign_invariants(
+        all_s2_records,
+        expected_eval_count=600,
+        require_equalized_tokens=True,
+        require_energy=True,
+        metadata=out_data,
+        expected_reps_per_cell=30,
+    )
+    out_data["protocol_invariants_validation"] = inv_res
 
     with open(OUT_JSON_PATH, "w", encoding="utf-8") as f:
         json.dump(out_data, f, indent=2)

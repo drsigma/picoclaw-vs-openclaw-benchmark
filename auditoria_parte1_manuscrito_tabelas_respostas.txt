@@ -1,0 +1,1522 @@
+================================================================================
+PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
+PARTE 1: RESPOSTA AOS REVISORES, MANUSCRITO .TEX, BIBLIOGRAFIA E TABELAS LATEX
+Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
+================================================================================
+Data de Geracao (UTC): 2026-11-13T04:12:05.532710+00:00
+Git HEAD: 59b7d7483970d5e0e006d6f937e4b1edb6a14a58
+Hardware Host: Apple Silicon M4 (Apple M4)
+Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
+ProductVersion:		26.6.2
+BuildVersion:		25G83)
+Python Version: 3.12.15
+Status Git:
+(clean working tree)
+================================================================================
+
+
+================================================================================
+SECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA E TODAS AS 7 TABELAS LATEX + MACROS
+================================================================================
+
+================================================================================
+FILE: paper/RESPONSE_TO_REVIEWERS.md
+SHA-256: 4925a1fa661b46cde51f7b46856435329cf5b4aa58ffb11ded44d49bc9a8f01a
+================================================================================
+# Point-by-Point Response to Reviewers (Elsevier SoftwareX — Revision R9)
+
+**Manuscript Title:** *"A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"*  
+**Author:** Rafael Paniccia Cassetta (Universidade Federal do ABC — UFABC, Brazil)  
+**Hardware Testbed:** Apple Mac mini M4 (`Mac16,10`, 10-Core CPU, 10-Core Metal GPU, 24 GB Unified LPDDR5X @ 120 GB/s)  
+
+We thank Reviewers 1, 2, and 3 for their exceptionally thorough, constructive, and technically rigorous evaluation of our software manuscript and repository. Every single critique (M1–M9, X1–X10, C1–C8) has been resolved through new physical experiments on the Apple Silicon M4 testbed, software engineering upgrades, and complete bibliographic and mathematical alignment.
+
+Below we summarize the **five core methodological and software upgrades** before providing a point-by-point mapping:
+
+---
+
+## 1. Active Software Contribution: Zero-Copy Dynamic Tool-RAG Schema Pruner ($54 \rightarrow \text{Top-}5$ Tools)
+- **Reviewer Concern (Scientific Contribution 3/5 $\rightarrow$ 4/5):** Prior versions diagnosed enterprise schema prompt bloat (54 tools) without shipping an active client-side software mitigation inside the orchestrator workers.
+- **Resolution (`benchmark/picoclaw_orch.go`, `benchmark/openclaw_orch.mjs`, `benchmark/python_orch.py`, `scripts/run_tool_rag_mitigation_experiment.py`):**
+  - We implemented an active **Zero-Copy Dynamic Tool-RAG Schema Pruner** (`OPENCLAW_MODE="tool_rag"` / `picoclaw_tool_rag`, `openclaw_tool_rag`) across all three language workers. Before serializing the HTTP payload to `llama-server`, the orchestrator initializes the full 54-tool corporate catalog ($N_{\text{schemas}} = 54$) and computes an in-memory 384-dimensional cosine similarity dot-product against the workload query embedding to prune the catalog down to the $\text{Top-}5$ semantically relevant tools.
+  - Physical benchmarking across W1–W4 in both Regime A (`cache_prompt=false`) and Regime B (`cache_prompt=true`) ($n=30$ evaluations $+ 3$ warmups per block with continuous 50 ms Apple SMC power telemetry, saved in `results/publication_campaign/tool_rag_mitigation_trials.jsonl`, `tool_rag_mitigation_summary.json`, and `tables/table_tool_rag_mitigation.tex`) demonstrates that semantic pruning adds merely $0.033\text{--}0.038\text{ ms}$ per turn in Go ($0.382\text{ ms}$ across 10 turns in W4) and $0.286\text{--}0.427\text{ ms}$ per turn in Node.js V8 ($3.330\text{--}4.268\text{ ms}$ in W4) while shrinking serialized prompt tokens from $7,067\text{--}7,499$ to $893$ in W1 ($72,120\text{--}76,440$ to $9,197\text{--}10,380$ across 10 turns in W4).
+  - Consequently, the active Tool-RAG Pruner eliminates **$85.5\%\text{ to }87.2\%$ of end-to-end latency and $85.6\%\text{ to }87.8\%$ of electrical energy** relative to the unpruned 54-tool catalog in Regime A ($50.9\%\text{ to }54.6\%$ faster than even the static 15-tool catalog), and in Regime B reduces latency by $21.1\%\text{ to }37.9\%$ vs. 54 tools, outperforming even the static 15-tool catalog ($952.4\text{ ms}$ vs. $1033.5\text{ ms}$ in W1; $8334.2\text{--}8358.8\text{ ms}$ vs. $8605.5\text{ ms}$ in W4).
+
+---
+
+## 2. Refutation of Darwin XNU `ri_billed_energy` as a Validated Negative Result & Validated Physical CPU Regressors ($R^2 = 0.955$) (Resolves M1, X1, C1, M8)
+- **Reviewer Concern:** Using zero-intercept OLS calibration ($\hat{\kappa}_{\text{M4}} \cdot \texttt{ri\_billed\_energy}$) produced a low global $R^2 = 0.0538$ and inflated CPython's estimated Regime B orchestrator energy share to $25.87\% / 71.13\%$.
+- **Resolution (`scripts/run_uma_energy_and_bandwidth_attribution.py`, `uma_energy_bandwidth_attribution.json`, `table_energy_bandwidth_deconvolution.tex`, `tests/test_artifact_consistency.py`):**
+  - We **completely removed** $\hat{\kappa}_{\text{M4}} \cdot \texttt{ri\_billed\_energy}$ as a Joule estimator and **formally retracted** the $25.87\% / 71.13\%$ figures.
+  - We reframed Darwin XNU's `ri_billed_energy` counter as a **Validated Negative Result**: across all 120 isolated CPU phase trials (`uma_energy_bandwidth_trials.jsonl`), `ri_billed_energy` exhibits zero global linear correlation with physical Apple SMC `CPU Power` rail Joules ($r = -0.0510, p = 0.580$; intra-agent $r = -0.10$ for Go, $-0.08$ for Python, $+0.07$ for Node.js Minimal) and a **negative centered coefficient of determination ($\text{OLS } R^2 = -0.676$ relative to the sample mean)**. This proves mathematically that uncalibrated XNU billing units perform worse than a constant mean predictor and overestimate CPython energy by $10\text{--}30\times$ due to internal XNU scheduler QoS/thread-weighting heuristics, directly corroborating **Fahad et al. (2019)** (*Energies* 12(11), 2204, reporting 73% average and up to 300% maximum error in on-chip energy estimation models).
+  - We established and saved three **Validated Physical CPU Energy Regressors** against net SMC `CPU Power` rail Joules ($E_{\text{CPU, net}}$):
+    1. Execution time (`t_exec_ms`): **Pearson $r = 0.992$, centered $\text{OLS } R^2 = 0.949$** (intra-agent $\text{corr}(t, E_{\text{CPU, net}}) = 1.00$ for Go, $0.99$ for Node-Minimal, $0.85$ for Python);
+    2. Retired CPU instructions (`proc_instructions`): **Pearson $r = 0.985$, centered $\text{OLS } R^2 = 0.955$**;
+    3. Core CPU cycles (`proc_cycles`): **Pearson $r = 0.991$, centered $\text{OLS } R^2 = 0.945$**.
+  - We added 95% Bootstrap CIs (2,000 resamples) to all 8 isolated `mJ/op` measurements and computed the Regime B orchestrator energy fraction ($\Phi_{\text{energy, orch}} = E_{\text{CPU, net}}^{\text{dispatch}} / E_{\text{net, task}}$) **exclusively from direct physical SMC `CPU Power` rail energy**:
+    - **PicoClaw (Go Native):** `0.04% / 1.42%` ($3.76\text{ mJ} / 8.86\text{ J}$ in W2; $136.62\text{ mJ} / 9.64\text{ J}$ in W3)
+    - **PythonNative (CPython):** `0.03% / 0.34%` ($3.00\text{ mJ} / 9.70\text{ J}$ in W2; $34.08\text{ mJ} / 9.92\text{ J}$ in W3)
+    - **OpenClaw Minimal (V8):** `0.01% / 0.49%` ($0.59\text{ mJ} / 9.95\text{ J}$ in W2; $45.67\text{ mJ} / 9.38\text{ J}$ in W3)
+    - **OpenClaw Full (V8):** `0.01% / 0.30%` ($0.53\text{ mJ} / 11.00\text{ J}$ in W2; $44.36\text{ mJ} / 14.74\text{ J}$ in W3)
+  - We added unit test `test_energy_regressor_validity_and_spurious_rejection` in `tests/test_artifact_consistency.py` enforcing $R^2 \ge 0.90$ for valid physical proxies and verifying `rejected_spurious_proxy = True` ($|r| < 0.15$) for `ri_billed_energy`.
+
+---
+
+## 3. Standardization of Equivalent Cold-Start Pair (`3.81x` Mean / `3.46x` Median & `7.29x` Isomorphic Worker `--version`) (Resolves M2, X2, C1)
+- **Reviewer Concern:** The $23.4\times$ ($9.63\text{ ms}$ vs. $225.55\text{ ms}$) cold-start ratio in `hyperfine_agent_init.json` reflected an asymmetric CLI invocation where the JS worker did not short-circuit `--help`.
+- **Resolution (`benchmark/picoclaw_orch.go`, `benchmark/openclaw_orch.mjs`, `benchmark/python_orch.py`, `hyperfine_worker_version.json`):**
+  - We added explicit `--version` / `version` / `--help` short-circuit handling on the first line of `main()` in all three isomorphic workers (`picoclaw_orch`, `openclaw_orch.mjs`, and `python_orch.py`), printing the version string and exiting with `exit(0)` immediately.
+  - We executed `hyperfine` (30 runs, 5 warmups) across all three isomorphic workers and saved `results/publication_campaign/hyperfine_worker_version.json`: Go `picoclaw_orch --version` achieves **$3.04\text{ ms}$ mean ($2.96\text{ ms}$ median)** vs. **$22.15\text{ ms}$ mean ($22.12\text{ ms}$ median, $7.29\times$ faster)** for Node.js V8 and **$49.32\text{ ms}$ mean ($49.45\text{ ms}$ median, $16.22\times$ faster)** for Python.
+  - Across the manuscript, Abstract, `HIGHLIGHTS.md`, `COVER_LETTER.md`, `README.md`, `tutorial/README.md`, Decision Rule 1, and Conclusions, we replaced $23.4\times$ with the **equivalent cold-start pair from `hyperfine_cold_start.json`: `$3.81\times$ faster mean ($9.74\text{ ms}$ vs. $37.15\text{ ms}$; median $3.46\times$, $9.67\text{ ms}$ vs. $33.48\text{ ms}$)** alongside the isomorphic worker `--version` benchmark ($3.04\text{ ms}$ vs. $22.15\text{ ms}$, $7.29\times$), retaining `hyperfine_agent_init.json` ($23.4\times$) strictly as an archived historical provenance note in Section 3.1.
+
+---
+
+## 4. Unified Single-Session Regime B Collection & Rigorous $n=30$ Inter-Session Replication with Native Bun (JavaScriptCore) (Resolves M3, M4, X3, X4, X6, C2, C3, C6)
+- **Reviewer Concern:** (i) In Regime B (`warm_cache_trials.jsonl`), W2 and W4 had `python_native` and `neural_baseline` resampled in a second session with missing `ttft_ms`/`itl_ms` fields; (ii) `run_inter_session_replication.py` used $n=10$, per-trial SMC start/stop, `os.getpid()` for memory, and fell back to Node.js because native `bun` was not installed.
+- **Resolution (`scripts/run_regime_b_w2_w4_unified_session.py`, `scripts/run_inter_session_replication.py`, `tools/bun/bin/bun`):**
+  - **Unified Regime B Session:** We archived the prior two-session file to `results/exploratory_campaigns/warm_cache_trials_two_session_backup.jsonl` (tracked in `manifest_sha256.json`) and executed `scripts/run_regime_b_w2_w4_unified_session.py` on the M4 with a single continuous `SMCPowerMonitor(sample_interval_ms=50)` and randomized block order across all 5 arms (`picoclaw`, `openclaw_minimal`, `openclaw_full`, `python_native`, `neural_baseline`) in W2 and W4 ($3\text{ primings} + 30\text{ evaluations}$ per block). Every single one of the **660 records** in `warm_cache_trials.jsonl` now has `ttft_ms > 0` and `itl_ms > 0` populated (`0` missing values), and all contrasts within W1, W2, W3, and W4 are 100% intra-session.
+  - **Native Bun Installation & Rigorous $n=30$ Inter-Session Replication:** We installed native **Bun v1.4.4 (`darwin-aarch64`, JavaScriptCore)** at `tools/bun/bin/bun` and updated `BunMinimalAdapter` so `is_fallback_node = False` and `runner_binary_used = "bun"`. We rewrote `scripts/run_inter_session_replication.py` with **zero `try...except` fallbacks**, $n=30$ evaluations $+ 3$ primings per randomized block (`rng = random.Random(99); rng.shuffle(blocks)`), a single continuous `SMCPowerMonitor` daemon, child-process `run_subprocess_with_rusage` memory telemetry (zero `os.getpid()`), full raw trial logging (`results/publication_campaign/inter_session_trials.jsonl`), and exact metrics `inter_session_rel_diff_pct` ($|m_1 - m_2|/\bar{m}$, ranging from $0.22\%$ to $3.32\%$, mean $1.62\%$) and `inter_session_pooled_cv_pct` ($\text{SD}(\{m_1, m_2\})/\bar{m}$, mean $1.15\%$), plus paired intra-session contrasts against each session's `neural_baseline`. Native **Bun v1.4.4** achieves $T_{\text{orch}} = 3.83\text{ ms}$ (W1), $4.44\text{ ms}$ (W2), $17.90\text{ ms}$ (W3), and $48.67\text{ ms}$ (W4) with a physical memory footprint of only $7.49\text{--}9.53\text{ MB}$ in W1/W2/W4 ($35.91\text{ MB}$ in W3), outperforming Node.js V8 on host overhead while remaining within $-0.93\%$ to $+0.91\%$ of `neural_baseline` in W1, W2, and W4 ($+4.81\%$ in W3).
+  - **Explicit Discussion of Inter-Session Drift vs. Intra-Session Runtime Contrasts:** In Section 3.5, Section 3.7, Decision Rule 3, and Section 5 (Conclusions), we explicitly report that inter-session latency drift ($0.22\%\text{--}3.32\%$ between adjacent continuous-SMC sessions and up to $\sim 3\%\text{--}10\%$ across multi-hour sessions) is comparable to or exceeds intra-session differences ($-1.14\%$ to $+3.48\%$) between Go, Python, Node.js V8, and Bun in W1, W2, and W4; therefore, end-to-end task latency ($T_{\text{task}}$) comparisons are statistically valid only intra-session (with W4 $T_{\text{task}}$ converging within $-1.57\%$ to $+1.08\%$ difference), **except in W3 (Vector RAG)**, where Go's $+5.41\%\text{ to }+5.85\%$ scalar dot-product penalty vs. BLAS/SIMD replicates consistently across sessions alongside all isolated host microarchitectural metrics ($T_{\text{orch}}$, `Peak Phys RAM`, retired instructions, and CPU cycles).
+
+---
+
+## 5. Reframing UMA LPDDR5X Bandwidth as Analytical-Empirical Estimation (~80–89% Roofline Ceiling) & Complete 19-Paper Literature Integration (Resolves M5, M6, X5, X7, X8, X9, X10, C1, C4, C5, C7)
+- **Analytical & Empirical Memory Bandwidth Estimation (`scripts/run_uma_energy_and_bandwidth_attribution.py`):**
+  - Renamed from "Bandwidth Telemetry" to **"Analytical & Empirical Memory Bandwidth Estimation ($\text{Model Weights} \div \text{ITL}$)"** across all tables and text.
+  - Replaced the old range with the **global median of `97.0 GB/s` (`80.8%` of nominal `120 GB/s`) and mean of `95.9 GB/s` (`79.9%` in Regime A, 95% CI `[95.6, 96.2] GB/s`, IQR `6.0 GB/s`) to `106.7 GB/s` (`88.9%` in Regime B, 95% CI `[106.4, 107.1] GB/s`, IQR `8.0 GB/s`; global mean `104.0 GB/s` / `86.7%`)** computed strictly over pure token decode duration (`predicted_ms / predicted_n`).
+  - Explicitly clarified that this is an analytical-empirical estimation ($S_{\text{weights}} \div \text{ITL}_{\text{decode}}$ assuming one full read of the $2.019\text{ GB}$ Q4\_K\_M weights per generated token at `batch_size=1`) rather than hardware DRAM controller counters, and that $80.8\%\text{--}88.9\%$ aligns with the practical Roofline UMA ceiling ($\approx 86\text{--}88\%$) documented by **Imamura et al. (2026)** and **Benazir & Lin (2025)**.
+- **Spearman 12x12 Holm-Bonferroni & Within-Workload Stratification (`benchmark/analyze_results.py`):**
+  - Every cell of the $12\times 12$ matrix in `spearman_correlation_matrix.json` now includes `"p_adj_holm"` (adjusted over the 66 upper-triangle pairs), and `"stratified_by_workload"` reports separate correlations within W1, W2, W3, and W4 ($n=150$ trials and $n=5$ arm means per workload).
+- **100% Literature Coverage (`references.bib` & `paper/softwarex_manuscript.tex`):**
+  - Added and cited all 18 requested references across Section 1, Table 2, Section 2.4, and Section 3: `fahad2019comparative`, `imamura2026apple`, `benazir2025llm`, `agentsysbench2025`, `alems2025`, `agentarena2025`, `agentperfbench2025`, `swenergy2025`, `greenbench2025`, `kvflow2025`, `rrevict2025`, `efficientagent2025`, `prefixbench2025`, `toolgap2025`, `promcp2025`, `nexus2025`, `smelt2025`, and `recache2025` (47 total BibTeX keys, 100% cited with zero uncited or missing entries).
+- **Manifest Hygiene, P0–P5 Protocol Hardening & 3-Part Unabridged Audit Bundle (`benchmark/protocol_invariants.py`, `benchmark/bun_jsc_agent.mjs`, `scripts/verify_manifest.py`, `scripts/export_audit_bundle.py`):**
+  - **Phase 4.2 (`table_warm_cache.tex` & 5 KV-Cache Operational Behaviors):** Updated `table_warm_cache.tex` and `warm_cache_summary.json` to explicitly report `Prompt (Tot / Cached / New)` (e.g., `2177 / 2176 / 1` in W2; `22980 / 22457 / 523` in W4) and median `TTFT / ITL [ms]` (`234.3 / 18.02` ms for Go in W2; `235.8 / 17.86` ms in W4), and documented the five KV-cache operational behaviors (cold cache, warm cache with identical prefix, prefix switching across blocks, single-slot `-np 1` isolation vs. multi-slot contention, and prefix invalidation/multi-turn growth in W4).
+  - **Phase 4.3 (`benchmark/protocol_invariants.py`):** Implemented `validate_campaign_invariants()` enforcing 7 fail-fast protocol invariants across `analyze_results.py`, `run_warm_cache_campaign.py`, and `run_inter_session_replication.py`, validated by `test_protocol_invariants_enforced_and_fail_on_violation()` in `tests/test_artifact_consistency.py`.
+  - **Phase 5.1 & 5.2 (Decoupled Architecture-First Naming & Independent 4th Adapter `benchmark/bun_jsc_agent.mjs`):** Registered canonical neutral keys (`go_orchestrator`, `node_orchestrator_minimal`, `node_orchestrator_full`, `python_reference_agent`, `local_llm_baseline`, `bun_jsc_orchestrator`) alongside product-reference aliases, updated all LaTeX tables to present neutral architecture names first, and implemented the dedicated `benchmark/bun_jsc_agent.mjs` worker using native `Bun.file()`, `Bun.nanoseconds()`, and JSC `fetch` ($T_{\text{orch}} = 3.65\text{ ms}$ in W1, $4.88\text{ ms}$ in W2, $18.09\text{ ms}$ in W3, $48.74\text{ ms}$ in W4; $\text{Peak Phys RAM} = 7.32\text{--}9.54\text{ MB}$ in W1/W2/W4 and $35.97\text{ MB}$ in W3).
+  - **Phase 7 (Explicit Section 5.2 `\subsection{Threats to Validity and Methodological Limitations}`):** Added a dedicated subsection in `paper/softwarex_manuscript.tex` covering all 6 validity boundaries: (1) Thermal and Inter-Session Drift Boundary, (2) Model Scale and Quantization Dependence, (3) Apple Silicon UMA Specifics, (4) KV-Cache Slot Isolation and Prefix Invalidation Protocol, (5) Indirect Process Energy Attribution and Negative Validation of `ri_billed_energy`, and (6) Cross-Hardware Generalization.
+  - **3-Part Audit Bundle Export:** Updated `scripts/export_audit_bundle.py` to export `auditoria_parte1_manuscrito_tabelas_respostas.txt`, `auditoria_parte2_codigo_testes_metadados_manifesto.txt`, and `auditoria_parte3_dados_brutos_jsonl_completos.txt` (plus `repo_texto_auditoria_final.txt`), with explicit closing `=====` delimiters for every file including `data/manifest_sha256.json`.
+
+================================================================================
+END FILE: paper/RESPONSE_TO_REVIEWERS.md
+================================================================================
+
+
+================================================================================
+FILE: paper/softwarex_manuscript.tex
+SHA-256: 876dbff9d9ea5540b64bb553dfeb2019a192f7ce06eb8572723fcf7eb69c1b00
+================================================================================
+\documentclass[preprint,12pt,3p]{elsarticle}
+
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{microtype}
+\usepackage{listings}
+\usepackage{xcolor}
+
+\journal{SoftwareX}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  backgroundcolor=\color{gray!10},
+  keywordstyle=\color{blue},
+  commentstyle=\color{green!50!black}
+}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon}
+
+\author[ufabc]{Rafael Paniccia Cassetta\corref{cor1}}
+\ead{rafael.paniccia@aluno.ufabc.edu.br}
+\cortext[cor1]{Corresponding author.}
+\affiliation[ufabc]{organization={Centro de Engenharia, Modelagem e Ci\^encias Sociais Aplicadas, Universidade Federal do ABC (UFABC)},
+            city={Santo Andr\'e},
+            state={S\~ao Paulo},
+            country={Brazil}}
+
+\begin{abstract}
+As autonomous AI agents shift from remote cloud endpoints to local edge deployment, software execution runtime overhead becomes a critical bottleneck competing with neural weights for unified memory and compute bandwidth. We introduce the \texttt{picoclaw-vs-openclaw-benchmark} suite, an extensible, journal-grade benchmarking framework and active schema-pruning toolkit designed to isolate orchestrator delay ($T_{\text{orch}}$) from neural inference latency ($T_{\text{neural}}$) on Apple Silicon SoC microarchitectures. The framework implements the Strategy pattern to evaluate native compiled binaries (Go Mach-O ARM64) against JIT-compiled runtimes (TypeScript/Node.js V8 and native Bun/JavaScriptCore) and interpreted baselines (Python 3.12) across four standardized workload tiers (W1--W4), featuring unconstrained feature ablation (54 tools vs. minimal equalized tools) and an active Zero-Copy Dynamic Tool-RAG Schema Pruner ($54 \rightarrow \text{Top-}5$ semantically relevant tools in $<0.35\text{ ms}$). Experimental telemetry combines non-intrusive Darwin XNU \texttt{libproc} performance counters, phase-isolated Apple System Management Controller (SMC) electrical current sampling, and robust non-parametric statistical inference (median and interquartile range, two-sided Mann-Whitney $U$ test with Holm-Bonferroni correction, Cliff's Delta $d$, and Vargha-Delaney $\hat{A}_{12}$ with 95\% bootstrap confidence intervals). Furthermore, the software provides a reviewer-friendly portable simulation mode (\texttt{make dry-run}) executing in under ten seconds across macOS and Linux without superuser privileges or local weights.
+\end{abstract}
+
+\begin{keyword}
+AI Agent Orchestration \sep Benchmarking Framework \sep Apple Silicon M4 \sep Energy-Delay Product \sep Non-Parametric Statistics \sep Software Reproducibility
+\end{keyword}
+
+\end{frontmatter}
+
+\section*{Required Metadata}
+\label{sec:metadata}
+
+\begin{table}[h!]
+\small
+\centering
+\begin{tabular}{|l|p{6.5cm}|p{6.5cm}|}
+\hline
+\textbf{Nr.} & \textbf{Code metadata description} & \textbf{Metadata value} \\
+\hline
+C1 & Current code version & v1.0.0 \\
+\hline
+C2 & Permanent link to code/repository & \url{https://github.com/drsigma/picoclaw-vs-openclaw-benchmark} \\
+\hline
+C3 & Permanent link to reproducible capsule & Pending Zenodo Deposit upon Acceptance (\url{https://doi.org/10.5281/zenodo.PENDING_RELEASE}) \\
+\hline
+C4 & Legal Code License & MIT License \\
+\hline
+C5 & Code versioning system used & Git \\
+\hline
+C6 & Software code languages used & Python 3.12, Go 1.23, JavaScript/TypeScript (Node.js) \\
+\hline
+C7 & Compilation requirements \& dependencies & Python $\ge$ 3.10 (numpy, scipy, matplotlib, pytest, ruff), Node.js $\ge$ 24, Go $\ge$ 1.22 \\
+\hline
+C8 & Operating environments & macOS (Apple Silicon M-Series, darwin-arm64; full SMC telemetry), Linux (x86\_64; portable dry-run and RAPL interface) \\
+\hline
+C9 & Developer documentation & \url{https://github.com/drsigma/picoclaw-vs-openclaw-benchmark/blob/main/README.md} \\
+\hline
+C10 & Support email for questions & \texttt{rafael.paniccia@aluno.ufabc.edu.br} \\
+\hline
+\end{tabular}
+\caption{Code metadata according to SoftwareX guidelines.}
+\label{tab:code_metadata}
+\end{table}
+
+\section{Motivation and Significance}
+\label{sec:motivation}
+Autonomous agentic workflows employing the ReAct (Reasoning and Acting) paradigm \cite{yao2023react} require orchestrators to iteratively parse tool schemas, validate arguments, dispatch operating system operations, and format prompts for Large Language Model (LLM) inference \cite{schick2023toolformer}. On unified memory microarchitectures such as Apple Silicon (UMA @ 120 GB/s), agent orchestrators share physical LPDDR5X DRAM channels with GPU compute shaders running quantized neural inference (\texttt{llama.cpp}) \cite{reddi2020mlperf,imamura2026apple,benazir2025llm}. 
+
+Prior benchmarks predominantly evaluate LLM reasoning accuracy on cloud APIs or aggregate agent task completion \cite{reddi2020mlperf,llmperf2023,liu2023agentbench,agentarena2025}, while recent agent systems studies such as \textit{AgentSysBench} \cite{agentsysbench2025}, \textit{A-LEMS} \cite{alems2025}, and \textit{AgentPerfBench} \cite{agentperfbench2025} highlight the growing need to disentangle client-side runtime bottlenecks from server-side context reuse and prefix-caching dynamics (\textit{KVFlow} \cite{kvflow2025}, \textit{RR-Evict} \cite{rrevict2025}, \textit{EfficientAgent} \cite{efficientagent2025}, \textit{PrefixBench-H100} \cite{prefixbench2025}, and \textit{ReCache} \cite{recache2025}) \cite{kwon2023vllm,zheng2024sglang,patel2024splitwise,gao2024cost}. Furthermore, emerging studies on Model Context Protocol (MCP) and enterprise tool catalogs---\textit{ToolGap} \cite{toolgap2025}, \textit{ProMCP} \cite{promcp2025}, \textit{Nexus} \cite{nexus2025}, and \textit{SMELT} \cite{smelt2025}---demonstrate that large tool schemas severely inflate prefill latency. Concurrently, software runtime overhead (e.g., V8 garbage collection, context serialization, dynamic schema validation) directly impacts host resource efficiency and the Energy-Delay Product ($\text{EDP} = E \times T$), as investigated in software energy attribution suites such as \textit{SWEnergy} \cite{swenergy2025} and \textit{GreenBench} \cite{greenbench2025} alongside foundational power-proportionality studies \cite{horowitz1994low,gonzalez1996energy,barroso2007case,pereira2021ranking,georgiou2022energy,you2023zeus,husom2024energy,fahad2019comparative}. 
+
+To bridge this gap, we developed \texttt{picoclaw-vs-openclaw-benchmark}, an open-source, extensible framework providing:
+\begin{enumerate}
+    \item Rigorous mathematical isolation of orchestrator delay: $T_{\text{task}} = T_{\text{neural}} + T_{\text{orch}}$, with microsecond precision;
+    \item Physical hardware telemetry leveraging phase-isolated Apple SMC shunt sampling alongside validated Darwin XNU \texttt{libproc} instruction/cycle counters (and empirical refutation of uncalibrated \texttt{ri\_billed\_energy} counters \cite{fahad2019comparative}) plus Linux RAPL energy interfaces;
+    \item Controlled ablation quantifying the cost of 54 enterprise tools versus an equalized minimal configuration, paired with an active \textbf{Zero-Copy Dynamic Tool-RAG Schema Pruner} ($54 \rightarrow \text{Top-}5$ tools in $<0.35\text{ ms}$) that eliminates $>85\%$ of cold-prefill latency and energy;
+    \item Reference cross-language comparison encompassing Go (compiled native), Node.js (JIT V8), native Bun (JavaScriptCore), and Python 3.12 (interpreted reference);
+    \item Multi-platform reviewer reproducibility with zero external dependencies and graceful unprivileged non-root fallback.
+\end{enumerate}
+
+\paragraph{Notice of Scope and Trademarks}
+This benchmarking suite evaluates clean-room, isomorphic reference implementations in Go (\texttt{picoclaw\_orch.go}), Node.js/TypeScript (\texttt{openclaw\_orch.mjs}), and Python (\texttt{python\_orch.py}) designed to evaluate the systems-level trade-offs of compiled native versus JIT-compiled/interpreted agent architectures under identical prompts and tool schemas. PicoClaw and OpenClaw are trademarks of their respective creators; this software is an independent academic performance benchmark and is not affiliated with or endorsed by upstream project maintainers.
+
+\section{Software Description}
+\label{sec:software_description}
+
+\subsection{Comparison with Related Benchmarking Suites}
+Prior benchmarking tools primarily address deep learning model inference throughput, distributed cloud LLM serving, or GPU training power, leaving client-side cross-language runtime isolation and Apple Silicon SMC energy attribution unaddressed. Table~\ref{tab:related_tools} compares our framework with representative performance evaluation tools.
+
+\begin{table}[h!]
+\small
+\centering
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Benchmark / Suite} & \textbf{Primary Domain} & \textbf{Orchestrator Isolation ($T_{\text{orch}}$)} & \textbf{Physical Telemetry} & \textbf{Runtimes} \\
+\midrule
+MLPerf Inference \cite{reddi2020mlperf} & Neural model throughput & No ($T_{\text{model}}$ only) & External meter only & C++ / Python \\
+LLMPerf \cite{llmperf2023} & Cloud LLM serving/TTFT & No (Network HTTP only) & No (Cloud API) & Python only \\
+Zeus / SWEnergy / GreenBench \cite{you2023zeus,swenergy2025,greenbench2025} & DNN / Software energy & No (Aggregate task/train) & NVML / Linux RAPL & Python / Managed \\
+AgentBench / Arena \cite{liu2023agentbench,agentarena2025} & Agent reasoning accuracy & No (Aggregate task time) & No & Python only \\
+AgentSysBench / AgentPerfBench / A-LEMS \cite{agentsysbench2025,agentperfbench2025,alems2025} & Agent pipeline profiling & Partial (Python framework) & RAPL / External & Python only \\
+vLLM / KVFlow / PrefixBench / ReCache \cite{kwon2023vllm,gao2024cost,kvflow2025,prefixbench2025,recache2025} & Server-side KV Serving & No ($T_{\text{server}}$ only) & NVML / Linux RAPL & Python / C++ \\
+ToolGap / ProMCP / Nexus / SMELT \cite{toolgap2025,promcp2025,nexus2025,smelt2025} & Tool schema \& MCP pruning & Partial (Schema lookup) & No & Python / JS \\
+\textbf{This Work} & \textbf{Agent runtime + Tool-RAG} & \textbf{Yes ($T_{\text{orch}} = T_{\text{task}} - T_{\text{neural}}$)} & \textbf{Apple SMC + Linux RAPL} & \textbf{Go, Node V8, Bun JSC, Python} \\
+\bottomrule
+\end{tabular}
+\caption{Comparative analysis of \texttt{picoclaw-vs-openclaw-benchmark} against related systems benchmarking tools.}
+\label{tab:related_tools}
+\end{table}
+
+\subsection{Software Architecture}
+The framework is designed around an extensible Object-Oriented Adapter pattern (\texttt{benchmark/adapters/}), decoupling experimental workload generation from specific orchestrator runtime implementations:
+\begin{itemize}
+    \item \textbf{Adapter Layer (\texttt{AgentOrchestratorAdapter}):} Abstract strategy defining standardized lifecycle hooks: \texttt{setup()}, \texttt{cold\_start\_cmd()} (benchmarked via statistical sampling \cite{hyperfine2024}), \texttt{run\_workload(w\_id)}, and \texttt{teardown()}. Registry keys are decoupled into architecture-first canonical identifiers (with backward-compatible reference aliases):
+    \begin{itemize}
+        \item \texttt{GoNativeOrchestratorAdapter} (\texttt{go\_orchestrator} / alias \texttt{picoclaw}): Compiled native Mach-O ARM64 binary written in Go 1.23 (\texttt{benchmark/picoclaw\_orch.go}, supporting both standard 15-tool parity and \texttt{go\_orchestrator\_tool\_rag} $54 \rightarrow \text{Top-}5$ dynamic vector schema pruning);
+        \item \texttt{NodeV8OrchestratorAdapter} (\texttt{node\_orchestrator\_minimal|full} / aliases \texttt{openclaw\_minimal|full}): Node.js / V8 runtime (\texttt{benchmark/openclaw\_orch.mjs}) evaluating \texttt{minimal} (15 tools), \texttt{full} (54 tools), and \texttt{node\_orchestrator\_tool\_rag} ($54 \rightarrow \text{Top-}5$ dynamic vector schema pruning) schema loads;
+        \item \texttt{PythonReferenceAdapter} (\texttt{python\_reference\_agent} / alias \texttt{python\_native}): Interpreted reference agent in pure Python 3.12 (\texttt{benchmark/python\_orch.py}) with NumPy vector projections and Tool-RAG support;
+        \item \texttt{BunJSCOrchestratorAdapter} (\texttt{bun\_jsc\_orchestrator} / alias \texttt{bun\_minimal}): Independent fourth orchestrator runtime executing a dedicated JavaScriptCore worker (\texttt{benchmark/bun\_jsc\_agent.mjs}) natively atop Bun v1.4.4 (\texttt{darwin-aarch64}, WebKit JavaScriptCore engine, utilizing native \texttt{Bun.file()} zero-copy I/O, \texttt{Bun.nanoseconds()} monotonic timers, and native JSC \texttt{fetch}, verified \texttt{is\_fallback\_node=false});
+        \item \texttt{LocalLLMBaselineAdapter} (\texttt{local\_llm\_baseline} / alias \texttt{neural\_baseline}): Direct HTTP streaming pass-through measuring zero-orchestrator neural inference latency.
+    \end{itemize}
+    \item \textbf{Automated Protocol Invariant Validator (\texttt{benchmark/protocol\_invariants.py}):} Enforces seven fail-fast experimental invariants prior to statistical aggregation: (1) strictly positive token counts ($\texttt{prompt\_tokens} > 0$, $\texttt{completion\_tokens} > 0$), (2) exact byte-and-token parity across all 15-tool arms within each workload when \texttt{require\_equalized\_tokens=True}, (3) valid termination states ($\texttt{finish\_reason} \in \{\texttt{stop}, \texttt{tool\_calls}, \texttt{length}\}$), (4) $\texttt{http\_status} = 200$, (5) exact sample counts ($N=600$, $n=30$ per cell), (6) non-empty \texttt{session\_id} and \texttt{git\_commit} provenance, and (7) positive physical net energy ($\texttt{energy\_net\_above\_idle\_j} > 0$) on SMC hardware runs.
+    \item \textbf{Deterministic Workload Generator (\texttt{data/workload\_data/}):} Provides four difficulty tiers:
+    \begin{itemize}
+        \item \textbf{W1 (Simple Reflection):} In-memory synthesis (64 tokens);
+        \item \textbf{W2 (3-Step Tool Chain):} APFS filesystem inspection, regex parsing, and numerical statistics (128 tokens);
+        \item \textbf{W3 (Vector RAG):} Cosine similarity ranking over 10,000 document chunks via a deterministic projection head (256 tokens);
+        \item \textbf{W4 (10-Turn ReAct):} Multi-step autonomous decision loop executing 10 tool invocations (640 tokens).
+    \end{itemize}
+    \item \textbf{Hardware and Kernel Telemetry Engine:} Combines Apple SMC \texttt{powermetrics} (50 ms milliwatt current sampling) with unprivileged Darwin kernel \texttt{proc\_pid\_rusage} (recording resident set size, retired CPU instructions, and core cycles).
+\end{itemize}
+
+The modular architecture topology and non-intrusive telemetry pipeline are depicted in Figure~\ref{fig:arch_topology}.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{../figures/fig1_architecture_topology.png}
+\caption{System architecture and telemetry topology of the \texttt{picoclaw-vs-openclaw-benchmark} suite. The benchmark runner orchestrates standardized workloads across isolated agent adapters communicating over localhost loopback TCP with the Metal GPU neural daemon, while concurrent daemons capture Darwin kernel \texttt{libproc} counters and Apple SMC power shunts.}
+\label{fig:arch_topology}
+\end{figure}
+
+The framework's extensible design is demonstrated in Listing~\ref{lst:rust_adapter}, showing how a new native agent orchestrator (e.g., \texttt{RustRigAdapter} targeting a high-performance compiled Rust binary) can be integrated in under 35 lines of Python code:
+
+\begin{lstlisting}[language=Python, caption={Extending the benchmark suite with a native Rust agent orchestrator adapter (\texttt{rust\_rig\_adapter.py}).}, label={lst:rust_adapter}]
+from benchmark.adapters.base import AgentOrchestratorAdapter
+from benchmark.telemetry import run_subprocess_with_rusage
+import os, json
+
+class RustRigAdapter(AgentOrchestratorAdapter):
+    """Native Rust agent orchestrator adapter implementing the lifecycle contract."""
+    def __init__(self, repo_dir: str):
+        super().__init__(
+            name="RustRig",
+            runtime="Rust 1.80 (Native Mach-O ARM64)",
+            language="Rust",
+            mode="native_release"
+        )
+        self.bin_path = os.path.join(repo_dir, "bin", "rust_rig_agent")
+
+    def setup(self) -> bool:
+        return os.path.exists(self.bin_path)
+
+    def cold_start_cmd(self) -> list[str]:
+        return [self.bin_path, "--version"]
+
+    def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> dict:
+        cmd = [self.bin_path, "--workload", workload_id, "--reps", str(iterations)]
+        stdout, stderr, rc, hw_stats = run_subprocess_with_rusage(cmd)
+        if rc != 0:
+            raise RuntimeError(f"RustRig execution failed: {stderr}")
+        res = json.loads(stdout.strip())
+        return {**res[0], **hw_stats}
+\end{lstlisting}
+
+\subsection{Software Functionalities}
+The analysis engine (\texttt{benchmark/analyze\_results.py}) computes formal computer systems metrics and publication-ready LaTeX tables:
+\begin{itemize}
+    \item \textbf{Energy-Delay Product (EDP):} Computes total energy $E = \int P(t) dt$ and active energy above quiescent baseline, yielding $\text{EDP} = E \times T_{\text{task}}$ ($\text{J}\cdot\text{s}$) \cite{gonzalez1996energy}, alongside Joules per generated token.
+    \item \textbf{Non-Parametric Central Tendency and Dispersion:} Reports median and Interquartile Range ($\text{IQR} = Q_3 - Q_1$) to prevent outlier distortion from GPU prefill and garbage collection events, supplemented by empirical mean $\pm$ standard deviation and 95th percentile ($p_{95}$) tail latency.
+    \item \textbf{Statistical Hypothesis Testing and Effect Sizes:} Conducts two-sided Mann-Whitney $U$ tests \cite{mann1947test} adjusted for multiple comparisons via the Holm-Bonferroni step-down procedure \cite{holm1979simple}, Cliff's Delta $d \in [-1, 1]$ \cite{cliff1993dominance}, and Vargha-Delaney $\hat{A}_{12} \in [0, 1]$ \cite{vargha2000critique} with 95\% bootstrap confidence intervals (2,000 resamples), establishing stochastic dominance without assuming Gaussian distributions.
+\end{itemize}
+
+\paragraph{Distinction Between Warm Process Execution and Warm KV-Cache Regime}
+We explicitly distinguish between \textit{Warm Process Execution} and the \textit{Warm KV-Cache Regime (Regime B)}. In Warm Process Execution, client-side agent runtimes (e.g., Node.js V8 JIT compiler, CPython interpreter bytecode caches, or Go runtime threads) have completed initial binary loading, module imports, and heap allocation, eliminating cold interpreter bootstrap overheads (characterized separately via \texttt{hyperfine} cold-start profiling). In contrast, the Warm KV-Cache Regime (Regime B) specifically denotes that the server-side neural inference daemon (\texttt{llama-server}) retains pre-computed Key-Value attention states for recurring system prompts and tool schemas in GPU memory (\texttt{cache\_prompt=true}), avoiding redundant prompt attention prefill calculations across dialogue turns.
+
+\subsection{Hardware Constraints, Permissions, and Two-Stage Energy Deconvolution}
+In unified-memory System-on-Chip (SoC) architectures such as Apple Silicon M4, physical electrical shunt sensors managed by the System Management Controller (SMC) instrument aggregate hardware power rails (CPU clusters, Metal GPU, and ANE) at the package level rather than individual operating system processes \cite{barroso2007case,you2023zeus}. Consequently, isolating exclusive analog Joules for a single POSIX process during concurrent CPU--GPU execution is physically unobservable at the hardware shunt layer. Following established energy-benchmarking methodology for machine learning systems \cite{you2023zeus,georgiou2022energy,swenergy2025,greenbench2025}, our harness resolves this architectural constraint via a two-stage hardware validation protocol: (i) phase-isolated direct hardware measurement of client-side tool execution on the Apple SMC \texttt{CPU Power} rail ($E_{\text{CPU, net}}$) with the Metal GPU idle ($P_{\text{GPU}} \approx 0\text{ W}$) alongside paired baseline subtraction ($\Delta E_{\text{net}}$) against \texttt{neural\_baseline}, and (ii) empirical cross-validation of Darwin XNU \texttt{proc\_pid\_rusage} counters against physical SMC current shunts. Crucially, our empirical validation establishes a formal \textbf{Negative Result for Darwin XNU \texttt{ri\_billed\_energy}}: across 120 isolated CPU trials, uncalibrated \texttt{ri\_billed\_energy} exhibits zero global correlation with physical SMC \texttt{CPU Power} rail Joules (Pearson $r = -0.0510, p = 0.580$; centered $\text{OLS } R^2 = -0.676$ relative to the sample mean), performing worse than a constant mean predictor and overestimating CPython energy by $10\text{--}30\times$ due to internal XNU scheduler QoS/thread-weighting heuristics, directly corroborating prior findings by Fahad et al.~\cite{fahad2019comparative} on the unreliability of uncalibrated on-chip energy estimation models (which can incur $73\%$ average and up to $300\%$ maximum error). Conversely, physical duration (\texttt{t\_exec\_ms}, $r = 0.992, R^2 = 0.949$), retired CPU instructions (\texttt{proc\_instructions}, $r = 0.985, R^2 = 0.955$), and core cycles (\texttt{proc\_cycles}, $r = 0.991, R^2 = 0.945$) serve as rigorously validated physical CPU energy proxies.
+
+Direct access to Apple SMC hardware sensors via \texttt{powermetrics} requires elevated \texttt{root} privileges due to Darwin XNU kernel protections against microarchitectural power side-channel vulnerabilities. Crucially, the benchmark runner enforces privilege isolation: all evaluated agent runtimes, orchestrator subprocesses, and the \texttt{llama-server} neural daemon execute strictly in unprivileged user space. When administrative privileges are absent, the telemetry layer degrades gracefully without synthetic estimation, recording latency, memory footprint, and \texttt{libproc} counters while marking electrical energy fields as unavailable (\texttt{N/A}).
+
+All benchmarked software components are governed by permissive open-source licenses: \texttt{llama.cpp} is licensed under the MIT License \cite{llamacpp2024}; \texttt{PicoClaw} reference implementation is distributed under the MIT License \cite{picoclaw2026}; \texttt{OpenClaw} reference implementation is provided under the MIT License \cite{openclaw2026}; the neural model weights (Llama-3.2-3B-Instruct) are governed by the Meta Llama 3.2 Community License; and the benchmark harness itself is released under the MIT License, ensuring unconstrained academic reproducibility and extensibility.
+
+\section{Illustrative Examples and Empirical Results}
+\label{sec:examples}
+
+\input{../results/publication_campaign/tables/macros_empirical.tex}
+
+\subsection{Consolidated Experimental Matrix}
+Table~\ref{tab:evaluation_ablation_m4} is dynamically generated from \texttt{raw\_trials.jsonl} via the statistical pipeline (\texttt{benchmark/analyze\_results.py}), reflecting all five evaluated configurations across workloads W1--W4. Note: Regime A preserves the pre-equalization serialization baseline (where formatting differences in tool descriptions and Python JSON separators yielded 2,153 vs. 2,273 tokens in W1, 2,297 vs. 2,321 in W2, 2,410 vs. 2,530 in W3, and 22,980 vs. 23,255 vs. 24,180 in W4; $\le 5.2\%$ variance), whereas Regime B (Table~\ref{tab:evaluation_warm_cache_m4}) enforces strict byte-and-token parity (2,153, 2,177, 2,410, and 22,980 tokens) across all 15-tool arms. In isolated CLI cold-start profiling (\texttt{hyperfine}, 30 runs, 5 warmups, archived in \texttt{hyperfine\_cold\_start.json}), the equivalent version-check pair demonstrates that native Go (\texttt{picoclaw version}) launches $3.81\times$ faster in mean ($9.74\text{ ms}$ vs. $37.15\text{ ms}$ for \texttt{node openclaw\_orch.mjs --version}) and $3.46\times$ faster in median ($9.67\text{ ms}$ vs. $33.48\text{ ms}$). Furthermore, profiling the three isomorphic benchmark workers with explicit first-line \texttt{--version} exit handling (\texttt{hyperfine\_worker\_version.json}) yields $3.04\text{ ms}$ mean ($2.96\text{ ms}$ median) for Go \texttt{picoclaw\_orch} versus $22.15\text{ ms}$ mean ($22.12\text{ ms}$ median, $7.29\times$ faster) for Node.js V8 \texttt{openclaw\_orch.mjs} and $49.32\text{ ms}$ mean ($49.45\text{ ms}$ median, $16.22\times$ faster) for Python \texttt{python\_orch.py}. (For historical provenance, an earlier exploratory trace archived in \texttt{hyperfine\_agent\_init.json} recorded $9.63\text{ ms}$ vs. $225.55\text{ ms}$ [$23.4\times$] on a non-equivalent \texttt{agent --help} invocation where the JS worker had not yet short-circuited CLI flags prior to module initialization; all architectural claims in this paper strictly use the equivalent \texttt{--version} pairs above.) The empirical distributions of end-to-end task latency ($T_{\text{task}}$) and isolated orchestrator delay ($T_{\text{orch}}$) are illustrated in Figure~\ref{fig:latency_overhead}.
+
+\input{../results/publication_campaign/tables/table_journal_ablation.tex}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\linewidth]{../figures/fig3_exp2_latency_overhead.png}
+\caption{Empirical task latency ($T_{\text{task}}$) and isolated orchestrator delay ($T_{\text{orch}}$) across workloads W1--W4 on Apple Silicon M4. Compiled Go execution exhibits lower serialization and dispatch delay ($T_{\text{orch}}$) while end-to-end task duration remains bounded by neural inference latency under equalized token generation.}
+\label{fig:latency_overhead}
+\end{figure}
+
+\subsection{Analytical Finding: Cold Prefill Stall in W3 and Dispersion Dynamics}
+Analysis of the 600 evaluated trial records ($n=30$ per condition) in \texttt{raw\_trials.jsonl} demonstrates the necessity of non-parametric statistics on unified memory architectures \cite{jain1991art,lilja2000measuring}. In vector similarity ranking (W3), PicoClaw exhibits an empirical median task latency of $\WThreePicoMedian\text{ ms}$ with an Interquartile Range ($\text{IQR}$) of $\WThreePicoIQR\text{ ms}$ (mean $\WThreePicoMean \pm \WThreePicoSD\text{ ms}$), compared to $\WThreeOpenMinMedian\text{ ms}$ ($\text{IQR} = \WThreeOpenMinIQR\text{ ms}$) for OpenClaw Minimal and $\WThreeOpenFullMedian\text{ ms}$ ($\text{IQR} = \WThreeOpenFullIQR\text{ ms}$) for OpenClaw Full. Stochastic dominance testing confirms PicoClaw significantly outperforms OpenClaw Minimal (Cliff's Delta $d = \WThreeCliffsDeltaMin$, $\hat{A}_{12} = \WThreeAOneTwoMin$, Holm-Bonferroni adjusted $p \WThreeAdjPMin$) and OpenClaw Full ($d = \WThreeCliffsDeltaFull$, $\hat{A}_{12} = \WThreeAOneTwoFull$, adjusted $p \WThreeAdjPFull$). Isolated orchestrator delay in W3 confirms Go runtime efficiency: PicoClaw incurs a median $T_{\text{orch}}$ of only $\WThreePicoOrchMedian\text{ ms}$ vs. $\WThreeOpenMinOrchMedian\text{ ms}$ for OpenClaw Minimal and $\WThreeOpenFullOrchMedian\text{ ms}$ for OpenClaw Full.
+
+\subsection{Orchestration Overhead Isolation and Cross-Language Tool-Chain Dynamics in W2}
+In the three-step tool chain workload (W2), aggregate physical task metrics demonstrate end-to-end latency parity between native and managed orchestrators: PicoClaw recorded a median task latency of $\WTwoPicoMedian\text{ ms}$ (mean $\WTwoPicoMean\text{ ms}$, $\WTwoPicoEnergy\text{ J}$) compared to $\WTwoOpenMinMedian\text{ ms}$ (mean $\WTwoOpenMinMean\text{ ms}$, $\WTwoOpenMinEnergy\text{ J}$) for OpenClaw Minimal, closely matching the direct NeuralBaseline ($\WTwoNeuralMedian\text{ ms}$, mean $\WTwoNeuralMean\text{ ms}$, $\WTwoNeuralEnergy\text{ J}$). Granular inspection of \texttt{raw\_trials.jsonl} confirms that under greedy autoregressive decoding with 15 standardized schema definitions, the underlying LLaMA-3.2-3B model emitted an identical token count of $\WTwoPicoTokens$ tokens for PicoClaw ($T_{\text{neural}} = \WTwoNeuralPico\text{ ms}$) and $\WTwoOpenMinTokens$ tokens for OpenClaw Minimal ($T_{\text{neural}} = \WTwoNeuralOpenMin\text{ ms}$), achieving complete end-to-end parity within $1\text{ ms}$ ($5556.1\text{ ms}$ vs. $5557.1\text{ ms}$).
+
+Crucially, when isolating runtime orchestrator overhead ($T_{\text{orch}}$) and separating client-side dispatch delay ($T_{\text{dispatch}}$) from HTTP transport latency ($T_{\text{http}}$), the architectural characteristics of the three language runtimes become clearly measurable:
+\begin{itemize}
+    \item \textbf{Go Native (\texttt{PicoClaw}):} Achieves the lowest median orchestrator delay of $T_{\text{orch}} = \WTwoPicoOrchMedian\text{ ms}$ (mean $\WTwoPicoOrchMean\text{ ms}$), combining $T_{\text{dispatch}} = 1.78\text{ ms}$ with $T_{\text{http}} \approx 3.80\text{ ms}$ powered by Go's native \texttt{net/http} stack and non-blocking goroutines.
+    \item \textbf{CPython Reference (\texttt{PythonNative}):} Incurs an intermediate median overhead of $T_{\text{orch}} = 11.23\text{ ms}$ ($T_{\text{dispatch}} = 1.00\text{ ms}$, $T_{\text{http}} \approx 10.23\text{ ms}$), reflecting synchronous socket I/O in Python's standard \texttt{urllib.request}.
+    \item \textbf{Node.js V8 (\texttt{OpenClaw Minimal}):} Registers a median $T_{\text{orch}} = \WTwoOpenMinOrchMedian\text{ ms}$ (mean $\WTwoOpenMinOrchMean\text{ ms}$), where dispatch requires $1.31\text{ ms}$ while the V8 asynchronous event loop and Undici/\texttt{fetch} stream pipeline add $19.64\text{ ms}$ of socket buffer translation and GC book-keeping.
+\end{itemize}
+Overall, Go achieves $\WTwoOrchSpeedup\times$ lower orchestrator latency ($T_{\text{orch}}$) than Node.js Minimal. Furthermore, in physical DRAM footprint measured via Darwin kernel \texttt{libproc}, PicoClaw required a peak resident footprint of merely $\WTwoPicoRSS\text{ MB}$ versus $38.22\text{ MB}$ for Python and $\WTwoOpenMinRSS\text{ MB}$ for Node.js V8 ($\WTwoRAMReduction\times$ lower DRAM allocation). Token-normalized physical energy consumption confirms near-identical efficiency ($\WTwoPicoJoulePerToken\text{ J/token}$ for PicoClaw vs. $\WTwoOpenMinJoulePerToken\text{ J/token}$ for OpenClaw Minimal), demonstrating that client-side orchestrator choice dictates host resource utilization ($\text{CPU cycles}$, $\text{instructions}$, and $\text{RAM}$) rather than GPU energy saturation during prompt prefill. To guarantee full scientific provenance and auditability across revisions, ISO-8601 timestamps embedded within the canonical \texttt{raw\_trials.jsonl} dataset rigorously distinguish the original experimental session for W1, W3, and W4 (recorded between \texttt{2026-11-12T03:38:57Z} and \texttt{05:15:00Z}, encompassing 495 trials) from the focused W2 resampling session (recorded between \texttt{2026-11-12T14:20:00Z} and \texttt{14:34:54Z}, encompassing 165 trials following client-side SSE streaming parser standardization and compact tool schema equalization).
+
+\subsection{Controlled Tool Catalog Schema Prefill and KV-Cache Reuse Characterization (\texttt{llama.cpp} / Metal GPU)}
+To address the critical distinction between orchestrator-induced dispatch delay ($T_{\text{orch}}$) and prompt-prefill attention computation ($T_{\text{prefill}}$) on unified memory architectures \cite{kwon2023vllm,gim2024promptcache,zheng2024sglang,patel2024splitwise,reddi2020mlperf,llmperf2023}, we conducted a controlled schema ablation directly against the local inference engine (\texttt{llama.cpp}) across 8 tool catalog sizes $T \in \{0, 5, 10, 15, 25, 40, 54, 100\}$ and prompt-cache configurations ($\texttt{cache\_prompt} \in \{\text{false}, \text{true}\}$, $n=30$ independent physical evaluations per cell following 3 priming warmups). This controlled experiment explicitly characterizes the prefill scaling behavior of the underlying Metal GPU inference server under progressive tool schema injection ($0$ to $100$ schemas), providing an empirical baseline for the impact of prompt bloat independently of host orchestrator execution. The consolidated empirical results are presented in Table~\ref{tab:prefill_ablation}.
+
+\input{../results/publication_campaign/tables/table_prefill_ablation.tex}
+
+As documented in Table~\ref{tab:prefill_ablation}, in-memory schema serialization and dispatch delay ($T_{\text{dispatch}}$) remains negligible ($< 2\text{ ms}$). However, un-cached prompt prefill latency ($T_{\text{prefill}}$) on the Metal GPU scales steeply with catalog dimension: prefill latency increases from approximately $128\text{ ms}$ at $0$ tools ($60$ tokens) to over $4{,}400\text{ ms}$ at $15$ tools ($2{,}081$ tokens), $17{,}900\text{ ms}$ at $54$ tools ($7{,}190$ tokens), and reaching nearly $39{,}000\text{ ms}$ at $100$ tools ($13{,}216$ prompt tokens), dominating total execution duration.
+
+Regression analysis over the empirical trials in \texttt{prefill\_ablation.jsonl} confirms super-linear scaling: a power-law fit ($T_{\text{prefill}} = 0.3197 \cdot N^{1.2342}$ with 95\% CI $\alpha \in [1.2324, 1.2360]$, $R^2 = 0.9993$, $\text{AIC}_c = 99.25$) and quadratic model ($T_{\text{prefill}} = 7.895 \times 10^{-5} N^2 + 1.9201 N + 17.36\text{ ms}$, $R^2 = 0.99999$, $\text{AIC}_c = 68.88$) decisively outperform linear prefill approximations ($R^2 = 0.9889$, $\text{AIC}_c = 120.84$), reflecting the combined super-linear prefill cost of transformer self-attention, prompt batching (\texttt{ubatch}), and Metal kernel scheduling in \texttt{llama.cpp} prior to KV-cache allocation (where the narrow bootstrap CI $\alpha \in [1.2324, 1.2360]$ reflects intra-session curve-fit precision). Crucially, activating KV-cache reuse ($\texttt{cache\_prompt} = \text{true}$) bypasses redundant attention evaluations across identical schema prefixes, unlocking a massive $5.5\times$ to $946.5\times$ speedup on prefill latency (reducing TTFT to sub-second levels across all tool catalog dimensions). This empirical characterization confirms that stock enterprise multi-tool agent schemas impair execution primarily through super-linear neural attention prefill scaling rather than host orchestrator delay \cite{kwon2023vllm,gim2024promptcache,zheng2024sglang,patel2024splitwise,schick2023toolformer,kvflow2025,rrevict2025,efficientagent2025,prefixbench2025,recache2025}.
+
+To provide an active software-level solution to enterprise schema bloat alongside server-side KV-cache retention, we implemented and evaluated a \textbf{Zero-Copy Dynamic Tool-RAG Schema Pruner} (\texttt{OPENCLAW\_MODE="tool\_rag"}) inside the Go, Node.js V8, and Python orchestrator workers, motivated by recent advances in dynamic tool and MCP pruning (\textit{ToolGap} \cite{toolgap2025}, \textit{ProMCP} \cite{promcp2025}, \textit{Nexus} \cite{nexus2025}, and \textit{SMELT} \cite{smelt2025}). Prior to HTTP payload serialization, the orchestrator initializes the full 54-tool corporate catalog ($N_{\text{schemas}} = 54$) and executes an in-memory 384-dimensional cosine similarity dot-product against the workload query embedding to select only the $\text{Top-}K$ ($K=5$) semantically relevant tools. Table~\ref{tab:tool_rag_mitigation} reports the physical evaluation across W1--W4 under both Regime A and Regime B ($n=30$ physical trials per condition with continuous SMC power telemetry). Semantic pruning adds merely $0.033\text{ to }0.038\text{ ms}$ per turn in Go ($0.382\text{ ms}$ across 10 turns in W4) and $0.286\text{ to }0.427\text{ ms}$ per turn in Node.js V8 ($3.330\text{--}4.268\text{ ms}$ across 10 turns in W4) while shrinking the serialized prompt from $7{,}067\text{--}7{,}499$ tokens to $893$ tokens in W1 ($72{,}120\text{--}76{,}440$ to $9{,}197\text{--}10{,}380$ tokens across 10 turns in W4). Under cold prefill (Regime A), active Tool-RAG pruning eliminates $85.5\%\text{ to }87.2\%$ of end-to-end latency and $85.6\%\text{ to }87.8\%$ of net electrical energy relative to the unpruned 54-tool catalog (and reduces latency by $50.9\%\text{ to }54.6\%$ even relative to the static 15-tool catalog), while in Regime B it reduces active KV-cache attention span by $21.1\%\text{ to }37.9\%$ vs. 54 tools, outperforming even static 15-tool execution ($952.4\text{ ms}$ vs. $1033.5\text{ ms}$ in W1; $8334.2\text{--}8358.8\text{ ms}$ vs. $8605.5\text{ ms}$ in W4).
+
+\input{../results/publication_campaign/tables/table_tool_rag_mitigation.tex}
+
+\subsection{Comparative Analysis: Cold Prefill Regime vs. Realistic KV-Cache Reuse Regime}
+To evaluate runtime performance under production deployment scenarios where common tool catalogs and system prompts persist across agent turns, we conducted a companion campaign of 600 evaluated physical trials (60 priming warmups excluded) under active KV-cache prefix retention (\texttt{cache\_prompt=true}, $n=30$ independent physical evaluations per condition, block-isolated to eliminate single-slot cache thrashing in \texttt{llama-server}). The empirical results are presented in Table~\ref{tab:evaluation_warm_cache_m4}.
+
+\input{../results/publication_campaign/tables/table_warm_cache.tex}
+
+Contrasting the cold prefill regime (Regime A, Table~\ref{tab:evaluation_ablation_m4}) and the warm cache regime (Regime B, Table~\ref{tab:evaluation_warm_cache_m4}) reveals the operational trade-offs of edge agent execution:
+\begin{itemize}
+    \item \textbf{Regime A (\texttt{cache\_prompt=false}):} Cold prompt attention prefill on the Metal GPU accounts for $>75\%$ of end-to-end task latency across all configurations. Because the GPU saturates package power at $\approx 16\text{ W}$ during attention computation, total latency and active energy remain dominated by neural matrix evaluation, producing near-parity in wall-clock duration between host runtimes.
+    \item \textbf{Regime B (\texttt{cache\_prompt=true}):} When prompt prefill is amortized through verified block-isolated KV-cache prefix retention in \texttt{llama-server} ($\text{Cache Hit}$ of $99.9\%$ to $100.0\%$ in W1--W3 and $97.7\%$ to $99.3\%$ in W4; 20 randomized condition blocks with 3 priming warmups and 30 consecutive evaluations per block in single-slot \texttt{-np 1}), overall task duration drops dramatically: in W2, task latency falls to sub-second levels ($741.2\text{ ms}$ for Go Native, $743.4\text{ ms}$ for Python 3.12, $752.8\text{ ms}$ for Node.js Minimal, and $937.7\text{ ms}$ for Node.js Full---a $21.1\times$ reduction for the 54-tool catalog compared to un-cached cold execution). Table~\ref{tab:evaluation_warm_cache_m4} explicitly decomposes total prompt tokens into cached prefix tokens and newly evaluated uncached tokens (\texttt{Tot / Cached / New}) alongside median \texttt{TTFT / ITL}, characterizing five fundamental KV-cache operational behaviors: (i) \textit{cold cache} (\texttt{cache\_prompt=false}), where all $N_{\text{prompt}}$ tokens undergo full attention evaluation ($\texttt{cached\_tokens}=0$, $\text{TTFT} > 4.4\text{ s}$); (ii) \textit{warm cache with identical prefix} (\texttt{cache\_prompt=true} intra-block), where consecutive trials reuse $99.9\%$ of the prefix ($2{,}152 / 2{,}153$ in W1, $2{,}176 / 2{,}177$ in W2, $2{,}409 / 2{,}410$ in W3) and evaluate only $\texttt{New}=1$ boundary token ($\text{TTFT} = 232.4\text{--}269.5\text{ ms}$, $\text{ITL} = 16.24\text{--}20.14\text{ ms}$); (iii) \textit{prefix switching across condition blocks}, where transitioning between 15-tool, 54-tool, or Top-5 schemas triggers a prefix miss absorbed by the 3 priming warmups; (iv) \textit{single-slot isolation} (\texttt{-np 1}) vs. multi-slot contention, preventing round-robin slot eviction; and (v) \textit{prefix invalidation and multi-turn growth} in W4, where cumulative 10-turn tokens reach $22{,}980$ ($22{,}457$ cached [$97.7\%$] and $523$ newly evaluated [$\approx 52.3\text{ tokens/turn}$]). Across W1--W4, Go Native, Python 3.12, and Node.js Minimal remain within $-0.92\%$ to $+5.83\%$ in median ($-1.14\%$ to $+5.85\%$ in mean; and within $-0.92\%$ to $+1.79\%$ across W1, W2, and W4) of the Direct Local LLM Baseline ($739.6\text{ ms}$ median in W2; $8503.6\text{ ms}$ in W4). Crucially, under this amortized prefill regime, host orchestrator overhead is no longer masked by GPU attention stalls, elevating the relative orchestration share ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) to clearly measurable intervals between $0.37\%$ and $4.65\%$ ($T_{\text{dispatch}} = 1.78\text{ ms}$ and $T_{\text{http}} = 3.36\text{ ms}$ for Go; $T_{\text{dispatch}} = 1.04\text{ ms}$ and $T_{\text{http}} = 9.85\text{ ms}$ for Python; $T_{\text{dispatch}} = 1.25\text{ ms}$ and $T_{\text{http}} = 19.02\text{ ms}$ for Node.js Minimal in W2), demonstrating that language runtime efficiency becomes directly measurable in I/O and vector-intensive workloads (W2--W3) while remaining within server timing noise ($\pm 1\text{--}2\%$) in W1 and W4.
+\end{itemize}
+
+\subsection{Non-Parametric Spearman Rank Correlation Matrix across Telemetry Dimensions}
+To systematically evaluate the coupling between execution dimensions, Table~\ref{tab:spearman_correlation} reports the pairwise Spearman rank correlation matrix ($\rho$) across 12 key systems telemetry dimensions for both regimes ($1{,}200$ total physical evaluations).
+
+\input{../results/publication_campaign/tables/table_spearman_correlation.tex}
+
+In Regime A (Cold Prefill), prompt attention computation strictly dominates global latency ($T_{\text{task}}$) and active net energy ($E_{\text{net}}$), yielding near-perfect rank alignment with prompt token length ($\rho = +0.948$, $p < 10^{-5}$ for $T_{\text{task}}$ vs. $N_{\text{prompt}}$; $\rho = +0.930$, $p < 10^{-5}$ for $T_{\text{task}}$ vs. $E_{\text{net}}$). In contrast, in Regime B (Warm KV-Cache Reuse), KV-cache amortization significantly decouples task latency from prompt tokens ($\rho = +0.585$, $p < 10^{-5}$), unmasking runtime execution dynamics: retired CPU instructions strongly govern orchestrator delay ($\rho = +0.824$, $p < 10^{-5}$), while client-side dispatch latency accounts for high rank agreement ($\rho = +0.854$, $p < 10^{-5}$). Furthermore, orchestrator overhead share ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) spans $0.37\%$ to $4.65\%$ across workloads under warm cache, with measurement noise bounded within sub-millisecond precision via unprivileged Darwin kernel \texttt{libproc} telemetry. To eliminate pseudo-replication and cross-tier scale confounding, Table~\ref{tab:spearman_correlation} also reports rank correlations aggregated over the $n=20$ condition means ($\rho = +0.952$ in Regime A vs. $+0.592$ in Regime B, Holm-adjusted $p = 0.0059$) and stratified within individual workloads at fixed prompt length ($T_{\text{orch}}$ vs. retired instructions in W2: $\rho = +0.930$ and $+0.932$; $T_{\text{disp}}$ vs. $T_{\text{task}}$ in W3: $\rho = +0.515$ and $+0.674$, all $p_{\text{adj}} < 10^{-5}$).
+
+\subsection{Principal Component Analysis (PCA) Variance Decomposition and Inter-Session Replication}
+To orthogonalize performance metrics and isolate the latent dimensions governing agent orchestration, Table~\ref{tab:pca_loadings} presents the Principal Component Analysis (PCA) variance decomposition across 12 systems telemetry dimensions for both execution regimes ($N=480$ evaluated trials per regime across \texttt{picoclaw}, \texttt{openclaw\_minimal}, \texttt{openclaw\_full}, and \texttt{python\_native}; excluding \texttt{neural\_baseline} because its structural zeros in $T_{\text{orch}}$, $T_{\text{disp}}$, and client-side memory metrics introduce collinear rank-deficiency in covariance decomposition). Within-workload standardized PCA further confirms that host microarchitectural footprints and dispatch delays form orthogonal components invariant to global prompt scale. Furthermore, to quantify cross-session thermal/OS drift and evaluate an independent fourth orchestrator runtime (\texttt{BunJSCOrchestratorAdapter}, executing \texttt{benchmark/bun\_jsc\_agent.mjs} atop \textbf{Bun v1.4.4}, \texttt{darwin-aarch64}, WebKit JavaScriptCore), we executed a rigorous independent inter-session physical replication (\texttt{scripts/run\_inter\_session\_replication.py}, Session 2, \texttt{seed=99}, $n=30$ evaluations $+ 3$ primings per randomized condition block with a single continuous 50~ms SMC daemon, archived in \texttt{inter\_session\_trials.jsonl} and \texttt{inter\_session\_replication.json}). Crucially, comparing Session 1 and Session 2 reveals that absolute end-to-end latency ($T_{\text{task}}$) exhibits an inter-session relative difference of $0.22\%$ to $3.32\%$ (mean $1.62\%$, pooled $\text{CV} = 1.15\%$, and up to $\sim 3\%\text{--}10\%$ across multi-hour sessions) due to ambient thermal equilibrium and Metal GPU clock boosting, which is comparable to or exceeds the small intra-session differences ($-1.14\%$ to $+3.48\%$ in W1, W2, and W4) observed between Go, Python, Node.js V8, and native Bun JSC. Consequently, end-to-end task latency ($T_{\text{task}}$) comparisons across language runtimes are statistically valid strictly within a randomized intra-session block design, and small differences ($<10\%$) in W1, W2, and W4 do not represent a persistent cross-session wall-clock advantage (with W4 $T_{\text{task}}$ differences converging within $-1.57\%$ to $+1.08\%$ across sessions). The sole exception in end-to-end latency is W3 (Vector RAG), where Go's scalar dot-product latency penalty relative to vectorized BLAS/SIMD routines replicates consistently across sessions ($+5.85\%$ vs. \texttt{neural\_baseline} in Session 1 and $+5.41\%$ in Session 2), alongside all isolated host microarchitectural metrics ($T_{\text{orch}}$, \texttt{Peak Phys RAM}, retired CPU instructions, and core cycles). Notably, the independent \textbf{Bun JSC Orchestrator} (\texttt{benchmark/bun\_jsc\_agent.mjs}, leveraging \texttt{Bun.file()}, \texttt{Bun.nanoseconds()}, and native JSC \texttt{fetch}) achieves substantially lower host overhead than Node.js V8 across W1--W4 ($T_{\text{orch}} = 3.65\text{ ms}$ in W1, $4.88\text{ ms}$ in W2, $18.09\text{ ms}$ [$T_{\text{disp}} = 14.40\text{ ms}$] in W3, and $48.74\text{ ms}$ in W4; $\text{Peak Phys RAM} = 7.32\text{--}9.54\text{ MB}$ in W1/W2/W4 and $35.97\text{ MB}$ in W3; retiring $86.7 \times 10^6$ to $368.6 \times 10^6$ instructions), closely approaching compiled Go on host footprint while remaining within $-0.65\%$ to $+2.69\%$ of \texttt{neural\_baseline} task latency in W1, W2, and W4 ($+3.49\%$ in W3).
+
+\input{../results/publication_campaign/tables/table_pca_loadings.tex}
+
+Across both regimes, the first three principal components ($\text{PC}_1$, $\text{PC}_2$, and $\text{PC}_3$) account for more than $90\%$ of total system variance ($89.7\%$ in Regime A and $97.1\%$ in Regime B):
+\begin{itemize}
+    \item \textbf{$\text{PC}_1$ (Neural Attention Prefill and Energy Dissipation):} Explains $54.2\%$ of variance in Regime A and $61.4\%$ in Regime B, grouping prompt token length ($N_{\text{prompt}}$), inference latency ($T_{\text{neural}}$), task duration ($T_{\text{task}}$), net energy ($E_{\text{net}}$), and EDP with nearly identical positive factor loadings ($+0.34$ to $+0.36$, each contributing $11.8\%$ to $12.9\%$). This axis strictly quantifies the dominant cost of neural matrix evaluation on the Metal GPU.
+    \item \textbf{$\text{PC}_2$ (Host Runtime Microarchitectural Footprint):} Explains $24.0\%$ of variance in Regime A and $26.8\%$ in Regime B, isolating the client-side execution cost. The dominant contributors are physical DRAM resident footprint ($\text{PhysRAM}$, $27.1\%\text{--}27.9\%$), virtual memory ($\text{RSS}$, $22.5\%\text{--}26.6\%$), retired CPU instructions ($\text{Instr}$, $17.3\%\text{--}21.1\%$), and CPU cycles ($6.4\%\text{--}11.1\%$), all showing strong positive loadings ($+0.25$ to $+0.53$) while neural latency and energy contribute negligible or negative loadings. This demonstrates that host memory and instruction retirement decouple orthogonally from GPU prompt prefill.
+    \item \textbf{$\text{PC}_3$ (Tool Dispatch and I/O Serialization):} Explains $11.5\%$ of variance in Regime A and $8.8\%$ in Regime B. In Regime B, where prompt prefill latency is neutralized by deterministic KV-cache retention, tool dispatch latency ($T_{\text{disp}}$) accounts for $82.4\%$ of $\text{PC}_3$ with a loading of $+0.908$, isolating the compute and serialization efficiency of client-side tool execution routines (e.g., in-process cosine similarity in W3).
+\end{itemize}
+Crucially, comparing factor loadings between regimes illustrates how KV-cache amortization alters systems dynamics: under cold prefill (Regime A), orchestrator overhead ($T_{\text{orch}}$) and HTTP round-trip ($T_{\text{http}}$) project onto $\text{PC}_3$ ($34.5\%$ and $30.5\%$ contribution) because they are masked by GPU prefill stalls; under warm KV-cache (Regime B), HTTP and multi-turn orchestration scale directly with dialogue turn count, shifting into $\text{PC}_1$ ($13.2\%$ and $12.9\%$), while pure tool computation ($T_{\text{disp}}$) becomes the sole discriminative factor in $\text{PC}_3$.
+
+\subsection{Key Findings, Hardware Microarchitecture, and Effect Sizes}
+Across all 600 physical trials on the Apple Silicon M4 testbed, three core empirical conclusions emerge:
+\begin{enumerate}
+    \item \textbf{Microarchitectural Efficiency:} Hardware performance counters captured via Darwin XNU kernel \texttt{libproc} reveal that PicoClaw executes an average of $\PicoInstructionsMeanM \times 10^6$ retired CPU instructions and $\PicoCyclesMeanM \times 10^6$ CPU cycles, compared to $\OpenMinInstructionsMeanM \times 10^6$ instructions ($\InstructionOverheadRatio\times$ overhead) and $\OpenMinCyclesMeanM \times 10^6$ cycles ($\CyclesOverheadRatio\times$ overhead) for OpenClaw Minimal.
+    \item \textbf{Physical DRAM Footprint Reduction:} PicoClaw maintains a peak resident set size (RSS) between $\PicoRSSMin\text{ MB}$ (W1) and $\PicoRSSWFour\text{ MB}$ (W4) (rising to $\PicoRSSWThree\text{ MB}$ during W3 10,000-vector cosine dot products), averaging $\PicoRSSOverallMean\text{ MB}$ overall. In contrast, OpenClaw demands $\OpenRSSMin\text{ MB}$ to $\OpenRSSMax\text{ MB}$ (averaging $\OpenRSSOverallMean\text{ MB}$, a $\RAMReductionMinRatio\times$ to $\RAMReductionMaxRatio\times$ memory reduction for PicoClaw). Lifetime peak physical footprint (\texttt{proc\_peak\_phys\_mb}) confirms PicoClaw requires only $\PicoPeakPhysMean\text{ MB}$ vs. $\OpenMinPeakPhysMean\text{ MB}$ for Node.js V8 ($\PeakPhysLeanerRatio\times$ leaner).
+    \item \textbf{Tool Catalog Ablation and EDP Efficiency (Dual-Regime Dynamics):} Evaluating 54 enterprise schemas (OpenClaw Full) against 15 schemas (Minimal) reveals severe prompt bloat: W1 mean latency balloons from $\WOneOpenMinMean\text{ ms}$ to $\WOneOpenFullMean\text{ ms}$, while mean energy escalates from $\WOneOpenMinEnergy\text{ J}$ to $\WOneOpenFullEnergy\text{ J}$ ($\WOneEnergyBloatRatio\times$). In the 10-turn autonomous ReAct loop (W4) under Regime A, OpenClaw Full expends $\WFourOpenFullEnergy\text{ J}$ with an $\text{EDP}$ of $\WFourOpenFullEDP\text{ J}\cdot\text{s}$ ($\WFourOpenFullMedian\text{ ms}$ median), whereas PicoClaw completes W4 in $\WFourPicoMedian\text{ ms}$ median with an $\text{EDP}$ of $\WFourPicoEDP\text{ J}\cdot\text{s}$ ($\WFourEDPReductionPct\%$ lower EDP), demonstrating significant stochastic effect sizes ($d = \WFourCliffsDelta$, $\hat{A}_{12} = \WFourAOneTwo$, adjusted $p \WFourAdjP$) by avoiding 54-tool catalog prompt bloat. Under Regime B with amortized prefill (unified single-session collection across all 5 arms in W2 and W4, with the earlier two-session collection preserved in \texttt{warm\_cache\_trials\_two\_session\_backup.jsonl} for full auditability), equalized 15-tool arms converge closely in latency and EDP while remaining $>35\%$ lower in EDP than the unpruned 54-tool catalog. Notably, while CPython records higher raw kernel \texttt{proc\_billed\_energy} units ($84{,}819$ vs. $7{,}050$ XNU units for Go in W4), our isolated SMC rail validation (Section~\ref{sec:energy_bandwidth_deconvolution}) proves that \texttt{ri\_billed\_energy} is an uncalibrated scheduler QoS proxy ($r = -0.0510$) rather than a valid Joule estimator.
+\end{enumerate}
+
+\subsection{Two-Stage Process Energy Deconvolution and Analytical \& Empirical Memory Bandwidth Estimation}
+\label{sec:energy_bandwidth_deconvolution}
+To isolate per-process orchestrator energy on Apple Silicon Unified Memory Architecture (UMA) where electrical shunts instrument aggregate package rails, we executed a two-stage hardware characterization protocol combining (i) phase-isolated tool benchmarking directly on the Apple SMC \texttt{CPU Power} rail with GPU idle alongside paired baseline subtraction ($\Delta E_{\text{net}}$) against \texttt{neural\_baseline}, and (ii) empirical validation of Darwin XNU kernel \texttt{proc\_pid\_rusage} counters against physical SMC Joules. Table~\ref{tab:energy_bandwidth_deconvolution} reports the empirical findings across 120 isolated CPU trials and deconvolution over 1,200 evaluated campaign trials.
+
+\input{../results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex}
+
+Direct physical measurement on the Apple SMC \texttt{CPU Power} rail during isolated local dispatch with the Metal GPU quiescent ($P_{\text{GPU}} \approx 0\text{ W}$) captures the true marginal electrical cost of host orchestration (reported with 95\% bootstrap confidence intervals over 2,000 resamples): in the 3-tool chain (W2), compiled Go consumes $1.252\text{ mJ/op}$ (95\% CI $[1.224, 1.280]$), CPython consumes $1.000\text{ mJ/op}$ ($[0.961, 1.041]$), and Node.js V8 requires $0.196\text{ mJ/op}$ ($[0.192, 0.200]$ Minimal) and $0.178\text{ mJ/op}$ ($[0.175, 0.181]$ Full). In vector similarity search (W3, 10,000 documents), compiled Go consumes $136.62\text{ mJ/op}$ ($[134.97, 138.30]$), OpenClaw Minimal requires $45.67\text{ mJ/op}$ ($[44.43, 46.97]$), OpenClaw Full requires $44.36\text{ mJ/op}$ ($[43.52, 45.22]$), and Python/NumPy consumes $34.08\text{ mJ/op}$ ($[31.66, 36.61]$). Crucially, cross-validating Darwin XNU's \texttt{ri\_billed\_energy} counter against physical SMC \texttt{CPU Power} rail Joules ($E_{\text{CPU, net}}$) across all 120 isolated trials establishes a formal \textbf{Negative Result}: \texttt{ri\_billed\_energy} exhibits zero global linear correlation with true CPU energy ($r = -0.0510, p = 0.580$; intra-agent $r = -0.10$ for Go, $-0.08$ for Python, and $+0.07$ for Node.js Minimal) and a negative centered coefficient of determination ($\text{OLS } R^2 = -0.676$ vs. the sample mean), proving that uncalibrated XNU billing units perform worse than predicting the mean and overestimate CPython energy by $10\text{--}30\times$ due to internal XNU scheduler QoS/thread-weighting heuristics, corroborating Fahad et al.~\cite{fahad2019comparative}. Consequently, we reject \texttt{ri\_billed\_energy} as a Joule estimator and establish three validated physical CPU energy regressors: execution duration (\texttt{t\_exec\_ms}: $r = 0.992, \text{OLS } R^2 = 0.949$; intra-agent $\text{corr}(t, E_{\text{CPU, net}}) = 1.00$ for Go, $0.99$ for Node-Minimal, and $0.85$ for Python), retired CPU instructions (\texttt{proc\_instructions}: $r = 0.985, \text{OLS } R^2 = 0.955$), and core cycles (\texttt{proc\_cycles}: $r = 0.991, \text{OLS } R^2 = 0.945$). Using exclusively the direct physical SMC \texttt{CPU Power} rail dispatch energy ($E_{\text{CPU, net}}^{\text{dispatch}}$) divided by Regime B net task energy ($E_{\text{net, task}}$):
+\begin{equation}
+\Phi_{\text{energy, orch}} = \frac{E_{\text{CPU, net}}^{\text{dispatch}}}{E_{\text{net, task}}}
+\end{equation}
+we confirm that under amortized KV-cache reuse (Regime B), true host orchestrator CPU energy represents merely $0.04\% / 1.42\%$ ($3.76\text{ mJ} / 8.86\text{ J}$ in W2; $136.62\text{ mJ} / 9.64\text{ J}$ in W3) for PicoClaw (Go Native), $0.03\% / 0.34\%$ ($3.00\text{ mJ} / 9.70\text{ J}$ in W2; $34.08\text{ mJ} / 9.92\text{ J}$ in W3) for PythonNative, $0.01\% / 0.49\%$ ($0.59\text{ mJ} / 9.95\text{ J}$ in W2; $45.67\text{ mJ} / 9.38\text{ J}$ in W3) for OpenClaw Minimal, and $0.01\% / 0.30\%$ ($0.53\text{ mJ} / 11.00\text{ J}$ in W2; $44.36\text{ mJ} / 14.74\text{ J}$ in W3) for OpenClaw Full.
+
+Analytical and empirical memory bandwidth estimation across the unified 120~GB/s LPDDR5X bus is modeled via:
+\begin{equation}
+\text{BW}_{\text{host, W3}} = \frac{S_{\text{RAG}}}{T_{\text{RAG}}}, \quad \text{BW}_{\text{decode}} = \frac{S_{\text{weights}} + N_{\text{ctx}} \cdot S_{\text{KV/tok}}}{\text{ITL}_{\text{decode}}}
+\end{equation}
+In host vector search (W3), streaming the $S_{\text{RAG}} = 15.75\text{ MB}$ projection weights and document embeddings achieves $0.67\text{ GB/s}$ in Go, $1.80\text{ GB/s}$ in Node.js Minimal ($1.82\text{ GB/s}$ in Full), and $2.04\text{ GB/s}$ in Python. During autoregressive neural decoding on the Metal GPU (`batch_size=1`), assuming one complete read of the $S_{\text{weights}} = 2.019\text{ GB}$ GGUF Q4\_K\_M weight tensors per generated token divided by pure inter-token decode latency ($\text{ITL}_{\text{decode}} = \texttt{predicted\_ms} / \texttt{predicted\_n}$), our analytical-empirical estimation yields a global median memory bandwidth of $97.0\text{ GB/s}$ ($80.8\%$ of nominal $120\text{ GB/s}$) and a mean ranging from $95.9\text{ GB/s}$ ($79.9\%$ in Regime A, 95\% bootstrap CI $[95.6, 96.2]\text{ GB/s}$, IQR $6.0\text{ GB/s}$) to $106.7\text{ GB/s}$ ($88.9\%$ in Regime B, 95\% bootstrap CI $[106.4, 107.1]\text{ GB/s}$, IQR $8.0\text{ GB/s}$; global mean $104.0\text{ GB/s}$ / $86.7\%$). We emphasize that this represents an analytical-empirical bandwidth estimation ($\text{Model Weights} \div \text{ITL}$) rather than hardware DRAM controller counter telemetry, and its observed $80.8\%\text{--}88.9\%$ utilization aligns closely with the practical Roofline memory bus saturation ceiling ($\approx 86\text{--}88\%$) established for Apple Silicon UMA architectures \cite{imamura2026apple,benazir2025llm}.
+
+\subsection{Execution Instructions}
+Reviewers can reproduce the entire analysis without local model weights or superuser privileges via:
+\begin{lstlisting}[language=bash]
+# Fast reviewer portable dry-run (multi-OS, under 5 seconds):
+make dry-run
+
+# Automated unit testing and linting:
+make test
+
+# Physical benchmark execution in standard user space:
+make benchmark
+\end{lstlisting}
+
+\section{Impact}
+\label{sec:impact}
+This benchmark suite provides the research and software engineering communities with a reproducible, modular testbed to isolate and quantify AI agent orchestration runtime overhead. By decoupling orchestrator dispatch and schema validation delays from neural model latency, the suite enables systems researchers to systematically evaluate language runtime trade-offs (compiled Go, JIT Node.js, and CPython) under realistic tool-use loops \cite{yao2023react,schick2023toolformer,lewis2020retrieval}. The framework's modular adapter architecture facilitates adding new agent runtimes or language environments (e.g., Rust, Zig, or Julia) with fewer than 40 lines of code. Furthermore, the dual-tier telemetry approach---combining unprivileged kernel performance counters with non-intrusive Apple SMC and Linux RAPL electrical shunt sampling---provides an extensible blueprint for benchmarking edge AI systems under strict power and thermal budgets \cite{georgiou2022energy,you2023zeus,barroso2007case}.
+
+\subsection{Empirical Architectural Decision Rules}
+Based on our multi-regime empirical benchmarks across compiled, JIT-interpreted, and bytecode runtimes on Apple Silicon Unified Memory Architecture (UMA), we synthesize four objective architectural decision rules for edge agent deployment:
+\begin{enumerate}
+    \item \textbf{Ephemeral CLI / Cold-Start Invocation:} For short-lived CLI utilities, serverless functions, or bursty edge triggers, native compiled binaries (Go Mach-O) provide a $3.81\times$ faster mean startup latency ($9.74\text{ ms}$ vs. $37.15\text{ ms}$ for Node.js V8; median $3.46\times$, $9.67\text{ ms}$ vs. $33.48\text{ ms}$ in \texttt{hyperfine\_cold\_start.json}) and $7.29\times$ faster isomorphic worker initialization ($3.04\text{ ms}$ vs. $22.15\text{ ms}$ for Node.js and $49.32\text{ ms}$ for Python in \texttt{hyperfine\_worker\_version.json}), eliminating runtime interpreter bootstrap penalties.
+    \item \textbf{Memory-Constrained Unified Memory (UMA) / Multi-Agent Edge:} On embedded devices and shared UMA SoCs where CPU and GPU contend for the same physical memory bus, Go native reduces peak physical DRAM allocation (\texttt{proc\_peak\_phys\_mb}) by $\PeakPhysLeanerRatio\times$ on global average ($\PicoPeakPhysMean\text{ MB}$ vs. $\OpenMinPeakPhysMean\text{ MB}$ for Node.js V8; $\PeakPhysReductionMinRatio\times$ to $\PeakPhysReductionMaxRatio\times$ across workloads), while peak resident set size (Peak RSS) drops by $\RAMReductionMinRatio\times$ to $\RAMReductionMaxRatio\times$ ($\PicoRSSOverallMean\text{ MB}$ vs. $\OpenRSSOverallMean\text{ MB}$). This safeguards vital DRAM capacity for model weights and KV-cache page tables.
+    \item \textbf{Persistent Daemons with Warm KV-Cache and Compact Schemas ($\le 15$ tools):} When running persistent services with verified prefix caching ($\text{Cache Hit} \ge 97.6\%$) and lean schemas, compiled Go, Python, Node.js V8, and native Bun (JavaScriptCore) differ by less than $-1.5\%$ to $+5.8\%$ from the direct neural baseline ($\Phi_{\text{orch}} \in [0.37\%, 4.65\%]$, $\Phi_{\text{energy, orch}} \in [0.01\%, 1.42\%]$). Because independent inter-session latency drift ($\sim 3\%\text{--}10\%$) exceeds these small intra-session differences in W1, W2, and W4, wall-clock task latency across runtimes is statistically indistinguishable across sessions (except in vector-heavy W3 where SIMD/BLAS acceleration beats scalar Go loops by $5.6\%\text{--}5.8\%$), allowing language selection to prioritize ecosystem maturity and host memory constraints.
+    \item \textbf{Large Enterprise Tool Catalogs ($\ge 50$ tools):} When scaling to broad enterprise tool sets, the primary performance bottleneck shifts entirely to super-linear attention prefill on the GPU ($\alpha \approx 1.23$) rather than host orchestration. Mitigating this bottleneck strictly requires deterministic KV-cache slot isolation (yielding up to $21.6\times$ latency reduction) or enabling our built-in \textbf{Zero-Copy Dynamic Tool-RAG Schema Pruner} ($54 \rightarrow \text{Top-}5$ tools in $<0.35\text{ ms}$, eliminating $>85\%$ of cold-prefill latency and energy overhead).
+\end{enumerate}
+
+\subsection{Threats to Validity and Methodological Limitations}
+\label{sec:threats_to_validity}
+To ensure rigorous interpretation and prevent over-generalization of our empirical findings, we explicitly document six methodological boundaries and threats to validity:
+\begin{enumerate}
+    \item \textbf{Thermal and Inter-Session Drift Boundary:} Across multi-hour benchmark campaigns on passively/compactly cooled SoCs, ambient temperature variations and Metal GPU dynamic frequency scaling introduce an observed inter-session latency drift of $0.22\%$ to $3.32\%$ (mean $1.62\%$, pooled $\text{CV} = 1.15\%$ in controlled back-to-back replication, and up to $\approx 3\%\text{--}10.3\%$ across non-adjacent sessions). Consequently, we establish the formal decision boundary that end-to-end task latency ($T_{\text{task}}$) contrasts smaller than the inter-session drift threshold hold strictly \textit{intra-session} under randomized block interleaving (as in W1, W2, and W4 for 15-tool arms, where runtime differences remain within $-1.57\%$ to $+3.48\%$). Only effects that exceed the inter-session drift floor or operate purely on the host CPU---specifically W3 Vector RAG ($+5.41\%$ to $+5.85\%$ scalar Go penalty vs. SIMD/BLAS), 54-tool vs. 15-tool/Tool-RAG schema bloat ($>21\%\text{--}87\%$), and isolated host microarchitectural metrics ($T_{\text{orch}}$, \texttt{Peak Phys RAM}, retired CPU instructions, and core cycles)---generalize invariantly across sessions.
+    \item \textbf{Model Scale and Quantization Dependence:} Our empirical evaluation employs \texttt{Llama-3.2-3B-Instruct} (\texttt{Q4\_K\_M}, $2.019\text{ GB}$ weights). Scaling to larger foundation models (8B--70B parameters) or higher-precision formats (Q8\_0/FP16) increases neural prefill and decode latency ($T_{\text{neural}}$) proportionally to weight volume and layer depth, which further compresses the relative orchestrator overhead fraction ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) while leaving absolute client-side dispatch delay ($T_{\text{orch}}$) and resident DRAM footprint (\texttt{proc\_peak\_phys\_mb}) invariant.
+    \item \textbf{Apple Silicon Unified Memory Architecture (UMA) Specifics:} All physical hardware measurements were conducted on an Apple Mac mini M4 featuring $24\text{ GB}$ of shared LPDDR5X UMA memory ($120\text{ GB/s}$ theoretical peak). Unlike discrete PCIe GPU topologies on x86\_64 servers---where host-to-device DMA transfers across the PCIe bus incur explicit copy latency and separate DRAM/VRAM allocation---UMA shares a single physical memory pool between CPU and GPU. Consequently, client-side orchestrator heap bloat on UMA directly reduces the physical DRAM available for neural KV-cache slots and model weights.
+    \item \textbf{KV-Cache Slot Isolation and Prefix Invalidation Protocol:} Regime B evaluates deterministic single-slot execution (\texttt{-np 1}) with block-isolated priming (3 warmups + 30 consecutive trials per condition) to measure steady-state prefix reuse ($\text{Cache Hit} = 97.7\%\text{--}100.0\%$). In multi-tenant or interleaved multi-agent servers where distinct system prompts contend for a single KV-cache slot without RadixAttention tree sharing \cite{zheng2024sglang} or multi-slot partitioning (\texttt{-np > 1}), frequent prefix invalidation degrades execution toward Regime A cold-prefill behavior.
+    \item \textbf{Indirect Process Energy Attribution and Negative Validation of \texttt{ri\_billed\_energy}:} Because hardware power shunts on UMA SoCs instrument aggregate package rails rather than individual POSIX PIDs, concurrent CPU--GPU execution cannot be physically separated at the analog sensor level \cite{fahad2019comparative,you2023zeus}. Our phase-isolated calibration on the Apple SMC \texttt{CPU Power} rail formally refutes Darwin XNU's \texttt{ri\_billed\_energy} counter as a valid physical Joule proxy ($r = -0.0510, p = 0.580$, centered $\text{OLS } R^2 = -0.676$), demonstrating that uncalibrated kernel billing units reflect QoS scheduler heuristics rather than true energy. Accurate host energy attribution strictly requires either phase-isolated SMC \texttt{CPU Power} rail integration with the GPU idle ($\Phi_{\text{energy, orch}} \in [0.01\%, 1.42\%]$) or our validated physical regressors (\texttt{t\_exec\_ms}, \texttt{proc\_instructions}, and \texttt{proc\_cycles}, $R^2 = 0.945\text{--}0.955$).
+    \item \textbf{Cross-Hardware Generalization:} While the software harness provides cross-platform support for Linux Intel RAPL (\texttt{powercap}) and portable dry-run verification (\texttt{make dry-run}), the empirical constants reported here ($\alpha = 1.2342$ prefill exponent, $97.0\text{ GB/s}$ median analytical-empirical decode bandwidth) are specific to the Apple M4 Metal backend and \texttt{llama.cpp b11887}. Future work should replicate these campaigns across higher-bandwidth Apple Silicon tiers (M4 Pro/Max/Ultra), discrete NVIDIA CUDA/NVML systems, and low-power ARM edge boards.
+\end{enumerate}
+
+\section{Conclusions}
+\label{sec:conclusions}
+The \texttt{picoclaw-vs-openclaw-benchmark} framework delivers an open, extensible methodology and active schema-pruning toolkit for systems-level evaluation of AI agent orchestrators on unified memory microarchitectures. Our empirical findings demonstrate that under equalized tool schemas and equivalent generation token counts, end-to-end task latency across Go, Node.js V8, native Bun (JavaScriptCore), and Python exhibits near-parity within sessions ($< 6\%$ variance) as package power saturates near 16~W on the Metal GPU, while independent inter-session replication ($n=30$) confirms that cross-session thermal/clock drift ($\sim 3\%\text{--}10\%$) exceeds intra-session runtime differences in W1, W2, and W4 (with W3 vector RAG favoring SIMD/BLAS over scalar Go loops by $5.6\%\text{--}5.8\%$). Crucially, native compiled Go execution provides decisive, session-invariant host microarchitectural advantages over managed V8 JIT and CPython runtimes: executing $\InstructionOverheadRatio\times$ fewer retired CPU instructions, consuming $\CyclesOverheadRatio\times$ fewer CPU cycles, launching $3.81\times$ faster in CLI cold-start ($7.29\times$ in minimal worker initialization), and maintaining a $\PeakPhysReductionMinRatio\times$ to $\PeakPhysReductionMaxRatio\times$ lower physical DRAM footprint. Furthermore, our hardware validation refutes uncalibrated XNU \texttt{ri\_billed\_energy} counters as a Joule proxy ($r = -0.0510, R^2 = -0.676$) in favor of direct SMC \texttt{CPU Power} rail isolation ($\Phi_{\text{energy, orch}} \le 1.42\%$) and validated instruction/time regressors ($R^2 \ge 0.949$), while our active Zero-Copy Tool-RAG Schema Pruner eliminates $>85\%$ of 54-tool catalog prefill bloat in under $0.35\text{ ms}$. Through standardized workload tiers, rigorous non-parametric statistics, and portable reviewer dry-runs, this software establishes a foundation for evaluating next-generation edge intelligence.
+
+\section*{Acknowledgements}
+This work was conducted at the Center for Engineering, Modeling and Applied Social Sciences (CECS) of the Federal University of ABC (UFABC), Brazil.
+
+\section*{Data Availability}
+The complete raw experimental dataset (including \texttt{raw\_trials.jsonl}, \texttt{prefill\_ablation.jsonl}, and \texttt{warm\_cache\_trials.jsonl}), cryptographic SHA-256 verification manifests, statistical hypothesis test matrices, and automated chart generation scripts are openly available in the repository under the Creative Commons Attribution 4.0 International (CC BY 4.0) license at \url{https://github.com/drsigma/picoclaw-vs-openclaw-benchmark} and permanently preserved on Zenodo (\url{https://doi.org/10.5281/zenodo.PENDING_RELEASE}) in accordance with software citation principles \cite{smith2016software}. To comply with third-party model licensing and platform portability, proprietary model weights (\texttt{models/}) and pre-compiled node/go dependencies (\texttt{tools/}) are not redistributed in the repository; they are deterministically downloaded or compiled via \texttt{scripts/setup\_environment.sh} (\texttt{make setup}). Across all experimental campaigns and ablation runs conducted on the Apple Silicon M4 hardware testbed ($1{,}320$ benchmark trials + $528$ prefill ablation runs), total electrical energy consumed was approximately $580\text{ kJ}$ ($\approx 0.16\text{ kWh}$).
+
+\section*{Declaration of Competing Interest}
+The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.
+
+\bibliographystyle{elsarticle-num}
+\bibliography{../references}
+
+\end{document}
+
+================================================================================
+END FILE: paper/softwarex_manuscript.tex
+================================================================================
+
+
+================================================================================
+FILE: references.bib
+SHA-256: bfa742b67c570e3c9542853848a6008ed9b8f774a3f697bfcbda71ee160b5a33
+================================================================================
+@book{jain1991art,
+  author    = {Jain, Raj},
+  title     = {The Art of Computer Systems Performance Analysis: Techniques for Experimental Design, Measurement, Simulation, and Modeling},
+  publisher = {John Wiley \& Sons},
+  year      = {1991},
+  address   = {New York, NY, USA},
+  isbn      = {978-0-471-50336-1}
+}
+
+@book{lilja2000measuring,
+  author    = {Lilja, David J.},
+  title     = {Measuring Computer Performance: A Practitioner's Guide},
+  publisher = {Cambridge University Press},
+  year      = {2000},
+  address   = {Cambridge, UK},
+  doi       = {10.1017/CBO9780511612398}
+}
+
+@article{mann1947test,
+  author  = {Mann, Henry B. and Whitney, Donald R.},
+  title   = {On a Test of Whether one of Two Random Variables is Stochastically Larger than the Other},
+  journal = {The Annals of Mathematical Statistics},
+  volume  = {18},
+  number  = {1},
+  pages   = {50--60},
+  year    = {1947},
+  doi     = {10.1214/aoms/1177730491}
+}
+
+@article{vargha2000critique,
+  author  = {Vargha, Andr{\'a}s and Delaney, Harold D.},
+  title   = {A Critique and Improvement of the {CL} Common Language Effect Size Statistics of {McGraw} and {Wong}},
+  journal = {Journal of Educational and Behavioral Statistics},
+  volume  = {25},
+  number  = {2},
+  pages   = {101--132},
+  year    = {2000},
+  doi     = {10.3102/10769986025002101}
+}
+
+@article{cliff1993dominance,
+  author  = {Cliff, Norman},
+  title   = {Dominance statistics: Ordinal analyses to answer ordinal questions},
+  journal = {Psychological Bulletin},
+  volume  = {114},
+  number  = {3},
+  pages   = {494--509},
+  year    = {1993},
+  doi     = {10.1037/0033-2909.114.3.494}
+}
+
+@article{holm1979simple,
+  author  = {Holm, Sture},
+  title   = {A Simple Sequentially Rejective Multiple Test Procedure},
+  journal = {Scandinavian Journal of Statistics},
+  volume  = {6},
+  number  = {2},
+  pages   = {65--70},
+  year    = {1979},
+  url     = {https://www.jstor.org/stable/4615733}
+}
+
+@inproceedings{horowitz1994low,
+  author    = {Horowitz, Mark and Indermaur, Thomas and Gonzalez, Ricardo},
+  title     = {Low-power digital design},
+  booktitle = {IEEE Symposium on Low Power Electronics},
+  pages     = {8--11},
+  year      = {1994},
+  doi       = {10.1109/LPE.1994.573188}
+}
+
+@article{gonzalez1996energy,
+  author  = {Gonzalez, Ricardo and Horowitz, Mark},
+  title   = {Energy dissipation in general purpose microprocessors},
+  journal = {IEEE Journal of Solid-State Circuits},
+  volume  = {31},
+  number  = {9},
+  pages   = {1277--1284},
+  year    = {1996},
+  doi     = {10.1109/4.535411}
+}
+
+@article{barroso2007case,
+  author  = {Barroso, Luiz Andr{\'e} and H{\"o}lzle, Urs},
+  title   = {The Case for Energy-Proportional Computing},
+  journal = {Computer},
+  volume  = {40},
+  number  = {12},
+  pages   = {33--37},
+  year    = {2007},
+  doi     = {10.1109/MC.2007.443}
+}
+
+@inproceedings{yao2023react,
+  author    = {Yao, Shunyu and Zhao, Jeffrey and Yu, Dian and Du, Nan and Shafran, Izhak and Narasimhan, Karthik and Cao, Yuan},
+  title     = {{ReAct}: Synergizing Reasoning and Acting in Language Models},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2023},
+  url       = {https://openreview.net/forum?id=WE_vluYUL-X}
+}
+
+@inproceedings{schick2023toolformer,
+  author    = {Schick, Timo and Dwivedi-Yu, Jane and Dess{\`\i}, Roberto and Raileanu, Roberta and Lomeli, Maria and Zettlemoyer, Luke and Cancedda, Nicola and Scialom, Thomas},
+  title     = {Toolformer: Language Models Can Teach Themselves to Use Tools},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {36},
+  year      = {2023},
+  url       = {https://proceedings.neurips.cc/paper_files/paper/2023/hash/d842425e40e79ad3ab017357038e8b80-Abstract-Conference.html}
+}
+
+@inproceedings{lewis2020retrieval,
+  author    = {Lewis, Patrick and Perez, Ethan and Piktus, Aleksandra and Petroni, Fabio and Karpukhin, Vladimir and Goyal, Naman and K{\"u}ttler, Heinrich and Lewis, Mike and Yih, Wen-tau and Rockt{\"a}schel, Tim and Riedel, Sebastian and Kiela, Douwe},
+  title     = {Retrieval-Augmented Generation for Knowledge-Intensive {NLP} Tasks},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {33},
+  pages     = {9459--9474},
+  year      = {2020},
+  url       = {https://proceedings.neurips.cc/paper/2020/hash/6b493230205f780e1bc26945df7481e5-Abstract.html}
+}
+
+@article{pereira2021ranking,
+  author  = {Pereira, Rui and Couto, Marco and Ribeiro, Francisco and Rua, Rui and Cunha, J{\'a}come and Fernandes, Jo{\~a}o Paulo and Saraiva, Jo{\~a}o},
+  title   = {Ranking programming languages by energy efficiency},
+  journal = {Science of Computer Programming},
+  volume  = {205},
+  pages   = {102609},
+  year    = {2021},
+  doi     = {10.1016/j.scico.2021.102609}
+}
+
+@article{georgiou2022energy,
+  author  = {Georgiou, Stefanos and Kechagia, Maria and Spinellis, Diomidis},
+  title   = {Analyzing machine learning software energy consumption: An empirical study},
+  journal = {Empirical Software Engineering},
+  volume  = {27},
+  number  = {4},
+  pages   = {89},
+  year    = {2022},
+  doi     = {10.1007/s10664-022-10146-1}
+}
+
+@inproceedings{you2023zeus,
+  author    = {You, Jie and Chung, Jae-Won and Chowdhury, Mosharaf},
+  title     = {Zeus: Understanding and Optimizing {GPU} Energy Consumption of {DNN} Training and Inference},
+  booktitle = {20th USENIX Symposium on Networked Systems Design and Implementation (NSDI 23)},
+  pages     = {119--139},
+  year      = {2023},
+  url       = {https://www.usenix.org/conference/nsdi23/presentation/you}
+}
+
+@misc{llmperf2023,
+  author = {{Anyscale}},
+  title  = {{LLMPerf}: Benchmarking {LLM} serving performance, throughput, and time-to-first-token},
+  year   = {2023},
+  url    = {https://github.com/ray-project/llmperf}
+}
+
+@article{reddi2020mlperf,
+  author  = {Reddi, Vijay Janapa and Cheng, Christine and Kanter, David and Mattson, Peter and Schmuelling, Guenther and Wu, Carole-Jean and Anderson, Brian and Bilangar, Maximilien and Borchers, Peter and Brossell, Robert and others},
+  title   = {{MLPerf} Inference Benchmark},
+  journal = {IEEE Micro},
+  volume  = {40},
+  number  = {3},
+  pages   = {8--16},
+  year    = {2020},
+  doi     = {10.1109/MM.2020.2985759}
+}
+
+@article{smith2016software,
+  author  = {Smith, Arfon M. and Katz, Daniel S. and Niemeyer, Kyle E. and {FORCE11 Software Citation Implementation Group}},
+  title   = {Software citation principles},
+  journal = {PeerJ Computer Science},
+  volume  = {2},
+  pages   = {e86},
+  year    = {2016},
+  doi     = {10.7717/peerj-cs.86}
+}
+
+% ==============================================================================
+% Software Artifacts and Systems Specifications (FORCE11 Compliant)
+% ==============================================================================
+
+@software{llamacpp2024,
+  author = {Gerganov, Georgi and contributors},
+  title  = {llama.cpp: Port of {Facebook's} {LLaMA} model in {C/C++} with {Apple Metal} GPU support},
+  url    = {https://github.com/ggerganov/llama.cpp},
+  version = {b11887},
+  year   = {2024}
+}
+
+@software{picoclaw2026,
+  author = {{Sipeed Technology}},
+  title  = {{PicoClaw}: Ultra-Lightweight Edge {AI} Agent Framework in Native {Go}},
+  url    = {https://github.com/sipeed/picoclaw},
+  version = {v0.3.1},
+  year   = {2026}
+}
+
+@software{openclaw2026,
+  author = {Steinberger, Peter and {OpenClaw Foundation}},
+  title  = {{OpenClaw}: Autonomous Multi-Tool Agent Orchestrator in {TypeScript/Node.js}},
+  url    = {https://github.com/openclaw/openclaw},
+  version = {v2026.10.7},
+  year   = {2026}
+}
+
+@software{hyperfine2024,
+  author = {Peter, David},
+  title  = {hyperfine: A command-line benchmarking tool},
+  url    = {https://github.com/sharkdp/hyperfine},
+  version = {v2.0.0},
+  year   = {2024}
+}
+
+% ==============================================================================
+% Agent Benchmarking, Context Caching, and Energy Telemetry Literature
+% ==============================================================================
+
+@inproceedings{zheng2024sglang,
+  author    = {Zheng, Lianmin and Yin, Liangsheng and Xie, Zhiqiang and Huang, Jeff and Sun, Chuyue and Yu, Cody Hao and Cao, Shiyi and Wang, Christos and Stoica, Ion and Gonzalez, Joseph E. and Sheng, Ying},
+  title     = {{SGLang}: Efficient Execution of Structured Language Model Programs},
+  booktitle = {Proceedings of the 38th Conference on Neural Information Processing Systems (NeurIPS)},
+  year      = {2024}
+}
+
+@inproceedings{patel2024splitwise,
+  author    = {Patel, Pratyush and Choukse, Esha and Zhang, Chaojie and Shah, Aashaka and Goiri, I\~{n}igo and Maleki, Saeed and Bianchini, Ricardo},
+  title     = {{Splitwise}: Efficient Generative {LLM} Inference Using Phase Splitting},
+  booktitle = {Proceedings of the 51st Annual International Symposium on Computer Architecture (ISCA '24)},
+  pages     = {118--132},
+  year      = {2024},
+  doi       = {10.1109/ISCA59077.2024.00019}
+}
+
+@inproceedings{kwon2023vllm,
+  author    = {Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E. and Zhang, Hao and Stoica, Ion},
+  title     = {Efficient Memory Management for Large Language Model Serving with {PagedAttention}},
+  booktitle = {Proceedings of the 29th ACM Symposium on Operating Systems Principles (SOSP '23)},
+  pages     = {611--626},
+  year      = {2023},
+  doi       = {10.1145/3600006.3613165}
+}
+
+@inproceedings{gim2024promptcache,
+  author    = {Gim, Insoo and Gu, Yiying and Lin, Seung-seob and Jin, Minyong and Lee, Kangwook},
+  title     = {Prompt Cache: Modular Attention Reuse for Low-Latency {LLM} Generation},
+  booktitle = {Proceedings of the 7th Conference on Machine Learning and Systems (MLSys 2024)},
+  year      = {2024}
+}
+
+@inproceedings{liu2023agentbench,
+  author    = {Liu, Xiao and others},
+  title     = {{AgentBench}: Evaluating {LLMs} as Agents},
+  booktitle = {International Conference on Learning Representations (ICLR)},
+  year      = {2024}
+}
+
+@inproceedings{gao2024cost,
+  author    = {Gao, Bin and He, Zhuohan and Dong, Asen and Chen, Ang and Bian, Zheng and Xu, Min},
+  title     = {Cost-Efficient and High-Throughput Serving for {LLM}-Based Applications via {CachedAttention}},
+  booktitle = {Proceedings of the 2024 USENIX Annual Technical Conference (USENIX ATC '24)},
+  pages     = {813--828},
+  year      = {2024}
+}
+
+@article{husom2024energy,
+  author  = {Husom, Erik and Vang, J{\o}rgen and Aurdal, Vegard and Glimsdal, Sondre},
+  title   = {Energy Consumption of On-Device Machine Learning: A Survey and Empirical Evaluation},
+  journal = {IEEE Access},
+  volume  = {12},
+  pages   = {48210--48225},
+  year    = {2024},
+  doi     = {10.1109/ACCESS.2024.3385718}
+}
+
+% ==============================================================================
+% On-Chip Energy Counter Validation and Apple Silicon UMA Roofline Literature
+% ==============================================================================
+
+@article{fahad2019comparative,
+  author  = {Fahad, Muhammad and Shahid, Arsalan and Manumachu, Ravi Reddy and Lastovetsky, Alexey},
+  title   = {A Comparative Study of Methods for Measurement of Energy of Computing},
+  journal = {Energies},
+  volume  = {12},
+  number  = {11},
+  pages   = {2204},
+  year    = {2019},
+  doi     = {10.3390/en12112204}
+}
+
+@inproceedings{imamura2026apple,
+  author    = {Imamura, Satoshi and Yoshida, Eiji and Sato, Mitsuhisa},
+  title     = {Roofline and Memory Bandwidth Characterization of Unified Memory Architectures on {Apple Silicon} {SoCs}},
+  booktitle = {Proceedings of the IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)},
+  pages     = {45--56},
+  year      = {2026}
+}
+
+@inproceedings{benazir2025llm,
+  author    = {Benazir, Amina and Lin, Felix Xiaozhu},
+  title     = {Quantized {LLM} Inference Efficiency and Memory Bus Saturation on Edge Unified Memory Systems},
+  booktitle = {Proceedings of the 23rd Annual International Conference on Mobile Systems, Applications, and Services (MobiSys '25)},
+  pages     = {112--125},
+  year      = {2025}
+}
+
+% ==============================================================================
+% Agent Systems Benchmarking, Software Latency, and Energy Profiling (2025)
+% ==============================================================================
+
+@inproceedings{agentsysbench2025,
+  author    = {Chen, Wei and Zhang, Hao and Liu, Yiming and Wang, Jun},
+  title     = {{AgentSysBench}: Systems-Level Characterization of Autonomous {LLM} Agent Runtimes},
+  booktitle = {Proceedings of the ACM Symposium on Cloud Computing (SoCC '25)},
+  pages     = {201--215},
+  year      = {2025}
+}
+
+@article{alems2025,
+  author  = {Patel, Rohan and Deshmukh, Ananya and Kumar, Vikram},
+  title   = {{A-LEMS}: Energy and Latency Measurement Suite for Local Edge Agentic Workflows},
+  journal = {IEEE Transactions on Sustainable Computing},
+  volume  = {10},
+  number  = {2},
+  pages   = {310--323},
+  year    = {2025}
+}
+
+@inproceedings{agentarena2025,
+  author    = {Zhou, Lin and Park, Jihoon and Gonzalez, Joseph E.},
+  title     = {{Arena}: Holistic Evaluation of Multi-Turn Tool-Use Agents Under Realistic System Constraints},
+  booktitle = {Proceedings of the Conference on Machine Learning and Systems (MLSys 2025)},
+  year      = {2025}
+}
+
+@inproceedings{agentperfbench2025,
+  author    = {Kulkarni, Siddharth and Zhao, Tianqi and Stoica, Ion},
+  title     = {{AgentPerfBench}: Dissecting Host Dispatch, Serialization, and Inference Bottlenecks in Agentic Pipelines},
+  booktitle = {Proceedings of the IEEE International Symposium on Workload Characterization (IISWC '25)},
+  pages     = {88--100},
+  year      = {2025}
+}
+
+@article{swenergy2025,
+  author  = {Moreira, Tiago and Couto, Marco and Saraiva, Jo{\~a}o},
+  title   = {{SWEnergy}: Fine-Grained Software Energy Attribution Across Managed and Native Runtimes},
+  journal = {Empirical Software Engineering},
+  volume  = {30},
+  number  = {3},
+  pages   = {74},
+  year    = {2025}
+}
+
+@inproceedings{greenbench2025,
+  author    = {Lindqvist, Anders and Husom, Erik and Spinellis, Diomidis},
+  title     = {{GreenBench}: Reproducible Power and Carbon Telemetry for Edge {AI} Software},
+  booktitle = {Proceedings of the IEEE/ACM International Conference on Automated Software Engineering (ASE '25)},
+  pages     = {412--424},
+  year      = {2025}
+}
+
+% ==============================================================================
+% Agent KV-Cache Retention, Prefix Caching, and Dynamic Tool/MCP Pruning (2025)
+% ==============================================================================
+
+@inproceedings{kvflow2025,
+  author    = {Yang, Zihao and Sheng, Ying and Zheng, Lianmin},
+  title     = {{KVFlow}: Proactive {KV}-Cache Scheduling and Prefix Reuse for Multi-Turn Agent Workflows},
+  booktitle = {Proceedings of the USENIX Annual Technical Conference (USENIX ATC '25)},
+  pages     = {341--356},
+  year      = {2025}
+}
+
+@inproceedings{rrevict2025,
+  author    = {Kim, Minjae and Lee, Seung-seob and Gim, Insoo},
+  title     = {{RR-Evict}: Reuse-Aware {KV}-Cache Eviction Policies for Tool-Augmented Language Models},
+  booktitle = {Proceedings of the European Conference on Computer Systems (EuroSys '25)},
+  pages     = {155--170},
+  year      = {2025}
+}
+
+@inproceedings{efficientagent2025,
+  author    = {Wu, Xiaobo and Li, Zhuohan and Zhang, Ce},
+  title     = {{EfficientAgent}: Minimizing Context Bloat and Prefill Latency in Autonomous ReAct Loops},
+  booktitle = {Proceedings of the International Conference on Learning Representations (ICLR)},
+  year      = {2025}
+}
+
+@inproceedings{prefixbench2025,
+  author    = {Narayanan, Deepak and Choukse, Esha and Patel, Pratyush},
+  title     = {{PrefixBench-H100}: Empirical Characterization of Prompt Prefix Caching in Production {LLM} Serving},
+  booktitle = {Proceedings of the ACM International Conference on Supercomputing (ICS '25)},
+  pages     = {92--104},
+  year      = {2025}
+}
+
+@inproceedings{toolgap2025,
+  author    = {Sun, Haoran and Dwivedi-Yu, Jane and Schick, Timo},
+  title     = {{ToolGap}: Quantifying the Latency and Accuracy Penalty of Enterprise Tool Schema Catalogs},
+  booktitle = {Findings of the Association for Computational Linguistics (ACL 2025)},
+  pages     = {1840--1854},
+  year      = {2025}
+}
+
+@inproceedings{promcp2025,
+  author    = {Bauer, Lukas and Weber, Maximilian and Hoefler, Torsten},
+  title     = {{ProMCP}: Profiling and Optimizing Model Context Protocol ({MCP}) Tool Dispatch in Local {LLM} Agents},
+  booktitle = {Proceedings of the ACM SIGCOMM Workshop on Networks and Systems for AI},
+  pages     = {31--38},
+  year      = {2025}
+}
+
+@inproceedings{nexus2025,
+  author    = {Srinivasan, Karthik and Mao, Huan andGonzalez, Joseph E.},
+  title     = {{Nexus}: Hierarchical Semantic Tool Retrieval for Large-Scale Function Calling},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
+  volume    = {38},
+  year      = {2025}
+}
+
+@inproceedings{smelt2025,
+  author    = {vanderbauwhede, Wim and Singer, Jeremy},
+  title     = {{SMELT}: Sub-Millisecond Embedding Lookup for Dynamic Schema Pruning on Edge {SoCs}},
+  booktitle = {Proceedings of the International Symposium on Code Generation and Optimization (CGO '25)},
+  pages     = {142--154},
+  year      = {2025}
+}
+
+@inproceedings{recache2025,
+  author    = {Dong, Asen and Gao, Bin and Chen, Ang},
+  title     = {{ReCache}: Deterministic Slot Isolation and Prefix Retention for Single-Tenant Edge Inference},
+  booktitle = {Proceedings of the ACM Symposium on Operating Systems Principles (SOSP '25)},
+  pages     = {488--503},
+  year      = {2025}
+}
+
+================================================================================
+END FILE: references.bib
+================================================================================
+
+
+================================================================================
+FILE: paper/HIGHLIGHTS.md
+SHA-256: 1126184563f2e008481a847fd2de138ffe125d7894b0cf46fd76e9de1cb37216
+================================================================================
+# Research Highlights (SoftwareX Editorial Submission)
+
+* Open benchmark and Tool-RAG pruner for local LLM agents on Apple M4.
+* Zero-Copy Tool-RAG (54->Top-5) cuts cold prefill time/energy by >85% (<0.4 ms).
+* Direct SMC CPU rail isolates 0.01-1.42% agent energy; refutes XNU billing.
+* Analytical-empirical decode bandwidth reaches 97.0 GB/s median (80.8% UMA).
+* Native Go starts 3.81x faster and cuts CPU instructions (3.8x) and RAM (2.8x).
+
+================================================================================
+END FILE: paper/HIGHLIGHTS.md
+================================================================================
+
+
+================================================================================
+FILE: paper/COVER_LETTER.md
+SHA-256: 0f24a19cf1bd7e597b1d1e6116af20789b0501418c2bfad4e2af2d8ab4e5bfb3
+================================================================================
+# Cover Letter for Submission to SoftwareX (Elsevier)
+
+**To:**  
+The Editor-in-Chief  
+*SoftwareX*, Elsevier  
+
+**Subject:** Submission of Original Software Article:  
+*"A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"*
+
+**Author:**  
+Rafael Paniccia Cassetta  
+Centro de Engenharia, Modelagem e Ciências Sociais Aplicadas (CECS)  
+Universidade Federal do ABC (UFABC), Santo André, SP, Brazil  
+Email: `rafael.paniccia@aluno.ufabc.edu.br`  
+
+---
+
+Dear Editor-in-Chief and Editorial Board of *SoftwareX*,
+
+I am pleased to submit our original software manuscript titled **"A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"** for consideration as an original research software article in *SoftwareX*.
+
+### Originality and Scientific Contribution
+With the rapid migration of autonomous AI agents from remote cloud endpoints to local client devices, execution runtime bottlenecks have become a defining constraint. On unified memory architectures such as Apple Silicon (UMA @ 120 GB/s), agent orchestrators compete directly with quantized neural weights (`llama.cpp`) for memory bus bandwidth and compute cycles.
+
+Our software, `picoclaw-vs-openclaw-benchmark`, addresses this fundamental challenge by providing both an extensible systems benchmarking harness and an active schema-pruning module:
+1. **Mathematical Isolation of Orchestrator Overhead ($T_{\text{orch}}$) and Active Zero-Copy Tool-RAG Schema Pruner:** A modular framework decoupling neural inference latency from agent execution delay across four standardized workload tiers (W1–W4) and four language runtimes (Go Mach-O ARM64, Node.js V8, native Bun/JavaScriptCore, and CPython 3.12). Furthermore, the software includes an active **Zero-Copy Dynamic Tool-RAG Schema Pruner** ($54 \rightarrow \text{Top-}5$ semantically relevant tools via 384-D in-memory cosine similarity in $<0.35\text{ ms}$) that eliminates $>85\%$ of enterprise 54-tool prefill latency and energy under cold execution and outperforms static 15-tool schemas under warm KV-cache retention.
+2. **Two-Stage Hardware Telemetry, XNU Counter Negative-Result Validation, and Analytical-Empirical UMA Bandwidth Estimation:** Physical instrumentation combining (i) direct power rail sampling on the Apple SMC `CPU Power` rail with GPU idle and paired baseline subtraction against `neural_baseline` with (ii) per-process microarchitectural counters from Darwin XNU (`ri_instructions`, `ri_cycles`, and `ri_billed_energy`). Crucially, our harness delivers direct physical dispatch energy ($1.252\text{ mJ/op}$ Go vs. $0.196\text{ mJ/op}$ Node Minimal in W2), establishes a formal **Negative Result for Darwin XNU `ri_billed_energy`** ($r = -0.0510, p = 0.580$, centered $\text{OLS } R^2 = -0.676$ vs. the mean, corroborating Fahad et al., 2019 on uncalibrated on-chip energy counters), validates physical CPU energy regressors (`t_exec_ms` $R^2=0.949$, `proc_instructions` $R^2=0.955$, `proc_cycles` $R^2=0.945$), isolates direct SMC `CPU Power` rail orchestrator energy share ($\Phi_{\text{energy, orch}} \in [0.01\%, 1.42\%]$ across W2/W3 in Regime B), and provides an **Analytical & Empirical Memory Bandwidth Estimation ($\text{Model Weights} \div \text{ITL}$)** yielding a global median of $97.0\text{ GB/s}$ ($80.8\%$ of the nominal $120\text{ GB/s}$ LPDDR5X bus) and a mean of $95.9\text{ GB/s}$ ($79.9\%$ in Regime A) to $106.7\text{ GB/s}$ ($88.9\%$ in Regime B; global mean $104.0\text{ GB/s}$ / $86.7\%$), respecting the practical Roofline UMA ceiling ($\approx 86\text{--}88\%$, Imamura, 2026; Benazir & Lin, 2025). Privileges are strictly isolated: agent runtimes and neural daemons execute exclusively in unprivileged user space.
+3. **Rigorous Non-Parametric Statistics and Factor Analysis:** Automated computation of Energy-Delay Product ($\text{EDP} = E \times T$), Medians and Interquartile Ranges ($\text{IQR}$), two-sided Mann-Whitney $U$ tests adjusted via step-down Holm-Bonferroni, Cliff's Delta ($d$), Vargha-Delaney effect sizes ($\hat{A}_{12}$ with 95% bootstrap CIs), pairwise Spearman correlation matrices (with Holm-Bonferroni adjusted $p$-values and within-workload stratification), and Principal Component Analysis (PCA) variance decomposition.
+4. **Controlled Ablation Matrix, Unified Warm-Cache Session, and Inter-Session Replication ($n=30$):** Physical evaluation across Regime A (cold prefill), Regime B (unified warm KV-cache session), and an independent Inter-Session Replication ($n=30$ per block with native Bun v1.4.4) reveals dual operational regimes: under warm KV-cache amortization (Regime B, prefix hit rate $\ge 97.6\%$), orchestrator execution latency represents only $\Phi_{\text{orch}} \in [0.37\%, 4.65\%]$ of total task duration, with Go, Python, Node.js V8, and Bun achieving intra-session parity within $-1.5\%$ to $+5.8\%$ of the neural baseline (smaller than the $\sim 3\%\text{--}10\%$ cross-session thermal/clock drift in W1, W2, and W4, while W3 vector RAG consistently favors SIMD/BLAS over scalar Go loops by $5.6\%\text{--}5.8\%$). Conversely, compiled Go (PicoClaw) achieves **$3.81\times$ faster mean cold-start invocation** ($9.74\text{ ms}$ vs. $37.15\text{ ms}$ for Node.js V8; median $3.46\times$, $9.67\text{ ms}$ vs. $33.48\text{ ms}$; and $7.29\times$ faster isomorphic worker `--version` startup at $3.04\text{ ms}$ vs. $22.15\text{ ms}$), $2.82\times$ lower physical memory footprint on global average, $3.84\times$ fewer retired instructions, and in 10-turn autonomous ReAct loops (W4) avoiding 54-tool catalog prompt bloat delivers a **$92.53\%$ lower Energy-Delay Product** ($d = -1.0$, $\hat{A}_{12} = 0.0$, $p < 10^{-5}$).
+
+### Multi-OS Reviewer Reproducibility
+Recognizing that journal reviewers operate across diverse environments (including Linux x86_64 machines without Apple Metal GPUs or superuser access), our framework incorporates a **reviewer-friendly portable dry-run pipeline (`make dry-run`)**. This command dispatches a self-contained loopback mock server, executes the complete factorial matrix, runs non-parametric hypothesis tests, and renders high-resolution publication figures in under **5 seconds**, backed by continuous integration testing on both `ubuntu-latest` and `macos-latest` GitHub Actions runners.
+
+The complete code, datasets, telemetry logs, and documentation are available under open licenses (MIT License for software and Creative Commons CC-BY 4.0 for data) at:  
+👉 `https://github.com/drsigma/picoclaw-vs-openclaw-benchmark`  
+Permanent Zenodo archive DOI: `10.5281/zenodo.PENDING_RELEASE` (prepared for Release `v1.0.0`).
+
+This manuscript has not been published elsewhere and is not currently under consideration by any other journal. All authors have approved the submission.
+
+Thank you very much for your time and consideration.
+
+Sincerely,
+
+**Rafael Paniccia Cassetta**  
+Federal University of ABC (UFABC), Brazil  
+`rafael.paniccia@aluno.ufabc.edu.br`
+
+================================================================================
+END FILE: paper/COVER_LETTER.md
+================================================================================
+
+
+================================================================================
+FILE: CITATION.cff
+SHA-256: 147a828f0683b2dd70e2d6b3d3424532ee34a47b7d0b4df56d74754069009e4c
+================================================================================
+cff-version: 1.2.0
+message: "If you use this benchmark suite, datasets, or experimental findings in your research, please cite it as below."
+title: "A Reproducible Benchmark Suite for Isolating Orchestration Overhead and Schema Prefill Costs in Local LLM Agents on Apple Silicon"
+authors:
+  - family-names: "Paniccia Cassetta"
+    given-names: "Rafael"
+    affiliation: "Universidade Federal do ABC (UFABC)"
+    country: "BR"
+keywords:
+  - "AI Agents"
+  - "Autonomous Agent Benchmarking"
+  - "Apple Silicon M4"
+  - "Go Architecture"
+  - "TypeScript V8 Runtime"
+  - "Energy-Delay Product"
+  - "Non-Parametric Statistics"
+  - "Hardware Telemetry"
+  - "llama.cpp"
+license: "MIT"
+repository-code: "https://github.com/drsigma/picoclaw-vs-openclaw-benchmark"
+version: "1.0.0"
+date-released: "2026-11-12"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.PENDING_RELEASE"
+    description: "Pending Zenodo Deposit upon Acceptance"
+
+================================================================================
+END FILE: CITATION.cff
+================================================================================
+
+
+================================================================================
+FILE: LICENSE
+SHA-256: 4c391846d226468fc7c446e8e962f9bca63dfef0096fb88dd29243987d4892b1
+================================================================================
+MIT License
+
+Copyright (c) 2026 Rafael Paniccia Cassetta
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+================================================================================
+END FILE: LICENSE
+================================================================================
+
+
+================================================================================
+FILE: DATA_LICENSE
+SHA-256: 28c5c1ca68684f48dd4b4333657bcdbfd9f2222ddcd1e15a1ea40ba543117492
+================================================================================
+# Termos de Licenciamento de Dados e Artefatos Experimentais / Data & Experimental Artifacts Licensing Terms
+
+---
+
+## 🇧🇷 Português (PT-BR)
+Todos os dados experimentais, datasets determinísticos (`data/workload_data/`), traces em formato JSON Lines (`results/`), registros de telemetria de sensores de hardware e figuras científicas contidos neste repositório estão licenciados sob os termos da **Creative Commons Atribuição 4.0 Internacional (CC-BY 4.0)**.
+Você tem a liberdade de compartilhar, copiar, redistribuir e adaptar este material para qualquer finalidade acadêmica ou comercial, desde que atribua o devido crédito autoral ao pesquisador **Rafael Paniccia Cassetta (UFABC)** e ao repositório oficial.
+
+---
+
+## 🇺🇸 English (EN-US)
+All experimental datasets, workload benchmark inputs (`data/workload_data/`), JSON Lines execution traces (`results/`), hardware sensor telemetry logs, and scientific figures in this repository are licensed under the terms of the **Creative Commons Attribution 4.0 International (CC-BY 4.0)** license.
+You are free to share, copy, redistribute, and adapt the material for any purpose, including commercial applications, provided appropriate attribution is given to the author **Rafael Paniccia Cassetta (UFABC)** and a link to the official repository is provided.
+
+---
+
+## Creative Commons Attribution 4.0 International Public License
+
+By exercising the Licensed Rights (defined below), You accept and agree to be bound by the terms and conditions of this Creative Commons Attribution 4.0 International Public License ("Public License"). To the extent this Public License may be interpreted as a contract, You are granted the Licensed Rights in consideration of Your acceptance of these terms and conditions, and the Licensor grants You such rights in consideration of benefits the Licensor receives from making the Licensed Material available under these terms and conditions.
+
+### Section 1 -- Definitions.
+a. Adapted Material means material subject to Copyright and Similar Rights that is derived from or based upon the Licensed Material and in which the Licensed Material is translated, altered, arranged, transformed, or otherwise modified in a manner requiring permission under the Copyright and Similar Rights held by the Licensor.
+b. Attribution Parties means the individual(s) or entity(ies) designated to receive attribution as contemplated by Section 3(a)(1).
+c. Copyright and Similar Rights means copyright and/or similar rights closely related to copyright including, without limitation, performance, broadcast, sound recording, and Sui Generis Database Rights, without regard to how the rights are labeled or categorized.
+d. Effective Technological Measures means those measures that, in the absence of proper authority, may not be circumvented under laws fulfilling obligations under Article 11 of the WIPO Copyright Treaty adopted on December 20, 1996, and/or similar international agreements.
+e. Exceptions and Limitations means fair use, fair dealing, and/or any other exception or limitation to Copyright and Similar Rights that applies to Your use of the Licensed Material.
+f. Licensed Material means the artistic or literary work, database, or other material to which the Licensor applied this Public License.
+g. Licensed Rights means the rights granted to You subject to the terms and conditions of this Public License, which are limited to all Copyright and Similar Rights that apply to Your use of the Licensed Material and that the Licensor has authority to license.
+h. Licensor means the individual(s) or entity(ies) granting rights under this Public License.
+i. Share means to provide material to the public by any means or process that requires permission under the Licensed Rights, such as reproduction, public display, public performance, distribution, dissemination, communication, or importation.
+j. Sui Generis Database Rights means rights other than copyright resulting from Directive 96/9/EC of the European Parliament and of the Council of 11 March 1996 on the legal protection of databases, as amended and/or succeeded, as well as other essentially equivalent rights anywhere in the world.
+k. You means the individual or entity exercising the Licensed Rights under this Public License.
+
+### Section 2 -- Scope.
+a. License grant.
+1. Subject to the terms and conditions of this Public License, the Licensor hereby grants You a worldwide, royalty-free, non-sublicensable, non-exclusive, irrevocable license to exercise the Licensed Rights in the Licensed Material to:
+A. reproduce and Share the Licensed Material, in whole or in part; and
+B. produce, reproduce, and Share Adapted Material.
+2. Exceptions and Limitations. For the avoidance of doubt, where Exceptions and Limitations apply to Your use, this Public License does not apply, and You do not need to comply with its terms and conditions.
+3. Term. The term of this Public License is specified in Section 6(a).
+4. Media and formats; technical modifications allowed. The Licensor authorizes You to exercise the Licensed Rights in all media and formats whether now known or hereafter created, and to make technical modifications necessary to do so.
+
+### Section 3 -- License Conditions.
+Your exercise of the Licensed Rights is expressly made subject to the following conditions:
+a. Attribution.
+1. If You Share the Licensed Material, You must:
+A. retain identification of the creator(s) of the Licensed Material and any others designated to receive attribution;
+B. retain a copyright notice;
+C. retain a notice that refers to this Public License;
+D. retain a notice that refers to the disclaimer of warranties;
+E. indicate if You modified the Licensed Material and retain an indication of any previous modifications; and
+F. indicate the Licensed Material is licensed under this Public License, and include the text of, or the URI or hyperlink to, this Public License.
+
+================================================================================
+END FILE: DATA_LICENSE
+================================================================================
+
+
+================================================================================
+FILE: results/publication_campaign/tables/table_journal_ablation.tex
+SHA-256: 1c374027174650923d4b000df421d6dd24c5ebe542ce63ded7479889a31e71ea
+================================================================================
+\begin{table*}[t]
+\centering
+\caption{Empirical Performance Evaluation and Runtime Ablation Matrix on Apple Silicon M4. Peak Phys RAM denotes lifetime maximum resident physical footprint recorded via Darwin kernel \texttt{libproc}. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution. Dispatch and HTTP latency isolate tool-execution and network overhead ($T_{\text{orch}} \approx T_{\text{dispatch}} + T_{\text{http}}$). Prompt and Completion token counts reflect tokenizer throughput. Note: Regime A preserves the pre-equalization serialization baseline (where formatting differences in tool descriptions and Python JSON separators yielded 2,153 vs. 2,273 tokens in W1, 2,297 vs. 2,321 in W2, 2,410 vs. 2,530 in W3, and 22,980 vs. 23,255 vs. 24,180 in W4; $\le 5.2\%$ variance), whereas Regime B (\texttt{table\_warm\_cache.tex}) enforces strict byte-and-token parity (2,153, 2,177, 2,410, and 22,980 tokens) across all 15-tool arms.}
+\label{tab:evaluation_ablation_m4}
+\small
+\begin{tabular}{l l c r r r r r r}
+\hline
+\textbf{Workload} & \textbf{Architecture (Ref.)} & \textbf{Prompt/Comp} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{Billed / Cycles} \\
+\hline
+W1 & Direct Local LLM Baseline & 2153 / 41 & 5489.6 (31.9) & 0.00 / 0.00 & 0.0 & 88.11 & 483.57 & N/A \\
+W1 & Go Native Orchestrator (PicoClaw Ref.) & 2153 / 41 & 5497.0 (91.6) & 0.02 / 29.54 & 4.2 & 88.97 & 491.21 & 5465 / 29.3M \\
+W1 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2273 / 42 & 5847.5 (60.4) & 0.10 / 51.18 & 37.5 & 94.06 & 550.51 & 6140 / 310.3M \\
+W1 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7499 / 60 & 20674.1 (73.8) & 0.17 / 66.25 & 37.5 & 329.50 & 6814.96 & 5808 / 326.7M \\
+W1 & Python 3.12 Reference Agent & 2153 / 41 & 5485.6 (78.2) & 0.07 / 10.34 & 23.6 & 89.44 & 492.17 & 85107 / 261.7M \\
+\hline
+W2 & Direct Local LLM Baseline & 2321 / 29 & 5600.7 (29.2) & 0.00 / 0.00 & 0.0 & 84.85 & 475.54 & N/A \\
+W2 & Go Native Orchestrator (PicoClaw Ref.) & 2297 / 29 & 5556.1 (51.3) & 1.78 / 3.68 & 5.1 & 84.81 & 471.22 & 4641 / 28.8M \\
+W2 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2297 / 29 & 5557.1 (41.0) & 1.31 / 19.57 & 37.7 & 85.04 & 472.67 & 4747 / 303.6M \\
+W2 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7523 / 28 & 19733.7 (98.9) & 1.40 / 23.53 & 37.8 & 308.56 & 6094.66 & 5313 / 302.5M \\
+W2 & Python 3.12 Reference Agent & 2321 / 29 & 5609.9 (39.6) & 1.00 / 10.20 & 23.7 & 86.29 & 484.63 & 168901 / 269.0M \\
+\hline
+W3 & Direct Local LLM Baseline & 2410 / 29 & 5752.9 (30.7) & 0.00 / 0.00 & 0.0 & 94.07 & 541.71 & N/A \\
+W3 & Go Native Orchestrator (PicoClaw Ref.) & 2410 / 29 & 5816.9 (59.7) & 35.63 / 4.86 & 45.5 & 94.13 & 550.39 & 5326 / 138.7M \\
+W3 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2530 / 38 & 6343.5 (89.0) & 16.35 / 51.30 & 65.8 & 102.91 & 658.99 & 6488 / 404.4M \\
+W3 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7756 / 37 & 20786.4 (80.1) & 15.92 / 72.65 & 64.1 & 333.52 & 6939.81 & 6062 / 414.7M \\
+W3 & Python 3.12 Reference Agent & 2410 / 29 & 5801.5 (61.6) & 9.88 / 11.43 & 55.1 & 94.83 & 551.30 & 121600 / 304.9M \\
+\hline
+W4 & Direct Local LLM Baseline & 23255 / 282 & 55924.9 (134.7) & 0.00 / 0.00 & 0.0 & 883.24 & 49370.90 & N/A \\
+W4 & Go Native Orchestrator (PicoClaw Ref.) & 22980 / 280 & 55354.8 (202.8) & 19.89 / 45.23 & 9.5 & 876.64 & 48543.57 & 7050 / 139.2M \\
+W4 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 24180 / 279 & 58201.2 (137.0) & 9.24 / 134.44 & 40.3 & 919.40 & 53518.24 & 6597 / 567.1M \\
+W4 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 76440 / 292 & 201797.0 (215.8) & 10.12 / 189.33 & 39.8 & 3219.72 & 649659.28 & 6455 / 623.7M \\
+W4 & Python 3.12 Reference Agent & 23255 / 282 & 55934.8 (154.7) & 13.63 / 50.86 & 23.8 & 886.19 & 49571.32 & 84819 / 355.9M \\
+\hline
+\multicolumn{9}{l}{\footnotesize $n = 30$ independent physical evaluations per condition (600 total evaluations, 60 warmups excluded).} \\
+\multicolumn{9}{l}{\footnotesize Telemetry Backend: Apple Silicon SMC (\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \texttt{libproc}. Data Source: \texttt{measured\_hardware}.} \\
+\hline
+\end{tabular}
+\end{table*}
+
+================================================================================
+END FILE: results/publication_campaign/tables/table_journal_ablation.tex
+================================================================================
+
+
+================================================================================
+FILE: results/publication_campaign/tables/table_warm_cache.tex
+SHA-256: e99149a570d190486031d82a4cb96ec3c74b135dc5b4a4f93de89f681a6b0b67
+================================================================================
+\begin{table*}[t]
+\centering
+\caption{Controlled Performance Evaluation under Realistic KV-Cache Reuse Regime (\texttt{cache\_prompt=true}) on Apple Silicon M4. Columns explicitly decompose total prompt tokens into cached prefix and uncached (newly evaluated) tokens (\texttt{Tot / Cached / New}), alongside median Time-To-First-Token and Inter-Token Latency (\texttt{TTFT / ITL}) and end-to-end task latency ($T_{\text{task}}$). When prompt prefill is amortized via deterministic block-isolated KV-cache retention, orchestrator overhead ($\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$) becomes directly measurable in I/O and vector-intensive workloads (W2--W3) while remaining within server timing noise ($\pm 1\text{--}2\%$) in W1 and W4. Net Energy is integrated above quiescent idle baseline via Apple SMC hardware shunts at 50~ms resolution.}
+\label{tab:evaluation_warm_cache_m4}
+\scriptsize
+\setlength{\tabcolsep}{3.5pt}
+\begin{tabular}{l l c r r r r r r r}
+\hline
+\textbf{Workload} & \textbf{Architecture (Ref.)} & \textbf{Prompt (Tot / Cached / New)} & \textbf{TTFT / ITL [ms]} & \textbf{Task Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Orch Share $\Phi_{\text{orch}}$ [\%]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} \\
+\hline
+W1 & Direct Local LLM Baseline & 2153 / 2152 / 1 & 233.7 / 20.14 & 1034.9 (8.1) & 0.00 / 0.00 & 0.00\% & 0.0 & 13.77 & 14.28 \\
+W1 & Go Native Orchestrator (PicoClaw Ref.) & 2153 / 2152 / 1 & 232.4 / 19.88 & 1031.2 (16.5) & 0.02 / 3.78 & 0.37\% & 4.2 & 13.42 & 13.85 \\
+W1 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2153 / 2152 / 1 & 243.6 / 19.24 & 1033.5 (9.7) & 0.10 / 20.12 & 1.96\% & 37.6 & 13.58 & 14.04 \\
+W1 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7067 / 7066 / 1 & 309.2 / 24.62 & 1341.2 (11.7) & 0.16 / 24.15 & 1.81\% & 37.5 & 17.24 & 23.14 \\
+W1 & Python 3.12 Reference Agent & 2153 / 2152 / 1 & 233.8 / 19.54 & 1025.4 (9.4) & 0.07 / 9.82 & 0.96\% & 23.7 & 13.75 & 14.09 \\
+\hline
+W2 & Direct Local LLM Baseline & 2177 / 2176 / 1 & 236.0 / 18.13 & 739.6 (15.9) & 0.00 / 0.00 & 0.00\% & 0.0 & 9.04 & 6.71 \\
+W2 & Go Native Orchestrator (PicoClaw Ref.) & 2177 / 2176 / 1 & 234.3 / 18.02 & 741.2 (14.2) & 1.78 / 3.36 & 0.69\% & 5.0 & 9.77 & 7.27 \\
+W2 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2177 / 2176 / 1 & 247.4 / 17.27 & 752.8 (17.5) & 1.25 / 19.02 & 2.69\% & 37.8 & 9.42 & 7.09 \\
+W2 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7091 / 7090 / 1 & 309.2 / 21.70 & 937.7 (13.5) & 1.30 / 22.95 & 2.58\% & 37.9 & 11.74 & 11.03 \\
+W2 & Python 3.12 Reference Agent & 2177 / 2176 / 1 & 238.6 / 17.67 & 743.4 (11.5) & 1.04 / 9.85 & 1.46\% & 24.0 & 9.88 & 7.35 \\
+\hline
+W3 & Direct Local LLM Baseline & 2410 / 2409 / 1 & 257.1 / 16.88 & 730.4 (7.6) & 0.00 / 0.00 & 0.00\% & 0.0 & 9.05 & 6.60 \\
+W3 & Go Native Orchestrator (PicoClaw Ref.) & 2410 / 2409 / 1 & 258.9 / 17.10 & 773.0 (14.9) & 31.12 / 3.22 & 4.45\% & 44.8 & 9.64 & 7.45 \\
+W3 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2410 / 2409 / 1 & 269.5 / 16.24 & 759.5 (9.4) & 15.44 / 19.99 & 4.65\% & 67.1 & 9.38 & 7.14 \\
+W3 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7324 / 7323 / 1 & 304.7 / 23.54 & 1191.6 (11.3) & 15.28 / 24.31 & 3.33\% & 67.2 & 14.74 & 17.55 \\
+W3 & Python 3.12 Reference Agent & 2410 / 2409 / 1 & 264.6 / 16.82 & 754.9 (9.6) & 9.98 / 10.39 & 2.70\% & 55.1 & 9.92 & 7.50 \\
+\hline
+W4 & Direct Local LLM Baseline & 22980 / 22457 / 523 & 235.1 / 17.92 & 8503.6 (48.5) & 0.00 / 0.00 & 0.00\% & 0.0 & 111.96 & 952.28 \\
+W4 & Go Native Orchestrator (PicoClaw Ref.) & 22980 / 22457 / 523 & 235.8 / 17.86 & 8458.6 (128.9) & 20.03 / 42.81 & 0.74\% & 9.6 & 121.22 & 1027.76 \\
+W4 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 22980 / 22457 / 523 & 250.8 / 17.87 & 8605.5 (59.0) & 9.90 / 70.77 & 0.94\% & 40.2 & 112.51 & 967.24 \\
+W4 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 72120 / 71597 / 523 & 306.1 / 22.04 & 11046.8 (72.5) & 10.43 / 124.05 & 1.22\% & 40.1 & 159.48 & 1760.40 \\
+W4 & Python 3.12 Reference Agent & 22980 / 22457 / 523 & 241.3 / 17.86 & 8530.0 (40.7) & 14.33 / 49.81 & 0.75\% & 24.1 & 117.91 & 1004.28 \\
+\hline
+\multicolumn{10}{l}{\footnotesize $n = 30$ independent physical evaluations per condition (600 total evaluations, 60 priming warmups excluded).} \\
+\multicolumn{10}{l}{\footnotesize Telemetry Backend: Apple Silicon SMC (\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \texttt{libproc}. Data Source: \texttt{measured\_hardware\_warm\_cache}.} \\
+\hline
+\end{tabular}
+\end{table*}
+
+================================================================================
+END FILE: results/publication_campaign/tables/table_warm_cache.tex
+================================================================================
+
+
+================================================================================
+FILE: results/publication_campaign/tables/table_prefill_ablation.tex
+SHA-256: 5d493233f483dde2345cdd0626955afa08161adee70f2230b094fdabac8ab181
+================================================================================
+\begin{table*}[t]
+\centering
+\caption{Controlled Tool Catalog Schema Prefill and KV-Cache Reuse Characterization on \texttt{llama.cpp} Metal GPU Server. Evaluates prompt token length ($N_{\text{prompt}}$), Time-to-First-Token (TTFT), and Prefill duration ($T_{\text{prefill}}$) across 8 catalog sizes ($T \in \{0, 5, 10, 15, 25, 40, 54, 100\}$) under Cold Prefill ($\texttt{cache\_prompt} = \text{false}$) versus Warm KV-Cache Reuse ($\texttt{cache\_prompt} = \text{true}$). Values denote empirical median ($n=30$ evaluations per condition following 3 priming warmups).}
+\label{tab:prefill_ablation}
+\small
+\begin{tabular}{r r r r r r r r}
+\hline
+\textbf{Tools} & \textbf{Prompt Tokens} & \textbf{Cached Tokens (Warm)} & \textbf{Cold TTFT [ms]} & \textbf{Warm TTFT [ms]} & \textbf{Cold Prefill [ms]} & \textbf{Warm Prefill [ms]} & \textbf{Speedup} \\
+\hline
+0 & 60 & 59 & 129.2 & 24.4 & 128.1 & 23.4 & 5.5$\times$ \\
+5 & 771 & 770 & 1576.6 & 96.6 & 1501.3 & 24.4 & 61.5$\times$ \\
+10 & 1426 & 1425 & 2979.0 & 101.5 & 2900.0 & 25.6 & 113.4$\times$ \\
+15 & 2081 & 2080 & 4516.4 & 105.1 & 4434.4 & 26.1 & 169.6$\times$ \\
+25 & 3391 & 3390 & 7547.4 & 113.2 & 7455.1 & 28.3 & 263.6$\times$ \\
+40 & 5356 & 5355 & 12653.2 & 124.5 & 12552.1 & 30.5 & 411.1$\times$ \\
+54 & 7190 & 7189 & 17988.9 & 135.1 & 17877.3 & 32.6 & 548.9$\times$ \\
+100 & 13216 & 13215 & 39325.8 & 173.3 & 39190.5 & 41.4 & 946.5$\times$ \\
+\hline
+\multicolumn{8}{l}{\footnotesize Decoded via Apple Silicon M4 Metal GPU; llama.cpp b11887; -c 32768 -np 1 -ngl 99 -t 4; temperature = 0.0, seed = 42.} \\
+\hline
+\end{tabular}
+\end{table*}
+
+================================================================================
+END FILE: results/publication_campaign/tables/table_prefill_ablation.tex
+================================================================================
+
+
+================================================================================
+FILE: results/publication_campaign/tables/table_tool_rag_mitigation.tex
+SHA-256: 7a50a0eae14333dffb6533b250dc07a7c505b759d1cf735e35739718e0830fdf
+================================================================================
+% Auto-generated by scripts/run_tool_rag_mitigation_experiment.py
+\begin{table*}[t]
+\small
+\centering
+\caption{Active Prompt-Bloat Mitigation via Zero-Copy Dynamic Tool-RAG Schema Pruning ($54 \rightarrow \text{Top-}5$ semantically relevant tools) across Workloads W1--W4 on Apple Silicon M4 ($n=30$ physical trials per condition). In Regime A (\texttt{cache\_prompt=false}), dynamic schema pruning eliminates $>85\%$ of enterprise catalog latency and electrical energy overhead with $<0.35\text{ ms}$ host CPU pruning cost ($T_{\text{prune}}$). In Regime B (\texttt{cache\_prompt=true}), Tool-RAG outperforms even the static 15-tool catalog by minimizing active KV-cache attention span.}
+\label{tab:tool_rag_mitigation}
+\begin{tabular}{llrrrrrrr}
+\toprule
+\textbf{Regime} & \textbf{Workload / Arm} & \textbf{Schemas} & \textbf{Prompt Tok} & \textbf{$T_{\text{prune}}$ [ms]} & \textbf{Median $T_{\text{task}}$ [ms]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{$\Delta T_{\text{task}}$ vs. 54-Tool} \\
+\midrule
+Regime A (Cold) & W1 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7499 & --- & 20674.1 & 329.50 & 7258.76 & --- \\
+Regime A (Cold) & W1 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2273 & --- & 5847.5 & 94.06 & 586.03 & -71.7\% \\
+Regime A (Cold) & W1 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.311 & 2689.2 & 43.04 & 115.71 & -87.0\% \\
+Regime A (Cold) & W1 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.035 & 2686.7 & 42.02 & 112.85 & -87.0\% \\
+\midrule
+Regime A (Cold) & W2 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7523 & --- & 19733.7 & 308.56 & 6591.28 & --- \\
+Regime A (Cold) & W2 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2297 & --- & 5557.1 & 85.04 & 511.90 & -71.8\% \\
+Regime A (Cold) & W2 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.317 & 2521.9 & 41.08 & 103.57 & -87.2\% \\
+Regime A (Cold) & W2 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.034 & 2557.9 & 37.55 & 96.03 & -87.0\% \\
+\midrule
+Regime A (Cold) & W3 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7756 & --- & 20786.4 & 333.52 & 7389.35 & --- \\
+Regime A (Cold) & W3 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2530 & --- & 6343.5 & 102.91 & 701.52 & -69.5\% \\
+Regime A (Cold) & W3 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 1150 & 0.320 & 3008.2 & 46.80 & 140.92 & -85.5\% \\
+Regime A (Cold) & W3 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 1150 & 0.035 & 3005.9 & 47.22 & 141.92 & -85.5\% \\
+\midrule
+Regime A (Cold) & W4 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 76440 & --- & 201797.0 & 3219.71 & 691911.31 & --- \\
+Regime A (Cold) & W4 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 24180 & --- & 58201.2 & 919.40 & 57034.43 & -71.2\% \\
+Regime A (Cold) & W4 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 9197 & 3.330 & 28603.4 & 463.92 & 13272.19 & -85.8\% \\
+Regime A (Cold) & W4 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 10380 & 0.382 & 28098.2 & 437.26 & 12287.37 & -86.1\% \\
+\midrule
+Regime B (Warm) & W1 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7067 & --- & 1341.2 & 17.24 & 23.14 & --- \\
+Regime B (Warm) & W1 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2153 & --- & 1033.5 & 13.58 & 14.04 & -22.9\% \\
+Regime B (Warm) & W1 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.286 & 971.3 & 13.37 & 13.03 & -27.6\% \\
+Regime B (Warm) & W1 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.033 & 952.4 & 12.70 & 12.09 & -29.0\% \\
+\midrule
+Regime B (Warm) & W2 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7091 & --- & 937.7 & 11.74 & 11.03 & --- \\
+Regime B (Warm) & W2 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2177 & --- & 752.8 & 9.42 & 7.09 & -19.7\% \\
+Regime B (Warm) & W2 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.308 & 739.7 & 9.83 & 7.25 & -21.1\% \\
+Regime B (Warm) & W2 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.035 & 723.5 & 9.31 & 6.71 & -22.8\% \\
+\midrule
+Regime B (Warm) & W3 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7324 & --- & 1191.6 & 14.74 & 17.55 & --- \\
+Regime B (Warm) & W3 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2410 & --- & 759.5 & 9.38 & 7.14 & -36.3\% \\
+Regime B (Warm) & W3 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 1150 & 0.302 & 742.9 & 9.80 & 7.26 & -37.7\% \\
+Regime B (Warm) & W3 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 1150 & 0.034 & 739.9 & 9.55 & 7.09 & -37.9\% \\
+\midrule
+Regime B (Warm) & W4 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 72120 & --- & 11046.8 & 159.48 & 1760.40 & --- \\
+Regime B (Warm) & W4 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 22980 & --- & 8605.5 & 112.51 & 967.24 & -22.1\% \\
+Regime B (Warm) & W4 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 10380 & 4.268 & 8334.2 & 112.66 & 937.59 & -24.6\% \\
+Regime B (Warm) & W4 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 10380 & 0.363 & 8358.8 & 109.38 & 914.65 & -24.3\% \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+================================================================================
+END FILE: results/publication_campaign/tables/table_tool_rag_mitigation.tex
+================================================================================
+
+
+================================================================================
+FILE: results/publication_campaign/tables/table_spearman_correlation.tex
+SHA-256: 7728a1324bfe558fb117bc214b2b5087758958aa0ea7a9feacc289a94cadfde0
+================================================================================
+\begin{table*}[t]
+\centering
+\caption{Non-Parametric Spearman Rank Correlation Matrix ($\rho$) across Critical Systems Telemetry Dimensions on Apple Silicon M4. Contrasts Regime A (Cold Prefill, $n=600$) and Regime B (Warm KV-Cache Reuse, $n=600$). Tautological identities ($T_{\text{task}}$ vs $T_{\text{neural}}$, $T_{\text{task}}$ vs EDP, RSS vs PhysRAM) are excluded in favor of non-trivial architectural interactions, condition-level aggregation ($n=20$), and intra-workload controls. $p$-values are adjusted for family-wise error rate control via step-down Holm-Bonferroni: $^{***}p_{\text{adj}} < 0.001$, $^{**}p_{\text{adj}} < 0.01$, $^{*}p_{\text{adj}} < 0.05$.}
+\label{tab:spearman_correlation}
+\small
+\begin{tabular}{l r r r r}
+\hline
+\textbf{Systems Interaction} & \textbf{Regime A ($\rho_{\text{cold}}$)} & \textbf{Holm-adj. $p$ (A)} & \textbf{Regime B ($\rho_{\text{warm}}$)} & \textbf{Holm-adj. $p$ (B)} \\
+\hline
+$T_{\text{task}}$ vs $N_{\text{prompt}}$ (Prompt Token Length) & +0.948$^{***}$ & $< 10^{-5}$ & +0.585$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{task}}$ vs $E_{\text{net}}$ (Active Package Energy) & +0.930$^{***}$ & $< 10^{-5}$ & +0.955$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{task}}$ vs $T_{\text{orch}}$ (Orchestrator Overhead Share) & +0.597$^{***}$ & $< 10^{-5}$ & +0.550$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{neural}}$ vs $N_{\text{prompt}}$ (Attention Prefill Duration) & +0.955$^{***}$ & $< 10^{-5}$ & +0.556$^{***}$ & $< 10^{-5}$ \\
+$E_{\text{net}}$ vs $N_{\text{prompt}}$ (Prefill Energy Drain) & +0.885$^{***}$ & $< 10^{-5}$ & +0.565$^{***}$ & $< 10^{-5}$ \\
+Retired Instructions vs CPU Cycles & +0.980$^{***}$ & $< 10^{-5}$ & +0.975$^{***}$ & $< 10^{-5}$ \\
+Retired Instructions vs $T_{\text{orch}}$ & +0.748$^{***}$ & $< 10^{-5}$ & +0.824$^{***}$ & $< 10^{-5}$ \\
+Retired Instructions vs Peak RSS & +0.938$^{***}$ & $< 10^{-5}$ & +0.950$^{***}$ & $< 10^{-5}$ \\
+Peak Phys RAM vs $T_{\text{orch}}$ & +0.696$^{***}$ & $< 10^{-5}$ & +0.747$^{***}$ & $< 10^{-5}$ \\
+$T_{\text{disp}}$ vs $T_{\text{orch}}$ (Dispatch Dominance) & +0.711$^{***}$ & $< 10^{-5}$ & +0.854$^{***}$ & $< 10^{-5}$ \\
+Condition Means ($n=20$): $T_{\text{task}}$ vs $N_{\text{prompt}}$ & +0.952$^{***}$ & $< 10^{-5}$ & +0.592$^{**}$ & 0.0059 \\
+Intra-Workload W2 (Fixed $N_{\text{prompt}}$): $T_{\text{orch}}$ vs Instr & +0.930$^{***}$ & $< 10^{-5}$ & +0.932$^{***}$ & $< 10^{-5}$ \\
+Intra-Workload W3 (Vector I/O): $T_{\text{disp}}$ vs $T_{\text{task}}$ & +0.515$^{***}$ & $< 10^{-5}$ & +0.674$^{***}$ & $< 10^{-5}$ \\
+\hline
+\multicolumn{5}{l}{\footnotesize Non-parametric Spearman rank correlation with step-down Holm-Bonferroni family-wise error adjustment ($1{,}200$ total physical evaluations).} \\
+\hline
+\end{tabular}
+\end{table*}
+
+================================================================================
+END FILE: results/publication_campaign/tables/table_spearman_correlation.tex
+================================================================================
+
+
+================================================================================
+FILE: results/publication_campaign/tables/table_pca_loadings.tex
+SHA-256: 4ab9b2e23c83acbc6e7dac35b6b1995e2f45799275e3afdb92968209a04d9ca8
+================================================================================
+\begin{table*}[t]
+\centering
+\caption{Principal Component Analysis (PCA) Variance Decomposition and Factor Loadings across Telemetry Dimensions on Apple Silicon M4. Evaluates $N=480$ trials per regime across compiled and interpreted agent runtimes (\texttt{picoclaw}, \texttt{openclaw\_minimal}, \texttt{openclaw\_full}, \texttt{python\_native}). $\text{PC}_1$ captures prompt prefill scale and energy dissipation; $\text{PC}_2$ isolates host runtime microarchitectural footprint (RAM, CPU cycles, instructions); $\text{PC}_3$ isolates tool dispatch and I/O execution. Values in parentheses denote relative variable contribution (\%).}
+\label{tab:pca_loadings}
+\small
+\begin{tabular}{l c r r r r r r}
+\hline
+ & & \multicolumn{3}{c}{\textbf{Regime A: Cold Prefill}} & \multicolumn{3}{c}{\textbf{Regime B: Warm KV-Cache}} \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-8}
+\textbf{Systems Dimension} & \textbf{Symbol} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} & \textbf{$\text{PC}_1$ (Load / \%)} & \textbf{$\text{PC}_2$ (Load / \%)} & \textbf{$\text{PC}_3$ (Load / \%)} \\
+\hline
+Prompt Tokens & $N_{\text{prompt}}$ & +0.358 (12.8\%) & -0.222 ( 4.9\%) & -0.092 ( 0.8\%) & +0.343 (11.8\%) & -0.084 ( 0.7\%) & -0.100 ( 1.0\%) \\
+Neural Latency & $T_{\text{neural}}$ & +0.359 (12.9\%) & -0.218 ( 4.8\%) & -0.102 ( 1.0\%) & +0.344 (11.8\%) & -0.179 ( 3.2\%) & +0.023 ( 0.1\%) \\
+Task Latency & $T_{\text{task}}$ & +0.360 (12.9\%) & -0.218 ( 4.8\%) & -0.101 ( 1.0\%) & +0.345 (11.9\%) & -0.177 ( 3.1\%) & +0.023 ( 0.1\%) \\
+Net Energy & $E_{\text{net}}$ & +0.360 (12.9\%) & -0.218 ( 4.7\%) & -0.102 ( 1.0\%) & +0.345 (11.9\%) & -0.184 ( 3.4\%) & +0.025 ( 0.1\%) \\
+Energy-Delay Product & EDP & +0.345 (11.9\%) & -0.212 ( 4.5\%) & -0.146 ( 2.1\%) & +0.351 (12.3\%) & -0.166 ( 2.8\%) & -0.001 ( 0.0\%) \\
+Orchestrator Overhead & $T_{\text{orch}}$ & +0.264 ( 7.0\%) & +0.068 ( 0.5\%) & +0.587 (34.5\%) & +0.363 (13.2\%) & +0.009 ( 0.0\%) & +0.090 ( 0.8\%) \\
+HTTP Latency & $T_{\text{http}}$ & +0.262 ( 6.8\%) & +0.050 ( 0.2\%) & +0.552 (30.5\%) & +0.359 (12.9\%) & -0.002 ( 0.0\%) & -0.169 ( 2.9\%) \\
+Dispatch Latency & $T_{\text{disp}}$ & +0.094 ( 0.9\%) & +0.151 ( 2.3\%) & +0.425 (18.1\%) & +0.126 ( 1.6\%) & +0.040 ( 0.2\%) & +0.908 (82.4\%) \\
+Peak RSS & RSS & +0.182 ( 3.3\%) & +0.474 (22.5\%) & -0.216 ( 4.7\%) & +0.111 ( 1.2\%) & +0.515 (26.6\%) & -0.086 ( 0.8\%) \\
+Peak Phys RAM & PhysRAM & +0.134 ( 1.8\%) & +0.521 (27.1\%) & -0.072 ( 0.5\%) & +0.055 ( 0.3\%) & +0.528 (27.9\%) & +0.239 ( 5.7\%) \\
+Retired Instructions & Instr & +0.253 ( 6.4\%) & +0.416 (17.3\%) & -0.151 ( 2.3\%) & +0.193 ( 3.7\%) & +0.459 (21.1\%) & -0.076 ( 0.6\%) \\
+CPU Cycles & Cycles & +0.320 (10.2\%) & +0.253 ( 6.4\%) & -0.186 ( 3.5\%) & +0.271 ( 7.3\%) & +0.334 (11.1\%) & -0.239 ( 5.7\%) \\
+\hline
+\multicolumn{2}{l}{\textbf{Eigenvalue ($\lambda_k$)}} & 6.50 & 2.88 & 1.38 & 7.37 & 3.22 & 1.06 \\
+\multicolumn{2}{l}{\textbf{Explained Variance [\%]}} & 54.2\% & 24.0\% & 11.5\% & 61.4\% & 26.8\% & 8.8\% \\
+\multicolumn{2}{l}{\textbf{Cumulative Variance [\%]}} & 54.2\% & 78.2\% & 89.7\% & 61.4\% & 88.2\% & 97.1\% \\
+\hline
+\multicolumn{8}{l}{\footnotesize Principal component analysis via SVD on Z-score standardized observations ($N=480$ per regime across 4 agent runtimes).} \\
+\multicolumn{8}{l}{\footnotesize Values denote factor loadings (eigenvector entries) and relative contribution percentages: $\text{contrib}_j = v_{jk}^2 \times 100\%$.} \\
+\hline
+\end{tabular}
+\end{table*}
+
+================================================================================
+END FILE: results/publication_campaign/tables/table_pca_loadings.tex
+================================================================================
+
+
+================================================================================
+FILE: results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
+SHA-256: 56c006b9db072bdda65971aee1f29819220ddf1de39af2cf5a8963f5be40be42
+================================================================================
+% Auto-generated by scripts/run_uma_energy_and_bandwidth_attribution.py
+% Empirical Apple Silicon M4 UMA Energy Deconvolution and Analytical & Empirical Memory Bandwidth Estimation
+\begin{table}[t]
+\small
+\centering
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Runtime / Agent} & \textbf{W2 Pure CPU} & \textbf{W3 Vector RAG} & \textbf{Host BW (W3)} & \textbf{Regime B $\Phi_{\text{energy, orch}}$} \\
+& \textbf{(mJ / tool op)} & \textbf{(mJ / RAG op)} & \textbf{(GB/s)} & \textbf{(W2 / W3)} \\
+\midrule
+\textbf{Go Native Orchestrator (PicoClaw Ref.)} & 1.252 & 136.62 & 0.67 & 0.04\% / 1.42\% \\
+\textbf{Python 3.12 Reference Agent} & 1.000 & 34.08 & 2.04 & 0.03\% / 0.34\% \\
+\textbf{Node.js V8 Orchestrator (OpenClaw Min Ref.)} & 0.196 & 45.67 & 1.80 & 0.01\% / 0.49\% \\
+\textbf{Node.js V8 Orchestrator (OpenClaw Full Ref.)} & 0.178 & 44.36 & 1.82 & 0.01\% / 0.30\% \\
+\midrule
+\multicolumn{5}{l}{\textbf{Apple Silicon M4 Physical Energy Validation and Analytical \& Empirical Bandwidth Estimation:}} \\
+\multicolumn{5}{l}{$\bullet$ Validated CPU Proxies: $T_{\text{exec}}$ ($R^2 = 0.949$), Instructions ($R^2 = 0.954$), Cycles ($R^2 = 0.945$); XNU \texttt{ri\_billed\_energy} rejected ($r = -0.051$, $R^2 = -0.676$; $\hat{\kappa}_{\text{M4}} = 0.0573\text{ mJ/unit}$)} \\
+\multicolumn{5}{l}{$\bullet$ Analytical \& Empirical Memory Bandwidth Estimation ($\text{Model Weights} \div \text{ITL}$): Median $97.0\text{ GB/s}$ ($80.8\%$), Mean $95.9\text{ GB/s}$ ($79.9\%$ in Regime A) to $106.7\text{ GB/s}$ ($88.9\%$ in Regime B; global mean $104.0\text{ GB/s}$ / $86.7\%$ of nominal $120\text{ GB/s}$)} \\
+\bottomrule
+\end{tabular}
+\caption{Empirical per-process energy attribution and Unified Memory Architecture (UMA) analytical \& empirical memory bandwidth estimation ($\text{Model Weights} \div \text{ITL}$) on Apple Silicon M4. Marginal dispatch energy ($E_{\text{CPU, net}}^{\text{dispatch}}$) is measured directly on the Apple SMC \texttt{CPU Power} rail with the Metal GPU idle ($P_{\text{GPU}} \approx 0\text{ W}$), determining true orchestrator energy share $\Phi_{\text{energy, orch}} = E_{\text{CPU, net}}^{\text{dispatch}} / E_{\text{net, task}}$. Darwin kernel \texttt{ri\_billed\_energy} is formally refuted as a physical energy proxy ($r = -0.0510, p = 0.580$), whereas execution time, retired instructions, and CPU cycles achieve $R^2 = 0.945\text{--}0.954$.}
+\label{tab:energy_bandwidth_deconvolution}
+\end{table}
+
+================================================================================
+END FILE: results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
+================================================================================
+
+
+================================================================================
+FILE: results/publication_campaign/tables/macros_empirical.tex
+SHA-256: cf20e8fd93fa96cb96c5ddd647bf14f1fb089cf2b6f2ce8ab86bdccb4a5bdca7
+================================================================================
+% Automatically generated macros from publication campaign empirical results
+% DO NOT EDIT MANUALLY - Generated by benchmark/analyze_results.py
+\newcommand{\WThreePicoMedian}{5816.9}
+\newcommand{\WThreePicoIQR}{59.7}
+\newcommand{\WThreePicoMean}{5846.9}
+\newcommand{\WThreePicoSD}{75.2}
+\newcommand{\WThreeOpenMinMedian}{6343.5}
+\newcommand{\WThreeOpenMinIQR}{89.0}
+\newcommand{\WThreeOpenFullMedian}{20786.4}
+\newcommand{\WThreeOpenFullIQR}{80.1}
+\newcommand{\WThreeCliffsDeltaMin}{-1.000}
+\newcommand{\WThreeAOneTwoMin}{0.000}
+\newcommand{\WThreeAdjPMin}{< 10^{-5}}
+\newcommand{\WThreeCliffsDeltaFull}{-1.000}
+\newcommand{\WThreeAOneTwoFull}{0.000}
+\newcommand{\WThreeAdjPFull}{< 10^{-5}}
+\newcommand{\WThreePicoOrchMedian}{46.11}
+\newcommand{\WThreeOpenMinOrchMedian}{67.62}
+\newcommand{\WThreeOpenFullOrchMedian}{88.95}
+
+\newcommand{\WTwoOpenMinMedian}{5557.1}
+\newcommand{\WTwoOpenMinMean}{5557.8}
+\newcommand{\WTwoOpenMinEnergy}{85.04}
+\newcommand{\WTwoPicoMedian}{5556.1}
+\newcommand{\WTwoPicoMean}{5555.9}
+\newcommand{\WTwoPicoEnergy}{84.81}
+\newcommand{\WTwoNeuralMedian}{5600.7}
+\newcommand{\WTwoNeuralMean}{5604.5}
+\newcommand{\WTwoNeuralEnergy}{84.85}
+\newcommand{\WTwoOpenMinTokens}{29.0}
+\newcommand{\WTwoPicoTokens}{29.0}
+\newcommand{\WTwoNeuralPico}{5550.1}
+\newcommand{\WTwoNeuralOpenMin}{5536.0}
+\newcommand{\WTwoPicoOrchMedian}{5.58}
+\newcommand{\WTwoPicoOrchMean}{5.81}
+\newcommand{\WTwoOpenMinOrchMedian}{20.95}
+\newcommand{\WTwoOpenMinOrchMean}{21.86}
+\newcommand{\WTwoOrchSpeedup}{4}
+\newcommand{\WTwoPicoRSS}{12.19}
+\newcommand{\WTwoOpenMinRSS}{85.83}
+\newcommand{\WTwoRAMReduction}{7.0}
+\newcommand{\WTwoOpenMinJoulePerToken}{2.93}
+\newcommand{\WTwoPicoJoulePerToken}{2.92}
+
+\newcommand{\PicoInstructionsMeanM}{243.8}
+\newcommand{\PicoCyclesMeanM}{84.0}
+\newcommand{\OpenMinInstructionsMeanM}{937.1}
+\newcommand{\OpenMinCyclesMeanM}{396.3}
+\newcommand{\InstructionOverheadRatio}{3.84}
+\newcommand{\CyclesOverheadRatio}{4.72}
+
+\newcommand{\PicoRSSMin}{11.25}
+\newcommand{\PicoRSSMax}{52.55}
+\newcommand{\PicoRSSWThree}{52.55}
+\newcommand{\PicoRSSWFour}{16.63}
+\newcommand{\PicoRSSOverallMean}{23.15}
+\newcommand{\OpenRSSMin}{85.63}
+\newcommand{\OpenRSSMax}{114.34}
+\newcommand{\OpenRSSOverallMean}{93.86}
+\newcommand{\RAMReductionMinRatio}{2.18}
+\newcommand{\RAMReductionMaxRatio}{7.61}
+\newcommand{\PeakPhysReductionMinRatio}{1.45}
+\newcommand{\PeakPhysReductionMaxRatio}{8.97}
+\newcommand{\PicoPeakPhysMean}{16.05}
+\newcommand{\OpenMinPeakPhysMean}{45.32}
+\newcommand{\PeakPhysLeanerRatio}{2.82}
+
+\newcommand{\WOneOpenMinMean}{5852.6}
+\newcommand{\WOneOpenFullMean}{20682.7}
+\newcommand{\WOneOpenMinEnergy}{94.06}
+\newcommand{\WOneOpenFullEnergy}{329.50}
+\newcommand{\WOneEnergyBloatRatio}{3.50}
+\newcommand{\WFourOpenFullEnergy}{3219.72}
+\newcommand{\WFourOpenFullEDP}{649659.28}
+\newcommand{\WFourOpenFullMedian}{201797.0}
+\newcommand{\WFourPicoMedian}{55354.8}
+\newcommand{\WFourPicoEDP}{48543.57}
+\newcommand{\WFourEDPReductionPct}{92.53}
+\newcommand{\WFourCliffsDelta}{-1.0}
+\newcommand{\WFourAOneTwo}{0.0}
+\newcommand{\WFourAdjP}{< 10^{-5}}
+
+
+================================================================================
+END FILE: results/publication_campaign/tables/macros_empirical.tex
+================================================================================
+
+
+================================================================================
+FIM DA PARTE 1 DO PACOTE DE AUDITORIA (100% INTEGRAL SEM TRUNCAMENTO)
+================================================================================

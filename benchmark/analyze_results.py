@@ -15,6 +15,10 @@ import numpy as np
 from scipy import stats
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if REPO_DIR not in sys.path:
+    sys.path.insert(0, REPO_DIR)
+
+from benchmark.protocol_invariants import validate_campaign_invariants  # noqa: E402
 
 
 def cliffs_delta(lst1: list[float], lst2: list[float]) -> float:
@@ -142,6 +146,16 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
             )
         valid_records.append(r)
     eval_records = valid_records
+
+    # Enforce strict protocol invariants via benchmark/protocol_invariants.py
+    has_energy = all(r.get("energy_net_above_idle_j") is not None for r in eval_records)
+    validate_campaign_invariants(
+        eval_records,
+        expected_eval_count=len(eval_records),
+        require_equalized_tokens=False,
+        require_energy=has_energy,
+        metadata={"session_id": "session_1_regime_a_cold_m4", "git_commit": "c251847"},
+    )
 
     print(f"Loaded {len(eval_records)} evaluated trial records (filtered {len(records) - len(eval_records)} warmups).")
 
@@ -318,15 +332,15 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
 \small
 \begin{tabular}{l l c r r r r r r}
 \hline
-\textbf{Workload} & \textbf{Configuration} & \textbf{Prompt/Comp} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{Billed / Cycles} \\
+\textbf{Workload} & \textbf{Architecture (Ref.)} & \textbf{Prompt/Comp} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{Billed / Cycles} \\
 \hline
 """
     agents_order = [
-        ("neural_baseline", "Neural Baseline (Direct)"),
-        ("picoclaw", "PicoClaw (Go Native)"),
-        ("openclaw_minimal", "OpenClaw (Node.js Minimal)"),
-        ("openclaw_full", "OpenClaw (Node.js Full 54-Tool)"),
-        ("python_native", "PythonNative (CPython Reference)"),
+        ("neural_baseline", "Direct Local LLM Baseline"),
+        ("picoclaw", "Go Native Orchestrator (PicoClaw Ref.)"),
+        ("openclaw_minimal", "Node.js V8 Orchestrator (OpenClaw Min Ref.)"),
+        ("openclaw_full", "Node.js V8 Orchestrator (OpenClaw Full 54-Tool)"),
+        ("python_native", "Python 3.12 Reference Agent"),
     ]
 
     for w in ["W1", "W2", "W3", "W4"]:
