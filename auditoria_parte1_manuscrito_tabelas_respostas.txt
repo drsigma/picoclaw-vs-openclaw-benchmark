@@ -3,24 +3,15 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 1: RESPOSTA AOS REVISORES, MANUSCRITO .TEX, BIBLIOGRAFIA E TABELAS LATEX
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T12:55:48.388971+00:00
-Git HEAD: 8da3d88d3d6259f22ea09888cc645c7c1e1f6d23
+Data de Geracao (UTC): 2026-11-13T12:56:17.925875+00:00
+Git HEAD: 279d8a5b1c9126d1cd938b48ce4385da0fb45fc7
 Hardware Host: Apple Silicon M4 (Apple M4)
 Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
 ProductVersion:		26.6.2
 BuildVersion:		25G83)
 Python Version: 3.12.15
 Status Git:
-M CITATION.cff
- M benchmark/bun_jsc_agent.mjs
- M benchmark/openclaw_orch.mjs
- M benchmark/picoclaw_orch
- M benchmark/picoclaw_orch.go
- M benchmark/python_orch.py
- M paper/RESPONSE_TO_REVIEWERS.md
- M paper/softwarex_manuscript.tex
- M references.bib
- M scripts/export_audit_bundle.py
+(clean working tree)
 ================================================================================
 
 
