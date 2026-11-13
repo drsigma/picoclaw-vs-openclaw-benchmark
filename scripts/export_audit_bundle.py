@@ -175,8 +175,6 @@ Status Git:
         ".github/workflows/ci.yml",
         "Makefile",
         "pyproject.toml",
-        "README.md",
-        "tutorial/README.md",
     ]
     for doc in priority_docs:
         sections.append(dump_file(doc))
@@ -195,28 +193,8 @@ Status Git:
     for lt in latex_tables:
         sections.append(dump_file(lt))
 
-    # SECAO 3: TODOS OS JSONS DE RESULTADOS E METADADOS
-    sections.append("=" * 80 + "\nSECAO 3: TODOS OS JSONS DE RESULTADOS E METADADOS (COMPACTADOS SEM PERDA DE DADOS)\n" + "=" * 80 + "\n")
-    meta_files = [
-        "results/publication_campaign/campaign_metadata.json",
-        "results/publication_campaign/prefill_regression_fit.json",
-        "results/publication_campaign/uma_energy_bandwidth_attribution.json",
-        "results/publication_campaign/inter_session_replication.json",
-        "results/publication_campaign/pca_variance_decomposition.json",
-        "results/publication_campaign/spearman_correlation_matrix.json",
-        "results/publication_campaign/summary_statistics.json",
-        "results/publication_campaign/warm_cache_summary.json",
-        "results/publication_campaign/statistical_tests.json",
-        "results/publication_campaign/warm_cache_statistical_tests.json",
-        "results/publication_campaign/hyperfine_cold_start.json",
-        "results/publication_campaign/hyperfine_agent_init.json",
-        "data/manifest_sha256.json",
-    ]
-    for mf in meta_files:
-        sections.append(dump_file(mf))
-
-    # SECAO 4: TODO O CODIGO-FONTE DE PRODUCAO E TESTES (100% INTEGRAL SEM TRUNCAMENTO)
-    sections.append("=" * 80 + "\nSECAO 4: TODO O CODIGO-FONTE DE PRODUCAO E TESTES (100% INTEGRAL - ZERO TRUNCAMENTO)\n" + "=" * 80 + "\n")
+    # SECAO 3: TODO O CODIGO-FONTE DE PRODUCAO E TESTES (100% INTEGRAL SEM TRUNCAMENTO)
+    sections.append("=" * 80 + "\nSECAO 3: TODO O CODIGO-FONTE DE PRODUCAO E TESTES (100% INTEGRAL - ZERO TRUNCAMENTO)\n" + "=" * 80 + "\n")
     source_files = [
         # Benchmark & Adapters
         "benchmark/picoclaw_orch.go",
@@ -252,6 +230,28 @@ Status Git:
     ]
     for sf in source_files:
         sections.append(dump_file(sf))
+
+    # SECAO 4: DOCUMENTACAO GERAL, METADADOS E TABELAS ESTATICAS
+    sections.append("=" * 80 + "\nSECAO 4: DOCUMENTACAO GERAL, METADADOS E JSONS DE RESULTADOS (COMPACTADOS SEM PERDA)\n" + "=" * 80 + "\n")
+    doc_and_meta_files = [
+        "README.md",
+        "tutorial/README.md",
+        "results/publication_campaign/campaign_metadata.json",
+        "results/publication_campaign/prefill_regression_fit.json",
+        "results/publication_campaign/uma_energy_bandwidth_attribution.json",
+        "results/publication_campaign/inter_session_replication.json",
+        "results/publication_campaign/pca_variance_decomposition.json",
+        "results/publication_campaign/spearman_correlation_matrix.json",
+        "results/publication_campaign/summary_statistics.json",
+        "results/publication_campaign/warm_cache_summary.json",
+        "results/publication_campaign/statistical_tests.json",
+        "results/publication_campaign/warm_cache_statistical_tests.json",
+        "results/publication_campaign/hyperfine_cold_start.json",
+        "results/publication_campaign/hyperfine_agent_init.json",
+        "data/manifest_sha256.json",
+    ]
+    for dmf in doc_and_meta_files:
+        sections.append(dump_file(dmf))
 
     bundle_content = "\n".join(sections)
     for out_path in [OUTPUT_FINAL, OUTPUT_FILE_6, OUTPUT_FILE_6_4]:

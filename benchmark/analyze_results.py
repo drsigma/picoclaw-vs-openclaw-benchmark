@@ -742,6 +742,22 @@ def compute_spearman_correlation_matrix(
     adj_p_a = holm_bonferroni_adjust(p_vals_a)
     adj_p_b = holm_bonferroni_adjust(p_vals_b)
 
+    reported_pairs = []
+    for idx, (label, ra, pa, rb, pb) in enumerate(table_data):
+        reported_pairs.append({
+            "interaction": label,
+            "regime_a_cold": {
+                "rho": round(float(ra), 4),
+                "p_raw": float(pa),
+                "p_adj_holm": float(adj_p_a[idx]),
+            },
+            "regime_b_warm": {
+                "rho": round(float(rb), 4),
+                "p_raw": float(pb),
+                "p_adj_holm": float(adj_p_b[idx]),
+            },
+        })
+
     out_json_path = os.path.join(output_dir, "spearman_correlation_matrix.json")
     full_output = {
         "description": "Pairwise Spearman Rank Correlation Matrix across 12 Systems Dimensions with Holm-Bonferroni Adjustment",
@@ -749,6 +765,7 @@ def compute_spearman_correlation_matrix(
         "n_evaluations_regime_b": len(recs_b),
         "metrics": [m[0] for m in metric_defs],
         "metric_labels": {m[0]: m[1] for m in metric_defs},
+        "table_reported_pairs_with_holm": reported_pairs,
         "regime_a_cold_prefill": mat_a,
         "regime_b_warm_kv_cache": mat_b,
     }

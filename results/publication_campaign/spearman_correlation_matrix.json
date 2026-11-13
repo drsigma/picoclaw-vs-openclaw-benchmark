@@ -30,6 +30,177 @@
     "energy_net_above_idle_j": "Net Energy",
     "edp_js": "Energy-Delay Product"
   },
+  "table_reported_pairs_with_holm": [
+    {
+      "interaction": "$T_{\\text{task}}$ vs $N_{\\text{prompt}}$ (Prompt Token Length)",
+      "regime_a_cold": {
+        "rho": 0.9476,
+        "p_raw": 1.2360497546563979e-298,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.5939,
+        "p_raw": 1.8129507184533878e-58,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "$T_{\\text{task}}$ vs $E_{\\text{net}}$ (Active Package Energy)",
+      "regime_a_cold": {
+        "rho": 0.93,
+        "p_raw": 4.6367189692715494e-262,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.958,
+        "p_raw": 0.0,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "$T_{\\text{task}}$ vs $T_{\\text{orch}}$ (Orchestrator Overhead Share)",
+      "regime_a_cold": {
+        "rho": 0.5967,
+        "p_raw": 3.8790782102325443e-59,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.5341,
+        "p_raw": 1.4848741049032566e-45,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "$T_{\\text{neural}}$ vs $N_{\\text{prompt}}$ (Attention Prefill Duration)",
+      "regime_a_cold": {
+        "rho": 0.9551,
+        "p_raw": 0.0,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.5782,
+        "p_raw": 7.931229153983075e-55,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "$E_{\\text{net}}$ vs $N_{\\text{prompt}}$ (Prefill Energy Drain)",
+      "regime_a_cold": {
+        "rho": 0.8849,
+        "p_raw": 1.468970454718394e-200,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.5646,
+        "p_raw": 8.04746039069147e-52,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "Retired Instructions vs CPU Cycles",
+      "regime_a_cold": {
+        "rho": 0.9801,
+        "p_raw": 0.0,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.9686,
+        "p_raw": 0.0,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "Retired Instructions vs $T_{\\text{orch}}$",
+      "regime_a_cold": {
+        "rho": 0.7479,
+        "p_raw": 1.6804253407416265e-108,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.8179,
+        "p_raw": 1.0587142746962816e-145,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "Retired Instructions vs Peak RSS",
+      "regime_a_cold": {
+        "rho": 0.9379,
+        "p_raw": 4.367183071657527e-277,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.9518,
+        "p_raw": 4.534088660384637e-309,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "Peak Phys RAM vs $T_{\\text{orch}}$",
+      "regime_a_cold": {
+        "rho": 0.6963,
+        "p_raw": 3.3604690888412255e-88,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.7451,
+        "p_raw": 2.895520369209334e-107,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "$T_{\\text{disp}}$ vs $T_{\\text{orch}}$ (Dispatch Dominance)",
+      "regime_a_cold": {
+        "rho": 0.7115,
+        "p_raw": 1.0766965238079281e-93,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.8457,
+        "p_raw": 2.830933485699842e-165,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "Condition Means ($n=20$): $T_{\\text{task}}$ vs $N_{\\text{prompt}}$",
+      "regime_a_cold": {
+        "rho": 0.9521,
+        "p_raw": 1.0657811491393924e-10,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.5985,
+        "p_raw": 0.005301339736093934,
+        "p_adj_holm": 0.005301
+      }
+    },
+    {
+      "interaction": "Intra-Workload W2 (Fixed $N_{\\text{prompt}}$): $T_{\\text{orch}}$ vs Instr",
+      "regime_a_cold": {
+        "rho": 0.93,
+        "p_raw": 3.295847200943456e-66,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.9174,
+        "p_raw": 4.208490619370275e-61,
+        "p_adj_holm": 0.0
+      }
+    },
+    {
+      "interaction": "Intra-Workload W3 (Vector I/O): $T_{\\text{disp}}$ vs $T_{\\text{task}}$",
+      "regime_a_cold": {
+        "rho": 0.5149,
+        "p_raw": 1.572075720418049e-11,
+        "p_adj_holm": 0.0
+      },
+      "regime_b_warm": {
+        "rho": 0.6736,
+        "p_raw": 3.575592624553836e-21,
+        "p_adj_holm": 0.0
+      }
+    }
+  ],
   "regime_a_cold_prefill": {
     "t_task_ms": {
       "t_task_ms": {
