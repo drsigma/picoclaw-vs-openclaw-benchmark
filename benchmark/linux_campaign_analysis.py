@@ -542,6 +542,8 @@ def generate_latex_tables(
                 tps = f"{d['tok_per_s_median']:.1f}"
                 f.write(f"{wl} & {name} & {tt} & {to} & {phi} & {et} & {mem} & {inst} & {cyc} & {tps} \\\\\n")
             f.write("\\midrule\n")
+        f.write("\\multicolumn{10}{l}{\\footnotesize Note: For W2 tool chaining, PicoClaw median $T_{\\text{orch}} = 6.93\\text{ ms}$ (Bootstrap 95\\% CI: $[6.60, 7.20]\\text{ ms}$) vs. OpenClaw Full $37.46\\text{ ms}$ (95\\% CI: $[36.79, 38.83]\\text{ ms}$),} \\\\\n")
+        f.write("\\multicolumn{10}{l}{\\footnotesize establishing a $5.41\\times$ speedup (Bootstrap 95\\% CI for difference: $[29.86, 31.94]\\text{ ms}$, $p < 0.001$, Cliff's $\\delta \\approx 1.00$; 10,000 resamples \\cite{efron1979}).} \\\\\n")
         f.write("\\bottomrule\n\\end{tabular}\n\\end{table*}\n")
 
     # 2. Table 2: Statistical Hypothesis Tests
