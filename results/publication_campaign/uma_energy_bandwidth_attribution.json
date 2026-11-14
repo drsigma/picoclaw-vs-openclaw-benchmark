@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "timestamp_utc": "2026-11-13T04:04:15.385304+00:00",
+    "timestamp_utc": "2026-11-14T23:20:40.811765+00:00",
     "hardware": "Apple Mac mini M4 (Mac16,10, 10-core GPU, darwin-arm64)",
     "telemetry_source": "Apple SMC powermetrics 50ms + Darwin XNU libproc RUSAGE_INFO_V4",
     "integrity_rule": "100% Physical Telemetry (Zero synthetic or mock data)"
@@ -22,21 +22,21 @@
   "validated_physical_cpu_proxies": {
     "t_exec_ms": {
       "pearson_r": 0.9921,
-      "p_value": 4.421568076531089e-108,
+      "p_value": 4.4215680765383454e-108,
       "ols_r2": 0.949,
-      "slope_joules_per_unit": 0.005437911819951524
+      "slope_joules_per_unit": 0.005437911819951522
     },
     "proc_instructions": {
       "pearson_r": 0.9849,
-      "p_value": 1.1523376608827776e-91,
+      "p_value": 1.1523376608847563e-91,
       "ols_r2": 0.9545,
-      "slope_joules_per_unit": 2.7366374206460887e-10
+      "slope_joules_per_unit": 2.73663742064609e-10
     },
     "proc_cycles": {
       "pearson_r": 0.991,
-      "p_value": 7.949367527638848e-105,
+      "p_value": 7.949367527650278e-105,
       "ols_r2": 0.9449,
-      "slope_joules_per_unit": 1.2507012472231843e-09
+      "slope_joules_per_unit": 1.2507012472231849e-09
     },
     "intra_agent_corr_time_vs_cpu_energy": {
       "picoclaw": 0.9959,
@@ -129,7 +129,7 @@
   },
   "calibration_m4": {
     "n_samples": 120,
-    "kappa_joules_per_unit": 5.7274109470319556e-05,
+    "kappa_joules_per_unit": 5.727410947031957e-05,
     "kappa_mj_per_unit": 0.057274,
     "ci_95_bootstrap_mj": [
       0.022554,
@@ -155,21 +155,21 @@
     "validated_physical_cpu_proxies": {
       "t_exec_ms": {
         "pearson_r": 0.9921,
-        "p_value": 4.421568076531089e-108,
+        "p_value": 4.4215680765383454e-108,
         "ols_r2": 0.949,
-        "slope_joules_per_unit": 0.005437911819951524
+        "slope_joules_per_unit": 0.005437911819951522
       },
       "proc_instructions": {
         "pearson_r": 0.9849,
-        "p_value": 1.1523376608827776e-91,
+        "p_value": 1.1523376608847563e-91,
         "ols_r2": 0.9545,
-        "slope_joules_per_unit": 2.7366374206460887e-10
+        "slope_joules_per_unit": 2.73663742064609e-10
       },
       "proc_cycles": {
         "pearson_r": 0.991,
-        "p_value": 7.949367527638848e-105,
+        "p_value": 7.949367527650278e-105,
         "ols_r2": 0.9449,
-        "slope_joules_per_unit": 1.2507012472231843e-09
+        "slope_joules_per_unit": 1.2507012472231849e-09
       },
       "intra_agent_corr_time_vs_cpu_energy": {
         "picoclaw": 0.9959,
@@ -425,7 +425,7 @@
         "e_net_mean_j": 13.5788,
         "e_dispatch_direct_smc_mj": 0.0,
         "phi_energy_orch_pct": 0.0,
-        "delta_e_net_vs_baseline_j": -0.1953
+        "delta_e_net_vs_baseline_j": -0.1954
       },
       "W3_openclaw_minimal": {
         "workload": "W3",
@@ -452,7 +452,7 @@
         "e_net_mean_j": 14.7401,
         "e_dispatch_direct_smc_mj": 44.364,
         "phi_energy_orch_pct": 0.3,
-        "delta_e_net_vs_baseline_j": 5.6929
+        "delta_e_net_vs_baseline_j": 5.6928
       },
       "W3_picoclaw": {
         "workload": "W3",
@@ -586,39 +586,39 @@
       "regime_a_cold": {
         "mean_gb_s": 100.8,
         "median_gb_s": 100.5,
-        "iqr_gb_s": 2.5,
+        "iqr_gb_s": 1.57,
         "bootstrap_ci_95_gb_s": [
-          99.8,
-          101.5
+          94.77,
+          97.58
         ],
-        "p05_gb_s": 99.0,
-        "p95_gb_s": 102.5,
+        "p05_gb_s": 93.97,
+        "p95_gb_s": 97.13,
         "util_pct_nominal_120": 84.0,
         "median_util_pct_nominal_120": 83.8
       },
       "regime_b_warm": {
         "mean_gb_s": 104.2,
         "median_gb_s": 104.0,
-        "iqr_gb_s": 3.1,
+        "iqr_gb_s": 1.51,
         "bootstrap_ci_95_gb_s": [
-          103.1,
-          105.2
+          110.94,
+          112.1
         ],
-        "p05_gb_s": 100.2,
-        "p95_gb_s": 108.5,
+        "p05_gb_s": 95.25,
+        "p95_gb_s": 114.09,
         "util_pct_nominal_120": 86.8,
         "median_util_pct_nominal_120": 86.7
       },
       "overall": {
         "mean_gb_s": 102.5,
         "median_gb_s": 102.4,
-        "iqr_gb_s": 5.4,
+        "iqr_gb_s": 2.3,
         "bootstrap_ci_95_gb_s": [
-          101.8,
-          103.2
+          108.99,
+          110.64
         ],
-        "p05_gb_s": 99.0,
-        "p95_gb_s": 108.5,
+        "p05_gb_s": 94.36,
+        "p95_gb_s": 114.09,
         "util_pct_nominal_120": 85.4,
         "median_util_pct_nominal_120": 85.3
       }

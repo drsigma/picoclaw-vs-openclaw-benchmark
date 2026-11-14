@@ -20,7 +20,6 @@ Zero hardcoding: every single number, ratio, and percentage is computed from loa
 """
 from __future__ import annotations
 
-import glob
 import hashlib
 import json
 import math
@@ -846,12 +845,12 @@ def generate_cross_platform_audit_report(
     content = f"""# Cross-Platform Systems & Microarchitectural Conformance Report
 ## Physical Node 2: Linux x86_64 vs Physical Node 1: Darwin ARM64 (Mac Mini M4)
 
-**Document Classification:** Systems Benchmark Conformance Report  
-**Verification Standard:** Empirical Systems Benchmarking Guidelines (Zero-Mock, Strictly Empirical)  
-**Host Architecture:** `{linux_hw}`  
-**Operating System & Kernel:** `{linux_os}`  
-**Git Base Commit (Origin):** `{linux_git}`  
-**Inference Context Parity:** `-c {ctx_linux}` (Strict Parity with Darwin) | `-ngl {ngl_linux}` (GPU Offloaded Layers on 4 GiB VRAM)  
+**Document Classification:** Systems Benchmark Conformance Report\n\
+**Verification Standard:** Empirical Systems Benchmarking Guidelines (Zero-Mock, Strictly Empirical)\n\
+**Host Architecture:** `{linux_hw}`\n\
+**Operating System & Kernel:** `{linux_os}`\n\
+**Git Base Commit (Origin):** `{linux_git}`\n\
+**Inference Context Parity:** `-c {ctx_linux}` (Strict Parity with Darwin) | `-ngl {ngl_linux}` (GPU Offloaded Layers on 4 GiB VRAM)
 
 ---
 

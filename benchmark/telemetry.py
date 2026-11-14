@@ -8,6 +8,7 @@ and Darwin XNU libproc per-process micro-architectural resource monitors.
 from __future__ import annotations
 
 import ctypes
+import json
 import os
 import re
 import shutil
@@ -89,7 +90,23 @@ def get_process_rusage_v4(pid: int | None = None) -> dict[str, Any] | None:
                     "proc_billed_energy": int(info.ri_billed_energy),
                 }
         except Exception:
-            return None
+            pass
+
+    # Darwin ps fallback to strictly isolate child PID
+    if sys.platform == "darwin":
+        try:
+            out = subprocess.check_output(["ps", "-p", str(pid), "-o", "rss="], text=True).strip()
+            if out:
+                rss_mb = round(float(out) / 1024.0, 2)
+                return {
+                    "proc_rss_mb": rss_mb,
+                    "proc_peak_phys_mb": rss_mb,
+                    "proc_instructions": 0,
+                    "proc_cycles": 0,
+                    "proc_billed_energy": 0,
+                }
+        except Exception:
+            pass
 
     # Generic POSIX / Linux psutil fallback with /proc/<pid>/status VmHWM isolation
     try:
@@ -164,15 +181,28 @@ def run_subprocess_with_rusage(
     stop_event = threading.Event()
 
     def sampler():
+        if sys.platform == "darwin":
+            st0 = get_process_rusage_v4(proc.pid)
+            if st0:
+                for k in hw_stats:
+                    if k in st0 and st0[k] > hw_stats[k]:
+                        hw_stats[k] = st0[k]
+
         while not stop_event.is_set():
             if proc.poll() is not None:
+                if sys.platform == "darwin":
+                    st = get_process_rusage_v4(proc.pid)
+                    if st:
+                        for k in hw_stats:
+                            if k in st and st[k] > hw_stats[k]:
+                                hw_stats[k] = st[k]
                 break
             st = get_process_rusage_v4(proc.pid)
             if st:
                 for k in hw_stats:
                     if k in st and st[k] > hw_stats[k]:
                         hw_stats[k] = st[k]
-            time.sleep(0.002)
+            time.sleep(0.001)
 
     th = threading.Thread(target=sampler, daemon=True)
     th.start()
@@ -185,6 +215,17 @@ def run_subprocess_with_rusage(
     finally:
         stop_event.set()
         th.join(timeout=0.1)
+
+    # Post-termination Darwin isolation check via ps
+    if sys.platform == "darwin" and hw_stats["proc_peak_phys_mb"] == 0.0:
+        try:
+            out = subprocess.check_output(["ps", "-p", str(proc.pid), "-o", "rss="], text=True).strip()
+            if out:
+                rss_mb = round(float(out) / 1024.0, 2)
+                hw_stats["proc_peak_phys_mb"] = max(hw_stats["proc_peak_phys_mb"], rss_mb)
+                hw_stats["proc_rss_mb"] = max(hw_stats["proc_rss_mb"], rss_mb)
+        except Exception:
+            pass
 
     return stdout, stderr, proc.returncode, hw_stats
 

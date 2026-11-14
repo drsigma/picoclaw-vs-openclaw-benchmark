@@ -1,7 +1,7 @@
 {
   "description": "Rigorous Inter-Session Replication (Session 2, seed=99, n=30 per cell) and Native Bun JSC (benchmark/bun_jsc_agent.mjs) Benchmark",
   "session_id": "session_2_replication_m4",
-  "git_commit": "c251847e2ec6",
+  "git_commit": "25c5601b6e88",
   "caching_protocol": "Deterministic block-isolation (-np 1, 3 primings + 30 evaluations per block, BENCH_CACHE_PROMPT=true, randomized block order)",
   "hardware": "Apple Mac mini M4 (Mac16,10, 10-core Metal GPU)",
   "raw_trials_file": "results/publication_campaign/inter_session_trials.jsonl",
@@ -101,7 +101,7 @@
       },
       "python_native": {
         "session_1_n": 30,
-        "session_1_mean_task_ms": 743.38,
+        "session_1_mean_task_ms": 743.39,
         "session_1_median_task_ms": 743.36,
         "session_1_std_task_ms": 9.95,
         "session_2_n": 30,
@@ -195,11 +195,11 @@
     "W4": {
       "picoclaw": {
         "session_1_n": 30,
-        "session_1_mean_task_ms": 8478.34,
+        "session_1_mean_task_ms": 8478.35,
         "session_1_median_task_ms": 8458.58,
         "session_1_std_task_ms": 111.76,
         "session_2_n": 30,
-        "session_2_mean_task_ms": 8349.91,
+        "session_2_mean_task_ms": 8349.9,
         "session_2_median_task_ms": 8366.16,
         "session_2_std_task_ms": 54.19,
         "inter_session_rel_diff_pct": 1.53,

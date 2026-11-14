@@ -6,12 +6,10 @@ CHUNK_SIZE caracteres (sem quebrar palavras), para consumo modular por
 um Avaliador IA com janela de contexto limitada.
 """
 
-import os
-import sys
 import subprocess
-import textwrap
-from pathlib import Path
+import sys
 from datetime import datetime, timezone
+from pathlib import Path
 
 # ─── Configuração ─────────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -62,7 +60,7 @@ def build_corpus() -> str:
     parts.append(
         border("PACOTE DE AUDITORIA — picoclaw-vs-openclaw-benchmark")
         + f"Gerado em : {ts}\n"
-        + f"Repositório: /home/rafalince/Desktop/mestrado/picoclaw-vs-openclaw-benchmark\n"
+        + "Repositório: /home/rafalince/Desktop/mestrado/picoclaw-vs-openclaw-benchmark\n"
         + f"Commit HEAD: {head_commit} (main)\n\n"
     )
 
@@ -163,7 +161,7 @@ def main() -> None:
         sys.exit(1)
 
     print()
-    print(f"📁  Pasta de exportação:")
+    print("📁  Pasta de exportação:")
     print(f"    {OUTPUT_DIR.resolve()}")
     print()
     print(f"📋  Total de partes : {len(chunks)}")
