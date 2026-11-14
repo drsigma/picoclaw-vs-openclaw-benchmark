@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import ctypes
 import glob
+import json
 import os
 import select
 import shutil
@@ -543,10 +544,10 @@ class PCIeTrafficMonitor:
         rx_vals = [s["rx_mb_s"] for s in self.samples]
         tx_vals = [s["tx_mb_s"] for s in self.samples]
         res = {
-            "pcie_rx_mean_mb_s": round(float(np.mean(rx_vals)), 2) if rx_vals else 0.0,
-            "pcie_rx_max_mb_s": round(float(np.max(rx_vals)), 2) if rx_vals else 0.0,
-            "pcie_tx_mean_mb_s": round(float(np.mean(tx_vals)), 2) if tx_vals else 0.0,
-            "pcie_tx_max_mb_s": round(float(np.max(tx_vals)), 2) if tx_vals else 0.0,
+            "pcie_rx_mean_mb_s": round(sum(rx_vals) / len(rx_vals), 2) if rx_vals else 0.0,
+            "pcie_rx_max_mb_s": round(max(rx_vals), 2) if rx_vals else 0.0,
+            "pcie_tx_mean_mb_s": round(sum(tx_vals) / len(tx_vals), 2) if tx_vals else 0.0,
+            "pcie_tx_max_mb_s": round(max(tx_vals), 2) if tx_vals else 0.0,
             "pcie_sample_count": len(self.samples),
         }
         if self.log_path and self.samples:

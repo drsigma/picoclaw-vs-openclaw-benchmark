@@ -700,8 +700,16 @@ def main() -> None:
     ap.add_argument("--warmups", type=int, default=3)
     ap.add_argument("--idle-sec", type=float, default=60.0)
     ap.add_argument("--ngl", type=int, required=True)
-    ap.add_argument("--model", default=os.environ.get("LLAMA_MODEL", os.path.expanduser(
-        "~/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf")))
+    default_model = os.environ.get("LLAMA_MODEL")
+    if not default_model:
+        for candidate in [
+            os.path.expanduser("~/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
+            "/home/rafalince/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+        ]:
+            if os.path.exists(candidate):
+                default_model = candidate
+                break
+    ap.add_argument("--model", default=default_model or os.path.expanduser("~/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"))
     ap.add_argument("--cool-cpu-c", type=float, default=75.0)
     ap.add_argument("--cool-gpu-c", type=float, default=65.0)
     ap.add_argument("--cool-timeout-s", type=float, default=600.0)

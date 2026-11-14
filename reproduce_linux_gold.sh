@@ -23,6 +23,7 @@ REPS="${REPS:-30}"
 WARMUPS="${WARMUPS:-3}"
 IDLE_SEC="${IDLE_SEC:-10}"
 NGL="${NGL:-16}"
+MODEL="${MODEL:-/home/rafalince/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf}"
 
 # ------------------------------------------------------------------------------
 # 1. Validação de Permissões (Sudo)
@@ -131,7 +132,7 @@ fi
 source .venv_repro/bin/activate
 echo "  - Instalando dependências científicas..."
 pip install --upgrade pip >/dev/null 2>&1
-pip install numpy scipy pytest psutil >/dev/null 2>&1
+pip install numpy scipy pytest psutil matplotlib >/dev/null 2>&1
 
 # Compila binário nativo Go do PicoClaw caso necessário
 if [ ! -f "benchmark/picoclaw_orch_linux" ]; then
@@ -150,6 +151,7 @@ echo "  Parâmetros: --ngl ${NGL} --reps ${REPS} --warmups ${WARMUPS} --idle-sec
 
 python3 scripts/run_linux_x86_64_master_campaign.py \
     --ngl "${NGL}" \
+    --model "${MODEL}" \
     --reps "${REPS}" \
     --warmups "${WARMUPS}" \
     --idle-sec "${IDLE_SEC}" \
@@ -177,6 +179,7 @@ echo "  Parâmetros: --ngl ${NGL} --reps ${REPS} --warmups ${WARMUPS} --idle-sec
 
 python3 scripts/run_linux_x86_64_master_campaign.py \
     --ngl "${NGL}" \
+    --model "${MODEL}" \
     --reps "${REPS}" \
     --warmups "${WARMUPS}" \
     --idle-sec "${IDLE_SEC}" \
