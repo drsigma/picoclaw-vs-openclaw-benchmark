@@ -331,6 +331,12 @@ make reproduce-figures
 
 ---
 
+## 🔄 Continuous Integration (CI) & Reproducibility
+
+Artifact consistency and cross-platform protocol invariants are automatically validated via a Continuous Integration (CI) pipeline using GitHub Actions. Upon every commit, the `.github/workflows/audit.yml` workflow triggers `pytest tests/test_artifact_consistency.py` across isolated runners to guarantee zero-drift reproducibility and strict adherence to the Zero-Mock empirical guidelines.
+
+---
+
 ## 📚 Fundamentação Teórica e Referências / References
 
 As decisões metodológicas, modelos estatísticos e formulações de hardware estão ancorados na literatura científica revisada por pares contida no arquivo [`references.bib`](references.bib):
@@ -343,6 +349,7 @@ As decisões metodológicas, modelos estatísticos e formulações de hardware e
    * Cliff, N. (1993). *Dominance statistics: Ordinal analyses to answer ordinal questions*. Psychological Bulletin, 114(3), 494–509.
    * Vargha, A., & Delaney, H. D. (2000). *A Critique and Improvement of the CL Common Language Effect Size Statistics*. Journal of Educational and Behavioral Statistics, 25(2), 101–132.
    * Holm, S. (1979). *A Simple Sequentially Rejective Multiple Test Procedure*. Scandinavian Journal of Statistics, 6(2), 65–70.
+   * Efron, B. (1979). *Bootstrap Methods: Another Look at the Jackknife*. The Annals of Statistics, 7(1), 1–26.
 3. **Eficiência Energética e Arquitetura de Computadores:**
    * Horowitz, M., Indermaur, T., & Gonzalez, R. (1994). *Low-power digital design*. IEEE Symposium on Low Power Electronics, 8–11.
    * Barroso, L. A., & Hölzle, U. (2007). *The Case for Energy-Proportional Computing*. IEEE Computer, 40(12), 33–37.
@@ -359,4 +366,4 @@ As decisões metodológicas, modelos estatísticos e formulações de hardware e
 
 * **Universidade Federal do ABC (UFABC):** Ao Programa de Pós-Graduação em Engenharia da Informação / Ciência da Computação.
 * **Universidade Federal do ABC (UFABC):** Ao Centro de Engenharia, Modelagem e Ciências Sociais Aplicadas (CECS) pelo apoio institucional e infraestrutura computacional.
-* **Open Source & Research Communities:** Às comunidades científicas de sistemas, engenharia de software e inteligência artificial por disponibilizarem ferramentas e metodologias abertas para pesquisa reprodutível.
+* **Telemetry Frameworks & Open Source:** The authors acknowledge the use of Apple Silicon and Intel RAPL telemetry frameworks for microarchitectural data acquisition. We also thank the open-source community for the foundational tools that enabled this cross-platform validation.

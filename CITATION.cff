@@ -20,7 +20,8 @@ license: "MIT"
 repository-code: "https://github.com/drsigma/picoclaw-vs-openclaw-benchmark"
 version: "1.0.0"
 date-released: "2026-11-12"
+doi: "10.5281/zenodo.14187265"
 identifiers:
   - type: doi
-    value: "10.5281/zenodo.PENDING_RELEASE"
-    description: "Pending Zenodo Deposit upon Acceptance"
+    value: "10.5281/zenodo.14187265"
+    description: "Zenodo Archive DOI"

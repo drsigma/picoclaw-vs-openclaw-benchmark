@@ -895,7 +895,9 @@ The orchestration bottleneck dominance observed in Regime A (Cold Prefill) remai
 | **Cycles** | PMU CPU Cycles | **{pico_w2.get('proc_cycles_mean', 0)/1e6:.2f}M** | **{open_w2.get('proc_cycles_mean', 0)/1e6:.2f}M** | **{dp['cycles']/1e6:.2f}M** | **{dop['cycles']/1e6:.2f}M** | Go cycles bounded $< 200\\text{{M}}$ |
 | **Peak Memory** | Resident Physical MB | **{pico_mem:.1f} MB** | **{open_mem:.1f} MB** | **{dp['peak_phys_mb']:.1f} MB** | **{dop['peak_phys_mb']:.1f} MB** | V8 heap baseline $\\approx 35-45$ MB |
 | **Energy Net** | Joules above Idle | **{pico_w2.get('energy_net_mean_j', 0.0):.2f} J** | **{open_w2.get('energy_net_mean_j', 0.0):.2f} J** | **{dp['energy_net_j']:.2f} J** | **{dop['energy_net_j']:.2f} J** | Governed primarily by neural turn |
-| **Billed Energy** | Task Energy Units | **N/A** *(RAPL mJ)* | **N/A** *(RAPL mJ)* | **{dp['billed']:,.0f}** | **{dop['billed']:,.0f}** | Mach-O task accounting |
+| **Energy per Agent Cycle (Mach-O Billed Energy)** | SMC Task Accounting Units | **N/A** *(RAPL mJ)* | **N/A** *(RAPL mJ)* | **{dp['billed']:,.0f}** | **{dop['billed']:,.0f}** | Attributed exclusively to the agent thread by Apple's SMC |
+
+> **Energy Metric Clarification (Apple SMC Mach-O Billed Energy):** The metric *Energy per Agent Cycle (Mach-O Billed Energy)* refers exclusively to the microarchitectural energy units attributed to the agent's execution threads by the Apple System Management Controller (SMC) via Darwin XNU's `RUSAGE_INFO_V4` (`ri_billed_energy`). On Linux x86_64, host energy is instead sampled at full physical hardware resolution via Intel RAPL (`energy_uj`) and NVIDIA NVML, making the Mach-O thread-billing unit not applicable (`N/A`).
 
 > **Interpretive Note (Neural Baseline Overhead Isolation):** The values of `0.0 MB` (Peak Phys RAM) and `0` (or `N/A`) PMU cycles/instructions recorded for the `neural_baseline` condition (Direct Local LLM Baseline) in Table 1 and master summaries are not telemetry collection failures. The experimental harness isolates and meters strictly the child process orchestrator runtime overhead (`wait4` `ru_maxrss` and `perf_event_open`). Because the baseline represents direct socket inference against `llama-server` without an intermediate agent layer, the middleware overhead is mathematically and physically true zero.
 
@@ -952,6 +954,12 @@ The orchestration bottleneck dominance observed in Regime A (Cold Prefill) remai
 3. **UMA vs. Discrete VRAM in Large Contexts:** Apple's Unified Memory Architecture (UMA) sustained 29.0 tok/s by accommodating the full 32k context (`-ngl 99`), whereas the 4GB RTX 3050 hit a PCIe bandwidth bottleneck (`-ngl 16`) at 23.5 tok/s, proving UMA's superiority for massive contexts.
 4. **KV-Cache Thrashing & Mitigation:** Both architectures suffer massive degradation on large tool catalogs, but the Zero-Copy Tool-RAG Pruner is a universal, ultra-low latency (~2.7ms) mitigation strategy.
 5. **Energy-Delay Product (EDP) Supremacy:** The combination of native execution (PicoClaw) and Apple's UMA architecture establishes a vastly superior EDP (Joules $\\times$ Seconds) compared to V8-based orchestration. This proves that eliminating microarchitectural bloat does not just lower latency, but exponentially increases thermo-electrical efficiency per autonomous agent cycle.
+
+---
+
+## 9. Acknowledgements
+
+The authors acknowledge the use of Apple Silicon and Intel RAPL telemetry frameworks for microarchitectural data acquisition. We also thank the open-source community for the foundational tools that enabled this cross-platform validation.
 """
     with open(guard(report_path), "w", encoding="utf-8") as f:
         f.write(content)
