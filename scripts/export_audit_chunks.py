@@ -64,18 +64,18 @@ def build_corpus() -> str:
         abs_path = REPO_ROOT / rel_path
         parts.append(border(label))
         if abs_path.exists():
-            content = abs_path.read_text(encoding="utf-8", errors="replace")
+            content = abs_path.read_text(encoding="utf-8", errors="replace").strip()
             parts.append(content)
-            if not content.endswith("\n"):
-                parts.append("\n")
+            parts.append("\n\n")
         else:
-            parts.append(f"[ARQUIVO NÃO ENCONTRADO: {rel_path}]\n")
+            parts.append(f"[ARQUIVO NÃO ENCONTRADO: {rel_path}]\n\n")
 
     # Log do pytest
     parts.append(border("LOG PYTEST — tests/test_artifact_consistency.py"))
     if PYTEST_LOG.exists():
-        content = PYTEST_LOG.read_text(encoding="utf-8", errors="replace")
+        content = PYTEST_LOG.read_text(encoding="utf-8", errors="replace").strip()
         parts.append(content)
+        parts.append("\n")
     else:
         parts.append("[Log do pytest não encontrado em /tmp/pytest_audit_output.txt]\n")
 
