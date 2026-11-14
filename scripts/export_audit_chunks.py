@@ -8,6 +8,7 @@ um Avaliador IA com janela de contexto limitada.
 
 import os
 import sys
+import subprocess
 import textwrap
 from pathlib import Path
 from datetime import datetime, timezone
@@ -52,11 +53,17 @@ def build_corpus() -> str:
 
     # Cabeçalho global
     ts = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    try:
+        head_commit = subprocess.check_output(
+            ["git", "rev-parse", "--short", "HEAD"], cwd=REPO_ROOT, text=True
+        ).strip()
+    except Exception:
+        head_commit = "main"
     parts.append(
         border("PACOTE DE AUDITORIA — picoclaw-vs-openclaw-benchmark")
         + f"Gerado em : {ts}\n"
         + f"Repositório: /home/rafalince/Desktop/mestrado/picoclaw-vs-openclaw-benchmark\n"
-        + f"Commit HEAD: d825586 (main)\n\n"
+        + f"Commit HEAD: {head_commit} (main)\n\n"
     )
 
     # Arquivos do repositório

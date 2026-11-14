@@ -75,7 +75,7 @@ The disparity in absolute energy consumption originates from three fundamental m
 
 3. **Methodological Harmonization (Net Energy Above Quiescent Baseline):**
    * Rather than naively contrasting raw cross-chassis electrical power, the methodology isolated dynamic neural and orchestration energy by calculating **Net Dynamic Energy** ($E_{\text{net}} = \int [P(t) - \bar{P}_{\text{idle}}] \, dt$) on each physical node relative to its empirical quiescent baseline.
-   * While absolute joules reflect host-specific silicon efficiency, the **relative cross-runtime invariant** held firmly across both operating systems: OpenClaw Full required significantly greater energy than PicoClaw in both environments (308.56 J vs. 84.81 J on Darwin, and 565.50 J vs. 210.36 J on Linux), proving that runtime orchestrator overhead systematically inflates energy expenditure irrespective of underlying hardware architecture.
+   * While absolute joules reflect host-specific silicon efficiency, the **relative cross-runtime relationship** held firmly across both operating systems: OpenClaw Full required significantly greater energy than PicoClaw in both environments (308.56 J vs. 84.81 J on Darwin, and 565.50 J vs. 210.36 J on Linux), demonstrating that runtime orchestrator overhead systematically inflates energy expenditure across both evaluated testbeds.
 
 ---
 
@@ -93,7 +93,7 @@ The reporting of "N/A" (*Not Applicable / Not Available*) for specific cross-pla
 
 3. **Adherence to Scientific Integrity (Zero-Mock):**
    * By explicitly marking these telemetry fields as "N/A", the study maintains total transparency regarding kernel observability boundaries rather than improvising pseudo-data.
-   * **Universal Harmonized Metric:** Crucially, **Net Dynamic Energy ($E_{\text{net}}$)** was physically sampled and integrated above quiescent baselines on both architectures (Apple SMC current shunts on Darwin; Intel RAPL + NVIDIA NVML on Linux), fully preserving cross-platform empirical validity.
+   * **Cross-Platform Harmonized Metric:** Crucially, **Net Dynamic Energy ($E_{\text{net}}$)** was physically sampled and integrated above quiescent baselines on both architectures (Apple SMC current shunts on Darwin; Intel RAPL + NVIDIA NVML on Linux), fully preserving cross-platform empirical validity.
 
 ---
 
@@ -107,7 +107,7 @@ The recorded values of $0.0$ MB for peak physical resident memory (*Peak Phys RA
 
 2. **Physical Nature of the Direct Baseline:**
    * In the `neural_baseline` arm, prompt payloads are dispatched directly via standard socket HTTP calls to `llama-server` without spawning an intermediary agent or runtime engine (no PicoClaw, OpenClaw, or Python process is instantiated).
-   * Consequently, the runtime memory footprint and retired execution instructions attributable to an orchestrator middleware layer are physically and mathematically **true zero** ($T_{\text{orch}} = 0.00$ ms, $\text{RAM}_{\text{orch}} = 0.0$ MB, $\text{Inst}_{\text{orch}} = 0$).
+   * Consequently, the runtime memory footprint and retired execution instructions attributable to an orchestrator middleware layer reflect the middleware orchestrator boundary ($T_{\text{orch}} = 0.00$ ms, $\text{RAM}_{\text{orch}} = 0.0$ MB, $\text{Inst}_{\text{orch}} = 0$). Zero values reflect the middleware orchestrator boundary (isolated via `wait4`/`perf`); they do not represent the total physical system consumption (inference, drivers, GPU), which continues to operate externally to the measured harness.
 
 3. **Empirical Baseline Alignment:**
    * Neural generation latency and package-level energy consumption are fully captured across all arms. Anchoring orchestrator memory and PMU counters at zero for the baseline establishes the formal control condition, enabling precise mathematical subtraction of neural work to isolate runtime overhead.

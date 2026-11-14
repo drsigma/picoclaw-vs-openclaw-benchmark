@@ -75,7 +75,7 @@ A diferença nas leituras de energia decorre de três distinções físicas e ar
 
 3. **Metodologia de Equalização Científica (Energia Líquida Acima do Repouso):**
    * Em vez de comparar potências brutas de nós fisicamente heterogêneos, a metodologia calculou rigorosamente a **Energia Líquida Dinâmica** ($E_{\text{net}} = \int [P(t) - \bar{P}_{\text{idle}}] \, dt$) individualmente em cada plataforma, descontando o consumo de base medido empiricamente.
-   * Enquanto a magnitude absoluta reflete a eficiência energética intrínseca de cada nó de hardware, a **relação relativa entre orquestradores** permaneceu estritamente invariante entre as plataformas: o OpenClaw Full consumiu substancialmente mais energia que o PicoClaw em ambos os nós (308,56 J vs. 84,81 J no Mac, e 565,50 J vs. 210,36 J no Linux), comprovando que o overhead de orquestração impacta a pegada energética transversalmente a qualquer arquitetura.
+   * Enquanto a magnitude absoluta reflete a eficiência energética intrínseca de cada nó de hardware, a **relação relativa entre orquestradores** permaneceu consistente entre as plataformas: o OpenClaw Full consumiu substancialmente mais energia que o PicoClaw em ambos os nós (308,56 J vs. 84,81 J no Mac, e 565,50 J vs. 210,36 J no Linux), demonstrando que o overhead de orquestração impacta a pegada energética em ambos os ambientes avaliados.
 
 ---
 
@@ -107,7 +107,7 @@ Os valores de $0{,}0$ MB para pegada de memória física (*Peak Phys RAM*) e a a
 
 2. **Significado Físico do Baseline Direto:**
    * No braço `neural_baseline`, uma requisição HTTP direta é despachada pelo harness ao `llama-server` sem instanciar qualquer processo intermediário de orquestrador (sem agente PicoClaw, OpenClaw ou Python).
-   * Portanto, a sobrecarga de memória do processo orquestrador e as instruções gastas em despacho/validação de esquemas são física e matematicamente **zero** ($T_{\text{orch}} = 0{,}00$ ms, $\text{RAM}_{\text{orch}} = 0{,}0$ MB, $\text{Inst}_{\text{orch}} = 0$).
+   * Portanto, os valores zero refletem o limite do processo orquestrador de middleware (isolado via `wait4`/`perf`); não representam o consumo total do sistema físico (inferência, drivers, GPU), que continua operando externamente ao harness medido ($T_{\text{orch}} = 0{,}00$ ms, $\text{RAM}_{\text{orch}} = 0{,}0$ MB, $\text{Inst}_{\text{orch}} = 0$).
 
 3. **Validade da Decomposição de Variância:**
-   * A energia e a latência da geração neural são devidamente contabilizadas na potência global e no $T_{\text{task}}$ de todos os braços. Manter o baseline em zero para memória e PMU de orquestração é o que viabiliza subtrair com precisão cirúrgica a contribuição neural e provar a supremacia de eficiência do PicoClaw.
+   * A energia e a latência da geração neural são devidamente contabilizadas na potência global e no $T_{\text{task}}$ de todos os braços. Manter o baseline em zero para memória e PMU de orquestração é o que viabiliza subtrair com precisão cirúrgica a contribuição neural e quantificar o ganho de eficiência do PicoClaw.
