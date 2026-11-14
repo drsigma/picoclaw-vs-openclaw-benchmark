@@ -1,8 +1,8 @@
-# Cross-Platform Systems & Microarchitectural Audit Report
+# Cross-Platform Systems & Microarchitectural Conformance Report
 ## Physical Node 2: Linux x86_64 vs Physical Node 1: Darwin ARM64 (Mac Mini M4)
 
-**Document Classification:** Formal Systems Benchmark Audit & Reproducibility Certificate  
-**Verification Standard:** IEEE / ACM Artifact Evaluation Guidelines (Zero-Mock, Strictly Empirical)  
+**Document Classification:** Systems Benchmark Conformance Report  
+**Verification Standard:** Empirical Systems Benchmarking Guidelines (Zero-Mock, Strictly Empirical)  
 **Host Architecture:** `Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 30.5 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02`  
 **Operating System & Kernel:** `Ubuntu 26.04 LTS (Linux 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64)`  
 **Git Base Commit (Origin):** `053bd6d9f99494f472bc55dc5367cb2dbba083dc`  
@@ -12,12 +12,12 @@
 
 ## 1. Executive Summary & Cross-Platform Findings
 
-This audit report evaluates the empirical reproduction of the **PicoClaw vs. OpenClaw** benchmarking campaign on a second, distinct physical architecture: an Intel Alder Lake / NVIDIA Ampere x86_64 Linux node, compared side-by-side with the reference Apple Silicon M4 (`darwin-aarch64`) node.
+This conformance report evaluates the empirical reproduction of the **PicoClaw vs. OpenClaw** benchmarking campaign on a second, distinct physical architecture: an Intel Alder Lake / NVIDIA Ampere x86_64 Linux node, compared side-by-side with the reference Apple Silicon M4 (`darwin-aarch64`) node.
 
 ### Core Cross-Platform Observations:
-1. **Orchestration Efficiency Gain ($\Phi_{\text{orch}}$):**
+1. **Orchestration Latency Reduction ($\Phi_{\text{orch}}$):**
    * On Linux x86_64 (W2 Tool Chain), PicoClaw Go native dispatch achieved a median orchestration latency of **6.93 ms** (Bootstrap 95% CI: [6.60, 7.20] ms; $\Phi_{\text{orch}} = 0.26\%$), compared to OpenClaw Node.js Full at **37.46 ms** (Bootstrap 95% CI: [36.79, 38.83] ms; $\Phi_{\text{orch}} = 0.47\%$), establishing a **5.41$\times$ orchestration speedup** (Bootstrap 95% CI for the difference: [29.86, 31.94] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$, indicating a substantial and statistically significant effect size).
-   * On Darwin aarch64, the measured speedup was **4.46$\times$** (Bootstrap 95% CI for the difference: [19.01, 19.77] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$), demonstrating that runtime overhead dominance remains consistent across both evaluated operating systems and instruction set architectures (ISAs).
+   * On Darwin aarch64, the measured speedup was **4.46$\times$** (Bootstrap 95% CI for the difference: [19.01, 19.77] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$), demonstrating that client-side orchestration latency (encompassing HTTP client socket dispatch, Server-Sent Events stream parsing, JSON serialization/deserialization, and tool fetch handling in each language runtime) represents a persistent overhead across both evaluated operating systems and instruction set architectures (ISAs).
 
 2. **Microarchitectural Instruction Elimination:**
    * Hardware PMU counters extracted via `perf_event_open(2)` confirm that OpenClaw Node.js executes **23.56$\times$ more hardware instructions** than PicoClaw (769.20M vs. 32.65M instructions on W2).
@@ -26,7 +26,7 @@ This audit report evaluates the empirical reproduction of the **PicoClaw vs. Ope
    * Measured Peak Physical Footprint (`wait4` `ru_maxrss` / `VmHWM`) confirms PicoClaw consumes **69.4 MB**, while OpenClaw Full consumes **86.0 MB** (**1.24$\times$ footprint expansion**).
 
 ### Cache Regime Consistency:
-The orchestration bottleneck dominance observed in Regime A (Cold Prefill) remains consistent in Regime B (Warm KV-Cache). Even when LLM time-to-first-token (TTFT) drops near zero, the V8 VM overhead remains a measurable physical floor, indicating that orchestration latency is not fully masked by faster neural inference.
+The orchestration bottleneck observed in Regime A (Cold Prefill) remains consistent in Regime B (Warm KV-Cache). Even when LLM time-to-first-token (TTFT) drops near zero, client-side orchestration latency remains a measurable physical floor, indicating that host middleware latency is not fully masked by faster neural inference.
 
 ---
 
@@ -50,14 +50,25 @@ To ensure empirical reproducibility and avoid cross-rail conflation, we formally
 Direct comparisons between PicoClaw and OpenClaw must not confound runtime language differences with JSON schema catalog size. We enforce a formal three-fold comparative framework:
 
 1. **Runtime & Language Isolation (PicoClaw Go vs. OpenClaw Node.js Minimal):**
-   * *Catalog Parity:* Exactly 15 tool definitions ($2,177$ prompt tokens) executed under identical input/output schemas.
+   * *Catalog Parity:* Exactly 15 tool definitions ($2,177$ prompt tokens on W2) executed under identical input/output schemas.
    * *Isolated Factor:* Compiled Go binary vs. Node.js V8 execution engine, isolating garbage collection, VM JIT warmup, and HTTP/IPC serialization overhead.
 2. **Schema & Context Bloat Isolation (OpenClaw Minimal vs. OpenClaw Full):**
    * *Runtime Parity:* Identical Node.js V8 runtime engine and client logic.
-   * *Isolated Factor:* Catalog expansion from 15 tools ($2,177$ tokens) to 54 tools ($7,091$ tokens), isolating token serialization, JSON schema parsing, and attention KV-cache context expansion.
+   * *Isolated Factor:* Catalog expansion from 15 tools ($2,177$ tokens) to 54 tools ($7,091$ tokens on W2), isolating token serialization, JSON schema parsing, and attention KV-cache context expansion.
 3. **Combined Cumulative Effect (PicoClaw Go vs. OpenClaw Full):**
    * Represents the total end-to-end difference between a minimalist compiled agent architecture and an unoptimized full-catalog dynamic runtime.
    * *Methodological Constraint:* OpenClaw Full is not a direct 1:1 runtime equivalent to PicoClaw; reporting both arms isolates the distinct source of latency and memory inflation.
+
+### Workload Prompt Token Dimensionality by Catalog Configuration:
+
+| Workload ID | Workload Semantics | 15-Tool Catalog (Minimal / Native) | 54-Tool Catalog (Full Schema) | Top-5 Vector Pruned (Tool-RAG) | Token Savings (Tool-RAG vs. Full) |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **W1** | Single-turn simple query | $2,153$ tokens | $7,067$ tokens | $893$ tokens | $-87.4\%$ |
+| **W2** | Sequential tool chain (3 calls) | $2,177$ tokens | $7,091$ tokens | $917$ tokens | $-87.1\%$ |
+| **W3** | Vector similarity retrieval (10k docs) | $2,410$ tokens | $7,324$ tokens | $1,150$ tokens | $-84.3\%$ |
+| **W4** | Multi-turn conversational agent (10 turns) | $22,980$ tokens | $72,120$ tokens | $10,380$ tokens | $-85.6\%$ |
+
+*Token Accounting Reconciliation:* In single-turn workloads (W1-W3), token counts reflect the static system header + full JSON tool schemas + user prompt. In W4, token counts represent the cumulative multi-turn context across 10 conversational turns ($10 \times \text{turn prompt}$), illustrating how unpruned schema bloat inflates context duration across extended agent dialogues.
 
 ---
 
@@ -86,8 +97,8 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 
 | Metric | Metric Definition | Linux x86_64 (PicoClaw) | Linux x86_64 (OpenClaw Full) | Darwin ARM64 (PicoClaw) | Darwin ARM64 (OpenClaw Full) | Empirical Cross-Platform Pattern |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **$T_{\text{orch}}$ (ms)** | Orchestrator Overhead | **6.93 ms** | **37.46 ms** | **5.58 ms** | **24.88 ms** | Go $\approx 4-6\times$ faster than V8 |
-| **Instructions** | PMU Hardware Retired | **32.65M** | **769.20M** | **N/A** *(XNU PMC locked)* | **N/A** *(XNU PMC locked)* | V8 VM overhead $> 10\times$ instructions |
+| **$T_{\text{orch}}$ (ms)** | Client-Side Orchestration Latency | **6.93 ms** | **37.46 ms** | **5.58 ms** | **24.88 ms** | Go $\approx 4-6\times$ faster than Node.js |
+| **Instructions** | PMU Hardware Retired | **32.65M** | **769.20M** | **N/A** *(XNU PMC locked)* | **N/A** *(XNU PMC locked)* | Node.js requires $> 10\times$ instructions (V8 JIT, HTTP parser, GC) |
 | **Cycles** | PMU CPU Cycles | **24.92M** | **506.57M** | **28.83M** | **302.45M** | Go cycles bounded $< 200\text{M}$ |
 | **Peak Memory** | Resident Physical MB | **69.4 MB** | **86.0 MB** | **5.1 MB** | **37.8 MB** | V8 heap baseline $\approx 35-45$ MB |
 | **Energy Net** | Joules above Idle | **210.36 J** | **565.50 J** | **84.81 J** | **308.56 J** | Governed primarily by neural turn |
@@ -95,7 +106,7 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 
 > **Energy Metric Clarification (Apple SMC Mach-O Billed Energy):** The metric *Energy per Agent Cycle (Mach-O Billed Energy)* refers exclusively to the microarchitectural energy units attributed to the agent's execution threads by the Apple System Management Controller (SMC) via Darwin XNU's `RUSAGE_INFO_V4` (`ri_billed_energy`). On Linux x86_64, host energy is instead sampled at full physical hardware resolution via Intel RAPL (`energy_uj`) and NVIDIA NVML, making the Mach-O thread-billing unit not applicable (`N/A`).
 
-> **Interpretive Note (Neural Baseline Overhead Isolation):** The values of `0.0 MB` (Peak Phys RAM) and `0` (or `N/A`) PMU cycles/instructions recorded for the `neural_baseline` condition (Direct Local LLM Baseline) in Table 1 and master summaries are not telemetry collection failures. The experimental harness isolates and meters strictly the child process orchestrator runtime overhead (`wait4` `ru_maxrss` and `perf_event_open`). Zero values reflect the middleware orchestrator boundary (isolated via wait4/perf); they do not represent the total physical system consumption (inference, drivers, GPU), which continues to operate externally to the measured harness.
+> **Interpretive Note (Neural Baseline Telemetry Boundary):** The values of `0.0 MB` (Peak Phys RAM) and `0` (or `N/A`) PMU cycles/instructions recorded for the `neural_baseline` condition (Direct Local LLM Baseline) in Table 1 and master summaries represent zero overhead attributed to the intermediary component according to the measurement boundary, rather than the physical zero of the complete system. The host harness isolates and meters strictly the child process orchestrator runtime overhead via `wait4(2)` (`ru_maxrss`) and `perf_event_open(2)`. Because the direct baseline dispatches requests via raw socket HTTP calls directly to `llama-server` without instantiating an intermediate agent process or runtime engine (no Go, Node.js, or Python orchestrator process is spawned), client-side orchestration latency and memory overhead are zero within this boundary. Total physical system consumption (neural tensor forward passes, GPU VRAM allocation, CUDA/Metal kernel dispatch, and background `llama-server` execution) continues to operate externally to the measured orchestrator harness.
 
 ---
 
@@ -106,8 +117,9 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 *   **Linux RTX 3050:** 4096 MiB discrete VRAM cannot accommodate weights + 32768-token KV cache simultaneously.
 *   **Empirical Solution:** Maintained mathematical parity of the context window at **`-c 32768`**, offloading **`-ngl 16`** layers to the RTX 3050 GPU (allocating ~3475 MiB VRAM) and streaming remaining layers via PCIe Gen 4 to DDR5 system RAM.
 *   **Inference Throughput Impact:**
-    *   Linux x86_64 Decode Throughput: **23.5 tok/s** (Partial offload)
-    *   Darwin Metal UMA Decode Throughput: **29.0 tok/s** (Full offload)
+    *   Linux x86_64 Decode Throughput: **23.5 tok/s** (Partial offload: `-ngl 16`)
+    *   Darwin Metal UMA Decode Throughput: **29.0 tok/s** (Full offload: `-ngl 99`)
+    *   *Offload Throughput Disparity:* Apple M4 sustained higher decode throughput under 100% GPU offload (`-ngl 99`), whereas the 4 GiB RTX 3050 executed a hybrid GPU/CPU partition (`-ngl 16`). The lower decode throughput on the hybrid Linux configuration is hypothesized to stem from PCIe bus transfer latency during CPU-GPU layer streaming and DDR5 memory bus contention, though direct PCIe bus hardware counters were not instrumented.
 
 ---
 
@@ -135,14 +147,29 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 
 ## 10. Related Work & Telemetry Comparison
 
-| Benchmark / Framework | Primary Evaluation Focus | Telemetry Layer & Granularity | Hardware Phase Deconvolution ($T_{\text{orch}}$ vs $T_{\text{neural}}$) | Physical Energy Instrumentation (RAPL / SMC) | Microarchitectural PMU (Cycles / Inst) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **OpenMCP** | MCP protocol compliance & interoperability | High-level API response times | No (End-to-end HTTP/stdio black box) | No | No |
-| **AgentRace** | Task success rate across competitive LLM agents | Task completion accuracy & high-level latency | No (Black-box agent wall-clock) | No | No |
-| **BudgetBench** | Financial token cost and budget-constrained planning | Token usage accounting & cloud API pricing | No (Token counters only) | No | No |
-| **This Suite (PicoClaw/OpenClaw Harness)** | Systems overhead, microarchitectural efficiency & energy | Low-level kernel syscalls (`wait4`, `perf_event_open`, RAPL, NVML, SMC) | **Yes** (Hardware-decoupled phase timing: $T_{\text{orch}}$, $T_{\text{dispatch}}$, $T_{\text{http}}$, $T_{\text{neural}}$) | **Yes** (Synchronized Intel RAPL + NVML on Linux; Apple SMC on Darwin) | **Yes** (PMU cycles, retired instructions via Linux `perf` and Darwin Mach-O) |
+| Benchmark / Literature | Primary Focus & Target Domain | Evaluated Abstraction Layer | Hardware Phase Deconvolution ($T_{\text{orch}}$ vs $T_{\text{neural}}$) | Physical Dynamic Energy (RAPL / SMC / NVML) | Low-Level PMU Telemetry (Cycles / Instructions) | Multi-Runtime Isolation (Go / Node / Python) |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: |
+| **OpenMCP** | MCP protocol compliance & cross-tool interoperability | High-level API transport | No | No | No | No |
+| **AgentRace** | Task success rate across competitive LLM agents | End-to-end task wall-clock | No | No | No | No |
+| **BudgetBench** | Financial token cost & constrained agent planning | API token pricing counters | No | No | No | No |
+| **AgentWare** | Agent middleware abstractions & runtime environments | Application runtime layer | No | No | No | Partial (Python only) |
+| **MCP-GRANITE** | Enterprise tool-routing & protocol correctness | Network / gateway layer | No | No | No | No |
+| **NikoBench** | Autonomous software engineering agent benchmarking | End-to-end task execution | No | No | No | No |
+| **SiliconBench** | Hardware accelerator compute benchmarking (FLOPS) | Silicon compute & BLAS | No (Macro tensor ops) | Coarse board-level | No (Agent PMU absent) | No |
+| **Don (2026)** | Energy & latency of LLM inference serving systems | Server-side GPU scheduling | No (Inference only) | Server-side GPU | Server PMU (no agent) | No |
+| **Agarwal (2026)** | LLM agent tool workflows & orchestration cost models | Application API & tokens | No (Black-box HTTP) | No | No | No |
+| **Intelligence per Watt (IPW)** | Macro-system cognitive output per electrical watt | System-wide energy ratio | No (System-wide ratio) | Platform gross | No (PMU uninstrumented) | No |
+| **SALT** | Agentic tool state-space transitions & validation | Agent trajectory tracking | No | No | No | No |
+| **This Suite (PicoClaw/OpenClaw)** | Systems overhead, microarchitectural efficiency & energy | Kernel syscalls (`wait4`, `perf`, RAPL, NVML, SMC) | **Yes** ($T_{\text{orch}}$, $T_{\text{dispatch}}$, $T_{\text{http}}$, $T_{\text{neural}}$) | **Yes** (RAPL+NVML & SMC synchronized shunts) | **Yes** (`perf_event_open` & Mach-O counters) | **Yes** (Go native, Node.js/V8, CPython, Bun/JSC) |
 
-*Framing of Contributions:* The primary contribution of this suite is the reproducible, low-level microarchitectural and energy telemetry harness that decouples middleware orchestration overhead from neural inference computation. The empirical performance findings reported herein serve as rigorous demonstrations of the harness across heterogeneous physical nodes.
+### Differentiating Contribution of This Work:
+While recent literature benchmarks high-level agent trajectory correctness (AgentRace, NikoBench, SALT), enterprise protocol conformance (OpenMCP, MCP-GRANITE), API token budget economics (BudgetBench, Agarwal 2026), or server-side GPU inference throughput (Don 2026, SiliconBench, IPW), none of these studies isolate the client-side middleware runtime tax that orchestrates the agent loop. Our suite addresses this gap by presenting an open, reproducible systems-level telemetry harness that simultaneously combines:
+1. **Multi-runtime execution isolation:** compiled Go native binaries vs. Google V8 JIT (Node.js) vs. interpreted CPython vs. JavaScriptCore (Bun);
+2. **Microarchitectural hardware performance counters:** synchronized sampling of hardware cycles and retired instructions via `perf_event_open(2)` and Darwin Mach-O task accounting;
+3. **Physical dynamic rail energy telemetry:** millijoule-resolution physical accounting (Intel RAPL `package-0` + NVIDIA NVML on Linux; Apple SMC current shunts on Darwin) calibrated against quiescent power baselines;
+4. **Tool schema catalog dimensionality scaling:** controlled factorial scaling (15 tools vs. 54 tools vs. vector Tool-RAG pruning); and
+5. **KV-cache prefix retention states:** cold prefill vs. warm cached prefix vs. interleaved multi-agent slot thrashing.
+This multidimensional design isolates client-side orchestration latency ($T_{\text{orch}}$) from neural tensor forward passes ($T_{\text{neural}}$) with sub-millisecond precision, providing a reproducible empirical methodology for evaluating autonomous agent runtimes.
 
 ---
 
@@ -151,11 +178,11 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 1. **Confounding Factors in Cross-Platform Hardware Comparison:**
    * The cross-platform evaluation between Node 1 (Darwin ARM64 / Mac Mini M4) and Node 2 (Linux x86_64 / Dell G15) is designed as a systems-level demonstration rather than an isolated microarchitectural CPU comparison.
    * Multiple architectural variables vary simultaneously:
-     * *CPU ISA & Microarchitecture:* Apple M4 (ARMv9-A) vs. Intel Core i7-12700H (Golden Cove / Gracemont hybrid x86_64).
+     * *CPU ISA & Microarchitecture:* Apple M4 (ARMv9-A) vs. 12th Gen Intel(R) Core(TM) i5-12500H (Golden Cove / Gracemont hybrid x86_64, 12 physical cores / 16 threads).
      * *Memory Architecture:* Apple 24 GB Unified Memory Architecture (UMA) vs. Linux dual-channel DDR5 system RAM + 4 GiB GDDR6 discrete VRAM.
      * *GPU Offload Parity:* Full GPU offload (`-ngl 99`) on Mac Mini M4 vs. partial offload (`-ngl 16`) on Linux RTX 3050 due to 4 GiB VRAM capacity limits.
-     * *Operating System & Kernel:* Darwin XNU 24.x vs. Linux 6.8.0.
-   * Consequently, throughput differences in neural decode ($29.0$ tok/s on Mac vs. $23.5$ tok/s on Linux) reflect the combined interaction of memory bus bandwidth, PCIe transfer overhead, and GPU compute capabilities, rather than an isolated CPU instruction set effect.
+     * *Operating System & Kernel:* Darwin XNU 24.x vs. Ubuntu 26.04 LTS (Linux 7.0.0-43-generic x86_64).
+   * Consequently, throughput differences in neural decode ($29.0$ tok/s on Mac vs. $23.5$ tok/s on Linux) reflect the combined interaction of memory bus bandwidth, layer offload configuration, and GPU compute capabilities; the PCIe bus transfer penalty remains a working hypothesis given the absence of direct bus instrumentation counters.
 2. **Workload and Framework Generalization Limits:**
    * The workloads evaluated (W1 simple query, W2 tool chain, W3 vector memory retrieval, W4 multi-turn dialogue) capture common agentic design patterns, but findings cannot be generalized unconditionally to arbitrary agent graphs or unmeasured LLM architectures.
    * Runtime observations reflect the specific Go, Node.js (V8), and Python runtimes evaluated and their respective JSON-RPC / HTTP client implementations under local execution conditions.
@@ -164,21 +191,21 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 
 ---
 
-## 12. Audit Compliance & Data Integrity Attestation
+## 12. Systems Conformance & Data Integrity Attestation
 
 *   [x] **Zero Telemetry Mocks:** 100% of telemetry values derived from real Linux kernel sysfs, `/proc`, `perf_event_open(2)`, `wait4(2)`, Intel RAPL, NVIDIA NVML, and live `llama-server`. (Note: directory `mock_files/` contains static test payload fixtures for synthetic tool execution, not mock telemetry).
 *   [x] **Zero Data Contamination:** All Linux outputs restricted strictly to `data/linux_x86_64/`, `results/publication_campaign_linux_x86_64/`, and `data/manifest_sha256_linux_x86_64.json`. 0 bytes modified in Darwin folders.
 *   [x] **Fail-Fast Compliance:** All telemetry checks strictly fail-fast without fallbacks.
 
-**Audit Status:** PASSED (VALIDATED & VERIFIED)
+**Conformance Summary:** VERIFIED UNDER TESTBED CONSTRAINTS
 
 ---
 
 ## 13. Final Research Conclusions: Cross-Platform Synthesis
 
-1. **Orchestration is Consistent Across Architectures:** PicoClaw (Go) yields a ~4.5x to 5.4x speedup over OpenClaw (Node.js) on both ARM64 and x86_64 (Linux W2 $T_{\text{orch}}$ difference: 30.53 ms, Bootstrap 95% CI: [29.86, 31.94] ms; Darwin difference: 19.30 ms, Bootstrap 95% CI: [19.01, 19.77] ms), indicating that VM overhead constitutes a persistent bottleneck across these architectures.
-2. **Microarchitectural Overhead:** The Node.js VM requires >20x more physical hardware instructions to execute the same tool dispatch loops on x86_64.
-3. **UMA vs. Discrete VRAM in Large Contexts:** Apple's Unified Memory Architecture (UMA) sustained higher throughput (29.0 tok/s) under this specific context and offload configuration (`-ngl 99`), whereas the 4GB RTX 3050 hit a PCIe bandwidth bottleneck under partial offload (`-ngl 16`) at 23.5 tok/s.
+1. **Orchestration Latency is Consistent Across Architectures:** PicoClaw (Go) yields a ~4.5x to 5.4x latency reduction over OpenClaw (Node.js) on both ARM64 and x86_64 (Linux W2 $T_{\text{orch}}$ difference: 30.53 ms, Bootstrap 95% CI: [29.86, 31.94] ms; Darwin difference: 19.30 ms, Bootstrap 95% CI: [19.01, 19.77] ms), indicating that client-side orchestration latency (encompassing HTTP socket transport, SSE parsing, JSON serialization, and tool dispatch) constitutes a measurable floor across these architectures.
+2. **Microarchitectural Instruction Cost:** The Node.js client-side orchestration stack executes >20x more physical hardware instructions than Go to complete the same tool dispatch loops on x86_64.
+3. **UMA vs. Discrete VRAM in Large Contexts:** Apple's Unified Memory Architecture (UMA) sustained higher throughput (29.0 tok/s) under this specific context and offload configuration (`-ngl 99`), whereas the 4GB RTX 3050 achieved 23.5 tok/s under partial offload (`-ngl 16`). The throughput difference is hypothesized to stem from PCIe bus transfer latency and host RAM access overhead during CPU-GPU layer streaming, though direct PCIe hardware counters were not instrumented.
 4. **KV-Cache Thrashing & Mitigation:** Both architectures exhibit latency inflation on large tool catalogs under unisolated single-slot execution, and the Zero-Copy Tool-RAG Pruner demonstrated effective, low-latency (~2.7ms) mitigation within the evaluated workloads.
 5. **Energy-Delay Product (EDP) Efficiency Advantage:** The combination of native compiled execution (PicoClaw) and hardware acceleration established a superior EDP (Joules $\times$ Seconds) compared to dynamic runtime orchestration. This demonstrates that eliminating microarchitectural overhead not only lowers latency, but substantially improves thermo-electrical efficiency per autonomous agent cycle.
 
