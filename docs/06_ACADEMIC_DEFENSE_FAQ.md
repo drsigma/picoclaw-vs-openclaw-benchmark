@@ -76,3 +76,21 @@ A diferença nas leituras de energia decorre de três distinções físicas e ar
 3. **Metodologia de Equalização Científica (Energia Líquida Acima do Repouso):**
    * Em vez de comparar potências brutas de nós fisicamente heterogêneos, a metodologia calculou rigorosamente a **Energia Líquida Dinâmica** ($E_{\text{net}} = \int [P(t) - \bar{P}_{\text{idle}}] \, dt$) individualmente em cada plataforma, descontando o consumo de base medido empiricamente.
    * Enquanto a magnitude absoluta reflete a eficiência energética intrínseca de cada nó de hardware, a **relação relativa entre orquestradores** permaneceu estritamente invariante entre as plataformas: o OpenClaw Full consumiu substancialmente mais energia que o PicoClaw em ambos os nós (308,56 J vs. 84,81 J no Mac, e 565,50 J vs. 210,36 J no Linux), comprovando que o overhead de orquestração impacta a pegada energética transversalmente a qualquer arquitetura.
+
+---
+
+### Pergunta 8: Por que a tabela comparativa cross-platform apresenta valores "N/A" para "Billed Energy" no Linux e "Instructions" no Mac, e como isso se alinha à diretriz Zero-Mock?
+**Resposta Rigorosa:**  
+A presença de valores "N/A" (*Not Applicable / Not Available*) é uma decisão metodológica deliberada e transparente que materializa o compromisso **Zero-Mock** desta pesquisa, rejeitando categoricamente qualquer interpolação sintética ou modelagem estimativa:
+
+1. **Linux x86_64: `Billed Energy = N/A (RAPL mJ)`:**
+   * No Linux, a telemetria física utiliza a interface **Intel RAPL** (`/sys/class/powercap/intel-rapl:0/energy_uj`), que integra a energia física real consumida pelo processador completo (Package/Cores/Uncore) e a GPU dedicada via NVML.
+   * Diferente do subsistema de contabilidade de tarefas do kernel Darwin/XNU (`RUSAGE_INFO_V4` com `ri_billed_energy`), o kernel Linux não atribui cotas de energia faturadas (*billed energy units*) individualmente a um PID sem instrumentação invasiva de eBPF ou modelos heurísticos. Como o RAPL fornece a energia física real em milijoules (mJ), o campo de contabilidade de tarefas Mach-O é reportado como `N/A`.
+
+2. **Darwin ARM64: `Instructions = N/A (XNU PMC locked)`:**
+   * No macOS/Darwin, o utilitário oficial `powermetrics` e a API pública do kernel XNU mantêm os contadores de monitoramento de performance (PMC) de baixo nível bloqueados para processos de usuário sem privilégios especiais de kernel (*Kperf / AppleInternal entitlements*).
+   * Em contrapartida, no Linux x86_64, a chamada de sistema nativa `perf_event_open(2)` expõe os contadores PMU de hardware (`instructions` e `cpu-cycles`) com precisão cirúrgica de registrador. Tentar projetar ou inferir as instruções do Mac a partir dos ciclos seria uma fabricação inaceitável de dados.
+
+3. **Preservação da Integridade Científica (Zero-Mock):**
+   * Em vez de fabricar dados cruzados ou preencher lacunas com constantes arbitradas, o estudo documenta com total transparência as fronteiras de observabilidade de cada kernel.
+   * **Métrica Unificadora:** Destaca-se que a **Energia Líquida Dinâmica ($E_{\text{net}}$)** foi rigorosamente medida e integrada em ambas as plataformas (Apple SMC Shunts no Mac e Intel RAPL + NVML no Linux), garantindo a comparabilidade bioenergética do experimento sem qualquer concessão ao empirismo.

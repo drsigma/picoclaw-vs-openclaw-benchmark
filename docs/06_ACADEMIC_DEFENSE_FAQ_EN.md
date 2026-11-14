@@ -76,3 +76,21 @@ The disparity in absolute energy consumption originates from three fundamental m
 3. **Methodological Harmonization (Net Energy Above Quiescent Baseline):**
    * Rather than naively contrasting raw cross-chassis electrical power, the methodology isolated dynamic neural and orchestration energy by calculating **Net Dynamic Energy** ($E_{\text{net}} = \int [P(t) - \bar{P}_{\text{idle}}] \, dt$) on each physical node relative to its empirical quiescent baseline.
    * While absolute joules reflect host-specific silicon efficiency, the **relative cross-runtime invariant** held firmly across both operating systems: OpenClaw Full required significantly greater energy than PicoClaw in both environments (308.56 J vs. 84.81 J on Darwin, and 565.50 J vs. 210.36 J on Linux), proving that runtime orchestrator overhead systematically inflates energy expenditure irrespective of underlying hardware architecture.
+
+---
+
+### Question 8: Why does the cross-platform comparison matrix display "N/A" for "Billed Energy" on Linux and "Instructions" on Darwin, and how does this align with the Zero-Mock mandate?
+**Rigorous Response:**  
+The reporting of "N/A" (*Not Applicable / Not Available*) for specific cross-platform telemetry cells is an intentional, principled methodological choice enforcing the strict **Zero-Mock** standard of this study, categorically rejecting synthetic imputation or heuristic modeling:
+
+1. **Linux x86_64: `Billed Energy = N/A (RAPL mJ)`:**
+   * On Linux, physical telemetry leverages **Intel RAPL** (`/sys/class/powercap/intel-rapl:0/energy_uj`) and NVIDIA NVML to record actual physical millijoules consumed across the full CPU Package, Memory Controller, and discrete GPU board.
+   * Unlike the Darwin XNU Mach-O task accounting subsystem (`RUSAGE_INFO_V4` exposing `ri_billed_energy`), the Linux kernel does not synthesize per-process energy accounting units without intrusive eBPF overhead or speculative models. Because RAPL provides ground-truth physical energy, Mach-O task units are strictly `N/A`.
+
+2. **Darwin ARM64: `Instructions = N/A (XNU PMC locked)`:**
+   * In macOS/Darwin, neither `powermetrics` nor public XNU APIs expose raw Hardware Performance Monitoring Counters (PMC) for hardware instructions retired without private kernel entitlements (*Kperf / AppleInternal*).
+   * Conversely, on Linux x86_64, the native `perf_event_open(2)` syscall provides direct, unprivileged access to core PMU event registers (`instructions` and `cpu-cycles`). Synthetically projecting instructions from cycle counts or IPC assumptions on Apple Silicon would constitute fraudulent data manufacturing.
+
+3. **Adherence to Scientific Integrity (Zero-Mock):**
+   * By explicitly marking these telemetry fields as "N/A", the study maintains total transparency regarding kernel observability boundaries rather than improvising pseudo-data.
+   * **Universal Harmonized Metric:** Crucially, **Net Dynamic Energy ($E_{\text{net}}$)** was physically sampled and integrated above quiescent baselines on both architectures (Apple SMC current shunts on Darwin; Intel RAPL + NVIDIA NVML on Linux), fully preserving cross-platform empirical validity.

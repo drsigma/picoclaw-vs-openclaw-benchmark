@@ -21,7 +21,7 @@ PYTEST_LOG = Path("/tmp/pytest_audit_output.txt")
 # Arquivos a incluir: (rótulo de cabeçalho, caminho relativo ao REPO_ROOT)
 FILES = [
     (
-        "RELATÓRIO DE AUDITORIA CROSS-PLATFORM (Linux x86_64)",
+        "RELATÓRIO DE AUDITORIA CROSS-PLATFORM (Linux x86_64 vs Darwin ARM64)",
         "results/publication_campaign_linux_x86_64/cross_platform_audit_report.md",
     ),
     (
@@ -39,14 +39,6 @@ FILES = [
     (
         "MANIFESTO SHA-256 — linux_x86_64 (Dell G15)",
         "data/manifest_sha256_linux_x86_64.json",
-    ),
-    (
-        "FAQ DE DEFESA ACADÊMICA (EN) — INCLUINDO ASSIMETRIA RAPL vs SMC",
-        "docs/06_ACADEMIC_DEFENSE_FAQ_EN.md",
-    ),
-    (
-        "FAQ DE DEFESA ACADÊMICA (PT) — INCLUINDO ASSIMETRIA RAPL vs SMC",
-        "docs/06_ACADEMIC_DEFENSE_FAQ.md",
     ),
 ]
 
