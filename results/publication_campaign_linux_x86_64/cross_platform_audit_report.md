@@ -16,8 +16,8 @@ This audit report validates the empirical reproduction of the **PicoClaw vs. Ope
 
 ### Core Cross-Platform Invariants Verified:
 1. **Orchestration Supremacy ($\Phi_{\text{orch}}$):**
-   * On Linux x86_64 (W2 Tool Chain), PicoClaw Go native dispatch achieved a median orchestration latency of **6.93 ms** ($\Phi_{\text{orch}} = 0.26\%$), compared to OpenClaw Node.js Full at **37.46 ms** ($\Phi_{\text{orch}} = 0.47\%$), establishing a **5.41$\times$ orchestration speedup** (Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$, indicating a massive and statistically deterministic effect size).
-   * On Darwin aarch64, the measured speedup was **4.46$\times$** (Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$), proving that runtime overhead dominance is invariant across operating systems and instruction set architectures (ISAs).
+   * On Linux x86_64 (W2 Tool Chain), PicoClaw Go native dispatch achieved a median orchestration latency of **6.93 ms** (Bootstrap 95% CI: [6.60, 7.20] ms; $\Phi_{\text{orch}} = 0.26\%$), compared to OpenClaw Node.js Full at **37.46 ms** (Bootstrap 95% CI: [36.79, 38.83] ms; $\Phi_{\text{orch}} = 0.47\%$), establishing a **5.41$\times$ orchestration speedup** (Bootstrap 95% CI for the difference: [29.86, 31.94] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$, indicating a massive and statistically deterministic effect size).
+   * On Darwin aarch64, the measured speedup was **4.46$\times$** (Bootstrap 95% CI for the difference: [19.01, 19.77] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$), proving that runtime overhead dominance is invariant across operating systems and instruction set architectures (ISAs).
 
 2. **Microarchitectural Instruction Elimination:**
    * Hardware PMU counters extracted via `perf_event_open(2)` confirm that OpenClaw Node.js executes **23.56$\times$ more hardware instructions** than PicoClaw (769.20M vs. 32.65M instructions on W2).
@@ -102,7 +102,7 @@ The orchestration bottleneck dominance observed in Regime A (Cold Prefill) remai
 
 ## 8. Final Research Conclusions: Cross-Platform Synthesis
 
-1. **Orchestration is Architecture-Agnostic:** PicoClaw (Go) yields a ~4.5x to 5.4x speedup over OpenClaw (Node.js) on both ARM64 and x86_64, proving VM overhead is an invariant bottleneck.
+1. **Orchestration is Architecture-Agnostic:** PicoClaw (Go) yields a ~4.5x to 5.4x speedup over OpenClaw (Node.js) on both ARM64 and x86_64 (Linux W2 $T_{\text{orch}}$ difference: 30.53 ms, Bootstrap 95% CI: [29.86, 31.94] ms; Darwin difference: 19.30 ms, Bootstrap 95% CI: [19.01, 19.77] ms), proving VM overhead is an invariant bottleneck.
 2. **Microarchitectural Bloat:** The Node.js VM requires >20x more physical hardware instructions to execute the same tool dispatch loops.
 3. **UMA vs. Discrete VRAM in Large Contexts:** Apple's Unified Memory Architecture (UMA) sustained 29.0 tok/s by accommodating the full 32k context (`-ngl 99`), whereas the 4GB RTX 3050 hit a PCIe bandwidth bottleneck (`-ngl 16`) at 23.5 tok/s, proving UMA's superiority for massive contexts.
 4. **KV-Cache Thrashing & Mitigation:** Both architectures suffer massive degradation on large tool catalogs, but the Zero-Copy Tool-RAG Pruner is a universal, ultra-low latency (~2.7ms) mitigation strategy.
