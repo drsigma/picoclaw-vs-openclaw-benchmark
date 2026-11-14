@@ -44,7 +44,7 @@ FILES = [
 
 # ─── Montagem do corpus ────────────────────────────────────────────────────────
 def border(label: str) -> str:
-    return f"\n{'=' * 60}\n=== {label} ===\n{'=' * 60}\n\n"
+    return f"\n=== {label} ===\n\n"
 
 
 def build_corpus() -> str:
@@ -85,8 +85,8 @@ def build_corpus() -> str:
 # ─── Fatiamento (word-safe) ────────────────────────────────────────────────────
 def chunk_text(text: str, max_file_size: int = MAX_CHARS_PER_FILE) -> list[str]:
     """Divide texto em blocos garantindo que cada bloco + rodapé <= max_file_size chars sem quebrar palavras."""
-    # Reservar 30 caracteres para o rodapé de paginação
-    effective_chunk_size = max_file_size - 30
+    # Reservar 25 caracteres para o rodapé de paginação
+    effective_chunk_size = max_file_size - 25
     chunks: list[str] = []
     start = 0
     total = len(text)
