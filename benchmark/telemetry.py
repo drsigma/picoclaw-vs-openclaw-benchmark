@@ -91,8 +91,31 @@ def get_process_rusage_v4(pid: int | None = None) -> dict[str, Any] | None:
         except Exception:
             return None
 
-    # Generic POSIX / Linux psutil fallback
+    # Generic POSIX / Linux psutil fallback with /proc/<pid>/status VmHWM isolation
     try:
+        if sys.platform.startswith("linux"):
+            status_file = f"/proc/{pid}/status"
+            if os.path.exists(status_file):
+                hwm_kb = 0
+                rss_kb = 0
+                with open(status_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if line.startswith("VmHWM:"):
+                            parts = line.split()
+                            if len(parts) >= 2:
+                                hwm_kb = int(parts[1])
+                        elif line.startswith("VmRSS:"):
+                            parts = line.split()
+                            if len(parts) >= 2:
+                                rss_kb = int(parts[1])
+                if hwm_kb > 0:
+                    return {
+                        "proc_rss_mb": round(rss_kb / 1024.0, 2),
+                        "proc_peak_phys_mb": round(hwm_kb / 1024.0, 2),
+                        "proc_instructions": 0,
+                        "proc_cycles": 0,
+                        "proc_billed_energy": 0,
+                    }
         import psutil
         p = psutil.Process(pid)
         mem = p.memory_info()
@@ -539,3 +562,81 @@ class LinuxRAPLMonitor:
             }
         except Exception:
             return None
+
+
+class PCIeTrafficMonitor:
+    """
+    Asynchronous background monitor executing `nvidia-smi dmon -s t -d 1` to capture PCIe Rx/Tx throughput (MB/s).
+    """
+
+    def __init__(self, log_path: str | None = None):
+        self.log_path = log_path
+        self.proc: subprocess.Popen | None = None
+        self.samples: list[dict[str, float]] = []
+        self._thread: threading.Thread | None = None
+        self._stop_event = threading.Event()
+
+    def start(self) -> None:
+        self.samples.clear()
+        self._stop_event.clear()
+        try:
+            self.proc = subprocess.Popen(
+                ["nvidia-smi", "dmon", "-s", "t", "-d", "1"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        except Exception:
+            self.proc = None
+            return
+
+        def _reader():
+            while not self._stop_event.is_set() and self.proc and self.proc.stdout:
+                line = self.proc.stdout.readline()
+                if not line:
+                    break
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts = line.split()
+                if len(parts) >= 3:
+                    try:
+                        rx = float(parts[1]) if parts[1] != "-" else 0.0
+                        tx = float(parts[2]) if parts[2] != "-" else 0.0
+                        self.samples.append({"rx_mb_s": rx, "tx_mb_s": tx})
+                    except ValueError:
+                        pass
+
+        self._thread = threading.Thread(target=_reader, daemon=True)
+        self._thread.start()
+
+    def stop(self) -> dict[str, float]:
+        self._stop_event.set()
+        if self.proc:
+            try:
+                self.proc.terminate()
+                self.proc.wait(timeout=2.0)
+            except Exception:
+                try:
+                    self.proc.kill()
+                except Exception:
+                    pass
+        if self._thread:
+            self._thread.join(timeout=1.0)
+
+        rx_vals = [s["rx_mb_s"] for s in self.samples]
+        tx_vals = [s["tx_mb_s"] for s in self.samples]
+        res = {
+            "pcie_rx_mean_mb_s": round(float(np.mean(rx_vals)), 2) if rx_vals else 0.0,
+            "pcie_rx_max_mb_s": round(float(np.max(rx_vals)), 2) if rx_vals else 0.0,
+            "pcie_tx_mean_mb_s": round(float(np.mean(tx_vals)), 2) if tx_vals else 0.0,
+            "pcie_tx_max_mb_s": round(float(np.max(tx_vals)), 2) if tx_vals else 0.0,
+            "pcie_sample_count": len(self.samples),
+        }
+        if self.log_path and self.samples:
+            try:
+                with open(self.log_path, "w", encoding="utf-8") as f:
+                    json.dump({"samples": self.samples, "summary": res}, f, indent=2)
+            except Exception:
+                pass
+        return res

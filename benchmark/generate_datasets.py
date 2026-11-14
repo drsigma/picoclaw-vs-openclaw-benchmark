@@ -89,10 +89,17 @@ def main():
     ]
     for idx in range(10000):
         t = topics[idx % len(topics)]
-        sample_chunks[str(idx)] = (
+        raw_text = (
             f"[Chunk #{idx:04d}] Technical Reference: {t}. "
             + ("Empirical telemetry confirms cache-line coherence across performance and efficiency cores. " * 4)
         )
+        # Enforce exact 512-character deterministic padding to ensure prompt byte & token parity in Regime A
+        pad_len = 512 - len(raw_text)
+        if pad_len > 0:
+            raw_text = raw_text + " " + ("." * (pad_len - 1))
+        else:
+            raw_text = raw_text[:512]
+        sample_chunks[str(idx)] = raw_text
     with open(DOCS_FILE, "w", encoding="utf-8") as f:
         json.dump(sample_chunks, f, indent=2)
 

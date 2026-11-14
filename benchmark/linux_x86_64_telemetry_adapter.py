@@ -237,7 +237,44 @@ def run_subprocess_with_perf_rusage(
     t_err.start()
 
     t_wait0 = time.monotonic()
+    peak_hwm_kb = 0
+    stop_mem_sampler = threading.Event()
+    status_path = f"/proc/{pid}/status"
+
+    def _sample_mem() -> None:
+        nonlocal peak_hwm_kb
+        while not stop_mem_sampler.is_set():
+            try:
+                with open(status_path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if line.startswith("VmHWM:"):
+                            parts = line.split()
+                            if len(parts) >= 2:
+                                val = int(parts[1])
+                                if val > peak_hwm_kb:
+                                    peak_hwm_kb = val
+                            break
+            except Exception:
+                pass
+            time.sleep(0.0005)
+
+    t_mem = threading.Thread(target=_sample_mem, daemon=True)
+    t_mem.start()
+
     while True:
+        try:
+            with open(status_path, "r", encoding="utf-8") as f:
+                for line in f:
+                    if line.startswith("VmHWM:"):
+                        parts = line.split()
+                        if len(parts) >= 2:
+                            val = int(parts[1])
+                            if val > peak_hwm_kb:
+                                peak_hwm_kb = val
+                        break
+        except Exception:
+            pass
+
         wpid, status, ru = os.wait4(pid, os.WNOHANG if timeout is not None else 0)
         if wpid == pid:
             break
@@ -246,6 +283,9 @@ def run_subprocess_with_perf_rusage(
             os.wait4(pid, 0)
             raise subprocess.TimeoutExpired(cmd, timeout)
         time.sleep(0.0005)
+
+    stop_mem_sampler.set()
+    t_mem.join(timeout=1.0)
     t_out.join()
     t_err.join()
     proc.returncode = os.waitstatus_to_exitcode(status)
@@ -266,7 +306,11 @@ def run_subprocess_with_perf_rusage(
             f"FAIL-FAST: PMU returned instructions={instructions}, cycles={cycles} for {cmd[:2]}"
         )
 
-    peak_mb = ru.ru_maxrss / 1024.0  # Linux: KiB
+    # Use isolated child VmHWM from /proc/<pid>/status; fallback to wait4 ru_maxrss only if unread
+    if peak_hwm_kb > 0:
+        peak_mb = peak_hwm_kb / 1024.0
+    else:
+        peak_mb = ru.ru_maxrss / 1024.0  # Linux: KiB fallback
     if peak_mb <= 0.0:
         raise RuntimeError(f"FAIL-FAST: ru_maxrss={ru.ru_maxrss} for {cmd[:2]}")
 
@@ -438,8 +482,84 @@ class Nvml:
         return int(r.value)
 
 
+class PCIeTrafficMonitor:
+    """Asynchronous background monitor executing `nvidia-smi dmon -s t -d 1` to capture PCIe Rx/Tx throughput (MB/s)."""
+
+    def __init__(self, log_path: str | None = None):
+        self.log_path = log_path
+        self.proc: subprocess.Popen | None = None
+        self.samples: list[dict[str, float]] = []
+        self._thread: threading.Thread | None = None
+        self._stop_event = threading.Event()
+
+    def start(self) -> None:
+        self.samples.clear()
+        self._stop_event.clear()
+        try:
+            self.proc = subprocess.Popen(
+                ["nvidia-smi", "dmon", "-s", "t", "-d", "1"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        except Exception:
+            self.proc = None
+            return
+
+        def _reader():
+            while not self._stop_event.is_set() and self.proc and self.proc.stdout:
+                line = self.proc.stdout.readline()
+                if not line:
+                    break
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts = line.split()
+                if len(parts) >= 3:
+                    try:
+                        rx = float(parts[1]) if parts[1] != "-" else 0.0
+                        tx = float(parts[2]) if parts[2] != "-" else 0.0
+                        self.samples.append({"rx_mb_s": rx, "tx_mb_s": tx})
+                    except ValueError:
+                        pass
+
+        self._thread = threading.Thread(target=_reader, daemon=True)
+        self._thread.start()
+
+    def stop(self) -> dict[str, float]:
+        self._stop_event.set()
+        if self.proc:
+            try:
+                self.proc.terminate()
+                self.proc.wait(timeout=2.0)
+            except Exception:
+                try:
+                    self.proc.kill()
+                except Exception:
+                    pass
+        if self._thread:
+            self._thread.join(timeout=1.0)
+
+        rx_vals = [s["rx_mb_s"] for s in self.samples]
+        tx_vals = [s["tx_mb_s"] for s in self.samples]
+        res = {
+            "pcie_rx_mean_mb_s": round(float(np.mean(rx_vals)), 2) if rx_vals else 0.0,
+            "pcie_rx_max_mb_s": round(float(np.max(rx_vals)), 2) if rx_vals else 0.0,
+            "pcie_tx_mean_mb_s": round(float(np.mean(tx_vals)), 2) if tx_vals else 0.0,
+            "pcie_tx_max_mb_s": round(float(np.max(tx_vals)), 2) if tx_vals else 0.0,
+            "pcie_sample_count": len(self.samples),
+        }
+        if self.log_path and self.samples:
+            try:
+                with open(self.log_path, "w", encoding="utf-8") as f:
+                    json.dump({"samples": self.samples, "summary": res}, f, indent=2)
+            except Exception:
+                pass
+        return res
+
+
 class LinuxHardwarePowerMonitor:
-    """Exact energy from hardware counters: Intel RAPL (package, core, uncore) + NVML (GPU)."""
+    """Exact energy from hardware counters: Intel RAPL (package, core, uncore) + NVML (GPU) with PCIe bus monitoring."""
 
     def __init__(self) -> None:
         base = "/sys/class/powercap"
@@ -457,6 +577,7 @@ class LinuxHardwarePowerMonitor:
                 )
         self._range = {n: _read_int(os.path.join(z, "max_energy_range_uj")) for n, z in self.zones.items()}
         self.nvml = Nvml.instance()
+        self.pcie_monitor = PCIeTrafficMonitor()
         self.telemetry_backend = "linux_intel_rapl_and_nvidia_nvml"
         self.idle_cpu_w = None
         self.idle_gpu_w = None
@@ -499,6 +620,7 @@ class LinuxHardwarePowerMonitor:
     def start(self) -> None:
         self._t0 = time.monotonic_ns()
         self._snap0 = self._snap()
+        self.pcie_monitor.start()
 
     def mark(self) -> dict[str, float]:
         """Energy since start() without stopping (used to split prefill / decode phases)."""
@@ -508,6 +630,7 @@ class LinuxHardwarePowerMonitor:
     def stop(self) -> dict[str, float]:
         if self.idle_total_w is None:
             raise RuntimeError("FAIL-FAST: idle baseline not measured before trials")
+        pcie_stats = self.pcie_monitor.stop()
         s1 = self._snap()
         dt = (time.monotonic_ns() - self._t0) / 1e9
         d = self._delta(self._snap0, s1)
@@ -523,4 +646,5 @@ class LinuxHardwarePowerMonitor:
             "p_net_w": net / dt,
             "avg_power_w": total / dt,
             "duration_s": dt,
+            **pcie_stats,
         }
