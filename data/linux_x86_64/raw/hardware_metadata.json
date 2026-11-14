@@ -1,0 +1,283 @@
+{
+  "session_id": "session_linux_x86_64_2ee46cfdd9fd",
+  "created_utc": "2026-11-14T04:18:16.439594+00:00",
+  "arch_tag": "linux_x86_64",
+  "provenance": {
+    "hardware": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 30.5 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02",
+    "os": "Ubuntu 26.04 LTS (Linux 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64)",
+    "git_commit": "053bd6d9f99494f472bc55dc5367cb2dbba083dc",
+    "cpu_model": "12th Gen Intel(R) Core(TM) i5-12500H",
+    "gpu_info": "NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02",
+    "total_ram": "30.5 GiB RAM",
+    "sys_vendor": "Dell Inc.",
+    "product_name": "Dell G15 5520"
+  },
+  "git_dirty_files": 7,
+  "llama_server": {
+    "flags_effective": "-c 32768 -np 1 -t 4 --temp 0.0 --seed 42 -ngl 16",
+    "reference_flags_darwin": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
+    "n_gpu_layers_final": 16,
+    "n_ctx": 32768,
+    "model_path": "/home/rafalince/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    "model_version": "Llama-3.2-3B-Instruct",
+    "quantization": "GGUF Q4_K_M (2.019 GB)",
+    "ngl_rationale": "-c 32768 kept identical to darwin; -ngl reduced until model+KV fit in 4 GiB VRAM + system RAM"
+  },
+  "memory_metric_note": "On Linux the primary physical memory metric proc_peak_phys_mb is VmHWM / Peak RSS (wait4 ru_maxrss of the workload process tree, KiB->MiB). Darwin uses ri_lifetime_max_phys_footprint.",
+  "pmu": {
+    "method": "perf_event_open(2) on workload PID, enable_on_exec, inherit; core PMUs summed",
+    "perf_event_paranoid": -1,
+    "kptr_restrict": 0
+  },
+  "energy": {
+    "backend": "linux_intel_rapl_and_nvidia_nvml",
+    "rapl_zones": [
+      "core",
+      "package-0",
+      "psys",
+      "uncore"
+    ],
+    "total_definition": "RAPL package-0 + NVML GPU (excludes platform/psys, display, SSD, fans)"
+  },
+  "idle_baseline": {
+    "duration_s": 60.023404565,
+    "p_idle_cpu_pkg_w": 17.835258975366987,
+    "p_idle_gpu_w": 4.192447959653653,
+    "p_idle_total_w": 22.02770693502064,
+    "p_idle_rapl_package-0_w": 17.835258975366987,
+    "p_idle_rapl_core_w": 10.474914453063565,
+    "p_idle_rapl_uncore_w": 0.3394317457940417,
+    "p_idle_rapl_psys_w": 38.933213951057056
+  },
+  "thermal_plateau": {
+    "waited_s": 15.006393867000043,
+    "cpu_c": 37.8,
+    "gpu_c": 36.0,
+    "fan_rpm": [
+      4005,
+      4294
+    ],
+    "fan_max_rpm": [
+      4000,
+      4300
+    ]
+  },
+  "thermal_gate": {
+    "cpu_max_c": 75.0,
+    "gpu_max_c": 65.0,
+    "timeout_s": 600.0
+  },
+  "fans": {
+    "rpm": [
+      4005,
+      4285
+    ],
+    "max_rpm": [
+      4000,
+      4300
+    ]
+  },
+  "cpu_governors": [
+    "performance"
+  ],
+  "platform_profile": "performance",
+  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 595.99.02, 4096 MiB, 3487 MiB, 1972 MHz, 2100 MHz, 6001 MHz, [N/A], Enabled",
+  "lscpu": {
+    "lscpu": [
+      {
+        "field": "Arquitetura:",
+        "data": "x86_64"
+      },
+      {
+        "field": "Modo(s) operacional da CPU:",
+        "data": "32-bit, 64-bit"
+      },
+      {
+        "field": "Tamanhos de endere\u00e7o:",
+        "data": "39 bits physical, 48 bits virtual"
+      },
+      {
+        "field": "Ordem dos bytes:",
+        "data": "Little Endian"
+      },
+      {
+        "field": "CPU(s):",
+        "data": "16"
+      },
+      {
+        "field": "Lista de CPU(s) on-line:",
+        "data": "0-15"
+      },
+      {
+        "field": "ID de fornecedor:",
+        "data": "GenuineIntel"
+      },
+      {
+        "field": "Nome do modelo:",
+        "data": "12th Gen Intel(R) Core(TM) i5-12500H"
+      },
+      {
+        "field": "Fam\u00edlia da CPU:",
+        "data": "6"
+      },
+      {
+        "field": "Modelo:",
+        "data": "154"
+      },
+      {
+        "field": "Thread(s) per n\u00facleo:",
+        "data": "2"
+      },
+      {
+        "field": "N\u00facleo(s) por soquete:",
+        "data": "12"
+      },
+      {
+        "field": "Soquete(s):",
+        "data": "1"
+      },
+      {
+        "field": "Step:",
+        "data": "3"
+      },
+      {
+        "field": "CPU(s) MHz de escala:",
+        "data": "37%"
+      },
+      {
+        "field": "CPU MHz m\u00e1x.:",
+        "data": "4500.0000"
+      },
+      {
+        "field": "CPU MHz m\u00edn.:",
+        "data": "400.0000"
+      },
+      {
+        "field": "BogoMIPS:",
+        "data": "6220.80"
+      },
+      {
+        "field": "Op\u00e7\u00f5es:",
+        "data": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb intel_pt sha_ni xsaveopt xsavec xgetbv1 xsaves split_lock_detect user_shstk avx_vnni dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req hfi vnmi umip pku ospke waitpkg gfni vaes vpclmulqdq rdpid movdiri movdir64b fsrm md_clear serialize arch_lbr ibt flush_l1d arch_capabilities"
+      },
+      {
+        "field": "Virtualiza\u00e7\u00e3o:",
+        "data": "VT-x"
+      },
+      {
+        "field": "cache de L1d:",
+        "data": "448 KiB (12 inst\u00e2ncias)"
+      },
+      {
+        "field": "cache de L1i:",
+        "data": "640 KiB (12 inst\u00e2ncias)"
+      },
+      {
+        "field": "cache de L2:",
+        "data": "9 MiB (6 inst\u00e2ncias)"
+      },
+      {
+        "field": "cache de L3:",
+        "data": "18 MiB (1 inst\u00e2ncia)"
+      },
+      {
+        "field": "N\u00f3(s) de NUMA:",
+        "data": "1"
+      },
+      {
+        "field": "CPU(s) de n\u00f30 NUMA:",
+        "data": "0-15"
+      },
+      {
+        "field": "Vulnerabilidade Gather data sampling:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Ghostwrite:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Indirect target selection:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Itlb multihit:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade L1tf:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Mds:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Meltdown:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Mmio stale data:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Old microcode:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Reg file data sampling:",
+        "data": "Mitigation; Clear Register File"
+      },
+      {
+        "field": "Vulnerabilidade Retbleed:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Spec rstack overflow:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Spec store bypass:",
+        "data": "Mitigation; Speculative Store Bypass disabled via prctl"
+      },
+      {
+        "field": "Vulnerabilidade Spectre v1:",
+        "data": "Mitigation; usercopy/swapgs barriers and __user pointer sanitization"
+      },
+      {
+        "field": "Vulnerabilidade Spectre v2:",
+        "data": "Mitigation; Enhanced / Automatic IBRS; IBPB conditional; PBRSB-eIBRS SW sequence; BHI BHI_DIS_S"
+      },
+      {
+        "field": "Vulnerabilidade Srbds:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Tsa:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Tsx async abort:",
+        "data": "Not affected"
+      },
+      {
+        "field": "Vulnerabilidade Vmscape:",
+        "data": "Mitigation; IBPB before exit to userspace"
+      }
+    ]
+  },
+  "toolchain": {
+    "picoclaw": "go version go1.26.8 linux/amd64 (native Linux ELF x86_64)",
+    "picoclaw_tool_rag": "go version go1.26.8 linux/amd64 (native Linux ELF x86_64)",
+    "openclaw_minimal": "Node.js v18.20.8 (Google V8 JIT)",
+    "openclaw_full": "Node.js v18.20.8 (Google V8 JIT)",
+    "openclaw_tool_rag": "Node.js v18.20.8 (Google V8 JIT)",
+    "python_native": "Python 3.14.4 (CPython)",
+    "bun_minimal": "Bun v1.4.4 / JavaScriptCore",
+    "neural_baseline": "llama.cpp Linux x86_64 (CUDA partial offload)"
+  },
+  "adapters_cfg": {
+    "reps": 30,
+    "warmups": 3
+  }
+}

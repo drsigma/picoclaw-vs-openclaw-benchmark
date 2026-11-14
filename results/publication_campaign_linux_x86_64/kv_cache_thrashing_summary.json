@@ -1,0 +1,56 @@
+{
+  "session_id": "KV_CACHE_THRASHING_LINUX_X86_64",
+  "hardware": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 30.5 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02",
+  "os": "Ubuntu 26.04 LTS (Linux 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64)",
+  "workload": "W2_synthetic_kv_stress",
+  "total_evaluated_trials": 180,
+  "regimes": {
+    "T1_cold_cache_15": {
+      "n_trials": 30,
+      "t_task_median_ms": 2735.11,
+      "t_task_mean_ms": 2737.63,
+      "prompt_ms_median": 1493.66,
+      "prompt_ms_mean": 1492.96
+    },
+    "T1_cold_cache_54": {
+      "n_trials": 30,
+      "t_task_median_ms": 7964.86,
+      "t_task_mean_ms": 7970.83,
+      "prompt_ms_median": 5162.89,
+      "prompt_ms_mean": 5163.47
+    },
+    "T2_interleaved_thrashing_15": {
+      "n_trials": 30,
+      "t_task_median_ms": 3112.32,
+      "t_task_mean_ms": 3097.19,
+      "prompt_ms_median": 1488.68,
+      "prompt_ms_mean": 1488.8
+    },
+    "T2_interleaved_thrashing_54": {
+      "n_trials": 30,
+      "t_task_median_ms": 8135.93,
+      "t_task_mean_ms": 8130.34,
+      "prompt_ms_median": 5213.57,
+      "prompt_ms_mean": 5214.71
+    },
+    "T3_block_isolated_warm_15": {
+      "n_trials": 30,
+      "t_task_median_ms": 1297.85,
+      "t_task_mean_ms": 1299.38,
+      "prompt_ms_median": 44.81,
+      "prompt_ms_mean": 45.43
+    },
+    "T3_block_isolated_warm_54": {
+      "n_trials": 30,
+      "t_task_median_ms": 2887.3,
+      "t_task_mean_ms": 2887.73,
+      "prompt_ms_median": 100.76,
+      "prompt_ms_mean": 100.3
+    }
+  },
+  "thrashing_vs_isolated_comparisons": {
+    "schemas_15_thrashing_latency_penalty_ratio": 2.4,
+    "schemas_54_thrashing_latency_penalty_ratio": 2.82,
+    "schemas_54_prefill_thrashing_penalty_ratio": 51.74
+  }
+}

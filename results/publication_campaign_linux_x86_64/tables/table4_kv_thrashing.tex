@@ -1,0 +1,22 @@
+% KV Cache Thrashing Ablation (Linux x86_64)
+\begin{table}[t]
+\centering\small
+\caption{KV-Cache Thrashing vs Isolated Contexts: RTX 3050 Latency Inflation}
+\label{tab:linux_kv_thrashing}
+\begin{tabular}{lrrr}
+\toprule
+Evaluation Condition & Schemas & Median Latency (ms) & Prefill Latency (ms) \\
+\midrule
+T1\_cold\_cache\_15 & - & 2735.1 & 1493.7 \\
+T1\_cold\_cache\_54 & - & 7964.9 & 5162.9 \\
+T2\_interleaved\_thrashing\_15 & - & 3112.3 & 1488.7 \\
+T2\_interleaved\_thrashing\_54 & - & 8135.9 & 5213.6 \\
+T3\_block\_isolated\_warm\_15 & - & 1297.8 & 44.8 \\
+T3\_block\_isolated\_warm\_54 & - & 2887.3 & 100.8 \\
+\midrule
+15-Tool Thrashing Inflation Ratio & 15 & \multicolumn{2}{r}{2.40\times} \\
+54-Tool Thrashing Inflation Ratio & 54 & \multicolumn{2}{r}{2.82\times} \\
+54-Tool Prefill Degradation Ratio & 54 & \multicolumn{2}{r}{51.74\times} \\
+\bottomrule
+\end{tabular}
+\end{table}

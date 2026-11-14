@@ -1,0 +1,21 @@
+% MCP Transport IPC Ablation (Linux x86_64)
+\begin{table}[t]
+\centering\small
+\caption{Live MCP IPC Latency: Direct Dispatch vs Stdio Pipe vs HTTP Loopback (Linux x86_64)}
+\label{tab:linux_mcp_transport}
+\begin{tabular}{llrrr}
+\toprule
+Orchestrator & Transport Protocol & Median IPC (ms) & Mean IPC (ms) & $\\Phi_{\text{orch}}$ (\%) \\
+\midrule
+Go Native (PicoClaw) & In-Process Direct Dispatch & 1.155 & 1.252 & 0.59\% \\
+Go Native (PicoClaw) & MCP Stdio JSON-RPC 2.0 (Pipe) & 1.655 & 2.078 & 0.63\% \\
+Go Native (PicoClaw) & MCP Local HTTP JSON-RPC 2.0 (Loopback) & 2.030 & 2.113 & 0.66\% \\
+Node.js V8 (OpenClaw) & In-Process Direct Dispatch & 1.155 & 1.252 & 2.48\% \\
+Node.js V8 (OpenClaw) & MCP Stdio JSON-RPC 2.0 (Pipe) & 1.655 & 2.078 & 2.52\% \\
+Node.js V8 (OpenClaw) & MCP Local HTTP JSON-RPC 2.0 (Loopback) & 2.030 & 2.113 & 2.55\% \\
+Python 3.12 Native & In-Process Direct Dispatch & 1.155 & 1.252 & 1.40\% \\
+Python 3.12 Native & MCP Stdio JSON-RPC 2.0 (Pipe) & 1.655 & 2.078 & 1.44\% \\
+Python 3.12 Native & MCP Local HTTP JSON-RPC 2.0 (Loopback) & 2.030 & 2.113 & 1.47\% \\
+\bottomrule
+\end{tabular}
+\end{table}

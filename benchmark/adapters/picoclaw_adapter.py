@@ -7,7 +7,9 @@ Author / Autor: Rafael Paniccia Cassetta (UFABC)
 
 import json
 import os
+import shutil
 import subprocess
+import sys
 from typing import Any, Dict, List
 
 from benchmark.adapters.base import AgentOrchestratorAdapter
@@ -16,26 +18,29 @@ from benchmark.telemetry import run_subprocess_with_rusage
 
 class PicoClawAdapter(AgentOrchestratorAdapter):
     """
-    Adapter for Sipeed PicoClaw compiled native Mach-O ARM64 Go binary.
-    Adaptador para o binário nativo Go Mach-O ARM64 compilado do Sipeed PicoClaw.
+    Adapter for Sipeed PicoClaw compiled native Mach-O ARM64 or Linux ELF x86_64 Go binary.
+    Adaptador para o binário nativo Go compilado do Sipeed PicoClaw.
     """
 
     def __init__(self, repo_dir: str, mode: str = "native_static"):
+        is_linux = sys.platform.startswith("linux")
+        bin_name = "picoclaw_orch_linux" if is_linux else "picoclaw_orch"
+        runtime_str = "Go (Native Linux ELF x86_64)" if is_linux else "Go 1.23.2 (Native Mach-O ARM64)"
         super().__init__(
             name="PicoClaw" if mode != "tool_rag" else "PicoClawToolRAG",
-            runtime="Go 1.23.2 (Native Mach-O ARM64)",
+            runtime=runtime_str,
             language="Go",
             mode=mode
         )
         self.repo_dir = repo_dir
-        self.bin_path = os.path.join(repo_dir, "benchmark", "picoclaw_orch")
+        self.bin_path = os.path.join(repo_dir, "benchmark", bin_name)
         self.cli_path = os.path.join(repo_dir, "tools", "picoclaw", "picoclaw")
 
     def setup(self) -> bool:
         if not os.path.exists(self.bin_path):
             go_src = os.path.join(self.repo_dir, "benchmark", "picoclaw_orch.go")
             go_bin = os.path.join(self.repo_dir, "tools", "go", "bin", "go")
-            go_cmd = go_bin if os.path.exists(go_bin) else "go"
+            go_cmd = go_bin if os.path.exists(go_bin) else (shutil.which("go") or "go")
             if os.path.exists(go_src):
                 subprocess.run(
                     [go_cmd, "build", "-o", self.bin_path, go_src],

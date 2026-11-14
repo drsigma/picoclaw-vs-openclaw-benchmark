@@ -115,9 +115,14 @@ def run_subprocess_with_rusage(
 ) -> tuple[str, str, int, dict[str, Any]]:
     """
     Executes a child process via subprocess.Popen and monitors hardware performance
-    counters via Darwin XNU libproc (RUSAGE_INFO_V4) or Linux psutil.
+    counters via Darwin XNU libproc (RUSAGE_INFO_V4) on macOS or native Linux PMU (perf_event_open + VmHWM).
     Returns (stdout, stderr, returncode, hardware_metrics_dict).
     """
+    if sys.platform.startswith("linux"):
+        # Native Linux PMU / rusage collector. Fail-fast: no silent fallback on counter errors.
+        from benchmark.linux_x86_64_telemetry_adapter import run_subprocess_with_perf_rusage
+        return run_subprocess_with_perf_rusage(cmd, cwd=cwd, env=env, timeout=timeout)
+
     proc = subprocess.Popen(
         cmd,
         cwd=cwd,

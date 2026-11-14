@@ -1,0 +1,60 @@
+{
+  "sample_size": 1200,
+  "variables": {
+    "proc_instructions": {
+      "q25": 241167315.0,
+      "q75": 1104003057.5,
+      "iqr": 862835742.5,
+      "lower_bound": -1053086298.75,
+      "upper_bound": 2398256671.25,
+      "outlier_count": 240,
+      "outlier_percentage": 20.0,
+      "skewness": 1.457,
+      "kurtosis": 1.48
+    },
+    "proc_cycles": {
+      "q25": 179948695.25,
+      "q75": 927273668.75,
+      "iqr": 747324973.5,
+      "lower_bound": -941038765.0,
+      "upper_bound": 2048261129.0,
+      "outlier_count": 240,
+      "outlier_percentage": 20.0,
+      "skewness": 1.813,
+      "kurtosis": 2.16
+    },
+    "proc_peak_phys_mb": {
+      "q25": 69.45,
+      "q75": 85.72,
+      "iqr": 16.27,
+      "lower_bound": 45.05,
+      "upper_bound": 110.12,
+      "outlier_count": 0,
+      "outlier_percentage": 0.0,
+      "skewness": 0.575,
+      "kurtosis": -1.29
+    },
+    "energy_total_j": {
+      "q25": 164.34,
+      "q75": 942.59,
+      "iqr": 778.25,
+      "lower_bound": -1003.04,
+      "upper_bound": 2109.97,
+      "outlier_count": 180,
+      "outlier_percentage": 15.0,
+      "skewness": 3.383,
+      "kurtosis": 13.385
+    },
+    "t_task_ms": {
+      "q25": 1825.75,
+      "q75": 10440.89,
+      "iqr": 8615.13,
+      "lower_bound": -11096.94,
+      "upper_bound": 23363.58,
+      "outlier_count": 180,
+      "outlier_percentage": 15.0,
+      "skewness": 3.377,
+      "kurtosis": 13.355
+    }
+  }
+}

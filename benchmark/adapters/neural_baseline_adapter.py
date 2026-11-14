@@ -154,9 +154,16 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             finish_reason = "stop"
 
         itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
+        # Additive bookkeeping of raw llama-server timings (does not alter the return contract)
+        self._acc_prompt_ms = getattr(self, "_acc_prompt_ms", 0.0) + (prompt_ms if has_server_timings else 0.0)
+        self._acc_predicted_ms = getattr(self, "_acc_predicted_ms", 0.0) + (predicted_ms if has_server_timings else 0.0)
+        self._all_server_timings = getattr(self, "_all_server_timings", True) and has_server_timings
         return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
 
     def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> dict[str, Any]:
+        self._acc_prompt_ms = 0.0
+        self._acc_predicted_ms = 0.0
+        self._all_server_timings = True
         t_neural_total = 0.0
         ttft_first = 0.0
         itl_avg = 0.0
@@ -267,6 +274,9 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             "warmth": "Cold",
             "t_task_ms": t_task_ms,
             "t_neural_ms": t_neural_total,
+            "prompt_ms": self._acc_prompt_ms,
+            "predicted_ms": self._acc_predicted_ms,
+            "server_timings_complete": self._all_server_timings,
             "t_orch_ms": 0.0,
             "phi_orch_pct": 0.0,
             "ttft_ms": ttft_first,
