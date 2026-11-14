@@ -43,7 +43,7 @@ This audit report validates the empirical reproduction of the **PicoClaw vs. Ope
 | Metric | Metric Definition | Linux x86_64 (PicoClaw) | Linux x86_64 (OpenClaw Full) | Darwin ARM64 (PicoClaw) | Darwin ARM64 (OpenClaw Full) | Cross-Platform Invariant |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **$T_{\text{orch}}$ (ms)** | Orchestrator Overhead | **6.93 ms** | **37.46 ms** | **5.58 ms** | **24.88 ms** | Go $\approx 4-6\times$ faster than V8 |
-| **Instructions** | PMU Hardware Retired | **32.65M** | **769.20M** | **65.20M** | **787.57M** | V8 VM overhead $> 10\times$ instructions |
+| **Instructions** | PMU Hardware Retired | **32.65M** | **769.20M** | **N/A** *(XNU PMC locked)* | **N/A** *(XNU PMC locked)* | V8 VM overhead $> 10\times$ instructions |
 | **Cycles** | PMU CPU Cycles | **24.92M** | **506.57M** | **28.83M** | **302.45M** | Go cycles bounded $< 200\text{M}$ |
 | **Peak Memory** | Resident Physical MB | **69.4 MB** | **86.0 MB** | **5.1 MB** | **37.8 MB** | V8 heap baseline $\approx 35-45$ MB |
 | **Energy Net** | Joules above Idle | **210.36 J** | **565.50 J** | **84.81 J** | **308.56 J** | Governed primarily by neural turn |

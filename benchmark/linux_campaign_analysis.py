@@ -856,7 +856,7 @@ This audit report validates the empirical reproduction of the **PicoClaw vs. Ope
 | Metric | Metric Definition | Linux x86_64 (PicoClaw) | Linux x86_64 (OpenClaw Full) | Darwin ARM64 (PicoClaw) | Darwin ARM64 (OpenClaw Full) | Cross-Platform Invariant |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **$T_{{\\text{{orch}}}}$ (ms)** | Orchestrator Overhead | **{pico_to:.2f} ms** | **{open_to:.2f} ms** | **{dp['t_orch']:.2f} ms** | **{dop['t_orch']:.2f} ms** | Go $\\approx 4-6\\times$ faster than V8 |
-| **Instructions** | PMU Hardware Retired | **{pico_inst/1e6:.2f}M** | **{open_inst/1e6:.2f}M** | **{dp['instructions']/1e6:.2f}M** | **{dop['instructions']/1e6:.2f}M** | V8 VM overhead $> 10\\times$ instructions |
+| **Instructions** | PMU Hardware Retired | **{pico_inst/1e6:.2f}M** | **{open_inst/1e6:.2f}M** | **N/A** *(XNU PMC locked)* | **N/A** *(XNU PMC locked)* | V8 VM overhead $> 10\\times$ instructions |
 | **Cycles** | PMU CPU Cycles | **{pico_w2.get('proc_cycles_mean', 0)/1e6:.2f}M** | **{open_w2.get('proc_cycles_mean', 0)/1e6:.2f}M** | **{dp['cycles']/1e6:.2f}M** | **{dop['cycles']/1e6:.2f}M** | Go cycles bounded $< 200\\text{{M}}$ |
 | **Peak Memory** | Resident Physical MB | **{pico_mem:.1f} MB** | **{open_mem:.1f} MB** | **{dp['peak_phys_mb']:.1f} MB** | **{dop['peak_phys_mb']:.1f} MB** | V8 heap baseline $\\approx 35-45$ MB |
 | **Energy Net** | Joules above Idle | **{pico_w2.get('energy_net_mean_j', 0.0):.2f} J** | **{open_w2.get('energy_net_mean_j', 0.0):.2f} J** | **{dp['energy_net_j']:.2f} J** | **{dop['energy_net_j']:.2f} J** | Governed primarily by neural turn |
