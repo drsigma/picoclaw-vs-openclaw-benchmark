@@ -356,6 +356,11 @@ def run_trial(ctx: Ctx, ak: str, wl: str, rep: int, warmup: bool, regime: str, o
         "energy_total_j": e["energy_total_j"], "energy_net_above_idle_j": e["energy_net_above_idle_j"],
         "p_net_w": e["p_net_w"], "avg_power_w": e["avg_power_w"], "trial_wall_s": e["duration_s"],
         "p_idle_total_w": ctx.pmon.idle_total_w,
+        "pcie_rx_mean_mb_s": e.get("pcie_rx_mean_mb_s"),
+        "pcie_rx_max_mb_s": e.get("pcie_rx_max_mb_s"),
+        "pcie_tx_mean_mb_s": e.get("pcie_tx_mean_mb_s"),
+        "pcie_tx_max_mb_s": e.get("pcie_tx_max_mb_s"),
+        "pcie_sample_count": e.get("pcie_sample_count"),
         **thermal_fields(s0, s1, waited), **(extra or {}),
     }
     if orch_proc and (not rec["proc_instructions"] or not rec["proc_peak_phys_mb"]):
