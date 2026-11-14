@@ -40,6 +40,14 @@ FILES = [
         "MANIFESTO SHA-256 — linux_x86_64 (Dell G15)",
         "data/manifest_sha256_linux_x86_64.json",
     ),
+    (
+        "FAQ DE DEFESA ACADÊMICA (EN) — INCLUINDO ASSIMETRIA RAPL vs SMC",
+        "docs/06_ACADEMIC_DEFENSE_FAQ_EN.md",
+    ),
+    (
+        "FAQ DE DEFESA ACADÊMICA (PT) — INCLUINDO ASSIMETRIA RAPL vs SMC",
+        "docs/06_ACADEMIC_DEFENSE_FAQ.md",
+    ),
 ]
 
 # ─── Montagem do corpus ────────────────────────────────────────────────────────
