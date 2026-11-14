@@ -94,3 +94,20 @@ The reporting of "N/A" (*Not Applicable / Not Available*) for specific cross-pla
 3. **Adherence to Scientific Integrity (Zero-Mock):**
    * By explicitly marking these telemetry fields as "N/A", the study maintains total transparency regarding kernel observability boundaries rather than improvising pseudo-data.
    * **Universal Harmonized Metric:** Crucially, **Net Dynamic Energy ($E_{\text{net}}$)** was physically sampled and integrated above quiescent baselines on both architectures (Apple SMC current shunts on Darwin; Intel RAPL + NVIDIA NVML on Linux), fully preserving cross-platform empirical validity.
+
+---
+
+### Question 9: Why does the "neural_baseline" (Direct Local LLM Baseline) show 0.0 MB RAM and no PMU instructions/cycles?
+**Rigorous Response:**  
+The recorded values of $0.0$ MB for peak physical resident memory (*Peak Phys RAM*) and zero/omitted hardware PMU counters for the `neural_baseline` experimental arm reflect the intended, physically grounded design of our measurement harness, **not** a telemetry acquisition defect:
+
+1. **Strict Middleware Overhead Isolation:**
+   * The scientific objective of this benchmark is to quantify the exact microarchitectural tax imposed by the agent orchestration runtime (Node.js/V8 vs. Go native vs. Python), isolating it completely from raw neural tensor operations.
+   * Telemetry hooks monitor the child process orchestrator binary directly via `wait4(2)` (`ru_maxrss`) and `perf_event_open(2)` (hardware performance counters). The underlying `llama-server` engine runs as a detached local background daemon.
+
+2. **Physical Nature of the Direct Baseline:**
+   * In the `neural_baseline` arm, prompt payloads are dispatched directly via standard socket HTTP calls to `llama-server` without spawning an intermediary agent or runtime engine (no PicoClaw, OpenClaw, or Python process is instantiated).
+   * Consequently, the runtime memory footprint and retired execution instructions attributable to an orchestrator middleware layer are physically and mathematically **true zero** ($T_{\text{orch}} = 0.00$ ms, $\text{RAM}_{\text{orch}} = 0.0$ MB, $\text{Inst}_{\text{orch}} = 0$).
+
+3. **Empirical Baseline Alignment:**
+   * Neural generation latency and package-level energy consumption are fully captured across all arms. Anchoring orchestrator memory and PMU counters at zero for the baseline establishes the formal control condition, enabling precise mathematical subtraction of neural work to isolate runtime overhead.

@@ -862,6 +862,8 @@ This audit report validates the empirical reproduction of the **PicoClaw vs. Ope
 | **Energy Net** | Joules above Idle | **{pico_w2.get('energy_net_mean_j', 0.0):.2f} J** | **{open_w2.get('energy_net_mean_j', 0.0):.2f} J** | **{dp['energy_net_j']:.2f} J** | **{dop['energy_net_j']:.2f} J** | Governed primarily by neural turn |
 | **Billed Energy** | Task Energy Units | **N/A** *(RAPL mJ)* | **N/A** *(RAPL mJ)* | **{dp['billed']:,.0f}** | **{dop['billed']:,.0f}** | Mach-O task accounting |
 
+> **Interpretive Note (Neural Baseline Overhead Isolation):** The values of `0.0 MB` (Peak Phys RAM) and `0` (or `N/A`) PMU cycles/instructions recorded for the `neural_baseline` condition (Direct Local LLM Baseline) in Table 1 and master summaries are not telemetry collection failures. The experimental harness isolates and meters strictly the child process orchestrator runtime overhead (`wait4` `ru_maxrss` and `perf_event_open`). Because the baseline represents direct socket inference against `llama-server` without an intermediate agent layer, the middleware overhead is mathematically and physically true zero.
+
 ---
 
 ## 4. Architectural Symmetry & Inference Offload Dynamics

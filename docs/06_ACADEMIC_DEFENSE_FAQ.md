@@ -94,3 +94,20 @@ A presença de valores "N/A" (*Not Applicable / Not Available*) é uma decisão 
 3. **Preservação da Integridade Científica (Zero-Mock):**
    * Em vez de fabricar dados cruzados ou preencher lacunas com constantes arbitradas, o estudo documenta com total transparência as fronteiras de observabilidade de cada kernel.
    * **Métrica Unificadora:** Destaca-se que a **Energia Líquida Dinâmica ($E_{\text{net}}$)** foi rigorosamente medida e integrada em ambas as plataformas (Apple SMC Shunts no Mac e Intel RAPL + NVML no Linux), garantindo a comparabilidade bioenergética do experimento sem qualquer concessão ao empirismo.
+
+---
+
+### Pergunta 9: Por que o "neural_baseline" (Direct Local LLM Baseline) apresenta 0,0 MB de memória RAM e ausência de contadores PMU (ciclos/instruções)?
+**Resposta Rigorosa:**  
+Os valores de $0{,}0$ MB para pegada de memória física (*Peak Phys RAM*) e a ausência de ciclos/instruções de hardware para o braço experimental `neural_baseline` representam o comportamento estritamente esperado da metodologia de isolamento, e **não** uma falha de amostragem:
+
+1. **Isolamento Estrito do Overhead de Middleware:**
+   * O objetivo central deste estudo é quantificar com exatidão microarquitetural o **custo parasitário imposto pela camada de orquestração de IA** (Node.js/V8 vs. Go nativo vs. Python), isolando-o da execução do modelo neural.
+   * O harness de telemetria invoca cada agente como um processo filho monitorado via `wait4(2)` e `perf_event_open(2)`. O `llama-server` executa como um serviço daemon local desacoplado, medido independentemente em nível de soquete.
+
+2. **Significado Físico do Baseline Direto:**
+   * No braço `neural_baseline`, uma requisição HTTP direta é despachada pelo harness ao `llama-server` sem instanciar qualquer processo intermediário de orquestrador (sem agente PicoClaw, OpenClaw ou Python).
+   * Portanto, a sobrecarga de memória do processo orquestrador e as instruções gastas em despacho/validação de esquemas são física e matematicamente **zero** ($T_{\text{orch}} = 0{,}00$ ms, $\text{RAM}_{\text{orch}} = 0{,}0$ MB, $\text{Inst}_{\text{orch}} = 0$).
+
+3. **Validade da Decomposição de Variância:**
+   * A energia e a latência da geração neural são devidamente contabilizadas na potência global e no $T_{\text{task}}$ de todos os braços. Manter o baseline em zero para memória e PMU de orquestração é o que viabiliza subtrair com precisão cirúrgica a contribuição neural e provar a supremacia de eficiência do PicoClaw.
