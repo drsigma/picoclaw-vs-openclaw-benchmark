@@ -36,7 +36,9 @@ echo "de energia (Intel RAPL, NVIDIA NVML), desativar suspensão e travar ventoi
 echo ""
 
 if [ "$EUID" -ne 0 ]; then
-    sudo -v || { echo -e "\033[1;31m❌ Falha na autenticação sudo. Abortando.\033[0m"; exit 1; }
+    if ! sudo -n true 2>/dev/null; then
+        sudo -v || { echo -e "\033[1;31m❌ Falha na autenticação sudo. Abortando.\033[0m"; exit 1; }
+    fi
 fi
 
 # Mantém o sudo ativo em segundo plano enquanto o script executa
