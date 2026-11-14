@@ -6,7 +6,7 @@
   "data/linux_x86_64/raw/raw_trials.jsonl": "ae0715e8865d76bd859589de55065e2783cee0be11e1d31aff23b0235a73efad",
   "data/linux_x86_64/raw/tool_rag_mitigation_trials.jsonl": "3a472ec26a7cfe060b451267ee5f1fec4edc74ca4a76fc98067eb0fa7d7467e9",
   "data/linux_x86_64/raw/warm_cache_trials.jsonl": "3bcd28fe400cd051d61ac4e38a6b2274825410baf877a4da934aeda3d95f5c44",
-  "results/publication_campaign_linux_x86_64/cross_platform_audit_report.md": "15acce4b0831a5045babcc95a4059b8e740e6d8d4e64a9b02d2f94df0ab79bcd",
+  "results/publication_campaign_linux_x86_64/cross_platform_audit_report.md": "2377ae00df722e13ecf3005947a5d1848559c04ffeb8f363921f1eaf9790a924",
   "results/publication_campaign_linux_x86_64/kv_cache_thrashing_summary.json": "d21148b42b7f7d2e8d5ea609ceed3c9f7b5cdf30ca6e5da125dafd93fad4b534",
   "results/publication_campaign_linux_x86_64/kv_cache_thrashing_trials.jsonl": "6fbf9fc718823a1fe9a4b5da02da8007f1f282cf58c78116793078c5811076a2",
   "results/publication_campaign_linux_x86_64/mcp_live_transport_ablation.json": "93160aa4b2999d00e1765e6f994b61bf29ebc99ee4e1cc8a2a00098bd4e23175",

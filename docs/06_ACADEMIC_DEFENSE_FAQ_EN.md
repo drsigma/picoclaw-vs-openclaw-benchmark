@@ -58,3 +58,21 @@ To address this with methodological rigor and scientific integrity:
 This study proves for the first time on Apple Silicon M4 with UMA that agent orchestrator runtime architecture is critical:
 * **Edge & Background Agents:** PicoClaw (native Go) is overwhelmingly superior. It requires 13x less RAM, boots 23x faster (9.6 ms vs. 225 ms), and serializes tools 5x to 7x faster, keeping the local host responsive without cache thrashing or UMA bus contention.
 * **Desktop & Server Environments:** OpenClaw (Node.js/TypeScript) is viable only if relying on the NPM ecosystem on machines with abundant memory (>16 GB to 32 GB), provided that developers aggressively prune inactive tool schemas to prevent *Prompt Token Bloat*.
+
+---
+
+### Question 7: Why do absolute energy values differ between Linux x86_64 and Apple Silicon (Mac Mini M4), and how is the telemetry asymmetry between Intel RAPL and Apple SMC methodologically addressed?
+**Rigorous Response:**  
+The disparity in absolute energy consumption originates from three fundamental microarchitectural and physical distinctions between the experimental nodes:
+
+1. **Hardware Telemetry Sensor Topology (Intel RAPL vs. Apple SMC Shunts):**
+   * **Linux x86_64 (Dell G15):** Energy telemetry is synthesized from two independent hardware subsystems: **Intel RAPL** (`/sys/class/powercap/intel-rapl:0/energy_uj`), which tracks Package, Core, and Uncore/Memory Controller energy via microjoule hardware MSR accumulators, and **NVIDIA NVML**, which samples discrete GPU board power via the PCIe bus. The quiescent idle power baseline ($\bar{P}_{\text{idle}}$) measured during calibration with cooling fans locked at 100% was **22.03 W** (17.84 W CPU Package + 4.19 W GPU).
+   * **Darwin ARM64 (Apple Mac Mini M4):** The Apple System Management Controller (SMC) directly samples integrated physical current-shunt resistors covering the monolithic SoC (CPU, Metal GPU, Apple Neural Engine, and LPDDR5X UMA DRAM). The quiescent baseline ($\bar{P}_{\text{idle}}$) is merely **1.46 W**, reflecting the architectural efficiency of TSMC's 3 nm process node.
+
+2. **Inference Offload and Memory Architecture Disparity (VRAM vs. UMA):**
+   * On Apple M4, the 24 GB Unified Memory Architecture (UMA) permitted 100% GPU layer offload (`-ngl 99`) alongside a 32,768-token context window (`-c 32768`), achieving fast neural execution and a net energy footprint of **84.81 J** on workload W2.
+   * On Linux, the mobile discrete RTX 3050 GPU features 4 GiB VRAM. To preserve mathematical parity with the 32,768-token context window without out-of-memory crashes, offload was locked to **16 layers (`-ngl 16`)**, streaming remaining layers across PCIe Gen 4 to system DDR5 RAM to be evaluated via CPU AVX2 kernels. This extended neural execution duration, resulting in an integrated net energy of **210.36 J** for PicoClaw.
+
+3. **Methodological Harmonization (Net Energy Above Quiescent Baseline):**
+   * Rather than naively contrasting raw cross-chassis electrical power, the methodology isolated dynamic neural and orchestration energy by calculating **Net Dynamic Energy** ($E_{\text{net}} = \int [P(t) - \bar{P}_{\text{idle}}] \, dt$) on each physical node relative to its empirical quiescent baseline.
+   * While absolute joules reflect host-specific silicon efficiency, the **relative cross-runtime invariant** held firmly across both operating systems: OpenClaw Full required significantly greater energy than PicoClaw in both environments (308.56 J vs. 84.81 J on Darwin, and 565.50 J vs. 210.36 J on Linux), proving that runtime orchestrator overhead systematically inflates energy expenditure irrespective of underlying hardware architecture.

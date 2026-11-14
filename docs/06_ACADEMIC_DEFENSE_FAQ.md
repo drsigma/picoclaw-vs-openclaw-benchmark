@@ -58,3 +58,21 @@ Para contornar isso metodologicamente com integridade científica:
 Este estudo demonstra pela primeira vez em hardware Apple Silicon de última geração (Apple M4 com UMA) que a escolha da arquitetura do orquestrador de IA não é secundária:
 * **Para Ambientes de Borda e Agentes em Segundo Plano:** O PicoClaw (Go nativo) é amplamente superior. Ele consome 13 vezes menos RAM, inicia 23 vezes mais rápido (9,6 ms vs. 225 ms) e serializa ferramentas 5 a 7 vezes mais rápido, permitindo que o computador continue responsivo sem sofrer degradação de cache ou contenção no barramento unificado.
 * **Para Ambientes Desktop/Servidor:** O OpenClaw (Node.js/TypeScript) só se justifica caso a aplicação dependa impreterivelmente de extensões do ecossistema NPM e opere em máquinas com capacidade de RAM abundante (>16 GB a 32 GB), devendo o desenvolvedor tomar extremo cuidado para podar esquemas de ferramentas desnecessárias a fim de evitar o fenômeno de *Prompt Token Bloat* documentado no estudo.
+
+---
+
+### Pergunta 7: Por que os valores absolutos de energia no Linux x86_64 diferem dos valores no Apple Silicon (Mac Mini M4) e como a assimetria entre Intel RAPL e Apple SMC foi tratada?
+**Resposta Rigorosa:**  
+A diferença nas leituras de energia decorre de três distinções físicas e arquiteturais fundamentais entre os dois nós experimentais:
+
+1. **Topologia dos Sensores Físicos (Intel RAPL vs. Apple SMC Shunts):**
+   * **Linux x86_64 (Dell G15):** A telemetria combina duas fontes físicas independentes: o subsistema **Intel RAPL** (`/sys/class/powercap/intel-rapl:0/energy_uj`), que integra a energia do processador (Package, Cores e Uncore/Controlador de Memória) via contadores MSR de hardware, e o subsistema **NVIDIA NVML**, que amostra a potência da GPU dedicada via barramento PCIe em milijoules. A potência quiescente de repouso ($\bar{P}_{\text{idle}}$) medida durante a calibração com ventoinhas em 100% foi de **22,03 W** (17,84 W CPU Package + 4,19 W GPU).
+   * **Darwin ARM64 (Apple Mac Mini M4):** O System Management Controller (SMC) amostra diretamente resistores shunt de hardware integrados no silício, cobrindo o SoC unificado (CPU, GPU Metal, Apple Neural Engine e barramento DRAM LPDDR5X UMA). O consumo em repouso ($\bar{P}_{\text{idle}}$) é de apenas **1,46 W** devido à eficiência térmica de silício de 3 nm.
+
+2. **Impacto do Particionamento de Memória (VRAM vs. UMA):**
+   * No Mac Mini M4, a arquitetura de memória unificada de 24 GB permitiu offload de 100% das camadas da rede neural para a GPU (`-ngl 99`), resultando em tempo de inferência compacto e energia líquida de **84,81 J** no workload W2.
+   * No nó Linux, a GPU RTX 3050 possui 4 GiB de VRAM. Para manter estrita paridade metodológica com a janela de contexto de 32.768 tokens (`-c 32768`), foram offloaded **16 camadas (`-ngl 16`)** para a GPU, enquanto as camadas restantes foram executadas pela CPU (i5-12500H) via instruções AVX2. Esse processamento híbrido CPU+GPU elevou o tempo de execução e a energia líquida integrada para **210,36 J** no PicoClaw.
+
+3. **Metodologia de Equalização Científica (Energia Líquida Acima do Repouso):**
+   * Em vez de comparar potências brutas de nós fisicamente heterogêneos, a metodologia calculou rigorosamente a **Energia Líquida Dinâmica** ($E_{\text{net}} = \int [P(t) - \bar{P}_{\text{idle}}] \, dt$) individualmente em cada plataforma, descontando o consumo de base medido empiricamente.
+   * Enquanto a magnitude absoluta reflete a eficiência energética intrínseca de cada nó de hardware, a **relação relativa entre orquestradores** permaneceu estritamente invariante entre as plataformas: o OpenClaw Full consumiu substancialmente mais energia que o PicoClaw em ambos os nós (308,56 J vs. 84,81 J no Mac, e 565,50 J vs. 210,36 J no Linux), comprovando que o overhead de orquestração impacta a pegada energética transversalmente a qualquer arquitetura.
