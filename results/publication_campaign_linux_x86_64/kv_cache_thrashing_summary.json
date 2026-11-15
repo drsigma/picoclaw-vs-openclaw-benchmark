@@ -7,50 +7,50 @@
   "regimes": {
     "T1_cold_cache_15": {
       "n_trials": 30,
-      "t_task_median_ms": 2735.11,
-      "t_task_mean_ms": 2737.63,
-      "prompt_ms_median": 1493.66,
-      "prompt_ms_mean": 1492.96
+      "t_task_median_ms": 3113.4,
+      "t_task_mean_ms": 3112.37,
+      "prompt_ms_median": 1502.65,
+      "prompt_ms_mean": 1502.56
     },
     "T1_cold_cache_54": {
       "n_trials": 30,
-      "t_task_median_ms": 7964.86,
-      "t_task_mean_ms": 7970.83,
-      "prompt_ms_median": 5162.89,
-      "prompt_ms_mean": 5163.47
+      "t_task_median_ms": 8166.99,
+      "t_task_mean_ms": 8168.49,
+      "prompt_ms_median": 5201.69,
+      "prompt_ms_mean": 5201.02
     },
     "T2_interleaved_thrashing_15": {
       "n_trials": 30,
-      "t_task_median_ms": 3112.32,
-      "t_task_mean_ms": 3097.19,
-      "prompt_ms_median": 1488.68,
-      "prompt_ms_mean": 1488.8
+      "t_task_median_ms": 4128.79,
+      "t_task_mean_ms": 4029.72,
+      "prompt_ms_median": 1503.12,
+      "prompt_ms_mean": 1502.05
     },
     "T2_interleaved_thrashing_54": {
       "n_trials": 30,
-      "t_task_median_ms": 8135.93,
-      "t_task_mean_ms": 8130.34,
-      "prompt_ms_median": 5213.57,
-      "prompt_ms_mean": 5214.71
+      "t_task_median_ms": 8172.6,
+      "t_task_mean_ms": 8237.11,
+      "prompt_ms_median": 5261.78,
+      "prompt_ms_mean": 5261.66
     },
     "T3_block_isolated_warm_15": {
       "n_trials": 30,
-      "t_task_median_ms": 1297.85,
-      "t_task_mean_ms": 1299.38,
-      "prompt_ms_median": 44.81,
-      "prompt_ms_mean": 45.43
+      "t_task_median_ms": 2101.6,
+      "t_task_mean_ms": 2102.71,
+      "prompt_ms_median": 44.83,
+      "prompt_ms_mean": 45.75
     },
     "T3_block_isolated_warm_54": {
       "n_trials": 30,
-      "t_task_median_ms": 2887.3,
-      "t_task_mean_ms": 2887.73,
-      "prompt_ms_median": 100.76,
-      "prompt_ms_mean": 100.3
+      "t_task_median_ms": 3112.77,
+      "t_task_mean_ms": 3109.11,
+      "prompt_ms_median": 96.93,
+      "prompt_ms_mean": 99.17
     }
   },
   "thrashing_vs_isolated_comparisons": {
-    "schemas_15_thrashing_latency_penalty_ratio": 2.4,
-    "schemas_54_thrashing_latency_penalty_ratio": 2.82,
-    "schemas_54_prefill_thrashing_penalty_ratio": 51.74
+    "schemas_15_thrashing_latency_penalty_ratio": 1.96,
+    "schemas_54_thrashing_latency_penalty_ratio": 2.63,
+    "schemas_54_prefill_thrashing_penalty_ratio": 54.28
   }
 }

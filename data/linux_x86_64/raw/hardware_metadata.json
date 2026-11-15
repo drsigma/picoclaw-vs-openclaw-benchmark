@@ -1,18 +1,18 @@
 {
-  "session_id": "session_linux_x86_64_2ee46cfdd9fd",
-  "created_utc": "2026-11-14T04:18:16.439594+00:00",
+  "session_id": "session_linux_x86_64_8ca32ac11168",
+  "created_utc": "2026-11-14T20:15:44.997539+00:00",
   "arch_tag": "linux_x86_64",
   "provenance": {
     "hardware": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 30.5 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02",
     "os": "Ubuntu 26.04 LTS (Linux 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64)",
-    "git_commit": "053bd6d9f99494f472bc55dc5367cb2dbba083dc",
+    "git_commit": "25c5601b6e882702fa7a1b493ec3f7ed86721bfe",
     "cpu_model": "12th Gen Intel(R) Core(TM) i5-12500H",
     "gpu_info": "NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02",
     "total_ram": "30.5 GiB RAM",
     "sys_vendor": "Dell Inc.",
     "product_name": "Dell G15 5520"
   },
-  "git_dirty_files": 7,
+  "git_dirty_files": 0,
   "llama_server": {
     "flags_effective": "-c 32768 -np 1 -t 4 --temp 0.0 --seed 42 -ngl 16",
     "reference_flags_darwin": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
@@ -40,22 +40,22 @@
     "total_definition": "RAPL package-0 + NVML GPU (excludes platform/psys, display, SSD, fans)"
   },
   "idle_baseline": {
-    "duration_s": 60.023404565,
-    "p_idle_cpu_pkg_w": 17.835258975366987,
-    "p_idle_gpu_w": 4.192447959653653,
-    "p_idle_total_w": 22.02770693502064,
-    "p_idle_rapl_package-0_w": 17.835258975366987,
-    "p_idle_rapl_core_w": 10.474914453063565,
-    "p_idle_rapl_uncore_w": 0.3394317457940417,
-    "p_idle_rapl_psys_w": 38.933213951057056
+    "duration_s": 10.026178738,
+    "p_idle_cpu_pkg_w": 14.735312810658172,
+    "p_idle_gpu_w": 4.9783672627760005,
+    "p_idle_total_w": 19.713680073434173,
+    "p_idle_rapl_package-0_w": 14.735312810658172,
+    "p_idle_rapl_core_w": 8.010856189466029,
+    "p_idle_rapl_uncore_w": 0.06478380417638231,
+    "p_idle_rapl_psys_w": 35.03865203086109
   },
   "thermal_plateau": {
-    "waited_s": 15.006393867000043,
-    "cpu_c": 37.8,
-    "gpu_c": 36.0,
+    "waited_s": 49.01969299100165,
+    "cpu_c": 47.06666666666667,
+    "gpu_c": 43.8,
     "fan_rpm": [
-      4005,
-      4294
+      3973,
+      4285
     ],
     "fan_max_rpm": [
       4000,
@@ -69,8 +69,8 @@
   },
   "fans": {
     "rpm": [
-      4005,
-      4285
+      4021,
+      4322
     ],
     "max_rpm": [
       4000,
@@ -80,8 +80,8 @@
   "cpu_governors": [
     "performance"
   ],
-  "platform_profile": "performance",
-  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 595.99.02, 4096 MiB, 3487 MiB, 1972 MHz, 2100 MHz, 6001 MHz, [N/A], Enabled",
+  "platform_profile": "balanced",
+  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 595.99.02, 4096 MiB, 3487 MiB, 1987 MHz, 2100 MHz, 6001 MHz, [N/A], Enabled",
   "lscpu": {
     "lscpu": [
       {
@@ -142,7 +142,7 @@
       },
       {
         "field": "CPU(s) MHz de escala:",
-        "data": "37%"
+        "data": "26%"
       },
       {
         "field": "CPU MHz m\u00e1x.:",

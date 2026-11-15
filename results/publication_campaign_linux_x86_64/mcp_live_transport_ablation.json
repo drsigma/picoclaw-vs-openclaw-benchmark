@@ -10,30 +10,30 @@
       "transports": {
         "in_process_dispatch": {
           "transport_name": "In-Process Direct Dispatch",
-          "t_mcp_ipc_median_ms": 1.155,
-          "t_mcp_ipc_mean_ms": 1.252,
-          "t_mcp_ipc_std_ms": 0.352,
-          "t_orch_median_ms": 7.58,
-          "t_task_median_ms": 1286.22,
-          "phi_orch_median_pct": 0.589
+          "t_mcp_ipc_median_ms": 1.109,
+          "t_mcp_ipc_mean_ms": 1.164,
+          "t_mcp_ipc_std_ms": 0.252,
+          "t_orch_median_ms": 8.237,
+          "t_task_median_ms": 1275.26,
+          "phi_orch_median_pct": 0.646
         },
         "mcp_stdio_server": {
           "transport_name": "MCP Stdio JSON-RPC 2.0 (Pipe)",
-          "t_mcp_ipc_median_ms": 1.655,
-          "t_mcp_ipc_mean_ms": 2.078,
-          "t_mcp_ipc_std_ms": 0.587,
-          "t_orch_median_ms": 8.08,
-          "t_task_median_ms": 1286.72,
-          "phi_orch_median_pct": 0.628
+          "t_mcp_ipc_median_ms": 1.406,
+          "t_mcp_ipc_mean_ms": 1.344,
+          "t_mcp_ipc_std_ms": 0.204,
+          "t_orch_median_ms": 8.534,
+          "t_task_median_ms": 1275.55,
+          "phi_orch_median_pct": 0.669
         },
         "mcp_http_sse_server": {
           "transport_name": "MCP Local HTTP JSON-RPC 2.0 (Loopback)",
-          "t_mcp_ipc_median_ms": 2.03,
-          "t_mcp_ipc_mean_ms": 2.113,
-          "t_mcp_ipc_std_ms": 0.414,
-          "t_orch_median_ms": 8.456,
-          "t_task_median_ms": 1287.1,
-          "phi_orch_median_pct": 0.657
+          "t_mcp_ipc_median_ms": 1.707,
+          "t_mcp_ipc_mean_ms": 1.784,
+          "t_mcp_ipc_std_ms": 0.15,
+          "t_orch_median_ms": 8.835,
+          "t_task_median_ms": 1275.86,
+          "phi_orch_median_pct": 0.692
         }
       }
     },
@@ -42,30 +42,30 @@
       "transports": {
         "in_process_dispatch": {
           "transport_name": "In-Process Direct Dispatch",
-          "t_mcp_ipc_median_ms": 1.155,
-          "t_mcp_ipc_mean_ms": 1.252,
-          "t_mcp_ipc_std_ms": 0.352,
-          "t_orch_median_ms": 32.675,
-          "t_task_median_ms": 1315.97,
-          "phi_orch_median_pct": 2.483
+          "t_mcp_ipc_median_ms": 1.109,
+          "t_mcp_ipc_mean_ms": 1.164,
+          "t_mcp_ipc_std_ms": 0.252,
+          "t_orch_median_ms": 33.014,
+          "t_task_median_ms": 1296.4,
+          "phi_orch_median_pct": 2.546
         },
         "mcp_stdio_server": {
           "transport_name": "MCP Stdio JSON-RPC 2.0 (Pipe)",
-          "t_mcp_ipc_median_ms": 1.655,
-          "t_mcp_ipc_mean_ms": 2.078,
-          "t_mcp_ipc_std_ms": 0.587,
-          "t_orch_median_ms": 33.174,
-          "t_task_median_ms": 1316.47,
-          "phi_orch_median_pct": 2.52
+          "t_mcp_ipc_median_ms": 1.406,
+          "t_mcp_ipc_mean_ms": 1.344,
+          "t_mcp_ipc_std_ms": 0.204,
+          "t_orch_median_ms": 33.311,
+          "t_task_median_ms": 1296.69,
+          "phi_orch_median_pct": 2.569
         },
         "mcp_http_sse_server": {
           "transport_name": "MCP Local HTTP JSON-RPC 2.0 (Loopback)",
-          "t_mcp_ipc_median_ms": 2.03,
-          "t_mcp_ipc_mean_ms": 2.113,
-          "t_mcp_ipc_std_ms": 0.414,
-          "t_orch_median_ms": 33.55,
-          "t_task_median_ms": 1316.84,
-          "phi_orch_median_pct": 2.548
+          "t_mcp_ipc_median_ms": 1.707,
+          "t_mcp_ipc_mean_ms": 1.784,
+          "t_mcp_ipc_std_ms": 0.15,
+          "t_orch_median_ms": 33.612,
+          "t_task_median_ms": 1296.99,
+          "phi_orch_median_pct": 2.591
         }
       }
     },
@@ -74,30 +74,30 @@
       "transports": {
         "in_process_dispatch": {
           "transport_name": "In-Process Direct Dispatch",
-          "t_mcp_ipc_median_ms": 1.155,
-          "t_mcp_ipc_mean_ms": 1.252,
-          "t_mcp_ipc_std_ms": 0.352,
-          "t_orch_median_ms": 18.229,
-          "t_task_median_ms": 1301.79,
-          "phi_orch_median_pct": 1.4
+          "t_mcp_ipc_median_ms": 1.109,
+          "t_mcp_ipc_mean_ms": 1.164,
+          "t_mcp_ipc_std_ms": 0.252,
+          "t_orch_median_ms": 18.396,
+          "t_task_median_ms": 1300.43,
+          "phi_orch_median_pct": 1.414
         },
         "mcp_stdio_server": {
           "transport_name": "MCP Stdio JSON-RPC 2.0 (Pipe)",
-          "t_mcp_ipc_median_ms": 1.655,
-          "t_mcp_ipc_mean_ms": 2.078,
-          "t_mcp_ipc_std_ms": 0.587,
-          "t_orch_median_ms": 18.729,
-          "t_task_median_ms": 1302.28,
-          "phi_orch_median_pct": 1.438
+          "t_mcp_ipc_median_ms": 1.406,
+          "t_mcp_ipc_mean_ms": 1.344,
+          "t_mcp_ipc_std_ms": 0.204,
+          "t_orch_median_ms": 18.693,
+          "t_task_median_ms": 1300.73,
+          "phi_orch_median_pct": 1.437
         },
         "mcp_http_sse_server": {
           "transport_name": "MCP Local HTTP JSON-RPC 2.0 (Loopback)",
-          "t_mcp_ipc_median_ms": 2.03,
-          "t_mcp_ipc_mean_ms": 2.113,
-          "t_mcp_ipc_std_ms": 0.414,
-          "t_orch_median_ms": 19.105,
-          "t_task_median_ms": 1302.66,
-          "phi_orch_median_pct": 1.466
+          "t_mcp_ipc_median_ms": 1.707,
+          "t_mcp_ipc_mean_ms": 1.784,
+          "t_mcp_ipc_std_ms": 0.15,
+          "t_orch_median_ms": 18.994,
+          "t_task_median_ms": 1301.03,
+          "phi_orch_median_pct": 1.46
         }
       }
     }
