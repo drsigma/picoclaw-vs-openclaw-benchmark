@@ -33,7 +33,7 @@ import numpy as np
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODELS_DIR = os.path.join(REPO_DIR, "models")
-LLAMA_BENCH_BIN = "/Users/rafael/.gemini/antigravity/scratch/picoclaw_vs_openclaw/tools/llama_cpp/llama-b11887/llama-bench"
+LLAMA_BENCH_BIN = os.path.join(REPO_DIR, "tools", "llama_cpp", "llama-b11887", "llama-bench")
 
 OUT_JSON = os.path.join(REPO_DIR, "data", "quantization_scaling_ablation.json")
 OUT_TEX = os.path.join(REPO_DIR, "results", "publication_campaign", "tables", "table_quantization_scaling.tex")
@@ -185,7 +185,8 @@ def run_quantization_ablation():
     tex_rows = []
     for r in results:
         q = r["quantization"]
-        q_tex = f"\\texttt{{{q.replace('_', '\\_')}}}"
+        q_escaped = q.replace('_', r'\_')
+        q_tex = f"\\texttt{{{q_escaped}}}"
         s_act = r["s_active_weights_gb"]
         tg = r["generation_throughput_tok_s"]
         itl = r["itl_0_median_ms"]

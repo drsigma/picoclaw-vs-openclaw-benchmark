@@ -398,6 +398,14 @@ def run_prefill_ablation():
                 metrics = call_llama_streaming(messages, tools, cache_prompt=cache_prompt, max_tokens=4)
                 rec = {
                     "timestamp_iso": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    "session_id": "S1_PREFILL_ABLATION_20261112",
+                    "git_commit": "c251847",
+                    "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
+                    "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
+                    "model_version": "Meta-Llama-3.2-3B-Instruct",
+                    "quantization": "GGUF Q4_K_M (2.019 GB)",
+                    "server_flags": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
+                    "workload": f"prefill_{tc}_tools",
                     "tool_count": tc,
                     "cache_prompt": cache_prompt,
                     "rep": w,
@@ -413,6 +421,14 @@ def run_prefill_ablation():
                 metrics = call_llama_streaming(messages, tools, cache_prompt=cache_prompt, max_tokens=4)
                 rec = {
                     "timestamp_iso": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+                    "session_id": "S1_PREFILL_ABLATION_20261112",
+                    "git_commit": "c251847",
+                    "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
+                    "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
+                    "model_version": "Meta-Llama-3.2-3B-Instruct",
+                    "quantization": "GGUF Q4_K_M (2.019 GB)",
+                    "server_flags": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
+                    "workload": f"prefill_{tc}_tools",
                     "tool_count": tc,
                     "cache_prompt": cache_prompt,
                     "rep": rep,

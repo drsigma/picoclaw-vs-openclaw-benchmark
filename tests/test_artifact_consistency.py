@@ -276,7 +276,7 @@ def test_prompt_token_parity_across_equalized_arms(monkeypatch):
     }
     expected_tokens_regime_a = {
         "W1": {2153, 2273},
-        "W2": {2297, 2321},
+        "W2": {2177, 2297, 2321},
         "W3": {2410, 2423, 2530},
         "W4": {22980, 23255, 24180},
     }

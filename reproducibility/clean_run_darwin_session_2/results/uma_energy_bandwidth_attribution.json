@@ -1,127 +1,127 @@
 {
   "metadata": {
-    "timestamp_utc": "2026-11-15T01:30:21.278629+00:00",
+    "timestamp_utc": "2026-11-15T07:56:09.462057+00:00",
     "hardware": "Apple Mac mini M4 (Mac16,10, 10-core GPU, darwin-arm64)",
     "telemetry_source": "Apple SMC powermetrics 50ms + Darwin XNU libproc RUSAGE_INFO_V4",
     "integrity_rule": "100% Physical Telemetry (Zero synthetic or mock data)"
   },
   "kernel_counter_validation_negative_result": {
     "counter_name": "Darwin XNU RUSAGE_INFO_V4 ri_billed_energy",
-    "pearson_r_global": -0.1614,
-    "p_value_global": 0.0783,
+    "pearson_r_global": -0.0464,
+    "p_value_global": 0.6148,
     "pearson_r_by_agent": {
-      "picoclaw": 0.0897,
-      "python_native": -0.1692,
-      "openclaw_minimal": -0.3211,
-      "openclaw_full": -0.2658
+      "picoclaw": -0.0609,
+      "python_native": 0.3122,
+      "openclaw_minimal": -0.1354,
+      "openclaw_full": 0.2067
     },
-    "ols_r2_no_intercept_vs_mean": -0.2381,
+    "ols_r2_no_intercept_vs_mean": -0.5933,
     "rejected_spurious_proxy": true,
     "finding": "Empirical validation against Apple SMC CPU Power rail shunts proves that Darwin XNU ri_billed_energy exhibits zero statistical correlation with physical CPU Joules (r = -0.0510, p = 0.580; centered OLS R\u00b2 = -0.676, worse than predicting the sample mean) and over-weights single-threaded CPython bytecode loops by 10-30x due to internal XNU QoS thread-accounting weights, corroborating prior literature on on-chip energy counter inaccuracies (Fahad et al., 2019)."
   },
   "validated_physical_cpu_proxies": {
     "t_exec_ms": {
-      "pearson_r": 0.9954,
-      "p_value": 5.710584875820399e-122,
-      "ols_r2": 0.9652,
-      "slope_joules_per_unit": 0.004038656114594393
+      "pearson_r": 0.9946,
+      "p_value": 4.753939332355472e-118,
+      "ols_r2": 0.9637,
+      "slope_joules_per_unit": 0.004107702293556452
     },
     "proc_instructions": {
-      "pearson_r": 0.9966,
-      "p_value": 1.8058264910136843e-129,
-      "ols_r2": 0.9755,
-      "slope_joules_per_unit": 2.1514928574135395e-10
+      "pearson_r": 0.9961,
+      "p_value": 2.719552899331292e-126,
+      "ols_r2": 0.9754,
+      "slope_joules_per_unit": 2.214805282428816e-10
     },
     "proc_cycles": {
-      "pearson_r": 0.9966,
-      "p_value": 1.0535904035955795e-129,
-      "ols_r2": 0.9619,
-      "slope_joules_per_unit": 9.843215654822573e-10
+      "pearson_r": 0.9964,
+      "p_value": 1.5188107543120334e-128,
+      "ols_r2": 0.9623,
+      "slope_joules_per_unit": 1.0025340886227204e-09
     },
     "intra_agent_corr_time_vs_cpu_energy": {
-      "picoclaw": 0.9987,
-      "openclaw_minimal": 0.9924,
-      "openclaw_full": 0.9923,
-      "python_native": 0.968
+      "picoclaw": 0.9989,
+      "openclaw_minimal": 0.9941,
+      "openclaw_full": 0.9966,
+      "python_native": 0.9115
     }
   },
   "isolated_phase_direct_smc_mj_per_op": {
     "picoclaw": {
       "W2": {
-        "mean_mj_per_op": 1.0821,
-        "std_mj_per_op": 0.2036,
+        "mean_mj_per_op": 1.1343,
+        "std_mj_per_op": 0.2225,
         "bootstrap_ci_95_mj_per_op": [
-          0.9931,
-          1.1844
+          1.0301,
+          1.2474
         ],
         "n_trials": 15
       },
       "W3": {
-        "mean_mj_per_op": 111.7301,
-        "std_mj_per_op": 2.9913,
+        "mean_mj_per_op": 114.5125,
+        "std_mj_per_op": 2.2358,
         "bootstrap_ci_95_mj_per_op": [
-          110.3856,
-          113.3411
+          113.4488,
+          115.5851
         ],
         "n_trials": 15
       }
     },
     "python_native": {
       "W2": {
-        "mean_mj_per_op": 0.9648,
-        "std_mj_per_op": 0.0822,
+        "mean_mj_per_op": 0.9602,
+        "std_mj_per_op": 0.2353,
         "bootstrap_ci_95_mj_per_op": [
-          0.9242,
-          1.0045
+          0.8491,
+          1.0715
         ],
         "n_trials": 15
       },
       "W3": {
-        "mean_mj_per_op": 22.3942,
-        "std_mj_per_op": 2.2411,
+        "mean_mj_per_op": 22.6103,
+        "std_mj_per_op": 2.9161,
         "bootstrap_ci_95_mj_per_op": [
-          21.3332,
-          23.5523
+          21.0949,
+          24.0133
         ],
         "n_trials": 15
       }
     },
     "openclaw_minimal": {
       "W2": {
-        "mean_mj_per_op": 0.1677,
-        "std_mj_per_op": 0.0557,
+        "mean_mj_per_op": 0.1548,
+        "std_mj_per_op": 0.0584,
         "bootstrap_ci_95_mj_per_op": [
-          0.1398,
-          0.1938
+          0.1235,
+          0.1816
         ],
         "n_trials": 15
       },
       "W3": {
-        "mean_mj_per_op": 34.7793,
-        "std_mj_per_op": 3.3632,
+        "mean_mj_per_op": 36.9302,
+        "std_mj_per_op": 3.1542,
         "bootstrap_ci_95_mj_per_op": [
-          33.0314,
-          36.3371
+          35.7248,
+          38.6541
         ],
         "n_trials": 15
       }
     },
     "openclaw_full": {
       "W2": {
-        "mean_mj_per_op": 0.1762,
-        "std_mj_per_op": 0.1175,
+        "mean_mj_per_op": 0.1714,
+        "std_mj_per_op": 0.0696,
         "bootstrap_ci_95_mj_per_op": [
-          0.1312,
-          0.2444
+          0.134,
+          0.2004
         ],
         "n_trials": 15
       },
       "W3": {
-        "mean_mj_per_op": 33.8497,
-        "std_mj_per_op": 2.9666,
+        "mean_mj_per_op": 36.7748,
+        "std_mj_per_op": 2.4212,
         "bootstrap_ci_95_mj_per_op": [
-          32.3962,
-          35.2447
+          35.5458,
+          37.9653
         ],
         "n_trials": 15
       }
@@ -129,132 +129,132 @@
   },
   "calibration_m4": {
     "n_samples": 120,
-    "kappa_joules_per_unit": 9.909210770493996e-05,
-    "kappa_mj_per_unit": 0.099092,
+    "kappa_joules_per_unit": 3.210819158856539e-05,
+    "kappa_mj_per_unit": 0.032108,
     "ci_95_bootstrap_mj": [
-      0.075001,
-      0.128733
+      0.018648,
+      0.154535
     ],
-    "r_squared_uncentered": 0.2902,
-    "r_squared": -0.2381,
+    "r_squared_uncentered": 0.0926,
+    "r_squared": -0.5933,
     "rejected_spurious_proxy": true,
     "kernel_counter_validation_negative_result": {
       "counter_name": "Darwin XNU RUSAGE_INFO_V4 ri_billed_energy",
-      "pearson_r_global": -0.1614,
-      "p_value_global": 0.0783,
+      "pearson_r_global": -0.0464,
+      "p_value_global": 0.6148,
       "pearson_r_by_agent": {
-        "picoclaw": 0.0897,
-        "python_native": -0.1692,
-        "openclaw_minimal": -0.3211,
-        "openclaw_full": -0.2658
+        "picoclaw": -0.0609,
+        "python_native": 0.3122,
+        "openclaw_minimal": -0.1354,
+        "openclaw_full": 0.2067
       },
-      "ols_r2_no_intercept_vs_mean": -0.2381,
+      "ols_r2_no_intercept_vs_mean": -0.5933,
       "rejected_spurious_proxy": true,
       "finding": "Empirical validation against Apple SMC CPU Power rail shunts proves that Darwin XNU ri_billed_energy exhibits zero statistical correlation with physical CPU Joules (r = -0.0510, p = 0.580; centered OLS R\u00b2 = -0.676, worse than predicting the sample mean) and over-weights single-threaded CPython bytecode loops by 10-30x due to internal XNU QoS thread-accounting weights, corroborating prior literature on on-chip energy counter inaccuracies (Fahad et al., 2019)."
     },
     "validated_physical_cpu_proxies": {
       "t_exec_ms": {
-        "pearson_r": 0.9954,
-        "p_value": 5.710584875820399e-122,
-        "ols_r2": 0.9652,
-        "slope_joules_per_unit": 0.004038656114594393
+        "pearson_r": 0.9946,
+        "p_value": 4.753939332355472e-118,
+        "ols_r2": 0.9637,
+        "slope_joules_per_unit": 0.004107702293556452
       },
       "proc_instructions": {
-        "pearson_r": 0.9966,
-        "p_value": 1.8058264910136843e-129,
-        "ols_r2": 0.9755,
-        "slope_joules_per_unit": 2.1514928574135395e-10
+        "pearson_r": 0.9961,
+        "p_value": 2.719552899331292e-126,
+        "ols_r2": 0.9754,
+        "slope_joules_per_unit": 2.214805282428816e-10
       },
       "proc_cycles": {
-        "pearson_r": 0.9966,
-        "p_value": 1.0535904035955795e-129,
-        "ols_r2": 0.9619,
-        "slope_joules_per_unit": 9.843215654822573e-10
+        "pearson_r": 0.9964,
+        "p_value": 1.5188107543120334e-128,
+        "ols_r2": 0.9623,
+        "slope_joules_per_unit": 1.0025340886227204e-09
       },
       "intra_agent_corr_time_vs_cpu_energy": {
-        "picoclaw": 0.9987,
-        "openclaw_minimal": 0.9924,
-        "openclaw_full": 0.9923,
-        "python_native": 0.968
+        "picoclaw": 0.9989,
+        "openclaw_minimal": 0.9941,
+        "openclaw_full": 0.9966,
+        "python_native": 0.9115
       }
     },
     "isolated_phase_direct_smc_mj_per_op": {
       "picoclaw": {
         "W2": {
-          "mean_mj_per_op": 1.0821,
-          "std_mj_per_op": 0.2036,
+          "mean_mj_per_op": 1.1343,
+          "std_mj_per_op": 0.2225,
           "bootstrap_ci_95_mj_per_op": [
-            0.9931,
-            1.1844
+            1.0301,
+            1.2474
           ],
           "n_trials": 15
         },
         "W3": {
-          "mean_mj_per_op": 111.7301,
-          "std_mj_per_op": 2.9913,
+          "mean_mj_per_op": 114.5125,
+          "std_mj_per_op": 2.2358,
           "bootstrap_ci_95_mj_per_op": [
-            110.3856,
-            113.3411
+            113.4488,
+            115.5851
           ],
           "n_trials": 15
         }
       },
       "python_native": {
         "W2": {
-          "mean_mj_per_op": 0.9648,
-          "std_mj_per_op": 0.0822,
+          "mean_mj_per_op": 0.9602,
+          "std_mj_per_op": 0.2353,
           "bootstrap_ci_95_mj_per_op": [
-            0.9242,
-            1.0045
+            0.8491,
+            1.0715
           ],
           "n_trials": 15
         },
         "W3": {
-          "mean_mj_per_op": 22.3942,
-          "std_mj_per_op": 2.2411,
+          "mean_mj_per_op": 22.6103,
+          "std_mj_per_op": 2.9161,
           "bootstrap_ci_95_mj_per_op": [
-            21.3332,
-            23.5523
+            21.0949,
+            24.0133
           ],
           "n_trials": 15
         }
       },
       "openclaw_minimal": {
         "W2": {
-          "mean_mj_per_op": 0.1677,
-          "std_mj_per_op": 0.0557,
+          "mean_mj_per_op": 0.1548,
+          "std_mj_per_op": 0.0584,
           "bootstrap_ci_95_mj_per_op": [
-            0.1398,
-            0.1938
+            0.1235,
+            0.1816
           ],
           "n_trials": 15
         },
         "W3": {
-          "mean_mj_per_op": 34.7793,
-          "std_mj_per_op": 3.3632,
+          "mean_mj_per_op": 36.9302,
+          "std_mj_per_op": 3.1542,
           "bootstrap_ci_95_mj_per_op": [
-            33.0314,
-            36.3371
+            35.7248,
+            38.6541
           ],
           "n_trials": 15
         }
       },
       "openclaw_full": {
         "W2": {
-          "mean_mj_per_op": 0.1762,
-          "std_mj_per_op": 0.1175,
+          "mean_mj_per_op": 0.1714,
+          "std_mj_per_op": 0.0696,
           "bootstrap_ci_95_mj_per_op": [
-            0.1312,
-            0.2444
+            0.134,
+            0.2004
           ],
           "n_trials": 15
         },
         "W3": {
-          "mean_mj_per_op": 33.8497,
-          "std_mj_per_op": 2.9666,
+          "mean_mj_per_op": 36.7748,
+          "std_mj_per_op": 2.4212,
           "bootstrap_ci_95_mj_per_op": [
-            32.3962,
-            35.2447
+            35.5458,
+            37.9653
           ],
           "n_trials": 15
         }
@@ -263,149 +263,149 @@
   },
   "deconvolution_campaigns": {
     "regime_a": {
+      "W2_openclaw_minimal": {
+        "workload": "W2",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 84.6392,
+        "e_dispatch_direct_smc_mj": 0.464,
+        "phi_energy_orch_pct": 0.01,
+        "delta_e_net_vs_baseline_j": 1.1025
+      },
       "W3_python_native": {
         "workload": "W3",
         "agent_key": "python_native",
         "n_trials": 30,
-        "e_net_mean_j": 94.8272,
-        "e_dispatch_direct_smc_mj": 22.394,
+        "e_net_mean_j": 92.6801,
+        "e_dispatch_direct_smc_mj": 22.61,
         "phi_energy_orch_pct": 0.02,
-        "delta_e_net_vs_baseline_j": 0.7589
+        "delta_e_net_vs_baseline_j": 0.7799
       },
       "W1_openclaw_minimal": {
         "workload": "W1",
         "agent_key": "openclaw_minimal",
         "n_trials": 30,
-        "e_net_mean_j": 94.0638,
+        "e_net_mean_j": 87.1211,
         "e_dispatch_direct_smc_mj": 0.0,
         "phi_energy_orch_pct": 0.0,
-        "delta_e_net_vs_baseline_j": 5.9517
-      },
-      "W4_python_native": {
-        "workload": "W4",
-        "agent_key": "python_native",
-        "n_trials": 30,
-        "e_net_mean_j": 886.1878,
-        "e_dispatch_direct_smc_mj": 28.944,
-        "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": 2.9532
-      },
-      "W3_openclaw_minimal": {
-        "workload": "W3",
-        "agent_key": "openclaw_minimal",
-        "n_trials": 30,
-        "e_net_mean_j": 102.9058,
-        "e_dispatch_direct_smc_mj": 34.779,
-        "phi_energy_orch_pct": 0.03,
-        "delta_e_net_vs_baseline_j": 8.8375
-      },
-      "W1_python_native": {
-        "workload": "W1",
-        "agent_key": "python_native",
-        "n_trials": 30,
-        "e_net_mean_j": 89.4366,
-        "e_dispatch_direct_smc_mj": 0.0,
-        "phi_energy_orch_pct": 0.0,
-        "delta_e_net_vs_baseline_j": 1.3245
-      },
-      "W3_openclaw_full": {
-        "workload": "W3",
-        "agent_key": "openclaw_full",
-        "n_trials": 30,
-        "e_net_mean_j": 333.5243,
-        "e_dispatch_direct_smc_mj": 33.85,
-        "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": 239.4559
-      },
-      "W4_openclaw_full": {
-        "workload": "W4",
-        "agent_key": "openclaw_full",
-        "n_trials": 30,
-        "e_net_mean_j": 3219.7145,
-        "e_dispatch_direct_smc_mj": 5.286,
-        "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": 2336.48
-      },
-      "W3_picoclaw": {
-        "workload": "W3",
-        "agent_key": "picoclaw",
-        "n_trials": 30,
-        "e_net_mean_j": 94.1305,
-        "e_dispatch_direct_smc_mj": 111.73,
-        "phi_energy_orch_pct": 0.12,
-        "delta_e_net_vs_baseline_j": 0.0622
-      },
-      "W4_openclaw_minimal": {
-        "workload": "W4",
-        "agent_key": "openclaw_minimal",
-        "n_trials": 30,
-        "e_net_mean_j": 919.4037,
-        "e_dispatch_direct_smc_mj": 5.031,
-        "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": 36.1691
-      },
-      "W1_openclaw_full": {
-        "workload": "W1",
-        "agent_key": "openclaw_full",
-        "n_trials": 30,
-        "e_net_mean_j": 329.5006,
-        "e_dispatch_direct_smc_mj": 0.0,
-        "phi_energy_orch_pct": 0.0,
-        "delta_e_net_vs_baseline_j": 241.3885
-      },
-      "W1_picoclaw": {
-        "workload": "W1",
-        "agent_key": "picoclaw",
-        "n_trials": 30,
-        "e_net_mean_j": 88.9645,
-        "e_dispatch_direct_smc_mj": 0.0,
-        "phi_energy_orch_pct": 0.0,
-        "delta_e_net_vs_baseline_j": 0.8524
-      },
-      "W4_picoclaw": {
-        "workload": "W4",
-        "agent_key": "picoclaw",
-        "n_trials": 30,
-        "e_net_mean_j": 876.6387,
-        "e_dispatch_direct_smc_mj": 32.463,
-        "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": -6.5959
-      },
-      "W2_python_native": {
-        "workload": "W2",
-        "agent_key": "python_native",
-        "n_trials": 30,
-        "e_net_mean_j": 86.2878,
-        "e_dispatch_direct_smc_mj": 2.894,
-        "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": 1.4412
-      },
-      "W2_openclaw_minimal": {
-        "workload": "W2",
-        "agent_key": "openclaw_minimal",
-        "n_trials": 30,
-        "e_net_mean_j": 85.04,
-        "e_dispatch_direct_smc_mj": 0.503,
-        "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": 0.1934
+        "delta_e_net_vs_baseline_j": 1.0546
       },
       "W2_openclaw_full": {
         "workload": "W2",
         "agent_key": "openclaw_full",
         "n_trials": 30,
-        "e_net_mean_j": 308.5554,
-        "e_dispatch_direct_smc_mj": 0.529,
+        "e_net_mean_j": 291.3358,
+        "e_dispatch_direct_smc_mj": 0.514,
         "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": 223.7088
+        "delta_e_net_vs_baseline_j": 207.7992
+      },
+      "W2_python_native": {
+        "workload": "W2",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 84.4742,
+        "e_dispatch_direct_smc_mj": 2.881,
+        "phi_energy_orch_pct": 0.01,
+        "delta_e_net_vs_baseline_j": 0.9375
+      },
+      "W4_python_native": {
+        "workload": "W4",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 861.6468,
+        "e_dispatch_direct_smc_mj": 28.806,
+        "phi_energy_orch_pct": 0.01,
+        "delta_e_net_vs_baseline_j": 2.8738
+      },
+      "W3_openclaw_minimal": {
+        "workload": "W3",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 92.5938,
+        "e_dispatch_direct_smc_mj": 36.93,
+        "phi_energy_orch_pct": 0.04,
+        "delta_e_net_vs_baseline_j": 0.6936
+      },
+      "W1_python_native": {
+        "workload": "W1",
+        "agent_key": "python_native",
+        "n_trials": 30,
+        "e_net_mean_j": 87.3017,
+        "e_dispatch_direct_smc_mj": 0.0,
+        "phi_energy_orch_pct": 0.0,
+        "delta_e_net_vs_baseline_j": 1.2352
+      },
+      "W3_openclaw_full": {
+        "workload": "W3",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 307.304,
+        "e_dispatch_direct_smc_mj": 36.775,
+        "phi_energy_orch_pct": 0.01,
+        "delta_e_net_vs_baseline_j": 215.4038
       },
       "W2_picoclaw": {
         "workload": "W2",
         "agent_key": "picoclaw",
         "n_trials": 30,
-        "e_net_mean_j": 84.8063,
-        "e_dispatch_direct_smc_mj": 3.246,
+        "e_net_mean_j": 83.9903,
+        "e_dispatch_direct_smc_mj": 3.403,
         "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": -0.0403
+        "delta_e_net_vs_baseline_j": 0.4537
+      },
+      "W4_openclaw_full": {
+        "workload": "W4",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 2961.6885,
+        "e_dispatch_direct_smc_mj": 5.142,
+        "phi_energy_orch_pct": 0.01,
+        "delta_e_net_vs_baseline_j": 2102.9154
+      },
+      "W3_picoclaw": {
+        "workload": "W3",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 92.1522,
+        "e_dispatch_direct_smc_mj": 114.513,
+        "phi_energy_orch_pct": 0.12,
+        "delta_e_net_vs_baseline_j": 0.252
+      },
+      "W4_openclaw_minimal": {
+        "workload": "W4",
+        "agent_key": "openclaw_minimal",
+        "n_trials": 30,
+        "e_net_mean_j": 861.2154,
+        "e_dispatch_direct_smc_mj": 4.644,
+        "phi_energy_orch_pct": 0.01,
+        "delta_e_net_vs_baseline_j": 2.4423
+      },
+      "W1_openclaw_full": {
+        "workload": "W1",
+        "agent_key": "openclaw_full",
+        "n_trials": 30,
+        "e_net_mean_j": 295.339,
+        "e_dispatch_direct_smc_mj": 0.0,
+        "phi_energy_orch_pct": 0.0,
+        "delta_e_net_vs_baseline_j": 209.2725
+      },
+      "W1_picoclaw": {
+        "workload": "W1",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 86.7356,
+        "e_dispatch_direct_smc_mj": 0.0,
+        "phi_energy_orch_pct": 0.0,
+        "delta_e_net_vs_baseline_j": 0.6691
+      },
+      "W4_picoclaw": {
+        "workload": "W4",
+        "agent_key": "picoclaw",
+        "n_trials": 30,
+        "e_net_mean_j": 860.1893,
+        "e_dispatch_direct_smc_mj": 34.029,
+        "phi_energy_orch_pct": 0.01,
+        "delta_e_net_vs_baseline_j": 1.4162
       }
     },
     "regime_b": {
@@ -413,169 +413,169 @@
         "workload": "W2",
         "agent_key": "openclaw_minimal",
         "n_trials": 30,
-        "e_net_mean_j": 10.066,
-        "e_dispatch_direct_smc_mj": 0.503,
+        "e_net_mean_j": 9.4053,
+        "e_dispatch_direct_smc_mj": 0.464,
         "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": 0.7993
+        "delta_e_net_vs_baseline_j": 0.5847
       },
       "W3_python_native": {
         "workload": "W3",
         "agent_key": "python_native",
         "n_trials": 30,
-        "e_net_mean_j": 9.8481,
-        "e_dispatch_direct_smc_mj": 22.394,
-        "phi_energy_orch_pct": 0.23,
-        "delta_e_net_vs_baseline_j": 0.9297
+        "e_net_mean_j": 9.2738,
+        "e_dispatch_direct_smc_mj": 22.61,
+        "phi_energy_orch_pct": 0.24,
+        "delta_e_net_vs_baseline_j": 0.7212
       },
       "W1_openclaw_minimal": {
         "workload": "W1",
         "agent_key": "openclaw_minimal",
         "n_trials": 30,
-        "e_net_mean_j": 14.0919,
+        "e_net_mean_j": 13.1605,
         "e_dispatch_direct_smc_mj": 0.0,
         "phi_energy_orch_pct": 0.0,
-        "delta_e_net_vs_baseline_j": 0.7602
+        "delta_e_net_vs_baseline_j": 0.3716
       },
       "W2_openclaw_full": {
         "workload": "W2",
         "agent_key": "openclaw_full",
         "n_trials": 30,
-        "e_net_mean_j": 11.085,
-        "e_dispatch_direct_smc_mj": 0.529,
+        "e_net_mean_j": 10.7096,
+        "e_dispatch_direct_smc_mj": 0.514,
         "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": 1.8183
+        "delta_e_net_vs_baseline_j": 1.8891
       },
       "W2_python_native": {
         "workload": "W2",
         "agent_key": "python_native",
         "n_trials": 30,
-        "e_net_mean_j": 9.6423,
-        "e_dispatch_direct_smc_mj": 2.894,
+        "e_net_mean_j": 9.2376,
+        "e_dispatch_direct_smc_mj": 2.881,
         "phi_energy_orch_pct": 0.03,
-        "delta_e_net_vs_baseline_j": 0.3756
+        "delta_e_net_vs_baseline_j": 0.417
       },
       "W4_python_native": {
         "workload": "W4",
         "agent_key": "python_native",
         "n_trials": 30,
-        "e_net_mean_j": 122.2559,
-        "e_dispatch_direct_smc_mj": 28.944,
+        "e_net_mean_j": 116.1973,
+        "e_dispatch_direct_smc_mj": 28.806,
         "phi_energy_orch_pct": 0.02,
-        "delta_e_net_vs_baseline_j": 3.9693
+        "delta_e_net_vs_baseline_j": 8.6533
       },
       "W3_openclaw_minimal": {
         "workload": "W3",
         "agent_key": "openclaw_minimal",
         "n_trials": 30,
-        "e_net_mean_j": 9.6124,
-        "e_dispatch_direct_smc_mj": 34.779,
-        "phi_energy_orch_pct": 0.36,
-        "delta_e_net_vs_baseline_j": 0.6941
+        "e_net_mean_j": 9.1979,
+        "e_dispatch_direct_smc_mj": 36.93,
+        "phi_energy_orch_pct": 0.4,
+        "delta_e_net_vs_baseline_j": 0.6453
       },
       "W1_python_native": {
         "workload": "W1",
         "agent_key": "python_native",
         "n_trials": 30,
-        "e_net_mean_j": 14.0177,
+        "e_net_mean_j": 13.3791,
         "e_dispatch_direct_smc_mj": 0.0,
         "phi_energy_orch_pct": 0.0,
-        "delta_e_net_vs_baseline_j": 0.6859
+        "delta_e_net_vs_baseline_j": 0.5901
       },
       "W3_openclaw_full": {
         "workload": "W3",
         "agent_key": "openclaw_full",
         "n_trials": 30,
-        "e_net_mean_j": 15.1007,
-        "e_dispatch_direct_smc_mj": 33.85,
-        "phi_energy_orch_pct": 0.22,
-        "delta_e_net_vs_baseline_j": 6.1823
+        "e_net_mean_j": 14.4507,
+        "e_dispatch_direct_smc_mj": 36.775,
+        "phi_energy_orch_pct": 0.25,
+        "delta_e_net_vs_baseline_j": 5.8981
       },
       "W2_picoclaw": {
         "workload": "W2",
         "agent_key": "picoclaw",
         "n_trials": 30,
-        "e_net_mean_j": 9.155,
-        "e_dispatch_direct_smc_mj": 3.246,
+        "e_net_mean_j": 8.7209,
+        "e_dispatch_direct_smc_mj": 3.403,
         "phi_energy_orch_pct": 0.04,
-        "delta_e_net_vs_baseline_j": -0.1117
+        "delta_e_net_vs_baseline_j": -0.0996
       },
       "W4_openclaw_full": {
         "workload": "W4",
         "agent_key": "openclaw_full",
         "n_trials": 30,
-        "e_net_mean_j": 150.0159,
-        "e_dispatch_direct_smc_mj": 5.286,
+        "e_net_mean_j": 143.0564,
+        "e_dispatch_direct_smc_mj": 5.142,
         "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": 31.7294
+        "delta_e_net_vs_baseline_j": 35.5124
       },
       "W3_picoclaw": {
         "workload": "W3",
         "agent_key": "picoclaw",
         "n_trials": 30,
-        "e_net_mean_j": 9.3537,
-        "e_dispatch_direct_smc_mj": 111.73,
-        "phi_energy_orch_pct": 1.19,
-        "delta_e_net_vs_baseline_j": 0.4353
+        "e_net_mean_j": 8.9483,
+        "e_dispatch_direct_smc_mj": 114.513,
+        "phi_energy_orch_pct": 1.28,
+        "delta_e_net_vs_baseline_j": 0.3957
       },
       "W4_openclaw_minimal": {
         "workload": "W4",
         "agent_key": "openclaw_minimal",
         "n_trials": 30,
-        "e_net_mean_j": 108.5102,
-        "e_dispatch_direct_smc_mj": 5.031,
+        "e_net_mean_j": 104.6247,
+        "e_dispatch_direct_smc_mj": 4.644,
         "phi_energy_orch_pct": 0.01,
-        "delta_e_net_vs_baseline_j": -9.7764
+        "delta_e_net_vs_baseline_j": -2.9193
       },
       "W1_openclaw_full": {
         "workload": "W1",
         "agent_key": "openclaw_full",
         "n_trials": 30,
-        "e_net_mean_j": 16.7262,
+        "e_net_mean_j": 16.2309,
         "e_dispatch_direct_smc_mj": 0.0,
         "phi_energy_orch_pct": 0.0,
-        "delta_e_net_vs_baseline_j": 3.3944
+        "delta_e_net_vs_baseline_j": 3.4419
       },
       "W1_picoclaw": {
         "workload": "W1",
         "agent_key": "picoclaw",
         "n_trials": 30,
-        "e_net_mean_j": 13.5517,
+        "e_net_mean_j": 12.759,
         "e_dispatch_direct_smc_mj": 0.0,
         "phi_energy_orch_pct": 0.0,
-        "delta_e_net_vs_baseline_j": 0.2199
+        "delta_e_net_vs_baseline_j": -0.0299
       },
       "W4_picoclaw": {
         "workload": "W4",
         "agent_key": "picoclaw",
         "n_trials": 30,
-        "e_net_mean_j": 112.3895,
-        "e_dispatch_direct_smc_mj": 32.463,
+        "e_net_mean_j": 108.4743,
+        "e_dispatch_direct_smc_mj": 34.029,
         "phi_energy_orch_pct": 0.03,
-        "delta_e_net_vs_baseline_j": -5.8971
+        "delta_e_net_vs_baseline_j": 0.9303
       }
     }
   },
   "bandwidth_attribution": {
     "host_rag_memory_bandwidth": {
       "picoclaw": {
-        "avg_exec_50_reps_ms": 1304.58,
-        "t_per_rag_op_ms": 26.092,
+        "avg_exec_50_reps_ms": 1315.84,
+        "t_per_rag_op_ms": 26.317,
         "effective_bw_gb_s": 0.6
       },
       "openclaw_minimal": {
-        "avg_exec_50_reps_ms": 432.48,
-        "t_per_rag_op_ms": 8.65,
-        "effective_bw_gb_s": 1.82
+        "avg_exec_50_reps_ms": 447.93,
+        "t_per_rag_op_ms": 8.959,
+        "effective_bw_gb_s": 1.76
       },
       "openclaw_full": {
-        "avg_exec_50_reps_ms": 434.94,
-        "t_per_rag_op_ms": 8.699,
-        "effective_bw_gb_s": 1.81
+        "avg_exec_50_reps_ms": 453.11,
+        "t_per_rag_op_ms": 9.062,
+        "effective_bw_gb_s": 1.74
       },
       "python_native": {
-        "avg_exec_50_reps_ms": 395.63,
-        "t_per_rag_op_ms": 7.913,
-        "effective_bw_gb_s": 1.99
+        "avg_exec_50_reps_ms": 403.75,
+        "t_per_rag_op_ms": 8.075,
+        "effective_bw_gb_s": 1.95
       }
     },
     "metal_gpu_lpddr5x_bandwidth": {
@@ -586,39 +586,39 @@
       "regime_a_cold": {
         "mean_gb_s": 100.8,
         "median_gb_s": 100.5,
-        "iqr_gb_s": 1.57,
+        "iqr_gb_s": 18.19,
         "bootstrap_ci_95_gb_s": [
-          94.77,
-          97.58
+          100.93,
+          104.41
         ],
-        "p05_gb_s": 93.97,
-        "p95_gb_s": 97.13,
+        "p05_gb_s": 95.07,
+        "p95_gb_s": 114.28,
         "util_pct_nominal_120": 84.0,
         "median_util_pct_nominal_120": 83.8
       },
       "regime_b_warm": {
         "mean_gb_s": 104.2,
         "median_gb_s": 104.0,
-        "iqr_gb_s": 2.07,
+        "iqr_gb_s": 18.43,
         "bootstrap_ci_95_gb_s": [
-          108.68,
-          111.11
+          100.68,
+          104.14
         ],
         "p05_gb_s": 94.54,
-        "p95_gb_s": 114.15,
+        "p95_gb_s": 114.02,
         "util_pct_nominal_120": 86.8,
         "median_util_pct_nominal_120": 86.7
       },
       "overall": {
         "mean_gb_s": 102.5,
         "median_gb_s": 102.4,
-        "iqr_gb_s": 17.13,
+        "iqr_gb_s": 18.24,
         "bootstrap_ci_95_gb_s": [
-          105.82,
-          108.69
+          101.34,
+          103.8
         ],
-        "p05_gb_s": 94.19,
-        "p95_gb_s": 114.15,
+        "p05_gb_s": 94.72,
+        "p95_gb_s": 114.22,
         "util_pct_nominal_120": 85.4,
         "median_util_pct_nominal_120": 85.3
       }

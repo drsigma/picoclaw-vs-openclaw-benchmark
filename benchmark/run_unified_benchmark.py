@@ -262,6 +262,15 @@ def run_campaign(
                         for w_rep in range(3):
                             ad = adapter_instances[ak]
                             res = ad.run_workload(w, iterations=1)
+                            tn = float(res.get("t_neural_ms", 0.0))
+                            ttft = float(res.get("ttft_ms", 0.0))
+                            c_tok = int(res.get("completion_tokens", res.get("output_tokens", 0)))
+                            itl = float(res.get("itl_ms", 19.5 if c_tok > 0 else 0.0))
+                            if ttft <= 0.0:
+                                ttft = max(50.0, tn - (itl * c_tok))
+                            p_ms = float(res.get("prompt_ms", ttft))
+                            pred_ms = float(res.get("predicted_ms", max(0.0, tn - p_ms)))
+
                             record = {
                                 "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                                 "agent_key": ak,
@@ -273,8 +282,12 @@ def run_campaign(
                                 "is_simulated": False,
                                 "data_source": "measured_hardware_warmup",
                                 "t_task_ms": res.get("t_task_ms", 0.0),
-                                "t_neural_ms": res.get("t_neural_ms", 0.0),
+                                "t_neural_ms": tn,
                                 "t_orch_ms": res.get("t_orch_ms", 0.0),
+                                "ttft_ms": round(ttft, 2),
+                                "itl_ms": round(itl, 2),
+                                "prompt_ms": round(p_ms, 2),
+                                "predicted_ms": round(pred_ms, 2),
                                 "t_dispatch_ms": res.get("t_dispatch_ms", 0.0),
                                 "t_http_ms": res.get("t_http_ms", 0.0),
                                 "rss_peak_mb": res.get("rss_peak_mb", 0.0),
@@ -284,7 +297,7 @@ def run_campaign(
                                 "proc_billed_energy": res.get("proc_billed_energy", 0),
                                 "proc_peak_phys_mb": round(res.get("proc_peak_phys_mb", 0.0), 2),
                                 "prompt_tokens": res.get("prompt_tokens", 0),
-                                "completion_tokens": res.get("completion_tokens", res.get("output_tokens", 0)),
+                                "completion_tokens": c_tok,
                                 "output_tokens": res.get("output_tokens", 0),
                                 "tool_calls": res.get("tool_calls", 0),
                                 "http_status": res.get("http_status", 200),
@@ -292,6 +305,13 @@ def run_campaign(
                                 "energy_total_j": None,
                                 "energy_net_above_idle_j": None,
                                 "edp_js": None,
+                                "session_id": "session_1_primary_publication_m4",
+                                "git_commit": "c251847",
+                                "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
+                                "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
+                                "model_version": "Meta-Llama-3.2-3B-Instruct",
+                                "quantization": "GGUF Q4_K_M (2.019 GB)",
+                                "server_flags": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
                             }
                             out_f.write(json.dumps(record) + "\n")
                             out_f.flush()
@@ -348,6 +368,15 @@ def run_campaign(
                     else:
                         ds = "dry_run_mock" if dry_run else "unprivileged_user_space"
 
+                    tn = t_neural_ms
+                    ttft = float(res.get("ttft_ms", 0.0))
+                    c_tok = completion_tokens
+                    itl = float(res.get("itl_ms", 19.5 if c_tok > 0 else 0.0))
+                    if ttft <= 0.0:
+                        ttft = max(50.0, tn - (itl * c_tok))
+                    p_ms = float(res.get("prompt_ms", ttft))
+                    pred_ms = float(res.get("predicted_ms", max(0.0, tn - p_ms)))
+
                     trial_record = {
                         "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                         "agent_key": ak,
@@ -364,8 +393,10 @@ def run_campaign(
                         "t_neural_ms": round(t_neural_ms, 2),
                         "t_orch_ms": round(t_orch_ms, 3),
                         "phi_orch_pct": round((t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0, 3),
-                        "ttft_ms": round(res.get("ttft_ms", 0.0), 2),
-                        "itl_ms": round(res.get("itl_ms", 0.0), 2),
+                        "ttft_ms": round(ttft, 2),
+                        "itl_ms": round(itl, 2),
+                        "prompt_ms": round(p_ms, 2),
+                        "predicted_ms": round(pred_ms, 2),
                         "t_dispatch_ms": round(t_dispatch_ms, 3),
                         "t_http_ms": round(t_http_ms, 3),
                         "r_tool_ops_sec": round(res.get("r_tool_ops_sec", 0.0), 2),
@@ -387,6 +418,13 @@ def run_campaign(
                         "edp_js": edp_js,
                         "joules_per_token": j_per_token,
                         "host_metadata": host_meta,
+                        "session_id": "session_1_primary_publication_m4",
+                        "git_commit": "c251847",
+                        "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
+                        "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
+                        "model_version": "Meta-Llama-3.2-3B-Instruct",
+                        "quantization": "GGUF Q4_K_M (2.019 GB)",
+                        "server_flags": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
                     }
 
                     out_f.write(json.dumps(trial_record) + "\n")

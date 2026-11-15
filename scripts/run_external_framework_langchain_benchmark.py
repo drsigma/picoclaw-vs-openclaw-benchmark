@@ -36,6 +36,8 @@ from benchmark.telemetry import SMCPowerMonitor, run_subprocess_with_rusage
 ORCH_PATH = os.path.join(REPO_DIR, "extensions", "langchain_adapter", "langchain_orch.py")
 OUT_JSONL = os.path.join(REPO_DIR, "data", "external_framework_langchain_trials.jsonl")
 OUT_SUMMARY = os.path.join(REPO_DIR, "data", "external_framework_langchain_summary.json")
+PUB_JSONL = os.path.join(REPO_DIR, "results", "publication_campaign", "external_framework_langchain_trials.jsonl")
+PUB_SUMMARY = os.path.join(REPO_DIR, "results", "publication_campaign", "external_framework_langchain_summary.json")
 PYTHON_BIN = os.path.join(REPO_DIR, "tools", ".venv", "bin", "python")
 if not os.path.exists(PYTHON_BIN):
     PYTHON_BIN = sys.executable
@@ -225,7 +227,12 @@ def run_langchain_battery():
 
     with open(OUT_SUMMARY, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
-    print(f"✅ Salvo sumário executivo em: {OUT_SUMMARY}")
+    with open(PUB_SUMMARY, "w", encoding="utf-8") as f:
+        json.dump(summary, f, indent=2)
+    if os.path.exists(OUT_JSONL):
+        import shutil
+        shutil.copy2(OUT_JSONL, PUB_JSONL)
+    print(f"✅ Salvo sumário executivo em: {OUT_SUMMARY} e {PUB_SUMMARY}")
     print("\n🏁 Bateria do Framework Externo LangChain concluída com 100% de sucesso!")
 
 

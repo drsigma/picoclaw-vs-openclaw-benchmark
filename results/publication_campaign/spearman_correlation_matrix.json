@@ -34,77 +34,77 @@
     {
       "interaction": "$T_{\\text{task}}$ vs $N_{\\text{prompt}}$ (Prompt Token Length)",
       "regime_a_cold": {
-        "rho": 0.9476,
-        "p_raw": 1.236049754656473e-298,
+        "rho": 0.8845,
+        "p_raw": 3.7118261647418634e-200,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.5685,
-        "p_raw": 1.18991310874314e-52,
+        "rho": 0.57,
+        "p_raw": 5.459254046333495e-53,
         "p_adj_holm": 0.0
       }
     },
     {
       "interaction": "$T_{\\text{task}}$ vs $E_{\\text{net}}$ (Active Package Energy)",
       "regime_a_cold": {
-        "rho": 0.93,
-        "p_raw": 4.6367189692715776e-262,
+        "rho": 0.9473,
+        "p_raw": 6.685591272051213e-298,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.958,
-        "p_raw": 0.0,
+        "rho": 0.9543,
+        "p_raw": 7.1513704e-316,
         "p_adj_holm": 0.0
       }
     },
     {
       "interaction": "$T_{\\text{task}}$ vs $T_{\\text{orch}}$ (Orchestrator Overhead Share)",
       "regime_a_cold": {
-        "rho": 0.5967,
-        "p_raw": 3.879078210232616e-59,
+        "rho": 0.6527,
+        "p_raw": 3.985171217341364e-74,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.5681,
-        "p_raw": 1.4089869921813807e-52,
+        "rho": 0.5505,
+        "p_raw": 7.822559948834483e-49,
         "p_adj_holm": 0.0
       }
     },
     {
       "interaction": "$T_{\\text{neural}}$ vs $N_{\\text{prompt}}$ (Attention Prefill Duration)",
       "regime_a_cold": {
-        "rho": 0.9551,
-        "p_raw": 3.820264e-318,
+        "rho": 0.8845,
+        "p_raw": 3.711715314124958e-200,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.5281,
-        "p_raw": 2.176915429029372e-44,
+        "rho": 0.5249,
+        "p_raw": 8.874434169488717e-44,
         "p_adj_holm": 0.0
       }
     },
     {
       "interaction": "$E_{\\text{net}}$ vs $N_{\\text{prompt}}$ (Prefill Energy Drain)",
       "regime_a_cold": {
-        "rho": 0.8849,
-        "p_raw": 1.4689704547183755e-200,
+        "rho": 0.8863,
+        "p_raw": 4.108978424310453e-202,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.5592,
-        "p_raw": 1.1582030152058726e-50,
+        "rho": 0.5636,
+        "p_raw": 1.374757440437948e-51,
         "p_adj_holm": 0.0
       }
     },
     {
       "interaction": "Retired Instructions vs CPU Cycles",
       "regime_a_cold": {
-        "rho": 0.9801,
+        "rho": 0.9765,
         "p_raw": 0.0,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.9754,
+        "rho": 0.9712,
         "p_raw": 0.0,
         "p_adj_holm": 0.0
       }
@@ -112,91 +112,91 @@
     {
       "interaction": "Retired Instructions vs $T_{\\text{orch}}$",
       "regime_a_cold": {
-        "rho": 0.7479,
-        "p_raw": 1.6804253407416686e-108,
+        "rho": 0.8092,
+        "p_raw": 3.2001176487237777e-140,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.8093,
-        "p_raw": 2.5341396583502743e-140,
+        "rho": 0.798,
+        "p_raw": 1.3162365103195422e-133,
         "p_adj_holm": 0.0
       }
     },
     {
       "interaction": "Retired Instructions vs Peak RSS",
       "regime_a_cold": {
-        "rho": 0.9379,
-        "p_raw": 4.3671830716571777e-277,
+        "rho": 0.9416,
+        "p_raw": 7.619303939755673e-285,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.9487,
-        "p_raw": 2.9892986858248494e-301,
+        "rho": 0.9483,
+        "p_raw": 2.9309192374314522e-300,
         "p_adj_holm": 0.0
       }
     },
     {
       "interaction": "Peak Phys RAM vs $T_{\\text{orch}}$",
       "regime_a_cold": {
-        "rho": 0.6963,
-        "p_raw": 3.360469088841194e-88,
+        "rho": 0.7347,
+        "p_raw": 7.157310380002895e-103,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.7375,
-        "p_raw": 5.1097293237889787e-104,
+        "rho": 0.7402,
+        "p_raw": 3.787225749651563e-105,
         "p_adj_holm": 0.0
       }
     },
     {
       "interaction": "$T_{\\text{disp}}$ vs $T_{\\text{orch}}$ (Dispatch Dominance)",
       "regime_a_cold": {
-        "rho": 0.7115,
-        "p_raw": 1.0766965238079215e-93,
+        "rho": 0.8531,
+        "p_raw": 4.547859915596499e-171,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.8368,
-        "p_raw": 1.5038394935739049e-158,
+        "rho": 0.8402,
+        "p_raw": 4.7312896230434746e-161,
         "p_adj_holm": 0.0
       }
     },
     {
       "interaction": "Condition Means ($n=20$): $T_{\\text{task}}$ vs $N_{\\text{prompt}}$",
       "regime_a_cold": {
-        "rho": 0.9521,
-        "p_raw": 1.065781149139393e-10,
+        "rho": 0.8856,
+        "p_raw": 2.0899615943875946e-07,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.568,
-        "p_raw": 0.008984130126396405,
-        "p_adj_holm": 0.008984
+        "rho": 0.5741,
+        "p_raw": 0.0081167084313028,
+        "p_adj_holm": 0.008117
       }
     },
     {
       "interaction": "Intra-Workload W2 (Fixed $N_{\\text{prompt}}$): $T_{\\text{orch}}$ vs Instr",
       "regime_a_cold": {
-        "rho": 0.93,
-        "p_raw": 3.295847200943441e-66,
+        "rho": 0.9361,
+        "p_raw": 4.736564004567931e-69,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.9209,
-        "p_raw": 1.95015009459519e-62,
+        "rho": 0.9201,
+        "p_raw": 4.208037198625037e-62,
         "p_adj_holm": 0.0
       }
     },
     {
       "interaction": "Intra-Workload W3 (Vector I/O): $T_{\\text{disp}}$ vs $T_{\\text{task}}$",
       "regime_a_cold": {
-        "rho": 0.5149,
-        "p_raw": 1.572075720418048e-11,
+        "rho": 0.5742,
+        "p_raw": 1.5756861069924423e-14,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
-        "rho": 0.7126,
-        "p_raw": 1.5174458250998943e-24,
+        "rho": 0.7035,
+        "p_raw": 1.0452099417877608e-23,
         "p_adj_holm": 0.0
       }
     }
@@ -208,49 +208,49 @@
         "trial_level_n150": {
           "t_task_ms_vs_prompt_tokens": {
             "n": 150,
-            "rho": 0.8764,
+            "rho": 0.6928,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n": 150,
-            "rho": 0.7092,
-            "p_value": 0.0,
-            "p_adj_holm": 0.0
+            "rho": 0.1377,
+            "p_value": 0.092946,
+            "p_adj_holm": 0.092946
           },
           "t_task_ms_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.6913,
+            "rho": 0.4695,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n": 150,
-            "rho": 0.7124,
+            "rho": 0.4673,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_orch_ms_vs_proc_instructions": {
             "n": 150,
-            "rho": 0.6587,
+            "rho": 0.9425,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_proc_cycles": {
             "n": 150,
-            "rho": 0.98,
+            "rho": 0.9536,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n": 150,
-            "rho": 0.9161,
+            "rho": 0.915,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.6206,
+            "rho": 0.932,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           }
@@ -258,28 +258,28 @@
         "arm_means_n5": {
           "t_task_ms_vs_prompt_tokens": {
             "n_arms": 5,
-            "rho": 0.8944,
-            "p_value": 0.040519
+            "rho": 0.7071,
+            "p_value": 0.18169
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n_arms": 5,
-            "rho": 0.9,
-            "p_value": 0.037386
+            "rho": 0.3,
+            "p_value": 0.623838
           },
           "t_task_ms_vs_t_orch_ms": {
             "n_arms": 5,
-            "rho": 1.0,
-            "p_value": 0.0
+            "rho": 0.6,
+            "p_value": 0.284757
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n_arms": 5,
-            "rho": 1.0,
-            "p_value": 0.0
+            "rho": 0.6,
+            "p_value": 0.284757
           },
           "t_orch_ms_vs_proc_instructions": {
             "n_arms": 5,
-            "rho": 0.9,
-            "p_value": 0.037386
+            "rho": 1.0,
+            "p_value": 0.0
           },
           "proc_instructions_vs_proc_cycles": {
             "n_arms": 5,
@@ -288,8 +288,8 @@
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n_arms": 5,
-            "rho": 1.0,
-            "p_value": 0.0
+            "rho": 0.9,
+            "p_value": 0.037386
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n_arms": 5,
@@ -303,49 +303,49 @@
         "trial_level_n150": {
           "t_task_ms_vs_prompt_tokens": {
             "n": 150,
-            "rho": 0.8678,
+            "rho": 0.6928,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n": 150,
-            "rho": 0.8583,
-            "p_value": 0.0,
-            "p_adj_holm": 0.0
+            "rho": 0.1678,
+            "p_value": 0.040149,
+            "p_adj_holm": 0.040149
           },
           "t_task_ms_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.3402,
-            "p_value": 2.1e-05,
-            "p_adj_holm": 4.1e-05
+            "rho": 0.5498,
+            "p_value": 0.0,
+            "p_adj_holm": 0.0
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n": 150,
-            "rho": -0.2339,
-            "p_value": 0.003967,
-            "p_adj_holm": 0.003967
+            "rho": 0.2014,
+            "p_value": 0.013447,
+            "p_adj_holm": 0.026895
           },
           "t_orch_ms_vs_proc_instructions": {
             "n": 150,
-            "rho": 0.93,
+            "rho": 0.9361,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_proc_cycles": {
             "n": 150,
-            "rho": 0.9531,
+            "rho": 0.9478,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n": 150,
-            "rho": 0.9235,
+            "rho": 0.936,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.9381,
+            "rho": 0.9349,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           }
@@ -353,8 +353,8 @@
         "arm_means_n5": {
           "t_task_ms_vs_prompt_tokens": {
             "n_arms": 5,
-            "rho": 0.9487,
-            "p_value": 0.013847
+            "rho": 0.7071,
+            "p_value": 0.18169
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n_arms": 5,
@@ -363,12 +363,12 @@
           },
           "t_task_ms_vs_t_orch_ms": {
             "n_arms": 5,
-            "rho": 0.5,
-            "p_value": 0.391002
+            "rho": 0.9,
+            "p_value": 0.037386
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n_arms": 5,
-            "rho": -0.6,
+            "rho": 0.6,
             "p_value": 0.284757
           },
           "t_orch_ms_vs_proc_instructions": {
@@ -398,63 +398,63 @@
         "trial_level_n150": {
           "t_task_ms_vs_prompt_tokens": {
             "n": 150,
-            "rho": 0.8764,
+            "rho": 0.6928,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n": 150,
-            "rho": 0.7383,
-            "p_value": 0.0,
-            "p_adj_holm": 0.0
+            "rho": 0.2042,
+            "p_value": 0.012178,
+            "p_adj_holm": 0.012178
           },
           "t_task_ms_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.7639,
+            "rho": 0.6463,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n": 150,
-            "rho": 0.5149,
+            "rho": 0.5742,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_orch_ms_vs_proc_instructions": {
             "n": 150,
-            "rho": 0.6559,
+            "rho": 0.4476,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_proc_cycles": {
             "n": 150,
-            "rho": 0.9921,
+            "rho": 0.9794,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n": 150,
-            "rho": 0.9185,
+            "rho": 0.9229,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.5291,
-            "p_value": 0.0,
-            "p_adj_holm": 0.0
+            "rho": 0.3725,
+            "p_value": 3e-06,
+            "p_adj_holm": 5e-06
           }
         },
         "arm_means_n5": {
           "t_task_ms_vs_prompt_tokens": {
             "n_arms": 5,
-            "rho": 0.8944,
-            "p_value": 0.040519
+            "rho": 0.7071,
+            "p_value": 0.18169
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n_arms": 5,
-            "rho": 0.9,
-            "p_value": 0.037386
+            "rho": 0.6,
+            "p_value": 0.284757
           },
           "t_task_ms_vs_t_orch_ms": {
             "n_arms": 5,
@@ -463,13 +463,13 @@
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n_arms": 5,
-            "rho": 0.6,
-            "p_value": 0.284757
+            "rho": 0.9,
+            "p_value": 0.037386
           },
           "t_orch_ms_vs_proc_instructions": {
             "n_arms": 5,
-            "rho": 0.8,
-            "p_value": 0.104088
+            "rho": 0.4,
+            "p_value": 0.504632
           },
           "proc_instructions_vs_proc_cycles": {
             "n_arms": 5,
@@ -483,8 +483,8 @@
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n_arms": 5,
-            "rho": 0.9,
-            "p_value": 0.037386
+            "rho": 0.3,
+            "p_value": 0.623838
           }
         }
       },
@@ -493,49 +493,49 @@
         "trial_level_n150": {
           "t_task_ms_vs_prompt_tokens": {
             "n": 150,
-            "rho": 0.9528,
+            "rho": 0.6928,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n": 150,
-            "rho": 0.8589,
-            "p_value": 0.0,
-            "p_adj_holm": 0.0
+            "rho": 0.2838,
+            "p_value": 0.000432,
+            "p_adj_holm": 0.000864
           },
           "t_task_ms_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.6282,
+            "rho": 0.6364,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n": 150,
-            "rho": -0.3873,
-            "p_value": 1e-06,
-            "p_adj_holm": 1e-06
+            "rho": -0.085,
+            "p_value": 0.301287,
+            "p_adj_holm": 0.301287
           },
           "t_orch_ms_vs_proc_instructions": {
             "n": 150,
-            "rho": 0.8261,
+            "rho": 0.9006,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_proc_cycles": {
             "n": 150,
-            "rho": 0.99,
+            "rho": 0.9872,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n": 150,
-            "rho": 0.9245,
+            "rho": 0.8923,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.7642,
+            "rho": 0.8742,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           }
@@ -543,18 +543,18 @@
         "arm_means_n5": {
           "t_task_ms_vs_prompt_tokens": {
             "n_arms": 5,
-            "rho": 0.9747,
-            "p_value": 0.004818
+            "rho": 0.7071,
+            "p_value": 0.18169
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n_arms": 5,
-            "rho": 1.0,
-            "p_value": 0.0
+            "rho": 0.8,
+            "p_value": 0.104088
           },
           "t_task_ms_vs_t_orch_ms": {
             "n_arms": 5,
-            "rho": 0.7,
-            "p_value": 0.18812
+            "rho": 0.9,
+            "p_value": 0.037386
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n_arms": 5,
@@ -563,8 +563,8 @@
           },
           "t_orch_ms_vs_proc_instructions": {
             "n_arms": 5,
-            "rho": 0.9,
-            "p_value": 0.037386
+            "rho": 1.0,
+            "p_value": 0.0
           },
           "proc_instructions_vs_proc_cycles": {
             "n_arms": 5,
@@ -578,8 +578,8 @@
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n_arms": 5,
-            "rho": 0.8,
-            "p_value": 0.104088
+            "rho": 1.0,
+            "p_value": 0.0
           }
         }
       }
@@ -596,43 +596,43 @@
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n": 150,
-            "rho": 0.8418,
+            "rho": 0.7644,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_task_ms_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.8347,
+            "rho": 0.8662,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n": 150,
-            "rho": 0.8369,
+            "rho": 0.8546,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_orch_ms_vs_proc_instructions": {
             "n": 150,
-            "rho": 0.939,
+            "rho": 0.9168,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_proc_cycles": {
             "n": 150,
-            "rho": 0.9728,
+            "rho": 0.9622,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n": 150,
-            "rho": 0.9116,
+            "rho": 0.9138,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.9276,
+            "rho": 0.9186,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           }
@@ -645,8 +645,8 @@
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n_arms": 5,
-            "rho": 1.0,
-            "p_value": 0.0
+            "rho": 0.8,
+            "p_value": 0.104088
           },
           "t_task_ms_vs_t_orch_ms": {
             "n_arms": 5,
@@ -665,8 +665,8 @@
           },
           "proc_instructions_vs_proc_cycles": {
             "n_arms": 5,
-            "rho": 1.0,
-            "p_value": 0.0
+            "rho": 0.9,
+            "p_value": 0.037386
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n_arms": 5,
@@ -691,43 +691,43 @@
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n": 150,
-            "rho": 0.8582,
+            "rho": 0.8259,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_task_ms_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.8478,
+            "rho": 0.8432,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n": 150,
-            "rho": 0.3399,
-            "p_value": 2.1e-05,
-            "p_adj_holm": 2.1e-05
+            "rho": 0.3006,
+            "p_value": 0.000186,
+            "p_adj_holm": 0.000186
           },
           "t_orch_ms_vs_proc_instructions": {
             "n": 150,
-            "rho": 0.9209,
+            "rho": 0.9201,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_proc_cycles": {
             "n": 150,
-            "rho": 0.9669,
+            "rho": 0.9676,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n": 150,
-            "rho": 0.9209,
+            "rho": 0.9325,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.9345,
+            "rho": 0.9406,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           }
@@ -786,43 +786,43 @@
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n": 150,
-            "rho": 0.7379,
+            "rho": 0.7225,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_task_ms_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.8672,
+            "rho": 0.8496,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n": 150,
-            "rho": 0.7126,
+            "rho": 0.7035,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_orch_ms_vs_proc_instructions": {
             "n": 150,
-            "rho": 0.5152,
+            "rho": 0.4497,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_proc_cycles": {
             "n": 150,
-            "rho": 0.9832,
+            "rho": 0.9768,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n": 150,
-            "rho": 0.9546,
+            "rho": 0.9587,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.5121,
+            "rho": 0.443,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           }
@@ -845,8 +845,8 @@
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n_arms": 5,
-            "rho": 0.9,
-            "p_value": 0.037386
+            "rho": 0.7,
+            "p_value": 0.18812
           },
           "t_orch_ms_vs_proc_instructions": {
             "n_arms": 5,
@@ -860,13 +860,13 @@
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n_arms": 5,
-            "rho": 0.9,
-            "p_value": 0.037386
+            "rho": 1.0,
+            "p_value": 0.0
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n_arms": 5,
-            "rho": 0.4,
-            "p_value": 0.504632
+            "rho": 0.3,
+            "p_value": 0.623838
           }
         }
       },
@@ -881,43 +881,43 @@
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n": 150,
-            "rho": 0.0788,
-            "p_value": 0.337998,
-            "p_adj_holm": 0.675997
+            "rho": 0.067,
+            "p_value": 0.415157,
+            "p_adj_holm": 0.415157
           },
           "t_task_ms_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.8023,
+            "rho": 0.701,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n": 150,
-            "rho": -0.0458,
-            "p_value": 0.578026,
-            "p_adj_holm": 0.675997
+            "rho": -0.3025,
+            "p_value": 0.000168,
+            "p_adj_holm": 0.000336
           },
           "t_orch_ms_vs_proc_instructions": {
             "n": 150,
-            "rho": 0.9463,
+            "rho": 0.9169,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_proc_cycles": {
             "n": 150,
-            "rho": 0.9761,
+            "rho": 0.9784,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_instructions_vs_rss_peak_mb": {
             "n": 150,
-            "rho": 0.9672,
+            "rho": 0.9655,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n": 150,
-            "rho": 0.9461,
+            "rho": 0.9278,
             "p_value": 0.0,
             "p_adj_holm": 0.0
           }
@@ -930,23 +930,23 @@
           },
           "t_task_ms_vs_energy_net_above_idle_j": {
             "n_arms": 5,
-            "rho": 0.1,
-            "p_value": 0.872889
+            "rho": 0.0,
+            "p_value": 1.0
           },
           "t_task_ms_vs_t_orch_ms": {
             "n_arms": 5,
-            "rho": 0.9,
-            "p_value": 0.037386
+            "rho": 0.7,
+            "p_value": 0.18812
           },
           "t_dispatch_ms_vs_t_task_ms": {
             "n_arms": 5,
-            "rho": 0.2,
-            "p_value": 0.74706
+            "rho": -0.5,
+            "p_value": 0.391002
           },
           "t_orch_ms_vs_proc_instructions": {
             "n_arms": 5,
-            "rho": 1.0,
-            "p_value": 0.0
+            "rho": 0.9,
+            "p_value": 0.037386
           },
           "proc_instructions_vs_proc_cycles": {
             "n_arms": 5,
@@ -960,8 +960,8 @@
           },
           "proc_peak_phys_mb_vs_t_orch_ms": {
             "n_arms": 5,
-            "rho": 1.0,
-            "p_value": 0.0
+            "rho": 0.9,
+            "p_value": 0.037386
           }
         }
       }
@@ -976,67 +976,67 @@
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.9905,
+        "rho": 0.9948,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.5967,
+        "rho": 0.6527,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.4701,
+        "rho": 0.4404,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.571,
+        "rho": 0.5942,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.459,
+        "rho": 0.368,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.3935,
+        "rho": 0.3368,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.5384,
+        "rho": 0.4445,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.5772,
+        "rho": 0.4755,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.9476,
+        "rho": 0.8845,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.93,
+        "rho": 0.9473,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.9664,
+        "rho": 0.9644,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1044,7 +1044,7 @@
     },
     "t_neural_ms": {
       "t_task_ms": {
-        "rho": 0.9905,
+        "rho": 0.9948,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1056,61 +1056,61 @@
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.5237,
+        "rho": 0.5878,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.4453,
+        "rho": 0.3794,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.4978,
+        "rho": 0.5397,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.442,
+        "rho": 0.3067,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.368,
+        "rho": 0.2763,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.5198,
+        "rho": 0.386,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.5555,
+        "rho": 0.4179,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.9551,
+        "rho": 0.8845,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.9177,
+        "rho": 0.9401,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.9496,
+        "rho": 0.9539,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1118,13 +1118,13 @@
     },
     "t_orch_ms": {
       "t_task_ms": {
-        "rho": 0.5967,
+        "rho": 0.6527,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.5237,
+        "rho": 0.5878,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1136,55 +1136,55 @@
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.7115,
+        "rho": 0.8531,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.9771,
+        "rho": 0.8824,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.7114,
+        "rho": 0.7582,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.6963,
+        "rho": 0.7347,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.7479,
+        "rho": 0.8092,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.7832,
+        "rho": 0.8187,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4684,
+        "rho": 0.6476,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.58,
+        "rho": 0.6648,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.6162,
+        "rho": 0.6935,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1192,19 +1192,19 @@
     },
     "t_dispatch_ms": {
       "t_task_ms": {
-        "rho": 0.4701,
+        "rho": 0.4404,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.4453,
+        "rho": 0.3794,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.7115,
+        "rho": 0.8531,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1216,19 +1216,19 @@
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.6124,
+        "rho": 0.6098,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.6367,
+        "rho": 0.6344,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.7569,
+        "rho": 0.7546,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1240,25 +1240,25 @@
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.6276,
+        "rho": 0.6249,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4828,
+        "rho": 0.5028,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.4233,
+        "rho": 0.4506,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.4542,
+        "rho": 0.4757,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1266,25 +1266,25 @@
     },
     "t_http_ms": {
       "t_task_ms": {
-        "rho": 0.571,
+        "rho": 0.5942,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.4978,
+        "rho": 0.5397,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.9771,
+        "rho": 0.8824,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.6124,
+        "rho": 0.6098,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1296,43 +1296,43 @@
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.7064,
+        "rho": 0.742,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.6441,
+        "rho": 0.5918,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.7598,
+        "rho": 0.836,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.7991,
+        "rho": 0.8557,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4318,
+        "rho": 0.5801,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.5599,
+        "rho": 0.6293,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.5958,
+        "rho": 0.6512,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1340,31 +1340,31 @@
     },
     "rss_peak_mb": {
       "t_task_ms": {
-        "rho": 0.459,
+        "rho": 0.368,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.442,
+        "rho": 0.3067,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.7114,
+        "rho": 0.7582,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.6367,
+        "rho": 0.6344,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.7064,
+        "rho": 0.742,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1376,37 +1376,37 @@
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.9205,
+        "rho": 0.927,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.9379,
+        "rho": 0.9416,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.9124,
+        "rho": 0.9134,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.398,
+        "rho": 0.347,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.4209,
+        "rho": 0.3864,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.453,
+        "rho": 0.419,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1414,37 +1414,37 @@
     },
     "proc_peak_phys_mb": {
       "t_task_ms": {
-        "rho": 0.3935,
+        "rho": 0.3368,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.368,
+        "rho": 0.2763,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.6963,
+        "rho": 0.7347,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.7569,
+        "rho": 0.7546,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.6441,
+        "rho": 0.5918,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.9205,
+        "rho": 0.927,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1456,31 +1456,31 @@
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.8369,
+        "rho": 0.8449,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.8229,
+        "rho": 0.8257,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.3522,
+        "rho": 0.3177,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.3654,
+        "rho": 0.3515,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.3947,
+        "rho": 0.3856,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1488,19 +1488,19 @@
     },
     "proc_instructions": {
       "t_task_ms": {
-        "rho": 0.5384,
+        "rho": 0.4445,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.5198,
+        "rho": 0.386,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.7479,
+        "rho": 0.8092,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1512,19 +1512,19 @@
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.7598,
+        "rho": 0.836,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.9379,
+        "rho": 0.9416,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.8369,
+        "rho": 0.8449,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1536,25 +1536,25 @@
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.9801,
+        "rho": 0.9765,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.486,
+        "rho": 0.4411,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.513,
+        "rho": 0.4749,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.5431,
+        "rho": 0.5049,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1562,49 +1562,49 @@
     },
     "proc_cycles": {
       "t_task_ms": {
-        "rho": 0.5772,
+        "rho": 0.4755,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.5555,
+        "rho": 0.4179,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.7832,
+        "rho": 0.8187,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.6276,
+        "rho": 0.6249,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.7991,
+        "rho": 0.8557,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.9124,
+        "rho": 0.9134,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.8229,
+        "rho": 0.8257,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.9801,
+        "rho": 0.9765,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1616,19 +1616,19 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.5098,
+        "rho": 0.4505,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.5614,
+        "rho": 0.5063,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.5905,
+        "rho": 0.5384,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1636,55 +1636,55 @@
     },
     "prompt_tokens": {
       "t_task_ms": {
-        "rho": 0.9476,
+        "rho": 0.8845,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.9551,
+        "rho": 0.8845,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.4684,
+        "rho": 0.6476,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.4828,
+        "rho": 0.5028,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.4318,
+        "rho": 0.5801,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.398,
+        "rho": 0.347,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.3522,
+        "rho": 0.3177,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.486,
+        "rho": 0.4411,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.5098,
+        "rho": 0.4505,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1696,13 +1696,13 @@
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.8849,
+        "rho": 0.8863,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.9063,
+        "rho": 0.8845,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1710,61 +1710,61 @@
     },
     "energy_net_above_idle_j": {
       "t_task_ms": {
-        "rho": 0.93,
+        "rho": 0.9473,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.9177,
+        "rho": 0.9401,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.58,
+        "rho": 0.6648,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.4233,
+        "rho": 0.4506,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.5599,
+        "rho": 0.6293,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.4209,
+        "rho": 0.3864,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.3654,
+        "rho": 0.3515,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.513,
+        "rho": 0.4749,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.5614,
+        "rho": 0.5063,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.8849,
+        "rho": 0.8863,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1776,7 +1776,7 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.985,
+        "rho": 0.995,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1784,67 +1784,67 @@
     },
     "edp_js": {
       "t_task_ms": {
-        "rho": 0.9664,
+        "rho": 0.9644,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.9496,
+        "rho": 0.9539,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.6162,
+        "rho": 0.6935,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.4542,
+        "rho": 0.4757,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.5958,
+        "rho": 0.6512,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.453,
+        "rho": 0.419,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.3947,
+        "rho": 0.3856,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.5431,
+        "rho": 0.5049,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.5905,
+        "rho": 0.5384,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.9063,
+        "rho": 0.8845,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.985,
+        "rho": 0.995,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1866,67 +1866,67 @@
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.9587,
+        "rho": 0.9522,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.5681,
+        "rho": 0.5505,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.2134,
-        "p_value": 0.0,
-        "p_adj_holm": 1e-06,
+        "rho": 0.1965,
+        "p_value": 1e-06,
+        "p_adj_holm": 1.1e-05,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.6426,
+        "rho": 0.6368,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.3065,
+        "rho": 0.3063,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.1605,
-        "p_value": 7.9e-05,
-        "p_adj_holm": 0.00063,
+        "rho": 0.1656,
+        "p_value": 4.6e-05,
+        "p_adj_holm": 0.000322,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.3782,
+        "rho": 0.3721,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.4609,
+        "rho": 0.4537,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.5685,
+        "rho": 0.57,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.958,
+        "rho": 0.9543,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.9698,
+        "rho": 0.9678,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1934,7 +1934,7 @@
     },
     "t_neural_ms": {
       "t_task_ms": {
-        "rho": 0.9587,
+        "rho": 0.9522,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -1946,61 +1946,61 @@
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.4223,
+        "rho": 0.3844,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.0435,
-        "p_value": 0.287509,
-        "p_adj_holm": 0.575019,
+        "rho": 0.0069,
+        "p_value": 0.867012,
+        "p_adj_holm": 0.867012,
         "significant_001": false
       },
       "t_http_ms": {
-        "rho": 0.571,
+        "rho": 0.5537,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.1592,
-        "p_value": 9e-05,
-        "p_adj_holm": 0.00063,
-        "significant_001": true
+        "rho": 0.1405,
+        "p_value": 0.000558,
+        "p_adj_holm": 0.002791,
+        "significant_001": false
       },
       "proc_peak_phys_mb": {
-        "rho": -0.024,
-        "p_value": 0.558103,
-        "p_adj_holm": 0.575019,
+        "rho": -0.0408,
+        "p_value": 0.318776,
+        "p_adj_holm": 0.637551,
         "significant_001": false
       },
       "proc_instructions": {
-        "rho": 0.2528,
+        "rho": 0.231,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.3437,
+        "rho": 0.3184,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.5281,
+        "rho": 0.5249,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.9448,
+        "rho": 0.9365,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.9479,
+        "rho": 0.9396,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2008,13 +2008,13 @@
     },
     "t_orch_ms": {
       "t_task_ms": {
-        "rho": 0.5681,
+        "rho": 0.5505,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.4223,
+        "rho": 0.3844,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2026,55 +2026,55 @@
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.8368,
+        "rho": 0.8402,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.8942,
+        "rho": 0.8835,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.7681,
+        "rho": 0.7619,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.7375,
+        "rho": 0.7402,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.8093,
+        "rho": 0.798,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.8292,
+        "rho": 0.8157,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.6516,
+        "rho": 0.655,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.4751,
+        "rho": 0.4948,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.4982,
+        "rho": 0.5212,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2082,19 +2082,19 @@
     },
     "t_dispatch_ms": {
       "t_task_ms": {
-        "rho": 0.2134,
-        "p_value": 0.0,
-        "p_adj_holm": 1e-06,
+        "rho": 0.1965,
+        "p_value": 1e-06,
+        "p_adj_holm": 1.1e-05,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.0435,
-        "p_value": 0.287509,
-        "p_adj_holm": 0.575019,
+        "rho": 0.0069,
+        "p_value": 0.867012,
+        "p_adj_holm": 0.867012,
         "significant_001": false
       },
       "t_orch_ms": {
-        "rho": 0.8368,
+        "rho": 0.8402,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2106,75 +2106,75 @@
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.6155,
+        "rho": 0.598,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.6298,
+        "rho": 0.6264,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.7521,
+        "rho": 0.749,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.6412,
+        "rho": 0.639,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.6058,
+        "rho": 0.6063,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4994,
+        "rho": 0.4958,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.1324,
-        "p_value": 0.001156,
-        "p_adj_holm": 0.005778,
+        "rho": 0.1526,
+        "p_value": 0.000175,
+        "p_adj_holm": 0.001048,
         "significant_001": false
       },
       "edp_js": {
-        "rho": 0.1559,
-        "p_value": 0.000126,
-        "p_adj_holm": 0.000756,
+        "rho": 0.1789,
+        "p_value": 1e-05,
+        "p_adj_holm": 8.4e-05,
         "significant_001": true
       }
     },
     "t_http_ms": {
       "t_task_ms": {
-        "rho": 0.6426,
+        "rho": 0.6368,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.571,
+        "rho": 0.5537,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.8942,
+        "rho": 0.8835,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.6155,
+        "rho": 0.598,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2186,43 +2186,43 @@
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.7524,
+        "rho": 0.7459,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.6153,
+        "rho": 0.6104,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.8288,
+        "rho": 0.8192,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.8623,
+        "rho": 0.8518,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.5912,
+        "rho": 0.5848,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.6013,
+        "rho": 0.629,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.6114,
+        "rho": 0.6427,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2230,31 +2230,31 @@
     },
     "rss_peak_mb": {
       "t_task_ms": {
-        "rho": 0.3065,
+        "rho": 0.3063,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.1592,
-        "p_value": 9e-05,
-        "p_adj_holm": 0.00063,
-        "significant_001": true
+        "rho": 0.1405,
+        "p_value": 0.000558,
+        "p_adj_holm": 0.002791,
+        "significant_001": false
       },
       "t_orch_ms": {
-        "rho": 0.7681,
+        "rho": 0.7619,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.6298,
+        "rho": 0.6264,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.7524,
+        "rho": 0.7459,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2266,37 +2266,37 @@
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.9313,
+        "rho": 0.9333,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.9487,
+        "rho": 0.9483,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.9289,
+        "rho": 0.9272,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.3554,
+        "rho": 0.3497,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.225,
+        "rho": 0.236,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.2454,
+        "rho": 0.2619,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2304,37 +2304,37 @@
     },
     "proc_peak_phys_mb": {
       "t_task_ms": {
-        "rho": 0.1605,
-        "p_value": 7.9e-05,
-        "p_adj_holm": 0.00063,
+        "rho": 0.1656,
+        "p_value": 4.6e-05,
+        "p_adj_holm": 0.000322,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": -0.024,
-        "p_value": 0.558103,
-        "p_adj_holm": 0.575019,
+        "rho": -0.0408,
+        "p_value": 0.318776,
+        "p_adj_holm": 0.637551,
         "significant_001": false
       },
       "t_orch_ms": {
-        "rho": 0.7375,
+        "rho": 0.7402,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.7521,
+        "rho": 0.749,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.6153,
+        "rho": 0.6104,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.9313,
+        "rho": 0.9333,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2346,75 +2346,75 @@
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.8584,
+        "rho": 0.8608,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.8339,
+        "rho": 0.843,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.33,
+        "rho": 0.3269,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.0837,
-        "p_value": 0.04048,
-        "p_adj_holm": 0.121439,
+        "rho": 0.099,
+        "p_value": 0.01525,
+        "p_adj_holm": 0.045749,
         "significant_001": false
       },
       "edp_js": {
-        "rho": 0.1047,
-        "p_value": 0.010285,
-        "p_adj_holm": 0.041138,
+        "rho": 0.1249,
+        "p_value": 0.002182,
+        "p_adj_holm": 0.008727,
         "significant_001": false
       }
     },
     "proc_instructions": {
       "t_task_ms": {
-        "rho": 0.3782,
+        "rho": 0.3721,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.2528,
+        "rho": 0.231,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.8093,
+        "rho": 0.798,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.6412,
+        "rho": 0.639,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.8288,
+        "rho": 0.8192,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.9487,
+        "rho": 0.9483,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.8584,
+        "rho": 0.8608,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2426,25 +2426,25 @@
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.9754,
+        "rho": 0.9712,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4246,
+        "rho": 0.4208,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.3277,
+        "rho": 0.338,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.3446,
+        "rho": 0.3598,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2452,49 +2452,49 @@
     },
     "proc_cycles": {
       "t_task_ms": {
-        "rho": 0.4609,
+        "rho": 0.4537,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.3437,
+        "rho": 0.3184,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.8292,
+        "rho": 0.8157,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.6058,
+        "rho": 0.6063,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.8623,
+        "rho": 0.8518,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.9289,
+        "rho": 0.9272,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.8339,
+        "rho": 0.843,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.9754,
+        "rho": 0.9712,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2506,19 +2506,19 @@
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.4418,
+        "rho": 0.4359,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.4065,
+        "rho": 0.4158,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.4223,
+        "rho": 0.4363,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2526,55 +2526,55 @@
     },
     "prompt_tokens": {
       "t_task_ms": {
-        "rho": 0.5685,
+        "rho": 0.57,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.5281,
+        "rho": 0.5249,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.6516,
+        "rho": 0.655,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.4994,
+        "rho": 0.4958,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.5912,
+        "rho": 0.5848,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.3554,
+        "rho": 0.3497,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.33,
+        "rho": 0.3269,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_instructions": {
-        "rho": 0.4246,
+        "rho": 0.4208,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.4418,
+        "rho": 0.4359,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2586,13 +2586,13 @@
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.5592,
+        "rho": 0.5636,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.5634,
+        "rho": 0.5662,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2600,61 +2600,61 @@
     },
     "energy_net_above_idle_j": {
       "t_task_ms": {
-        "rho": 0.958,
+        "rho": 0.9543,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.9448,
+        "rho": 0.9365,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.4751,
+        "rho": 0.4948,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.1324,
-        "p_value": 0.001156,
-        "p_adj_holm": 0.005778,
+        "rho": 0.1526,
+        "p_value": 0.000175,
+        "p_adj_holm": 0.001048,
         "significant_001": false
       },
       "t_http_ms": {
-        "rho": 0.6013,
+        "rho": 0.629,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.225,
+        "rho": 0.236,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.0837,
-        "p_value": 0.04048,
-        "p_adj_holm": 0.121439,
+        "rho": 0.099,
+        "p_value": 0.01525,
+        "p_adj_holm": 0.045749,
         "significant_001": false
       },
       "proc_instructions": {
-        "rho": 0.3277,
+        "rho": 0.338,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.4065,
+        "rho": 0.4158,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.5592,
+        "rho": 0.5636,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2666,7 +2666,7 @@
         "significant_001": true
       },
       "edp_js": {
-        "rho": 0.9979,
+        "rho": 0.9975,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
@@ -2674,67 +2674,67 @@
     },
     "edp_js": {
       "t_task_ms": {
-        "rho": 0.9698,
+        "rho": 0.9678,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_neural_ms": {
-        "rho": 0.9479,
+        "rho": 0.9396,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_orch_ms": {
-        "rho": 0.4982,
+        "rho": 0.5212,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "t_dispatch_ms": {
-        "rho": 0.1559,
-        "p_value": 0.000126,
-        "p_adj_holm": 0.000756,
+        "rho": 0.1789,
+        "p_value": 1e-05,
+        "p_adj_holm": 8.4e-05,
         "significant_001": true
       },
       "t_http_ms": {
-        "rho": 0.6114,
+        "rho": 0.6427,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "rss_peak_mb": {
-        "rho": 0.2454,
+        "rho": 0.2619,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_peak_phys_mb": {
-        "rho": 0.1047,
-        "p_value": 0.010285,
-        "p_adj_holm": 0.041138,
+        "rho": 0.1249,
+        "p_value": 0.002182,
+        "p_adj_holm": 0.008727,
         "significant_001": false
       },
       "proc_instructions": {
-        "rho": 0.3446,
+        "rho": 0.3598,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "proc_cycles": {
-        "rho": 0.4223,
+        "rho": 0.4363,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "prompt_tokens": {
-        "rho": 0.5634,
+        "rho": 0.5662,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true
       },
       "energy_net_above_idle_j": {
-        "rho": 0.9979,
+        "rho": 0.9975,
         "p_value": 0.0,
         "p_adj_holm": 0.0,
         "significant_001": true

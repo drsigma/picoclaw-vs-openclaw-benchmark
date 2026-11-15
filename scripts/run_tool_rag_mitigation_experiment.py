@@ -245,6 +245,16 @@ def main() -> int:
                             "energy_total_j": None,
                             "energy_net_above_idle_j": None,
                             "edp_js": None,
+                            "http_status": int(res.get("http_status", 200)),
+                            "session_id": "S1_TOOL_RAG_MITIGATION_20261113",
+                            "git_commit": "c251847",
+                            "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
+                            "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
+                            "model_version": "Meta-Llama-3.2-3B-Instruct",
+                            "quantization": "GGUF Q4_K_M (2.019 GB)",
+                            "server_flags": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
+                            "prompt_ms": round(ttft_ms, 2),
+                            "predicted_ms": round(max(0.0, t_neural_ms - ttft_ms), 2),
                         })
 
                     for eval_rep in range(1, n_evals + 1):
@@ -314,6 +324,15 @@ def main() -> int:
                             "energy_net_above_idle_j": e_net,
                             "edp_js": edp_js,
                             "http_status": int(res.get("http_status", 200)),
+                            "session_id": "S1_TOOL_RAG_MITIGATION_20261113",
+                            "git_commit": "c251847",
+                            "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
+                            "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
+                            "model_version": "Meta-Llama-3.2-3B-Instruct",
+                            "quantization": "GGUF Q4_K_M (2.019 GB)",
+                            "server_flags": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
+                            "prompt_ms": round(ttft_ms, 2),
+                            "predicted_ms": round(max(0.0, t_neural_ms - ttft_ms), 2),
                         }
                         measured_tool_rag_records.append(rec)
 

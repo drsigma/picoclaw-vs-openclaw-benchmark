@@ -7,29 +7,29 @@
 \hline
 \textbf{Workload} & \textbf{Architecture (Ref.)} & \textbf{Prompt/Comp} & \textbf{Median (IQR) [ms]} & \textbf{Disp / HTTP [ms]} & \textbf{Peak Phys [MB]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{Billed / Cycles} \\
 \hline
-W1 & Direct Local LLM Baseline & 2153 / 41 & 5489.6 (31.9) & 0.00 / 0.00 & 0.0 & 88.11 & 483.57 & N/A \\
-W1 & Go Native Orchestrator (PicoClaw Ref.) & 2153 / 41 & 5497.0 (91.6) & 0.02 / 29.54 & 4.2 & 88.97 & 491.21 & 5465 / 29.3M \\
-W1 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2273 / 42 & 5847.5 (60.4) & 0.10 / 51.18 & 37.5 & 94.06 & 550.51 & 6140 / 310.3M \\
-W1 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7499 / 60 & 20674.1 (73.8) & 0.17 / 66.25 & 37.5 & 329.50 & 6814.96 & 5808 / 326.7M \\
-W1 & Python 3.12 Reference Agent & 2153 / 41 & 5485.6 (78.2) & 0.07 / 10.34 & 23.6 & 89.44 & 492.17 & 85107 / 261.7M \\
+W1 & Direct Local LLM Baseline & 2153 / 41 & 5481.9 (19.8) & 0.00 / 0.00 & 0.0 & 86.07 & 471.46 & N/A \\
+W1 & Go Native Orchestrator (PicoClaw Ref.) & 2153 / 41 & 5460.7 (24.6) & 0.02 / 4.75 & 4.2 & 86.74 & 473.88 & 14245 / 26.2M \\
+W1 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2153 / 41 & 5475.3 (22.4) & 0.11 / 20.38 & 37.5 & 87.12 & 477.25 & 13622 / 291.4M \\
+W1 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7067 / 42 & 18637.7 (30.5) & 0.17 / 24.51 & 37.4 & 295.34 & 5504.42 & 13449 / 298.9M \\
+W1 & Python 3.12 Reference Agent & 2153 / 41 & 5461.4 (24.1) & 0.07 / 9.94 & 24.0 & 87.30 & 476.81 & 146460 / 257.7M \\
 \hline
-W2 & Direct Local LLM Baseline & 2321 / 29 & 5600.7 (29.2) & 0.00 / 0.00 & 0.0 & 84.85 & 475.54 & N/A \\
-W2 & Go Native Orchestrator (PicoClaw Ref.) & 2297 / 29 & 5556.1 (51.3) & 1.78 / 3.68 & 5.1 & 84.81 & 471.22 & 4641 / 28.8M \\
-W2 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2297 / 29 & 5557.1 (41.0) & 1.31 / 19.57 & 37.7 & 85.04 & 472.67 & 4747 / 303.6M \\
-W2 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7523 / 28 & 19733.7 (98.9) & 1.40 / 23.53 & 37.8 & 308.56 & 6094.66 & 5313 / 302.5M \\
-W2 & Python 3.12 Reference Agent & 2321 / 29 & 5609.9 (39.6) & 1.00 / 10.20 & 23.7 & 86.29 & 484.63 & 168901 / 269.0M \\
+W2 & Direct Local LLM Baseline & 2177 / 30 & 5261.4 (24.6) & 0.00 / 0.00 & 0.0 & 83.54 & 439.66 & N/A \\
+W2 & Go Native Orchestrator (PicoClaw Ref.) & 2177 / 30 & 5265.1 (28.8) & 2.52 / 4.55 & 5.0 & 83.99 & 442.15 & 14328 / 31.0M \\
+W2 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2177 / 30 & 5269.3 (24.4) & 1.42 / 20.26 & 37.7 & 84.64 & 446.07 & 12980 / 302.1M \\
+W2 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7091 / 29 & 18335.5 (28.0) & 1.48 / 24.08 & 37.9 & 291.34 & 5342.18 & 14254 / 291.3M \\
+W2 & Python 3.12 Reference Agent & 2177 / 30 & 5263.2 (21.6) & 1.01 / 9.98 & 24.0 & 84.47 & 444.60 & 103475 / 260.0M \\
 \hline
-W3 & Direct Local LLM Baseline & 2410 / 29 & 5752.9 (30.7) & 0.00 / 0.00 & 0.0 & 94.07 & 541.71 & N/A \\
-W3 & Go Native Orchestrator (PicoClaw Ref.) & 2410 / 29 & 5816.9 (59.7) & 35.63 / 4.86 & 45.5 & 94.13 & 550.39 & 5326 / 138.7M \\
-W3 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2530 / 38 & 6343.5 (89.0) & 16.35 / 51.30 & 65.8 & 102.91 & 658.99 & 6488 / 404.4M \\
-W3 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7756 / 37 & 20786.4 (80.1) & 15.92 / 72.65 & 64.1 & 333.52 & 6939.81 & 6062 / 414.7M \\
-W3 & Python 3.12 Reference Agent & 2410 / 29 & 5801.5 (61.6) & 9.88 / 11.43 & 55.1 & 94.83 & 551.30 & 121600 / 304.9M \\
+W3 & Direct Local LLM Baseline & 2423 / 29 & 5754.3 (26.0) & 0.00 / 0.00 & 0.0 & 91.90 & 528.81 & N/A \\
+W3 & Go Native Orchestrator (PicoClaw Ref.) & 2423 / 29 & 5797.1 (29.3) & 39.11 / 3.43 & 45.1 & 92.15 & 533.87 & 13096 / 141.2M \\
+W3 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 2423 / 29 & 5781.1 (28.8) & 15.79 / 19.68 & 68.1 & 92.59 & 535.61 & 12610 / 375.3M \\
+W3 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 7337 / 37 & 19372.4 (21.7) & 16.11 / 23.75 & 66.3 & 307.30 & 5952.64 & 13684 / 384.8M \\
+W3 & Python 3.12 Reference Agent & 2423 / 29 & 5769.7 (24.6) & 9.67 / 10.63 & 56.0 & 92.68 & 534.86 & 158995 / 291.5M \\
 \hline
-W4 & Direct Local LLM Baseline & 23255 / 282 & 55924.9 (134.7) & 0.00 / 0.00 & 0.0 & 883.24 & 49370.90 & N/A \\
-W4 & Go Native Orchestrator (PicoClaw Ref.) & 22980 / 280 & 55354.8 (202.8) & 19.89 / 45.23 & 9.5 & 876.64 & 48543.57 & 7050 / 139.2M \\
-W4 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 24180 / 279 & 58201.2 (137.0) & 9.24 / 134.44 & 40.3 & 919.40 & 53518.24 & 6597 / 567.1M \\
-W4 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 76440 / 292 & 201797.0 (215.8) & 10.12 / 189.33 & 39.8 & 3219.72 & 649659.28 & 6455 / 623.7M \\
-W4 & Python 3.12 Reference Agent & 23255 / 282 & 55934.8 (154.7) & 13.63 / 50.86 & 23.8 & 886.19 & 49571.32 & 84819 / 355.9M \\
+W4 & Direct Local LLM Baseline & 22980 / 282 & 55184.7 (44.9) & 0.00 / 0.00 & 0.0 & 858.77 & 47385.04 & N/A \\
+W4 & Go Native Orchestrator (PicoClaw Ref.) & 22980 / 280 & 55180.6 (62.8) & 19.66 / 41.59 & 9.4 & 860.19 & 47459.92 & 13220 / 125.1M \\
+W4 & Node.js V8 Orchestrator (OpenClaw Min Ref.) & 22980 / 282 & 55251.9 (83.1) & 8.83 / 66.20 & 39.8 & 861.22 & 47573.87 & 13770 / 517.8M \\
+W4 & Node.js V8 Orchestrator (OpenClaw Full 54-Tool) & 72120 / 294 & 187723.1 (41.6) & 9.58 / 121.05 & 40.0 & 2961.69 & 555962.01 & 13809 / 564.5M \\
+W4 & Python 3.12 Reference Agent & 22980 / 282 & 55204.4 (67.9) & 12.84 / 47.78 & 24.1 & 861.65 & 47569.45 & 160693 / 343.5M \\
 \hline
 \multicolumn{9}{l}{\footnotesize $n = 30$ independent physical evaluations per condition (600 total evaluations, 60 warmups excluded).} \\
 \multicolumn{9}{l}{\footnotesize Telemetry Backend: Apple Silicon SMC (\texttt{powermetrics} 50~ms current shunt sampling) + Darwin XNU \texttt{libproc}. Data Source: \texttt{measured\_hardware}.} \\

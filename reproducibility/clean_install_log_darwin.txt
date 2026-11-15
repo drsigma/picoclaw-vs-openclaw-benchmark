@@ -2,195 +2,833 @@
  🍏 DARWIN GOLD STANDARD REPRODUCTION (STRICTLY EMPIRICAL) 🍏 
 ==================================================================
 💀 Matando instâncias zumbis do llama-server e powermetrics...
+🧹 Limpando memória unificada e caches residuais...
 🐍 Configurando ambiente Python limpo...
 WARNING: The directory '/Users/rafael/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
 WARNING: The directory '/Users/rafael/Library/Caches/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
-🚀 INICIANDO SESSÃO 1 (COLETA FÍSICA NO METAL/SMC - DEMORADO)...
+🚀 INICIANDO SESSÃO 1 (COLETA FÍSICA NO METAL/SMC - 100% EMPÍRICO)...
   - Validando Tool-RAG Recall@5...
 ========================================================================
 🔍 VALIDATING ZERO-COPY TOOL-RAG SCHEMA PRUNER RECALL@5 (30 REPETITIONS)
 ========================================================================
-  ✔ W1: Recall@5=100.0%, Precision@5=100.0%, Prune Latency=0.5596ms (median=0.5585ms)
-  ✔ W2: Recall@5=100.0%, Precision@5=100.0%, Prune Latency=0.5582ms (median=0.5599ms)
-  ✔ W3: Recall@5=100.0%, Precision@5=100.0%, Prune Latency=0.5544ms (median=0.5625ms)
-  ✔ W4: Recall@5=100.0%, Precision@5=100.0%, Prune Latency=0.5539ms (median=0.5562ms)
+  ✔ W1: Recall@5=100.0%, Precision@5=100.0%, Prune Latency=0.5870ms (median=0.5863ms)
+  ✔ W2: Recall@5=100.0%, Precision@5=100.0%, Prune Latency=0.5860ms (median=0.5840ms)
+  ✔ W3: Recall@5=100.0%, Precision@5=100.0%, Prune Latency=0.5870ms (median=0.5871ms)
+  ✔ W4: Recall@5=100.0%, Precision@5=100.0%, Prune Latency=0.5903ms (median=0.5850ms)
 
 💾 Saved Recall@5 metrics to /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tool_rag_recall_metrics.json
 ✅ Overall Recall@5: 100.00% (Zero-Miss Guarantee verified across all 120 trials)
   - Iniciando llama-server no Metal GPU (porta 8080)...
     Aguardando prontidão do endpoint /health...
-    ✔ llama-server ativo e pronto para inferência (PID: 50855)!
-  - Executando Campanha Darwin - Sessão 1 (Warm Cache Campaign)...
+    ✔ llama-server ativo e pronto para inferência (PID: 52521)!
+  - [1/9] Executando Campanha Primária de Benchmark Unificado (Cold Prefill, n=30)...
+========================================================================
+ 🚀 [PT-BR] Iniciando Campanha Experimental de Publicação (Medições Reais)
+    [EN-US] Launching Publication Experimental Campaign (Hardware Measurements)
+========================================================================
+ℹ️  [NOTICE] Running as root. Standard user execution with 'sudo -n' is supported.
+⚡ [INFO] Apple SMC hardware telemetry active (root powermetrics shunts).
+         Measuring 5-second quiescent idle baseline...
+         Quiescent idle baseline package power: 928.68 mW.
+         Starting continuous Apple SMC powermetrics sampler daemon...
+📊 Matrix: 5 agents x 4 workloads x 30 reps = 600 evaluation trials.
+
+🔥 Executing warmup rounds (3 per condition, marked with is_warmup=True)...
+
+▶️  Dispatching randomized evaluation blocks...
+   [001/600] neural_baseline  W4 Rep 1: Task=55290.1ms, Orch=0.000ms, RAM=0.0MB, EDP=50138.372J·s
+   [002/600] openclaw_minimal W2 Rep 1: Task=5286.3ms, Orch=21.403ms, RAM=85.5MB, EDP=464.662J·s
+   [003/600] python_native    W3 Rep 1: Task=5787.9ms, Orch=19.951ms, RAM=70.4MB, EDP=562.813J·s
+   [004/600] openclaw_minimal W1 Rep 1: Task=5491.3ms, Orch=19.932ms, RAM=85.6MB, EDP=503.554J·s
+   [005/600] openclaw_full    W2 Rep 1: Task=18329.5ms, Orch=25.314ms, RAM=85.7MB, EDP=5663.232J·s
+   [006/600] python_native    W2 Rep 1: Task=5285.6ms, Orch=10.833ms, RAM=38.1MB, EDP=472.409J·s
+   [007/600] python_native    W4 Rep 1: Task=55270.5ms, Orch=59.718ms, RAM=38.5MB, EDP=50368.698J·s
+   [008/600] neural_baseline  W3 Rep 1: Task=5783.2ms, Orch=0.000ms, RAM=0.0MB, EDP=554.986J·s
+   [009/600] openclaw_minimal W3 Rep 1: Task=5800.4ms, Orch=34.933ms, RAM=120.7MB, EDP=560.813J·s
+   [010/600] python_native    W1 Rep 1: Task=5480.0ms, Orch=10.503ms, RAM=38.1MB, EDP=503.703J·s
+   [011/600] neural_baseline  W2 Rep 1: Task=5278.6ms, Orch=0.000ms, RAM=0.0MB, EDP=461.358J·s
+   [012/600] openclaw_full    W3 Rep 1: Task=19382.3ms, Orch=40.219ms, RAM=111.4MB, EDP=6319.122J·s
+   [013/600] picoclaw         W2 Rep 1: Task=5270.5ms, Orch=8.001ms, RAM=11.9MB, EDP=463.785J·s
+   [014/600] openclaw_full    W4 Rep 1: Task=187806.7ms, Orch=119.151ms, RAM=89.8MB, EDP=589087.782J·s
+   [015/600] picoclaw         W3 Rep 1: Task=5800.2ms, Orch=42.923ms, RAM=53.8MB, EDP=563.312J·s
+   [016/600] neural_baseline  W1 Rep 1: Task=5483.5ms, Orch=0.000ms, RAM=0.0MB, EDP=500.173J·s
+   [017/600] openclaw_minimal W4 Rep 1: Task=55197.4ms, Orch=73.575ms, RAM=90.2MB, EDP=50412.542J·s
+   [018/600] openclaw_full    W1 Rep 1: Task=18617.1ms, Orch=24.510ms, RAM=85.7MB, EDP=5808.089J·s
+   [019/600] picoclaw         W1 Rep 1: Task=5436.4ms, Orch=4.986ms, RAM=11.2MB, EDP=502.983J·s
+   [020/600] picoclaw         W4 Rep 1: Task=55060.4ms, Orch=59.461ms, RAM=16.4MB, EDP=50337.493J·s
+   [021/600] python_native    W3 Rep 2: Task=5773.9ms, Orch=19.512ms, RAM=70.3MB, EDP=564.917J·s
+   [022/600] openclaw_full    W1 Rep 2: Task=18601.1ms, Orch=24.151ms, RAM=85.5MB, EDP=5818.419J·s
+   [023/600] picoclaw         W4 Rep 2: Task=55094.1ms, Orch=61.487ms, RAM=16.4MB, EDP=50266.533J·s
+   [024/600] openclaw_full    W4 Rep 2: Task=187833.1ms, Orch=239.689ms, RAM=90.0MB, EDP=591514.368J·s
+   [025/600] openclaw_full    W3 Rep 2: Task=19387.1ms, Orch=38.982ms, RAM=100.9MB, EDP=6293.728J·s
+   [026/600] neural_baseline  W1 Rep 2: Task=5459.6ms, Orch=0.000ms, RAM=0.0MB, EDP=501.514J·s
+   [027/600] picoclaw         W2 Rep 2: Task=5275.9ms, Orch=8.679ms, RAM=12.1MB, EDP=468.013J·s
+   [028/600] python_native    W1 Rep 2: Task=5451.7ms, Orch=13.134ms, RAM=38.2MB, EDP=509.695J·s
+   [029/600] openclaw_minimal W2 Rep 2: Task=5260.9ms, Orch=23.606ms, RAM=87.1MB, EDP=478.909J·s
+   [030/600] neural_baseline  W3 Rep 2: Task=5715.0ms, Orch=0.000ms, RAM=0.0MB, EDP=559.000J·s
+   [031/600] picoclaw         W3 Rep 2: Task=5767.4ms, Orch=41.864ms, RAM=53.8MB, EDP=571.597J·s
+   [032/600] picoclaw         W1 Rep 2: Task=5468.6ms, Orch=5.006ms, RAM=11.1MB, EDP=506.828J·s
+   [033/600] openclaw_minimal W1 Rep 2: Task=5472.4ms, Orch=19.343ms, RAM=85.3MB, EDP=512.820J·s
+   [034/600] openclaw_full    W2 Rep 2: Task=18303.9ms, Orch=26.985ms, RAM=85.7MB, EDP=5658.315J·s
+   [035/600] python_native    W4 Rep 2: Task=55302.3ms, Orch=189.545ms, RAM=38.4MB, EDP=50570.411J·s
+   [036/600] openclaw_minimal W4 Rep 2: Task=55270.8ms, Orch=75.193ms, RAM=90.2MB, EDP=50380.714J·s
+   [037/600] python_native    W2 Rep 2: Task=5273.9ms, Orch=10.757ms, RAM=38.4MB, EDP=468.058J·s
+   [038/600] neural_baseline  W4 Rep 2: Task=55191.5ms, Orch=0.000ms, RAM=0.0MB, EDP=50203.844J·s
+   [039/600] openclaw_minimal W3 Rep 2: Task=5817.6ms, Orch=42.341ms, RAM=118.5MB, EDP=566.044J·s
+   [040/600] neural_baseline  W2 Rep 2: Task=5262.0ms, Orch=0.000ms, RAM=0.0MB, EDP=463.703J·s
+   [041/600] openclaw_full    W2 Rep 3: Task=18330.3ms, Orch=24.391ms, RAM=86.0MB, EDP=5656.831J·s
+   [042/600] picoclaw         W1 Rep 3: Task=5474.2ms, Orch=7.136ms, RAM=11.1MB, EDP=504.058J·s
+   [043/600] neural_baseline  W4 Rep 3: Task=55207.0ms, Orch=0.000ms, RAM=0.0MB, EDP=50146.298J·s
+   [044/600] picoclaw         W3 Rep 3: Task=5810.5ms, Orch=43.003ms, RAM=47.6MB, EDP=559.874J·s
+   [045/600] python_native    W2 Rep 3: Task=5283.0ms, Orch=13.505ms, RAM=38.2MB, EDP=473.533J·s
+   [046/600] openclaw_minimal W2 Rep 3: Task=5277.9ms, Orch=20.952ms, RAM=86.7MB, EDP=469.701J·s
+   [047/600] openclaw_full    W3 Rep 3: Task=19373.7ms, Orch=40.097ms, RAM=113.3MB, EDP=6305.865J·s
+   [048/600] openclaw_minimal W1 Rep 3: Task=5489.1ms, Orch=19.804ms, RAM=85.2MB, EDP=503.882J·s
+   [049/600] python_native    W1 Rep 3: Task=5463.5ms, Orch=9.340ms, RAM=38.3MB, EDP=504.808J·s
+   [050/600] python_native    W3 Rep 3: Task=5764.7ms, Orch=20.222ms, RAM=70.4MB, EDP=565.074J·s
+   [051/600] openclaw_minimal W3 Rep 3: Task=5780.4ms, Orch=34.772ms, RAM=116.7MB, EDP=565.456J·s
+   [052/600] python_native    W4 Rep 3: Task=55221.2ms, Orch=61.227ms, RAM=38.3MB, EDP=50369.753J·s
+   [053/600] neural_baseline  W1 Rep 3: Task=5500.3ms, Orch=0.000ms, RAM=0.0MB, EDP=495.305J·s
+   [054/600] openclaw_minimal W4 Rep 3: Task=55311.5ms, Orch=75.726ms, RAM=90.3MB, EDP=50410.654J·s
+   [055/600] neural_baseline  W2 Rep 3: Task=5315.7ms, Orch=0.000ms, RAM=0.0MB, EDP=464.673J·s
+   [056/600] picoclaw         W2 Rep 3: Task=5276.4ms, Orch=8.554ms, RAM=12.3MB, EDP=466.813J·s
+   [057/600] openclaw_full    W1 Rep 3: Task=18649.4ms, Orch=24.415ms, RAM=85.4MB, EDP=5817.975J·s
+   [058/600] neural_baseline  W3 Rep 3: Task=5768.7ms, Orch=0.000ms, RAM=0.0MB, EDP=561.705J·s
+   [059/600] openclaw_full    W4 Rep 3: Task=187719.3ms, Orch=131.431ms, RAM=89.5MB, EDP=588295.688J·s
+   [060/600] picoclaw         W4 Rep 3: Task=55333.0ms, Orch=173.338ms, RAM=16.3MB, EDP=50630.545J·s
+   [061/600] openclaw_full    W3 Rep 4: Task=19423.4ms, Orch=95.676ms, RAM=110.4MB, EDP=6318.153J·s
+   [062/600] picoclaw         W1 Rep 4: Task=5444.1ms, Orch=4.796ms, RAM=11.2MB, EDP=502.535J·s
+   [063/600] python_native    W3 Rep 4: Task=5748.0ms, Orch=23.396ms, RAM=70.4MB, EDP=570.876J·s
+   [064/600] openclaw_full    W1 Rep 4: Task=18614.4ms, Orch=24.128ms, RAM=85.5MB, EDP=5824.967J·s
+   [065/600] python_native    W1 Rep 4: Task=5438.3ms, Orch=10.459ms, RAM=38.4MB, EDP=506.618J·s
+   [066/600] openclaw_full    W4 Rep 4: Task=187610.0ms, Orch=130.441ms, RAM=89.5MB, EDP=587353.966J·s
+   [067/600] neural_baseline  W1 Rep 4: Task=5470.8ms, Orch=0.000ms, RAM=0.0MB, EDP=495.883J·s
+   [068/600] python_native    W4 Rep 4: Task=55191.5ms, Orch=61.927ms, RAM=38.4MB, EDP=50373.705J·s
+   [069/600] openclaw_minimal W2 Rep 4: Task=5301.0ms, Orch=50.327ms, RAM=85.7MB, EDP=479.062J·s
+   [070/600] neural_baseline  W2 Rep 4: Task=5267.0ms, Orch=0.000ms, RAM=0.0MB, EDP=466.074J·s
+   [071/600] openclaw_minimal W1 Rep 4: Task=5452.5ms, Orch=20.454ms, RAM=85.7MB, EDP=506.943J·s
+   [072/600] openclaw_minimal W3 Rep 4: Task=5759.0ms, Orch=48.913ms, RAM=116.0MB, EDP=571.588J·s
+   [073/600] neural_baseline  W3 Rep 4: Task=5736.5ms, Orch=0.000ms, RAM=0.0MB, EDP=561.695J·s
+   [074/600] picoclaw         W4 Rep 4: Task=55125.0ms, Orch=63.933ms, RAM=16.8MB, EDP=50376.740J·s
+   [075/600] python_native    W2 Rep 4: Task=5263.5ms, Orch=13.715ms, RAM=38.2MB, EDP=476.264J·s
+   [076/600] neural_baseline  W4 Rep 4: Task=55140.0ms, Orch=0.000ms, RAM=0.0MB, EDP=50192.916J·s
+   [077/600] openclaw_full    W2 Rep 4: Task=18333.2ms, Orch=24.264ms, RAM=85.6MB, EDP=5654.158J·s
+   [078/600] openclaw_minimal W4 Rep 4: Task=55295.8ms, Orch=76.025ms, RAM=89.8MB, EDP=50476.135J·s
+   [079/600] picoclaw         W2 Rep 4: Task=5284.0ms, Orch=9.148ms, RAM=12.3MB, EDP=464.957J·s
+   [080/600] picoclaw         W3 Rep 4: Task=5791.0ms, Orch=45.397ms, RAM=53.8MB, EDP=560.936J·s
+   [081/600] python_native    W1 Rep 5: Task=5453.2ms, Orch=13.362ms, RAM=38.4MB, EDP=503.245J·s
+   [082/600] openclaw_full    W4 Rep 5: Task=187708.9ms, Orch=130.803ms, RAM=89.8MB, EDP=588636.246J·s
+   [083/600] python_native    W2 Rep 5: Task=5278.1ms, Orch=11.019ms, RAM=38.3MB, EDP=462.391J·s
+   [084/600] openclaw_full    W2 Rep 5: Task=18361.9ms, Orch=25.559ms, RAM=85.8MB, EDP=5662.383J·s
+   [085/600] picoclaw         W3 Rep 5: Task=5806.2ms, Orch=44.952ms, RAM=53.8MB, EDP=563.951J·s
+   [086/600] python_native    W3 Rep 5: Task=5782.3ms, Orch=20.999ms, RAM=70.3MB, EDP=565.390J·s
+   [087/600] picoclaw         W2 Rep 5: Task=5249.4ms, Orch=6.477ms, RAM=12.1MB, EDP=467.530J·s
+   [088/600] picoclaw         W1 Rep 5: Task=5479.9ms, Orch=4.564ms, RAM=10.9MB, EDP=503.516J·s
+   [089/600] python_native    W4 Rep 5: Task=55159.8ms, Orch=58.642ms, RAM=38.3MB, EDP=50438.072J·s
+   [090/600] picoclaw         W4 Rep 5: Task=55160.4ms, Orch=62.736ms, RAM=16.4MB, EDP=50178.890J·s
+   [091/600] openclaw_full    W1 Rep 5: Task=18639.0ms, Orch=24.692ms, RAM=85.4MB, EDP=5807.806J·s
+   [092/600] openclaw_full    W3 Rep 5: Task=19373.4ms, Orch=39.357ms, RAM=119.2MB, EDP=6308.026J·s
+   [093/600] openclaw_minimal W1 Rep 5: Task=5470.7ms, Orch=20.409ms, RAM=85.8MB, EDP=502.440J·s
+   [094/600] openclaw_minimal W3 Rep 5: Task=5790.5ms, Orch=35.251ms, RAM=119.7MB, EDP=569.194J·s
+   [095/600] neural_baseline  W1 Rep 5: Task=5458.8ms, Orch=0.000ms, RAM=0.0MB, EDP=501.221J·s
+   [096/600] neural_baseline  W3 Rep 5: Task=5720.2ms, Orch=0.000ms, RAM=0.0MB, EDP=557.923J·s
+   [097/600] openclaw_minimal W4 Rep 5: Task=55178.1ms, Orch=76.407ms, RAM=90.1MB, EDP=50426.233J·s
+   [098/600] neural_baseline  W2 Rep 5: Task=5277.9ms, Orch=0.000ms, RAM=0.0MB, EDP=463.098J·s
+   [099/600] openclaw_minimal W2 Rep 5: Task=5272.8ms, Orch=20.899ms, RAM=85.8MB, EDP=472.115J·s
+   [100/600] neural_baseline  W4 Rep 5: Task=55184.1ms, Orch=0.000ms, RAM=0.0MB, EDP=50316.527J·s
+   [101/600] openclaw_full    W2 Rep 6: Task=18343.9ms, Orch=24.746ms, RAM=85.8MB, EDP=5647.654J·s
+   [102/600] picoclaw         W1 Rep 6: Task=5477.6ms, Orch=4.827ms, RAM=11.2MB, EDP=494.036J·s
+   [103/600] picoclaw         W2 Rep 6: Task=5282.5ms, Orch=7.136ms, RAM=12.1MB, EDP=470.531J·s
+   [104/600] python_native    W3 Rep 6: Task=5773.3ms, Orch=21.166ms, RAM=70.3MB, EDP=570.284J·s
+   [105/600] openclaw_full    W1 Rep 6: Task=18630.9ms, Orch=23.579ms, RAM=85.6MB, EDP=5836.084J·s
+   [106/600] python_native    W1 Rep 6: Task=5462.6ms, Orch=9.816ms, RAM=38.3MB, EDP=503.525J·s
+   [107/600] openclaw_minimal W2 Rep 6: Task=5262.4ms, Orch=21.693ms, RAM=85.6MB, EDP=469.824J·s
+   [108/600] python_native    W2 Rep 6: Task=5247.5ms, Orch=11.255ms, RAM=38.3MB, EDP=469.452J·s
+   [109/600] picoclaw         W4 Rep 6: Task=55179.7ms, Orch=60.644ms, RAM=16.9MB, EDP=50276.804J·s
+   [110/600] openclaw_full    W4 Rep 6: Task=187732.1ms, Orch=128.956ms, RAM=90.0MB, EDP=588495.595J·s
+   [111/600] openclaw_minimal W1 Rep 6: Task=5504.5ms, Orch=20.232ms, RAM=86.8MB, EDP=501.766J·s
+   [112/600] picoclaw         W3 Rep 6: Task=5797.0ms, Orch=41.158ms, RAM=54.0MB, EDP=565.557J·s
+   [113/600] openclaw_minimal W4 Rep 6: Task=55249.7ms, Orch=73.344ms, RAM=90.1MB, EDP=50390.450J·s
+   [114/600] neural_baseline  W2 Rep 6: Task=5294.1ms, Orch=0.000ms, RAM=0.0MB, EDP=466.186J·s
+   [115/600] neural_baseline  W1 Rep 6: Task=5439.7ms, Orch=0.000ms, RAM=0.0MB, EDP=500.353J·s
+   [116/600] python_native    W4 Rep 6: Task=55183.2ms, Orch=60.215ms, RAM=38.3MB, EDP=50377.745J·s
+   [117/600] neural_baseline  W4 Rep 6: Task=55175.3ms, Orch=0.000ms, RAM=0.0MB, EDP=50158.930J·s
+   [118/600] openclaw_full    W3 Rep 6: Task=19371.7ms, Orch=38.572ms, RAM=119.0MB, EDP=6296.842J·s
+   [119/600] neural_baseline  W3 Rep 6: Task=5755.2ms, Orch=0.000ms, RAM=0.0MB, EDP=558.952J·s
+   [120/600] openclaw_minimal W3 Rep 6: Task=5767.4ms, Orch=35.345ms, RAM=117.2MB, EDP=563.694J·s
+   [121/600] openclaw_full    W1 Rep 7: Task=18607.9ms, Orch=24.280ms, RAM=85.4MB, EDP=5821.244J·s
+   [122/600] picoclaw         W1 Rep 7: Task=5452.2ms, Orch=4.745ms, RAM=11.0MB, EDP=500.526J·s
+   [123/600] openclaw_minimal W2 Rep 7: Task=5248.1ms, Orch=21.596ms, RAM=85.7MB, EDP=472.727J·s
+   [124/600] openclaw_full    W4 Rep 7: Task=187683.9ms, Orch=133.251ms, RAM=89.6MB, EDP=588420.958J·s
+   [125/600] openclaw_minimal W4 Rep 7: Task=55354.6ms, Orch=72.997ms, RAM=90.1MB, EDP=50369.412J·s
+   [126/600] neural_baseline  W4 Rep 7: Task=55198.5ms, Orch=0.000ms, RAM=0.0MB, EDP=50086.884J·s
+   [127/600] picoclaw         W4 Rep 7: Task=55225.7ms, Orch=57.493ms, RAM=16.8MB, EDP=50239.558J·s
+   [128/600] openclaw_full    W2 Rep 7: Task=18360.9ms, Orch=25.788ms, RAM=85.7MB, EDP=5654.165J·s
+   [129/600] python_native    W3 Rep 7: Task=5777.1ms, Orch=18.675ms, RAM=70.4MB, EDP=562.606J·s
+   [130/600] openclaw_minimal W3 Rep 7: Task=5775.5ms, Orch=35.475ms, RAM=117.0MB, EDP=564.640J·s
+   [131/600] python_native    W1 Rep 7: Task=5457.4ms, Orch=9.908ms, RAM=38.3MB, EDP=504.424J·s
+   [132/600] openclaw_full    W3 Rep 7: Task=19336.5ms, Orch=37.386ms, RAM=118.9MB, EDP=6300.921J·s
+   [133/600] neural_baseline  W3 Rep 7: Task=5759.6ms, Orch=0.000ms, RAM=0.0MB, EDP=561.132J·s
+   [134/600] neural_baseline  W2 Rep 7: Task=5253.1ms, Orch=0.000ms, RAM=0.0MB, EDP=467.373J·s
+   [135/600] python_native    W2 Rep 7: Task=5254.0ms, Orch=10.473ms, RAM=38.2MB, EDP=472.804J·s
+   [136/600] picoclaw         W2 Rep 7: Task=5236.5ms, Orch=7.656ms, RAM=11.9MB, EDP=470.775J·s
+   [137/600] picoclaw         W3 Rep 7: Task=5746.9ms, Orch=42.206ms, RAM=54.1MB, EDP=563.783J·s
+   [138/600] python_native    W4 Rep 7: Task=55184.2ms, Orch=61.339ms, RAM=38.4MB, EDP=50498.510J·s
+   [139/600] neural_baseline  W1 Rep 7: Task=5485.9ms, Orch=0.000ms, RAM=0.0MB, EDP=500.031J·s
+   [140/600] openclaw_minimal W1 Rep 7: Task=5483.7ms, Orch=20.110ms, RAM=85.5MB, EDP=507.556J·s
+   [141/600] python_native    W2 Rep 8: Task=5246.8ms, Orch=11.316ms, RAM=38.3MB, EDP=474.061J·s
+   [142/600] python_native    W4 Rep 8: Task=55209.5ms, Orch=61.687ms, RAM=38.2MB, EDP=50394.295J·s
+   [143/600] openclaw_minimal W2 Rep 8: Task=5287.4ms, Orch=21.712ms, RAM=85.6MB, EDP=469.065J·s
+   [144/600] picoclaw         W2 Rep 8: Task=5280.6ms, Orch=7.125ms, RAM=11.9MB, EDP=467.988J·s
+   [145/600] openclaw_full    W4 Rep 8: Task=187738.8ms, Orch=128.476ms, RAM=89.8MB, EDP=588796.428J·s
+   [146/600] neural_baseline  W1 Rep 8: Task=5480.0ms, Orch=0.000ms, RAM=0.0MB, EDP=498.833J·s
+   [147/600] openclaw_full    W2 Rep 8: Task=18352.6ms, Orch=26.153ms, RAM=85.7MB, EDP=5648.082J·s
+   [148/600] python_native    W1 Rep 8: Task=5491.8ms, Orch=9.918ms, RAM=38.4MB, EDP=502.970J·s
+   [149/600] neural_baseline  W3 Rep 8: Task=5753.4ms, Orch=0.000ms, RAM=0.0MB, EDP=559.230J·s
+   [150/600] python_native    W3 Rep 8: Task=5763.1ms, Orch=19.869ms, RAM=70.3MB, EDP=568.624J·s
+   [151/600] picoclaw         W1 Rep 8: Task=5451.2ms, Orch=4.358ms, RAM=11.1MB, EDP=501.632J·s
+   [152/600] openclaw_minimal W4 Rep 8: Task=55145.1ms, Orch=74.479ms, RAM=89.7MB, EDP=50445.554J·s
+   [153/600] picoclaw         W3 Rep 8: Task=5797.3ms, Orch=41.462ms, RAM=54.3MB, EDP=564.060J·s
+   [154/600] openclaw_minimal W3 Rep 8: Task=5764.0ms, Orch=33.755ms, RAM=119.0MB, EDP=565.664J·s
+   [155/600] openclaw_minimal W1 Rep 8: Task=5453.4ms, Orch=20.484ms, RAM=85.5MB, EDP=506.430J·s
+   [156/600] neural_baseline  W4 Rep 8: Task=55101.5ms, Orch=0.000ms, RAM=0.0MB, EDP=50259.709J·s
+   [157/600] openclaw_full    W3 Rep 8: Task=19345.0ms, Orch=36.865ms, RAM=119.0MB, EDP=6297.683J·s
+   [158/600] openclaw_full    W1 Rep 8: Task=18637.7ms, Orch=24.761ms, RAM=85.8MB, EDP=5818.634J·s
+   [159/600] neural_baseline  W2 Rep 8: Task=5269.7ms, Orch=0.000ms, RAM=0.0MB, EDP=463.542J·s
+   [160/600] picoclaw         W4 Rep 8: Task=55190.3ms, Orch=58.394ms, RAM=16.7MB, EDP=50318.046J·s
+   [161/600] python_native    W1 Rep 9: Task=5476.8ms, Orch=9.455ms, RAM=38.2MB, EDP=502.861J·s
+   [162/600] picoclaw         W3 Rep 9: Task=5801.2ms, Orch=42.430ms, RAM=54.2MB, EDP=565.983J·s
+   [163/600] openclaw_minimal W3 Rep 9: Task=5771.8ms, Orch=34.611ms, RAM=116.7MB, EDP=568.346J·s
+   [164/600] python_native    W3 Rep 9: Task=5749.3ms, Orch=19.835ms, RAM=70.3MB, EDP=566.406J·s
+   [165/600] openclaw_full    W4 Rep 9: Task=187689.9ms, Orch=164.118ms, RAM=89.9MB, EDP=588696.715J·s
+   [166/600] openclaw_full    W1 Rep 9: Task=18670.2ms, Orch=24.399ms, RAM=85.4MB, EDP=5892.481J·s
+   [167/600] python_native    W4 Rep 9: Task=55289.7ms, Orch=60.372ms, RAM=38.4MB, EDP=50283.975J·s
+   [168/600] openclaw_full    W2 Rep 9: Task=18351.7ms, Orch=24.968ms, RAM=86.4MB, EDP=5649.476J·s
+   [169/600] python_native    W2 Rep 9: Task=5273.4ms, Orch=11.324ms, RAM=38.3MB, EDP=469.262J·s
+   [170/600] picoclaw         W4 Rep 9: Task=55163.8ms, Orch=62.793ms, RAM=16.9MB, EDP=50158.513J·s
+   [171/600] openclaw_minimal W1 Rep 9: Task=5488.6ms, Orch=21.048ms, RAM=85.5MB, EDP=501.782J·s
+   [172/600] neural_baseline  W4 Rep 9: Task=55198.7ms, Orch=0.000ms, RAM=0.0MB, EDP=50160.053J·s
+   [173/600] picoclaw         W2 Rep 9: Task=5278.4ms, Orch=6.624ms, RAM=12.0MB, EDP=466.496J·s
+   [174/600] neural_baseline  W3 Rep 9: Task=5749.3ms, Orch=0.000ms, RAM=0.0MB, EDP=560.987J·s
+   [175/600] openclaw_minimal W4 Rep 9: Task=55260.6ms, Orch=73.409ms, RAM=90.0MB, EDP=50450.710J·s
+   [176/600] openclaw_full    W3 Rep 9: Task=19373.8ms, Orch=39.387ms, RAM=119.1MB, EDP=6306.095J·s
+   [177/600] picoclaw         W1 Rep 9: Task=5478.5ms, Orch=4.891ms, RAM=11.1MB, EDP=498.894J·s
+   [178/600] neural_baseline  W1 Rep 9: Task=5472.0ms, Orch=0.000ms, RAM=0.0MB, EDP=494.033J·s
+   [179/600] neural_baseline  W2 Rep 9: Task=5260.3ms, Orch=0.000ms, RAM=0.0MB, EDP=467.764J·s
+   [180/600] openclaw_minimal W2 Rep 9: Task=5275.2ms, Orch=21.083ms, RAM=85.6MB, EDP=471.626J·s
+   [181/600] picoclaw         W1 Rep 10: Task=5439.6ms, Orch=4.599ms, RAM=11.0MB, EDP=500.921J·s
+   [182/600] picoclaw         W2 Rep 10: Task=5249.0ms, Orch=6.638ms, RAM=11.8MB, EDP=470.921J·s
+   [183/600] openclaw_minimal W4 Rep 10: Task=55204.7ms, Orch=75.034ms, RAM=90.7MB, EDP=50473.464J·s
+   [184/600] openclaw_full    W4 Rep 10: Task=187717.4ms, Orch=131.093ms, RAM=89.7MB, EDP=588502.711J·s
+   [185/600] picoclaw         W3 Rep 10: Task=5818.1ms, Orch=46.809ms, RAM=54.1MB, EDP=563.782J·s
+   [186/600] neural_baseline  W1 Rep 10: Task=5481.5ms, Orch=0.000ms, RAM=0.0MB, EDP=493.613J·s
+   [187/600] python_native    W1 Rep 10: Task=5461.3ms, Orch=10.316ms, RAM=38.3MB, EDP=503.191J·s
+   [188/600] neural_baseline  W4 Rep 10: Task=55162.2ms, Orch=0.000ms, RAM=0.0MB, EDP=50278.715J·s
+   [189/600] openclaw_full    W3 Rep 10: Task=19360.4ms, Orch=38.432ms, RAM=118.7MB, EDP=6299.900J·s
+   [190/600] python_native    W3 Rep 10: Task=5768.2ms, Orch=20.358ms, RAM=70.3MB, EDP=567.590J·s
+   [191/600] picoclaw         W4 Rep 10: Task=55144.6ms, Orch=60.027ms, RAM=16.8MB, EDP=50270.579J·s
+   [192/600] openclaw_minimal W3 Rep 10: Task=5810.7ms, Orch=34.959ms, RAM=116.5MB, EDP=563.234J·s
+   [193/600] openclaw_full    W2 Rep 10: Task=18316.8ms, Orch=26.485ms, RAM=86.2MB, EDP=5644.481J·s
+   [194/600] python_native    W2 Rep 10: Task=5261.6ms, Orch=11.332ms, RAM=38.3MB, EDP=471.563J·s
+   [195/600] neural_baseline  W3 Rep 10: Task=5739.5ms, Orch=0.000ms, RAM=0.0MB, EDP=564.077J·s
+   [196/600] openclaw_full    W1 Rep 10: Task=18629.9ms, Orch=24.734ms, RAM=85.6MB, EDP=5835.642J·s
+   [197/600] openclaw_minimal W2 Rep 10: Task=5269.8ms, Orch=22.059ms, RAM=85.4MB, EDP=473.266J·s
+   [198/600] neural_baseline  W2 Rep 10: Task=5220.4ms, Orch=0.000ms, RAM=0.0MB, EDP=464.698J·s
+   [199/600] python_native    W4 Rep 10: Task=55141.2ms, Orch=62.286ms, RAM=38.4MB, EDP=50477.892J·s
+   [200/600] openclaw_minimal W1 Rep 10: Task=5485.0ms, Orch=19.136ms, RAM=85.5MB, EDP=506.613J·s
+   [201/600] python_native    W4 Rep 11: Task=55211.6ms, Orch=60.846ms, RAM=38.4MB, EDP=50395.956J·s
+   [202/600] neural_baseline  W1 Rep 11: Task=5479.5ms, Orch=0.000ms, RAM=0.0MB, EDP=494.976J·s
+   [203/600] openclaw_minimal W1 Rep 11: Task=5473.5ms, Orch=20.622ms, RAM=86.7MB, EDP=506.512J·s
+   [204/600] neural_baseline  W2 Rep 11: Task=5261.2ms, Orch=0.000ms, RAM=0.0MB, EDP=466.295J·s
+   [205/600] python_native    W1 Rep 11: Task=5455.1ms, Orch=9.650ms, RAM=38.4MB, EDP=508.180J·s
+   [206/600] openclaw_minimal W3 Rep 11: Task=5747.9ms, Orch=33.371ms, RAM=118.7MB, EDP=567.238J·s
+   [207/600] openclaw_minimal W2 Rep 11: Task=5267.6ms, Orch=21.685ms, RAM=86.4MB, EDP=485.082J·s
+   [208/600] picoclaw         W2 Rep 11: Task=5248.3ms, Orch=6.280ms, RAM=12.1MB, EDP=468.677J·s
+   [209/600] python_native    W3 Rep 11: Task=5759.6ms, Orch=21.801ms, RAM=70.3MB, EDP=573.336J·s
+   [210/600] openclaw_full    W4 Rep 11: Task=187704.0ms, Orch=126.967ms, RAM=89.9MB, EDP=589391.038J·s
+   [211/600] python_native    W2 Rep 11: Task=5290.9ms, Orch=13.945ms, RAM=38.3MB, EDP=468.267J·s
+   [212/600] neural_baseline  W4 Rep 11: Task=55223.9ms, Orch=0.000ms, RAM=0.0MB, EDP=50123.908J·s
+   [213/600] openclaw_full    W1 Rep 11: Task=18642.8ms, Orch=24.395ms, RAM=85.3MB, EDP=5816.623J·s
+   [214/600] openclaw_full    W2 Rep 11: Task=18349.1ms, Orch=26.086ms, RAM=85.6MB, EDP=5653.873J·s
+   [215/600] picoclaw         W1 Rep 11: Task=5495.5ms, Orch=7.698ms, RAM=11.2MB, EDP=497.969J·s
+   [216/600] openclaw_full    W3 Rep 11: Task=19345.6ms, Orch=43.467ms, RAM=114.2MB, EDP=6298.185J·s
+   [217/600] picoclaw         W3 Rep 11: Task=5811.9ms, Orch=43.807ms, RAM=54.0MB, EDP=566.934J·s
+   [218/600] neural_baseline  W3 Rep 11: Task=5749.6ms, Orch=0.000ms, RAM=0.0MB, EDP=560.694J·s
+   [219/600] openclaw_minimal W4 Rep 11: Task=55187.3ms, Orch=76.311ms, RAM=89.9MB, EDP=50417.444J·s
+   [220/600] picoclaw         W4 Rep 11: Task=55218.5ms, Orch=60.960ms, RAM=16.4MB, EDP=50275.527J·s
+   [221/600] openclaw_minimal W1 Rep 12: Task=5492.6ms, Orch=19.691ms, RAM=85.3MB, EDP=502.547J·s
+   [222/600] python_native    W3 Rep 12: Task=5785.2ms, Orch=21.080ms, RAM=70.3MB, EDP=566.427J·s
+   [223/600] picoclaw         W1 Rep 12: Task=5463.1ms, Orch=4.711ms, RAM=11.0MB, EDP=503.524J·s
+   [224/600] picoclaw         W2 Rep 12: Task=5258.0ms, Orch=6.460ms, RAM=12.0MB, EDP=466.431J·s
+   [225/600] openclaw_minimal W2 Rep 12: Task=5251.3ms, Orch=21.780ms, RAM=85.8MB, EDP=473.125J·s
+   [226/600] openclaw_full    W4 Rep 12: Task=187708.1ms, Orch=127.933ms, RAM=89.7MB, EDP=589001.357J·s
+   [227/600] openclaw_minimal W3 Rep 12: Task=5807.7ms, Orch=33.002ms, RAM=118.6MB, EDP=559.525J·s
+   [228/600] python_native    W1 Rep 12: Task=5483.1ms, Orch=10.668ms, RAM=38.3MB, EDP=503.903J·s
+   [229/600] python_native    W2 Rep 12: Task=5262.9ms, Orch=10.867ms, RAM=38.3MB, EDP=469.408J·s
+   [230/600] openclaw_full    W2 Rep 12: Task=18328.0ms, Orch=25.766ms, RAM=87.2MB, EDP=5646.534J·s
+   [231/600] neural_baseline  W3 Rep 12: Task=5769.8ms, Orch=0.000ms, RAM=0.0MB, EDP=557.352J·s
+   [232/600] python_native    W4 Rep 12: Task=55182.6ms, Orch=62.556ms, RAM=38.4MB, EDP=50395.509J·s
+   [233/600] picoclaw         W4 Rep 12: Task=55181.9ms, Orch=61.127ms, RAM=16.5MB, EDP=50235.516J·s
+   [234/600] neural_baseline  W2 Rep 12: Task=5261.6ms, Orch=0.000ms, RAM=0.0MB, EDP=465.945J·s
+   [235/600] neural_baseline  W4 Rep 12: Task=55164.5ms, Orch=0.000ms, RAM=0.0MB, EDP=50184.673J·s
+   [236/600] openclaw_full    W1 Rep 12: Task=18641.4ms, Orch=25.092ms, RAM=85.7MB, EDP=5826.266J·s
+   [237/600] openclaw_minimal W4 Rep 12: Task=55255.6ms, Orch=74.004ms, RAM=90.0MB, EDP=50383.687J·s
+   [238/600] neural_baseline  W1 Rep 12: Task=5470.0ms, Orch=0.000ms, RAM=0.0MB, EDP=498.966J·s
+   [239/600] picoclaw         W3 Rep 12: Task=5777.1ms, Orch=39.776ms, RAM=47.7MB, EDP=563.288J·s
+   [240/600] openclaw_full    W3 Rep 12: Task=19366.4ms, Orch=39.451ms, RAM=116.2MB, EDP=6297.914J·s
+   [241/600] picoclaw         W4 Rep 13: Task=55222.8ms, Orch=71.614ms, RAM=16.4MB, EDP=50349.384J·s
+   [242/600] openclaw_minimal W4 Rep 13: Task=55276.8ms, Orch=78.410ms, RAM=90.2MB, EDP=50320.464J·s
+   [243/600] openclaw_minimal W1 Rep 13: Task=5498.5ms, Orch=20.181ms, RAM=85.8MB, EDP=505.038J·s
+   [244/600] openclaw_full    W2 Rep 13: Task=18335.5ms, Orch=25.680ms, RAM=85.9MB, EDP=5664.458J·s
+   [245/600] openclaw_full    W1 Rep 13: Task=18666.3ms, Orch=24.879ms, RAM=85.7MB, EDP=5827.211J·s
+   [246/600] picoclaw         W3 Rep 13: Task=5808.9ms, Orch=42.047ms, RAM=53.9MB, EDP=562.285J·s
+   [247/600] openclaw_minimal W2 Rep 13: Task=5289.9ms, Orch=22.109ms, RAM=85.7MB, EDP=471.050J·s
+   [248/600] openclaw_minimal W3 Rep 13: Task=5792.3ms, Orch=38.122ms, RAM=120.8MB, EDP=563.793J·s
+   [249/600] python_native    W1 Rep 13: Task=5462.1ms, Orch=9.466ms, RAM=38.2MB, EDP=506.740J·s
+   [250/600] picoclaw         W2 Rep 13: Task=5274.7ms, Orch=6.587ms, RAM=11.8MB, EDP=468.932J·s
+   [251/600] python_native    W4 Rep 13: Task=55232.9ms, Orch=62.147ms, RAM=38.5MB, EDP=50415.657J·s
+   [252/600] openclaw_full    W3 Rep 13: Task=19391.0ms, Orch=40.695ms, RAM=121.9MB, EDP=6307.407J·s
+   [253/600] picoclaw         W1 Rep 13: Task=5482.9ms, Orch=5.140ms, RAM=11.0MB, EDP=497.507J·s
+   [254/600] neural_baseline  W3 Rep 13: Task=5780.7ms, Orch=0.000ms, RAM=0.0MB, EDP=555.522J·s
+   [255/600] neural_baseline  W1 Rep 13: Task=5498.1ms, Orch=0.000ms, RAM=0.0MB, EDP=496.720J·s
+   [256/600] python_native    W3 Rep 13: Task=5771.0ms, Orch=18.017ms, RAM=70.5MB, EDP=561.931J·s
+   [257/600] neural_baseline  W2 Rep 13: Task=5255.2ms, Orch=0.000ms, RAM=0.0MB, EDP=461.974J·s
+   [258/600] neural_baseline  W4 Rep 13: Task=55214.7ms, Orch=0.000ms, RAM=0.0MB, EDP=50197.852J·s
+   [259/600] openclaw_full    W4 Rep 13: Task=187756.4ms, Orch=129.030ms, RAM=89.9MB, EDP=588251.530J·s
+   [260/600] python_native    W2 Rep 13: Task=5271.1ms, Orch=10.509ms, RAM=38.3MB, EDP=465.237J·s
+   [261/600] openclaw_full    W2 Rep 14: Task=18324.7ms, Orch=24.984ms, RAM=86.0MB, EDP=5647.740J·s
+   [262/600] picoclaw         W3 Rep 14: Task=5782.2ms, Orch=42.366ms, RAM=54.0MB, EDP=564.550J·s
+   [263/600] python_native    W1 Rep 14: Task=5444.1ms, Orch=9.961ms, RAM=38.3MB, EDP=506.522J·s
+   [264/600] openclaw_minimal W3 Rep 14: Task=5753.3ms, Orch=35.298ms, RAM=116.4MB, EDP=569.487J·s
+   [265/600] openclaw_full    W3 Rep 14: Task=19335.4ms, Orch=39.809ms, RAM=118.8MB, EDP=6289.391J·s
+   [266/600] neural_baseline  W3 Rep 14: Task=5722.5ms, Orch=0.000ms, RAM=0.0MB, EDP=560.375J·s
+   [267/600] python_native    W4 Rep 14: Task=55121.4ms, Orch=60.305ms, RAM=38.3MB, EDP=50528.548J·s
+   [268/600] picoclaw         W1 Rep 14: Task=5441.2ms, Orch=4.413ms, RAM=11.1MB, EDP=504.184J·s
+   [269/600] openclaw_full    W4 Rep 14: Task=187668.0ms, Orch=131.133ms, RAM=89.7MB, EDP=588147.821J·s
+   [270/600] openclaw_full    W1 Rep 14: Task=18653.4ms, Orch=24.903ms, RAM=86.0MB, EDP=5814.094J·s
+   [271/600] neural_baseline  W1 Rep 14: Task=5493.6ms, Orch=0.000ms, RAM=0.0MB, EDP=497.186J·s
+   [272/600] picoclaw         W2 Rep 14: Task=5270.7ms, Orch=7.096ms, RAM=12.1MB, EDP=466.041J·s
+   [273/600] picoclaw         W4 Rep 14: Task=55179.1ms, Orch=59.595ms, RAM=16.3MB, EDP=50265.984J·s
+   [274/600] openclaw_minimal W4 Rep 14: Task=55238.0ms, Orch=76.017ms, RAM=90.7MB, EDP=50346.456J·s
+   [275/600] neural_baseline  W4 Rep 14: Task=55207.4ms, Orch=0.000ms, RAM=0.0MB, EDP=50296.178J·s
+   [276/600] openclaw_minimal W2 Rep 14: Task=5269.1ms, Orch=21.133ms, RAM=85.9MB, EDP=471.615J·s
+   [277/600] python_native    W2 Rep 14: Task=5246.0ms, Orch=10.278ms, RAM=38.3MB, EDP=475.153J·s
+   [278/600] openclaw_minimal W1 Rep 14: Task=5443.5ms, Orch=21.116ms, RAM=85.3MB, EDP=500.872J·s
+   [279/600] python_native    W3 Rep 14: Task=5752.1ms, Orch=20.150ms, RAM=70.3MB, EDP=566.539J·s
+   [280/600] neural_baseline  W2 Rep 14: Task=5261.2ms, Orch=0.000ms, RAM=0.0MB, EDP=470.950J·s
+   [281/600] picoclaw         W2 Rep 15: Task=5244.9ms, Orch=9.272ms, RAM=12.1MB, EDP=470.757J·s
+   [282/600] openclaw_full    W2 Rep 15: Task=18310.5ms, Orch=25.038ms, RAM=85.7MB, EDP=5675.953J·s
+   [283/600] openclaw_full    W3 Rep 15: Task=19350.4ms, Orch=39.733ms, RAM=118.8MB, EDP=6295.772J·s
+   [284/600] openclaw_minimal W2 Rep 15: Task=5266.7ms, Orch=21.779ms, RAM=85.9MB, EDP=472.168J·s
+   [285/600] openclaw_full    W1 Rep 15: Task=18631.8ms, Orch=24.708ms, RAM=85.4MB, EDP=5837.251J·s
+   [286/600] picoclaw         W4 Rep 15: Task=55228.5ms, Orch=60.292ms, RAM=17.0MB, EDP=50283.794J·s
+   [287/600] neural_baseline  W2 Rep 15: Task=5277.1ms, Orch=0.000ms, RAM=0.0MB, EDP=461.977J·s
+   [288/600] openclaw_minimal W4 Rep 15: Task=55298.7ms, Orch=76.810ms, RAM=90.1MB, EDP=50444.556J·s
+   [289/600] openclaw_minimal W1 Rep 15: Task=5501.4ms, Orch=20.483ms, RAM=85.6MB, EDP=503.462J·s
+   [290/600] openclaw_full    W4 Rep 15: Task=187724.1ms, Orch=129.928ms, RAM=90.4MB, EDP=588474.430J·s
+   [291/600] neural_baseline  W4 Rep 15: Task=55269.8ms, Orch=0.000ms, RAM=0.0MB, EDP=50245.783J·s
+   [292/600] neural_baseline  W1 Rep 15: Task=5496.0ms, Orch=0.000ms, RAM=0.0MB, EDP=498.654J·s
+   [293/600] picoclaw         W3 Rep 15: Task=5796.5ms, Orch=40.538ms, RAM=54.2MB, EDP=566.098J·s
+   [294/600] picoclaw         W1 Rep 15: Task=5457.0ms, Orch=4.921ms, RAM=11.2MB, EDP=503.831J·s
+   [295/600] python_native    W3 Rep 15: Task=5743.9ms, Orch=18.246ms, RAM=70.4MB, EDP=565.262J·s
+   [296/600] python_native    W1 Rep 15: Task=5439.0ms, Orch=10.268ms, RAM=38.3MB, EDP=507.088J·s
+   [297/600] openclaw_minimal W3 Rep 15: Task=5771.8ms, Orch=35.830ms, RAM=119.3MB, EDP=570.677J·s
+   [298/600] neural_baseline  W3 Rep 15: Task=5719.1ms, Orch=0.000ms, RAM=0.0MB, EDP=562.914J·s
+   [299/600] python_native    W4 Rep 15: Task=55128.6ms, Orch=62.056ms, RAM=38.3MB, EDP=50444.655J·s
+   [300/600] python_native    W2 Rep 15: Task=5265.2ms, Orch=11.012ms, RAM=38.3MB, EDP=470.070J·s
+   [301/600] neural_baseline  W3 Rep 16: Task=5752.8ms, Orch=0.000ms, RAM=0.0MB, EDP=560.816J·s
+   [302/600] picoclaw         W4 Rep 16: Task=55143.8ms, Orch=61.738ms, RAM=16.8MB, EDP=50295.554J·s
+   [303/600] python_native    W1 Rep 16: Task=5476.0ms, Orch=10.216ms, RAM=38.2MB, EDP=502.881J·s
+   [304/600] openclaw_minimal W2 Rep 16: Task=5259.3ms, Orch=21.923ms, RAM=85.7MB, EDP=470.997J·s
+   [305/600] neural_baseline  W1 Rep 16: Task=5468.4ms, Orch=0.000ms, RAM=0.0MB, EDP=498.060J·s
+   [306/600] openclaw_full    W4 Rep 16: Task=187725.2ms, Orch=130.727ms, RAM=89.6MB, EDP=588945.952J·s
+   [307/600] openclaw_minimal W1 Rep 16: Task=5530.5ms, Orch=20.873ms, RAM=85.7MB, EDP=499.287J·s
+   [308/600] python_native    W2 Rep 16: Task=5274.2ms, Orch=11.236ms, RAM=38.4MB, EDP=467.246J·s
+   [309/600] picoclaw         W3 Rep 16: Task=5817.2ms, Orch=39.870ms, RAM=47.8MB, EDP=568.190J·s
+   [310/600] python_native    W4 Rep 16: Task=55230.3ms, Orch=61.326ms, RAM=38.5MB, EDP=50325.042J·s
+   [311/600] openclaw_full    W1 Rep 16: Task=18647.4ms, Orch=24.163ms, RAM=85.3MB, EDP=5813.057J·s
+   [312/600] openclaw_minimal W4 Rep 16: Task=55254.2ms, Orch=75.375ms, RAM=89.9MB, EDP=50341.591J·s
+   [313/600] neural_baseline  W4 Rep 16: Task=55239.9ms, Orch=0.000ms, RAM=0.0MB, EDP=50074.835J·s
+   [314/600] python_native    W3 Rep 16: Task=5802.8ms, Orch=20.118ms, RAM=70.3MB, EDP=563.590J·s
+   [315/600] picoclaw         W1 Rep 16: Task=5471.1ms, Orch=4.618ms, RAM=11.3MB, EDP=501.280J·s
+   [316/600] openclaw_full    W3 Rep 16: Task=19372.4ms, Orch=38.957ms, RAM=116.7MB, EDP=6309.453J·s
+   [317/600] neural_baseline  W2 Rep 16: Task=5285.0ms, Orch=0.000ms, RAM=0.0MB, EDP=463.910J·s
+   [318/600] picoclaw         W2 Rep 16: Task=5258.3ms, Orch=6.589ms, RAM=12.1MB, EDP=463.087J·s
+   [319/600] openclaw_minimal W3 Rep 16: Task=5777.3ms, Orch=36.722ms, RAM=121.0MB, EDP=567.719J·s
+   [320/600] openclaw_full    W2 Rep 16: Task=18335.5ms, Orch=24.817ms, RAM=86.0MB, EDP=5670.397J·s
+   [321/600] picoclaw         W1 Rep 17: Task=5489.8ms, Orch=6.464ms, RAM=11.2MB, EDP=502.364J·s
+   [322/600] openclaw_minimal W1 Rep 17: Task=5452.5ms, Orch=20.593ms, RAM=85.5MB, EDP=505.195J·s
+   [323/600] neural_baseline  W2 Rep 17: Task=5249.2ms, Orch=0.000ms, RAM=0.0MB, EDP=465.231J·s
+   [324/600] neural_baseline  W1 Rep 17: Task=5472.5ms, Orch=0.000ms, RAM=0.0MB, EDP=500.524J·s
+   [325/600] neural_baseline  W3 Rep 17: Task=5747.5ms, Orch=0.000ms, RAM=0.0MB, EDP=562.939J·s
+   [326/600] python_native    W2 Rep 17: Task=5258.7ms, Orch=6.676ms, RAM=38.2MB, EDP=470.350J·s
+   [327/600] picoclaw         W3 Rep 17: Task=5767.0ms, Orch=45.354ms, RAM=48.1MB, EDP=566.146J·s
+   [328/600] openclaw_minimal W2 Rep 17: Task=5247.2ms, Orch=19.572ms, RAM=85.5MB, EDP=470.992J·s
+   [329/600] openclaw_full    W1 Rep 17: Task=18618.3ms, Orch=21.132ms, RAM=85.5MB, EDP=5827.403J·s
+   [330/600] openclaw_full    W4 Rep 17: Task=187737.1ms, Orch=131.257ms, RAM=89.7MB, EDP=588877.793J·s
+   [331/600] python_native    W3 Rep 17: Task=5799.2ms, Orch=21.179ms, RAM=70.2MB, EDP=559.086J·s
+   [332/600] openclaw_full    W3 Rep 17: Task=19381.3ms, Orch=39.429ms, RAM=118.5MB, EDP=6286.015J·s
+   [333/600] openclaw_minimal W3 Rep 17: Task=5801.4ms, Orch=36.293ms, RAM=117.1MB, EDP=565.700J·s
+   [334/600] python_native    W4 Rep 17: Task=55192.4ms, Orch=60.463ms, RAM=38.5MB, EDP=50340.619J·s
+   [335/600] openclaw_full    W2 Rep 17: Task=18323.1ms, Orch=25.680ms, RAM=85.8MB, EDP=5644.876J·s
+   [336/600] picoclaw         W2 Rep 17: Task=5264.6ms, Orch=7.340ms, RAM=11.9MB, EDP=464.934J·s
+   [337/600] neural_baseline  W4 Rep 17: Task=55092.7ms, Orch=0.000ms, RAM=0.0MB, EDP=50247.246J·s
+   [338/600] picoclaw         W4 Rep 17: Task=55195.2ms, Orch=58.605ms, RAM=16.5MB, EDP=50331.852J·s
+   [339/600] python_native    W1 Rep 17: Task=5461.4ms, Orch=9.277ms, RAM=38.3MB, EDP=502.271J·s
+   [340/600] openclaw_minimal W4 Rep 17: Task=55190.8ms, Orch=75.909ms, RAM=89.7MB, EDP=50405.147J·s
+   [341/600] openclaw_minimal W3 Rep 18: Task=5789.9ms, Orch=35.083ms, RAM=117.8MB, EDP=570.017J·s
+   [342/600] python_native    W2 Rep 18: Task=5252.1ms, Orch=10.254ms, RAM=38.5MB, EDP=473.901J·s
+   [343/600] neural_baseline  W2 Rep 18: Task=5239.5ms, Orch=0.000ms, RAM=0.0MB, EDP=466.945J·s
+   [344/600] openclaw_minimal W2 Rep 18: Task=5246.7ms, Orch=21.356ms, RAM=85.6MB, EDP=474.247J·s
+   [345/600] openclaw_full    W4 Rep 18: Task=187722.2ms, Orch=131.081ms, RAM=89.6MB, EDP=589193.984J·s
+   [346/600] python_native    W4 Rep 18: Task=55295.9ms, Orch=64.792ms, RAM=38.5MB, EDP=50274.080J·s
+   [347/600] neural_baseline  W4 Rep 18: Task=55242.6ms, Orch=0.000ms, RAM=0.0MB, EDP=50104.968J·s
+   [348/600] picoclaw         W4 Rep 18: Task=55212.8ms, Orch=66.284ms, RAM=16.8MB, EDP=50102.094J·s
+   [349/600] openclaw_full    W1 Rep 18: Task=18649.3ms, Orch=23.634ms, RAM=85.6MB, EDP=5817.323J·s
+   [350/600] neural_baseline  W1 Rep 18: Task=5490.1ms, Orch=0.000ms, RAM=0.0MB, EDP=498.734J·s
+   [351/600] picoclaw         W2 Rep 18: Task=5280.6ms, Orch=6.722ms, RAM=11.9MB, EDP=467.447J·s
+   [352/600] python_native    W1 Rep 18: Task=5461.9ms, Orch=9.565ms, RAM=38.4MB, EDP=501.630J·s
+   [353/600] neural_baseline  W3 Rep 18: Task=5748.5ms, Orch=0.000ms, RAM=0.0MB, EDP=562.278J·s
+   [354/600] openclaw_minimal W4 Rep 18: Task=55238.1ms, Orch=73.521ms, RAM=91.4MB, EDP=50414.639J·s
+   [355/600] picoclaw         W1 Rep 18: Task=5452.2ms, Orch=5.043ms, RAM=10.9MB, EDP=495.706J·s
+   [356/600] picoclaw         W3 Rep 18: Task=5798.2ms, Orch=44.091ms, RAM=53.8MB, EDP=564.301J·s
+   [357/600] openclaw_full    W3 Rep 18: Task=19370.1ms, Orch=40.073ms, RAM=118.6MB, EDP=6308.029J·s
+   [358/600] python_native    W3 Rep 18: Task=5782.5ms, Orch=23.181ms, RAM=70.4MB, EDP=564.851J·s
+   [359/600] openclaw_full    W2 Rep 18: Task=18340.1ms, Orch=25.701ms, RAM=86.4MB, EDP=5659.517J·s
+   [360/600] openclaw_minimal W1 Rep 18: Task=5483.5ms, Orch=20.837ms, RAM=85.6MB, EDP=503.886J·s
+   [361/600] openclaw_minimal W3 Rep 19: Task=5796.0ms, Orch=35.304ms, RAM=118.5MB, EDP=566.247J·s
+   [362/600] picoclaw         W4 Rep 19: Task=55194.5ms, Orch=61.630ms, RAM=16.5MB, EDP=50249.447J·s
+   [363/600] neural_baseline  W2 Rep 19: Task=5308.3ms, Orch=0.000ms, RAM=0.0MB, EDP=464.212J·s
+   [364/600] neural_baseline  W1 Rep 19: Task=5488.5ms, Orch=0.000ms, RAM=0.0MB, EDP=499.510J·s
+   [365/600] python_native    W2 Rep 19: Task=5271.7ms, Orch=10.992ms, RAM=38.3MB, EDP=471.128J·s
+   [366/600] picoclaw         W3 Rep 19: Task=5778.7ms, Orch=42.755ms, RAM=47.7MB, EDP=564.556J·s
+   [367/600] openclaw_minimal W4 Rep 19: Task=55271.9ms, Orch=74.150ms, RAM=90.0MB, EDP=50460.716J·s
+   [368/600] picoclaw         W2 Rep 19: Task=5312.6ms, Orch=7.216ms, RAM=12.1MB, EDP=467.534J·s
+   [369/600] openclaw_minimal W1 Rep 19: Task=5509.1ms, Orch=20.707ms, RAM=85.6MB, EDP=501.348J·s
+   [370/600] neural_baseline  W4 Rep 19: Task=55201.4ms, Orch=0.000ms, RAM=0.0MB, EDP=50195.610J·s
+   [371/600] picoclaw         W1 Rep 19: Task=5507.3ms, Orch=4.347ms, RAM=11.0MB, EDP=497.194J·s
+   [372/600] openclaw_full    W1 Rep 19: Task=18670.5ms, Orch=24.756ms, RAM=85.5MB, EDP=5839.698J·s
+   [373/600] openclaw_full    W3 Rep 19: Task=19378.9ms, Orch=40.094ms, RAM=118.7MB, EDP=6288.505J·s
+   [374/600] python_native    W1 Rep 19: Task=5485.1ms, Orch=10.422ms, RAM=38.4MB, EDP=502.134J·s
+   [375/600] python_native    W4 Rep 19: Task=55293.6ms, Orch=60.675ms, RAM=38.4MB, EDP=50380.121J·s
+   [376/600] neural_baseline  W3 Rep 19: Task=5793.8ms, Orch=0.000ms, RAM=0.0MB, EDP=554.256J·s
+   [377/600] python_native    W3 Rep 19: Task=5809.9ms, Orch=20.625ms, RAM=70.3MB, EDP=564.721J·s
+   [378/600] openclaw_minimal W2 Rep 19: Task=5289.6ms, Orch=21.584ms, RAM=86.7MB, EDP=464.273J·s
+   [379/600] openclaw_full    W2 Rep 19: Task=18359.3ms, Orch=26.022ms, RAM=86.0MB, EDP=5661.729J·s
+   [380/600] openclaw_full    W4 Rep 19: Task=187781.2ms, Orch=126.742ms, RAM=89.8MB, EDP=588563.217J·s
+   [381/600] neural_baseline  W3 Rep 20: Task=5770.0ms, Orch=0.000ms, RAM=0.0MB, EDP=555.122J·s
+   [382/600] python_native    W2 Rep 20: Task=5261.5ms, Orch=11.483ms, RAM=38.2MB, EDP=470.366J·s
+   [383/600] python_native    W4 Rep 20: Task=55156.8ms, Orch=58.769ms, RAM=38.3MB, EDP=50381.387J·s
+   [384/600] openclaw_full    W4 Rep 20: Task=187610.8ms, Orch=128.870ms, RAM=90.3MB, EDP=587695.537J·s
+   [385/600] picoclaw         W3 Rep 20: Task=5808.7ms, Orch=46.058ms, RAM=47.8MB, EDP=562.622J·s
+   [386/600] picoclaw         W4 Rep 20: Task=55156.0ms, Orch=62.322ms, RAM=16.4MB, EDP=50249.516J·s
+   [387/600] openclaw_minimal W2 Rep 20: Task=5268.5ms, Orch=21.799ms, RAM=85.7MB, EDP=470.676J·s
+   [388/600] picoclaw         W2 Rep 20: Task=5265.6ms, Orch=7.362ms, RAM=12.2MB, EDP=471.169J·s
+   [389/600] picoclaw         W1 Rep 20: Task=5460.6ms, Orch=4.850ms, RAM=11.0MB, EDP=507.318J·s
+   [390/600] python_native    W1 Rep 20: Task=5443.9ms, Orch=9.795ms, RAM=38.2MB, EDP=508.518J·s
+   [391/600] openclaw_minimal W4 Rep 20: Task=55142.6ms, Orch=76.683ms, RAM=90.5MB, EDP=50418.343J·s
+   [392/600] neural_baseline  W4 Rep 20: Task=55194.2ms, Orch=0.000ms, RAM=0.0MB, EDP=50269.419J·s
+   [393/600] openclaw_minimal W1 Rep 20: Task=5475.9ms, Orch=20.611ms, RAM=85.6MB, EDP=504.401J·s
+   [394/600] python_native    W3 Rep 20: Task=5757.3ms, Orch=20.166ms, RAM=70.2MB, EDP=565.723J·s
+   [395/600] neural_baseline  W1 Rep 20: Task=5454.0ms, Orch=0.000ms, RAM=0.0MB, EDP=502.957J·s
+   [396/600] neural_baseline  W2 Rep 20: Task=5248.5ms, Orch=0.000ms, RAM=0.0MB, EDP=468.095J·s
+   [397/600] openclaw_full    W3 Rep 20: Task=19329.8ms, Orch=39.807ms, RAM=118.5MB, EDP=6298.207J·s
+   [398/600] openclaw_minimal W3 Rep 20: Task=5790.7ms, Orch=35.231ms, RAM=118.5MB, EDP=569.321J·s
+   [399/600] openclaw_full    W2 Rep 20: Task=18318.9ms, Orch=25.686ms, RAM=85.7MB, EDP=5648.510J·s
+   [400/600] openclaw_full    W1 Rep 20: Task=18646.1ms, Orch=24.800ms, RAM=85.5MB, EDP=5828.266J·s
+   [401/600] openclaw_minimal W4 Rep 21: Task=55260.2ms, Orch=75.634ms, RAM=90.1MB, EDP=50364.633J·s
+   [402/600] openclaw_full    W3 Rep 21: Task=19399.4ms, Orch=40.849ms, RAM=118.8MB, EDP=6290.260J·s
+   [403/600] openclaw_full    W2 Rep 21: Task=18344.8ms, Orch=25.787ms, RAM=85.7MB, EDP=5657.237J·s
+   [404/600] picoclaw         W4 Rep 21: Task=55242.9ms, Orch=59.881ms, RAM=16.5MB, EDP=50281.235J·s
+   [405/600] openclaw_full    W4 Rep 21: Task=187765.7ms, Orch=126.672ms, RAM=89.7MB, EDP=588706.704J·s
+   [406/600] openclaw_minimal W3 Rep 21: Task=5816.0ms, Orch=35.632ms, RAM=119.3MB, EDP=560.914J·s
+   [407/600] neural_baseline  W4 Rep 21: Task=55234.6ms, Orch=0.000ms, RAM=0.0MB, EDP=50059.490J·s
+   [408/600] neural_baseline  W2 Rep 21: Task=5269.8ms, Orch=0.000ms, RAM=0.0MB, EDP=464.417J·s
+   [409/600] python_native    W4 Rep 21: Task=55199.3ms, Orch=59.793ms, RAM=38.3MB, EDP=50353.584J·s
+   [410/600] neural_baseline  W1 Rep 21: Task=5487.2ms, Orch=0.000ms, RAM=0.0MB, EDP=498.936J·s
+   [411/600] picoclaw         W3 Rep 21: Task=5809.4ms, Orch=46.179ms, RAM=53.8MB, EDP=568.200J·s
+   [412/600] python_native    W1 Rep 21: Task=5446.4ms, Orch=9.641ms, RAM=38.3MB, EDP=503.341J·s
+   [413/600] picoclaw         W2 Rep 21: Task=5254.1ms, Orch=6.634ms, RAM=12.1MB, EDP=466.651J·s
+   [414/600] picoclaw         W1 Rep 21: Task=5469.1ms, Orch=4.590ms, RAM=11.3MB, EDP=501.646J·s
+   [415/600] neural_baseline  W3 Rep 21: Task=5755.7ms, Orch=0.000ms, RAM=0.0MB, EDP=563.303J·s
+   [416/600] python_native    W2 Rep 21: Task=5232.3ms, Orch=10.593ms, RAM=38.4MB, EDP=471.343J·s
+   [417/600] python_native    W3 Rep 21: Task=5731.2ms, Orch=18.202ms, RAM=70.4MB, EDP=568.565J·s
+   [418/600] openclaw_minimal W2 Rep 21: Task=5246.8ms, Orch=21.558ms, RAM=85.6MB, EDP=475.952J·s
+   [419/600] openclaw_full    W1 Rep 21: Task=18603.9ms, Orch=24.669ms, RAM=85.6MB, EDP=5821.496J·s
+   [420/600] openclaw_minimal W1 Rep 21: Task=5474.5ms, Orch=20.768ms, RAM=85.9MB, EDP=507.418J·s
+   [421/600] openclaw_minimal W1 Rep 22: Task=5466.0ms, Orch=20.281ms, RAM=85.6MB, EDP=509.777J·s
+   [422/600] openclaw_minimal W4 Rep 22: Task=55190.2ms, Orch=74.687ms, RAM=90.0MB, EDP=50447.281J·s
+   [423/600] picoclaw         W1 Rep 22: Task=5484.4ms, Orch=4.500ms, RAM=11.0MB, EDP=498.042J·s
+   [424/600] python_native    W2 Rep 22: Task=5255.3ms, Orch=11.423ms, RAM=38.4MB, EDP=468.753J·s
+   [425/600] python_native    W1 Rep 22: Task=5452.1ms, Orch=10.000ms, RAM=38.4MB, EDP=505.907J·s
+   [426/600] neural_baseline  W4 Rep 22: Task=55164.7ms, Orch=0.000ms, RAM=0.0MB, EDP=50246.351J·s
+   [427/600] neural_baseline  W1 Rep 22: Task=5494.5ms, Orch=0.000ms, RAM=0.0MB, EDP=500.476J·s
+   [428/600] picoclaw         W3 Rep 22: Task=5782.3ms, Orch=41.353ms, RAM=54.2MB, EDP=563.721J·s
+   [429/600] python_native    W4 Rep 22: Task=55243.2ms, Orch=60.537ms, RAM=38.4MB, EDP=50423.593J·s
+   [430/600] openclaw_full    W1 Rep 22: Task=18691.2ms, Orch=25.039ms, RAM=85.6MB, EDP=5824.022J·s
+   [431/600] openclaw_minimal W2 Rep 22: Task=5291.2ms, Orch=21.410ms, RAM=85.8MB, EDP=466.171J·s
+   [432/600] neural_baseline  W2 Rep 22: Task=5281.2ms, Orch=0.000ms, RAM=0.0MB, EDP=461.572J·s
+   [433/600] python_native    W3 Rep 22: Task=5785.2ms, Orch=20.819ms, RAM=70.3MB, EDP=568.247J·s
+   [434/600] picoclaw         W4 Rep 22: Task=55198.9ms, Orch=61.104ms, RAM=17.0MB, EDP=50319.906J·s
+   [435/600] openclaw_full    W3 Rep 22: Task=19401.0ms, Orch=40.031ms, RAM=120.4MB, EDP=6315.365J·s
+   [436/600] openclaw_minimal W3 Rep 22: Task=5804.7ms, Orch=36.487ms, RAM=120.2MB, EDP=560.985J·s
+   [437/600] neural_baseline  W3 Rep 22: Task=5799.1ms, Orch=0.000ms, RAM=0.0MB, EDP=557.039J·s
+   [438/600] picoclaw         W2 Rep 22: Task=5300.3ms, Orch=6.963ms, RAM=12.3MB, EDP=468.328J·s
+   [439/600] openclaw_full    W4 Rep 22: Task=187742.0ms, Orch=149.203ms, RAM=89.8MB, EDP=588040.388J·s
+   [440/600] openclaw_full    W2 Rep 22: Task=18354.6ms, Orch=25.143ms, RAM=86.0MB, EDP=5656.495J·s
+   [441/600] python_native    W3 Rep 23: Task=5767.9ms, Orch=20.535ms, RAM=70.3MB, EDP=563.660J·s
+   [442/600] python_native    W4 Rep 23: Task=55145.0ms, Orch=63.067ms, RAM=38.4MB, EDP=50383.340J·s
+   [443/600] neural_baseline  W4 Rep 23: Task=55108.2ms, Orch=0.000ms, RAM=0.0MB, EDP=50318.976J·s
+   [444/600] openclaw_minimal W1 Rep 23: Task=5465.5ms, Orch=20.042ms, RAM=85.5MB, EDP=506.219J·s
+   [445/600] picoclaw         W3 Rep 23: Task=5770.4ms, Orch=41.814ms, RAM=53.8MB, EDP=571.846J·s
+   [446/600] openclaw_full    W2 Rep 23: Task=18312.2ms, Orch=25.655ms, RAM=87.2MB, EDP=5665.455J·s
+   [447/600] neural_baseline  W3 Rep 23: Task=5737.8ms, Orch=0.000ms, RAM=0.0MB, EDP=559.038J·s
+   [448/600] neural_baseline  W1 Rep 23: Task=5434.5ms, Orch=0.000ms, RAM=0.0MB, EDP=502.324J·s
+   [449/600] picoclaw         W4 Rep 23: Task=55040.1ms, Orch=61.145ms, RAM=16.8MB, EDP=50437.193J·s
+   [450/600] neural_baseline  W2 Rep 23: Task=5244.8ms, Orch=0.000ms, RAM=0.0MB, EDP=465.437J·s
+   [451/600] picoclaw         W1 Rep 23: Task=5456.2ms, Orch=4.593ms, RAM=11.1MB, EDP=502.875J·s
+   [452/600] openclaw_minimal W3 Rep 23: Task=5773.2ms, Orch=37.082ms, RAM=120.6MB, EDP=577.229J·s
+   [453/600] picoclaw         W2 Rep 23: Task=5224.4ms, Orch=7.084ms, RAM=12.1MB, EDP=469.144J·s
+   [454/600] openclaw_full    W4 Rep 23: Task=187607.5ms, Orch=126.694ms, RAM=90.3MB, EDP=587941.524J·s
+   [455/600] python_native    W1 Rep 23: Task=5467.9ms, Orch=9.322ms, RAM=38.3MB, EDP=503.326J·s
+   [456/600] openclaw_minimal W2 Rep 23: Task=5257.8ms, Orch=21.753ms, RAM=85.7MB, EDP=470.916J·s
+   [457/600] openclaw_full    W1 Rep 23: Task=18628.4ms, Orch=25.174ms, RAM=85.4MB, EDP=5828.640J·s
+   [458/600] openclaw_minimal W4 Rep 23: Task=55211.0ms, Orch=73.619ms, RAM=90.0MB, EDP=50461.063J·s
+   [459/600] python_native    W2 Rep 23: Task=5258.4ms, Orch=10.560ms, RAM=38.3MB, EDP=470.665J·s
+   [460/600] openclaw_full    W3 Rep 23: Task=19342.6ms, Orch=38.448ms, RAM=118.2MB, EDP=6290.877J·s
+   [461/600] openclaw_minimal W4 Rep 24: Task=55236.9ms, Orch=74.177ms, RAM=90.1MB, EDP=50414.183J·s
+   [462/600] picoclaw         W4 Rep 24: Task=55219.6ms, Orch=59.876ms, RAM=16.2MB, EDP=50240.799J·s
+   [463/600] openclaw_full    W4 Rep 24: Task=187742.6ms, Orch=129.092ms, RAM=90.0MB, EDP=589005.207J·s
+   [464/600] python_native    W3 Rep 24: Task=5814.2ms, Orch=21.279ms, RAM=70.4MB, EDP=566.407J·s
+   [465/600] picoclaw         W3 Rep 24: Task=5823.1ms, Orch=42.820ms, RAM=47.5MB, EDP=562.812J·s
+   [466/600] openclaw_full    W2 Rep 24: Task=18333.2ms, Orch=25.726ms, RAM=85.9MB, EDP=5651.174J·s
+   [467/600] neural_baseline  W4 Rep 24: Task=55138.0ms, Orch=0.000ms, RAM=0.0MB, EDP=50210.615J·s
+   [468/600] neural_baseline  W1 Rep 24: Task=5482.2ms, Orch=0.000ms, RAM=0.0MB, EDP=500.232J·s
+   [469/600] neural_baseline  W3 Rep 24: Task=5757.5ms, Orch=0.000ms, RAM=0.0MB, EDP=560.456J·s
+   [470/600] python_native    W4 Rep 24: Task=55199.2ms, Orch=59.871ms, RAM=38.2MB, EDP=50534.400J·s
+   [471/600] openclaw_minimal W2 Rep 24: Task=5284.2ms, Orch=38.914ms, RAM=85.5MB, EDP=472.031J·s
+   [472/600] openclaw_minimal W1 Rep 24: Task=5476.8ms, Orch=20.709ms, RAM=85.5MB, EDP=508.038J·s
+   [473/600] neural_baseline  W2 Rep 24: Task=5257.3ms, Orch=0.000ms, RAM=0.0MB, EDP=466.433J·s
+   [474/600] picoclaw         W2 Rep 24: Task=5244.8ms, Orch=8.390ms, RAM=12.1MB, EDP=472.409J·s
+   [475/600] python_native    W2 Rep 24: Task=5234.9ms, Orch=10.822ms, RAM=38.3MB, EDP=474.684J·s
+   [476/600] openclaw_full    W1 Rep 24: Task=18609.6ms, Orch=24.172ms, RAM=85.7MB, EDP=5838.636J·s
+   [477/600] openclaw_full    W3 Rep 24: Task=19360.4ms, Orch=52.555ms, RAM=110.1MB, EDP=6310.654J·s
+   [478/600] python_native    W1 Rep 24: Task=5447.0ms, Orch=10.013ms, RAM=38.1MB, EDP=505.559J·s
+   [479/600] openclaw_minimal W3 Rep 24: Task=5744.3ms, Orch=34.622ms, RAM=116.5MB, EDP=568.224J·s
+   [480/600] picoclaw         W1 Rep 24: Task=5452.2ms, Orch=4.645ms, RAM=11.2MB, EDP=502.631J·s
+   [481/600] neural_baseline  W1 Rep 25: Task=5445.9ms, Orch=0.000ms, RAM=0.0MB, EDP=501.659J·s
+   [482/600] openclaw_minimal W4 Rep 25: Task=55182.8ms, Orch=76.877ms, RAM=90.0MB, EDP=50540.684J·s
+   [483/600] picoclaw         W3 Rep 25: Task=5794.2ms, Orch=42.393ms, RAM=53.8MB, EDP=563.692J·s
+   [484/600] python_native    W4 Rep 25: Task=55216.9ms, Orch=59.321ms, RAM=38.5MB, EDP=50361.462J·s
+   [485/600] python_native    W1 Rep 25: Task=5475.5ms, Orch=10.075ms, RAM=38.4MB, EDP=502.959J·s
+   [486/600] openclaw_minimal W2 Rep 25: Task=5277.7ms, Orch=21.954ms, RAM=85.6MB, EDP=470.471J·s
+   [487/600] picoclaw         W1 Rep 25: Task=5441.9ms, Orch=4.392ms, RAM=11.0MB, EDP=499.868J·s
+   [488/600] openclaw_minimal W1 Rep 25: Task=5456.7ms, Orch=20.596ms, RAM=85.6MB, EDP=507.388J·s
+   [489/600] neural_baseline  W3 Rep 25: Task=5735.7ms, Orch=0.000ms, RAM=0.0MB, EDP=562.928J·s
+   [490/600] neural_baseline  W2 Rep 25: Task=5265.9ms, Orch=0.000ms, RAM=0.0MB, EDP=468.079J·s
+   [491/600] python_native    W3 Rep 25: Task=5755.2ms, Orch=19.611ms, RAM=70.5MB, EDP=570.086J·s
+   [492/600] neural_baseline  W4 Rep 25: Task=55176.3ms, Orch=0.000ms, RAM=0.0MB, EDP=50283.044J·s
+   [493/600] openclaw_full    W1 Rep 25: Task=18661.5ms, Orch=25.533ms, RAM=85.5MB, EDP=5826.107J·s
+   [494/600] openclaw_full    W2 Rep 25: Task=18385.0ms, Orch=26.053ms, RAM=86.0MB, EDP=5650.128J·s
+   [495/600] openclaw_minimal W3 Rep 25: Task=5800.6ms, Orch=35.638ms, RAM=118.8MB, EDP=563.958J·s
+   [496/600] openclaw_full    W3 Rep 25: Task=19390.5ms, Orch=40.254ms, RAM=120.8MB, EDP=6302.245J·s
+   [497/600] openclaw_full    W4 Rep 25: Task=187747.2ms, Orch=131.468ms, RAM=90.0MB, EDP=588778.308J·s
+   [498/600] python_native    W2 Rep 25: Task=5290.4ms, Orch=11.558ms, RAM=38.4MB, EDP=467.472J·s
+   [499/600] picoclaw         W4 Rep 25: Task=55198.1ms, Orch=60.187ms, RAM=16.3MB, EDP=50174.833J·s
+   [500/600] picoclaw         W2 Rep 25: Task=5290.3ms, Orch=4.295ms, RAM=12.0MB, EDP=464.606J·s
+   [501/600] openclaw_full    W2 Rep 26: Task=18311.5ms, Orch=26.155ms, RAM=85.7MB, EDP=5630.529J·s
+   [502/600] openclaw_minimal W2 Rep 26: Task=5269.5ms, Orch=21.728ms, RAM=85.5MB, EDP=468.776J·s
+   [503/600] picoclaw         W1 Rep 26: Task=5469.7ms, Orch=4.746ms, RAM=11.1MB, EDP=502.879J·s
+   [504/600] python_native    W1 Rep 26: Task=5442.3ms, Orch=10.760ms, RAM=38.5MB, EDP=505.617J·s
+   [505/600] openclaw_minimal W4 Rep 26: Task=55155.7ms, Orch=77.431ms, RAM=89.9MB, EDP=50430.645J·s
+   [506/600] picoclaw         W4 Rep 26: Task=55177.4ms, Orch=62.536ms, RAM=16.2MB, EDP=50190.582J·s
+   [507/600] neural_baseline  W2 Rep 26: Task=5285.5ms, Orch=0.000ms, RAM=0.0MB, EDP=463.908J·s
+   [508/600] openclaw_minimal W3 Rep 26: Task=5780.5ms, Orch=34.353ms, RAM=116.7MB, EDP=566.693J·s
+   [509/600] python_native    W3 Rep 26: Task=5778.3ms, Orch=20.521ms, RAM=70.6MB, EDP=563.384J·s
+   [510/600] openclaw_full    W1 Rep 26: Task=18618.1ms, Orch=25.471ms, RAM=85.7MB, EDP=5826.582J·s
+   [511/600] openclaw_minimal W1 Rep 26: Task=5472.9ms, Orch=20.825ms, RAM=85.9MB, EDP=508.542J·s
+   [512/600] neural_baseline  W4 Rep 26: Task=55163.7ms, Orch=0.000ms, RAM=0.0MB, EDP=50288.853J·s
+   [513/600] picoclaw         W2 Rep 26: Task=5252.4ms, Orch=6.847ms, RAM=11.8MB, EDP=462.441J·s
+   [514/600] neural_baseline  W3 Rep 26: Task=5766.0ms, Orch=0.000ms, RAM=0.0MB, EDP=559.839J·s
+   [515/600] python_native    W4 Rep 26: Task=55274.0ms, Orch=60.510ms, RAM=38.5MB, EDP=50405.721J·s
+   [516/600] neural_baseline  W1 Rep 26: Task=5470.8ms, Orch=0.000ms, RAM=0.0MB, EDP=497.119J·s
+   [517/600] openclaw_full    W3 Rep 26: Task=19372.4ms, Orch=39.643ms, RAM=118.3MB, EDP=6300.786J·s
+   [518/600] picoclaw         W3 Rep 26: Task=5832.1ms, Orch=44.784ms, RAM=47.7MB, EDP=565.513J·s
+   [519/600] python_native    W2 Rep 26: Task=5265.4ms, Orch=10.362ms, RAM=38.4MB, EDP=468.212J·s
+   [520/600] openclaw_full    W4 Rep 26: Task=187762.9ms, Orch=129.842ms, RAM=89.8MB, EDP=588815.155J·s
+   [521/600] python_native    W2 Rep 27: Task=5289.5ms, Orch=11.385ms, RAM=38.3MB, EDP=465.473J·s
+   [522/600] python_native    W4 Rep 27: Task=55233.6ms, Orch=60.419ms, RAM=38.3MB, EDP=50265.876J·s
+   [523/600] picoclaw         W3 Rep 27: Task=5786.3ms, Orch=41.914ms, RAM=54.3MB, EDP=564.900J·s
+   [524/600] openclaw_full    W1 Rep 27: Task=18633.8ms, Orch=24.552ms, RAM=85.6MB, EDP=5833.485J·s
+   [525/600] picoclaw         W2 Rep 27: Task=5253.7ms, Orch=7.205ms, RAM=11.9MB, EDP=469.809J·s
+   [526/600] openclaw_full    W4 Rep 27: Task=187641.8ms, Orch=134.266ms, RAM=91.2MB, EDP=587763.449J·s
+   [527/600] neural_baseline  W1 Rep 27: Task=5489.6ms, Orch=0.000ms, RAM=0.0MB, EDP=498.183J·s
+   [528/600] openclaw_minimal W4 Rep 27: Task=55268.5ms, Orch=75.460ms, RAM=90.3MB, EDP=50410.067J·s
+   [529/600] neural_baseline  W3 Rep 27: Task=5766.5ms, Orch=0.000ms, RAM=0.0MB, EDP=554.399J·s
+   [530/600] openclaw_full    W3 Rep 27: Task=19365.8ms, Orch=40.330ms, RAM=108.5MB, EDP=6304.045J·s
+   [531/600] neural_baseline  W2 Rep 27: Task=5256.5ms, Orch=0.000ms, RAM=0.0MB, EDP=467.520J·s
+   [532/600] openclaw_minimal W3 Rep 27: Task=5775.8ms, Orch=36.530ms, RAM=118.6MB, EDP=566.370J·s
+   [533/600] picoclaw         W4 Rep 27: Task=55152.3ms, Orch=58.346ms, RAM=16.2MB, EDP=50302.406J·s
+   [534/600] python_native    W3 Rep 27: Task=5768.4ms, Orch=18.686ms, RAM=70.4MB, EDP=562.856J·s
+   [535/600] openclaw_minimal W1 Rep 27: Task=5486.7ms, Orch=20.842ms, RAM=85.6MB, EDP=505.244J·s
+   [536/600] picoclaw         W1 Rep 27: Task=5460.7ms, Orch=4.256ms, RAM=11.2MB, EDP=501.586J·s
+   [537/600] neural_baseline  W4 Rep 27: Task=55163.4ms, Orch=0.000ms, RAM=0.0MB, EDP=50267.923J·s
+   [538/600] openclaw_full    W2 Rep 27: Task=18354.5ms, Orch=25.446ms, RAM=85.9MB, EDP=5674.994J·s
+   [539/600] openclaw_minimal W2 Rep 27: Task=5277.7ms, Orch=21.208ms, RAM=85.8MB, EDP=474.312J·s
+   [540/600] python_native    W1 Rep 27: Task=5453.2ms, Orch=10.090ms, RAM=38.3MB, EDP=505.127J·s
+   [541/600] openclaw_full    W4 Rep 28: Task=187699.8ms, Orch=130.712ms, RAM=89.7MB, EDP=588885.017J·s
+   [542/600] openclaw_minimal W2 Rep 28: Task=5299.3ms, Orch=21.570ms, RAM=85.7MB, EDP=464.556J·s
+   [543/600] openclaw_minimal W4 Rep 28: Task=55309.0ms, Orch=74.462ms, RAM=91.2MB, EDP=50364.602J·s
+   [544/600] openclaw_full    W1 Rep 28: Task=18659.9ms, Orch=25.659ms, RAM=86.2MB, EDP=5821.711J·s
+   [545/600] picoclaw         W2 Rep 28: Task=5268.9ms, Orch=8.026ms, RAM=12.1MB, EDP=466.984J·s
+   [546/600] openclaw_minimal W3 Rep 28: Task=5781.7ms, Orch=36.480ms, RAM=119.2MB, EDP=564.014J·s
+   [547/600] picoclaw         W1 Rep 28: Task=5457.7ms, Orch=4.889ms, RAM=11.2MB, EDP=504.192J·s
+   [548/600] python_native    W4 Rep 28: Task=55214.4ms, Orch=59.332ms, RAM=38.5MB, EDP=50406.563J·s
+   [549/600] neural_baseline  W3 Rep 28: Task=5766.6ms, Orch=0.000ms, RAM=0.0MB, EDP=558.959J·s
+   [550/600] python_native    W3 Rep 28: Task=5775.7ms, Orch=20.578ms, RAM=70.5MB, EDP=566.300J·s
+   [551/600] openclaw_minimal W1 Rep 28: Task=5474.7ms, Orch=19.858ms, RAM=85.4MB, EDP=507.699J·s
+   [552/600] neural_baseline  W2 Rep 28: Task=5224.1ms, Orch=0.000ms, RAM=0.0MB, EDP=462.966J·s
+   [553/600] picoclaw         W4 Rep 28: Task=55140.8ms, Orch=60.832ms, RAM=16.5MB, EDP=50283.179J·s
+   [554/600] python_native    W1 Rep 28: Task=5484.4ms, Orch=10.222ms, RAM=38.3MB, EDP=503.219J·s
+   [555/600] python_native    W2 Rep 28: Task=5280.1ms, Orch=10.631ms, RAM=38.2MB, EDP=470.299J·s
+   [556/600] neural_baseline  W4 Rep 28: Task=55185.3ms, Orch=0.000ms, RAM=0.0MB, EDP=50220.255J·s
+   [557/600] openclaw_full    W3 Rep 28: Task=19392.4ms, Orch=39.578ms, RAM=116.7MB, EDP=6285.326J·s
+   [558/600] neural_baseline  W1 Rep 28: Task=5503.7ms, Orch=0.000ms, RAM=0.0MB, EDP=503.642J·s
+   [559/600] openclaw_full    W2 Rep 28: Task=18350.7ms, Orch=26.172ms, RAM=86.2MB, EDP=5655.547J·s
+   [560/600] picoclaw         W3 Rep 28: Task=5802.8ms, Orch=42.926ms, RAM=53.8MB, EDP=561.164J·s
+   [561/600] openclaw_full    W1 Rep 29: Task=18637.6ms, Orch=25.465ms, RAM=85.5MB, EDP=5819.995J·s
+   [562/600] neural_baseline  W1 Rep 29: Task=5501.0ms, Orch=0.000ms, RAM=0.0MB, EDP=493.983J·s
+   [563/600] openclaw_full    W4 Rep 29: Task=187719.2ms, Orch=130.555ms, RAM=91.6MB, EDP=588918.986J·s
+   [564/600] openclaw_minimal W4 Rep 29: Task=55280.1ms, Orch=74.433ms, RAM=90.3MB, EDP=50277.872J·s
+   [565/600] openclaw_minimal W1 Rep 29: Task=5468.4ms, Orch=21.044ms, RAM=86.9MB, EDP=502.317J·s
+   [566/600] openclaw_minimal W2 Rep 29: Task=5255.4ms, Orch=22.087ms, RAM=85.8MB, EDP=471.226J·s
+   [567/600] openclaw_full    W2 Rep 29: Task=18300.5ms, Orch=25.635ms, RAM=86.0MB, EDP=5652.957J·s
+   [568/600] neural_baseline  W3 Rep 29: Task=5743.8ms, Orch=0.000ms, RAM=0.0MB, EDP=559.723J·s
+   [569/600] neural_baseline  W4 Rep 29: Task=55096.9ms, Orch=0.000ms, RAM=0.0MB, EDP=50295.689J·s
+   [570/600] picoclaw         W2 Rep 29: Task=5241.4ms, Orch=6.684ms, RAM=12.1MB, EDP=469.318J·s
+   [571/600] picoclaw         W1 Rep 29: Task=5436.4ms, Orch=4.964ms, RAM=11.0MB, EDP=498.407J·s
+   [572/600] openclaw_full    W3 Rep 29: Task=19364.7ms, Orch=40.324ms, RAM=118.4MB, EDP=6323.479J·s
+   [573/600] picoclaw         W3 Rep 29: Task=5764.4ms, Orch=40.766ms, RAM=53.8MB, EDP=567.835J·s
+   [574/600] picoclaw         W4 Rep 29: Task=55054.7ms, Orch=61.951ms, RAM=16.9MB, EDP=50265.378J·s
+   [575/600] neural_baseline  W2 Rep 29: Task=5253.4ms, Orch=0.000ms, RAM=0.0MB, EDP=461.972J·s
+   [576/600] python_native    W4 Rep 29: Task=55154.8ms, Orch=59.766ms, RAM=38.2MB, EDP=50348.301J·s
+   [577/600] python_native    W1 Rep 29: Task=5457.7ms, Orch=9.246ms, RAM=38.2MB, EDP=504.499J·s
+   [578/600] openclaw_minimal W3 Rep 29: Task=5767.0ms, Orch=35.210ms, RAM=116.2MB, EDP=564.745J·s
+   [579/600] python_native    W2 Rep 29: Task=5241.8ms, Orch=10.987ms, RAM=38.4MB, EDP=473.091J·s
+   [580/600] python_native    W3 Rep 29: Task=5741.6ms, Orch=20.004ms, RAM=70.4MB, EDP=566.478J·s
+   [581/600] picoclaw         W3 Rep 30: Task=5754.9ms, Orch=41.858ms, RAM=47.3MB, EDP=563.849J·s
+   [582/600] picoclaw         W1 Rep 30: Task=5457.8ms, Orch=4.816ms, RAM=11.0MB, EDP=502.634J·s
+   [583/600] neural_baseline  W1 Rep 30: Task=5485.4ms, Orch=0.000ms, RAM=0.0MB, EDP=510.038J·s
+   [584/600] neural_baseline  W2 Rep 30: Task=5212.5ms, Orch=0.000ms, RAM=0.0MB, EDP=467.014J·s
+   [585/600] neural_baseline  W4 Rep 30: Task=55000.8ms, Orch=0.000ms, RAM=0.0MB, EDP=50309.375J·s
+   [586/600] openclaw_minimal W2 Rep 30: Task=5254.3ms, Orch=18.762ms, RAM=85.6MB, EDP=476.183J·s
+   [587/600] picoclaw         W2 Rep 30: Task=5240.5ms, Orch=8.344ms, RAM=12.1MB, EDP=468.193J·s
+   [588/600] python_native    W2 Rep 30: Task=5228.4ms, Orch=15.470ms, RAM=38.4MB, EDP=472.708J·s
+   [589/600] python_native    W4 Rep 30: Task=55150.9ms, Orch=60.662ms, RAM=38.6MB, EDP=50528.951J·s
+   [590/600] openclaw_minimal W3 Rep 30: Task=5830.7ms, Orch=99.323ms, RAM=120.4MB, EDP=577.667J·s
+   [591/600] openclaw_full    W1 Rep 30: Task=18620.7ms, Orch=25.288ms, RAM=85.8MB, EDP=5834.303J·s
+   [592/600] openclaw_full    W4 Rep 30: Task=187730.9ms, Orch=140.337ms, RAM=89.9MB, EDP=589368.385J·s
+   [593/600] openclaw_full    W2 Rep 30: Task=18349.7ms, Orch=25.143ms, RAM=85.8MB, EDP=5619.177J·s
+   [594/600] openclaw_minimal W4 Rep 30: Task=55297.3ms, Orch=74.413ms, RAM=89.9MB, EDP=50321.272J·s
+   [595/600] python_native    W1 Rep 30: Task=5477.6ms, Orch=13.763ms, RAM=38.4MB, EDP=505.405J·s
+   [596/600] openclaw_full    W3 Rep 30: Task=19378.5ms, Orch=46.404ms, RAM=113.8MB, EDP=6283.181J·s
+   [597/600] neural_baseline  W3 Rep 30: Task=5765.0ms, Orch=0.000ms, RAM=0.0MB, EDP=554.675J·s
+   [598/600] openclaw_minimal W1 Rep 30: Task=5449.3ms, Orch=20.417ms, RAM=85.3MB, EDP=502.624J·s
+   [599/600] python_native    W3 Rep 30: Task=5765.3ms, Orch=21.627ms, RAM=70.3MB, EDP=567.215J·s
+   [600/600] picoclaw         W4 Rep 30: Task=55181.4ms, Orch=63.292ms, RAM=16.5MB, EDP=50371.216J·s
+
+📈 Executing non-parametric statistical analysis...
+Loaded 600 evaluated trial records (filtered 60 warmups).
+✅ Generated LaTeX macros: results/publication_campaign/tables/macros_empirical.tex
+✅ Generated Spearman correlation matrix JSON: results/publication_campaign/spearman_correlation_matrix.json
+✅ Generated Spearman correlation LaTeX table: results/publication_campaign/tables/table_spearman_correlation.tex
+✅ Generated PCA variance decomposition JSON: results/publication_campaign/pca_variance_decomposition.json
+✅ Generated PCA loadings LaTeX table: results/publication_campaign/tables/table_pca_loadings.tex
+✅ Generated sensitivity and outlier analysis JSON: results/publication_campaign/sensitivity_and_outlier_analysis.json
+✅ Generated summary JSON: results/publication_campaign/summary_statistics.json
+✅ Generated statistical tests JSON: results/publication_campaign/statistical_tests.json
+✅ Generated CSV table: results/publication_campaign/tables/metrics_summary.csv
+✅ Generated LaTeX table: results/publication_campaign/tables/table_journal_ablation.tex
+
+🎨 Generating publication charts...
+Generated publication figures:
+  /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/figures/fig1_architecture_topology.png
+  /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/figures/fig2_exp1_cold_start_rss.png
+  /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/figures/fig3_exp2_latency_overhead.png
+  /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/figures/fig4_exp3_energy_edp.png
+  /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/figures/fig5_exp4_tools_and_bloat.png
+  /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/figures/fig6_pmc_hardware_counters.png
+  - [2/9] Executando Campanha Darwin (Warm Cache Campaign, n=30)...
 ========================================================================
  🚀 Full Warm-Cache Benchmark Campaign (Apple Silicon M4)
     Regime B: Realistic KV-Cache Reuse (BENCH_CACHE_PROMPT=true)
 ========================================================================
 ⚡ [INFO] Apple SMC hardware telemetry active (root powermetrics shunts).
          Measuring 3-second quiescent idle baseline...
-         Quiescent idle baseline package power: 740.75 mW.
+         Quiescent idle baseline package power: 881.00 mW.
          Starting continuous Apple SMC powermetrics sampler daemon...
 
 ▶️  Dispatching 20 randomized blocks (30 evaluations + 3 primings per block = 600 evals, 60 primings)...
 
 📦 [Block 01/20] Condition: neural_baseline on W4 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] neural_baseline  W4: Task=12172.32ms, Prompt=22980, Cached=20421 (88.9%)
-   [Priming 2/3] neural_baseline  W4: Task=8165.3ms, Prompt=22980, Cached=22457 (97.7%)
-   [Priming 3/3] neural_baseline  W4: Task=8186.66ms, Prompt=22980, Cached=22457 (97.7%)
-   [010/600] neural_baseline  W4 Rep 10: Task=8181.7ms, Orch= 0.00ms, CacheHit= 97.7%, Φ_orch= 0.0%, NetE=121.82J
-   [020/600] neural_baseline  W4 Rep 20: Task=8277.5ms, Orch= 0.00ms, CacheHit= 97.7%, Φ_orch= 0.0%, NetE=120.78J
-   [030/600] neural_baseline  W4 Rep 30: Task=8349.4ms, Orch= 0.00ms, CacheHit= 97.7%, Φ_orch= 0.0%, NetE=109.23J
+   [Priming 1/3] neural_baseline  W4: Task=8193.43ms, Prompt=22980, Cached=22411 (97.5%)
+   [Priming 2/3] neural_baseline  W4: Task=8108.15ms, Prompt=22980, Cached=22457 (97.7%)
+   [Priming 3/3] neural_baseline  W4: Task=8101.99ms, Prompt=22980, Cached=22457 (97.7%)
+   [010/600] neural_baseline  W4 Rep 10: Task=8204.3ms, Orch= 0.00ms, CacheHit= 97.7%, Φ_orch= 0.0%, NetE=109.72J
+   [020/600] neural_baseline  W4 Rep 20: Task=8275.8ms, Orch= 0.00ms, CacheHit= 97.7%, Φ_orch= 0.0%, NetE=102.55J
+   [030/600] neural_baseline  W4 Rep 30: Task=8282.2ms, Orch= 0.00ms, CacheHit= 97.7%, Φ_orch= 0.0%, NetE=102.15J
 
 📦 [Block 02/20] Condition: openclaw_minimal on W2 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] openclaw_minimal W2: Task=1272.14ms, Prompt=2177, Cached=1984 (91.1%)
-   [Priming 2/3] openclaw_minimal W2: Task=768.9ms, Prompt=2177, Cached=2176 (100.0%)
-   [Priming 3/3] openclaw_minimal W2: Task=782.41ms, Prompt=2177, Cached=2176 (100.0%)
-   [040/600] openclaw_minimal W2 Rep 10: Task= 776.7ms, Orch=21.14ms, CacheHit=100.0%, Φ_orch= 2.7%, NetE=10.14J
-   [050/600] openclaw_minimal W2 Rep 20: Task= 763.2ms, Orch=19.76ms, CacheHit=100.0%, Φ_orch= 2.6%, NetE=9.76J
-   [060/600] openclaw_minimal W2 Rep 30: Task= 773.4ms, Orch=20.39ms, CacheHit=100.0%, Φ_orch= 2.6%, NetE=9.92J
+   [Priming 1/3] openclaw_minimal W2: Task=1266.8ms, Prompt=2177, Cached=1984 (91.1%)
+   [Priming 2/3] openclaw_minimal W2: Task=761.35ms, Prompt=2177, Cached=2176 (100.0%)
+   [Priming 3/3] openclaw_minimal W2: Task=776.14ms, Prompt=2177, Cached=2176 (100.0%)
+   [040/600] openclaw_minimal W2 Rep 10: Task= 769.5ms, Orch=20.51ms, CacheHit=100.0%, Φ_orch= 2.7%, NetE=9.47J
+   [050/600] openclaw_minimal W2 Rep 20: Task= 750.4ms, Orch=20.53ms, CacheHit=100.0%, Φ_orch= 2.7%, NetE=8.96J
+   [060/600] openclaw_minimal W2 Rep 30: Task= 766.7ms, Orch=20.84ms, CacheHit=100.0%, Φ_orch= 2.7%, NetE=9.18J
 
 📦 [Block 03/20] Condition: python_native on W3 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] python_native    W3: Task=1746.4ms, Prompt=2423, Cached=1984 (81.9%)
-   [Priming 2/3] python_native    W3: Task=764.9ms, Prompt=2423, Cached=2422 (100.0%)
-   [Priming 3/3] python_native    W3: Task=758.75ms, Prompt=2423, Cached=2422 (100.0%)
-   [070/600] python_native    W3 Rep 10: Task= 763.4ms, Orch=18.77ms, CacheHit=100.0%, Φ_orch= 2.5%, NetE=9.82J
-   [080/600] python_native    W3 Rep 20: Task= 763.1ms, Orch=19.09ms, CacheHit=100.0%, Φ_orch= 2.5%, NetE=9.63J
-   [090/600] python_native    W3 Rep 30: Task= 773.4ms, Orch=17.95ms, CacheHit=100.0%, Φ_orch= 2.3%, NetE=10.77J
+   [Priming 1/3] python_native    W3: Task=1740.9ms, Prompt=2423, Cached=1984 (81.9%)
+   [Priming 2/3] python_native    W3: Task=751.01ms, Prompt=2423, Cached=2422 (100.0%)
+   [Priming 3/3] python_native    W3: Task=757.72ms, Prompt=2423, Cached=2422 (100.0%)
+   [070/600] python_native    W3 Rep 10: Task= 755.9ms, Orch=20.01ms, CacheHit=100.0%, Φ_orch= 2.6%, NetE=9.64J
+   [080/600] python_native    W3 Rep 20: Task= 750.8ms, Orch=19.85ms, CacheHit=100.0%, Φ_orch= 2.6%, NetE=9.37J
+   [090/600] python_native    W3 Rep 30: Task= 743.6ms, Orch=19.91ms, CacheHit=100.0%, Φ_orch= 2.7%, NetE=9.51J
 
 📦 [Block 04/20] Condition: openclaw_minimal on W1 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] openclaw_minimal W1: Task=1428.39ms, Prompt=2153, Cached=1984 (92.2%)
-   [Priming 2/3] openclaw_minimal W1: Task=1064.69ms, Prompt=2153, Cached=2152 (100.0%)
-   [Priming 3/3] openclaw_minimal W1: Task=1045.46ms, Prompt=2153, Cached=2152 (100.0%)
-   [100/600] openclaw_minimal W1 Rep 10: Task=1054.7ms, Orch=19.73ms, CacheHit=100.0%, Φ_orch= 1.9%, NetE=13.76J
-   [110/600] openclaw_minimal W1 Rep 20: Task=1062.5ms, Orch=19.52ms, CacheHit=100.0%, Φ_orch= 1.8%, NetE=14.11J
-   [120/600] openclaw_minimal W1 Rep 30: Task=1048.4ms, Orch=19.65ms, CacheHit=100.0%, Φ_orch= 1.9%, NetE=13.77J
+   [Priming 1/3] openclaw_minimal W1: Task=1426.36ms, Prompt=2153, Cached=1984 (92.2%)
+   [Priming 2/3] openclaw_minimal W1: Task=1045.99ms, Prompt=2153, Cached=2152 (100.0%)
+   [Priming 3/3] openclaw_minimal W1: Task=1033.04ms, Prompt=2153, Cached=2152 (100.0%)
+   [100/600] openclaw_minimal W1 Rep 10: Task=1032.0ms, Orch=19.74ms, CacheHit=100.0%, Φ_orch= 1.9%, NetE=13.35J
+   [110/600] openclaw_minimal W1 Rep 20: Task=1037.9ms, Orch=19.93ms, CacheHit=100.0%, Φ_orch= 1.9%, NetE=13.22J
+   [120/600] openclaw_minimal W1 Rep 30: Task=1047.2ms, Orch=20.22ms, CacheHit=100.0%, Φ_orch= 1.9%, NetE=13.22J
 
 📦 [Block 05/20] Condition: openclaw_full on W2 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] openclaw_full    W2: Task=14747.34ms, Prompt=7091, Cached=1984 (28.0%)
-   [Priming 2/3] openclaw_full    W2: Task=929.06ms, Prompt=7091, Cached=7090 (100.0%)
-   [Priming 3/3] openclaw_full    W2: Task=934.64ms, Prompt=7091, Cached=7090 (100.0%)
-   [130/600] openclaw_full    W2 Rep 10: Task= 931.3ms, Orch=24.72ms, CacheHit=100.0%, Φ_orch= 2.7%, NetE=10.99J
-   [140/600] openclaw_full    W2 Rep 20: Task= 915.1ms, Orch=24.79ms, CacheHit=100.0%, Φ_orch= 2.7%, NetE=11.13J
-   [150/600] openclaw_full    W2 Rep 30: Task= 928.8ms, Orch=24.79ms, CacheHit=100.0%, Φ_orch= 2.7%, NetE=11.45J
+   [Priming 1/3] openclaw_full    W2: Task=14810.53ms, Prompt=7091, Cached=1984 (28.0%)
+   [Priming 2/3] openclaw_full    W2: Task=906.95ms, Prompt=7091, Cached=7090 (100.0%)
+   [Priming 3/3] openclaw_full    W2: Task=928.24ms, Prompt=7091, Cached=7090 (100.0%)
+   [130/600] openclaw_full    W2 Rep 10: Task= 899.5ms, Orch=25.43ms, CacheHit=100.0%, Φ_orch= 2.8%, NetE=10.84J
+   [140/600] openclaw_full    W2 Rep 20: Task= 921.9ms, Orch=25.16ms, CacheHit=100.0%, Φ_orch= 2.7%, NetE=11.20J
+   [150/600] openclaw_full    W2 Rep 30: Task= 907.5ms, Orch=24.43ms, CacheHit=100.0%, Φ_orch= 2.7%, NetE=10.84J
 
 📦 [Block 06/20] Condition: python_native on W2 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] python_native    W2: Task=1287.32ms, Prompt=2177, Cached=1984 (91.1%)
-   [Priming 2/3] python_native    W2: Task=762.98ms, Prompt=2177, Cached=2176 (100.0%)
-   [Priming 3/3] python_native    W2: Task=750.79ms, Prompt=2177, Cached=2176 (100.0%)
-   [160/600] python_native    W2 Rep 10: Task= 749.4ms, Orch=10.71ms, CacheHit=100.0%, Φ_orch= 1.4%, NetE=9.79J
-   [170/600] python_native    W2 Rep 20: Task= 755.4ms, Orch=10.72ms, CacheHit=100.0%, Φ_orch= 1.4%, NetE=9.97J
-   [180/600] python_native    W2 Rep 30: Task= 760.2ms, Orch=10.62ms, CacheHit=100.0%, Φ_orch= 1.4%, NetE=10.07J
+   [Priming 1/3] python_native    W2: Task=1211.91ms, Prompt=2177, Cached=1984 (91.1%)
+   [Priming 2/3] python_native    W2: Task=745.38ms, Prompt=2177, Cached=2176 (100.0%)
+   [Priming 3/3] python_native    W2: Task=763.05ms, Prompt=2177, Cached=2176 (100.0%)
+   [160/600] python_native    W2 Rep 10: Task= 753.7ms, Orch=10.93ms, CacheHit=100.0%, Φ_orch= 1.5%, NetE=9.32J
+   [170/600] python_native    W2 Rep 20: Task= 742.9ms, Orch=10.62ms, CacheHit=100.0%, Φ_orch= 1.4%, NetE=8.89J
+   [180/600] python_native    W2 Rep 30: Task= 739.3ms, Orch=10.56ms, CacheHit=100.0%, Φ_orch= 1.4%, NetE=9.13J
 
 📦 [Block 07/20] Condition: python_native on W4 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] python_native    W4: Task=8346.79ms, Prompt=22980, Cached=22405 (97.5%)
-   [Priming 2/3] python_native    W4: Task=8259.56ms, Prompt=22980, Cached=22457 (97.7%)
-   [Priming 3/3] python_native    W4: Task=8238.9ms, Prompt=22980, Cached=22457 (97.7%)
-   [190/600] python_native    W4 Rep 10: Task=8255.7ms, Orch=70.99ms, CacheHit= 97.7%, Φ_orch= 0.9%, NetE=122.54J
-   [200/600] python_native    W4 Rep 20: Task=8282.9ms, Orch=58.51ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=121.77J
-   [210/600] python_native    W4 Rep 30: Task=8321.3ms, Orch=58.45ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=118.77J
+   [Priming 1/3] python_native    W4: Task=8285.2ms, Prompt=22980, Cached=22405 (97.5%)
+   [Priming 2/3] python_native    W4: Task=8174.13ms, Prompt=22980, Cached=22457 (97.7%)
+   [Priming 3/3] python_native    W4: Task=8178.13ms, Prompt=22980, Cached=22457 (97.7%)
+   [190/600] python_native    W4 Rep 10: Task=8191.0ms, Orch=60.32ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=117.15J
+   [200/600] python_native    W4 Rep 20: Task=8216.0ms, Orch=53.65ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=116.12J
+   [210/600] python_native    W4 Rep 30: Task=8246.3ms, Orch=59.09ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=114.20J
 
 📦 [Block 08/20] Condition: neural_baseline on W3 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] neural_baseline  W3: Task=1729.02ms, Prompt=2423, Cached=1984 (81.9%)
-   [Priming 2/3] neural_baseline  W3: Task=727.07ms, Prompt=2423, Cached=2422 (100.0%)
-   [Priming 3/3] neural_baseline  W3: Task=745.66ms, Prompt=2423, Cached=2422 (100.0%)
-   [220/600] neural_baseline  W3 Rep 10: Task= 733.9ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=9.14J
-   [230/600] neural_baseline  W3 Rep 20: Task= 734.1ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=8.93J
-   [240/600] neural_baseline  W3 Rep 30: Task= 737.9ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=9.01J
+   [Priming 1/3] neural_baseline  W3: Task=1715.42ms, Prompt=2423, Cached=1984 (81.9%)
+   [Priming 2/3] neural_baseline  W3: Task=725.88ms, Prompt=2423, Cached=2422 (100.0%)
+   [Priming 3/3] neural_baseline  W3: Task=721.03ms, Prompt=2423, Cached=2422 (100.0%)
+   [220/600] neural_baseline  W3 Rep 10: Task= 728.8ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=8.59J
+   [230/600] neural_baseline  W3 Rep 20: Task= 713.4ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=8.39J
+   [240/600] neural_baseline  W3 Rep 30: Task= 729.5ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=8.78J
 
 📦 [Block 09/20] Condition: openclaw_minimal on W3 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] openclaw_minimal W3: Task=771.15ms, Prompt=2423, Cached=2422 (100.0%)
-   [Priming 2/3] openclaw_minimal W3: Task=777.88ms, Prompt=2423, Cached=2422 (100.0%)
-   [Priming 3/3] openclaw_minimal W3: Task=756.4ms, Prompt=2423, Cached=2422 (100.0%)
-   [250/600] openclaw_minimal W3 Rep 10: Task= 773.2ms, Orch=33.05ms, CacheHit=100.0%, Φ_orch= 4.3%, NetE=9.74J
-   [260/600] openclaw_minimal W3 Rep 20: Task= 776.3ms, Orch=33.37ms, CacheHit=100.0%, Φ_orch= 4.3%, NetE=9.84J
-   [270/600] openclaw_minimal W3 Rep 30: Task= 768.2ms, Orch=34.96ms, CacheHit=100.0%, Φ_orch= 4.6%, NetE=9.70J
+   [Priming 1/3] openclaw_minimal W3: Task=778.64ms, Prompt=2423, Cached=2422 (100.0%)
+   [Priming 2/3] openclaw_minimal W3: Task=756.89ms, Prompt=2423, Cached=2422 (100.0%)
+   [Priming 3/3] openclaw_minimal W3: Task=771.59ms, Prompt=2423, Cached=2422 (100.0%)
+   [250/600] openclaw_minimal W3 Rep 10: Task= 764.9ms, Orch=35.10ms, CacheHit=100.0%, Φ_orch= 4.6%, NetE=9.07J
+   [260/600] openclaw_minimal W3 Rep 20: Task= 751.9ms, Orch=35.07ms, CacheHit=100.0%, Φ_orch= 4.7%, NetE=9.00J
+   [270/600] openclaw_minimal W3 Rep 30: Task= 761.0ms, Orch=34.76ms, CacheHit=100.0%, Φ_orch= 4.6%, NetE=9.20J
 
 📦 [Block 10/20] Condition: python_native on W1 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] python_native    W1: Task=1404.5ms, Prompt=2153, Cached=1984 (92.2%)
-   [Priming 2/3] python_native    W1: Task=1043.74ms, Prompt=2153, Cached=2152 (100.0%)
-   [Priming 3/3] python_native    W1: Task=1025.9ms, Prompt=2153, Cached=2152 (100.0%)
-   [280/600] python_native    W1 Rep 10: Task=1046.8ms, Orch=10.05ms, CacheHit=100.0%, Φ_orch= 1.0%, NetE=14.08J
-   [290/600] python_native    W1 Rep 20: Task=1035.9ms, Orch= 9.60ms, CacheHit=100.0%, Φ_orch= 0.9%, NetE=13.47J
-   [300/600] python_native    W1 Rep 30: Task=1028.7ms, Orch= 9.78ms, CacheHit=100.0%, Φ_orch= 1.0%, NetE=13.80J
+   [Priming 1/3] python_native    W1: Task=1410.05ms, Prompt=2153, Cached=1984 (92.2%)
+   [Priming 2/3] python_native    W1: Task=1015.27ms, Prompt=2153, Cached=2152 (100.0%)
+   [Priming 3/3] python_native    W1: Task=1040.28ms, Prompt=2153, Cached=2152 (100.0%)
+   [280/600] python_native    W1 Rep 10: Task=1011.2ms, Orch= 9.88ms, CacheHit=100.0%, Φ_orch= 1.0%, NetE=12.80J
+   [290/600] python_native    W1 Rep 20: Task=1012.8ms, Orch=10.24ms, CacheHit=100.0%, Φ_orch= 1.0%, NetE=12.56J
+   [300/600] python_native    W1 Rep 30: Task=1030.5ms, Orch= 9.96ms, CacheHit=100.0%, Φ_orch= 1.0%, NetE=13.49J
 
 📦 [Block 11/20] Condition: neural_baseline on W2 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] neural_baseline  W2: Task=1206.72ms, Prompt=2177, Cached=1984 (91.1%)
-   [Priming 2/3] neural_baseline  W2: Task=748.19ms, Prompt=2177, Cached=2176 (100.0%)
-   [Priming 3/3] neural_baseline  W2: Task=756.83ms, Prompt=2177, Cached=2176 (100.0%)
-   [310/600] neural_baseline  W2 Rep 10: Task= 745.4ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=8.54J
-   [320/600] neural_baseline  W2 Rep 20: Task= 758.1ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=9.81J
-   [330/600] neural_baseline  W2 Rep 30: Task= 741.1ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=9.34J
+   [Priming 1/3] neural_baseline  W2: Task=1197.29ms, Prompt=2177, Cached=1984 (91.1%)
+   [Priming 2/3] neural_baseline  W2: Task=746.88ms, Prompt=2177, Cached=2176 (100.0%)
+   [Priming 3/3] neural_baseline  W2: Task=734.15ms, Prompt=2177, Cached=2176 (100.0%)
+   [310/600] neural_baseline  W2 Rep 10: Task= 751.0ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=9.18J
+   [320/600] neural_baseline  W2 Rep 20: Task= 739.6ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=8.67J
+   [330/600] neural_baseline  W2 Rep 30: Task= 739.8ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=8.90J
 
 📦 [Block 12/20] Condition: openclaw_full on W3 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] openclaw_full    W3: Task=15370.4ms, Prompt=7337, Cached=1984 (27.0%)
-   [Priming 2/3] openclaw_full    W3: Task=1206.78ms, Prompt=7337, Cached=7336 (100.0%)
-   [Priming 3/3] openclaw_full    W3: Task=1205.98ms, Prompt=7337, Cached=7336 (100.0%)
-   [340/600] openclaw_full    W3 Rep 10: Task=1203.1ms, Orch=38.27ms, CacheHit=100.0%, Φ_orch= 3.2%, NetE=14.98J
-   [350/600] openclaw_full    W3 Rep 20: Task=1206.2ms, Orch=38.22ms, CacheHit=100.0%, Φ_orch= 3.2%, NetE=15.42J
-   [360/600] openclaw_full    W3 Rep 30: Task=1219.9ms, Orch=38.26ms, CacheHit=100.0%, Φ_orch= 3.1%, NetE=15.88J
+   [Priming 1/3] openclaw_full    W3: Task=15337.08ms, Prompt=7337, Cached=1984 (27.0%)
+   [Priming 2/3] openclaw_full    W3: Task=1182.46ms, Prompt=7337, Cached=7336 (100.0%)
+   [Priming 3/3] openclaw_full    W3: Task=1193.9ms, Prompt=7337, Cached=7336 (100.0%)
+   [340/600] openclaw_full    W3 Rep 10: Task=1190.4ms, Orch=39.22ms, CacheHit=100.0%, Φ_orch= 3.3%, NetE=14.92J
+   [350/600] openclaw_full    W3 Rep 20: Task=1196.6ms, Orch=40.85ms, CacheHit=100.0%, Φ_orch= 3.4%, NetE=14.61J
+   [360/600] openclaw_full    W3 Rep 30: Task=1178.9ms, Orch=38.80ms, CacheHit=100.0%, Φ_orch= 3.3%, NetE=14.45J
 
 📦 [Block 13/20] Condition: picoclaw on W2 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] picoclaw         W2: Task=1287.71ms, Prompt=2177, Cached=1984 (91.1%)
-   [Priming 2/3] picoclaw         W2: Task=761.89ms, Prompt=2177, Cached=2176 (100.0%)
-   [Priming 3/3] picoclaw         W2: Task=745.41ms, Prompt=2177, Cached=2176 (100.0%)
-   [370/600] picoclaw         W2 Rep 10: Task= 760.5ms, Orch= 5.41ms, CacheHit=100.0%, Φ_orch= 0.7%, NetE=9.31J
-   [380/600] picoclaw         W2 Rep 20: Task= 748.5ms, Orch= 5.88ms, CacheHit=100.0%, Φ_orch= 0.8%, NetE=9.24J
-   [390/600] picoclaw         W2 Rep 30: Task= 760.7ms, Orch= 5.34ms, CacheHit=100.0%, Φ_orch= 0.7%, NetE=9.53J
+   [Priming 1/3] picoclaw         W2: Task=1196.75ms, Prompt=2177, Cached=1984 (91.1%)
+   [Priming 2/3] picoclaw         W2: Task=750.36ms, Prompt=2177, Cached=2176 (100.0%)
+   [Priming 3/3] picoclaw         W2: Task=732.24ms, Prompt=2177, Cached=2176 (100.0%)
+   [370/600] picoclaw         W2 Rep 10: Task= 749.9ms, Orch= 6.45ms, CacheHit=100.0%, Φ_orch= 0.9%, NetE=8.46J
+   [380/600] picoclaw         W2 Rep 20: Task= 739.4ms, Orch= 6.09ms, CacheHit=100.0%, Φ_orch= 0.8%, NetE=8.20J
+   [390/600] picoclaw         W2 Rep 30: Task= 748.9ms, Orch= 6.90ms, CacheHit=100.0%, Φ_orch= 0.9%, NetE=8.50J
 
 📦 [Block 14/20] Condition: openclaw_full on W4 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] openclaw_full    W4: Task=23839.68ms, Prompt=72120, Cached=66631 (92.4%)
-   [Priming 2/3] openclaw_full    W4: Task=10862.11ms, Prompt=72120, Cached=71597 (99.3%)
-   [Priming 3/3] openclaw_full    W4: Task=10867.76ms, Prompt=72120, Cached=71597 (99.3%)
-   [400/600] openclaw_full    W4 Rep 10: Task=10897.9ms, Orch=121.66ms, CacheHit= 99.3%, Φ_orch= 1.1%, NetE=150.97J
-   [410/600] openclaw_full    W4 Rep 20: Task=10923.2ms, Orch=123.04ms, CacheHit= 99.3%, Φ_orch= 1.1%, NetE=149.75J
-   [420/600] openclaw_full    W4 Rep 30: Task=10920.1ms, Orch=121.41ms, CacheHit= 99.3%, Φ_orch= 1.1%, NetE=146.59J
+   [Priming 1/3] openclaw_full    W4: Task=23679.98ms, Prompt=72120, Cached=66631 (92.4%)
+   [Priming 2/3] openclaw_full    W4: Task=10700.51ms, Prompt=72120, Cached=71597 (99.3%)
+   [Priming 3/3] openclaw_full    W4: Task=10687.26ms, Prompt=72120, Cached=71597 (99.3%)
+   [400/600] openclaw_full    W4 Rep 10: Task=10724.2ms, Orch=129.15ms, CacheHit= 99.3%, Φ_orch= 1.2%, NetE=145.09J
+   [410/600] openclaw_full    W4 Rep 20: Task=10765.2ms, Orch=127.43ms, CacheHit= 99.3%, Φ_orch= 1.2%, NetE=142.65J
+   [420/600] openclaw_full    W4 Rep 30: Task=10790.2ms, Orch=129.10ms, CacheHit= 99.3%, Φ_orch= 1.2%, NetE=136.93J
 
 📦 [Block 15/20] Condition: picoclaw on W3 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] picoclaw         W3: Task=1833.64ms, Prompt=2423, Cached=1984 (81.9%)
-   [Priming 2/3] picoclaw         W3: Task=778.62ms, Prompt=2423, Cached=2422 (100.0%)
-   [Priming 3/3] picoclaw         W3: Task=771.39ms, Prompt=2423, Cached=2422 (100.0%)
-   [430/600] picoclaw         W3 Rep 10: Task= 780.6ms, Orch=39.65ms, CacheHit=100.0%, Φ_orch= 5.1%, NetE=9.33J
-   [440/600] picoclaw         W3 Rep 20: Task= 761.6ms, Orch=35.80ms, CacheHit=100.0%, Φ_orch= 4.7%, NetE=9.12J
-   [450/600] picoclaw         W3 Rep 30: Task= 777.8ms, Orch=37.05ms, CacheHit=100.0%, Φ_orch= 4.8%, NetE=9.69J
+   [Priming 1/3] picoclaw         W3: Task=1749.21ms, Prompt=2423, Cached=1984 (81.9%)
+   [Priming 2/3] picoclaw         W3: Task=765.55ms, Prompt=2423, Cached=2422 (100.0%)
+   [Priming 3/3] picoclaw         W3: Task=759.94ms, Prompt=2423, Cached=2422 (100.0%)
+   [430/600] picoclaw         W3 Rep 10: Task= 773.4ms, Orch=42.53ms, CacheHit=100.0%, Φ_orch= 5.5%, NetE=8.94J
+   [440/600] picoclaw         W3 Rep 20: Task= 758.2ms, Orch=38.68ms, CacheHit=100.0%, Φ_orch= 5.1%, NetE=8.78J
+   [450/600] picoclaw         W3 Rep 30: Task= 770.5ms, Orch=38.45ms, CacheHit=100.0%, Φ_orch= 5.0%, NetE=9.16J
 
 📦 [Block 16/20] Condition: neural_baseline on W1 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] neural_baseline  W1: Task=1427.92ms, Prompt=2153, Cached=1984 (92.2%)
-   [Priming 2/3] neural_baseline  W1: Task=1017.87ms, Prompt=2153, Cached=2152 (100.0%)
-   [Priming 3/3] neural_baseline  W1: Task=1033.78ms, Prompt=2153, Cached=2152 (100.0%)
-   [460/600] neural_baseline  W1 Rep 10: Task=1024.5ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=13.50J
-   [470/600] neural_baseline  W1 Rep 20: Task=1024.1ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=13.34J
-   [480/600] neural_baseline  W1 Rep 30: Task=1014.6ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=12.91J
+   [Priming 1/3] neural_baseline  W1: Task=1405.5ms, Prompt=2153, Cached=1984 (92.2%)
+   [Priming 2/3] neural_baseline  W1: Task=1010.19ms, Prompt=2153, Cached=2152 (100.0%)
+   [Priming 3/3] neural_baseline  W1: Task=1013.87ms, Prompt=2153, Cached=2152 (100.0%)
+   [460/600] neural_baseline  W1 Rep 10: Task=1008.1ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=12.53J
+   [470/600] neural_baseline  W1 Rep 20: Task=1007.2ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=12.60J
+   [480/600] neural_baseline  W1 Rep 30: Task=1008.3ms, Orch= 0.00ms, CacheHit=100.0%, Φ_orch= 0.0%, NetE=12.53J
 
 📦 [Block 17/20] Condition: openclaw_minimal on W4 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] openclaw_minimal W4: Task=8511.17ms, Prompt=22980, Cached=22405 (97.5%)
-   [Priming 2/3] openclaw_minimal W4: Task=8407.94ms, Prompt=22980, Cached=22457 (97.7%)
-   [Priming 3/3] openclaw_minimal W4: Task=8424.66ms, Prompt=22980, Cached=22457 (97.7%)
-   [490/600] openclaw_minimal W4 Rep 10: Task=8432.6ms, Orch=70.91ms, CacheHit= 97.7%, Φ_orch= 0.8%, NetE=109.23J
-   [500/600] openclaw_minimal W4 Rep 20: Task=8445.7ms, Orch=70.02ms, CacheHit= 97.7%, Φ_orch= 0.8%, NetE=108.83J
-   [510/600] openclaw_minimal W4 Rep 30: Task=8447.4ms, Orch=70.36ms, CacheHit= 97.7%, Φ_orch= 0.8%, NetE=107.86J
+   [Priming 1/3] openclaw_minimal W4: Task=8400.08ms, Prompt=22980, Cached=22405 (97.5%)
+   [Priming 2/3] openclaw_minimal W4: Task=8329.79ms, Prompt=22980, Cached=22457 (97.7%)
+   [Priming 3/3] openclaw_minimal W4: Task=8313.28ms, Prompt=22980, Cached=22457 (97.7%)
+   [490/600] openclaw_minimal W4 Rep 10: Task=8335.8ms, Orch=71.69ms, CacheHit= 97.7%, Φ_orch= 0.9%, NetE=104.94J
+   [500/600] openclaw_minimal W4 Rep 20: Task=8299.2ms, Orch=72.51ms, CacheHit= 97.7%, Φ_orch= 0.9%, NetE=105.10J
+   [510/600] openclaw_minimal W4 Rep 30: Task=8339.6ms, Orch=74.20ms, CacheHit= 97.7%, Φ_orch= 0.9%, NetE=103.19J
 
 📦 [Block 18/20] Condition: openclaw_full on W1 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] openclaw_full    W1: Task=15068.36ms, Prompt=7067, Cached=1984 (28.1%)
-   [Priming 2/3] openclaw_full    W1: Task=1341.88ms, Prompt=7067, Cached=7066 (100.0%)
-   [Priming 3/3] openclaw_full    W1: Task=1327.4ms, Prompt=7067, Cached=7066 (100.0%)
-   [520/600] openclaw_full    W1 Rep 10: Task=1329.1ms, Orch=24.17ms, CacheHit=100.0%, Φ_orch= 1.8%, NetE=17.21J
-   [530/600] openclaw_full    W1 Rep 20: Task=1338.0ms, Orch=24.26ms, CacheHit=100.0%, Φ_orch= 1.8%, NetE=16.70J
-   [540/600] openclaw_full    W1 Rep 30: Task=1316.5ms, Orch=23.25ms, CacheHit=100.0%, Φ_orch= 1.8%, NetE=16.30J
+   [Priming 1/3] openclaw_full    W1: Task=14901.41ms, Prompt=7067, Cached=1984 (28.1%)
+   [Priming 2/3] openclaw_full    W1: Task=1305.27ms, Prompt=7067, Cached=7066 (100.0%)
+   [Priming 3/3] openclaw_full    W1: Task=1311.88ms, Prompt=7067, Cached=7066 (100.0%)
+   [520/600] openclaw_full    W1 Rep 10: Task=1320.9ms, Orch=24.48ms, CacheHit=100.0%, Φ_orch= 1.9%, NetE=16.89J
+   [530/600] openclaw_full    W1 Rep 20: Task=1301.2ms, Orch=24.54ms, CacheHit=100.0%, Φ_orch= 1.9%, NetE=16.40J
+   [540/600] openclaw_full    W1 Rep 30: Task=1308.9ms, Orch=24.13ms, CacheHit=100.0%, Φ_orch= 1.8%, NetE=16.25J
 
 📦 [Block 19/20] Condition: picoclaw on W1 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] picoclaw         W1: Task=1491.36ms, Prompt=2153, Cached=1984 (92.2%)
-   [Priming 2/3] picoclaw         W1: Task=1031.78ms, Prompt=2153, Cached=2152 (100.0%)
-   [Priming 3/3] picoclaw         W1: Task=1020.69ms, Prompt=2153, Cached=2152 (100.0%)
-   [550/600] picoclaw         W1 Rep 10: Task=1021.2ms, Orch= 3.58ms, CacheHit=100.0%, Φ_orch= 0.4%, NetE=13.07J
-   [560/600] picoclaw         W1 Rep 20: Task=1021.5ms, Orch= 3.55ms, CacheHit=100.0%, Φ_orch= 0.3%, NetE=13.55J
-   [570/600] picoclaw         W1 Rep 30: Task=1022.2ms, Orch= 3.90ms, CacheHit=100.0%, Φ_orch= 0.4%, NetE=13.54J
+   [Priming 1/3] picoclaw         W1: Task=1423.66ms, Prompt=2153, Cached=1984 (92.2%)
+   [Priming 2/3] picoclaw         W1: Task=1000.38ms, Prompt=2153, Cached=2152 (100.0%)
+   [Priming 3/3] picoclaw         W1: Task=1021.67ms, Prompt=2153, Cached=2152 (100.0%)
+   [550/600] picoclaw         W1 Rep 10: Task=1020.7ms, Orch= 4.38ms, CacheHit=100.0%, Φ_orch= 0.4%, NetE=12.82J
+   [560/600] picoclaw         W1 Rep 20: Task=1019.7ms, Orch= 4.56ms, CacheHit=100.0%, Φ_orch= 0.4%, NetE=12.40J
+   [570/600] picoclaw         W1 Rep 30: Task=1010.9ms, Orch= 4.45ms, CacheHit=100.0%, Φ_orch= 0.4%, NetE=12.86J
 
 📦 [Block 20/20] Condition: picoclaw on W4 (3 Priming Warmups + 30 Evaluations)
-   [Priming 1/3] picoclaw         W4: Task=8359.53ms, Prompt=22980, Cached=22405 (97.5%)
-   [Priming 2/3] picoclaw         W4: Task=8240.24ms, Prompt=22980, Cached=22457 (97.7%)
-   [Priming 3/3] picoclaw         W4: Task=8283.21ms, Prompt=22980, Cached=22457 (97.7%)
-   [580/600] picoclaw         W4 Rep 10: Task=8285.2ms, Orch=57.07ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=112.92J
-   [590/600] picoclaw         W4 Rep 20: Task=8295.0ms, Orch=56.47ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=111.08J
-   [600/600] picoclaw         W4 Rep 30: Task=8341.4ms, Orch=56.58ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=109.78J
+   [Priming 1/3] picoclaw         W4: Task=8267.75ms, Prompt=22980, Cached=22405 (97.5%)
+   [Priming 2/3] picoclaw         W4: Task=8159.25ms, Prompt=22980, Cached=22457 (97.7%)
+   [Priming 3/3] picoclaw         W4: Task=8193.02ms, Prompt=22980, Cached=22457 (97.7%)
+   [580/600] picoclaw         W4 Rep 10: Task=8186.9ms, Orch=60.63ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=110.38J
+   [590/600] picoclaw         W4 Rep 20: Task=8196.8ms, Orch=58.76ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=107.80J
+   [600/600] picoclaw         W4 Rep 30: Task=8224.9ms, Orch=60.15ms, CacheHit= 97.7%, Φ_orch= 0.7%, NetE=105.14J
 
 💾 Writing 660 total records to /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/warm_cache_trials.jsonl...
 
@@ -203,13 +841,13 @@ WARNING: The directory '/Users/rafael/Library/Caches/pip' or its parent director
 ========================================================================
  ✅ Warm-Cache Campaign and Artifacts Consolidated Successfully!
 ========================================================================
-  - Executando Ablação de Atribuição de Energia e Largura de Banda UMA...
+  - [3/9] Executando Ablação de Atribuição de Energia e Largura de Banda UMA...
 ========================================================================
  ⚡ [Medição 1] Isolamento Físico no Silício da Energia de Despacho (CPU)
     Local Tool Benchmark (W2 x 200 iters, W3 x 50 iters, Sem GPU)
 ========================================================================
   -> Medindo 3.0 segundos de baseline quiescente (idle real)...
-     Idle Real: Package=778.75 mW | CPU=556.33 mW | GPU=222.47 mW
+     Idle Real: Package=504.47 mW | CPU=317.18 mW | GPU=187.30 mW
   -> Sincronizando leitor do Apple SMC powermetrics...
      Leitor SMC sincronizado com 2 amostras iniciais.
   -> Executando picoclaw em W2 (200 iters, 600 ops, n=15)...
@@ -225,8 +863,8 @@ WARNING: The directory '/Users/rafael/Library/Caches/pip' or its parent director
 ========================================================================
  🔬 [Medição 2] Validação de Contadores XNU (Resultado Negativo) & Regressores Físicos
 ========================================================================
-  -> [NEGATIVE RESULT] ri_billed_energy vs SMC CPU Joules: Pearson r = -0.1614 (p = 0.078), OLS R² vs mean = -0.238
-  -> [VALIDATED PROXIES] t_exec_ms (r=0.995, R²=0.965), proc_instructions (r=0.997, R²=0.976), proc_cycles (r=0.997, R²=0.962)
+  -> [NEGATIVE RESULT] ri_billed_energy vs SMC CPU Joules: Pearson r = -0.0464 (p = 0.615), OLS R² vs mean = -0.593
+  -> [VALIDATED PROXIES] t_exec_ms (r=0.995, R²=0.964), proc_instructions (r=0.996, R²=0.975), proc_cycles (r=0.996, R²=0.962)
 
 ========================================================================
  📊 [Deconvolução Física Direta] Aplicação às Campanhas A e B (1.200 Ensaios)
@@ -236,114 +874,457 @@ WARNING: The directory '/Users/rafael/Library/Caches/pip' or its parent director
  🚀 [Medição 3] Largura de Banda UMA LPDDR5X (Host CPU e GPU Metal)
 ========================================================================
   -> Total de bytes lidos por chamada RAG (W3): 15754752 bytes (15.75 MB)
-     Vazão Host CPU (picoclaw): 0.60 GB/s (26.09 ms/op)
-     Vazão Host CPU (openclaw_minimal): 1.82 GB/s (8.65 ms/op)
-     Vazão Host CPU (openclaw_full): 1.81 GB/s (8.70 ms/op)
-     Vazão Host CPU (python_native): 1.99 GB/s (7.91 ms/op)
+     Vazão Host CPU (picoclaw): 0.60 GB/s (26.32 ms/op)
+     Vazão Host CPU (openclaw_minimal): 1.76 GB/s (8.96 ms/op)
+     Vazão Host CPU (openclaw_full): 1.74 GB/s (9.06 ms/op)
+     Vazão Host CPU (python_native): 1.95 GB/s (8.08 ms/op)
   -> Tamanho real dos pesos neurais GGUF Q4_K_M: 2019377696 bytes (2.019 GB)
   -> Estimativa Analítico-Empírica de Largura de Banda Metal GPU (Pesos / ITL): Mediana=102.4 GB/s (85.3%), Média=102.5 GB/s (85.4% de 120 GB/s)
 
 📄 Gerando tabela LaTeX: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex...
 ✅ Generated LaTeX table: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tables/table_energy_bandwidth_deconvolution.tex
 ✅ Saved attribution summary: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/uma_energy_bandwidth_attribution.json
+  - [4/9] Executando Ablação de KV-Cache Thrashing vs Slot Isolation...
+⚡ Measuring 3.0s quiescent idle power baseline on Apple Silicon M4...
+   Idle baseline: 515.88 mW. Starting continuous SMC powermetrics stream...
+✅ Loaded 30 physical Regime T1 (Cold Cache) W2 baseline trials.
+
+🚀 Executing Regime T2 — Interleaved Prefix Thrashing (n=30 alternating requests on slot 0)...
+   [T2 01/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=30 (1.38%), prompt_ms=4271.3ms, t_task=5020.6ms, E_net=84.01J
+   [T2 02/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=16879.2ms, t_task=17791.6ms, E_net=324.04J
+   [T2 03/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4494.7ms, t_task=5389.6ms, E_net=86.09J
+   [T2 04/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17449.7ms, t_task=18372.5ms, E_net=299.63J
+   [T2 05/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4557.5ms, t_task=5434.6ms, E_net=83.06J
+   [T2 06/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17482.0ms, t_task=18409.7ms, E_net=302.37J
+   [T2 07/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4555.7ms, t_task=5448.9ms, E_net=83.48J
+   [T2 08/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17466.2ms, t_task=18461.7ms, E_net=299.32J
+   [T2 09/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4553.6ms, t_task=5410.4ms, E_net=82.25J
+   [T2 10/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17482.4ms, t_task=18402.4ms, E_net=294.69J
+   [T2 11/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4549.8ms, t_task=5433.1ms, E_net=81.97J
+   [T2 12/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17459.0ms, t_task=18379.5ms, E_net=293.08J
+   [T2 13/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4539.9ms, t_task=5352.7ms, E_net=82.00J
+   [T2 14/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17455.0ms, t_task=18356.0ms, E_net=291.46J
+   [T2 15/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4480.0ms, t_task=5323.0ms, E_net=85.24J
+   [T2 16/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17319.3ms, t_task=18471.0ms, E_net=297.54J
+   [T2 17/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4413.4ms, t_task=5460.0ms, E_net=88.27J
+   [T2 18/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17237.0ms, t_task=18141.0ms, E_net=301.02J
+   [T2 19/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4412.9ms, t_task=5200.4ms, E_net=87.44J
+   [T2 20/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17181.0ms, t_task=18077.9ms, E_net=302.85J
+   [T2 21/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4384.2ms, t_task=5262.9ms, E_net=88.06J
+   [T2 22/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17142.4ms, t_task=18028.6ms, E_net=303.68J
+   [T2 23/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4378.7ms, t_task=5246.8ms, E_net=87.88J
+   [T2 24/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17099.3ms, t_task=17995.2ms, E_net=306.06J
+   [T2 25/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4388.4ms, t_task=5167.7ms, E_net=88.40J
+   [T2 26/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17075.0ms, t_task=17963.3ms, E_net=306.00J
+   [T2 27/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4376.0ms, t_task=5184.4ms, E_net=88.05J
+   [T2 28/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17059.2ms, t_task=17980.8ms, E_net=308.37J
+   [T2 29/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=32 (1.47%), prompt_ms=4363.9ms, t_task=5246.2ms, E_net=89.50J
+   [T2 30/30] openclaw_full (54 tools): prompt_tok=7091, cached=32 (0.45%), prompt_ms=17030.7ms, t_task=17935.4ms, E_net=308.77J
+
+🚀 Executing Regime T3 — Isolated Prefix Retention (n=30 block-isolated requests)...
+   [T3 01/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=24.9ms, t_task=744.3ms, E_net=9.78J
+   [T3 02/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=25.9ms, t_task=728.7ms, E_net=8.85J
+   [T3 03/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=25.9ms, t_task=748.4ms, E_net=8.76J
+   [T3 04/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=26.0ms, t_task=743.9ms, E_net=8.89J
+   [T3 05/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=28.5ms, t_task=753.2ms, E_net=9.13J
+   [T3 06/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=26.1ms, t_task=750.9ms, E_net=8.69J
+   [T3 07/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=25.2ms, t_task=737.0ms, E_net=8.00J
+   [T3 08/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=25.4ms, t_task=749.5ms, E_net=8.92J
+   [T3 09/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=26.0ms, t_task=729.6ms, E_net=8.05J
+   [T3 10/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=25.7ms, t_task=746.5ms, E_net=8.96J
+   [T3 11/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=25.2ms, t_task=741.4ms, E_net=8.95J
+   [T3 12/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=25.1ms, t_task=741.6ms, E_net=8.76J
+   [T3 13/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=26.4ms, t_task=746.8ms, E_net=8.77J
+   [T3 14/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=25.2ms, t_task=736.4ms, E_net=8.56J
+   [T3 15/30] openclaw_minimal (15 tools): prompt_tok=2177, cached=2176 (99.95%), prompt_ms=26.0ms, t_task=748.5ms, E_net=8.90J
+   [T3 16/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=31.8ms, t_task=896.4ms, E_net=11.37J
+   [T3 17/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=32.4ms, t_task=893.7ms, E_net=9.84J
+   [T3 18/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=32.3ms, t_task=900.1ms, E_net=10.53J
+   [T3 19/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=31.2ms, t_task=890.9ms, E_net=9.59J
+   [T3 20/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=31.8ms, t_task=896.9ms, E_net=10.10J
+   [T3 21/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=31.3ms, t_task=890.6ms, E_net=10.43J
+   [T3 22/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=32.2ms, t_task=898.1ms, E_net=10.65J
+   [T3 23/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=30.9ms, t_task=896.2ms, E_net=9.95J
+   [T3 24/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=32.2ms, t_task=898.1ms, E_net=10.35J
+   [T3 25/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=37.8ms, t_task=906.3ms, E_net=10.61J
+   [T3 26/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=31.4ms, t_task=896.9ms, E_net=10.63J
+   [T3 27/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=31.3ms, t_task=893.2ms, E_net=9.75J
+   [T3 28/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=31.8ms, t_task=893.7ms, E_net=10.54J
+   [T3 29/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=31.2ms, t_task=894.5ms, E_net=9.90J
+   [T3 30/30] openclaw_full (54 tools): prompt_tok=7091, cached=7090 (99.99%), prompt_ms=31.9ms, t_task=897.1ms, E_net=10.00J
+
+✅ Saved 90 KV-cache thrashing ablation trials to /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/kv_cache_thrashing_trials.jsonl
+✅ Saved summary to /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/kv_cache_thrashing_summary.json
+  - [5/9] Executando Experimento de Mitigação Tool-RAG...
+⚡ Measuring 3.0s quiescent idle baseline on Apple Silicon M4...
+   Idle package power: 530.00 mW. Starting continuous SMC powermetrics daemon...
+
+🚀 Executing Tool-RAG physical campaign for regime_b_warm (BENCH_CACHE_PROMPT=true, 8 blocks)...
+
+📦 [regime_b_warm Block 01/08] picoclaw_tool_rag on W3 (3 warmups + 30 evals)
+   [Rep 10/30] picoclaw_tool_rag  W3: Task= 723.3ms, Prune=0.041ms, Prompt=1163, NetE=8.36J
+   [Rep 20/30] picoclaw_tool_rag  W3: Task= 715.9ms, Prune=0.038ms, Prompt=1163, NetE=8.59J
+   [Rep 30/30] picoclaw_tool_rag  W3: Task= 709.9ms, Prune=0.043ms, Prompt=1163, NetE=7.94J
+
+📦 [regime_b_warm Block 02/08] picoclaw_tool_rag on W4 (3 warmups + 30 evals)
+   [Rep 10/30] picoclaw_tool_rag  W4: Task=8126.2ms, Prune=0.329ms, Prompt=10380, NetE=105.52J
+   [Rep 20/30] picoclaw_tool_rag  W4: Task=8162.7ms, Prune=0.347ms, Prompt=10380, NetE=104.80J
+   [Rep 30/30] picoclaw_tool_rag  W4: Task=8166.6ms, Prune=0.337ms, Prompt=10380, NetE=104.74J
+
+📦 [regime_b_warm Block 03/08] openclaw_tool_rag on W4 (3 warmups + 30 evals)
+   [Rep 10/30] openclaw_tool_rag  W4: Task=8165.0ms, Prune=3.124ms, Prompt=10380, NetE=106.09J
+   [Rep 20/30] openclaw_tool_rag  W4: Task=8169.5ms, Prune=4.904ms, Prompt=10380, NetE=104.43J
+   [Rep 30/30] openclaw_tool_rag  W4: Task=8169.9ms, Prune=3.417ms, Prompt=10380, NetE=104.71J
+
+📦 [regime_b_warm Block 04/08] openclaw_tool_rag on W1 (3 warmups + 30 evals)
+   [Rep 10/30] openclaw_tool_rag  W1: Task= 945.8ms, Prune=0.721ms, Prompt=893, NetE=12.04J
+   [Rep 20/30] openclaw_tool_rag  W1: Task= 945.6ms, Prune=0.679ms, Prompt=893, NetE=12.46J
+   [Rep 30/30] openclaw_tool_rag  W1: Task= 956.0ms, Prune=0.794ms, Prompt=893, NetE=12.56J
+
+📦 [regime_b_warm Block 05/08] picoclaw_tool_rag on W2 (3 warmups + 30 evals)
+   [Rep 10/30] picoclaw_tool_rag  W2: Task= 705.9ms, Prune=0.040ms, Prompt=917, NetE=8.94J
+   [Rep 20/30] picoclaw_tool_rag  W2: Task= 706.8ms, Prune=0.036ms, Prompt=917, NetE=9.02J
+   [Rep 30/30] picoclaw_tool_rag  W2: Task= 708.0ms, Prune=0.041ms, Prompt=917, NetE=8.91J
+
+📦 [regime_b_warm Block 06/08] picoclaw_tool_rag on W1 (3 warmups + 30 evals)
+   [Rep 10/30] picoclaw_tool_rag  W1: Task= 938.3ms, Prune=0.042ms, Prompt=893, NetE=12.24J
+   [Rep 20/30] picoclaw_tool_rag  W1: Task= 930.3ms, Prune=0.040ms, Prompt=893, NetE=11.73J
+   [Rep 30/30] picoclaw_tool_rag  W1: Task= 927.3ms, Prune=0.037ms, Prompt=893, NetE=10.85J
+
+📦 [regime_b_warm Block 07/08] openclaw_tool_rag on W3 (3 warmups + 30 evals)
+   [Rep 10/30] openclaw_tool_rag  W3: Task= 724.0ms, Prune=0.651ms, Prompt=1163, NetE=8.78J
+   [Rep 20/30] openclaw_tool_rag  W3: Task= 703.5ms, Prune=0.762ms, Prompt=1163, NetE=8.76J
+   [Rep 30/30] openclaw_tool_rag  W3: Task= 722.9ms, Prune=0.758ms, Prompt=1163, NetE=8.74J
+
+📦 [regime_b_warm Block 08/08] openclaw_tool_rag on W2 (3 warmups + 30 evals)
+   [Rep 10/30] openclaw_tool_rag  W2: Task= 709.1ms, Prune=0.709ms, Prompt=917, NetE=9.52J
+   [Rep 20/30] openclaw_tool_rag  W2: Task= 720.5ms, Prune=0.684ms, Prompt=917, NetE=8.78J
+   [Rep 30/30] openclaw_tool_rag  W2: Task= 732.7ms, Prune=0.725ms, Prompt=917, NetE=9.78J
+
+🚀 Executing Tool-RAG physical campaign for regime_a_cold (BENCH_CACHE_PROMPT=false, 8 blocks)...
+
+📦 [regime_a_cold Block 01/08] picoclaw_tool_rag on W2 (3 warmups + 30 evals)
+   [Rep 10/30] picoclaw_tool_rag  W2: Task=2545.7ms, Prune=0.039ms, Prompt=917, NetE=37.88J
+   [Rep 20/30] picoclaw_tool_rag  W2: Task=2518.5ms, Prune=0.044ms, Prompt=917, NetE=37.11J
+   [Rep 30/30] picoclaw_tool_rag  W2: Task=2511.8ms, Prune=0.040ms, Prompt=917, NetE=36.68J
+
+📦 [regime_a_cold Block 02/08] openclaw_tool_rag on W3 (3 warmups + 30 evals)
+   [Rep 10/30] openclaw_tool_rag  W3: Task=3041.6ms, Prune=0.727ms, Prompt=1163, NetE=48.02J
+   [Rep 20/30] openclaw_tool_rag  W3: Task=3014.1ms, Prune=0.828ms, Prompt=1163, NetE=49.04J
+   [Rep 30/30] openclaw_tool_rag  W3: Task=2996.8ms, Prune=0.697ms, Prompt=1163, NetE=49.30J
+
+📦 [regime_a_cold Block 03/08] openclaw_tool_rag on W1 (3 warmups + 30 evals)
+   [Rep 10/30] openclaw_tool_rag  W1: Task=2631.1ms, Prune=0.889ms, Prompt=893, NetE=43.00J
+   [Rep 20/30] openclaw_tool_rag  W1: Task=2636.2ms, Prune=0.701ms, Prompt=893, NetE=43.74J
+   [Rep 30/30] openclaw_tool_rag  W1: Task=2632.6ms, Prune=0.729ms, Prompt=893, NetE=43.31J
+
+📦 [regime_a_cold Block 04/08] openclaw_tool_rag on W2 (3 warmups + 30 evals)
+   [Rep 10/30] openclaw_tool_rag  W2: Task=2463.8ms, Prune=0.681ms, Prompt=917, NetE=41.13J
+   [Rep 20/30] openclaw_tool_rag  W2: Task=2469.5ms, Prune=0.688ms, Prompt=917, NetE=40.89J
+   [Rep 30/30] openclaw_tool_rag  W2: Task=2474.2ms, Prune=0.738ms, Prompt=917, NetE=41.59J
+
+📦 [regime_a_cold Block 05/08] openclaw_tool_rag on W4 (3 warmups + 30 evals)
+   [Rep 10/30] openclaw_tool_rag  W4: Task=27188.1ms, Prune=3.252ms, Prompt=10380, NetE=458.49J
+   [Rep 20/30] openclaw_tool_rag  W4: Task=27240.7ms, Prune=3.281ms, Prompt=10380, NetE=457.03J
+   [Rep 30/30] openclaw_tool_rag  W4: Task=27297.0ms, Prune=3.506ms, Prompt=10380, NetE=455.40J
+
+📦 [regime_a_cold Block 06/08] picoclaw_tool_rag on W1 (3 warmups + 30 evals)
+   [Rep 10/30] picoclaw_tool_rag  W1: Task=2643.1ms, Prune=0.043ms, Prompt=893, NetE=42.87J
+   [Rep 20/30] picoclaw_tool_rag  W1: Task=2628.4ms, Prune=0.039ms, Prompt=893, NetE=42.82J
+   [Rep 30/30] picoclaw_tool_rag  W1: Task=2629.2ms, Prune=0.041ms, Prompt=893, NetE=42.21J
+
+📦 [regime_a_cold Block 07/08] picoclaw_tool_rag on W3 (3 warmups + 30 evals)
+   [Rep 10/30] picoclaw_tool_rag  W3: Task=2995.0ms, Prune=0.038ms, Prompt=1163, NetE=49.68J
+   [Rep 20/30] picoclaw_tool_rag  W3: Task=2983.7ms, Prune=0.061ms, Prompt=1163, NetE=48.76J
+   [Rep 30/30] picoclaw_tool_rag  W3: Task=2993.5ms, Prune=0.034ms, Prompt=1163, NetE=48.11J
+
+📦 [regime_a_cold Block 08/08] picoclaw_tool_rag on W4 (3 warmups + 30 evals)
+   [Rep 10/30] picoclaw_tool_rag  W4: Task=27504.6ms, Prune=0.327ms, Prompt=10380, NetE=446.92J
+   [Rep 20/30] picoclaw_tool_rag  W4: Task=27612.8ms, Prune=0.337ms, Prompt=10380, NetE=443.44J
+   [Rep 30/30] picoclaw_tool_rag  W4: Task=27735.5ms, Prune=0.326ms, Prompt=10380, NetE=436.94J
+
+💾 Wrote 1056 total records to /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tool_rag_mitigation_trials.jsonl
+✅ Saved Tool-RAG summary JSON: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tool_rag_mitigation_summary.json
+✅ Generated Tool-RAG LaTeX table: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tables/table_tool_rag_mitigation.tex
+  - [6/9] Executando Ablação Controlada de Prefill e Escalonamento...
+🚀 Running Controlled Prefill & KV-Cache Ablation Campaign (8 catalog levels x 2 cache modes x (3 warmups + 30 evals) = 528 requests)...
+
+📦 Catalog Level: 0 tools
+  ⚡ Cache Mode: Cold (Prompt Prefill)
+    -> Median Tokens: 60 (Cached: 0) | TTFT: 130.0 ms | Prefill: 128.8 ms
+  ⚡ Cache Mode: Warm (KV Cache Reuse)
+    -> Median Tokens: 60 (Cached: 59) | TTFT: 23.2 ms | Prefill: 22.3 ms
+
+📦 Catalog Level: 5 tools
+  ⚡ Cache Mode: Cold (Prompt Prefill)
+    -> Median Tokens: 771 (Cached: 0) | TTFT: 1662.2 ms | Prefill: 1589.0 ms
+  ⚡ Cache Mode: Warm (KV Cache Reuse)
+    -> Median Tokens: 771 (Cached: 770) | TTFT: 93.8 ms | Prefill: 23.2 ms
+
+📦 Catalog Level: 10 tools
+  ⚡ Cache Mode: Cold (Prompt Prefill)
+    -> Median Tokens: 1426 (Cached: 0) | TTFT: 3003.1 ms | Prefill: 2927.0 ms
+  ⚡ Cache Mode: Warm (KV Cache Reuse)
+    -> Median Tokens: 1426 (Cached: 1425) | TTFT: 98.7 ms | Prefill: 24.6 ms
+
+📦 Catalog Level: 15 tools
+  ⚡ Cache Mode: Cold (Prompt Prefill)
+    -> Median Tokens: 2081 (Cached: 0) | TTFT: 4478.0 ms | Prefill: 4397.9 ms
+  ⚡ Cache Mode: Warm (KV Cache Reuse)
+    -> Median Tokens: 2081 (Cached: 2080) | TTFT: 102.2 ms | Prefill: 25.0 ms
+
+📦 Catalog Level: 25 tools
+  ⚡ Cache Mode: Cold (Prompt Prefill)
+    -> Median Tokens: 3391 (Cached: 0) | TTFT: 7493.1 ms | Prefill: 7405.6 ms
+  ⚡ Cache Mode: Warm (KV Cache Reuse)
+    -> Median Tokens: 3391 (Cached: 3390) | TTFT: 110.5 ms | Prefill: 26.9 ms
+
+📦 Catalog Level: 40 tools
+  ⚡ Cache Mode: Cold (Prompt Prefill)
+    -> Median Tokens: 5356 (Cached: 0) | TTFT: 12637.6 ms | Prefill: 12540.2 ms
+  ⚡ Cache Mode: Warm (KV Cache Reuse)
+    -> Median Tokens: 5356 (Cached: 5355) | TTFT: 122.6 ms | Prefill: 29.5 ms
+
+📦 Catalog Level: 54 tools
+  ⚡ Cache Mode: Cold (Prompt Prefill)
+    -> Median Tokens: 7190 (Cached: 0) | TTFT: 17935.1 ms | Prefill: 17828.8 ms
+  ⚡ Cache Mode: Warm (KV Cache Reuse)
+    -> Median Tokens: 7190 (Cached: 7189) | TTFT: 133.2 ms | Prefill: 31.4 ms
+
+📦 Catalog Level: 100 tools
+  ⚡ Cache Mode: Cold (Prompt Prefill)
+    -> Median Tokens: 13216 (Cached: 0) | TTFT: 39151.0 ms | Prefill: 39012.9 ms
+  ⚡ Cache Mode: Warm (KV Cache Reuse)
+    -> Median Tokens: 13216 (Cached: 13215) | TTFT: 170.8 ms | Prefill: 39.9 ms
+
+✅ Prefill ablation completed successfully! Saved 528 trials to /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/prefill_ablation.jsonl
+✅ Generated consolidated LaTeX ablation table: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tables/table_prefill_ablation.tex
+✅ Generated prefill regression fit: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/prefill_regression_fit.json
+  - [7/9] Executando Benchmark do Framework Externo LangChain Core...
+================================================================================
+🚀 EXECUTANDO BATERIA DO FRAMEWORK EXTERNO LANGCHAIN CORE (GATE C1)
+   Apple Mac mini M4 | llama-server 127.0.0.1:8080
+================================================================================
+
+📊 --- Regime B (Warm Cache) (LANGCHAIN_WARM_20261115_0942) ---
+
+  ▶ Workload W1 [Warm]: 3 warmups + 15 evals...
+     [Trial 05/15] Task:  397.8 ms | Orch:  1.18 ms | RAM:  56.0 MB | Net Energy:  5.64 J
+     [Trial 10/15] Task:  398.5 ms | Orch:  1.20 ms | RAM:  55.9 MB | Net Energy:  6.32 J
+     [Trial 15/15] Task:  398.1 ms | Orch:  1.21 ms | RAM:  55.9 MB | Net Energy:  6.00 J
+
+  ▶ Workload W2 [Warm]: 3 warmups + 15 evals...
+     [Trial 05/15] Task: 2464.2 ms | Orch:  7.28 ms | RAM:  56.8 MB | Net Energy: 37.05 J
+     [Trial 10/15] Task: 2479.4 ms | Orch:  6.70 ms | RAM:  56.8 MB | Net Energy: 38.20 J
+     [Trial 15/15] Task: 2491.7 ms | Orch:  7.52 ms | RAM:  56.8 MB | Net Energy: 38.44 J
+
+  ▶ Workload W3 [Warm]: 3 warmups + 15 evals...
+     [Trial 05/15] Task:  858.5 ms | Orch:  3.79 ms | RAM:  58.0 MB | Net Energy: 12.93 J
+     [Trial 10/15] Task:  852.3 ms | Orch:  3.84 ms | RAM:  58.2 MB | Net Energy: 12.96 J
+     [Trial 15/15] Task:  846.0 ms | Orch:  3.77 ms | RAM:  58.0 MB | Net Energy: 13.46 J
+
+  ▶ Workload W4 [Warm]: 3 warmups + 15 evals...
+     [Trial 05/15] Task: 4376.8 ms | Orch:  2.77 ms | RAM:  55.9 MB | Net Energy: 68.01 J
+     [Trial 10/15] Task: 4395.6 ms | Orch:  2.85 ms | RAM:  56.2 MB | Net Energy: 64.70 J
+     [Trial 15/15] Task: 4423.5 ms | Orch:  2.87 ms | RAM:  55.9 MB | Net Energy: 62.72 J
+
+📊 --- Regime A (Cold Prefill) (LANGCHAIN_COLD_20261115_0945) ---
+
+  ▶ Workload W1 [Cold]: 3 warmups + 15 evals...
+     [Trial 05/15] Task: 5284.8 ms | Orch:  1.21 ms | RAM:  56.0 MB | Net Energy: 88.90 J
+     [Trial 10/15] Task: 5278.9 ms | Orch:  1.19 ms | RAM:  56.0 MB | Net Energy: 87.20 J
+     [Trial 15/15] Task: 5230.1 ms | Orch:  1.21 ms | RAM:  55.9 MB | Net Energy: 88.80 J
+
+  ▶ Workload W2 [Cold]: 3 warmups + 15 evals...
+     [Trial 05/15] Task: 11978.1 ms | Orch:  7.77 ms | RAM:  56.8 MB | Net Energy: 200.09 J
+     [Trial 10/15] Task: 11987.3 ms | Orch:  6.97 ms | RAM:  56.7 MB | Net Energy: 200.46 J
+     [Trial 15/15] Task: 11979.0 ms | Orch:  6.97 ms | RAM:  56.8 MB | Net Energy: 200.13 J
+
+  ▶ Workload W3 [Cold]: 3 warmups + 15 evals...
+     [Trial 05/15] Task: 5656.8 ms | Orch:  3.60 ms | RAM:  58.3 MB | Net Energy: 96.52 J
+     [Trial 10/15] Task: 5656.6 ms | Orch:  3.60 ms | RAM:  58.0 MB | Net Energy: 96.14 J
+     [Trial 15/15] Task: 5669.2 ms | Orch:  3.69 ms | RAM:  58.1 MB | Net Energy: 96.84 J
+
+  ▶ Workload W4 [Cold]: 3 warmups + 15 evals...
+     [Trial 05/15] Task: 52709.0 ms | Orch:  2.83 ms | RAM:  56.0 MB | Net Energy: 869.21 J
+     [Trial 10/15] Task: 52723.9 ms | Orch:  2.80 ms | RAM:  55.9 MB | Net Energy: 868.73 J
+     [Trial 15/15] Task: 52712.0 ms | Orch:  2.84 ms | RAM:  56.0 MB | Net Energy: 870.30 J
+
+💾 Salvos 144 ensaios em /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/data/external_framework_langchain_trials.jsonl
+✅ Salvo sumário executivo em: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/data/external_framework_langchain_summary.json e /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/external_framework_langchain_summary.json
+
+🏁 Bateria do Framework Externo LangChain concluída com 100% de sucesso!
+  - [8/9] Executando Ablação de Quantização Extrema (Q2_K vs Q3_K_M vs Q4_K_M)...
+================================================================================
+🔬 EXECUTANDO ABLAÇÃO DE QUANTIZAÇÃO EXTREMA (Q2_K vs. Q3_K_M vs. Q4_K_M)
+   Meta-Llama-3.2-3B-Instruct | Apple Mac mini M4 (Metal GPU 10-core)
+================================================================================
+
+▶ Avaliando Nível de Quantização: Q2_K (1.356 GB file)...
+     Generation: 50.99 tok/s | ITL_0: 19.61 ms | Active BW: 52.26 GB/s (43.6% M4 peak)
+
+▶ Avaliando Nível de Quantização: Q3_K_M (1.679 GB file)...
+     Generation: 40.14 tok/s | ITL_0: 24.91 ms | Active BW: 54.11 GB/s (45.1% M4 peak)
+
+▶ Avaliando Nível de Quantização: Q4_K_M (2.019 GB file)...
+     Generation: 45.76 tok/s | ITL_0: 21.86 ms | Active BW: 77.23 GB/s (64.4% M4 peak)
+
+💾 Salvo sumário em: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/data/quantization_scaling_ablation.json
+📊 Salva tabela LaTeX em: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tables/table_quantization_scaling.tex
+📈 Regressão: ITL_0 = 3.285 * S_active + 17.679 (R² = 0.1677)
+🏁 Gate R10 Quantization Scaling concluído com 100% de sucesso!
+  - [9/9] Executando Ablação de Transporte MCP Vivo (JSON-RPC 2.0)...
+================================================================================
+🔬 EXECUTANDO ABLAÇÃO DE TRANSPORTE MCP VIVO (JSON-RPC 2.0)
+   In-Process vs. MCP Stdio Pipe vs. MCP Local Loopback HTTP
+   Workload: W2 Warm Cache | Apple Mac mini M4 | llama-server 8080
+================================================================================
+
+▶ Runtime: Go Native (PicoClaw) (go_orchestrator)
+  ├─ Transport: In-Process Direct Dispatch (in_process_dispatch)...
+     -> Mediana IPC: 1.270 ms | Mediana Orch: 2.520 ms
+  ├─ Transport: MCP Stdio JSON-RPC 2.0 (Pipe) (mcp_stdio_server)...
+     -> Mediana IPC: 2.281 ms | Mediana Orch: 3.531 ms
+  ├─ Transport: MCP Local HTTP JSON-RPC 2.0 (Loopback) (mcp_http_sse_server)...
+     -> Mediana IPC: 3.974 ms | Mediana Orch: 5.224 ms
+
+▶ Runtime: Node.js V8 (OpenClaw) (node_orchestrator)
+  ├─ Transport: In-Process Direct Dispatch (in_process_dispatch)...
+     -> Mediana IPC: 2.632 ms | Mediana Orch: 3.012 ms
+  ├─ Transport: MCP Stdio JSON-RPC 2.0 (Pipe) (mcp_stdio_server)...
+     -> Mediana IPC: 2.176 ms | Mediana Orch: 2.556 ms
+  ├─ Transport: MCP Local HTTP JSON-RPC 2.0 (Loopback) (mcp_http_sse_server)...
+     -> Mediana IPC: 3.808 ms | Mediana Orch: 4.188 ms
+
+▶ Runtime: Python 3.12 Native (python_native)
+  ├─ Transport: In-Process Direct Dispatch (in_process_dispatch)...
+     -> Mediana IPC: 2.574 ms | Mediana Orch: 3.924 ms
+  ├─ Transport: MCP Stdio JSON-RPC 2.0 (Pipe) (mcp_stdio_server)...
+     -> Mediana IPC: 2.349 ms | Mediana Orch: 3.699 ms
+  ├─ Transport: MCP Local HTTP JSON-RPC 2.0 (Loopback) (mcp_http_sse_server)...
+     -> Mediana IPC: 3.699 ms | Mediana Orch: 5.049 ms
+
+💾 Salvo sumário em: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/data/mcp_live_transport_ablation.json
+📊 Salva tabela LaTeX em: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tables/table_mcp_transport_ablation.tex
+🏁 Gate R10 MCP Live Transport concluído com sucesso!
   - Empacotando dados brutos da Sessão 1...
-./reproduce_darwin_gold.sh: line 73: 50855 Killed: 9               tools/llama_cpp/llama-b11887/llama-server -m models/Llama-3.2-3B-Instruct-Q4_K_M.gguf -c 32768 -np 1 -ngl 99 -t 4 --port 8080 > /tmp/llama_server_stdout.log 2>&1
+./reproduce_darwin_gold.sh: line 98: 52521 Killed: 9               tools/llama_cpp/llama-b11887/llama-server -m models/Llama-3.2-3B-Instruct-Q4_K_M.gguf -c 32768 -np 1 -ngl 99 -t 4 --port 8080 > /tmp/llama_server_stdout.log 2>&1
 🧠 Limpando cache de RAM do macOS e forçando quiescência...
 ⏳ Aguardando 15s para estabilização térmica do Apple M4...
-🚀 INICIANDO SESSÃO 2 (RÉPLICA INTER-SESSION)...
+🚀 INICIANDO SESSÃO 2 (RÉPLICA INTER-SESSION 100% EMPÍRICA)...
   - Disparando llama-server para Sessão 2 em 127.0.0.1:8080 (Metal GPU offload)...
     Aguardando prontidão do endpoint /health...
-    ✔ llama-server ativo e pronto para inferência (PID: 51561)!
-  - Executando Campanha Darwin - Sessão 2 (Inter-Session Replication)...
+    ✔ llama-server ativo e pronto para inferência (PID: 54810)!
+  - Executando Campanha Darwin - Sessão 2 (Inter-Session Replication, n=30)...
 ⚡ Measuring 3.0s quiescent idle baseline on Apple Silicon M4...
-   Idle package power: 658.72 mW. Starting single continuous SMC powermetrics daemon...
-🚀 Executing 16 physical blocks (n=30 evals + 3 primings per block)...
+   Idle package power: 443.13 mW. Starting single continuous SMC powermetrics daemon...
+🚀 Executing 20 physical blocks (n=30 evals + 3 primings per block)...
 
-📦 [Session 2 Block 01/16] bun_minimal on W1 (3 primings + 30 evaluations)
-   [Rep 10/30] bun_minimal      W1: Task=1009.2ms, Orch= 3.84ms, PhysRAM=  7.3MB, NetE=12.90J
-   [Rep 20/30] bun_minimal      W1: Task=1011.3ms, Orch= 3.57ms, PhysRAM=  7.3MB, NetE=13.23J
-   [Rep 30/30] bun_minimal      W1: Task=1028.5ms, Orch= 3.77ms, PhysRAM=  7.3MB, NetE=13.54J
+📦 [Session 2 Block 01/20] bun_minimal on W2 (3 primings + 30 evaluations)
+   [Rep 10/30] bun_minimal      W2: Task= 725.3ms, Orch= 5.33ms, PhysRAM=  7.8MB, NetE=8.66J
+   [Rep 20/30] bun_minimal      W2: Task= 742.3ms, Orch= 6.28ms, PhysRAM=  7.8MB, NetE=8.77J
+   [Rep 30/30] bun_minimal      W2: Task= 740.7ms, Orch= 5.91ms, PhysRAM=  7.9MB, NetE=8.89J
 
-📦 [Session 2 Block 02/16] python_native on W2 (3 primings + 30 evaluations)
-   [Rep 10/30] python_native    W2: Task= 741.5ms, Orch=10.58ms, PhysRAM= 24.2MB, NetE=10.01J
-   [Rep 20/30] python_native    W2: Task= 783.0ms, Orch=10.49ms, PhysRAM= 24.0MB, NetE=10.66J
-   [Rep 30/30] python_native    W2: Task= 767.7ms, Orch=10.89ms, PhysRAM= 23.9MB, NetE=10.37J
+📦 [Session 2 Block 02/20] picoclaw on W1 (3 primings + 30 evaluations)
+   [Rep 10/30] picoclaw         W1: Task= 990.7ms, Orch= 3.63ms, PhysRAM=  4.4MB, NetE=12.96J
+   [Rep 20/30] picoclaw         W1: Task=1000.1ms, Orch= 4.12ms, PhysRAM=  4.1MB, NetE=13.30J
+   [Rep 30/30] picoclaw         W1: Task=1015.1ms, Orch= 3.96ms, PhysRAM=  4.1MB, NetE=13.50J
 
-📦 [Session 2 Block 03/16] bun_minimal on W3 (3 primings + 30 evaluations)
-   [Rep 10/30] bun_minimal      W3: Task= 762.1ms, Orch=17.96ms, PhysRAM= 37.1MB, NetE=9.77J
-   [Rep 20/30] bun_minimal      W3: Task= 747.6ms, Orch=17.80ms, PhysRAM= 37.4MB, NetE=9.63J
-   [Rep 30/30] bun_minimal      W3: Task= 760.8ms, Orch=19.85ms, PhysRAM= 37.4MB, NetE=9.38J
+📦 [Session 2 Block 03/20] neural_baseline on W3 (3 primings + 30 evaluations)
+   [Rep 10/30] neural_baseline  W3: Task= 723.8ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=8.76J
+   [Rep 20/30] neural_baseline  W3: Task= 722.8ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=9.24J
+   [Rep 30/30] neural_baseline  W3: Task= 713.8ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=9.28J
 
-📦 [Session 2 Block 04/16] picoclaw on W1 (3 primings + 30 evaluations)
-   [Rep 10/30] picoclaw         W1: Task=1024.3ms, Orch= 3.51ms, PhysRAM=  4.3MB, NetE=13.70J
-   [Rep 20/30] picoclaw         W1: Task=1031.5ms, Orch= 3.67ms, PhysRAM=  4.3MB, NetE=13.50J
-   [Rep 30/30] picoclaw         W1: Task=1042.7ms, Orch= 3.67ms, PhysRAM=  4.1MB, NetE=12.99J
+📦 [Session 2 Block 04/20] openclaw_minimal on W4 (3 primings + 30 evaluations)
+   [Rep 10/30] openclaw_minimal W4: Task=8328.2ms, Orch=75.31ms, PhysRAM= 41.7MB, NetE=107.19J
+   [Rep 20/30] openclaw_minimal W4: Task=8316.9ms, Orch=74.44ms, PhysRAM= 41.8MB, NetE=106.50J
+   [Rep 30/30] openclaw_minimal W4: Task=8297.8ms, Orch=73.77ms, PhysRAM= 42.1MB, NetE=106.16J
 
-📦 [Session 2 Block 05/16] bun_minimal on W4 (3 primings + 30 evaluations)
-   [Rep 10/30] bun_minimal      W4: Task=8408.2ms, Orch=45.00ms, PhysRAM=  9.4MB, NetE=107.65J
-   [Rep 20/30] bun_minimal      W4: Task=8411.5ms, Orch=45.84ms, PhysRAM=  9.3MB, NetE=107.82J
-   [Rep 30/30] bun_minimal      W4: Task=8376.0ms, Orch=45.27ms, PhysRAM=  9.6MB, NetE=107.16J
+📦 [Session 2 Block 05/20] picoclaw on W4 (3 primings + 30 evaluations)
+   [Rep 10/30] picoclaw         W4: Task=8241.8ms, Orch=60.65ms, PhysRAM=  9.6MB, NetE=104.33J
+   [Rep 20/30] picoclaw         W4: Task=8243.2ms, Orch=59.88ms, PhysRAM=  9.1MB, NetE=105.54J
+   [Rep 30/30] picoclaw         W4: Task=8243.2ms, Orch=62.97ms, PhysRAM=  9.3MB, NetE=104.81J
 
-📦 [Session 2 Block 06/16] picoclaw on W2 (3 primings + 30 evaluations)
-   [Rep 10/30] picoclaw         W2: Task= 750.3ms, Orch= 4.99ms, PhysRAM=  5.0MB, NetE=9.24J
-   [Rep 20/30] picoclaw         W2: Task= 764.9ms, Orch= 6.32ms, PhysRAM=  4.8MB, NetE=10.21J
-   [Rep 30/30] picoclaw         W2: Task= 760.6ms, Orch= 5.59ms, PhysRAM=  5.0MB, NetE=9.96J
+📦 [Session 2 Block 06/20] bun_minimal on W3 (3 primings + 30 evaluations)
+   [Rep 10/30] bun_minimal      W3: Task= 746.5ms, Orch=19.56ms, PhysRAM= 37.3MB, NetE=8.83J
+   [Rep 20/30] bun_minimal      W3: Task= 740.4ms, Orch=18.55ms, PhysRAM= 37.4MB, NetE=8.77J
+   [Rep 30/30] bun_minimal      W3: Task= 737.1ms, Orch=18.40ms, PhysRAM= 37.4MB, NetE=8.98J
 
-📦 [Session 2 Block 07/16] neural_baseline on W2 (3 primings + 30 evaluations)
-   [Rep 10/30] neural_baseline  W2: Task= 759.4ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=10.07J
-   [Rep 20/30] neural_baseline  W2: Task= 756.0ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=10.11J
-   [Rep 30/30] neural_baseline  W2: Task= 742.7ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=9.18J
+📦 [Session 2 Block 07/20] picoclaw on W3 (3 primings + 30 evaluations)
+   [Rep 10/30] picoclaw         W3: Task= 764.7ms, Orch=38.83ms, PhysRAM= 40.8MB, NetE=9.39J
+   [Rep 20/30] picoclaw         W3: Task= 759.0ms, Orch=37.42ms, PhysRAM= 40.5MB, NetE=9.03J
+   [Rep 30/30] picoclaw         W3: Task= 765.3ms, Orch=37.32ms, PhysRAM= 46.9MB, NetE=9.55J
 
-📦 [Session 2 Block 08/16] openclaw_minimal on W1 (3 primings + 30 evaluations)
-   [Rep 10/30] openclaw_minimal W1: Task=1040.8ms, Orch=18.68ms, PhysRAM= 37.1MB, NetE=13.19J
-   [Rep 20/30] openclaw_minimal W1: Task=1036.4ms, Orch=19.39ms, PhysRAM= 37.4MB, NetE=13.72J
-   [Rep 30/30] openclaw_minimal W1: Task=1042.3ms, Orch=18.77ms, PhysRAM= 37.4MB, NetE=13.44J
+📦 [Session 2 Block 08/20] openclaw_minimal on W3 (3 primings + 30 evaluations)
+   [Rep 10/30] openclaw_minimal W3: Task= 763.0ms, Orch=32.92ms, PhysRAM= 68.4MB, NetE=9.68J
+   [Rep 20/30] openclaw_minimal W3: Task= 750.5ms, Orch=33.75ms, PhysRAM= 70.7MB, NetE=9.80J
+   [Rep 30/30] openclaw_minimal W3: Task= 764.5ms, Orch=34.02ms, PhysRAM= 69.1MB, NetE=9.66J
 
-📦 [Session 2 Block 09/16] openclaw_minimal on W3 (3 primings + 30 evaluations)
-   [Rep 10/30] openclaw_minimal W3: Task= 775.6ms, Orch=33.13ms, PhysRAM= 68.7MB, NetE=10.56J
-   [Rep 20/30] openclaw_minimal W3: Task= 770.4ms, Orch=33.11ms, PhysRAM= 69.7MB, NetE=9.69J
-   [Rep 30/30] openclaw_minimal W3: Task= 770.4ms, Orch=32.52ms, PhysRAM= 65.6MB, NetE=9.66J
+📦 [Session 2 Block 09/20] neural_baseline on W2 (3 primings + 30 evaluations)
+   [Rep 10/30] neural_baseline  W2: Task= 740.8ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=9.16J
+   [Rep 20/30] neural_baseline  W2: Task= 744.5ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=9.30J
+   [Rep 30/30] neural_baseline  W2: Task= 743.8ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=9.39J
 
-📦 [Session 2 Block 10/16] picoclaw on W3 (3 primings + 30 evaluations)
-   [Rep 10/30] picoclaw         W3: Task= 777.1ms, Orch=36.06ms, PhysRAM= 40.7MB, NetE=9.79J
-   [Rep 20/30] picoclaw         W3: Task= 762.7ms, Orch=37.20ms, PhysRAM= 40.5MB, NetE=9.71J
-   [Rep 30/30] picoclaw         W3: Task= 779.0ms, Orch=35.90ms, PhysRAM= 46.7MB, NetE=9.97J
+📦 [Session 2 Block 10/20] python_native on W4 (3 primings + 30 evaluations)
+   [Rep 10/30] python_native    W4: Task=8299.2ms, Orch=59.69ms, PhysRAM= 24.2MB, NetE=106.69J
+   [Rep 20/30] python_native    W4: Task=8300.9ms, Orch=61.04ms, PhysRAM= 23.9MB, NetE=106.96J
+   [Rep 30/30] python_native    W4: Task=8262.9ms, Orch=60.76ms, PhysRAM= 24.1MB, NetE=107.12J
 
-📦 [Session 2 Block 11/16] neural_baseline on W3 (3 primings + 30 evaluations)
-   [Rep 10/30] neural_baseline  W3: Task= 724.3ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=8.80J
-   [Rep 20/30] neural_baseline  W3: Task= 738.6ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=8.96J
-   [Rep 30/30] neural_baseline  W3: Task= 740.8ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=9.18J
+📦 [Session 2 Block 11/20] bun_minimal on W1 (3 primings + 30 evaluations)
+   [Rep 10/30] bun_minimal      W1: Task=1016.0ms, Orch= 3.48ms, PhysRAM=  7.3MB, NetE=12.95J
+   [Rep 20/30] bun_minimal      W1: Task=1020.7ms, Orch= 4.13ms, PhysRAM=  7.3MB, NetE=12.76J
+   [Rep 30/30] bun_minimal      W1: Task=1013.9ms, Orch= 4.28ms, PhysRAM=  7.3MB, NetE=12.32J
 
-📦 [Session 2 Block 12/16] python_native on W1 (3 primings + 30 evaluations)
-   [Rep 10/30] python_native    W1: Task=1039.8ms, Orch= 9.21ms, PhysRAM= 24.2MB, NetE=14.21J
-   [Rep 20/30] python_native    W1: Task=1030.2ms, Orch= 9.54ms, PhysRAM= 23.9MB, NetE=14.11J
-   [Rep 30/30] python_native    W1: Task=1025.1ms, Orch=10.00ms, PhysRAM= 23.9MB, NetE=13.36J
+📦 [Session 2 Block 12/20] openclaw_minimal on W1 (3 primings + 30 evaluations)
+   [Rep 10/30] openclaw_minimal W1: Task=1022.3ms, Orch=19.73ms, PhysRAM= 37.3MB, NetE=13.49J
+   [Rep 20/30] openclaw_minimal W1: Task=1021.1ms, Orch=19.62ms, PhysRAM= 37.4MB, NetE=12.97J
+   [Rep 30/30] openclaw_minimal W1: Task=1024.3ms, Orch=18.72ms, PhysRAM= 37.4MB, NetE=13.74J
 
-📦 [Session 2 Block 13/16] bun_minimal on W2 (3 primings + 30 evaluations)
-   [Rep 10/30] bun_minimal      W2: Task= 741.7ms, Orch= 5.10ms, PhysRAM=  7.8MB, NetE=9.08J
-   [Rep 20/30] bun_minimal      W2: Task= 764.4ms, Orch= 5.41ms, PhysRAM=  7.8MB, NetE=9.81J
-   [Rep 30/30] bun_minimal      W2: Task= 756.1ms, Orch= 5.04ms, PhysRAM=  7.9MB, NetE=9.13J
+📦 [Session 2 Block 13/20] neural_baseline on W4 (3 primings + 30 evaluations)
+   [Rep 10/30] neural_baseline  W4: Task=8208.5ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=104.41J
+   [Rep 20/30] neural_baseline  W4: Task=8220.0ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=104.00J
+   [Rep 30/30] neural_baseline  W4: Task=8230.1ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=104.55J
 
-📦 [Session 2 Block 14/16] neural_baseline on W1 (3 primings + 30 evaluations)
-   [Rep 10/30] neural_baseline  W1: Task=1034.3ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=13.54J
-   [Rep 20/30] neural_baseline  W1: Task=1023.6ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=12.74J
-   [Rep 30/30] neural_baseline  W1: Task=1016.6ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=12.28J
+📦 [Session 2 Block 14/20] python_native on W1 (3 primings + 30 evaluations)
+   [Rep 10/30] python_native    W1: Task=1009.2ms, Orch= 9.82ms, PhysRAM= 24.1MB, NetE=13.38J
+   [Rep 20/30] python_native    W1: Task=1006.5ms, Orch= 9.62ms, PhysRAM= 24.0MB, NetE=12.96J
+   [Rep 30/30] python_native    W1: Task=1011.7ms, Orch= 9.65ms, PhysRAM= 24.0MB, NetE=13.40J
 
-📦 [Session 2 Block 15/16] openclaw_minimal on W2 (3 primings + 30 evaluations)
-   [Rep 10/30] openclaw_minimal W2: Task= 773.9ms, Orch=20.77ms, PhysRAM= 37.6MB, NetE=9.59J
-   [Rep 20/30] openclaw_minimal W2: Task= 773.3ms, Orch=19.91ms, PhysRAM= 37.6MB, NetE=9.81J
-   [Rep 30/30] openclaw_minimal W2: Task= 783.7ms, Orch=20.07ms, PhysRAM= 37.6MB, NetE=9.82J
+📦 [Session 2 Block 15/20] neural_baseline on W1 (3 primings + 30 evaluations)
+   [Rep 10/30] neural_baseline  W1: Task=1017.5ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=11.74J
+   [Rep 20/30] neural_baseline  W1: Task=1002.0ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=12.13J
+   [Rep 30/30] neural_baseline  W1: Task=1001.9ms, Orch= 0.00ms, PhysRAM=  0.0MB, NetE=11.71J
 
-📦 [Session 2 Block 16/16] python_native on W3 (3 primings + 30 evaluations)
-   [Rep 10/30] python_native    W3: Task= 741.1ms, Orch=18.90ms, PhysRAM= 56.2MB, NetE=9.37J
-   [Rep 20/30] python_native    W3: Task= 762.0ms, Orch=19.17ms, PhysRAM= 56.0MB, NetE=9.70J
-   [Rep 30/30] python_native    W3: Task= 758.7ms, Orch=18.70ms, PhysRAM= 55.9MB, NetE=9.70J
+📦 [Session 2 Block 16/20] python_native on W2 (3 primings + 30 evaluations)
+   [Rep 10/30] python_native    W2: Task= 742.1ms, Orch=10.74ms, PhysRAM= 24.0MB, NetE=9.91J
+   [Rep 20/30] python_native    W2: Task= 747.9ms, Orch=10.87ms, PhysRAM= 24.1MB, NetE=10.33J
+   [Rep 30/30] python_native    W2: Task= 756.1ms, Orch=10.53ms, PhysRAM= 24.0MB, NetE=9.70J
+
+📦 [Session 2 Block 17/20] picoclaw on W2 (3 primings + 30 evaluations)
+   [Rep 10/30] picoclaw         W2: Task= 734.0ms, Orch= 6.09ms, PhysRAM=  5.0MB, NetE=9.11J
+   [Rep 20/30] picoclaw         W2: Task= 748.8ms, Orch= 5.71ms, PhysRAM=  4.9MB, NetE=9.11J
+   [Rep 30/30] picoclaw         W2: Task= 746.7ms, Orch= 5.44ms, PhysRAM=  4.9MB, NetE=9.12J
+
+📦 [Session 2 Block 18/20] openclaw_minimal on W2 (3 primings + 30 evaluations)
+   [Rep 10/30] openclaw_minimal W2: Task= 764.5ms, Orch=20.38ms, PhysRAM= 37.7MB, NetE=9.48J
+   [Rep 20/30] openclaw_minimal W2: Task= 758.0ms, Orch=20.71ms, PhysRAM= 37.6MB, NetE=9.46J
+   [Rep 30/30] openclaw_minimal W2: Task= 764.0ms, Orch=20.84ms, PhysRAM= 37.7MB, NetE=9.73J
+
+📦 [Session 2 Block 19/20] bun_minimal on W4 (3 primings + 30 evaluations)
+   [Rep 10/30] bun_minimal      W4: Task=8260.0ms, Orch=46.95ms, PhysRAM=  9.4MB, NetE=105.23J
+   [Rep 20/30] bun_minimal      W4: Task=8272.0ms, Orch=48.60ms, PhysRAM=  9.4MB, NetE=104.93J
+   [Rep 30/30] bun_minimal      W4: Task=8259.9ms, Orch=46.37ms, PhysRAM=  9.4MB, NetE=105.09J
+
+📦 [Session 2 Block 20/20] python_native on W3 (3 primings + 30 evaluations)
+   [Rep 10/30] python_native    W3: Task= 740.7ms, Orch=18.45ms, PhysRAM= 56.1MB, NetE=9.72J
+   [Rep 20/30] python_native    W3: Task= 733.4ms, Orch=18.25ms, PhysRAM= 56.0MB, NetE=9.39J
+   [Rep 30/30] python_native    W3: Task= 747.5ms, Orch=18.54ms, PhysRAM= 56.0MB, NetE=9.84J
 
 💾 Wrote 660 Session 2 records to /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/inter_session_trials.jsonl
 ✅ Generated inter-session replication results: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/inter_session_replication.json
-   Overall Mean Inter-Session Relative Diff: 0.61% | Pooled CV: 0.43%
+   Overall Mean Inter-Session Relative Diff: 0.44% | Pooled CV: 0.31%
   - Empacotando dados brutos da Sessão 2...
-./reproduce_darwin_gold.sh: line 107: 51561 Killed: 9               tools/llama_cpp/llama-b11887/llama-server -m models/Llama-3.2-3B-Instruct-Q4_K_M.gguf -c 32768 -np 1 -ngl 99 -t 4 --port 8080 > /tmp/llama_server_stdout.log 2>&1
+./reproduce_darwin_gold.sh: line 132: 54810 Killed: 9               tools/llama_cpp/llama-b11887/llama-server -m models/Llama-3.2-3B-Instruct-Q4_K_M.gguf -c 32768 -np 1 -ngl 99 -t 4 --port 8080 > /tmp/llama_server_stdout.log 2>&1
 ✅ REPRODUÇÃO EMPÍRICA CONCLUÍDA! Analisando e validando manifestos...
   - Consolidando tabelas e análises estatísticas LaTeX...
 Loaded 600 evaluated trial records (filtered 60 warmups).
@@ -358,13 +1339,18 @@ Loaded 600 evaluated trial records (filtered 60 warmups).
 ✅ Generated CSV table: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tables/metrics_summary.csv
 ✅ Generated LaTeX table: /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tables/table_journal_ablation.tex
   - Sincronizando e validando integridade criptográfica do manifesto Darwin...
-✅ [SUCCESS] Updated 226 tracked file signatures in /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/data/manifest_sha256.json
+⚠️  [SKIP] File missing on disk, omitting from updated manifest: results/publication_campaign/cross_hardware_and_independent_validation.json
+⚠️  [SKIP] File missing on disk, omitting from updated manifest: results/publication_campaign/hyperfine_agent_init.json
+⚠️  [SKIP] File missing on disk, omitting from updated manifest: results/publication_campaign/hyperfine_cold_start.json
+⚠️  [SKIP] File missing on disk, omitting from updated manifest: results/publication_campaign/hyperfine_worker_version.json
+⚠️  [SKIP] File missing on disk, omitting from updated manifest: results/publication_campaign/independent_validation_report.json
+✅ [SUCCESS] Updated 221 tracked file signatures in /Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/data/manifest_sha256.json
 ========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (226 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (221 files)
 ========================================================================
-✅ [SUCCESS] All 226/226 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 221/221 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 
-🏁 Tudo salvo e validado.
+🏁 Tudo salvo e validado com sucesso no Apple Mac Mini M4.

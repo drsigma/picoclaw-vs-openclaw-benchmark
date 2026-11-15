@@ -23,6 +23,9 @@ pkill -9 -f picoclaw_orch 2>/dev/null || true
 pkill -9 -f openclaw_orch 2>/dev/null || true
 sleep 2
 
+echo "🧹 Limpando memória unificada e caches residuais..."
+purge
+
 echo "🐍 Configurando ambiente Python limpo..."
 if [ ! -d ".venv_repro_darwin" ]; then
     python3 -m venv .venv_repro_darwin
@@ -31,8 +34,9 @@ source .venv_repro_darwin/bin/activate
 pip install --upgrade pip -q
 pip install -r requirements.txt -q
 
-echo "🚀 INICIANDO SESSÃO 1 (COLETA FÍSICA NO METAL/SMC - DEMORADO)..."
+echo "🚀 INICIANDO SESSÃO 1 (COLETA FÍSICA NO METAL/SMC - 100% EMPÍRICO)..."
 mkdir -p reproducibility/clean_run_darwin_session_1
+mkdir -p results/publication_campaign/tables
 
 if [ ! -f "benchmark/picoclaw_orch" ]; then
     echo "  - Compilando binário nativo Darwin ARM64 do PicoClaw (Go)..."
@@ -56,11 +60,32 @@ for i in {1..30}; do
     sleep 1
 done
 
-echo "  - Executando Campanha Darwin - Sessão 1 (Warm Cache Campaign)..."
+echo "  - [1/9] Executando Campanha Primária de Benchmark Unificado (Cold Prefill, n=30)..."
+python3 benchmark/run_unified_benchmark.py --reps 30 --output-dir results/publication_campaign
+
+echo "  - [2/9] Executando Campanha Darwin (Warm Cache Campaign, n=30)..."
 python3 scripts/run_warm_cache_campaign.py
 
-echo "  - Executando Ablação de Atribuição de Energia e Largura de Banda UMA..."
+echo "  - [3/9] Executando Ablação de Atribuição de Energia e Largura de Banda UMA..."
 python3 scripts/run_uma_energy_and_bandwidth_attribution.py
+
+echo "  - [4/9] Executando Ablação de KV-Cache Thrashing vs Slot Isolation..."
+python3 scripts/run_kv_cache_thrashing_ablation.py
+
+echo "  - [5/9] Executando Experimento de Mitigação Tool-RAG..."
+python3 scripts/run_tool_rag_mitigation_experiment.py
+
+echo "  - [6/9] Executando Ablação Controlada de Prefill e Escalonamento..."
+python3 scripts/run_prefill_ablation.py
+
+echo "  - [7/9] Executando Benchmark do Framework Externo LangChain Core..."
+python3 scripts/run_external_framework_langchain_benchmark.py
+
+echo "  - [8/9] Executando Ablação de Quantização Extrema (Q2_K vs Q3_K_M vs Q4_K_M)..."
+python3 scripts/run_quantization_scaling_ablation.py
+
+echo "  - [9/9] Executando Ablação de Transporte MCP Vivo (JSON-RPC 2.0)..."
+python3 scripts/run_mcp_live_transport_ablation.py
 
 echo "  - Empacotando dados brutos da Sessão 1..."
 mkdir -p reproducibility/clean_run_darwin_session_1/results
@@ -77,7 +102,7 @@ purge
 echo "⏳ Aguardando 15s para estabilização térmica do Apple M4..."
 sleep 15
 
-echo "🚀 INICIANDO SESSÃO 2 (RÉPLICA INTER-SESSION)..."
+echo "🚀 INICIANDO SESSÃO 2 (RÉPLICA INTER-SESSION 100% EMPÍRICA)..."
 mkdir -p reproducibility/clean_run_darwin_session_2
 
 echo "  - Disparando llama-server para Sessão 2 em 127.0.0.1:8080 (Metal GPU offload)..."
@@ -93,7 +118,7 @@ for i in {1..30}; do
     sleep 1
 done
 
-echo "  - Executando Campanha Darwin - Sessão 2 (Inter-Session Replication)..."
+echo "  - Executando Campanha Darwin - Sessão 2 (Inter-Session Replication, n=30)..."
 python3 scripts/run_inter_session_replication.py
 
 echo "  - Empacotando dados brutos da Sessão 2..."
@@ -114,4 +139,4 @@ echo "  - Sincronizando e validando integridade criptográfica do manifesto Darw
 python3 scripts/verify_manifest.py --update
 python3 scripts/verify_manifest.py
 
-echo "🏁 Tudo salvo e validado."
+echo "🏁 Tudo salvo e validado com sucesso no Apple Mac Mini M4."
