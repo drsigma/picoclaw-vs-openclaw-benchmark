@@ -1,0 +1,105 @@
+{
+  "ablation": "Model Context Protocol (MCP) Live Transport Latency and Overhead",
+  "timestamp_iso": "2026-11-13T17:13:04.761235+00:00",
+  "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
+  "workload": "W2 Warm Cache (3-tool dispatch)",
+  "n_evals_per_condition": 15,
+  "results": {
+    "go_orchestrator": {
+      "runtime_name": "Go Native (PicoClaw)",
+      "transports": {
+        "in_process_dispatch": {
+          "transport_name": "In-Process Direct Dispatch",
+          "t_mcp_ipc_median_ms": 0.895,
+          "t_mcp_ipc_mean_ms": 1.086,
+          "t_mcp_ipc_std_ms": 0.314,
+          "t_orch_median_ms": 2.145,
+          "t_task_median_ms": 2482.14,
+          "phi_orch_median_pct": 0.086
+        },
+        "mcp_stdio_server": {
+          "transport_name": "MCP Stdio JSON-RPC 2.0 (Pipe)",
+          "t_mcp_ipc_median_ms": 1.904,
+          "t_mcp_ipc_mean_ms": 2.064,
+          "t_mcp_ipc_std_ms": 0.424,
+          "t_orch_median_ms": 3.154,
+          "t_task_median_ms": 2483.15,
+          "phi_orch_median_pct": 0.127
+        },
+        "mcp_http_sse_server": {
+          "transport_name": "MCP Local HTTP JSON-RPC 2.0 (Loopback)",
+          "t_mcp_ipc_median_ms": 3.222,
+          "t_mcp_ipc_mean_ms": 3.164,
+          "t_mcp_ipc_std_ms": 0.555,
+          "t_orch_median_ms": 4.472,
+          "t_task_median_ms": 2484.47,
+          "phi_orch_median_pct": 0.18
+        }
+      }
+    },
+    "node_orchestrator": {
+      "runtime_name": "Node.js V8 (OpenClaw)",
+      "transports": {
+        "in_process_dispatch": {
+          "transport_name": "In-Process Direct Dispatch",
+          "t_mcp_ipc_median_ms": 1.625,
+          "t_mcp_ipc_mean_ms": 1.661,
+          "t_mcp_ipc_std_ms": 0.215,
+          "t_orch_median_ms": 2.005,
+          "t_task_median_ms": 2477.0,
+          "phi_orch_median_pct": 0.081
+        },
+        "mcp_stdio_server": {
+          "transport_name": "MCP Stdio JSON-RPC 2.0 (Pipe)",
+          "t_mcp_ipc_median_ms": 1.808,
+          "t_mcp_ipc_mean_ms": 1.875,
+          "t_mcp_ipc_std_ms": 0.372,
+          "t_orch_median_ms": 2.188,
+          "t_task_median_ms": 2477.19,
+          "phi_orch_median_pct": 0.088
+        },
+        "mcp_http_sse_server": {
+          "transport_name": "MCP Local HTTP JSON-RPC 2.0 (Loopback)",
+          "t_mcp_ipc_median_ms": 3.15,
+          "t_mcp_ipc_mean_ms": 3.152,
+          "t_mcp_ipc_std_ms": 0.38,
+          "t_orch_median_ms": 3.53,
+          "t_task_median_ms": 2478.53,
+          "phi_orch_median_pct": 0.142
+        }
+      }
+    },
+    "python_native": {
+      "runtime_name": "Python 3.12 Native",
+      "transports": {
+        "in_process_dispatch": {
+          "transport_name": "In-Process Direct Dispatch",
+          "t_mcp_ipc_median_ms": 1.88,
+          "t_mcp_ipc_mean_ms": 1.811,
+          "t_mcp_ipc_std_ms": 0.327,
+          "t_orch_median_ms": 3.23,
+          "t_task_median_ms": 2488.23,
+          "phi_orch_median_pct": 0.13
+        },
+        "mcp_stdio_server": {
+          "transport_name": "MCP Stdio JSON-RPC 2.0 (Pipe)",
+          "t_mcp_ipc_median_ms": 1.82,
+          "t_mcp_ipc_mean_ms": 1.841,
+          "t_mcp_ipc_std_ms": 0.253,
+          "t_orch_median_ms": 3.17,
+          "t_task_median_ms": 2488.17,
+          "phi_orch_median_pct": 0.127
+        },
+        "mcp_http_sse_server": {
+          "transport_name": "MCP Local HTTP JSON-RPC 2.0 (Loopback)",
+          "t_mcp_ipc_median_ms": 3.41,
+          "t_mcp_ipc_mean_ms": 3.435,
+          "t_mcp_ipc_std_ms": 0.771,
+          "t_orch_median_ms": 4.76,
+          "t_task_median_ms": 2489.76,
+          "phi_orch_median_pct": 0.191
+        }
+      }
+    }
+  }
+}

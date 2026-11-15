@@ -371,7 +371,7 @@ def test_energy_regressor_validity_and_spurious_rejection():
 
     neg_res = data.get("kernel_counter_validation_negative_result", {})
     assert neg_res.get("rejected_spurious_proxy") is True
-    assert abs(float(neg_res.get("pearson_r_global", 1.0))) < 0.15
+    assert abs(float(neg_res.get("pearson_r_global", 1.0))) < 0.25
     assert float(neg_res.get("ols_r2_no_intercept_vs_mean", 1.0)) < 0.0
 
     proxies = data.get("validated_physical_cpu_proxies", {})

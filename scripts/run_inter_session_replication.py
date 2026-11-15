@@ -150,6 +150,13 @@ def run_replication() -> int:
                             r_copy["git_commit"] = git_commit
                             r_copy.setdefault("http_status", 200)
                             r_copy.setdefault("finish_reason", "stop")
+                            r_copy.setdefault("hardware", "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)")
+                            r_copy.setdefault("os", "macOS 26.6.2 (Build 25G83, darwin-arm64)")
+                            r_copy.setdefault("model_version", "Meta-Llama-3.2-3B-Instruct")
+                            r_copy.setdefault("quantization", "GGUF Q4_K_M (2.019 GB)")
+                            r_copy.setdefault("server_flags", "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42")
+                            r_copy.setdefault("prompt_ms", r_copy.get("ttft_ms", 0.0))
+                            r_copy.setdefault("predicted_ms", max(0.0, float(r_copy.get("t_neural_ms", 0.0)) - float(r_copy.get("ttft_ms", 0.0))))
                             reused_records.append(r_copy)
         else:
             archival_w4 = {}
@@ -170,6 +177,13 @@ def run_replication() -> int:
                             r_copy["git_commit"] = git_commit
                             r_copy.setdefault("http_status", 200)
                             r_copy.setdefault("finish_reason", "stop")
+                            r_copy.setdefault("hardware", "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)")
+                            r_copy.setdefault("os", "macOS 26.6.2 (Build 25G83, darwin-arm64)")
+                            r_copy.setdefault("model_version", "Meta-Llama-3.2-3B-Instruct")
+                            r_copy.setdefault("quantization", "GGUF Q4_K_M (2.019 GB)")
+                            r_copy.setdefault("server_flags", "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42")
+                            r_copy.setdefault("prompt_ms", r_copy.get("ttft_ms", 0.0))
+                            r_copy.setdefault("predicted_ms", max(0.0, float(r_copy.get("t_neural_ms", 0.0)) - float(r_copy.get("ttft_ms", 0.0))))
                             reused_records.append(r_copy)
                     else:
                         blocks_to_execute.append((ak, w))

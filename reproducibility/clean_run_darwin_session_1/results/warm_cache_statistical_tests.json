@@ -1,0 +1,226 @@
+{
+  "picoclaw_vs_openclaw_minimal_W1": {
+    "workload": "W1",
+    "reference": "picoclaw",
+    "comparison": "openclaw_minimal",
+    "mann_whitney_u": 38.0,
+    "raw_p_value": 1.1737354361857567e-09,
+    "cliffs_delta": 0.9156,
+    "vargha_delaney_a12": 0.9578,
+    "bootstrap_ci_95": [
+      1047.4086,
+      1057.52
+    ],
+    "holm_bonferroni_p_value": 0.0
+  },
+  "picoclaw_vs_openclaw_full_W1": {
+    "workload": "W1",
+    "reference": "picoclaw",
+    "comparison": "openclaw_full",
+    "mann_whitney_u": 0.0,
+    "raw_p_value": 3.0198593591621564e-11,
+    "cliffs_delta": 1.0,
+    "vargha_delaney_a12": 1.0,
+    "bootstrap_ci_95": [
+      1324.435,
+      1333.95
+    ],
+    "holm_bonferroni_p_value": 0.0
+  },
+  "picoclaw_vs_python_native_W1": {
+    "workload": "W1",
+    "reference": "picoclaw",
+    "comparison": "python_native",
+    "mann_whitney_u": 323.0,
+    "raw_p_value": 0.06144830445380234,
+    "cliffs_delta": 0.2822,
+    "vargha_delaney_a12": 0.6411,
+    "bootstrap_ci_95": [
+      1028.495,
+      1038.01
+    ],
+    "holm_bonferroni_p_value": 0.245793
+  },
+  "picoclaw_vs_neural_baseline_W1": {
+    "workload": "W1",
+    "reference": "picoclaw",
+    "comparison": "neural_baseline",
+    "mann_whitney_u": 543.0,
+    "raw_p_value": 0.17145004745971015,
+    "cliffs_delta": -0.2067,
+    "vargha_delaney_a12": 0.3967,
+    "bootstrap_ci_95": [
+      1022.23,
+      1031.59
+    ],
+    "holm_bonferroni_p_value": 0.274635
+  },
+  "picoclaw_vs_openclaw_minimal_W2": {
+    "workload": "W2",
+    "reference": "picoclaw",
+    "comparison": "openclaw_minimal",
+    "mann_whitney_u": 12.0,
+    "raw_p_value": 9.912733253852247e-11,
+    "cliffs_delta": 0.9733,
+    "vargha_delaney_a12": 0.9867,
+    "bootstrap_ci_95": [
+      773.22,
+      782.135
+    ],
+    "holm_bonferroni_p_value": 0.0
+  },
+  "picoclaw_vs_openclaw_full_W2": {
+    "workload": "W2",
+    "reference": "picoclaw",
+    "comparison": "openclaw_full",
+    "mann_whitney_u": 0.0,
+    "raw_p_value": 3.0198593591621564e-11,
+    "cliffs_delta": 1.0,
+    "vargha_delaney_a12": 1.0,
+    "bootstrap_ci_95": [
+      920.675,
+      931.075
+    ],
+    "holm_bonferroni_p_value": 0.0
+  },
+  "picoclaw_vs_python_native_W2": {
+    "workload": "W2",
+    "reference": "picoclaw",
+    "comparison": "python_native",
+    "mann_whitney_u": 349.0,
+    "raw_p_value": 0.13731737344568412,
+    "cliffs_delta": 0.2244,
+    "vargha_delaney_a12": 0.6122,
+    "bootstrap_ci_95": [
+      754.035,
+      761.285
+    ],
+    "holm_bonferroni_p_value": 0.274635
+  },
+  "picoclaw_vs_neural_baseline_W2": {
+    "workload": "W2",
+    "reference": "picoclaw",
+    "comparison": "neural_baseline",
+    "mann_whitney_u": 603.0,
+    "raw_p_value": 0.02415688464281263,
+    "cliffs_delta": -0.34,
+    "vargha_delaney_a12": 0.33,
+    "bootstrap_ci_95": [
+      746.345,
+      755.7584
+    ],
+    "holm_bonferroni_p_value": 0.144941
+  },
+  "picoclaw_vs_openclaw_minimal_W3": {
+    "workload": "W3",
+    "reference": "picoclaw",
+    "comparison": "openclaw_minimal",
+    "mann_whitney_u": 602.0,
+    "raw_p_value": 0.02509522031642025,
+    "cliffs_delta": -0.3378,
+    "vargha_delaney_a12": 0.3311,
+    "bootstrap_ci_95": [
+      766.29,
+      773.06
+    ],
+    "holm_bonferroni_p_value": 0.144941
+  },
+  "picoclaw_vs_openclaw_full_W3": {
+    "workload": "W3",
+    "reference": "picoclaw",
+    "comparison": "openclaw_full",
+    "mann_whitney_u": 0.0,
+    "raw_p_value": 3.0198593591621564e-11,
+    "cliffs_delta": 1.0,
+    "vargha_delaney_a12": 1.0,
+    "bootstrap_ci_95": [
+      1194.46,
+      1203.1
+    ],
+    "holm_bonferroni_p_value": 0.0
+  },
+  "picoclaw_vs_python_native_W3": {
+    "workload": "W3",
+    "reference": "picoclaw",
+    "comparison": "python_native",
+    "mann_whitney_u": 832.0,
+    "raw_p_value": 1.6979526017102315e-08,
+    "cliffs_delta": -0.8489,
+    "vargha_delaney_a12": 0.0756,
+    "bootstrap_ci_95": [
+      751.14,
+      763.155
+    ],
+    "holm_bonferroni_p_value": 0.0
+  },
+  "picoclaw_vs_neural_baseline_W3": {
+    "workload": "W3",
+    "reference": "picoclaw",
+    "comparison": "neural_baseline",
+    "mann_whitney_u": 900.0,
+    "raw_p_value": 3.0198593591621564e-11,
+    "cliffs_delta": -1.0,
+    "vargha_delaney_a12": 0.0,
+    "bootstrap_ci_95": [
+      731.81,
+      740.415
+    ],
+    "holm_bonferroni_p_value": 0.0
+  },
+  "picoclaw_vs_openclaw_minimal_W4": {
+    "workload": "W4",
+    "reference": "picoclaw",
+    "comparison": "openclaw_minimal",
+    "mann_whitney_u": 0.0,
+    "raw_p_value": 3.017966798490446e-11,
+    "cliffs_delta": 1.0,
+    "vargha_delaney_a12": 1.0,
+    "bootstrap_ci_95": [
+      8423.37,
+      8434.315
+    ],
+    "holm_bonferroni_p_value": 0.0
+  },
+  "picoclaw_vs_openclaw_full_W4": {
+    "workload": "W4",
+    "reference": "picoclaw",
+    "comparison": "openclaw_full",
+    "mann_whitney_u": 0.0,
+    "raw_p_value": 3.017966798490446e-11,
+    "cliffs_delta": 1.0,
+    "vargha_delaney_a12": 1.0,
+    "bootstrap_ci_95": [
+      10886.34,
+      10916.44
+    ],
+    "holm_bonferroni_p_value": 0.0
+  },
+  "picoclaw_vs_python_native_W4": {
+    "workload": "W4",
+    "reference": "picoclaw",
+    "comparison": "python_native",
+    "mann_whitney_u": 574.5,
+    "raw_p_value": 0.06675504254640573,
+    "cliffs_delta": -0.2767,
+    "vargha_delaney_a12": 0.3617,
+    "bootstrap_ci_95": [
+      8255.755,
+      8301.38
+    ],
+    "holm_bonferroni_p_value": 0.245793
+  },
+  "picoclaw_vs_neural_baseline_W4": {
+    "workload": "W4",
+    "reference": "picoclaw",
+    "comparison": "neural_baseline",
+    "mann_whitney_u": 616.0,
+    "raw_p_value": 0.014410824178630799,
+    "cliffs_delta": -0.3689,
+    "vargha_delaney_a12": 0.3156,
+    "bootstrap_ci_95": [
+      8198.645,
+      8289.485
+    ],
+    "holm_bonferroni_p_value": 0.100876
+  }
+}

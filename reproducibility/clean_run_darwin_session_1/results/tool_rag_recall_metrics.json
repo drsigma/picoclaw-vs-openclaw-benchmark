@@ -1,0 +1,168 @@
+{
+  "description": "Zero-Copy Dynamic Tool-RAG Schema Pruner Recall@5 and Zero-Miss Validation",
+  "evaluations_per_workload": 30,
+  "total_evaluations": 120,
+  "overall_recall_at_5": 1.0,
+  "zero_miss_rate": 1.0,
+  "catalog_size_unpruned": 54,
+  "pruned_catalog_size_top_k": 5,
+  "pruning_ratio_pct": 90.74,
+  "workloads": {
+    "W1": {
+      "n_trials": 30,
+      "target_tools_ground_truth": [
+        "system_tool_12",
+        "system_tool_13",
+        "system_tool_32",
+        "system_tool_33",
+        "system_tool_53"
+      ],
+      "target_tool_indices": [
+        12,
+        13,
+        32,
+        33,
+        53
+      ],
+      "retrieved_tools_top5": [
+        "system_tool_12",
+        "system_tool_13",
+        "system_tool_32",
+        "system_tool_33",
+        "system_tool_53"
+      ],
+      "retrieved_indices_top5": [
+        12,
+        13,
+        32,
+        33,
+        53
+      ],
+      "recall_at_5": 1.0,
+      "precision_at_5": 1.0,
+      "zero_miss_guarantee": true,
+      "prune_latency_mean_ms": 0.5596,
+      "prune_latency_median_ms": 0.5585,
+      "prune_latency_std_ms": 0.0241,
+      "prune_latency_min_ms": 0.524,
+      "prune_latency_max_ms": 0.6191
+    },
+    "W2": {
+      "n_trials": 30,
+      "target_tools_ground_truth": [
+        "system_tool_13",
+        "system_tool_14",
+        "system_tool_33",
+        "system_tool_34",
+        "system_tool_35"
+      ],
+      "target_tool_indices": [
+        13,
+        14,
+        33,
+        34,
+        35
+      ],
+      "retrieved_tools_top5": [
+        "system_tool_13",
+        "system_tool_14",
+        "system_tool_33",
+        "system_tool_34",
+        "system_tool_35"
+      ],
+      "retrieved_indices_top5": [
+        13,
+        14,
+        33,
+        34,
+        35
+      ],
+      "recall_at_5": 1.0,
+      "precision_at_5": 1.0,
+      "zero_miss_guarantee": true,
+      "prune_latency_mean_ms": 0.5582,
+      "prune_latency_median_ms": 0.5599,
+      "prune_latency_std_ms": 0.0172,
+      "prune_latency_min_ms": 0.5113,
+      "prune_latency_max_ms": 0.607
+    },
+    "W3": {
+      "n_trials": 30,
+      "target_tools_ground_truth": [
+        "system_tool_14",
+        "system_tool_15",
+        "system_tool_34",
+        "system_tool_35",
+        "system_tool_36"
+      ],
+      "target_tool_indices": [
+        14,
+        15,
+        34,
+        35,
+        36
+      ],
+      "retrieved_tools_top5": [
+        "system_tool_14",
+        "system_tool_15",
+        "system_tool_34",
+        "system_tool_35",
+        "system_tool_36"
+      ],
+      "retrieved_indices_top5": [
+        14,
+        15,
+        34,
+        35,
+        36
+      ],
+      "recall_at_5": 1.0,
+      "precision_at_5": 1.0,
+      "zero_miss_guarantee": true,
+      "prune_latency_mean_ms": 0.5544,
+      "prune_latency_median_ms": 0.5625,
+      "prune_latency_std_ms": 0.0191,
+      "prune_latency_min_ms": 0.5153,
+      "prune_latency_max_ms": 0.59
+    },
+    "W4": {
+      "n_trials": 30,
+      "target_tools_ground_truth": [
+        "system_tool_14",
+        "system_tool_15",
+        "system_tool_16",
+        "system_tool_35",
+        "system_tool_36"
+      ],
+      "target_tool_indices": [
+        14,
+        15,
+        16,
+        35,
+        36
+      ],
+      "retrieved_tools_top5": [
+        "system_tool_14",
+        "system_tool_15",
+        "system_tool_16",
+        "system_tool_35",
+        "system_tool_36"
+      ],
+      "retrieved_indices_top5": [
+        14,
+        15,
+        16,
+        35,
+        36
+      ],
+      "recall_at_5": 1.0,
+      "precision_at_5": 1.0,
+      "zero_miss_guarantee": true,
+      "prune_latency_mean_ms": 0.5539,
+      "prune_latency_median_ms": 0.5562,
+      "prune_latency_std_ms": 0.014,
+      "prune_latency_min_ms": 0.5197,
+      "prune_latency_max_ms": 0.5994
+    }
+  }
+}

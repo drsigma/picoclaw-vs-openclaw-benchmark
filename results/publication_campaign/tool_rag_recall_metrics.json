@@ -41,11 +41,11 @@
       "recall_at_5": 1.0,
       "precision_at_5": 1.0,
       "zero_miss_guarantee": true,
-      "prune_latency_mean_ms": 0.5589,
-      "prune_latency_median_ms": 0.5543,
-      "prune_latency_std_ms": 0.021,
-      "prune_latency_min_ms": 0.537,
-      "prune_latency_max_ms": 0.6115
+      "prune_latency_mean_ms": 0.5596,
+      "prune_latency_median_ms": 0.5585,
+      "prune_latency_std_ms": 0.0241,
+      "prune_latency_min_ms": 0.524,
+      "prune_latency_max_ms": 0.6191
     },
     "W2": {
       "n_trials": 30,
@@ -80,11 +80,11 @@
       "recall_at_5": 1.0,
       "precision_at_5": 1.0,
       "zero_miss_guarantee": true,
-      "prune_latency_mean_ms": 0.5509,
-      "prune_latency_median_ms": 0.551,
-      "prune_latency_std_ms": 0.0313,
-      "prune_latency_min_ms": 0.5126,
-      "prune_latency_max_ms": 0.6749
+      "prune_latency_mean_ms": 0.5582,
+      "prune_latency_median_ms": 0.5599,
+      "prune_latency_std_ms": 0.0172,
+      "prune_latency_min_ms": 0.5113,
+      "prune_latency_max_ms": 0.607
     },
     "W3": {
       "n_trials": 30,
@@ -119,11 +119,11 @@
       "recall_at_5": 1.0,
       "precision_at_5": 1.0,
       "zero_miss_guarantee": true,
-      "prune_latency_mean_ms": 0.5505,
-      "prune_latency_median_ms": 0.5512,
-      "prune_latency_std_ms": 0.0281,
-      "prune_latency_min_ms": 0.5163,
-      "prune_latency_max_ms": 0.6522
+      "prune_latency_mean_ms": 0.5544,
+      "prune_latency_median_ms": 0.5625,
+      "prune_latency_std_ms": 0.0191,
+      "prune_latency_min_ms": 0.5153,
+      "prune_latency_max_ms": 0.59
     },
     "W4": {
       "n_trials": 30,
@@ -158,11 +158,11 @@
       "recall_at_5": 1.0,
       "precision_at_5": 1.0,
       "zero_miss_guarantee": true,
-      "prune_latency_mean_ms": 0.5597,
-      "prune_latency_median_ms": 0.557,
-      "prune_latency_std_ms": 0.0221,
-      "prune_latency_min_ms": 0.5211,
-      "prune_latency_max_ms": 0.6498
+      "prune_latency_mean_ms": 0.5539,
+      "prune_latency_median_ms": 0.5562,
+      "prune_latency_std_ms": 0.014,
+      "prune_latency_min_ms": 0.5197,
+      "prune_latency_max_ms": 0.5994
     }
   }
 }
