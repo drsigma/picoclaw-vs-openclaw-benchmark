@@ -1,0 +1,32 @@
+% Warm KV Cache Summary - Regime B (Windows 11 x86_64)
+\begin{table}[t]
+\centering\small
+\caption{Regime B Warm KV-Cache Latency and Energy Net Above Idle (Windows 11 x86_64)}
+\label{tab:Windows_warm_cache}
+\begin{tabular}{llrrrr}
+\toprule
+Workload & Orchestrator & $T_{\text{task}}$ (ms) & $T_{\text{orch}}$ (ms) & $E_{\text{net}}$ (J) & EDP (J$\cdot$s) \\
+\midrule
+W1 & neural\_baseline & 1856.9 & 0.00 & 57.86 & 107.45 \\
+W1 & picoclaw & 1756.1 & 8.85 & 70.83 & 124.40 \\
+W1 & openclaw\_minimal & 1862.9 & 35.36 & 59.17 & 110.23 \\
+W1 & openclaw\_full & 4457.6 & 42.57 & 97.77 & 435.81 \\
+W1 & python\_native & 1907.0 & 40.40 & 66.74 & 127.27 \\
+W2 & neural\_baseline & 1240.9 & 0.00 & 53.12 & 65.92 \\
+W2 & picoclaw & 1243.4 & 10.99 & 43.32 & 53.87 \\
+W2 & openclaw\_minimal & 1320.2 & 38.22 & 53.05 & 70.04 \\
+W2 & openclaw\_full & 2824.7 & 45.25 & 68.36 & 193.10 \\
+W2 & python\_native & 1297.0 & 26.07 & 47.15 & 61.16 \\
+W3 & neural\_baseline & 1600.4 & 0.00 & 40.30 & 64.49 \\
+W3 & picoclaw & 1450.8 & 52.12 & 64.99 & 94.29 \\
+W3 & openclaw\_minimal & 1761.7 & 71.91 & 45.01 & 79.30 \\
+W3 & openclaw\_full & 4058.6 & 82.35 & 87.90 & 356.74 \\
+W3 & python\_native & 1672.0 & 46.88 & 43.65 & 72.98 \\
+W4 & neural\_baseline & 12911.9 & 0.00 & 515.51 & 6656.19 \\
+W4 & picoclaw & 12536.3 & 98.20 & 530.38 & 6648.96 \\
+W4 & openclaw\_minimal & 12868.1 & 146.81 & 543.32 & 6991.44 \\
+W4 & openclaw\_full & 28033.6 & 226.64 & 686.12 & 19234.56 \\
+W4 & python\_native & 13157.0 & 225.97 & 539.82 & 7102.44 \\
+\bottomrule
+\end{tabular}
+\end{table}
