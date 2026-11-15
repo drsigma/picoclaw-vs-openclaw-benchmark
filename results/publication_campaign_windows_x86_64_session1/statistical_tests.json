@@ -1,9 +1,0 @@
-{
-  "baseline": "picoclaw",
-  "comparisons": {
-    "bun_minimal": {},
-    "openclaw_full": {},
-    "openclaw_minimal": {},
-    "python_native": {}
-  }
-}

@@ -162,6 +162,9 @@ def run_subprocess_with_rusage(
         # Native Linux PMU / rusage collector. Fail-fast: no silent fallback on counter errors.
         from benchmark.linux_x86_64_telemetry_adapter import run_subprocess_with_perf_rusage
         return run_subprocess_with_perf_rusage(cmd, cwd=cwd, env=env, timeout=timeout)
+    if sys.platform.startswith("win"):
+        from benchmark.windows_x86_64_telemetry_adapter import run_subprocess_with_windows_counters
+        return run_subprocess_with_windows_counters(cmd, cwd=cwd, env=env, timeout=timeout)
 
     proc = subprocess.Popen(
         cmd,

@@ -219,19 +219,26 @@ try {
     # --------------------------------------------------------------------------
     Write-Host "`n📦 Realizando Git commit isolado na branch feat/windows-gold-run..." -ForegroundColor Cyan
     & git add windows_gold.ps1
+    & git add .gitignore
     & git add scripts/*windows*
     & git add benchmark/*windows*
+    & git add benchmark/adapters/picoclaw_adapter.py
+    & git add benchmark/telemetry.py
     & git add data/windows_x86_64*
+    & git add data/manifest_sha256_windows_x86_64*
     & git add results/*windows_x86_64*
     & git add reproducibility/clean_run_windows_*
     
     $Status = (& git status --porcelain)
     if ($Status) {
-        & git commit -m "data(benchmark): add complete Windows 11 x86_64 Gold Run results"
+        & git commit -m "data(benchmark): add complete Windows 11 x86_64 Gold Run results (Dell G15 RTX 3050)"
         Write-Host "✔ Commit realizado com sucesso na branch feat/windows-gold-run." -ForegroundColor Green
     } else {
         Write-Host "Nenhuma alteração pendente para commit." -ForegroundColor Gray
     }
+
+    Write-Host "🚀 Enviando resultados para origin feat/windows-gold-run..." -ForegroundColor Cyan
+    & git push -u origin feat/windows-gold-run
 
 } finally {
     Restore-Environment
