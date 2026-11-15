@@ -145,6 +145,13 @@ def run_physical_cpu_isolation_campaign() -> List[Dict[str, Any]]:
                         "idle_cpu_mw": round(idle_cpu_mw, 2),
                         "idle_gpu_mw": round(idle_gpu_mw, 2),
                         "idle_package_mw": round(idle_pkg_mw, 2),
+                        "session_id": "S1_UMA_DECONVOLUTION_20261112",
+                        "git_commit": "c251847",
+                        "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
+                        "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
+                        "model_version": "Meta-Llama-3.2-3B-Instruct",
+                        "quantization": "GGUF Q4_K_M (2.019 GB)",
+                        "server_flags": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
                         "http_status": 200,
                     }
                     trial_records.append(rec)

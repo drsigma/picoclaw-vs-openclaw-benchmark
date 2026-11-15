@@ -24,7 +24,7 @@ import re
 import sys
 import time
 import urllib.request
-from typing import Any, List, Optional
+from typing import Any, List
 
 import numpy as np
 from pydantic import BaseModel, Field

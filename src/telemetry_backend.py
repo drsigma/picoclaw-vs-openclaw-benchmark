@@ -19,12 +19,10 @@ Author: Rafael Paniccia Cassetta (UFABC)
 
 from __future__ import annotations
 
-import ctypes
 import os
 import platform
 import shutil
 import subprocess
-import sys
 import time
 from typing import Any, Dict, List, Optional, Tuple
 
