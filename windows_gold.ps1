@@ -231,7 +231,7 @@ try {
     
     $Status = (& git status --porcelain)
     if ($Status) {
-        & git commit -m "data(benchmark): add complete Windows 11 x86_64 Gold Run results (Dell G15 RTX 3050)"
+        & git commit -m "data(benchmark): add clean empirical Windows 11 x86_64 Gold Run results"
         Write-Host "✔ Commit realizado com sucesso na branch feat/windows-gold-run." -ForegroundColor Green
     } else {
         Write-Host "Nenhuma alteração pendente para commit." -ForegroundColor Gray
