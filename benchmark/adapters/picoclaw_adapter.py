@@ -24,8 +24,16 @@ class PicoClawAdapter(AgentOrchestratorAdapter):
 
     def __init__(self, repo_dir: str, mode: str = "native_static"):
         is_linux = sys.platform.startswith("linux")
-        bin_name = "picoclaw_orch_linux" if is_linux else "picoclaw_orch"
-        runtime_str = "Go (Native Linux ELF x86_64)" if is_linux else "Go 1.23.2 (Native Mach-O ARM64)"
+        is_win = sys.platform.startswith("win")
+        if is_win:
+            bin_name = "picoclaw_orch_windows.exe"
+            runtime_str = "Go 1.23.3 (Native Windows PE x86_64)"
+        elif is_linux:
+            bin_name = "picoclaw_orch_linux"
+            runtime_str = "Go (Native Linux ELF x86_64)"
+        else:
+            bin_name = "picoclaw_orch"
+            runtime_str = "Go 1.23.2 (Native Mach-O ARM64)"
         super().__init__(
             name="PicoClaw" if mode != "tool_rag" else "PicoClawToolRAG",
             runtime=runtime_str,
