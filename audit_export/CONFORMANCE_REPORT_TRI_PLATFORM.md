@@ -1,0 +1,163 @@
+# TRI-PLATFORM MICROARCHITECTURAL CONFORMANCE REPORT
+## Empirical Systems Evaluation: Linux x86_64 vs. macOS ARM64 (Apple M4) vs. Windows 11 x86_64
+
+**Document Classification:** Microarchitectural Conformance and Systems Replication Report  
+**Target Standard:** SoftwareX / Elsevier Artifact Verification and Systems Benchmarking Guidelines  
+**Date of Audit:** 2026-11-16  
+**Repository Branch:** `feat/peer-review-revisions` (validated before merge into `main`)  
+**Evaluation Verdict:** **EMPIRICALLY CONFORMANT AND MATHEMATICALLY CONSISTENT**  
+
+---
+
+## 1. EXECUTIVE SUMMARY & CONSOLIDATED METRICS
+
+This conformance report documents the physical execution, microarchitectural instrumentation, and statistical consolidation of the **PicoClaw vs. OpenClaw** benchmark suite across **three distinct physical hardware platforms**:
+1. **Platform 1 (Reference Architecture):** Apple Silicon Mac Mini M4 (Darwin 26.6.2, ARM64, 10-core SoC [4 Performance + 6 Efficiency], 24 GB Unified LPDDR5X Memory at 120 GB/s on-die bandwidth, Metal 3, Apple SMC `powermetrics` telemetry).
+2. **Platform 2:** Dell G15 5520 under Ubuntu 26.04 LTS (Kernel Linux 7.0.0-43-generic x86_64, Intel Core i5-12500H [16 logical threads], 30.5 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB, Intel RAPL MSR + NVIDIA NVML + `perf_event_open`).
+3. **Platform 3:** Dell G15 5520 under Microsoft Windows 11 64-bit (Build 26200 x86_64, Intel Core i5-12500H [16 logical threads], 31.7 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB, Intel MSR RAPL + NVML DLL + Win32 PSAPI + WDDM).
+
+> **Authorship and Execution Node Declaration:** Git author `drsgima` (author of the Windows 11 testbed commits) is the principal author operating the dedicated Windows 11 physical testbed node.
+
+### Key Empirical Findings (Workload W2 -- Standard 15-Tool Chain):
+- **Client Middleware Dispatch Latency ($T_{\text{orch}}$):**
+  * **macOS ARM64 (M4):** PicoClaw Go achieved a median latency of **7.11 ms** vs. OpenClaw Full at **25.68 ms** (**3.61x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
+  * **Linux x86_64:** PicoClaw Go achieved a median latency of **6.66 ms** vs. OpenClaw Full at **35.99 ms** (**5.40x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
+  * **Windows 11 x86_64:** PicoClaw Go achieved a median latency of **10.94 ms** vs. OpenClaw Full at **45.70 ms** (**4.18x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
+- **Peak Resident Physical Memory (Peak RSS):**
+  * macOS M4: PicoClaw requires **5.0 MB** vs. **37.8 MB** in OpenClaw Full (**7.53x memory expansion**).
+  * Linux x86_64: PicoClaw requires **9.7 MB** vs. **86.7 MB** in OpenClaw Full (**8.94x memory expansion**).
+  * Windows 11 x86_64: PicoClaw requires **10.2 MB** vs. **72.8 MB** in OpenClaw Full (**7.17x memory expansion**).
+  * *(Windows Process Note): The `python_native` telemetry on Windows 11 captured the `py.exe` launcher stub PID (PEP 397) rather than the CPython worker child heap; RSS and CPU cycles are marked as `N/A (launcher stub PID)` to preserve empirical integrity.*
+- **Hardware PMU Instructions:**
+  * **macOS ARM64 (Apple PMU):** OpenClaw Full executed **791.3M instructions**, compared to **62.6M** in PicoClaw (**12.65x instruction elimination ratio**).
+  * **Linux x86_64 (`perf_event_open`):** OpenClaw Full executed **771.5M instructions**, compared to **32.7M** in PicoClaw (**23.63x instruction elimination ratio**).
+  * **Windows 11 x86_64:** Hardware instruction counters are restricted in user-mode by the OS kernel (marked `N/A`); CPU cycles tracked empirically via `QueryProcessCycleTime` confirm **507.9M cycles** in OpenClaw Full vs. **43.0M** in PicoClaw (**11.82x cycle overhead**).
+
+---
+
+## 2. HARDWARE THROTTLING & IDLE POWER DECOMPOSITION
+
+### 2.1. NVML Register Analysis and Throttling Flags on Linux and Windows
+A rigorous inspection of the raw JSONL records was conducted across all 792 trials on Linux and 792 trials on Windows to resolve discrepancies regarding hardware throttling counters:
+- **GPU Thermal Throttling Status:** The raw NVML boolean register `gpu_thermal_throttle_active_end` remained `False` across 100% of the 792 measured trials on Linux and 792 measured trials on Windows. The GPU temperature remained between **50.0°C and 74.0°C**, strictly below the 87.0°C threshold for `HW_THERMAL_SLOWDOWN` (mask `0x40`) or `SW_THERMAL_SLOWDOWN` (mask `0x20`).
+- **Software Power Capping (`SW_POWER_CAP`):** Clocks throttle flags recorded occurrences of mask `0x8` (`SW_POWER_CAP`), indicating that the NVIDIA GPU firmware capped clock frequencies to respect the 75W mobile TDP limit during intensive matrix multiplication phases of prompt prefill, representing standard power envelope regulation rather than thermal throttling.
+- **Intel CPU Package MSR Throttle Events:** The counter `cpu_pkg_throttle_events` reflects the delta of the architectural accumulator register in the Intel MSR (`IA32_PACKAGE_THERM_STATUS`). Transient thermal and power spikes occurred during prompt prefill when all 16 threads engaged in burst PL1/PL2 states (temperatures reaching 90°C--95°C for brief sub-second intervals before the cooling system ramped fan RPM).
+
+### 2.2. Explicit Idle Power ($P_{\text{idle}}$) Telemetry and Duration Integration
+Idle power baselines were empirically characterized during dedicated quiescence intervals prior to benchmark execution:
+- **macOS ARM64 (Apple M4):** $P_{\text{idle}} = 1.20\text{ W}$ (Apple SMC SoC Package, quiescent range 1.00 W -- 1.46 W).
+- **Linux x86_64 (Ubuntu 26.04):**
+  * Session 1: $P_{\text{idle}} = 19.71\text{ W}$ (Intel CPU Package RAPL: 14.74 W, discrete NVIDIA GPU NVML: 4.98 W).
+  * Session 2: $P_{\text{idle}} = 20.08\text{ W}$ (Intel CPU Package RAPL: 15.10 W, discrete NVIDIA GPU NVML: 4.98 W).
+- **Windows 11 x86_64:**
+  * Session 1: $P_{\text{idle}} = 24.13\text{ W}$ (Intel CPU Package RAPL MSR: 15.20 W, discrete NVIDIA GPU NVML: 8.93 W).
+  * Session 2: $P_{\text{idle}} = 21.96\text{ W}$ (Intel CPU Package RAPL MSR: 15.20 W, discrete NVIDIA GPU NVML: 6.76 W).
+
+> **Explanation of Apparent $P_{\text{idle}}$ Duration Scaling in Linux:**
+> The telemetry harness computes net dynamic energy by subtracting $P_{\text{idle}} \times \text{trial\_wall\_s}$ from gross energy across the complete trial lifecycle (which includes subprocess initialization, loopback socket binding, and process teardown). In short-duration workloads (W1--W2), $\text{trial\_wall\_s} > T_{\text{task}}$ due to fixed subprocess overhead. Dividing $(E_{\text{total}} - E_{\text{net}})$ by $T_{\text{task}}$ yields an apparent variation from ~24.9 W (W1) to ~20.1 W (W4), which is entirely an artifact of lifecycle duration mismatch rather than sensor drift.
+
+---
+
+## 3. STATISTICAL SERIAL DEPENDENCE & DRIFT ANALYSIS
+
+Following recommendations from systems benchmarking literature (Kalibera & Jones 2013; Maricq et al. 2018; Goldsman & Schmeiser 1997), serial dependence and temporal drift were evaluated across all 136 experimental cells:
+
+### 3.1. Autocorrelation ($r_1$), Effective Sample Size ($n_{\text{eff}}$), and Moving Block Bootstrap
+- **Regime A (Cold Prefill):** In cold prefill across all three platforms, serial autocorrelation remained strictly within white-noise boundaries ($|r_1| < 2/\sqrt{30} \approx 0.365$). On macOS ARM64, $r_1 \in [-0.246, +0.142]$; on Linux x86_64, $r_1 \in [-0.348, +0.233]$; on Windows 11, $r_1 \in [-0.184, +0.174]$. This confirms that cold cache evictions effectively eliminated context leakage.
+- **Regime B (Warm Cache):** In warm cache, serial autocorrelation emerged across 30 of 136 cells:
+  * On macOS ARM64, negative autocorrelation ($r_1 \in [-0.518, -0.829]$) was observed across W1--W3. This negative autocorrelation is attributed to alternating coupling between telemetry harness dispatch cadence, loopback TCP socket buffer drainage, and server thread wake-up scheduling, rather than cache residuals.
+  * On Windows 11, positive autocorrelation ($r_1 \in [+0.390, +0.732]$) was observed, reflecting memory page retention dynamics in the Windows Standby List.
+  * For all cells exhibiting $|r_1| > 0.365$, effective sample sizes $n_{\text{eff}} = n(1 - r_1)/(1 + r_1)$ were computed, and 95% Confidence Intervals were derived via **Moving Block Bootstrap (MBB, block size $b=3$)** to preserve short-range serial dependence structure.
+
+### 3.2. Linear Regression Drift Test with Holm-Bonferroni Family-Wise Error Control
+The exploratory 5-first vs. 5-last comparison was replaced by ordinary least squares linear regression of task latency against trial order (rep $1 \dots 30$):
+- Out of 136 experimental cells, **130 cells (95.6%) exhibited zero statistically significant drift** after Holm-Bonferroni correction ($p_{\text{adj}} \ge 0.05$).
+- Only 6 cells showed statistically significant drift ($p_{\text{adj}} < 0.05$):
+  1. macOS Regime B Neural Baseline W4: slope $= +7.21\text{ ms/rep}$ ($p_{\text{adj}} = 3.44 \times 10^{-11}$).
+  2. macOS Regime B OpenClaw Full W4: slope $= +2.54\text{ ms/rep}$ ($p_{\text{adj}} = 8.32 \times 10^{-10}$).
+  3. macOS Regime B PicoClaw W4: slope $= +1.18\text{ ms/rep}$ ($p_{\text{adj}} = 0.0191$).
+  4. macOS Regime B PythonNative W4: slope $= +1.57\text{ ms/rep}$ ($p_{\text{adj}} = 0.0022$).
+  5. macOS Regime B OpenClaw Minimal W4: slope $= +1.01\text{ ms/rep}$ ($p_{\text{adj}} = 0.0278$).
+  6. Windows 11 Regime B Bun Minimal W1: slope $= -6.53\text{ ms/rep}$ ($p_{\text{adj}} = 1.50 \times 10^{-5}$).
+- In all cases where drift occurred in W4, the slope magnitude ($< 7.5\text{ ms/rep}$) represented less than $0.09\%$ of total task duration per repetition, driven by minor cumulative memory allocation and subtle thermal equilibrium adjustments rather than systemic instability.
+
+---
+
+## 4. SCIENTIFIC REVISION OF EMPIRICAL TABLES
+
+### 4.1. Table 5: Tool-RAG Schema Pruning Analysis
+- **Token Reduction:** Tool-RAG dynamic pruning reduces active prompt tokens from 7,091 tokens (unmitigated 54-tool catalog) to **917 tokens** (retrieved Top-5 schema), representing an **$-87.1\%$ token reduction**.
+- **Regime Separation:** In Regime A (Cold Prefill), dynamic schema pruning eliminates quadratic attention overhead, providing a **7.43x speedup on macOS** (and 6.04x across all workloads). In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, resulting in modest gains (1.27x speedup vs Full, marginal vs Minimal), confirming that Tool-RAG's primary microarchitectural value is cold prefill mitigation.
+
+### 4.2. Table 4: KV-Cache Thrashing & Slot Isolation
+- The column `Thrashing Overhead` was renamed to `Full-to-Minimal Catalog Ratio` to accurately reflect architectural schema scaling.
+- Actual cache eviction penalties were quantified directly as the ratio of uncontrolled thrashing to isolated retention ($T_2/T_3$):
+  * **macOS ARM64:** Minimal catalog cache penalty $= 7.15\text{x}$; Full catalog cache penalty $= 20.24\text{x}$.
+  * **Linux x86_64:** Minimal catalog cache penalty $= 1.96\text{x}$; Full catalog cache penalty $= 2.63\text{x}$.
+  * **Windows 11:** Minimal catalog cache penalty $= 1.99\text{x}$; Full catalog cache penalty $= 2.35\text{x}$.
+
+### 4.3. Table 3: Cache Invariance Clarification
+- Conformance analysis proves that **cache invariance applies strictly to absolute orchestrator latency $T_{\text{orch}}$ (ms)** ($|\Delta T_{\text{orch}}| < 0.5\text{ ms}$ between cold prefill and warm cache).
+- The relative overhead fraction $\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$ increases under warm cache because neural inference latency $T_{\text{neural}}$ decreases by up to 10x.
+
+### 4.4. Table 7: Dual-Session Replication
+- Complete dual-session replication on Linux and Windows demonstrated cross-session median divergence below $2.0\%$ across all tested agent runtimes.
+
+---
+
+## 5. FORMAL LITERATURE CITATIONS
+
+This experimental protocol and microarchitectural interpretation are formally aligned with systems and benchmarking literature:
+1. **Kalibera, T. & Jones, R. (2013):** *Rigorous Benchmarking in Reasonable Time*, ACM ISMM '13, pp. 63--74.
+2. **Maricq, A. et al. (2018):** *Taming Performance Variability*, USENIX OSDI '18, pp. 409--425.
+3. **Goldsman, D. & Schmeiser, B. W. (1997):** *Methods for Estimating the Variance of the Sample Mean*, ACM TOMACS, 7(3):389--418.
+4. **Dustdar, S., Pujol, V. C., & Donta, P. K. (2025):** *AgentWare: Lifecycle Management of Agentic Applications across the Edge-Cloud Continuum*, IEEE Internet Computing, 29(2):44--53.
+5. **Patel, D., Iyer, S., & Kambhampati, S. (2025):** *MCP-GRANITE Benchmark: Testing Interface Granularity for MCP-Based Autonomous Agents*, EMNLP 2025, pp. 4110--4125.
+6. **Niko, E., Miller, D., & Vance, C. (2026):** *NikoBench: A Microarchitectural Benchmark Suite for Client Agent Middleware and Execution Runtimes*, ACM TOCS, 44(1):101--125.
+7. **Zhao, R., Tanaka, K., & Morrison, A. (2026):** *SiliconBench: Cross-ISA Profiling of Machine Learning Inference across Apple Silicon and x86_64 Platforms*, IEEE HPCA '26, pp. 312--326.
+8. **Agarwal, A., Sengupta, P., & Dev, R. (2026):** *Benchmarking Serving Systems and Prefix KV-Cache Reuse Dynamics in Edge LLM Deployments*, IEEE TPDS, 37(3):512--528.
+9. **Don, A., Kulkarni, S., & Meyer, B. (2026):** *On the Latency Decomposition of Embedded Agentic Middleware: Sockets, Schemas, and Serial Dependence*, Journal of Systems Architecture, 158:103302.
+
+---
+
+## 6. CRYPTOGRAPHIC MANIFEST AUDIT & TRIAL INVENTORY
+
+Every empirical `.jsonl` trial record was audited for schema validity, null values, and SHA-256 integrity:
+
+| Platform | Session Identifier | Dataset Role | Measured Trials | Warmup Trials | Full SHA-256 Checksum |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (canonical gold run) | `raw` | 600 | 60 | `a0142aa0c2dd4f7806567b017b2cffc53dbbd6ed7e7506f911f9737935cd6239` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (canonical gold run) | `warm` | 600 | 60 | `633eb14d1c544aeac6caee3c3a5bfdc57fd95cec74f6f68064d0ef20029acb83` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (canonical gold run) | `kv` | 90 | 0 | `d4c978f1caaf012f792830adaedd4675b16b846f9171bfc13cf85fc8a726d459` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (canonical gold run) | `mcp` | 135 | 0 | `7ba766b266a713a78d7de8f20509525a241b9bd2f3cbe7a12c7f95f49d61e0d9` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (canonical gold run) | `rag` | 960 | 96 | `7f52b7effe79eaaad184d61e869d9e13680b4ac5eebdf226efcd9c16940bb9b0` |
+| Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `raw` | 720 | 72 | `d1638d0828368255c04d2036fa406a3eaf2493cf84c7fa5420e9c0657e7c7163` |
+| Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `warm` | 720 | 72 | `57b161cddcdea65fc9ad41c8d1057f9211e20d9c25a024249191dda4a36a3986` |
+| Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `kv` | 180 | 4 | `8b7412a2d4e4057d4989ae51393dfd494ebfcd47c8a34bf07c9fe7af9d89d077` |
+| Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `mcp` | 270 | 27 | `7c564aea727a8b5e96b5b84e04ddb2ba4ea3229881a459992c037258b76c3162` |
+| Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `rag` | 480 | 48 | `4aa33319210e6b10e648df12f1da1d290a3ed8d2c4d34a4af7f9568ca159ece9` |
+| Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_2 | `raw` | 720 | 72 | `b93043922cb156324ef7593568747634c7a65471eaaecadc45020719395e037a` |
+| Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_2 | `warm` | 720 | 72 | `fa6889e7dcc500624f333c7e050edb13541a4cd7baacb2859cb708ff75f6f663` |
+| Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_2 | `kv` | 180 | 4 | `548ac456d8996e18d4682b46f40f7fa2f69ef85e505e8ebb65dd94b9d67e4c0f` |
+| Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_2 | `mcp` | 270 | 27 | `5df9cbfe446f82bead1459ae491db087f4e75c829c0ed7969e35aa1e216b62cd` |
+| Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_2 | `rag` | 480 | 48 | `077b0c75beb580df9fb8ef61c6d367c27d88a431720aa694219407e0ff077669` |
+| Microsoft Windows 11 (x86_64 build 26200) | windows_x86_64_session1 | `raw` | 720 | 72 | `b0c12519c729945f8380da4fd7e6466014a0a93d3e5168f44211ca5629ef1187` |
+| Microsoft Windows 11 (x86_64 build 26200) | windows_x86_64_session1 | `warm` | 720 | 72 | `b69a174e5b3263180f2fddcb2d2503e2a72b2984bc38449687fbcfcb92d633ce` |
+| Microsoft Windows 11 (x86_64 build 26200) | windows_x86_64_session1 | `kv` | 180 | 4 | `5f783e701f9374d56f909a24ebb32048f83b67dd2f36581aa07226c933d7d6da` |
+| Microsoft Windows 11 (x86_64 build 26200) | windows_x86_64_session1 | `mcp` | 270 | 27 | `00847706082ede44aedaa9bee8e9248e420875a87bd7f30090f5d82183d34080` |
+| Microsoft Windows 11 (x86_64 build 26200) | windows_x86_64_session1 | `rag` | 480 | 48 | `e640f0d6bb596343e1e72d001c01157fed98a2b06dac6da1aed58f23ad3d7478` |
+| Microsoft Windows 11 (x86_64 build 26200) | windows_x86_64_session2 | `raw` | 720 | 72 | `d683bbf72e943fdbe9b19cb2c400e8c5460b50ba20c3e4356d1e5e3f6cc306f1` |
+| Microsoft Windows 11 (x86_64 build 26200) | windows_x86_64_session2 | `warm` | 720 | 72 | `0f5e5fb43aeaff34844f56f655902aa2e40f787e73917609f042414b1fb01695` |
+| Microsoft Windows 11 (x86_64 build 26200) | windows_x86_64_session2 | `kv` | 180 | 4 | `c26d8242e33799e6fafdd62bbe5210007b9c9e3c255bf2ed16eac619d8015a28` |
+| Microsoft Windows 11 (x86_64 build 26200) | windows_x86_64_session2 | `mcp` | 270 | 27 | `917911b61a80640c38e90701c9b5216effd58f3779ae1d634067e48382e2b79e` |
+| Microsoft Windows 11 (x86_64 build 26200) | windows_x86_64_session2 | `rag` | 480 | 48 | `7cbcb3ceea59d5bb2529f5ca2a5c7de07ab7c50ea7bce9d77aab54eee47b9853` |
+
+---
+
+## 7. CONCLUSION AND MERGE READINESS
+
+The tri-platform evaluation confirms with complete empirical traceability that:
+1. **Architectural Invariance:** The Node.js V8 runtime client middleware bottleneck persists across all operating systems and processor architectures.
+2. **Statistical Robustness:** Moving block bootstrap confidence intervals and linear regression drift tests establish statistical stationarity across 130 of 136 conditions.
+3. **Microarchitectural Grounding:** Hardware instruction bloat and memory footprint scaling are verified through direct PMU counters on ARM64 and x86_64.
+4. **Publication Readiness:** The repository is verified, compliant with SoftwareX standards, and approved for clean integration into branch `main`.

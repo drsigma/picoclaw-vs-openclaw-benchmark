@@ -1,12 +1,12 @@
 {
   "darwin_m4": {
+    "name": "macOS ARM64 (Apple Silicon M4)",
+    "short": "macOS (M4)",
+    "os_family": "darwin",
+    "p_idle_w": 1.2,
     "regime_a": {
       "neural_baseline": {
         "W4": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 55177.731,
@@ -124,6 +124,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.564,
+            "std": 0.054,
+            "median": 15.568,
+            "iqr": 0.067,
+            "ci_95": [
+              15.54,
+              15.587
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 47385.045,
@@ -188,13 +201,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": 0.137
         },
         "W3": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 5754.283,
@@ -312,6 +322,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.971,
+            "std": 0.187,
+            "median": 16.006,
+            "iqr": 0.271,
+            "ci_95": [
+              15.925,
+              16.068
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 528.806,
@@ -376,13 +399,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.083
         },
         "W2": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 5263.216,
@@ -500,6 +520,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.873,
+            "std": 0.185,
+            "median": 15.898,
+            "iqr": 0.283,
+            "ci_95": [
+              15.79,
+              15.975
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 439.66,
@@ -564,13 +597,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.007
         },
         "W1": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 5477.923,
@@ -688,6 +718,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.712,
+            "std": 0.176,
+            "median": 15.687,
+            "iqr": 0.19,
+            "ci_95": [
+              15.632,
+              15.733
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 471.457,
@@ -752,15 +795,12 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": 0.01
         }
       },
       "openclaw_minimal": {
         "W2": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 5270.38,
@@ -878,6 +918,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 16.06,
+            "std": 0.215,
+            "median": 16.075,
+            "iqr": 0.205,
+            "ci_95": [
+              15.997,
+              16.108
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 446.072,
@@ -942,13 +995,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.111
         },
         "W1": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 5478.125,
@@ -1066,6 +1116,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.904,
+            "std": 0.183,
+            "median": 15.926,
+            "iqr": 0.236,
+            "ci_95": [
+              15.844,
+              16.009
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 477.25,
@@ -1130,13 +1193,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.133
         },
         "W3": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 5784.664,
@@ -1254,6 +1314,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 16.007,
+            "std": 0.194,
+            "median": 16.038,
+            "iqr": 0.217,
+            "ci_95": [
+              15.938,
+              16.071
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 535.613,
@@ -1318,13 +1391,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.085
         },
         "W4": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 55240.471,
@@ -1442,6 +1512,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.59,
+            "std": 0.043,
+            "median": 15.584,
+            "iqr": 0.062,
+            "ci_95": [
+              15.57,
+              15.619
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 47573.872,
@@ -1506,15 +1589,12 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.059
         }
       },
       "python_native": {
         "W3": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 5771.142,
@@ -1632,6 +1712,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 16.06,
+            "std": 0.175,
+            "median": 16.045,
+            "iqr": 0.244,
+            "ci_95": [
+              15.977,
+              16.16
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 534.859,
@@ -1696,13 +1789,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.017
         },
         "W2": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 5263.276,
@@ -1820,6 +1910,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 16.05,
+            "std": 0.197,
+            "median": 16.039,
+            "iqr": 0.294,
+            "ci_95": [
+              15.957,
+              16.107
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 444.6,
@@ -1884,13 +1987,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": 0.078
         },
         "W4": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 55207.672,
@@ -2008,6 +2108,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.607,
+            "std": 0.046,
+            "median": 15.604,
+            "iqr": 0.048,
+            "ci_95": [
+              15.595,
+              15.621
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 47569.447,
@@ -2072,13 +2185,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": 0.142
         },
         "W1": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 5461.747,
@@ -2196,6 +2306,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.985,
+            "std": 0.145,
+            "median": 15.982,
+            "iqr": 0.252,
+            "ci_95": [
+              15.902,
+              16.052
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 476.813,
@@ -2260,15 +2383,12 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.09
         }
       },
       "openclaw_full": {
         "W2": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 18336.871,
@@ -2386,6 +2506,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.888,
+            "std": 0.05,
+            "median": 15.885,
+            "iqr": 0.052,
+            "ci_95": [
+              15.866,
+              15.902
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 5342.181,
@@ -2450,13 +2583,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.193
         },
         "W3": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 19370.538,
@@ -2574,6 +2704,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.865,
+            "std": 0.041,
+            "median": 15.876,
+            "iqr": 0.055,
+            "ci_95": [
+              15.85,
+              15.885
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 5952.639,
@@ -2638,13 +2781,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.01
         },
         "W4": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 187717.891,
@@ -2762,6 +2902,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.777,
+            "std": 0.015,
+            "median": 15.775,
+            "iqr": 0.014,
+            "ci_95": [
+              15.771,
+              15.781
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 555962.008,
@@ -2826,13 +2979,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.109
         },
         "W1": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 18637.649,
@@ -2950,6 +3100,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.846,
+            "std": 0.052,
+            "median": 15.837,
+            "iqr": 0.085,
+            "ci_95": [
+              15.816,
+              15.884
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 5504.419,
@@ -3014,15 +3177,12 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.206
         }
       },
       "picoclaw": {
         "W2": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 5264.417,
@@ -3140,6 +3300,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.955,
+            "std": 0.179,
+            "median": 15.912,
+            "iqr": 0.259,
+            "ci_95": [
+              15.849,
+              16.061
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 442.15,
@@ -3204,13 +3377,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.103
         },
         "W3": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 5793.4,
@@ -3328,6 +3498,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.907,
+            "std": 0.162,
+            "median": 15.882,
+            "iqr": 0.158,
+            "ci_95": [
+              15.833,
+              15.942
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 533.865,
@@ -3392,13 +3575,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.148
         },
         "W1": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 5463.64,
@@ -3516,6 +3696,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.876,
+            "std": 0.171,
+            "median": 15.932,
+            "iqr": 0.223,
+            "ci_95": [
+              15.851,
+              15.965
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 473.884,
@@ -3580,13 +3773,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.246
         },
         "W4": {
-          "platform": "macOS (M4)",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 55173.87,
@@ -3704,6 +3894,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 15.591,
+            "std": 0.045,
+            "median": 15.586,
+            "iqr": 0.051,
+            "ci_95": [
+              15.565,
+              15.608
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 47459.924,
@@ -3768,17 +3971,14 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.141
         }
       }
     },
     "regime_b": {
       "neural_baseline": {
         "W4": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 8225.952,
@@ -3786,8 +3986,8 @@
             "median": 8258.145,
             "iqr": 107.032,
             "ci_95": [
-              8208.73,
-              8277.49
+              8168.07,
+              8280.92
             ],
             "status": "OK",
             "na_reason": null
@@ -3896,6 +4096,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 13.081,
+            "std": 0.89,
+            "median": 12.545,
+            "iqr": 1.72,
+            "ci_95": [
+              12.423,
+              13.216
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 884.241,
@@ -3960,13 +4173,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": 0.885
         },
         "W3": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 724.248,
@@ -3974,8 +4184,8 @@
             "median": 725.165,
             "iqr": 10.393,
             "ci_95": [
-              719.96,
-              729.105
+              720.91,
+              728.672
             ],
             "status": "OK",
             "na_reason": null
@@ -4084,6 +4294,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 11.807,
+            "std": 0.402,
+            "median": 11.797,
+            "iqr": 0.448,
+            "ci_95": [
+              11.595,
+              11.976
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6.196,
@@ -4148,13 +4371,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.765
         },
         "W2": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 741.291,
@@ -4163,7 +4383,7 @@
             "iqr": 9.285,
             "ci_95": [
               739.22,
-              746.165
+              745.81
             ],
             "status": "OK",
             "na_reason": null
@@ -4272,6 +4492,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 11.898,
+            "std": 0.391,
+            "median": 11.876,
+            "iqr": 0.525,
+            "ci_95": [
+              11.729,
+              12.057
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6.539,
@@ -4336,13 +4569,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.808
         },
         "W1": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1012.233,
@@ -4350,8 +4580,8 @@
             "median": 1011.975,
             "iqr": 9.115,
             "ci_95": [
-              1008.295,
-              1015.275
+              1009.09,
+              1013.749
             ],
             "status": "OK",
             "na_reason": null
@@ -4460,6 +4690,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 12.634,
+            "std": 0.345,
+            "median": 12.623,
+            "iqr": 0.385,
+            "ci_95": [
+              12.443,
+              12.713
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 12.946,
@@ -4524,15 +4767,12 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.682
         }
       },
       "openclaw_minimal": {
         "W2": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 766.911,
@@ -4540,8 +4780,8 @@
             "median": 768.61,
             "iqr": 10.965,
             "ci_95": [
-              764.015,
-              771.385
+              766.24,
+              770.71
             ],
             "status": "OK",
             "na_reason": null
@@ -4650,6 +4890,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 12.262,
+            "std": 0.442,
+            "median": 12.309,
+            "iqr": 0.444,
+            "ci_95": [
+              12.076,
+              12.404
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 7.214,
@@ -4714,13 +4967,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.77
         },
         "W1": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1038.347,
@@ -4728,8 +4978,8 @@
             "median": 1037.665,
             "iqr": 10.485,
             "ci_95": [
-              1034.62,
-              1040.87
+              1035.9,
+              1038.205
             ],
             "status": "OK",
             "na_reason": null
@@ -4838,6 +5088,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 12.674,
+            "std": 0.259,
+            "median": 12.628,
+            "iqr": 0.297,
+            "ci_95": [
+              12.557,
+              12.74
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 13.666,
@@ -4902,13 +5165,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.518
         },
         "W3": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 759.117,
@@ -4916,8 +5176,8 @@
             "median": 761.275,
             "iqr": 10.762,
             "ci_95": [
-              754.22,
-              763.852
+              754.78,
+              763.69
             ],
             "status": "OK",
             "na_reason": null
@@ -5026,6 +5286,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 12.116,
+            "std": 0.414,
+            "median": 12.13,
+            "iqr": 0.6,
+            "ci_95": [
+              11.87,
+              12.359
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6.983,
@@ -5090,13 +5363,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.829
         },
         "W4": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 8319.298,
@@ -5214,6 +5484,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 12.576,
+            "std": 0.156,
+            "median": 12.547,
+            "iqr": 0.217,
+            "ci_95": [
+              12.451,
+              12.648
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 870.394,
@@ -5278,15 +5561,12 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.028
         }
       },
       "python_native": {
         "W3": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 747.928,
@@ -5294,8 +5574,8 @@
             "median": 748.3,
             "iqr": 10.3,
             "ci_95": [
-              743.7,
-              753.215
+              744.825,
+              752.76
             ],
             "status": "OK",
             "na_reason": null
@@ -5404,6 +5684,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 12.398,
+            "std": 0.376,
+            "median": 12.438,
+            "iqr": 0.694,
+            "ci_95": [
+              12.207,
+              12.616
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6.937,
@@ -5468,13 +5761,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.78
         },
         "W2": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 746.946,
@@ -5482,8 +5772,8 @@
             "median": 748.36,
             "iqr": 10.952,
             "ci_95": [
-              742.995,
-              751.13
+              745.205,
+              751.07
             ],
             "status": "OK",
             "na_reason": null
@@ -5592,6 +5882,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 12.367,
+            "std": 0.297,
+            "median": 12.341,
+            "iqr": 0.427,
+            "ci_95": [
+              12.212,
+              12.427
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6.901,
@@ -5656,13 +5959,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.806
         },
         "W4": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 8207.181,
@@ -5780,6 +6080,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 14.158,
+            "std": 0.182,
+            "median": 14.216,
+            "iqr": 0.252,
+            "ci_95": [
+              14.109,
+              14.252
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 953.642,
@@ -5844,13 +6157,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": 0.27
         },
         "W1": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1022.456,
@@ -5968,6 +6278,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 13.083,
+            "std": 0.427,
+            "median": 13.041,
+            "iqr": 0.561,
+            "ci_95": [
+              12.859,
+              13.144
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 13.683,
@@ -6032,15 +6355,12 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.131
         }
       },
       "openclaw_full": {
         "W2": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 914.274,
@@ -6048,8 +6368,8 @@
             "median": 914.49,
             "iqr": 13.092,
             "ci_95": [
-              910.84,
-              919.155
+              911.5,
+              918.97
             ],
             "status": "OK",
             "na_reason": null
@@ -6158,6 +6478,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 11.715,
+            "std": 0.475,
+            "median": 11.881,
+            "iqr": 0.547,
+            "ci_95": [
+              11.685,
+              11.986
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 9.792,
@@ -6222,13 +6555,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.597
         },
         "W3": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1183.934,
@@ -6346,6 +6676,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 12.204,
+            "std": 0.264,
+            "median": 12.21,
+            "iqr": 0.265,
+            "ci_95": [
+              12.139,
+              12.288
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 17.112,
@@ -6410,13 +6753,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.017
         },
         "W4": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 10745.275,
@@ -6424,8 +6764,8 @@
             "median": 10738.825,
             "iqr": 42.93,
             "ci_95": [
-              10727.7,
-              10763.495
+              10726.295,
+              10767.075
             ],
             "status": "OK",
             "na_reason": null
@@ -6534,6 +6874,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 13.314,
+            "std": 0.338,
+            "median": 13.354,
+            "iqr": 0.493,
+            "ci_95": [
+              13.196,
+              13.529
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 1537.111,
@@ -6598,13 +6951,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": 0.691
         },
         "W1": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1308.588,
@@ -6722,6 +7072,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 12.404,
+            "std": 0.291,
+            "median": 12.508,
+            "iqr": 0.276,
+            "ci_95": [
+              12.359,
+              12.535
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 21.239,
@@ -6786,15 +7149,12 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": 0.065
         }
       },
       "picoclaw": {
         "W2": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 743.623,
@@ -6802,8 +7162,8 @@
             "median": 744.87,
             "iqr": 9.738,
             "ci_95": [
-              740.66,
-              748.565
+              741.185,
+              747.9
             ],
             "status": "OK",
             "na_reason": null
@@ -6912,6 +7272,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 11.726,
+            "std": 0.427,
+            "median": 11.679,
+            "iqr": 0.528,
+            "ci_95": [
+              11.493,
+              11.824
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6.486,
@@ -6976,13 +7349,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.723
         },
         "W3": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 763.938,
@@ -6990,8 +7360,8 @@
             "median": 764.49,
             "iqr": 10.5,
             "ci_95": [
-              761.55,
-              767.625
+              762.24,
+              767.09
             ],
             "status": "OK",
             "na_reason": null
@@ -7100,6 +7470,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 11.713,
+            "std": 0.376,
+            "median": 11.787,
+            "iqr": 0.477,
+            "ci_95": [
+              11.569,
+              11.92
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6.836,
@@ -7164,13 +7547,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.751
         },
         "W1": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1012.79,
@@ -7178,8 +7558,8 @@
             "median": 1012.22,
             "iqr": 9.15,
             "ci_95": [
-              1009.21,
-              1015.095
+              1009.78,
+              1015.09
             ],
             "status": "OK",
             "na_reason": null
@@ -7288,6 +7668,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 12.598,
+            "std": 0.348,
+            "median": 12.593,
+            "iqr": 0.398,
+            "ci_95": [
+              12.444,
+              12.714
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 12.923,
@@ -7352,13 +7745,10 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": -0.738
         },
         "W4": {
-          "platform": "macOS (M4)",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 8208.124,
@@ -7476,6 +7866,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 13.216,
+            "std": 0.228,
+            "median": 13.253,
+            "iqr": 0.309,
+            "ci_95": [
+              13.089,
+              13.341
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 890.358,
@@ -7540,7 +7943,8 @@
             ],
             "status": "N/A",
             "na_reason": "Unified Memory Architecture (UMA) on-die without discrete PCIe bus"
-          }
+          },
+          "autocorr_r1": 0.353
         }
       }
     },
@@ -7617,196 +8021,414 @@
       }
     },
     "rag_mitigation": {
-      "openclaw_minimal": {
-        "W2": {
-          "n": 60,
-          "mean_latency_ms": 3018.65,
-          "median_latency_ms": 3010.92,
-          "iqr_latency_ms": 4500.44,
-          "mean_prompt_tokens": 2177.0,
-          "ci_95": [
-            772.35,
-            5257.85
-          ]
+      "cold": {
+        "openclaw_minimal": {
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 5270.38,
+            "median_latency_ms": 5269.28,
+            "iqr_latency_ms": 24.43,
+            "mean_prompt_tokens": 2177.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              5261.62,
+              5277.7
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 5478.13,
+            "median_latency_ms": 5475.27,
+            "iqr_latency_ms": 22.36,
+            "mean_prompt_tokens": 2153.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              5471.54,
+              5485.87
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 5784.66,
+            "median_latency_ms": 5781.1,
+            "iqr_latency_ms": 28.75,
+            "mean_prompt_tokens": 2423.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              5774.34,
+              5795.55
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 55240.47,
+            "median_latency_ms": 55251.95,
+            "iqr_latency_ms": 83.07,
+            "mean_prompt_tokens": 22980.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              55207.87,
+              55269.67
+            ]
+          }
         },
-        "W1": {
-          "n": 60,
-          "mean_latency_ms": 3258.24,
-          "median_latency_ms": 3249.64,
-          "iqr_latency_ms": 4437.28,
-          "mean_prompt_tokens": 2153.0,
-          "ci_95": [
-            1044.19,
-            5465.99
-          ]
+        "openclaw_full": {
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 18336.87,
+            "median_latency_ms": 18335.53,
+            "iqr_latency_ms": 27.99,
+            "mean_prompt_tokens": 7091.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              18328.75,
+              18349.69
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 19370.54,
+            "median_latency_ms": 19372.4,
+            "iqr_latency_ms": 21.66,
+            "mean_prompt_tokens": 7337.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              19365.26,
+              19378.71
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 187717.89,
+            "median_latency_ms": 187723.12,
+            "iqr_latency_ms": 41.57,
+            "mean_prompt_tokens": 72120.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              187708.48,
+              187738.76
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 18637.65,
+            "median_latency_ms": 18637.65,
+            "iqr_latency_ms": 30.47,
+            "mean_prompt_tokens": 7067.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              18629.17,
+              18646.14
+            ]
+          }
         },
-        "W3": {
-          "n": 60,
-          "mean_latency_ms": 3271.89,
-          "median_latency_ms": 3255.62,
-          "iqr_latency_ms": 5019.35,
-          "mean_prompt_tokens": 2423.0,
-          "ci_95": [
-            764.48,
-            5771.76
-          ]
+        "picoclaw_tool_rag": {
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 2535.07,
+            "median_latency_ms": 2531.35,
+            "iqr_latency_ms": 21.15,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 0.0388,
+            "ci_95": [
+              2527.06,
+              2542.49
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 2625.0,
+            "median_latency_ms": 2625.26,
+            "iqr_latency_ms": 8.76,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 0.0393,
+            "ci_95": [
+              2622.58,
+              2628.8
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 2999.48,
+            "median_latency_ms": 2998.01,
+            "iqr_latency_ms": 10.75,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 0.04,
+            "ci_95": [
+              2994.9,
+              3002.48
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 27569.24,
+            "median_latency_ms": 27568.72,
+            "iqr_latency_ms": 170.54,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 0.3317,
+            "ci_95": [
+              27508.94,
+              27614.04
+            ]
+          }
         },
-        "W4": {
-          "n": 60,
-          "mean_latency_ms": 31779.88,
-          "median_latency_ms": 31741.14,
-          "iqr_latency_ms": 46927.46,
-          "mean_prompt_tokens": 22980.0,
-          "ci_95": [
-            8330.83,
-            55190.51
-          ]
+        "openclaw_tool_rag": {
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 3024.0,
+            "median_latency_ms": 3016.36,
+            "iqr_latency_ms": 25.94,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 0.702,
+            "ci_95": [
+              3013.67,
+              3030.08
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 2636.69,
+            "median_latency_ms": 2636.16,
+            "iqr_latency_ms": 15.57,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 0.7118,
+            "ci_95": [
+              2629.73,
+              2639.57
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 2466.45,
+            "median_latency_ms": 2467.33,
+            "iqr_latency_ms": 10.73,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 0.6974,
+            "ci_95": [
+              2463.82,
+              2470.64
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 27241.33,
+            "median_latency_ms": 27226.08,
+            "iqr_latency_ms": 75.2,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 3.4238,
+            "ci_95": [
+              27210.86,
+              27252.04
+            ]
+          }
         }
       },
-      "openclaw_full": {
-        "W2": {
-          "n": 60,
-          "mean_latency_ms": 9625.57,
-          "median_latency_ms": 9614.23,
-          "iqr_latency_ms": 17420.39,
-          "mean_prompt_tokens": 7091.0,
-          "ci_95": [
-            921.3,
-            18323.1
-          ]
+      "warm": {
+        "openclaw_minimal": {
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 766.91,
+            "median_latency_ms": 768.61,
+            "iqr_latency_ms": 10.97,
+            "mean_prompt_tokens": 2177.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              764.01,
+              771.38
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1038.35,
+            "median_latency_ms": 1037.66,
+            "iqr_latency_ms": 10.49,
+            "mean_prompt_tokens": 2153.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              1034.62,
+              1040.87
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 759.12,
+            "median_latency_ms": 761.28,
+            "iqr_latency_ms": 10.76,
+            "mean_prompt_tokens": 2423.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              754.22,
+              763.85
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 8319.3,
+            "median_latency_ms": 8323.21,
+            "iqr_latency_ms": 21.71,
+            "mean_prompt_tokens": 22980.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              8312.59,
+              8327.86
+            ]
+          }
         },
-        "W3": {
-          "n": 60,
-          "mean_latency_ms": 10277.24,
-          "median_latency_ms": 10275.36,
-          "iqr_latency_ms": 18189.24,
-          "mean_prompt_tokens": 7337.0,
-          "ci_95": [
-            1187.65,
-            19357.52
-          ]
+        "openclaw_full": {
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 914.27,
+            "median_latency_ms": 914.49,
+            "iqr_latency_ms": 13.09,
+            "mean_prompt_tokens": 7091.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              910.84,
+              919.15
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1183.93,
+            "median_latency_ms": 1183.06,
+            "iqr_latency_ms": 9.19,
+            "mean_prompt_tokens": 7337.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              1179.08,
+              1186.93
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 10745.27,
+            "median_latency_ms": 10738.83,
+            "iqr_latency_ms": 42.93,
+            "mean_prompt_tokens": 72120.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              10727.7,
+              10763.49
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1308.59,
+            "median_latency_ms": 1308.19,
+            "iqr_latency_ms": 10.55,
+            "mean_prompt_tokens": 7067.0,
+            "median_t_prune_ms": 0.0,
+            "ci_95": [
+              1303.8,
+              1313.14
+            ]
+          }
         },
-        "W4": {
-          "n": 60,
-          "mean_latency_ms": 99231.58,
-          "median_latency_ms": 99198.83,
-          "iqr_latency_ms": 176983.8,
-          "mean_prompt_tokens": 72120.0,
-          "ci_95": [
-            10767.71,
-            187699.85
-          ]
+        "picoclaw_tool_rag": {
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 723.33,
+            "median_latency_ms": 716.09,
+            "iqr_latency_ms": 11.31,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 0.0399,
+            "ci_95": [
+              712.27,
+              721.3
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 8128.27,
+            "median_latency_ms": 8149.82,
+            "iqr_latency_ms": 41.98,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 0.3334,
+            "ci_95": [
+              8133.58,
+              8160.62
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 702.1,
+            "median_latency_ms": 703.83,
+            "iqr_latency_ms": 10.12,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 0.0397,
+            "ci_95": [
+              698.28,
+              706.9
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 933.06,
+            "median_latency_ms": 933.72,
+            "iqr_latency_ms": 11.66,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 0.039,
+            "ci_95": [
+              928.96,
+              937.38
+            ]
+          }
         },
-        "W1": {
-          "n": 60,
-          "mean_latency_ms": 9973.12,
-          "median_latency_ms": 9961.18,
-          "iqr_latency_ms": 17329.23,
-          "mean_prompt_tokens": 7067.0,
-          "ci_95": [
-            1314.56,
-            18618.3
-          ]
-        }
-      },
-      "picoclaw_tool_rag": {
-        "W3": {
-          "n": 60,
-          "mean_latency_ms": 1861.41,
-          "median_latency_ms": 1952.88,
-          "iqr_latency_ms": 2281.65,
-          "mean_prompt_tokens": 1163.0,
-          "ci_95": [
-            722.82,
-            2993.78
-          ]
-        },
-        "W4": {
-          "n": 60,
-          "mean_latency_ms": 17848.76,
-          "median_latency_ms": 17781.67,
-          "iqr_latency_ms": 19417.36,
-          "mean_prompt_tokens": 10380.0,
-          "ci_95": [
-            8162.69,
-            27487.87
-          ]
-        },
-        "W2": {
-          "n": 60,
-          "mean_latency_ms": 1618.58,
-          "median_latency_ms": 1611.21,
-          "iqr_latency_ms": 1827.33,
-          "mean_prompt_tokens": 917.0,
-          "ci_95": [
-            707.49,
-            2524.11
-          ]
-        },
-        "W1": {
-          "n": 60,
-          "mean_latency_ms": 1779.03,
-          "median_latency_ms": 1777.39,
-          "iqr_latency_ms": 1691.11,
-          "mean_prompt_tokens": 893.0,
-          "ci_95": [
-            939.19,
-            2621.3
-          ]
-        }
-      },
-      "openclaw_tool_rag": {
-        "W4": {
-          "n": 60,
-          "mean_latency_ms": 17705.16,
-          "median_latency_ms": 17687.1,
-          "iqr_latency_ms": 19056.76,
-          "mean_prompt_tokens": 10380.0,
-          "ci_95": [
-            8174.84,
-            27205.09
-          ]
-        },
-        "W1": {
-          "n": 60,
-          "mean_latency_ms": 1793.52,
-          "median_latency_ms": 1794.97,
-          "iqr_latency_ms": 1684.71,
-          "mean_prompt_tokens": 893.0,
-          "ci_95": [
-            956.15,
-            2628.0
-          ]
-        },
-        "W3": {
-          "n": 60,
-          "mean_latency_ms": 1871.24,
-          "median_latency_ms": 1865.7,
-          "iqr_latency_ms": 2295.55,
-          "mean_prompt_tokens": 1163.0,
-          "ci_95": [
-            723.9,
-            3011.32
-          ]
-        },
-        "W2": {
-          "n": 60,
-          "mean_latency_ms": 1592.91,
-          "median_latency_ms": 1592.3,
-          "iqr_latency_ms": 1745.26,
-          "mean_prompt_tokens": 917.0,
-          "ci_95": [
-            724.93,
-            2459.96
-          ]
+        "openclaw_tool_rag": {
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 8168.99,
+            "median_latency_ms": 8168.24,
+            "iqr_latency_ms": 13.56,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 3.5548,
+            "ci_95": [
+              8164.93,
+              8172.98
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 950.36,
+            "median_latency_ms": 951.29,
+            "iqr_latency_ms": 12.27,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 0.7323,
+            "ci_95": [
+              945.28,
+              955.25
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 718.47,
+            "median_latency_ms": 720.31,
+            "iqr_latency_ms": 9.71,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 0.7199,
+            "ci_95": [
+              715.28,
+              722.87
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 719.36,
+            "median_latency_ms": 722.01,
+            "iqr_latency_ms": 10.01,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 0.7086,
+            "ci_95": [
+              716.5,
+              723.62
+            ]
+          }
         }
       }
     },
     "mcp_transport": {
-      "in_process": {
+      "in_process_dispatch": {
         "n": 45,
-        "mean_ms": 2.304,
-        "std_ms": 0.607,
         "median_ms": 2.573,
         "iqr_ms": 0.542,
         "ci_95": [
@@ -7814,10 +8436,8 @@
           2.603
         ]
       },
-      "stdio": {
+      "mcp_stdio_server": {
         "n": 45,
-        "mean_ms": 2.342,
-        "std_ms": 0.525,
         "median_ms": 2.306,
         "iqr_ms": 0.447,
         "ci_95": [
@@ -7825,10 +8445,8 @@
           2.449
         ]
       },
-      "http": {
+      "mcp_http_sse_server": {
         "n": 45,
-        "mean_ms": 3.932,
-        "std_ms": 0.746,
         "median_ms": 3.85,
         "iqr_ms": 0.637,
         "ci_95": [
@@ -7839,13 +8457,13 @@
     }
   },
   "linux_x86_64": {
+    "name": "Ubuntu 26.04 LTS (Linux 7.0 x86_64)",
+    "short": "Linux x86_64",
+    "os_family": "linux",
+    "p_idle_w": 19.71,
     "regime_a": {
       "openclaw_minimal": {
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 3271.763,
@@ -7963,6 +8581,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 58.748,
+            "std": 1.452,
+            "median": 58.712,
+            "iqr": 2.171,
+            "ci_95": [
+              57.819,
+              59.66
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 791.924,
@@ -8027,13 +8658,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.244
         },
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 2939.395,
@@ -8151,6 +8779,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 68.988,
+            "std": 1.992,
+            "median": 68.84,
+            "iqr": 2.616,
+            "ci_95": [
+              67.617,
+              69.878
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 627.813,
@@ -8215,13 +8856,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.196
         },
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2758.698,
@@ -8339,6 +8977,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 65.489,
+            "std": 1.655,
+            "median": 65.745,
+            "iqr": 2.231,
+            "ci_95": [
+              64.422,
+              66.414
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 560.346,
@@ -8403,13 +9054,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.233
         },
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 27849.826,
@@ -8527,6 +9175,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 69.144,
+            "std": 0.438,
+            "median": 69.183,
+            "iqr": 0.58,
+            "ci_95": [
+              69.044,
+              69.278
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 54635.651,
@@ -8591,15 +9252,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.176
         }
       },
       "openclaw_full": {
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 82439.827,
@@ -8717,6 +9375,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 67.298,
+            "std": 0.322,
+            "median": 67.295,
+            "iqr": 0.316,
+            "ci_95": [
+              67.183,
+              67.38
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 460148.05,
@@ -8781,13 +9452,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.225
         },
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 9102.494,
@@ -8905,6 +9573,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 61.932,
+            "std": 2.188,
+            "median": 61.245,
+            "iqr": 1.47,
+            "ci_95": [
+              60.916,
+              61.708
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 5637.63,
@@ -8969,13 +9650,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.295
         },
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 7889.867,
@@ -9093,6 +9771,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 67.749,
+            "std": 0.965,
+            "median": 67.908,
+            "iqr": 1.755,
+            "ci_95": [
+              67.27,
+              68.335
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 4362.265,
@@ -9157,13 +9848,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.066
         },
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 9100.726,
@@ -9281,6 +9969,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 62.753,
+            "std": 2.548,
+            "median": 61.731,
+            "iqr": 1.869,
+            "ci_95": [
+              61.323,
+              62.225
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 5669.566,
@@ -9345,15 +10046,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.038
         }
       },
       "neural_baseline": {
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 2910.021,
@@ -9471,6 +10169,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 68.636,
+            "std": 1.609,
+            "median": 68.741,
+            "iqr": 1.619,
+            "ci_95": [
+              68.187,
+              69.032
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 621.279,
@@ -9535,13 +10246,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.068
         },
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 3248.181,
@@ -9659,6 +10367,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 58.356,
+            "std": 1.479,
+            "median": 58.764,
+            "iqr": 1.838,
+            "ci_95": [
+              57.853,
+              59.234
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 781.595,
@@ -9723,13 +10444,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.199
         },
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 27833.237,
@@ -9847,6 +10565,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 68.773,
+            "std": 0.566,
+            "median": 68.722,
+            "iqr": 0.626,
+            "ci_95": [
+              68.471,
+              68.966
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 54348.95,
@@ -9911,13 +10642,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.03
         },
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2732.893,
@@ -10035,6 +10763,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 65.788,
+            "std": 2.003,
+            "median": 65.834,
+            "iqr": 1.825,
+            "ci_95": [
+              65.443,
+              66.57
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 558.606,
@@ -10099,15 +10840,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.245
         }
       },
       "picoclaw": {
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 2925.379,
@@ -10225,6 +10963,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 67.988,
+            "std": 1.687,
+            "median": 67.73,
+            "iqr": 2.22,
+            "ci_95": [
+              67.153,
+              68.405
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 617.261,
@@ -10289,13 +11040,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.126
         },
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2723.881,
@@ -10413,6 +11161,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 65.989,
+            "std": 1.713,
+            "median": 65.929,
+            "iqr": 2.175,
+            "ci_95": [
+              64.883,
+              66.649
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 558.148,
@@ -10477,13 +11238,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.077
         },
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 3243.619,
@@ -10601,6 +11359,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 58.108,
+            "std": 1.544,
+            "median": 58.183,
+            "iqr": 1.788,
+            "ci_95": [
+              57.305,
+              58.79
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 776.546,
@@ -10665,13 +11436,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.165
         },
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 27500.123,
@@ -10789,6 +11557,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 68.427,
+            "std": 0.521,
+            "median": 68.365,
+            "iqr": 0.845,
+            "ci_95": [
+              68.202,
+              68.746
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 53402.304,
@@ -10853,15 +11634,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.186
         }
       },
       "bun_minimal": {
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "bun_minimal",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 27812.555,
@@ -10979,6 +11757,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 68.991,
+            "std": 0.649,
+            "median": 69.021,
+            "iqr": 0.646,
+            "ci_95": [
+              68.841,
+              69.205
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 54441.241,
@@ -11043,13 +11834,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.023
         },
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "bun_minimal",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 2911.186,
@@ -11167,6 +11955,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 68.698,
+            "std": 1.98,
+            "median": 68.645,
+            "iqr": 3.271,
+            "ci_95": [
+              67.547,
+              69.665
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 620.892,
@@ -11231,13 +12032,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.144
         },
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "bun_minimal",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2773.628,
@@ -11355,6 +12153,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 66.286,
+            "std": 2.107,
+            "median": 66.332,
+            "iqr": 2.611,
+            "ci_95": [
+              65.488,
+              67.212
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 571.625,
@@ -11419,13 +12230,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.037
         },
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "bun_minimal",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 3246.175,
@@ -11543,6 +12351,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 57.774,
+            "std": 1.446,
+            "median": 57.558,
+            "iqr": 2.311,
+            "ci_95": [
+              57.071,
+              58.436
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 772.26,
@@ -11607,15 +12428,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.076
         }
       },
       "python_native": {
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 2937.019,
@@ -11733,6 +12551,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 62.527,
+            "std": 7.306,
+            "median": 58.401,
+            "iqr": 14.453,
+            "ci_95": [
+              56.319,
+              69.087
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 658.214,
@@ -11797,13 +12628,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.324
         },
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 3249.362,
@@ -11921,6 +12749,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 59.058,
+            "std": 1.197,
+            "median": 59.186,
+            "iqr": 1.668,
+            "ci_95": [
+              58.935,
+              59.761
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 790.652,
@@ -11985,13 +12826,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.233
         },
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 27837.465,
@@ -12109,6 +12947,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 69.188,
+            "std": 0.453,
+            "median": 69.227,
+            "iqr": 0.589,
+            "ci_95": [
+              69.05,
+              69.432
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 54665.314,
@@ -12173,13 +13024,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.348
         },
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2750.251,
@@ -12297,6 +13145,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 66.044,
+            "std": 2.048,
+            "median": 66.2,
+            "iqr": 3.353,
+            "ci_95": [
+              64.832,
+              67.527
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 563.328,
@@ -12361,17 +13222,14 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.076
         }
       }
     },
     "regime_b": {
       "neural_baseline": {
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 13933.198,
@@ -12489,6 +13347,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 62.346,
+            "std": 0.798,
+            "median": 62.334,
+            "iqr": 1.122,
+            "ci_95": [
+              62.011,
+              62.815
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 12391.143,
@@ -12553,13 +13424,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.014
         },
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1802.038,
@@ -12677,6 +13545,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 55.599,
+            "std": 2.07,
+            "median": 55.487,
+            "iqr": 1.981,
+            "ci_95": [
+              55.045,
+              56.212
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 209.887,
@@ -12741,13 +13622,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.071
         },
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1526.526,
@@ -12865,6 +13743,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 50.584,
+            "std": 2.38,
+            "median": 50.788,
+            "iqr": 2.312,
+            "ci_95": [
+              50.053,
+              51.265
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 161.618,
@@ -12929,13 +13820,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.033
         },
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 1278.384,
@@ -13053,6 +13941,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 44.606,
+            "std": 1.872,
+            "median": 44.443,
+            "iqr": 1.911,
+            "ci_95": [
+              43.869,
+              45.275
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 119.798,
@@ -13117,15 +14018,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.055
         }
       },
       "openclaw_minimal": {
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 14025.902,
@@ -13243,6 +14141,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 62.331,
+            "std": 1.433,
+            "median": 62.843,
+            "iqr": 0.742,
+            "ci_95": [
+              62.54,
+              62.977
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 12563.399,
@@ -13307,13 +14218,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.113
         },
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1533.689,
@@ -13431,6 +14339,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 49.855,
+            "std": 2.659,
+            "median": 49.768,
+            "iqr": 4.063,
+            "ci_95": [
+              48.437,
+              50.467
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 159.736,
@@ -13495,13 +14416,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.249
         },
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1830.11,
@@ -13619,6 +14537,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 56.109,
+            "std": 2.514,
+            "median": 56.076,
+            "iqr": 2.725,
+            "ci_95": [
+              55.213,
+              56.887
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 214.38,
@@ -13683,13 +14614,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.024
         },
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 1299.781,
@@ -13807,6 +14735,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 46.525,
+            "std": 2.361,
+            "median": 46.361,
+            "iqr": 3.095,
+            "ci_95": [
+              45.604,
+              47.334
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 126.962,
@@ -13871,15 +14812,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.112
         }
       },
       "openclaw_full": {
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 4011.8,
@@ -13997,6 +14935,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 50.295,
+            "std": 4.463,
+            "median": 52.531,
+            "iqr": 8.628,
+            "ci_95": [
+              46.032,
+              53.989
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 901.615,
@@ -14061,13 +15012,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.087
         },
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 29290.981,
@@ -14185,6 +15133,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 55.372,
+            "std": 0.923,
+            "median": 55.058,
+            "iqr": 1.556,
+            "ci_95": [
+              54.774,
+              56.089
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 48600.976,
@@ -14249,13 +15210,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.072
         },
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2790.449,
@@ -14373,6 +15331,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 52.17,
+            "std": 1.909,
+            "median": 52.077,
+            "iqr": 2.171,
+            "ci_95": [
+              51.442,
+              52.837
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 451.907,
@@ -14437,13 +15408,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.095
         },
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 3717.882,
@@ -14561,6 +15529,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 51.033,
+            "std": 1.461,
+            "median": 50.985,
+            "iqr": 1.532,
+            "ci_95": [
+              50.733,
+              51.532
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 779.972,
@@ -14625,15 +15606,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.338
         }
       },
       "bun_minimal": {
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "bun_minimal",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 13969.298,
@@ -14751,6 +15729,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 62.913,
+            "std": 0.87,
+            "median": 63.039,
+            "iqr": 0.684,
+            "ci_95": [
+              62.894,
+              63.272
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 12518.401,
@@ -14815,13 +15806,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.245
         },
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "bun_minimal",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1788.503,
@@ -14939,6 +15927,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 54.691,
+            "std": 3.174,
+            "median": 54.759,
+            "iqr": 3.567,
+            "ci_95": [
+              53.434,
+              55.836
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 204.525,
@@ -15003,13 +16004,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.081
         },
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "bun_minimal",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 1320.099,
@@ -15017,8 +16015,8 @@
             "median": 1313.393,
             "iqr": 32.604,
             "ci_95": [
-              1308.685,
-              1332.096
+              1309.535,
+              1334.092
             ],
             "status": "OK",
             "na_reason": null
@@ -15127,6 +16125,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 45.387,
+            "std": 2.816,
+            "median": 45.875,
+            "iqr": 2.701,
+            "ci_95": [
+              44.595,
+              46.387
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 125.261,
@@ -15191,13 +16202,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.365
         },
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "bun_minimal",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1492.706,
@@ -15205,8 +16213,8 @@
             "median": 1488.652,
             "iqr": 23.045,
             "ci_95": [
-              1484.08,
-              1501.381
+              1485.004,
+              1497.602
             ],
             "status": "OK",
             "na_reason": null
@@ -15315,6 +16323,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 48.736,
+            "std": 2.69,
+            "median": 49.047,
+            "iqr": 2.236,
+            "ci_95": [
+              48.625,
+              49.998
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 151.814,
@@ -15379,15 +16400,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.479
         }
       },
       "picoclaw": {
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 1272.962,
@@ -15505,6 +16523,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 45.686,
+            "std": 2.251,
+            "median": 45.696,
+            "iqr": 2.728,
+            "ci_95": [
+              44.837,
+              46.488
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 121.887,
@@ -15569,13 +16600,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.019
         },
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1792.86,
@@ -15693,6 +16721,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 55.61,
+            "std": 3.454,
+            "median": 54.945,
+            "iqr": 3.394,
+            "ci_95": [
+              53.796,
+              56.497
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 208.667,
@@ -15757,13 +16798,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.132
         },
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1509.196,
@@ -15881,6 +16919,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 49.943,
+            "std": 2.18,
+            "median": 50.125,
+            "iqr": 2.076,
+            "ci_95": [
+              48.848,
+              50.493
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 157.724,
@@ -15945,13 +16996,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.279
         },
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 13852.006,
@@ -16069,6 +17117,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 63.082,
+            "std": 0.705,
+            "median": 63.081,
+            "iqr": 0.939,
+            "ci_95": [
+              62.77,
+              63.382
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 12424.502,
@@ -16133,15 +17194,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.02
         }
       },
       "python_native": {
         "W2": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 1300.099,
@@ -16259,6 +17317,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 47.062,
+            "std": 2.644,
+            "median": 47.211,
+            "iqr": 2.896,
+            "ci_95": [
+              46.257,
+              48.294
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 127.942,
@@ -16323,13 +17394,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.25
         },
         "W4": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 13992.376,
@@ -16447,6 +17515,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 62.473,
+            "std": 1.776,
+            "median": 63.256,
+            "iqr": 3.312,
+            "ci_95": [
+              61.076,
+              63.678
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 12735.917,
@@ -16511,13 +17592,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.241
         },
         "W1": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1832.346,
@@ -16635,6 +17713,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 57.519,
+            "std": 2.278,
+            "median": 57.536,
+            "iqr": 3.045,
+            "ci_95": [
+              56.556,
+              58.63
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 220.517,
@@ -16699,13 +17790,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.146
         },
         "W3": {
-          "platform": "Linux x86_64",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1556.382,
@@ -16823,6 +17911,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 52.1,
+            "std": 2.296,
+            "median": 51.73,
+            "iqr": 2.448,
+            "ci_95": [
+              51.143,
+              53.138
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 169.742,
@@ -16887,7 +17988,8 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.221
         }
       }
     },
@@ -16964,104 +18066,214 @@
       }
     },
     "rag_mitigation": {
-      "picoclaw_tool_rag": {
-        "W1": {
-          "n": 60,
-          "mean_latency_ms": 1592.66,
-          "median_latency_ms": 1586.15,
-          "iqr_latency_ms": 559.7,
-          "mean_prompt_tokens": 893.0,
-          "ci_95": [
-            1343.99,
-            1840.42
-          ]
+      "cold": {
+        "picoclaw_tool_rag": {
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1870.85,
+            "median_latency_ms": 1871.52,
+            "iqr_latency_ms": 57.36,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 0.0375,
+            "ci_95": [
+              1856.34,
+              1888.4
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 16955.64,
+            "median_latency_ms": 16969.06,
+            "iqr_latency_ms": 119.49,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 0.3288,
+            "ci_95": [
+              16930.65,
+              16999.45
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1833.74,
+            "median_latency_ms": 1836.14,
+            "iqr_latency_ms": 35.99,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 0.0365,
+            "ci_95": [
+              1820.58,
+              1843.65
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 1545.2,
+            "median_latency_ms": 1550.23,
+            "iqr_latency_ms": 28.11,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 0.039,
+            "ci_95": [
+              1537.74,
+              1557.13
+            ]
+          }
         },
-        "W3": {
-          "n": 60,
-          "mean_latency_ms": 1495.26,
-          "median_latency_ms": 1488.62,
-          "iqr_latency_ms": 679.76,
-          "mean_prompt_tokens": 1163.0,
-          "ci_95": [
-            1172.47,
-            1817.69
-          ]
-        },
-        "W2": {
-          "n": 60,
-          "mean_latency_ms": 1270.62,
-          "median_latency_ms": 1268.82,
-          "iqr_latency_ms": 556.93,
-          "mean_prompt_tokens": 917.0,
-          "ci_95": [
-            1012.06,
-            1530.23
-          ]
-        },
-        "W4": {
-          "n": 60,
-          "mean_latency_ms": 14127.82,
-          "median_latency_ms": 14109.11,
-          "iqr_latency_ms": 5673.05,
-          "mean_prompt_tokens": 10380.0,
-          "ci_95": [
-            11362.6,
-            16899.15
-          ]
+        "openclaw_tool_rag": {
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 16984.56,
+            "median_latency_ms": 16980.0,
+            "iqr_latency_ms": 96.9,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 8.6127,
+            "ci_95": [
+              16939.44,
+              17016.65
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1851.07,
+            "median_latency_ms": 1850.42,
+            "iqr_latency_ms": 40.26,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 2.6453,
+            "ci_95": [
+              1835.84,
+              1864.42
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1891.56,
+            "median_latency_ms": 1889.21,
+            "iqr_latency_ms": 42.48,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 2.6861,
+            "ci_95": [
+              1869.58,
+              1904.8
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 1585.52,
+            "median_latency_ms": 1589.16,
+            "iqr_latency_ms": 33.28,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 2.6161,
+            "ci_95": [
+              1574.89,
+              1596.55
+            ]
+          }
         }
       },
-      "openclaw_tool_rag": {
-        "W1": {
-          "n": 60,
-          "mean_latency_ms": 1620.55,
-          "median_latency_ms": 1619.3,
-          "iqr_latency_ms": 538.32,
-          "mean_prompt_tokens": 893.0,
-          "ci_95": [
-            1365.34,
-            1868.1
-          ]
+      "warm": {
+        "picoclaw_tool_rag": {
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1314.47,
+            "median_latency_ms": 1309.87,
+            "iqr_latency_ms": 52.22,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 0.0388,
+            "ci_95": [
+              1296.62,
+              1332.37
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1156.78,
+            "median_latency_ms": 1155.66,
+            "iqr_latency_ms": 28.84,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 0.0369,
+            "ci_95": [
+              1150.91,
+              1166.99
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 996.05,
+            "median_latency_ms": 991.58,
+            "iqr_latency_ms": 31.34,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 0.0366,
+            "ci_95": [
+              982.62,
+              1008.38
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 11300.0,
+            "median_latency_ms": 11289.37,
+            "iqr_latency_ms": 105.51,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 0.3537,
+            "ci_95": [
+              11260.94,
+              11348.29
+            ]
+          }
         },
-        "W3": {
-          "n": 60,
-          "mean_latency_ms": 1512.37,
-          "median_latency_ms": 1513.02,
-          "iqr_latency_ms": 677.48,
-          "mean_prompt_tokens": 1163.0,
-          "ci_95": [
-            1200.45,
-            1829.65
-          ]
-        },
-        "W2": {
-          "n": 60,
-          "mean_latency_ms": 1304.78,
-          "median_latency_ms": 1308.45,
-          "iqr_latency_ms": 567.94,
-          "mean_prompt_tokens": 917.0,
-          "ci_95": [
-            1042.76,
-            1567.9
-          ]
-        },
-        "W4": {
-          "n": 60,
-          "mean_latency_ms": 14165.38,
-          "median_latency_ms": 14159.34,
-          "iqr_latency_ms": 5646.67,
-          "mean_prompt_tokens": 10380.0,
-          "ci_95": [
-            11401.99,
-            16932.63
-          ]
+        "openclaw_tool_rag": {
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1349.53,
+            "median_latency_ms": 1349.98,
+            "iqr_latency_ms": 28.78,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 2.704,
+            "ci_95": [
+              1337.87,
+              1357.47
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1173.68,
+            "median_latency_ms": 1171.87,
+            "iqr_latency_ms": 41.91,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 2.6059,
+            "ci_95": [
+              1161.28,
+              1189.57
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 1024.04,
+            "median_latency_ms": 1020.78,
+            "iqr_latency_ms": 32.72,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 2.6606,
+            "ci_95": [
+              1014.4,
+              1035.71
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 11346.19,
+            "median_latency_ms": 11327.78,
+            "iqr_latency_ms": 112.74,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 8.5812,
+            "ci_95": [
+              11300.79,
+              11372.66
+            ]
+          }
         }
       }
     },
     "mcp_transport": {
-      "in_process": {
+      "in_process_dispatch": {
         "n": 90,
-        "mean_ms": 1.164,
-        "std_ms": 0.249,
         "median_ms": 1.109,
         "iqr_ms": 0.061,
         "ci_95": [
@@ -17069,10 +18281,8 @@
           1.119
         ]
       },
-      "stdio": {
+      "mcp_stdio_server": {
         "n": 90,
-        "mean_ms": 1.344,
-        "std_ms": 0.202,
         "median_ms": 1.406,
         "iqr_ms": 0.415,
         "ci_95": [
@@ -17080,10 +18290,8 @@
           1.495
         ]
       },
-      "http": {
+      "mcp_http_sse_server": {
         "n": 90,
-        "mean_ms": 1.784,
-        "std_ms": 0.148,
         "median_ms": 1.707,
         "iqr_ms": 0.218,
         "ci_95": [
@@ -17094,13 +18302,13 @@
     }
   },
   "windows_x86_64": {
+    "name": "Microsoft Windows 11 (x86_64 build 26200)",
+    "short": "Windows 11",
+    "os_family": "windows",
+    "p_idle_w": 24.13,
     "regime_a": {
       "openclaw_minimal": {
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 3264.658,
@@ -17218,6 +18426,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 44.681,
+            "std": 1.075,
+            "median": 44.543,
+            "iqr": 0.96,
+            "ci_95": [
+              44.112,
+              44.817
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 496.552,
@@ -17282,13 +18503,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.133
         },
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 3000.038,
@@ -17406,6 +18624,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 46.221,
+            "std": 1.474,
+            "median": 45.99,
+            "iqr": 1.156,
+            "ci_95": [
+              45.676,
+              46.425
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 435.416,
@@ -17470,13 +18701,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.109
         },
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2783.902,
@@ -17594,6 +18822,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 44.536,
+            "std": 1.009,
+            "median": 44.437,
+            "iqr": 0.948,
+            "ci_95": [
+              44.102,
+              44.802
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 363.231,
@@ -17658,13 +18899,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.015
         },
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 26731.957,
@@ -17782,6 +19020,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 61.521,
+            "std": 0.665,
+            "median": 61.643,
+            "iqr": 0.473,
+            "ci_95": [
+              61.448,
+              61.767
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 44192.64,
@@ -17846,15 +19097,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.017
         }
       },
       "openclaw_full": {
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 79490.812,
@@ -17972,6 +19220,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 61.061,
+            "std": 0.355,
+            "median": 61.153,
+            "iqr": 0.296,
+            "ci_95": [
+              61.055,
+              61.205
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 386497.396,
@@ -18036,13 +19297,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.051
         },
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 8868.238,
@@ -18160,6 +19418,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 54.469,
+            "std": 0.569,
+            "median": 54.42,
+            "iqr": 0.737,
+            "ci_95": [
+              54.237,
+              54.837
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 4349.993,
@@ -18224,13 +19495,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.045
         },
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 7688.161,
@@ -18348,6 +19616,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 59.022,
+            "std": 0.764,
+            "median": 59.124,
+            "iqr": 0.72,
+            "ci_95": [
+              58.885,
+              59.424
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 3551.283,
@@ -18412,13 +19693,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.096
         },
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "openclaw_full",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 8890.173,
@@ -18536,6 +19814,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 56.106,
+            "std": 1.19,
+            "median": 56.214,
+            "iqr": 0.732,
+            "ci_95": [
+              56.044,
+              56.434
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 4501.561,
@@ -18600,15 +19891,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.022
         }
       },
       "neural_baseline": {
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 2932.61,
@@ -18726,6 +20014,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 47.479,
+            "std": 1.292,
+            "median": 47.544,
+            "iqr": 1.978,
+            "ci_95": [
+              46.98,
+              48.2
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 416.96,
@@ -18790,13 +20091,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.05
         },
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 3225.744,
@@ -18914,6 +20212,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 46.257,
+            "std": 1.421,
+            "median": 46.201,
+            "iqr": 1.546,
+            "ci_95": [
+              45.856,
+              46.519
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 486.735,
@@ -18978,13 +20289,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.125
         },
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 26444.017,
@@ -19102,6 +20410,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 61.82,
+            "std": 0.386,
+            "median": 61.757,
+            "iqr": 0.607,
+            "ci_95": [
+              61.554,
+              62.069
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 43546.562,
@@ -19166,13 +20487,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.058
         },
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "neural_baseline",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2735.99,
@@ -19290,6 +20608,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 45.9,
+            "std": 1.712,
+            "median": 45.386,
+            "iqr": 2.07,
+            "ci_95": [
+              45.009,
+              46.595
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 347.695,
@@ -19354,15 +20685,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.121
         }
       },
       "picoclaw": {
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 2960.717,
@@ -19480,6 +20808,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 47.443,
+            "std": 1.521,
+            "median": 47.189,
+            "iqr": 1.088,
+            "ci_95": [
+              46.886,
+              47.356
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 420.825,
@@ -19544,13 +20885,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.174
         },
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2752.797,
@@ -19668,6 +21006,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 46.14,
+            "std": 1.462,
+            "median": 45.656,
+            "iqr": 1.35,
+            "ci_95": [
+              45.463,
+              46.392
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 353.671,
@@ -19732,13 +21083,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.154
         },
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 3237.265,
@@ -19856,6 +21204,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 45.945,
+            "std": 1.763,
+            "median": 45.44,
+            "iqr": 2.467,
+            "ci_95": [
+              44.916,
+              46.548
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 485.947,
@@ -19920,13 +21281,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.105
         },
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "picoclaw",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 26379.663,
@@ -20044,6 +21402,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 62.008,
+            "std": 0.258,
+            "median": 62.009,
+            "iqr": 0.341,
+            "ci_95": [
+              61.862,
+              62.126
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 43203.183,
@@ -20108,15 +21479,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.038
         }
       },
       "bun_minimal": {
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "bun_minimal",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 26598.387,
@@ -20234,6 +21602,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 61.669,
+            "std": 0.398,
+            "median": 61.737,
+            "iqr": 0.427,
+            "ci_95": [
+              61.59,
+              61.838
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 43865.577,
@@ -20298,13 +21679,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.116
         },
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "bun_minimal",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 2957.055,
@@ -20422,6 +21800,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 46.299,
+            "std": 1.523,
+            "median": 46.137,
+            "iqr": 1.17,
+            "ci_95": [
+              45.675,
+              46.439
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 424.806,
@@ -20486,13 +21877,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.184
         },
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "bun_minimal",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2751.517,
@@ -20610,6 +21998,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 45.542,
+            "std": 1.727,
+            "median": 45.559,
+            "iqr": 2.134,
+            "ci_95": [
+              44.649,
+              46.014
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 362.989,
@@ -20674,13 +22075,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.048
         },
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "bun_minimal",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 3249.943,
@@ -20798,6 +22196,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 44.777,
+            "std": 1.284,
+            "median": 44.626,
+            "iqr": 1.607,
+            "ci_95": [
+              44.138,
+              45.143
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 493.671,
@@ -20862,15 +22273,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.174
         }
       },
       "python_native": {
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 2997.333,
@@ -20988,6 +22396,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 45.509,
+            "std": 1.327,
+            "median": 45.614,
+            "iqr": 1.245,
+            "ci_95": [
+              44.963,
+              45.892
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 434.089,
@@ -21052,13 +22473,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.012
         },
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 3228.633,
@@ -21176,6 +22594,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 44.496,
+            "std": 0.931,
+            "median": 44.437,
+            "iqr": 1.166,
+            "ci_95": [
+              44.068,
+              44.847
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 491.01,
@@ -21240,13 +22671,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.049
         },
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 26806.767,
@@ -21364,6 +22792,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 61.372,
+            "std": 0.795,
+            "median": 61.414,
+            "iqr": 0.46,
+            "ci_95": [
+              61.286,
+              61.606
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 44422.2,
@@ -21428,13 +22869,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.01
         },
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime A (Cold Prefill)",
-          "agent_key": "python_native",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 2780.233,
@@ -21552,6 +22990,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 44.294,
+            "std": 1.205,
+            "median": 44.123,
+            "iqr": 1.459,
+            "ci_95": [
+              43.592,
+              44.631
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 364.865,
@@ -21616,17 +23067,14 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.124
         }
       }
     },
     "regime_b": {
       "neural_baseline": {
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 12959.439,
@@ -21744,6 +23192,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 38.706,
+            "std": 1.013,
+            "median": 38.732,
+            "iqr": 1.049,
+            "ci_95": [
+              38.134,
+              38.972
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6588.502,
@@ -21808,13 +23269,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.314
         },
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 2000.998,
@@ -21822,8 +23280,8 @@
             "median": 1988.021,
             "iqr": 69.012,
             "ci_95": [
-              1969.362,
-              2022.997
+              1970.374,
+              2026.868
             ],
             "status": "OK",
             "na_reason": null
@@ -21932,6 +23390,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 21.354,
+            "std": 0.136,
+            "median": 21.366,
+            "iqr": 0.2,
+            "ci_95": [
+              21.26,
+              21.409
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 87.628,
@@ -21996,13 +23467,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.377
         },
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1643.39,
@@ -22010,8 +23478,8 @@
             "median": 1652.38,
             "iqr": 19.386,
             "ci_95": [
-              1644.467,
-              1658.054
+              1641.642,
+              1658.053
             ],
             "status": "OK",
             "na_reason": null
@@ -22120,6 +23588,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.939,
+            "std": 0.24,
+            "median": 20.879,
+            "iqr": 0.163,
+            "ci_95": [
+              20.837,
+              20.937
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 59.009,
@@ -22184,13 +23665,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.378
         },
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "neural_baseline",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 1450.735,
@@ -22308,6 +23786,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 21.431,
+            "std": 0.269,
+            "median": 21.408,
+            "iqr": 0.115,
+            "ci_95": [
+              21.364,
+              21.46
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 46.333,
@@ -22372,15 +23863,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.206
         }
       },
       "openclaw_minimal": {
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 13085.996,
@@ -22388,8 +23876,8 @@
             "median": 13095.098,
             "iqr": 189.541,
             "ci_95": [
-              13070.863,
-              13171.03
+              13051.747,
+              13198.197
             ],
             "status": "OK",
             "na_reason": null
@@ -22498,6 +23986,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 38.398,
+            "std": 1.193,
+            "median": 38.486,
+            "iqr": 1.816,
+            "ci_95": [
+              37.82,
+              39.223
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6647.575,
@@ -22562,13 +24063,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.499
         },
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1769.736,
@@ -22686,6 +24184,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.38,
+            "std": 0.149,
+            "median": 20.375,
+            "iqr": 0.168,
+            "ci_95": [
+              20.328,
+              20.457
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 69.429,
@@ -22750,13 +24261,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.13
         },
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 2110.627,
@@ -22764,8 +24272,8 @@
             "median": 2118.374,
             "iqr": 49.186,
             "ci_95": [
-              2093.046,
-              2128.113
+              2088.576,
+              2129.838
             ],
             "status": "OK",
             "na_reason": null
@@ -22874,6 +24382,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.843,
+            "std": 0.121,
+            "median": 20.838,
+            "iqr": 0.12,
+            "ci_95": [
+              20.805,
+              20.892
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 99.574,
@@ -22938,13 +24459,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.39
         },
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_minimal",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 1570.059,
@@ -23062,6 +24580,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.486,
+            "std": 0.135,
+            "median": 20.477,
+            "iqr": 0.191,
+            "ci_95": [
+              20.388,
+              20.546
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 55.475,
@@ -23126,15 +24657,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.349
         }
       },
       "openclaw_full": {
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 4727.125,
@@ -23142,8 +24670,8 @@
             "median": 4723.356,
             "iqr": 59.581,
             "ci_95": [
-              4711.355,
-              4744.308
+              4707.133,
+              4751.484
             ],
             "status": "OK",
             "na_reason": null
@@ -23252,6 +24780,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 18.589,
+            "std": 0.114,
+            "median": 18.577,
+            "iqr": 0.176,
+            "ci_95": [
+              18.507,
+              18.634
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 428.959,
@@ -23316,13 +24857,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.535
         },
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 28138.676,
@@ -23331,7 +24869,7 @@
             "iqr": 499.318,
             "ci_95": [
               27733.157,
-              28063.5
+              28090.495
             ],
             "status": "OK",
             "na_reason": null
@@ -23440,6 +24978,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 22.711,
+            "std": 0.488,
+            "median": 22.713,
+            "iqr": 0.586,
+            "ci_95": [
+              22.537,
+              22.809
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 18096.975,
@@ -23504,13 +25055,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.595
         },
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 3301.833,
@@ -23518,8 +25066,8 @@
             "median": 3300.374,
             "iqr": 83.707,
             "ci_95": [
-              3280.231,
-              3323.383
+              3268.668,
+              3349.337
             ],
             "status": "OK",
             "na_reason": null
@@ -23628,6 +25176,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 18.453,
+            "std": 0.077,
+            "median": 18.469,
+            "iqr": 0.088,
+            "ci_95": [
+              18.452,
+              18.485
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 210.584,
@@ -23692,13 +25253,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.59
         },
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "openclaw_full",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 4327.583,
@@ -23706,8 +25264,8 @@
             "median": 4326.164,
             "iqr": 64.377,
             "ci_95": [
-              4313.25,
-              4343.952
+              4304.022,
+              4353.382
             ],
             "status": "OK",
             "na_reason": null
@@ -23816,6 +25374,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 18.364,
+            "std": 0.07,
+            "median": 18.354,
+            "iqr": 0.101,
+            "ci_95": [
+              18.327,
+              18.394
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 356.201,
@@ -23880,15 +25451,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.511
         }
       },
       "bun_minimal": {
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "bun_minimal",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 12971.252,
@@ -23896,8 +25464,8 @@
             "median": 12966.28,
             "iqr": 296.16,
             "ci_95": [
-              12859.095,
-              13096.354
+              12836.36,
+              13109.865
             ],
             "status": "OK",
             "na_reason": null
@@ -24006,6 +25574,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 38.434,
+            "std": 0.856,
+            "median": 38.476,
+            "iqr": 1.304,
+            "ci_95": [
+              38.238,
+              38.916
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6545.167,
@@ -24070,13 +25651,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.551
         },
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "bun_minimal",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 2068.659,
@@ -24084,8 +25662,8 @@
             "median": 2073.395,
             "iqr": 57.97,
             "ci_95": [
-              2052.403,
-              2092.585
+              2044.399,
+              2098.106
             ],
             "status": "OK",
             "na_reason": null
@@ -24194,6 +25772,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.756,
+            "std": 0.155,
+            "median": 20.732,
+            "iqr": 0.167,
+            "ci_95": [
+              20.678,
+              20.818
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 95.855,
@@ -24258,13 +25849,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.732
         },
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "bun_minimal",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 1535.119,
@@ -24382,6 +25970,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.783,
+            "std": 0.141,
+            "median": 20.788,
+            "iqr": 0.194,
+            "ci_95": [
+              20.75,
+              20.812
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 54.178,
@@ -24446,13 +26047,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.024
         },
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "bun_minimal",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1698.465,
@@ -24570,6 +26168,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.569,
+            "std": 0.142,
+            "median": 20.531,
+            "iqr": 0.173,
+            "ci_95": [
+              20.493,
+              20.602
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 65.016,
@@ -24634,15 +26245,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.007
         }
       },
       "picoclaw": {
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 1460.877,
@@ -24760,6 +26368,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 21.059,
+            "std": 0.239,
+            "median": 21.015,
+            "iqr": 0.203,
+            "ci_95": [
+              20.972,
+              21.084
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 46.075,
@@ -24824,13 +26445,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.262
         },
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 1968.235,
@@ -24838,8 +26456,8 @@
             "median": 1970.004,
             "iqr": 93.656,
             "ci_95": [
-              1935.841,
-              2000.842
+              1917.152,
+              2004.745
             ],
             "status": "OK",
             "na_reason": null
@@ -24948,6 +26566,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 21.385,
+            "std": 0.154,
+            "median": 21.408,
+            "iqr": 0.237,
+            "ci_95": [
+              21.33,
+              21.456
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 84.446,
@@ -25012,13 +26643,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.586
         },
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1720.818,
@@ -25136,6 +26764,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.801,
+            "std": 0.11,
+            "median": 20.778,
+            "iqr": 0.162,
+            "ci_95": [
+              20.743,
+              20.844
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 62.994,
@@ -25200,13 +26841,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": -0.265
         },
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "picoclaw",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 12889.986,
@@ -25214,8 +26852,8 @@
             "median": 12896.236,
             "iqr": 219.917,
             "ci_95": [
-              12788.444,
-              12985.315
+              12786.821,
+              13003.633
             ],
             "status": "OK",
             "na_reason": null
@@ -25324,6 +26962,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 38.828,
+            "std": 0.814,
+            "median": 38.931,
+            "iqr": 1.181,
+            "ci_95": [
+              38.403,
+              39.107
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6465.896,
@@ -25388,15 +27039,12 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.495
         }
       },
       "python_native": {
         "W2": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W2",
           "t_task_ms": {
             "n": 30,
             "mean": 1460.333,
@@ -25514,6 +27162,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.326,
+            "std": 0.136,
+            "median": 20.302,
+            "iqr": 0.21,
+            "ci_95": [
+              20.262,
+              20.384
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 49.464,
@@ -25578,13 +27239,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.037
         },
         "W4": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W4",
           "t_task_ms": {
             "n": 30,
             "mean": 13176.6,
@@ -25592,8 +27250,8 @@
             "median": 13218.5,
             "iqr": 320.0,
             "ci_95": [
-              13054.5,
-              13297.0
+              13047.0,
+              13328.0
             ],
             "status": "OK",
             "na_reason": null
@@ -25702,6 +27360,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 37.804,
+            "std": 1.099,
+            "median": 37.893,
+            "iqr": 1.536,
+            "ci_95": [
+              37.105,
+              38.402
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 6656.056,
@@ -25766,13 +27437,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.517
         },
         "W1": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W1",
           "t_task_ms": {
             "n": 30,
             "mean": 2059.367,
@@ -25780,8 +27448,8 @@
             "median": 2062.0,
             "iqr": 78.0,
             "ci_95": [
-              2031.0,
-              2093.5
+              2016.0,
+              2094.0
             ],
             "status": "OK",
             "na_reason": null
@@ -25890,6 +27558,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.715,
+            "std": 0.146,
+            "median": 20.681,
+            "iqr": 0.215,
+            "ci_95": [
+              20.635,
+              20.767
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 96.724,
@@ -25954,13 +27635,10 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.416
         },
         "W3": {
-          "platform": "Windows 11",
-          "regime": "Regime B (Warm Cache)",
-          "agent_key": "python_native",
-          "workload": "W3",
           "t_task_ms": {
             "n": 30,
             "mean": 1707.3,
@@ -26078,6 +27756,19 @@
             "status": "OK",
             "na_reason": null
           },
+          "power_net_w": {
+            "n": 30,
+            "mean": 20.194,
+            "std": 0.117,
+            "median": 20.202,
+            "iqr": 0.17,
+            "ci_95": [
+              20.123,
+              20.257
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
           "edp_js": {
             "n": 30,
             "mean": 66.078,
@@ -26142,7 +27833,8 @@
             ],
             "status": "OK",
             "na_reason": null
-          }
+          },
+          "autocorr_r1": 0.024
         }
       }
     },
@@ -26219,104 +27911,214 @@
       }
     },
     "rag_mitigation": {
-      "picoclaw_tool_rag": {
-        "W1": {
-          "n": 60,
-          "mean_latency_ms": 1651.18,
-          "median_latency_ms": 1652.0,
-          "iqr_latency_ms": 428.69,
-          "mean_prompt_tokens": 893.0,
-          "ci_95": [
-            1445.09,
-            1832.12
-          ]
+      "cold": {
+        "picoclaw_tool_rag": {
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1865.49,
+            "median_latency_ms": 1861.64,
+            "iqr_latency_ms": 45.19,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 0.0284,
+            "ci_95": [
+              1840.39,
+              1873.77
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 16368.16,
+            "median_latency_ms": 16361.74,
+            "iqr_latency_ms": 168.34,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 0.3263,
+            "ci_95": [
+              16318.28,
+              16444.07
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1807.4,
+            "median_latency_ms": 1807.71,
+            "iqr_latency_ms": 15.57,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 0.0278,
+            "ci_95": [
+              1800.82,
+              1810.23
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 1535.88,
+            "median_latency_ms": 1535.42,
+            "iqr_latency_ms": 22.25,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 0.0287,
+            "ci_95": [
+              1528.5,
+              1541.06
+            ]
+          }
         },
-        "W3": {
-          "n": 60,
-          "mean_latency_ms": 1531.45,
-          "median_latency_ms": 1534.86,
-          "iqr_latency_ms": 554.57,
-          "mean_prompt_tokens": 1163.0,
-          "ci_95": [
-            1287.38,
-            1798.79
-          ]
-        },
-        "W2": {
-          "n": 60,
-          "mean_latency_ms": 1313.48,
-          "median_latency_ms": 1323.86,
-          "iqr_latency_ms": 444.7,
-          "mean_prompt_tokens": 917.0,
-          "ci_95": [
-            1102.81,
-            1522.09
-          ]
-        },
-        "W4": {
-          "n": 60,
-          "mean_latency_ms": 13601.78,
-          "median_latency_ms": 13554.98,
-          "iqr_latency_ms": 5523.38,
-          "mean_prompt_tokens": 10380.0,
-          "ci_95": [
-            10935.61,
-            16300.27
-          ]
+        "openclaw_tool_rag": {
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 16430.75,
+            "median_latency_ms": 16427.35,
+            "iqr_latency_ms": 208.52,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 5.1719,
+            "ci_95": [
+              16370.17,
+              16491.83
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1874.58,
+            "median_latency_ms": 1867.62,
+            "iqr_latency_ms": 47.02,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 1.3762,
+            "ci_95": [
+              1857.73,
+              1891.38
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1893.64,
+            "median_latency_ms": 1896.19,
+            "iqr_latency_ms": 26.98,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 1.3433,
+            "ci_95": [
+              1885.1,
+              1903.64
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 1568.24,
+            "median_latency_ms": 1570.06,
+            "iqr_latency_ms": 27.82,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 1.3401,
+            "ci_95": [
+              1558.12,
+              1579.07
+            ]
+          }
         }
       },
-      "openclaw_tool_rag": {
-        "W1": {
-          "n": 60,
-          "mean_latency_ms": 1675.86,
-          "median_latency_ms": 1681.1,
-          "iqr_latency_ms": 438.39,
-          "mean_prompt_tokens": 893.0,
-          "ci_95": [
-            1475.44,
-            1882.4
-          ]
+      "warm": {
+        "picoclaw_tool_rag": {
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1436.86,
+            "median_latency_ms": 1432.0,
+            "iqr_latency_ms": 18.02,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 0.0283,
+            "ci_95": [
+              1428.61,
+              1440.53
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1255.5,
+            "median_latency_ms": 1253.0,
+            "iqr_latency_ms": 56.84,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 0.0282,
+            "ci_95": [
+              1244.8,
+              1267.03
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 1091.09,
+            "median_latency_ms": 1089.98,
+            "iqr_latency_ms": 24.8,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 0.0292,
+            "ci_95": [
+              1080.9,
+              1100.58
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 10835.39,
+            "median_latency_ms": 10825.5,
+            "iqr_latency_ms": 229.41,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 0.3255,
+            "ci_95": [
+              10761.83,
+              10926.23
+            ]
+          }
         },
-        "W3": {
-          "n": 60,
-          "mean_latency_ms": 1611.79,
-          "median_latency_ms": 1608.7,
-          "iqr_latency_ms": 517.56,
-          "mean_prompt_tokens": 1163.0,
-          "ci_95": [
-            1365.68,
-            1852.35
-          ]
-        },
-        "W2": {
-          "n": 60,
-          "mean_latency_ms": 1354.51,
-          "median_latency_ms": 1361.14,
-          "iqr_latency_ms": 425.77,
-          "mean_prompt_tokens": 917.0,
-          "ci_95": [
-            1155.92,
-            1554.49
-          ]
-        },
-        "W4": {
-          "n": 60,
-          "mean_latency_ms": 13684.12,
-          "median_latency_ms": 13736.92,
-          "iqr_latency_ms": 5505.09,
-          "mean_prompt_tokens": 10380.0,
-          "ci_95": [
-            11027.42,
-            16351.87
-          ]
+        "openclaw_tool_rag": {
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1458.08,
+            "median_latency_ms": 1457.31,
+            "iqr_latency_ms": 27.45,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 1.3431,
+            "ci_95": [
+              1450.19,
+              1466.97
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1349.01,
+            "median_latency_ms": 1349.75,
+            "iqr_latency_ms": 33.91,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 1.3323,
+            "ci_95": [
+              1339.89,
+              1358.11
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 1140.77,
+            "median_latency_ms": 1143.19,
+            "iqr_latency_ms": 30.85,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 1.3391,
+            "ci_95": [
+              1126.96,
+              1153.95
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 10937.49,
+            "median_latency_ms": 10920.42,
+            "iqr_latency_ms": 162.04,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 4.838,
+            "ci_95": [
+              10872.18,
+              11005.73
+            ]
+          }
         }
       }
     },
     "mcp_transport": {
-      "in_process": {
+      "in_process_dispatch": {
         "n": 90,
-        "mean_ms": 1.865,
-        "std_ms": 0.11,
         "median_ms": 1.808,
         "iqr_ms": 0.088,
         "ci_95": [
@@ -26324,10 +28126,8 @@
           1.824
         ]
       },
-      "stdio": {
+      "mcp_stdio_server": {
         "n": 90,
-        "mean_ms": 2.211,
-        "std_ms": 0.422,
         "median_ms": 2.102,
         "iqr_ms": 0.181,
         "ci_95": [
@@ -26335,10 +28135,8 @@
           2.149
         ]
       },
-      "http": {
+      "mcp_http_sse_server": {
         "n": 90,
-        "mean_ms": 20.162,
-        "std_ms": 13.62,
         "median_ms": 18.32,
         "iqr_ms": 20.768,
         "ci_95": [

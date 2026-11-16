@@ -249,11 +249,12 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── reproduce_linux_gold.sh                    <- Script de reprodução física automatizada em Linux x86_64
 ├── windows_gold.ps1                           <- Script PowerShell de reprodução no Windows 11
 ├── audit_export/                              <- Artefatos consolidados da auditoria forense tri-plataforma
-│   ├── AUDIT_REPORT_MASTER.md                 <- Relatório forense mestre com rastreabilidade 100% empírica
+│   ├── CONFORMANCE_REPORT_TRI_PLATFORM.md     <- Relatório mestre de conformidade tri-plataforma (SoftwareX standard)
+│   ├── AUDIT_REPORT_MASTER.md                 <- Cópia canônica de auditoria forense
 │   ├── audit_summary_metrics.json             <- Métricas consolidadas em formato JSON estruturado
 │   ├── tri_platform_consolidated_summary.csv  <- Sumário estatístico comparativo tri-plataforma
-│   ├── anomaly_and_cache_diagnostics.csv      <- Diagnóstico de anomalias, estabilidade térmica e KV-cache
-│   └── tables/                                <- Tabelas consolidadas em Markdown e LaTeX (Tabelas 1 a 6)
+│   ├── anomaly_and_cache_diagnostics.csv      <- Diagnóstico de dependência serial, drift e telemetria térmica
+│   └── tables/                                <- Tabelas consolidadas em Markdown e LaTeX (Tabelas 1 a 7)
 ├── audit_export_tri_platform.zip              <- Pacote zip autocontido da auditoria tri-plataforma
 ├── tutorial/                                  <- Guia didático passo a passo e logs ilustrativos
 │   └── README.md                              <- Tutorial prático bilíngue com passos 1 a 9 e traces ilustrativos
