@@ -708,13 +708,13 @@ def main() -> None:
     default_model = os.environ.get("LLAMA_MODEL")
     if not default_model:
         for candidate in [
+            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
             os.path.expanduser("~/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
-            "/home/rafalince/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
         ]:
             if os.path.exists(candidate):
                 default_model = candidate
                 break
-    ap.add_argument("--model", default=default_model or os.path.expanduser("~/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"))
+    ap.add_argument("--model", default=default_model or "models/Llama-3.2-3B-Instruct-Q4_K_M.gguf")
     ap.add_argument("--cool-cpu-c", type=float, default=75.0)
     ap.add_argument("--cool-gpu-c", type=float, default=65.0)
     ap.add_argument("--cool-timeout-s", type=float, default=600.0)

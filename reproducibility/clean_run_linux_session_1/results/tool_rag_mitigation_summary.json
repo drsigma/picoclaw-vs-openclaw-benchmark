@@ -1,0 +1,215 @@
+{
+  "description": "Zero-Copy Dynamic Tool-RAG Schema Pruner vs Full/Minimal Tool Schemas (Linux x86_64)",
+  "regime_a_cold": {
+    "W1": {
+      "openclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 893.0,
+        "t_prune_mean_ms": 2.7273,
+        "t_task_mean_ms": 1891.56,
+        "t_task_median_ms": 1889.21,
+        "t_task_std_ms": 27.9,
+        "t_orch_mean_ms": 33.306,
+        "energy_net_mean_j": 144.45,
+        "edp_mean_js": 273.31,
+        "proc_peak_phys_mb_mean": 86.17
+      },
+      "picoclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 893.0,
+        "t_prune_mean_ms": 0.0325,
+        "t_task_mean_ms": 1870.85,
+        "t_task_median_ms": 1871.52,
+        "t_task_std_ms": 36.08,
+        "t_orch_mean_ms": 3.199,
+        "energy_net_mean_j": 142.39,
+        "edp_mean_js": 266.36,
+        "proc_peak_phys_mb_mean": 8.99
+      }
+    },
+    "W2": {
+      "openclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 917.0,
+        "t_prune_mean_ms": 2.6993,
+        "t_task_mean_ms": 1585.52,
+        "t_task_median_ms": 1589.16,
+        "t_task_std_ms": 21.43,
+        "t_orch_mean_ms": 35.111,
+        "energy_net_mean_j": 133.75,
+        "edp_mean_js": 212.07,
+        "proc_peak_phys_mb_mean": 86.64
+      },
+      "picoclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 917.0,
+        "t_prune_mean_ms": 0.0344,
+        "t_task_mean_ms": 1545.2,
+        "t_task_median_ms": 1550.23,
+        "t_task_std_ms": 22.43,
+        "t_orch_mean_ms": 5.512,
+        "energy_net_mean_j": 134.61,
+        "edp_mean_js": 208.0,
+        "proc_peak_phys_mb_mean": 9.8
+      }
+    },
+    "W3": {
+      "openclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 1163.0,
+        "t_prune_mean_ms": 2.7502,
+        "t_task_mean_ms": 1851.07,
+        "t_task_median_ms": 1850.42,
+        "t_task_std_ms": 26.12,
+        "t_orch_mean_ms": 59.837,
+        "energy_net_mean_j": 140.25,
+        "edp_mean_js": 259.63,
+        "proc_peak_phys_mb_mean": 92.19
+      },
+      "picoclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 1163.0,
+        "t_prune_mean_ms": 0.0314,
+        "t_task_mean_ms": 1833.74,
+        "t_task_median_ms": 1836.14,
+        "t_task_std_ms": 26.33,
+        "t_orch_mean_ms": 43.714,
+        "energy_net_mean_j": 144.69,
+        "edp_mean_js": 265.32,
+        "proc_peak_phys_mb_mean": 50.05
+      }
+    },
+    "W4": {
+      "openclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 10380.0,
+        "t_prune_mean_ms": 8.8729,
+        "t_task_mean_ms": 16984.56,
+        "t_task_median_ms": 16980.0,
+        "t_task_std_ms": 80.21,
+        "t_orch_mean_ms": 102.236,
+        "energy_net_mean_j": 1189.96,
+        "edp_mean_js": 20211.16,
+        "proc_peak_phys_mb_mean": 86.52
+      },
+      "picoclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 10380.0,
+        "t_prune_mean_ms": 0.3397,
+        "t_task_mean_ms": 16955.64,
+        "t_task_median_ms": 16969.06,
+        "t_task_std_ms": 82.44,
+        "t_orch_mean_ms": 60.296,
+        "energy_net_mean_j": 1185.89,
+        "edp_mean_js": 20107.31,
+        "proc_peak_phys_mb_mean": 13.94
+      }
+    }
+  },
+  "regime_b_warm": {
+    "W1": {
+      "openclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 893.0,
+        "t_prune_mean_ms": 2.7793,
+        "t_task_mean_ms": 1349.53,
+        "t_task_median_ms": 1349.98,
+        "t_task_std_ms": 26.84,
+        "t_orch_mean_ms": 33.508,
+        "energy_net_mean_j": 102.5,
+        "edp_mean_js": 138.29,
+        "proc_peak_phys_mb_mean": 86.24
+      },
+      "picoclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 893.0,
+        "t_prune_mean_ms": 0.0329,
+        "t_task_mean_ms": 1314.47,
+        "t_task_median_ms": 1309.87,
+        "t_task_std_ms": 30.98,
+        "t_orch_mean_ms": 3.338,
+        "energy_net_mean_j": 98.08,
+        "edp_mean_js": 128.89,
+        "proc_peak_phys_mb_mean": 8.98
+      }
+    },
+    "W2": {
+      "openclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 917.0,
+        "t_prune_mean_ms": 2.6464,
+        "t_task_mean_ms": 1024.04,
+        "t_task_median_ms": 1020.78,
+        "t_task_std_ms": 26.61,
+        "t_orch_mean_ms": 34.524,
+        "energy_net_mean_j": 86.81,
+        "edp_mean_js": 88.99,
+        "proc_peak_phys_mb_mean": 86.72
+      },
+      "picoclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 917.0,
+        "t_prune_mean_ms": 0.0308,
+        "t_task_mean_ms": 996.05,
+        "t_task_median_ms": 991.58,
+        "t_task_std_ms": 26.1,
+        "t_orch_mean_ms": 5.63,
+        "energy_net_mean_j": 75.27,
+        "edp_mean_js": 75.14,
+        "proc_peak_phys_mb_mean": 9.85
+      }
+    },
+    "W3": {
+      "openclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 1163.0,
+        "t_prune_mean_ms": 2.637,
+        "t_task_mean_ms": 1173.68,
+        "t_task_median_ms": 1171.87,
+        "t_task_std_ms": 26.62,
+        "t_orch_mean_ms": 59.607,
+        "energy_net_mean_j": 91.98,
+        "edp_mean_js": 107.93,
+        "proc_peak_phys_mb_mean": 92.12
+      },
+      "picoclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 1163.0,
+        "t_prune_mean_ms": 0.0331,
+        "t_task_mean_ms": 1156.78,
+        "t_task_median_ms": 1155.66,
+        "t_task_std_ms": 23.97,
+        "t_orch_mean_ms": 44.655,
+        "energy_net_mean_j": 88.65,
+        "edp_mean_js": 102.55,
+        "proc_peak_phys_mb_mean": 50.02
+      }
+    },
+    "W4": {
+      "openclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 10380.0,
+        "t_prune_mean_ms": 8.8341,
+        "t_task_mean_ms": 11346.19,
+        "t_task_median_ms": 11327.78,
+        "t_task_std_ms": 84.69,
+        "t_orch_mean_ms": 101.782,
+        "energy_net_mean_j": 776.4,
+        "edp_mean_js": 8808.98,
+        "proc_peak_phys_mb_mean": 86.66
+      },
+      "picoclaw_tool_rag": {
+        "n_trials": 30,
+        "prompt_tokens_mean": 10380.0,
+        "t_prune_mean_ms": 0.3551,
+        "t_task_mean_ms": 11300.0,
+        "t_task_median_ms": 11289.37,
+        "t_task_std_ms": 87.83,
+        "t_orch_mean_ms": 62.364,
+        "energy_net_mean_j": 768.08,
+        "edp_mean_js": 8679.28,
+        "proc_peak_phys_mb_mean": 13.94
+      }
+    }
+  }
+}

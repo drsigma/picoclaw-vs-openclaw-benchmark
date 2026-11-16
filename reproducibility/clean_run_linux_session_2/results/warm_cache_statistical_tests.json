@@ -1,0 +1,189 @@
+{
+  "baseline": "picoclaw",
+  "comparisons": {
+    "bun_minimal": {
+      "W1": {
+        "u_statistic": 448.0,
+        "p_value_raw": 0.9823070530800847,
+        "cliffs_delta_task": 0.0044,
+        "vargha_delaney_a12_task": 0.5022,
+        "u_statistic_orch": 508.0,
+        "p_value_orch_raw": 0.3952670113331167,
+        "cliffs_delta_orch": -0.1289,
+        "vargha_delaney_a12_orch": 0.4355,
+        "p_value_holm_bonferroni": 1.0
+      },
+      "W2": {
+        "u_statistic": 416.0,
+        "p_value_raw": 0.6204037206277525,
+        "cliffs_delta_task": 0.0756,
+        "vargha_delaney_a12_task": 0.5378,
+        "u_statistic_orch": 501.0,
+        "p_value_orch_raw": 0.4552969069031376,
+        "cliffs_delta_orch": -0.1133,
+        "vargha_delaney_a12_orch": 0.4434,
+        "p_value_holm_bonferroni": 1.0
+      },
+      "W3": {
+        "u_statistic": 730.0,
+        "p_value_raw": 3.592342311269681e-05,
+        "cliffs_delta_task": -0.6222,
+        "vargha_delaney_a12_task": 0.1889,
+        "u_statistic_orch": 900.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": -1.0,
+        "vargha_delaney_a12_orch": 0.0,
+        "p_value_holm_bonferroni": 0.00018
+      },
+      "W4": {
+        "u_statistic": 0.0,
+        "p_value_raw": 3.019859359162157e-11,
+        "cliffs_delta_task": 1.0,
+        "vargha_delaney_a12_task": 1.0,
+        "u_statistic_orch": 900.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": -1.0,
+        "vargha_delaney_a12_orch": 0.0,
+        "p_value_holm_bonferroni": 0.0
+      }
+    },
+    "openclaw_full": {
+      "W1": {
+        "u_statistic": 0.0,
+        "p_value_raw": 3.019859359162157e-11,
+        "cliffs_delta_task": 1.0,
+        "vargha_delaney_a12_task": 1.0,
+        "u_statistic_orch": 0.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": 1.0,
+        "vargha_delaney_a12_orch": 1.0,
+        "p_value_holm_bonferroni": 0.0
+      },
+      "W2": {
+        "u_statistic": 0.0,
+        "p_value_raw": 3.019859359162157e-11,
+        "cliffs_delta_task": 1.0,
+        "vargha_delaney_a12_task": 1.0,
+        "u_statistic_orch": 0.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": 1.0,
+        "vargha_delaney_a12_orch": 1.0,
+        "p_value_holm_bonferroni": 0.0
+      },
+      "W3": {
+        "u_statistic": 0.0,
+        "p_value_raw": 3.019859359162157e-11,
+        "cliffs_delta_task": 1.0,
+        "vargha_delaney_a12_task": 1.0,
+        "u_statistic_orch": 0.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": 1.0,
+        "vargha_delaney_a12_orch": 1.0,
+        "p_value_holm_bonferroni": 0.0
+      },
+      "W4": {
+        "u_statistic": 0.0,
+        "p_value_raw": 3.019859359162157e-11,
+        "cliffs_delta_task": 1.0,
+        "vargha_delaney_a12_task": 1.0,
+        "u_statistic_orch": 0.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": 1.0,
+        "vargha_delaney_a12_orch": 1.0,
+        "p_value_holm_bonferroni": 0.0
+      }
+    },
+    "openclaw_minimal": {
+      "W1": {
+        "u_statistic": 105.0,
+        "p_value_raw": 3.520057626068007e-07,
+        "cliffs_delta_task": 0.7667,
+        "vargha_delaney_a12_task": 0.8834,
+        "u_statistic_orch": 0.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": 1.0,
+        "vargha_delaney_a12_orch": 1.0,
+        "p_value_holm_bonferroni": 3e-06
+      },
+      "W2": {
+        "u_statistic": 148.0,
+        "p_value_raw": 8.291938835502516e-06,
+        "cliffs_delta_task": 0.6711,
+        "vargha_delaney_a12_task": 0.8356,
+        "u_statistic_orch": 0.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": 1.0,
+        "vargha_delaney_a12_orch": 1.0,
+        "p_value_holm_bonferroni": 5.1e-05
+      },
+      "W3": {
+        "u_statistic": 192.0,
+        "p_value_raw": 0.00014066868942295472,
+        "cliffs_delta_task": 0.5733,
+        "vargha_delaney_a12_task": 0.7867,
+        "u_statistic_orch": 2.0,
+        "p_value_orch_raw": 3.6897258539809896e-11,
+        "cliffs_delta_orch": 0.9956,
+        "vargha_delaney_a12_orch": 0.9978,
+        "p_value_holm_bonferroni": 0.000422
+      },
+      "W4": {
+        "u_statistic": 1.0,
+        "p_value_raw": 3.3383888204288e-11,
+        "cliffs_delta_task": 0.9978,
+        "vargha_delaney_a12_task": 0.9989,
+        "u_statistic_orch": 0.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": 1.0,
+        "vargha_delaney_a12_orch": 1.0,
+        "p_value_holm_bonferroni": 0.0
+      }
+    },
+    "python_native": {
+      "W1": {
+        "u_statistic": 187.0,
+        "p_value_raw": 0.00010406563331101462,
+        "cliffs_delta_task": 0.5844,
+        "vargha_delaney_a12_task": 0.7922,
+        "u_statistic_orch": 0.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": 1.0,
+        "vargha_delaney_a12_orch": 1.0,
+        "p_value_holm_bonferroni": 0.000416
+      },
+      "W2": {
+        "u_statistic": 146.0,
+        "p_value_raw": 7.220829977875534e-06,
+        "cliffs_delta_task": 0.6756,
+        "vargha_delaney_a12_task": 0.8378,
+        "u_statistic_orch": 0.0,
+        "p_value_orch_raw": 3.019859359162157e-11,
+        "cliffs_delta_orch": 1.0,
+        "vargha_delaney_a12_orch": 1.0,
+        "p_value_holm_bonferroni": 5.1e-05
+      },
+      "W3": {
+        "u_statistic": 121.0,
+        "p_value_raw": 1.1936801001725348e-06,
+        "cliffs_delta_task": 0.7311,
+        "vargha_delaney_a12_task": 0.8656,
+        "u_statistic_orch": 845.0,
+        "p_value_orch_raw": 5.4617466566169245e-09,
+        "cliffs_delta_orch": -0.8778,
+        "vargha_delaney_a12_orch": 0.0611,
+        "p_value_holm_bonferroni": 1e-05
+      },
+      "W4": {
+        "u_statistic": 0.0,
+        "p_value_raw": 3.019859359162157e-11,
+        "cliffs_delta_task": 1.0,
+        "vargha_delaney_a12_task": 1.0,
+        "u_statistic_orch": 217.0,
+        "p_value_orch_raw": 0.0005873732857736315,
+        "cliffs_delta_orch": 0.5178,
+        "vargha_delaney_a12_orch": 0.7589,
+        "p_value_holm_bonferroni": 0.0
+      }
+    }
+  }
+}

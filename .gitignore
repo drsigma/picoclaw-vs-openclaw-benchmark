@@ -6,6 +6,8 @@ reproducibility/*
 !reproducibility/clean_run_darwin_session_1/
 !reproducibility/clean_run_darwin_session_2/
 !reproducibility/clean_install_log_darwin.txt
+!reproducibility/clean_run_linux_session_1/
+!reproducibility/clean_run_linux_session_2/
 !reproducibility/clean_run_windows_session_1/
 !reproducibility/clean_run_windows_session_2/
 !reproducibility/clean_install_log_windows.txt

@@ -34,9 +34,19 @@ make test
 make reproduce-figures
 ```
 
-*Caso você possua um Mac com Apple Silicon (M1/M2/M3/M4):*
-* Execute `make benchmark` para rodar a campanha física real em espaço de usuário comum;
-* Execute `make benchmark-full-smc` caso queira amostragem física de miliwatts com privilégios de superusuário via Apple SMC.
+### Reprodução Física nas 3 Plataformas Nativas / Physical Tri-Platform Execution
+
+* **🍎 macOS ARM64 (Apple Silicon M1/M2/M3/M4):**
+  * Execute `make benchmark` para rodar a campanha física real em espaço de usuário comum;
+  * Execute `make benchmark-full-smc` para amostragem física de miliwatts com privilégios de superusuário via Apple SMC.
+* **🐧 Linux x86_64 (Ubuntu 24.04/26.04 com NVIDIA GPU):**
+  * Execute `sudo bash reproduce_linux_gold.sh` para a campanha completa automatizada com telemetria Intel RAPL e NVIDIA NVML;
+  * Ou invoque diretamente `python scripts/run_linux_x86_64_master_campaign.py --ngl 16 --reps 30`.
+* **🪟 Windows 11 x86_64 (PowerShell 7+ / Prompt de Administrador):**
+  * Execute `.\windows_gold.ps1 -Reps 30 -Ngl 16` no PowerShell para execução com isolamento e telemetria Win32 / NVML;
+  * Ou invoque diretamente `python scripts\run_windows_x86_64_master_campaign.py --ngl 16 --reps 30`.
+* **📊 Consolidação Tri-Plataforma e Pacote de Auditoria:**
+  * Execute `python scripts/reproduce_tri_platform_analysis.py` para reprocessar todos os dados brutos dos 3 sistemas operacionais, computar intervalos bootstrap 95% da mediana, regenerar as 6 figuras e exportar o pacote `audit_export_tri_platform.zip`.
 
 ---
 

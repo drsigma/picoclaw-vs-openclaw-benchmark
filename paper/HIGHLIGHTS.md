@@ -1,7 +1,7 @@
 # Research Highlights (SoftwareX Editorial Submission)
 
-* Open benchmark and Tool-RAG pruner for local LLM agents on Apple M4.
-* Zero-Copy Tool-RAG (54->Top-5) cuts cold prefill time/energy by >85% (<0.4 ms).
-* Direct SMC CPU rail isolates 0.01-1.42% agent energy; refutes XNU billing.
-* Affine Roofline active decode bandwidth reaches 102.4 GB/s median (85.3% UMA, range 99.0–108.5 GB/s / 82.5%–90.4%).
-* Native Go starts 3.81x faster and cuts CPU instructions (3.8x) and RAM (2.8x).
+* Tri-platform benchmark and Tool-RAG pruner for local LLM agents across macOS ARM64, Linux x86_64, and Windows 11.
+* Zero-Copy Tool-RAG (54->Top-5) cuts cold prefill latency/energy by >85% across all 3 operating systems.
+* Direct hardware telemetry (Apple SMC, Intel RAPL/NVML, Win32 CycleTime) isolates client orchestration delay.
+* Native Go yields 3.61x (macOS), 5.40x (Linux), and 4.18x (Windows 11) orchestration speedup over Node.js.
+* Zero-Mock forensic compliance: median bootstrap CIs, clean-from-scratch runs, and empirical instruction/cycle telemetry.

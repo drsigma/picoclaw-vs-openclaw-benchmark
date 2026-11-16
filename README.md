@@ -1,11 +1,11 @@
-# A Reproducible Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and KV-Cache Dynamics in Local LLM Agents on Apple Silicon
+# A Reproducible Tri-Platform Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and Microarchitectural Dynamics in Local LLM Agents (macOS, Linux, Windows 11)
 
 [![CI](https://github.com/drsigma/picoclaw-vs-openclaw-benchmark/actions/workflows/ci.yml/badge.svg)](https://github.com/drsigma/picoclaw-vs-openclaw-benchmark/actions)
 [![Code License: MIT](https://img.shields.io/badge/Code%20License-MIT-yellow.svg)](LICENSE)
 [![Data License: CC BY 4.0](https://img.shields.io/badge/Data%20License-CC%20BY%204.0-lightgrey.svg)](DATA_LICENSE)
-[![Hardware: Apple Silicon M4](https://img.shields.io/badge/Hardware-Apple%20Silicon%20M4-purple.svg)](https://www.apple.com/)
+[![Hardware: Tri-Platform](https://img.shields.io/badge/Hardware-M4%20%7C%20Linux%20x86__64%20%7C%20Win11-purple.svg)](https://github.com/drsigma/picoclaw-vs-openclaw-benchmark)
 [![Documentation: Bilingual](https://img.shields.io/badge/Docs-Bilingual%20(PT--BR%20%7C%20EN--US)-blue.svg)](#)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.PENDING_RELEASE-blue.svg)](CITATION.cff)
+[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.14187265-blue.svg)](CITATION.cff)
 
 **Author / Autor:** Rafael Paniccia Cassetta  
 **Affiliation / Afiliação:** Universidade Federal do ABC (UFABC), Santo André, SP, Brazil  
@@ -16,18 +16,30 @@
 ## 📌 Resumo Executivo / Executive Summary
 
 ### 🇧🇷 Português (PT-BR)
-Este repositório apresenta um framework experimental reprodutível e uma avaliação comparativa rigorosa entre duas arquiteturas paradigmáticas de orquestração de agentes autônomos de Inteligência Artificial:
-1. **PicoClaw v0.3.1 (Sipeed):** Binário nativo estático Mach-O ARM64 compilado em Go 1.23.2, com concorrência leve baseada em *goroutines* (~2 KB por pilha) e coletor de lixo não-geracional tri-color com pausas sub-milissegundo.
+Este repositório apresenta um framework experimental reprodutível e uma avaliação comparativa rigorosa entre arquiteturas paradigmáticas de orquestração de agentes autônomos de Inteligência Artificial avaliadas em **três plataformas físicas de computação**: **macOS ARM64 (Apple M4)**, **Linux x86_64 (Ubuntu 26.04 LTS)** e **Windows 11 x86_64 (Build 26200)**:
+1. **PicoClaw v0.3.1 (Sipeed):** Binário nativo compilado em Go 1.23.2, com concorrência leve baseada em *goroutines* (~2 KB por pilha) e coletor de lixo não-geracional tri-color com pausas sub-milissegundo.
 2. **OpenClaw v2026.10.7:** Orquestrador corporativo modular em TypeScript/Node.js v26.12.1 executando sobre a Google V8 (compilação JIT multinível), com validação de esquemas via TypeBox e persistência nativa `node:sqlite`.
+3. **Runtimes Isomórficos Secundários:** CPython 3.12/3.14 (referência dinâmica) e Bun v1.4.4 (JavaScriptCore AOT micro-VM).
 
-Ambos os agentes comunicam-se via loopback TCP (`127.0.0.1:8080`) com uma instância neural local servida por **llama.cpp (build b11887 Metal GPU)** hospedando o modelo **Meta Llama-3.2-3B-Instruct (GGUF Q4_K_M)** sob decodificação gulosa determinística (`temperature = 0.0`, `seed = 42`). O estudo inclui uma **análise formal de ablação** (*OpenClaw Minimal* vs. *OpenClaw Full* com 54 ferramentas), decomposição analítica de latência de orquestração ($T_{\text{orch}}$), telemetria de potência via Apple System Management Controller (SMC), contadores de hardware XNU via `libproc` e testes estatísticos não-paramétricos de significância e dominância estocástica (Mann-Whitney U com correção de Holm-Bonferroni, Cliff's Delta $d$ e $\hat{A}_{12}$ de Vargha-Delaney).
+Ambos os agentes comunicam-se via loopback TCP (`127.0.0.1:8080`) com uma instância neural local servida por **llama.cpp** hospedando o modelo **Meta Llama-3.2-3B-Instruct (GGUF Q4_K_M)** sob decodificação gulosa determinística (`temperature = 0.0`, `seed = 42`). O estudo inclui:
+* **Speedups de Orquestração ($T_{\text{orch}}$) no Workload W2:** PicoClaw atinge **$3{,}61\times$ no macOS M4**, **$5{,}40\times$ no Linux x86_64** e **$4{,}18\times$ no Windows 11 x86_64** em relação ao OpenClaw.
+* **Redução de Instruções de Hardware (PMU):** Redução de **$12{,}65\times$ no macOS ARM64** (Apple PMU) e **$23{,}63\times$ no Linux x86_64** (`perf_event_open`). No Windows 11, contadores de instruções de PMU em *user-mode* são restritos pelo SO, mantendo-se a telemetria empírica direta de ciclos de CPU via `QueryProcessCycleTime` (**$43{,}0\text{M}$ ciclos no PicoClaw vs. $507{,}9\text{M}$ no OpenClaw Full, sobrecarga de $11{,}82\times$**), em estrita conformidade com a política **Zero-Mock**.
+* **Mitigação Tool-RAG:** Pruning dinâmico de esquemas ($54 \rightarrow \text{Top-}15$) gerando speedups empíricos de **$11{,}52\times$ no macOS**, **$6{,}03\times$ no Linux** e **$5{,}63\times$ no Windows 11**.
+* **Telemetria de Potência e Energia:** Apple SMC Shunts no macOS, Intel RAPL + NVIDIA NVML no Linux e Windows 11.
+* **Estatística Não-Paramétrica:** Intervalos de confiança Bootstrap de 95% calculados diretamente sobre a mediana (100% das medianas contidas nos intervalos), testes Mann-Whitney U com correção de Holm-Bonferroni, Cliff's Delta $d$ e $\hat{A}_{12}$ de Vargha-Delaney.
 
 ### 🇺🇸 English (EN-US)
-This repository delivers an open-source, reproducible experimental benchmark framework comparing two contrasting runtime architectures for autonomous AI agent orchestration on Apple Silicon M4:
-1. **PicoClaw v0.3.1 (Sipeed):** Statically compiled Mach-O ARM64 native Go 1.23.2 binary leveraging concurrent goroutines (~2 KB starting stack) and non-generational tri-color mark-sweep garbage collection with sub-millisecond pauses.
+This repository delivers an open-source, reproducible experimental benchmark framework comparing autonomous AI agent orchestration architectures evaluated across **three physical computing platforms**: **macOS ARM64 (Apple M4)**, **Linux x86_64 (Ubuntu 26.04 LTS)**, and **Windows 11 x86_64 (Build 26200)**:
+1. **PicoClaw v0.3.1 (Sipeed):** Statically compiled Go 1.23.2 binary leveraging concurrent goroutines (~2 KB starting stack) and non-generational tri-color mark-sweep garbage collection with sub-millisecond pauses.
 2. **OpenClaw v2026.10.7:** Enterprise-grade TypeScript agent orchestrator executing atop Node.js v26.12.1 (Google V8 tiered JIT), dynamic TypeBox schema validation, and native `node:sqlite` session state storage.
+3. **Secondary Isomorphic Runtimes:** CPython 3.12/3.14 (dynamic reference) and Bun v1.4.4 (JavaScriptCore AOT micro-VM).
 
-Both orchestrators interface via local loopback (`127.0.0.1:8080`) with a unified neural server powered by **llama.cpp (build b11887 Metal GPU)** serving **Meta Llama-3.2-3B-Instruct (Q4_K_M)** under greedy deterministic decoding (`temperature = 0.0`, `seed = 42`). The evaluation features an **empirical ablation study** (*OpenClaw Minimal* vs. *OpenClaw Full* with 54 schemas), orchestrator latency decomposition ($T_{\text{orch}}$), direct Apple System Management Controller (SMC) electrical telemetry, Darwin XNU `libproc` hardware performance counters, and non-parametric effect size analyses (Mann-Whitney U with Holm-Bonferroni adjustment, Cliff's Delta $d$, and Vargha-Delaney $\hat{A}_{12}$).
+All orchestrators interface via local loopback (`127.0.0.1:8080`) with a unified neural server powered by **llama.cpp** serving **Meta Llama-3.2-3B-Instruct (Q4_K_M)** under greedy deterministic decoding (`temperature = 0.0`, `seed = 42`). Key findings include:
+* **Orchestration Speedups ($T_{\text{orch}}$) on W2:** PicoClaw achieves **$3.61\times$ on macOS M4**, **$5.40\times$ on Linux x86_64**, and **$4.18\times$ on Windows 11 x86_64** over OpenClaw.
+* **Hardware Instruction Reduction (PMU):** **$12.65\times$ on macOS ARM64** (Apple PMU) and **$23.63\times$ on Linux x86_64** (`perf_event_open`). On Windows 11, user-mode PMU instruction counters are restricted by kernel policy; empirical CPU cycles tracked via `QueryProcessCycleTime` confirm **$43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ in OpenClaw Full ($11.82\times$ cycle overhead)** under strict **Zero-Mock** guidelines.
+* **Tool-RAG Mitigation:** Dynamic schema pruning ($54 \rightarrow \text{Top-}15$) yields speedups of **$11.52\times$ on macOS**, **$6.03\times$ on Linux**, and **$5.63\times$ on Windows 11**.
+* **Power & Energy Telemetry:** Apple SMC Shunts on macOS, Intel RAPL + NVIDIA NVML on Linux and Windows 11.
+* **Non-Parametric Statistics:** 95% Bootstrap confidence intervals computed directly on sample medians (guaranteeing 100% containment), Mann-Whitney U tests with step-down Holm-Bonferroni adjustment, Cliff's Delta $d$, and Vargha-Delaney $\hat{A}_{12}$.
 
 ---
 
@@ -234,6 +246,15 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── LICENSE                                    <- Licença MIT para código-fonte
 ├── DATA_LICENSE                               <- Licença Creative Commons CC-BY 4.0 para dados e figuras
 ├── references.bib                             <- Base bibliográfica formal BibTeX (IEEE/ACM/Elsevier)
+├── reproduce_linux_gold.sh                    <- Script de reprodução física automatizada em Linux x86_64
+├── windows_gold.ps1                           <- Script PowerShell de reprodução no Windows 11
+├── audit_export/                              <- Artefatos consolidados da auditoria forense tri-plataforma
+│   ├── AUDIT_REPORT_MASTER.md                 <- Relatório forense mestre com rastreabilidade 100% empírica
+│   ├── audit_summary_metrics.json             <- Métricas consolidadas em formato JSON estruturado
+│   ├── tri_platform_consolidated_summary.csv  <- Sumário estatístico comparativo tri-plataforma
+│   ├── anomaly_and_cache_diagnostics.csv      <- Diagnóstico de anomalias, estabilidade térmica e KV-cache
+│   └── tables/                                <- Tabelas consolidadas em Markdown e LaTeX (Tabelas 1 a 6)
+├── audit_export_tri_platform.zip              <- Pacote zip autocontido da auditoria tri-plataforma
 ├── tutorial/                                  <- Guia didático passo a passo e logs ilustrativos
 │   └── README.md                              <- Tutorial prático bilíngue com passos 1 a 9 e traces ilustrativos
 ├── benchmark/                                 <- Harness de execução, adaptadores e orquestradores
@@ -242,16 +263,20 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 │   │   ├── picoclaw_adapter.py                <- Adaptador PicoClaw Go nativo
 │   │   ├── openclaw_adapter.py                <- Adaptador OpenClaw Node.js (Minimal e Full Ablation)
 │   │   ├── bun_minimal_adapter.py             <- Adaptador BunMinimal para extensibilidade multi-runtime
-│   │   ├── python_native_adapter.py           <- Adaptador PythonNative (referência CPython 3.12)
+│   │   ├── python_native_adapter.py           <- Adaptador PythonNative (referência CPython 3.12/3.14)
 │   │   └── neural_baseline_adapter.py         <- Adaptador de linha de base neural direta
-│   ├── picoclaw_orch.go                       <- Orquestrador Go nativo (compilado Mach-O ARM64)
+│   ├── windows_x86_64_telemetry_adapter.py    <- Telemetria Win32 QueryProcessCycleTime e PSAPI
+│   ├── picoclaw_orch.go                       <- Orquestrador Go nativo (compilado Mach-O ARM64 / ELF / PE)
 │   ├── openclaw_orch.mjs                      <- Orquestrador Node.js/TypeScript V8
-│   ├── python_orch.py                         <- Orquestrador Python 3.12 + NumPy
+│   ├── python_orch.py                         <- Orquestrador Python 3.12/3.14 + NumPy
 │   ├── telemetry.py                           <- Coletor de telemetria Apple SMC, libproc e Linux RAPL
 │   ├── run_unified_benchmark.py               <- Executor mestre com randomized block e modo dry-run
 │   ├── analyze_results.py                     <- Análise estatística (Mediana, IQR, Cliff's d, A12, Holm-Bonferroni)
 │   └── generate_charts.py                     <- Gerador das 6 figuras científicas em 300 DPI
 ├── scripts/                                   <- Scripts utilitários e de campanha
+│   ├── reproduce_tri_platform_analysis.py     <- Script de auditoria mestre, gráficos 300 DPI e consolidação
+│   ├── run_linux_x86_64_master_campaign.py    <- Harness de execução física para Linux x86_64 (RAPL/NVML/PMU)
+│   ├── run_windows_x86_64_master_campaign.py  <- Harness de execução física para Windows 11 (Win32/NVML)
 │   ├── run_prefill_ablation.py                <- Caracterização de prefill e ajuste polinomial (Metal GPU)
 │   ├── run_warm_cache_campaign.py             <- Campanha do Regime B com isolamento de blocos (KV-cache ativo)
 │   ├── run_w2_resample.py                     <- Script auditável de reamostragem focada de W2 com backup
@@ -308,15 +333,16 @@ Para revisores acadêmicos (*SoftwareX*) testando o repositório em ambientes is
 make dry-run
 ```
 
-### 2. Modelo de Segurança e Execução Completa no Apple Silicon / Security Model & Full Physical Run
+### 2. Modelo de Segurança e Execução Completa nas 3 Plataformas Físicas / Security Model & Tri-Platform Physical Runs
 > [!IMPORTANT]
-> **Privilégios e Segurança:** Os agentes avaliados (`PicoClaw` e `OpenClaw`) e o servidor neural (`llama-server`) **sempre executam estritamente em espaço de usuário comum** (`euid != 0`). A exigência de `sudo` restringe-se exclusivamente à amostragem física de miliwatts dos sensores de corrente do Apple SMC (`powermetrics`), bloqueada pelo kernel Darwin para mitigar ataques de canal lateral de potência. Caso executado sem `sudo`, o harness degrada graciosamente sem bloquear ou solicitar senha.
+> **Privilégios e Segurança:** Os agentes avaliados (`PicoClaw` e `OpenClaw`) e o servidor neural (`llama-server`) **sempre executam estritamente em espaço de usuário comum** (`euid != 0`). A exigência de `sudo` restringe-se exclusivamente à amostragem física de sensores de hardware bloqueada pelo kernel (Apple SMC `powermetrics` no macOS, Intel RAPL e NVIDIA NVML no Linux).
 
+#### 🍎 Apple Silicon M4 (macOS Darwin ARM64)
 ```bash
 # 1. Configurar o ambiente isolado automaticamente (Python venv, Node.js e ferramentas)
 make setup
 
-# 2. Auditar a integridade e executar os 32 testes unitários automatizados da suíte (pytest e ruff linter) / 32 automated unit tests
+# 2. Executar os 45 testes automatizados (pytest e ruff linter)
 make test
 
 # 3. Execução em espaço de usuário comum (Sem Sudo / Degradação Graciosa)
@@ -327,6 +353,31 @@ make benchmark-full-smc
 
 # 5. Regenerar todas as 6 figuras científicas em 300 DPI
 make reproduce-figures
+```
+
+#### 🐧 Linux x86_64 (Ubuntu 24.04/26.04 LTS com NVIDIA GPU)
+```bash
+# Execução da campanha completa com telemetria Intel RAPL e NVIDIA NVML (Requer Sudo)
+sudo bash reproduce_linux_gold.sh
+
+# Ou execução direta via script mestre em Python
+python scripts/run_linux_x86_64_master_campaign.py --ngl 16 --reps 30
+```
+
+#### 🪟 Windows 11 x86_64 (PowerShell 7+ / Prompt de Administrador)
+```powershell
+# Execução da campanha padrão ouro com telemetria Win32 QueryProcessCycleTime e NVML
+.\windows_gold.ps1 -Reps 30 -Ngl 16
+
+# Ou execução direta via script mestre em Python
+python scripts\run_windows_x86_64_master_campaign.py --ngl 16 --reps 30
+```
+
+#### 📊 Pipeline Mestre de Auditoria Forense e Consolidação Tri-Plataforma
+```bash
+# Executa a auditoria cruzada de ponta a ponta, computa ICs Bootstrap da mediana,
+# regenera as 6 figuras científicas em 300 DPI e empacota audit_export_tri_platform.zip
+python scripts/reproduce_tri_platform_analysis.py
 ```
 
 ---

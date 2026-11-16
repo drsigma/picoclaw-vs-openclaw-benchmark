@@ -19,7 +19,7 @@ param(
     [int]$Warmups = 3,
     [int]$IdleSec = 10,
     [int]$Ngl = 16,
-    [string]$Model = "C:\benchmark_gold\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    [string]$Model = "$PSScriptRoot\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf",
     [switch]$DryRun,
     [switch]$SkipSession2
 )

@@ -60,7 +60,7 @@ def build_corpus() -> str:
     parts.append(
         border("PACOTE DE AUDITORIA — picoclaw-vs-openclaw-benchmark")
         + f"Gerado em : {ts}\n"
-        + "Repositório: /home/rafalince/Desktop/mestrado/picoclaw-vs-openclaw-benchmark\n"
+        + "Repositório: picoclaw-vs-openclaw-benchmark\n"
         + f"Commit HEAD: {head_commit} (main)\n\n"
     )
 

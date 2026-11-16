@@ -23,7 +23,7 @@ REPS="${REPS:-30}"
 WARMUPS="${WARMUPS:-3}"
 IDLE_SEC="${IDLE_SEC:-10}"
 NGL="${NGL:-16}"
-MODEL="${MODEL:-/home/rafalince/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf}"
+MODEL="${MODEL:-${REPO_DIR}/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf}"
 
 # ------------------------------------------------------------------------------
 # 1. Validação de Permissões (Sudo)

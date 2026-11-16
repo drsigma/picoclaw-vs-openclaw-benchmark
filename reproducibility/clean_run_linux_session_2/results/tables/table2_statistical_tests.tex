@@ -1,0 +1,28 @@
+% Hypothesis Testing: PicoClaw vs Rivals (Mann-Whitney U, Cliff's Delta, A12, Holm-Bonferroni)
+\begin{table}[t]
+\centering\small
+\caption{Non-Parametric Statistical Superiority: PicoClaw vs Competitors (Linux x86_64)}
+\label{tab:linux_stat_tests}
+\begin{tabular}{llrrrr}
+\toprule
+Comparison (Rival vs PicoClaw) & WL & $U$ Stat & Raw $p$ & Cliff's $d$ & $A_{12}$ Effect \\
+\midrule
+bun\_minimal & W1 & 374 & 0.2643 & +0.169 & 0.585 \\
+bun\_minimal & W2 & 299 & 0.0261 & +0.336 & 0.668 \\
+bun\_minimal & W3 & 657 & 0.0023 & -0.460 & 0.270 \\
+bun\_minimal & W4 & 46 & 2.44e-09 & +0.898 & 0.949 \\
+openclaw\_full & W1 & 0 & 3.02e-11 & +1.000 & 1.000 \\
+openclaw\_full & W2 & 0 & 3.02e-11 & +1.000 & 1.000 \\
+openclaw\_full & W3 & 0 & 3.02e-11 & +1.000 & 1.000 \\
+openclaw\_full & W4 & 0 & 3.02e-11 & +1.000 & 1.000 \\
+openclaw\_minimal & W1 & 200 & 2.25e-04 & +0.556 & 0.778 \\
+openclaw\_minimal & W2 & 187 & 1.04e-04 & +0.584 & 0.792 \\
+openclaw\_minimal & W3 & 283 & 0.0138 & +0.371 & 0.685 \\
+openclaw\_minimal & W4 & 30 & 5.57e-10 & +0.933 & 0.967 \\
+python\_native & W1 & 292 & 0.0199 & +0.351 & 0.675 \\
+python\_native & W2 & 265 & 0.0064 & +0.411 & 0.706 \\
+python\_native & W3 & 337 & 0.0963 & +0.251 & 0.626 \\
+python\_native & W4 & 33 & 7.38e-10 & +0.927 & 0.963 \\
+\bottomrule
+\end{tabular}
+\end{table}
