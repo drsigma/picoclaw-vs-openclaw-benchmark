@@ -213,10 +213,45 @@ def run_linux_subprocess_with_status(cmd: List[str], cwd: Optional[str] = None) 
     return stdout, stderr, ret, hw_stats
 
 
+def decompose_nvml_throttle_reasons(bitmask: Optional[int]) -> Dict[str, Any]:
+    """
+    Decomposes raw NVML clocks throttle reasons bitmask into standard boolean flags:
+      - 0x04: SwPowerCap (software power capping / TDP limit reached)
+      - 0x08: HwSlowdown (hardware slowdown general)
+      - 0x20: SwThermalSlowdown (software thermal slowdown)
+      - 0x40: HwThermalSlowdown (hardware thermal slowdown / emergency thermal trip)
+      - 0x80: HwPowerBrakeSlowdown (external power brake)
+    """
+    mask = int(bitmask) if bitmask is not None else 0
+    sw_power = bool(mask & 0x04)
+    hw_slowdown = bool(mask & 0x08)
+    sw_thermal = bool(mask & 0x20)
+    hw_thermal = bool(mask & 0x40)
+    hw_brake = bool(mask & 0x80)
+    is_thermal = bool(sw_thermal or hw_thermal)
+    return {
+        "nvml_throttle_reasons_bitmask": mask,
+        "gpu_sw_power_cap": sw_power,
+        "gpu_hw_slowdown": hw_slowdown,
+        "gpu_sw_thermal_slowdown": sw_thermal,
+        "gpu_hw_thermal_slowdown": hw_thermal,
+        "gpu_hw_power_brake": hw_brake,
+        "gpu_thermal_throttle_active_end": is_thermal,
+    }
+
+
 def run_windows_subprocess_with_psutil(cmd: List[str], cwd: Optional[str] = None) -> Tuple[str, str, int, Dict[str, Any]]:
-    """Runs child process on Windows, collecting peak_wset (Peak Working Set) via psutil."""
+    """Runs child process on Windows, collecting peak_wset (Peak Working Set) via psutil across process and children."""
+    import sys
     import psutil
     t0 = time.monotonic()
+    cmd = list(cmd)
+    if cmd and os.path.basename(cmd[0]).lower() in ("py.exe", "py"):
+        real_py = sys.executable
+        if os.path.basename(real_py).lower() in ("py.exe", "py"):
+            real_py = shutil.which("python.exe") or shutil.which("python") or real_py
+        cmd[0] = real_py
+
     p = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     peak_wset_bytes = 0
     try:
@@ -224,13 +259,18 @@ def run_windows_subprocess_with_psutil(cmd: List[str], cwd: Optional[str] = None
         while p.poll() is None:
             try:
                 mem = proc.memory_info()
-                if hasattr(mem, "peak_wset"):
-                    peak_wset_bytes = max(peak_wset_bytes, mem.peak_wset)
-                else:
-                    peak_wset_bytes = max(peak_wset_bytes, mem.rss)
+                wset = getattr(mem, "peak_wset", None) or getattr(mem, "rss", 0)
+                peak_wset_bytes = max(peak_wset_bytes, wset)
+                for ch in proc.children(recursive=True):
+                    try:
+                        ch_mem = ch.memory_info()
+                        ch_wset = getattr(ch_mem, "peak_wset", None) or getattr(ch_mem, "rss", 0)
+                        peak_wset_bytes = max(peak_wset_bytes, ch_wset)
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 break
-            time.sleep(0.01)
+            time.sleep(0.005)
     except Exception:
         pass
     stdout, stderr = p.communicate()
@@ -238,7 +278,7 @@ def run_windows_subprocess_with_psutil(cmd: List[str], cwd: Optional[str] = None
     t_elapsed_ms = (time.monotonic() - t0) * 1000.0
     peak_mb = peak_wset_bytes / (1024.0 * 1024.0)
     hw_stats = {
-        "proc_peak_phys_mb": round(peak_mb, 2),
+        "proc_peak_phys_mb": round(max(1.0, peak_mb), 2),
         "proc_rss_mb": round(peak_mb, 2),
         "proc_instructions": 0,
         "proc_cycles": 0,

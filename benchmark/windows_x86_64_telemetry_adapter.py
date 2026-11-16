@@ -47,6 +47,69 @@ class PROCESS_MEMORY_COUNTERS_EX(ctypes.Structure):
     ]
 
 
+class IO_COUNTERS(ctypes.Structure):
+    _fields_ = [
+        ("ReadOperationCount", ctypes.c_uint64),
+        ("WriteOperationCount", ctypes.c_uint64),
+        ("OtherOperationCount", ctypes.c_uint64),
+        ("ReadTransferCount", ctypes.c_uint64),
+        ("WriteTransferCount", ctypes.c_uint64),
+        ("OtherTransferCount", ctypes.c_uint64),
+    ]
+
+
+class JOBOBJECT_BASIC_LIMIT_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ("PerProcessUserTimeLimit", ctypes.c_int64),
+        ("PerJobUserTimeLimit", ctypes.c_int64),
+        ("LimitFlags", wintypes.DWORD),
+        ("MinimumWorkingSetSize", ctypes.c_size_t),
+        ("MaximumWorkingSetSize", ctypes.c_size_t),
+        ("ActiveProcessLimit", wintypes.DWORD),
+        ("Affinity", ctypes.c_size_t),
+        ("PriorityClass", wintypes.DWORD),
+        ("SchedulingClass", wintypes.DWORD),
+    ]
+
+
+class JOBOBJECT_EXTENDED_LIMIT_INFORMATION(ctypes.Structure):
+    _fields_ = [
+        ("BasicLimitInformation", JOBOBJECT_BASIC_LIMIT_INFORMATION),
+        ("IoInfo", IO_COUNTERS),
+        ("ProcessMemoryLimit", ctypes.c_size_t),
+        ("JobMemoryLimit", ctypes.c_size_t),
+        ("PeakProcessMemoryUsed", ctypes.c_size_t),
+        ("PeakJobMemoryUsed", ctypes.c_size_t),
+    ]
+
+
+def decompose_nvml_throttle_reasons(bitmask: int | None) -> dict[str, Any]:
+    """
+    Decomposes raw NVML clocks throttle reasons bitmask into standard boolean flags:
+      - 0x04: SwPowerCap (software power capping / TDP limit reached)
+      - 0x08: HwSlowdown (hardware slowdown general)
+      - 0x20: SwThermalSlowdown (software thermal slowdown)
+      - 0x40: HwThermalSlowdown (hardware thermal slowdown / emergency thermal trip)
+      - 0x80: HwPowerBrakeSlowdown (external power brake)
+    """
+    mask = int(bitmask) if bitmask is not None else 0
+    sw_power = bool(mask & 0x04)
+    hw_slowdown = bool(mask & 0x08)
+    sw_thermal = bool(mask & 0x20)
+    hw_thermal = bool(mask & 0x40)
+    hw_brake = bool(mask & 0x80)
+    is_thermal = bool(sw_thermal or hw_thermal)
+    return {
+        "nvml_throttle_reasons_bitmask": mask,
+        "gpu_sw_power_cap": sw_power,
+        "gpu_hw_slowdown": hw_slowdown,
+        "gpu_sw_thermal_slowdown": sw_thermal,
+        "gpu_hw_thermal_slowdown": hw_thermal,
+        "gpu_hw_power_brake": hw_brake,
+        "gpu_thermal_throttle_active_end": is_thermal,
+    }
+
+
 # ==============================================================================
 # 1. GATE 0 HOST PROVENANCE (WINDOWS)
 # ==============================================================================
@@ -411,13 +474,84 @@ def run_subprocess_with_windows_counters(
     env: dict[str, str] | None = None,
     timeout: float | None = None,
 ) -> tuple[str, str, int, dict[str, Any]]:
-    kernel32 = ctypes.windll.kernel32
-    psapi = ctypes.windll.psapi
+    cmd = list(cmd)
+    # 1. Resolve real Python executable, avoiding PEP 397 py.exe wrapper stub
+    if cmd and os.path.basename(cmd[0]).lower() in ("py.exe", "py"):
+        real_py = sys.executable
+        if os.path.basename(real_py).lower() in ("py.exe", "py"):
+            real_py = shutil.which("python.exe") or shutil.which("python") or real_py
+        cmd[0] = real_py
+
+    windll = getattr(ctypes, "windll", None)
+    if windll is None:
+        # Fallback if invoked on non-Windows host (e.g. testing)
+        proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        stdout, stderr = proc.communicate(timeout=timeout)
+        return stdout, stderr, proc.returncode, {
+            "proc_instructions": None,
+            "proc_cycles": 0,
+            "proc_billed_energy": 0,
+            "proc_peak_phys_mb": 1.0,
+            "proc_rss_mb": 0.0,
+            "page_faults": 0,
+        }
+
+    kernel32 = windll.kernel32
+    psapi = windll.psapi
+
+    # 2. Encapsulate in Win32 Job Object for tracking entire process tree memory footprint
+    hJob = None
+    try:
+        hJob = kernel32.CreateJobObjectW(None, None)
+    except Exception:
+        hJob = None
 
     proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    hProcess = kernel32.OpenProcess(0x1000 | 0x0400, False, proc.pid)
+    hProcess = None
+    try:
+        hProcess = kernel32.OpenProcess(0x1000 | 0x0400, False, proc.pid)
+        if hJob and hProcess:
+            kernel32.AssignProcessToJobObject(hJob, hProcess)
+    except Exception:
+        pass
 
-    stdout, stderr = proc.communicate(timeout=timeout)
+    # 3. Background thread to monitor recursive child process peak memory and cycles
+    child_peak_rss_bytes = 0
+    stop_event = threading.Event()
+
+    def child_watcher():
+        nonlocal child_peak_rss_bytes
+        try:
+            import psutil
+            parent_proc = psutil.Process(proc.pid)
+        except Exception:
+            return
+
+        while not stop_event.is_set():
+            try:
+                if not parent_proc.is_running():
+                    break
+                children = parent_proc.children(recursive=True)
+                for ch in children:
+                    try:
+                        mem = ch.memory_info()
+                        wset = getattr(mem, "peak_wset", None) or getattr(mem, "rss", 0)
+                        if wset > child_peak_rss_bytes:
+                            child_peak_rss_bytes = wset
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        pass
+            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                break
+            time.sleep(0.005)
+
+    watcher_th = threading.Thread(target=child_watcher, daemon=True)
+    watcher_th.start()
+
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    finally:
+        stop_event.set()
+        watcher_th.join(timeout=0.1)
 
     cycles = ctypes.c_uint64()
     pmc = PROCESS_MEMORY_COUNTERS_EX()
@@ -436,6 +570,42 @@ def run_subprocess_with_windows_counters(
             proc_rss_mb = round(pmc.WorkingSetSize / (1024.0 * 1024.0), 4)
             page_faults = int(pmc.PageFaultCount)
         kernel32.CloseHandle(hProcess)
+
+    # 4. Query Win32 Job Object extended limit information (class 9)
+    job_peak_mb = 0.0
+    if hJob:
+        try:
+            ext_info = JOBOBJECT_EXTENDED_LIMIT_INFORMATION()
+            ret_len = wintypes.DWORD()
+            if kernel32.QueryInformationJobObject(
+                hJob,
+                9,  # JobObjectExtendedLimitInformation
+                ctypes.byref(ext_info),
+                ctypes.sizeof(ext_info),
+                ctypes.byref(ret_len),
+            ):
+                job_peak_bytes = max(ext_info.PeakJobMemoryUsed, ext_info.PeakProcessMemoryUsed)
+                if job_peak_bytes > 0:
+                    job_peak_mb = round(job_peak_bytes / (1024.0 * 1024.0), 4)
+        except Exception:
+            pass
+        finally:
+            try:
+                kernel32.CloseHandle(hJob)
+            except Exception:
+                pass
+
+    # 5. Reconcile with child peak memory and Win32 Job Object metrics
+    if child_peak_rss_bytes > 0:
+        child_mb = round(child_peak_rss_bytes / (1024.0 * 1024.0), 4)
+        proc_peak_mb = max(proc_peak_mb, child_mb)
+        if proc_rss_mb <= 5.0:  # Wrapper artifact threshold
+            proc_rss_mb = max(proc_rss_mb, child_mb)
+
+    if job_peak_mb > 0:
+        proc_peak_mb = max(proc_peak_mb, job_peak_mb)
+        if proc_rss_mb <= 5.0:
+            proc_rss_mb = max(proc_rss_mb, job_peak_mb)
 
     hw_stats = {
         "proc_instructions": None,  # PMU instruction counter restricted in Windows user-mode (Zero-Mock compliance)

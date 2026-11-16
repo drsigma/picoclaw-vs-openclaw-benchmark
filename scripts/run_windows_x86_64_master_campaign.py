@@ -112,6 +112,7 @@ def die(msg: str) -> None:
 import numpy as np  # noqa: E402
 
 from benchmark.adapters import get_adapter  # noqa: E402
+from benchmark.telemetry import decompose_nvml_throttle_reasons  # noqa: E402
 from benchmark.windows_x86_64_telemetry_adapter import (  # noqa: E402
     WindowsHardwarePowerMonitor,
     ThermalController,
@@ -290,13 +291,19 @@ def provenance_fields(ctx: Ctx, wl: str) -> dict[str, Any]:
 
 
 def thermal_fields(s0: dict[str, Any], s1: dict[str, Any], waited: float) -> dict[str, Any]:
-    gpu_thr = bool(s1["gpu_throttle_reasons"] & GPU_THERMAL_MASK)
-    cpu_thr = s1["cpu_pkg_throttle_count"] - s0["cpu_pkg_throttle_count"]
+    mask = s1.get("gpu_throttle_reasons", 0)
+    dec = decompose_nvml_throttle_reasons(mask)
+    cpu_thr = max(0, int(s1.get("cpu_pkg_throttle_count", 0)) - int(s0.get("cpu_pkg_throttle_count", 0)))
+    gpu_thr = dec["gpu_thermal_throttle_active_end"]
     return {
-        "thermal_gate_wait_s": round(waited, 2), "cpu_pkg_temp_start_c": s0["cpu_pkg_temp_c"],
-        "cpu_pkg_temp_end_c": s1["cpu_pkg_temp_c"], "gpu_temp_start_c": s0["gpu_temp_c"],
-        "gpu_temp_end_c": s1["gpu_temp_c"], "fan_rpm_end": s1["fan_rpm"],
-        "cpu_pkg_throttle_events": cpu_thr, "gpu_thermal_throttle_active_end": gpu_thr,
+        "thermal_gate_wait_s": round(waited, 2),
+        "cpu_pkg_temp_start_c": s0["cpu_pkg_temp_c"],
+        "cpu_pkg_temp_end_c": s1["cpu_pkg_temp_c"],
+        "gpu_temp_start_c": s0["gpu_temp_c"],
+        "gpu_temp_end_c": s1["gpu_temp_c"],
+        "fan_rpm_end": s1["fan_rpm"],
+        "cpu_pkg_throttle_events": cpu_thr,
+        **dec,
         "thermal_throttled": bool(cpu_thr > 0 or gpu_thr),
     }
 

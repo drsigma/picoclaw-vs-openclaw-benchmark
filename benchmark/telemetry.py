@@ -684,3 +684,30 @@ class PCIeTrafficMonitor:
             except Exception:
                 pass
         return res
+
+
+def decompose_nvml_throttle_reasons(bitmask: int | None) -> dict[str, Any]:
+    """
+    Decomposes raw NVML clocks throttle reasons bitmask into standard boolean flags:
+      - 0x04: SwPowerCap (software power capping / TDP limit reached)
+      - 0x08: HwSlowdown (hardware slowdown general)
+      - 0x20: SwThermalSlowdown (software thermal slowdown)
+      - 0x40: HwThermalSlowdown (hardware thermal slowdown / emergency thermal trip)
+      - 0x80: HwPowerBrakeSlowdown (external power brake)
+    """
+    mask = int(bitmask) if bitmask is not None else 0
+    sw_power = bool(mask & 0x04)
+    hw_slowdown = bool(mask & 0x08)
+    sw_thermal = bool(mask & 0x20)
+    hw_thermal = bool(mask & 0x40)
+    hw_brake = bool(mask & 0x80)
+    is_thermal = bool(sw_thermal or hw_thermal)
+    return {
+        "nvml_throttle_reasons_bitmask": mask,
+        "gpu_sw_power_cap": sw_power,
+        "gpu_hw_slowdown": hw_slowdown,
+        "gpu_sw_thermal_slowdown": sw_thermal,
+        "gpu_hw_thermal_slowdown": hw_thermal,
+        "gpu_hw_power_brake": hw_brake,
+        "gpu_thermal_throttle_active_end": is_thermal,
+    }

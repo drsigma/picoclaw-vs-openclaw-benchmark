@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import sys
 from typing import Any
 
@@ -30,11 +31,27 @@ class PythonNativeAdapter(AgentOrchestratorAdapter):
         )
         self.repo_dir = repo_dir
         self.script_path = os.path.join(repo_dir, "benchmark", "python_orch.py")
-        venv_py = os.path.join(repo_dir, "tools", ".venv", "bin", "python")
-        if os.path.exists(venv_py):
-            self.py_bin = venv_py
-        else:
-            self.py_bin = sys.executable
+        
+        # Resolve real python executable, avoiding PEP 397 py.exe wrapper stub on Windows
+        candidates = [
+            os.path.join(repo_dir, "tools", ".venv", "Scripts", "python.exe"),
+            os.path.join(repo_dir, ".venv", "Scripts", "python.exe"),
+            os.path.join(repo_dir, "tools", ".venv", "bin", "python"),
+            os.path.join(repo_dir, ".venv", "bin", "python"),
+        ]
+        chosen = None
+        for c in candidates:
+            if os.path.exists(c) and not os.path.basename(c).lower().startswith("py.exe"):
+                chosen = c
+                break
+        if not chosen:
+            exe = sys.executable
+            if os.path.basename(exe).lower() in ("py.exe", "py"):
+                real_py = shutil.which("python.exe") or shutil.which("python")
+                chosen = real_py or exe
+            else:
+                chosen = exe
+        self.py_bin = chosen
 
     def setup(self) -> bool:
         return os.path.exists(self.script_path) and os.path.exists(self.py_bin)
