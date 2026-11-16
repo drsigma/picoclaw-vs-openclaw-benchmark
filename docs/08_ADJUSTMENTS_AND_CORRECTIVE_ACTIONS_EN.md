@@ -49,3 +49,16 @@ The table below summarizes all 9 adjustments implemented during *System Testing*
 * **Observed Phenomenon:** In the publication campaign for Workload W3, PicoClaw's Total Latency exhibited $6423.1 \pm 870.0\text{ ms}$, while orchestration overhead remained negligible at $T_{\text{orch}} = 5.493 \pm 0.84\text{ ms}$.
 * **Empirical Root Cause:** Audit of `results/publication_campaign/raw_trials.jsonl` demonstrates that in Trial 1, Time-To-First-Token ($\text{TTFT}$) surged to $1955.62\text{ ms}$ due to prompt prefill and tensor memory allocation on the Metal GPU upon first encountering the vector RAG context. Across Trials 2 through 5, with prompt prefix cached in `llama-server` KV memory, $\text{TTFT}$ dropped to an average of $26.7\text{ ms}$ and total latency stabilized at ~ $6035\text{ ms}$.
 * **Methodological Evidence:** PicoClaw's Median for W3 is $6035.6\text{ ms}$ and the Interquartile Range ($\text{IQR}$) is only $7.3\text{ ms}$ (0.12%), verifying that 100% of the observed sample variance stemmed from neural prefill caching rather than the Go orchestrator.
+
+#### 2.5. Zero-Mock Forensic Audit on Windows 11: Expurgation of Synthetic IPC and Stub PID Isolation
+* **Issue:** Preliminary Windows 11 trial records derived instructions via fixed constant scaling (`0.85 * cycles`), violating Zero-Mock empirical guidelines. Additionally, standard CPython invocation via `py.exe` (PEP 397) tracked the wrapper stub PID (~4.91 MB) rather than the child worker process.
+* **Correction:**
+  1. Instructions on Windows 11 were formally marked as `N/A*` (due to user-mode PMU restrictions by the OS kernel without privileged drivers), retaining empirical CPU cycles via `QueryProcessCycleTime` (43.0M in PicoClaw vs. 507.9M in OpenClaw Full in W2, an 11.82x cycle ratio).
+  2. PythonNative RSS and cycles on Windows were marked as `N/A† (Stub PID)` to eliminate methodological contamination.
+
+#### 2.6. Clean-Room Runs Policy
+* **Standard Established:** 100% of consolidated datasets derive from clean from-scratch runs with prior termination of concurrent/zombie processes and policies suppressing OS background sleep, hibernation, and auto-updates. Partial data from interrupted runs was expunged.
+
+#### 2.7. Windows 11 Loopback HTTP Winsock Latency Overhead (Table 6)
+* **Observed Phenomenon:** In the MCP transport ablation, local loopback HTTP dispatch on Windows 11 reached $18.32\text{ ms}$ (vs. $1.81\text{ ms}$ for in-process dispatch), a $10.13\times$ overhead.
+* **Empirical Root Cause:** The Windows Winsock stack (`ws2_32.dll` / `AFD.sys`) incurs greater socket connection handshake, local firewall inspection, and thread switching overhead relative to POSIX Unix domain sockets and pipes (Linux $1.71\text{ ms}$, macOS $3.85\text{ ms}$).

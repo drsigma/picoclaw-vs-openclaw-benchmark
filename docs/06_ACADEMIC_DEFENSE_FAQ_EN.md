@@ -79,21 +79,22 @@ The disparity in absolute energy consumption originates from three fundamental m
 
 ---
 
-### Question 8: Why does the cross-platform comparison matrix display "N/A" for "Billed Energy" on Linux and "Instructions" on Darwin, and how does this align with the Zero-Mock mandate?
+### Question 8: How does the "N/A" taxonomy across tri-platform tables align with the Zero-Mock mandate, and what are the formal methodological justifications?
 **Rigorous Response:**  
-The reporting of "N/A" (*Not Applicable / Not Available*) for specific cross-platform telemetry cells is an intentional, principled methodological choice enforcing the strict **Zero-Mock** standard of this study, categorically rejecting synthetic imputation or heuristic modeling:
+The presence of "N/A" (*Not Applicable / Not Available*) values is an intentional, principled methodological choice enforcing the strict **Zero-Mock** standard of this study, categorically rejecting synthetic imputation, heuristic extrapolations, or speculative estimates:
 
-1. **Linux x86_64: `Billed Energy = N/A (RAPL mJ)`:**
-   * On Linux, physical telemetry leverages **Intel RAPL** (`/sys/class/powercap/intel-rapl:0/energy_uj`) and NVIDIA NVML to record actual physical millijoules consumed across the full CPU Package, Memory Controller, and discrete GPU board.
-   * Unlike the Darwin XNU Mach-O task accounting subsystem (`RUSAGE_INFO_V4` exposing `ri_billed_energy`), the Linux kernel does not synthesize per-process energy accounting units without intrusive eBPF overhead or speculative models. Because RAPL provides ground-truth physical energy, Mach-O task units are strictly `N/A`.
+1. **Windows 11 x86_64: `Instructions = N/A*` (User-Mode PMU Restriction):**
+   * On Windows 11 in user-mode, hardware PMU instruction counters are restricted by kernel policy without privileged kernel drivers (the `CR4.PCE` bit is disabled by default, and kernel-mode tracing via ETW/WPR imposes prohibitive execution overhead on isolated subprocesses).
+   * The Win32 API exposes accumulated execution cycle time via `QueryProcessCycleTime` (`realtimeapiset.h`). Under our strict Zero-Mock guidelines, the forensic audit expunged the spurious practice of estimating instructions via fixed IPC constants (e.g. `0.85 * cycles`), formally marking `Instructions` as `N/A*` and tracking empirical CPU cycles: **43.0M cycles in PicoClaw vs. 507.9M cycles in OpenClaw Full in W2 (an 11.82x cycle overhead)**.
+   * *References:* Microsoft Learn (Win32 `QueryProcessCycleTime`); Intel® 64 and IA-32 SDM Vol. 3B Ch. 20; Weaver, V. M. (2013), *Linux perf_event Features and Overhead*, IEEE ISPASS.
 
-2. **Darwin ARM64: `Instructions = N/A (XNU PMC locked)`:**
-   * In macOS/Darwin, neither `powermetrics` nor public XNU APIs expose raw Hardware Performance Monitoring Counters (PMC) for hardware instructions retired without private kernel entitlements (*Kperf / AppleInternal*).
-   * Conversely, on Linux x86_64, the native `perf_event_open(2)` syscall provides direct, unprivileged access to core PMU event registers (`instructions` and `cpu-cycles`). Synthetically projecting instructions from cycle counts or IPC assumptions on Apple Silicon would constitute fraudulent data manufacturing.
+2. **Windows 11 x86_64: `PythonNative Peak RSS = N/A†` (Launcher Stub PID PEP 397):**
+   * Standard CPython invocation on Windows via `py.exe` (PEP 397) functions as a launcher wrapper stub that spawns an independent child `python.exe` process. Telemetry via Win32 PSAPI (`GetProcessMemoryInfo` / `PROCESS_MEMORY_COUNTERS`) monitored the immediate parent wrapper PID (~4.91 MB) rather than the child worker heap (tree aggregation requires Win32 *Job Objects* via `QueryInformationJobObject`). Under Zero-Mock compliance, `N/A†` is reported rather than truncated stub metrics.
+   * *References:* Python Enhancement Proposal PEP 397 (*Python Launcher for Windows*); Microsoft Learn (Win32 PSAPI `GetProcessMemoryInfo`).
 
-3. **Adherence to Scientific Integrity (Zero-Mock):**
-   * By explicitly marking these telemetry fields as "N/A", the study maintains total transparency regarding kernel observability boundaries rather than improvising pseudo-data.
-   * **Cross-Platform Harmonized Metric:** Crucially, **Net Dynamic Energy ($E_{\text{net}}$)** was physically sampled and integrated above quiescent baselines on both architectures (Apple SMC current shunts on Darwin; Intel RAPL + NVIDIA NVML on Linux), fully preserving cross-platform empirical validity.
+3. **Darwin ARM64 and Linux x86_64: Direct Empirical PMU Instruction Comparison:**
+   * On Linux x86_64, the native `perf_event_open(2)` system call directly samples hardware PMU counters with register-level precision (32.65M in PicoClaw vs. 771.51M in OpenClaw Full, a 23.63x instruction bloat ratio).
+   * On macOS Darwin ARM64, Apple PMU hardware counters are captured via `proc_pid_rusage()` (`ri_instructions`: 62.56M in PicoClaw vs. 791.35M in OpenClaw Full, a 12.65x bloat ratio).
 
 ---
 
@@ -111,3 +112,16 @@ The recorded values of $0.0$ MB for peak physical resident memory (*Peak Phys RA
 
 3. **Empirical Baseline Alignment:**
    * Neural generation latency and package-level energy consumption are fully captured across all arms. Anchoring orchestrator memory and PMU counters at zero for the baseline establishes the formal control condition, enabling precise mathematical subtraction of neural work to isolate runtime overhead.
+
+---
+
+### Question 10: How was the "Clean-Room Runs" policy enforced, and what accounts for the Windows 11 loopback HTTP latency anomaly (Table 6)?
+**Rigorous Response:**  
+
+1. **Clean-Room Runs Protocol:**
+   * 100% of consolidated empirical datasets originate from clean from-scratch runs without partial data reuse.
+   * Active process isolation was enforced prior to each campaign, ensuring mandatory termination of residual daemon processes and blocking background OS automatic update, sleep, and indexing services. No partial data from aborted runs was salvaged.
+
+2. **Windows 11 Loopback HTTP Latency Anomaly (Table 6):**
+   * In the MCP transport IPC ablation, dispatch latency over local loopback HTTP REST on Windows 11 registered a median of **$18.32\text{ ms}$** (with an IQR of $20.77\text{ ms}$), compared to just **$1.81\text{ ms}$** for native in-process dispatch (a **$10.13\times$** overhead). On Linux, loopback HTTP registered $1.71\text{ ms}$ ($1.54\times$) and on macOS $3.85\text{ ms}$ ($1.50\times$).
+   * This pronounced latency tax stems from the architectural overhead of the Windows Winsock network stack (`ws2_32.dll`) and kernel TCP/IP transport driver (AFD.sys), which incur greater connection handshake, local firewall inspection, and socket context switching costs compared to Unix domain sockets and stdio pipes on POSIX operating systems. This empirically demonstrates that local HTTP-based agent microservice architectures suffer severe runtime penalties specifically within the Windows desktop environment.

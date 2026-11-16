@@ -79,21 +79,22 @@ A diferença nas leituras de energia decorre de três distinções físicas e ar
 
 ---
 
-### Pergunta 8: Por que a tabela comparativa cross-platform apresenta valores "N/A" para "Billed Energy" no Linux e "Instructions" no Mac, e como isso se alinha à diretriz Zero-Mock?
+### Pergunta 8: Como a taxonomia de valores "N/A" nas tabelas tri-plataforma se alinha à diretriz Zero-Mock e quais são as justificativas metodológicas formais?
 **Resposta Rigorosa:**  
-A presença de valores "N/A" (*Not Applicable / Not Available*) é uma decisão metodológica deliberada e transparente que materializa o compromisso **Zero-Mock** desta pesquisa, rejeitando categoricamente qualquer interpolação sintética ou modelagem estimativa:
+A presença de valores "N/A" (*Not Applicable / Not Available*) é uma decisão metodológica deliberada, transparente e cientificamente mandatória que materializa o compromisso **Zero-Mock** desta pesquisa, rejeitando categoricamente qualquer interpolação sintética, aproximação heurística ou estimativa arbitrária:
 
-1. **Linux x86_64: `Billed Energy = N/A (RAPL mJ)`:**
-   * No Linux, a telemetria física utiliza a interface **Intel RAPL** (`/sys/class/powercap/intel-rapl:0/energy_uj`), que integra a energia física real consumida pelo processador completo (Package/Cores/Uncore) e a GPU dedicada via NVML.
-   * Diferente do subsistema de contabilidade de tarefas do kernel Darwin/XNU (`RUSAGE_INFO_V4` com `ri_billed_energy`), o kernel Linux não atribui cotas de energia faturadas (*billed energy units*) individualmente a um PID sem instrumentação invasiva de eBPF ou modelos heurísticos. Como o RAPL fornece a energia física real em milijoules (mJ), o campo de contabilidade de tarefas Mach-O é reportado como `N/A`.
+1. **Windows 11 x86_64: `Instructions = N/A*` (Restrição de PMU em User-Mode):**
+   * No Windows 11 em espaço de usuário (*user-mode*), contadores de instruções de hardware da PMU são restritos pelo kernel do SO sem drivers privilegiados (o bit `CR4.PCE` é desativado por padrão e o rastreamento via ETW/WPR kernel-mode impõe overhead proibitivo a subprocessos isolados).
+   * A API Win32 expõe apenas ciclos acumulados via `QueryProcessCycleTime` (`realtimeapiset.h`). Sob a política estrita Zero-Mock / Zero-Sintetização, a auditoria expurgou a prática espúria de derivar instruções por constante de IPC fixo (ex.: `0.85 * cycles`), marcando `Instructions` como `N/A*` e mantendo a telemetria empírica direta de ciclos: **43,0M ciclos no PicoClaw vs. 507,9M ciclos no OpenClaw Full em W2 (sobrecarga de 11,82x)**.
+   * *Referências:* Microsoft Learn (Win32 `QueryProcessCycleTime`); Intel® 64 and IA-32 SDM Vol. 3B Ch. 20; Weaver, V. M. (2013), *Linux perf_event Features and Overhead*, IEEE ISPASS.
 
-2. **Darwin ARM64: `Instructions = N/A (XNU PMC locked)`:**
-   * No macOS/Darwin, o utilitário oficial `powermetrics` e a API pública do kernel XNU mantêm os contadores de monitoramento de performance (PMC) de baixo nível bloqueados para processos de usuário sem privilégios especiais de kernel (*Kperf / AppleInternal entitlements*).
-   * Em contrapartida, no Linux x86_64, a chamada de sistema nativa `perf_event_open(2)` expõe os contadores PMU de hardware (`instructions` e `cpu-cycles`) com precisão cirúrgica de registrador. Tentar projetar ou inferir as instruções do Mac a partir dos ciclos seria uma fabricação inaceitável de dados.
+2. **Windows 11 x86_64: `PythonNative Peak RSS = N/A†` (Wrapper Stub PID PEP 397):**
+   * A invocação padrão no Windows via `py.exe` (PEP 397) opera como um processo launcher stub que despacha um processo filho `python.exe` independente. A telemetria via Win32 PSAPI (`GetProcessMemoryInfo` / `PROCESS_MEMORY_COUNTERS`) monitorou o PID do wrapper pai imediato (~4,91 MB) e não a heap do CPython worker filho (já que a agregação em árvore exige Win32 *Job Object* via `QueryInformationJobObject`). Sob conformidade Zero-Mock, reporta-se `N/A†` em vez de valores truncados do stub.
+   * *Referências:* Python Enhancement Proposal PEP 397 (*Python Launcher for Windows*); Microsoft Learn (Win32 PSAPI `GetProcessMemoryInfo`).
 
-3. **Preservação da Integridade Científica (Zero-Mock):**
-   * Em vez de fabricar dados cruzados ou preencher lacunas com constantes arbitradas, o estudo documenta com total transparência as fronteiras de observabilidade de cada kernel.
-   * **Métrica Unificadora:** Destaca-se que a **Energia Líquida Dinâmica ($E_{\text{net}}$)** foi rigorosamente medida e integrada em ambas as plataformas (Apple SMC Shunts no Mac e Intel RAPL + NVML no Linux), garantindo a comparabilidade bioenergética do experimento sem qualquer concessão ao empirismo.
+3. **Darwin ARM64 e Linux x86_64: Comparação Direta de Instruções PMU:**
+   * No Linux x86_64, a chamada de sistema nativa `perf_event_open(2)` expõe contadores PMU de instruções aposentadas com precisão cirúrgica de registrador (32,65M no PicoClaw vs. 771,51M no OpenClaw Full, redução de 23,63x).
+   * No macOS Darwin ARM64, os contadores de PMU da Apple são coletados via `proc_pid_rusage()` (`ri_instructions`: 62,56M no PicoClaw vs. 791,35M no OpenClaw Full, redução de 12,65x).
 
 ---
 
@@ -111,3 +112,16 @@ Os valores de $0{,}0$ MB para pegada de memória física (*Peak Phys RAM*) e a a
 
 3. **Validade da Decomposição de Variância:**
    * A energia e a latência da geração neural são devidamente contabilizadas na potência global e no $T_{\text{task}}$ de todos os braços. Manter o baseline em zero para memória e PMU de orquestração é o que viabiliza subtrair com precisão cirúrgica a contribuição neural e quantificar o ganho de eficiência do PicoClaw.
+
+---
+
+### Pergunta 10: Como foi assegurada a política de "Clean-Room Runs" e o que explica a anomalia de latência de loopback HTTP no Windows 11 (Tabela 6)?
+**Resposta Rigorosa:**  
+
+1. **Protocolo de Execuções Limpas (*Clean-Room Runs*):**
+   * 100% dos dados consolidados foram coletados a partir de execuções ininterruptas executadas do zero (*clean from-scratch runs*).
+   * Foi implementada política ativa de isolamento de processos concorrentes/zumbis, garantindo término compulsório de daemons residuais e bloqueio de serviços de atualização automática e economia de energia do SO antes de cada campanha. Nenhum dado parcial de execuções abortadas foi reutilizado.
+
+2. **Anomalia de Loopback HTTP no Windows 11 (Tabela 6):**
+   * No teste de ablação de transporte MCP, a latência de despacho via loopback HTTP REST no Windows 11 registrou mediana de **$18{,}32\text{ ms}$** (com IQR de $20{,}77\text{ ms}$), comparada a apenas **$1{,}81\text{ ms}$** no despacho *in-process* (sobrecarga de **$10{,}13\times$**). No Linux, o loopback HTTP registrou $1{,}71\text{ ms}$ ($1{,}54\times$) e no macOS $3{,}85\text{ ms}$ ($1{,}50\times$).
+   * Essa penalidade decorre do overhead arquitetural da pilha de rede Winsock (`ws2_32.dll`) e do subsistema TCP/IP do kernel Windows (AFD.sys), que impõem maior latência de handshake, verificação de firewall e troca de contexto de socket local quando comparados aos mecanismos Unix domain sockets e pipes de SOs POSIX. Isso evidencia empiricamente que arquiteturas de agentes baseadas em microserviços HTTP locais sofrem penalidade severa de runtime especificamente no ecossistema Windows.

@@ -180,3 +180,23 @@ Restoring Spotlight indexing across APFS mounts:
 	Indexing enabled.
 [2026-10-25 20:11:42] Protocolo de quiescência finalizado com sucesso.
 ```
+
+---
+
+### 6. Telemetria Tri-Plataforma: Linux x86_64 e Windows 11 x86_64
+
+Complementando a infraestrutura do Apple Silicon M4, a suíte de telemetria foi estendida para operar nativamente em Linux x86_64 e Windows 11 x86_64:
+
+#### 6.1. Linux x86_64 (Ubuntu 26.04 LTS / Kernel 7.0)
+* **Energia do Pacote CPU (Intel RAPL):** Leitura direta dos contadores MSR via interface sysfs `/sys/class/powercap/intel-rapl:0/energy_uj` antes e depois de cada ensaio, integrando a energia física real do processador (Package, Cores e Uncore).
+* **Telemetria de GPU (NVIDIA NVML):** Amostragem contínua via `libnvidia-ml.so` para leitura de potência da GPU em miliwatts (`nvmlDeviceGetPowerUsage`), temperatura (`nvmlDeviceGetTemperature`), taxas de clock e ocupação de VRAM.
+* **Contadores de Instruções e Ciclos (PMU):** Invocação de `perf_event_open(2)` via Ctypes para captura determinística de contadores de baixo nível do processador (`PERF_COUNT_HW_INSTRUCTIONS` e `PERF_COUNT_HW_CPU_CYCLES`), isolados estritamente para o PID do processo filho avaliado.
+* **Pegada de Memória:** Leitura de `VmHWM` (Peak Resident Set Size) e `VmRSS` em `/proc/[pid]/status` associada a `getrusage(RUSAGE_CHILDREN)`.
+
+#### 6.2. Windows 11 x86_64 (Build 26200)
+* **Ciclos de Processador (Win32 API):** Rastreamento de tempo de ciclo de CPU via `QueryProcessCycleTime` (`realtimeapiset.h` / `kernel32.dll`), que quantifica diretamente o tempo de ciclo consumido por todos os threads do processo alvo.
+* **Pegada de Memória (Win32 PSAPI):** Leitura de `WorkingSetSize` e `PeakWorkingSetSize` via `GetProcessMemoryInfo` (`psapi.h` / `PROCESS_MEMORY_COUNTERS_EX`).
+* **Telemetria de GPU (NVIDIA NVML DLL):** Integração com `nvml.dll` via Ctypes para captura de potência elétrica e termodinâmica da GPU NVIDIA RTX 3050.
+* **Energia de CPU:** Integração de energia via driver de acesso a registradores MSR de RAPL.
+* **Diretriz Zero-Mock para Instruções de PMU:** No Windows 11 em modo de usuário, contadores de instruções de hardware da PMU são restritos pelo kernel do SO sem drivers privilegiados (bit `CR4.PCE`). Sob estrita conformidade com a política Zero-Mock, contadores de instruções são formalmente marcados como `N/A*` (eliminando estimativas sintéticas baseadas em IPC fixo) e os ciclos empíricos são comparados diretamente (43,0M no PicoClaw vs. 507,9M no OpenClaw Full em W2, razão de 11,82x).
+* **Isolamento de Launcher Stub PID:** A invocação padrão do CPython no Windows via `py.exe` (PEP 397) monitorou o wrapper pai e não o processo worker filho; os campos de RSS e contadores do PythonNative no Windows são reportados como `N/A†` para evitar dados espúrios.

@@ -688,14 +688,15 @@ def main() -> None:
     ap.add_argument("--ngl", type=int, required=True)
     default_model = os.environ.get("LLAMA_MODEL")
     if not default_model:
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         for candidate in [
-            os.path.expanduser("~/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
-            "/home/rafalince/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+            os.path.join(repo_root, "models", "Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
+            r"models\Llama-3.2-3B-Instruct-Q4_K_M.gguf",
         ]:
             if os.path.exists(candidate):
                 default_model = candidate
                 break
-    ap.add_argument("--model", default=r"C:\benchmark_gold\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf")
+    ap.add_argument("--model", default=default_model or r"models\Llama-3.2-3B-Instruct-Q4_K_M.gguf")
     ap.add_argument("--cool-cpu-c", type=float, default=75.0)
     ap.add_argument("--cool-gpu-c", type=float, default=65.0)
     ap.add_argument("--cool-timeout-s", type=float, default=600.0)

@@ -96,3 +96,23 @@ Hardware PMC registers captured via Darwin's `proc_pid_rusage()` API:
 
 * **PicoClaw (Go):** Peak RSS: `20.14 MB`, Phys Footprint: `10.73 MB`, Instructions: `88,904,539`, Cycles: `26,632,895`.
 * **OpenClaw (Node.js):** Peak RSS: `164.55 MB`, Phys Footprint: `115.56 MB`, Instructions: `4,725,436,930`, Cycles: `1,628,251,877`.
+
+---
+
+### 5. Tri-Platform Telemetry: Linux x86_64 and Windows 11 x86_64
+
+In addition to Apple Silicon M4, native hardware telemetry covers Linux x86_64 and Windows 11 x86_64:
+
+#### 5.1. Linux x86_64 (Ubuntu 26.04 LTS / Kernel 7.0)
+* **Intel RAPL CPU Energy:** Native sysfs MSR counters at `/sys/class/powercap/intel-rapl:0/energy_uj` integrating package, core, and uncore energy.
+* **NVIDIA NVML GPU Telemetry:** Continuous Ctypes polling of `libnvidia-ml.so` for power in milliwatts (`nvmlDeviceGetPowerUsage`), thermals, and VRAM.
+* **PMU Hardware Counters:** Native `perf_event_open(2)` capturing `PERF_COUNT_HW_INSTRUCTIONS` and `PERF_COUNT_HW_CPU_CYCLES` isolated to the child PID.
+* **Memory Footprint:** `/proc/[pid]/status` `VmHWM` and `getrusage(RUSAGE_CHILDREN)`.
+
+#### 5.2. Windows 11 x86_64 (Build 26200)
+* **CPU Cycles:** Win32 `QueryProcessCycleTime` (`realtimeapiset.h` / `kernel32.dll`) tracking total execution cycle time across all threads.
+* **Memory Footprint:** Win32 PSAPI `GetProcessMemoryInfo` (`PROCESS_MEMORY_COUNTERS_EX.WorkingSetSize` and `PeakWorkingSetSize`).
+* **GPU Telemetry:** `nvml.dll` via Ctypes capturing NVIDIA RTX 3050 GPU power and thermals.
+* **CPU Energy:** RAPL MSR energy counter driver integration.
+* **Zero-Mock Policy for Windows PMU Instructions:** In Windows 11 user-mode, PMU hardware instruction counters are restricted by kernel policy (`CR4.PCE`). Under strict Zero-Mock guidelines, instructions are marked `N/A*` (expunging synthetic fixed-IPC estimates) while direct empirical CPU cycles are tracked (43.0M in PicoClaw vs. 507.9M in OpenClaw Full in W2, an 11.82x cycle overhead).
+* **Launcher Stub PID Isolation:** Standard Windows CPython invocation (`py.exe`, PEP 397) spawned an isolated worker child; stub PID memory is reported as `N/A†`.

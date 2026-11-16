@@ -438,7 +438,7 @@ def run_subprocess_with_windows_counters(
         kernel32.CloseHandle(hProcess)
 
     hw_stats = {
-        "proc_instructions": int(proc_cycles * 0.85) if proc_cycles > 0 else 1000000,
+        "proc_instructions": None,  # PMU instruction counter restricted in Windows user-mode (Zero-Mock compliance)
         "proc_cycles": proc_cycles,
         "proc_billed_energy": 0,
         "proc_peak_phys_mb": max(1.0, proc_peak_mb),

@@ -49,3 +49,16 @@ A tabela abaixo resume todos os 9 ajustes implementados durante o *System Testin
 * **Fenômeno Identificado:** No Workload W3 da campanha de publicação, a Latência Total do PicoClaw registrou $6423{,}1 \pm 870{,}0\text{ ms}$, enquanto a sobrecarga do orquestrador foi de apenas $T_{\text{orch}} = 5{,}493 \pm 0{,}84\text{ ms}$.
 * **Causa Raiz Empírica:** A auditoria em `results/publication_campaign/raw_trials.jsonl` revelou que no Ensaio 1, o Time-To-First-Token ($\text{TTFT}$) foi de $1955{,}62\text{ ms}$ devido ao stall de prefill e alocação de tensores na GPU Metal no primeiro contato com o prompt de RAG. Nos Ensaios 2 a 5, com o prefixo residente no cache KV do `llama-server`, o $\text{TTFT}$ caiu para média de $26{,}7\text{ ms}$ e a latência convergiu para ~ $6035\text{ ms}$.
 * **Evidência Metodológica:** A Mediana do PicoClaw no W3 é de $6035{,}6\text{ ms}$ e o Intervalo Interquartil ($\text{IQR}$) é de apenas $7{,}3\text{ ms}$ (0,12%), comprovando que 100% da dispersão originou-se no prefill neural e 0% no runtime Go.
+
+#### 2.5. Auditoria Forense Zero-Mock no Windows 11: Expurgamento de IPC Sintético e Launcher Stub PID
+* **Problema Encontrado:** Nos dados preliminares do Windows 11, instruções de hardware haviam sido estimadas sinteticamente por constante fixa (`0.85 * cycles`), violando o princípio Zero-Mock. Adicionalmente, a invocação padrão do CPython via `py.exe` (PEP 397) monitorou o PID do wrapper launcher (~4,91 MB) e não o subprocesso filho real.
+* **Ajuste Adotado:**
+  1. Instruções no Windows 11 foram formalmente marcadas como `N/A*` (devido a restrições de PMU em user-mode pelo kernel sem drivers privilegiados), mantendo-se a telemetria empírica direta de ciclos de CPU via `QueryProcessCycleTime` (43,0M no PicoClaw vs. 507,9M no OpenClaw Full em W2, razão de 11,82x).
+  2. RSS e contadores do PythonNative no Windows foram marcados como `N/A† (Stub PID)` para eliminar contaminações metodológicas.
+
+#### 2.6. Protocolo de Execuções Limpas do Zero (*Clean-Room Runs*)
+* **Protocolo Estabelecido:** 100% dos dados consolidados derivam de execuções ininterruptas executadas do zero (*clean from-scratch runs*), com purga prévia de processos concorrentes/zumbis e políticas de bloqueio de sleep, hibernação e updates automáticos de SO. Dados parciais de execuções abortadas foram descartados.
+
+#### 2.7. Sobrecarga de Loopback HTTP Winsock no Windows 11 (Tabela 6)
+* **Fenômeno Identificado:** No teste de ablação de transporte MCP, a latência de despacho via loopback HTTP no Windows 11 atingiu $18{,}32\text{ ms}$ (vs. $1{,}81\text{ ms}$ no in-process), uma sobrecarga de $10{,}13\times$.
+* **Causa Raiz Empírica:** A pilha de rede Winsock (`ws2_32.dll` / `AFD.sys`) impõe maior latência de socket local em relação aos mecanismos Unix domain sockets e pipes de SOs POSIX (Linux $1{,}71\text{ ms}$ e macOS $3{,}85\text{ ms}$).
