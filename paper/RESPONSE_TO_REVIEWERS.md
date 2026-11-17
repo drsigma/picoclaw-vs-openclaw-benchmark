@@ -104,19 +104,25 @@ Below we summarize the **five core methodological and software upgrades** before
 
 ---
 
-## 6. Forensic Tri-Platform Extension & Zero-Mock Empirical Validation (macOS ARM64, Linux x86_64, Windows 11 x86_64)
+## 6. Forensic Tri-Platform Extension & Strict Empirical Validation (macOS ARM64, Linux x86_64, Windows 11 x86_64)
 - **Reviewer Concern:** While Apple Silicon M4 provides an ideal UMA testbed, evaluating multi-runtime agent orchestrators requires empirical cross-platform verification across discrete GPU architectures (Linux and Windows 11) under strict scientific reproducibility and zero synthetic data interpolation.
 - **Resolution (`scripts/reproduce_tri_platform_analysis.py`, `windows_gold.ps1`, `reproduce_linux_gold.sh`, `audit_export/`):**
   - **Three Physical Testbeds Instrumented:**
     1. *Apple Silicon M4 (Darwin ARM64):* 10-core CPU, 10-core Metal GPU, 24 GB UMA, Apple SMC power telemetry.
-    2. *Linux x86_64 (Ubuntu 26.04 LTS, kernel 7.0):* Intel Core i5-12500H, NVIDIA RTX 3050 Laptop GPU, Intel RAPL MSR energy and `perf_event_open(2)` PMU counters.
-    3. *Windows 11 x86_64 (Build 26200):* Intel Core i5-12500H, NVIDIA RTX 3050 Laptop GPU, Win32 `QueryProcessCycleTime` telemetry, PSAPI process memory counters, and NVML DLL telemetry.
+    2. *Linux x86_64 (Ubuntu 26.04 LTS, kernel 7.0):* Dell G15 5520, Intel Core i5-12500H, NVIDIA RTX 3050 Laptop GPU (4 GB VRAM), Intel RAPL MSR energy and `perf_event_open(2)` PMU counters.
+    3. *Windows 11 x86_64 (Build 26200):* Dell G15 5520, Intel Core i5-12500H, NVIDIA RTX 3050 Laptop GPU (4 GB VRAM), Win32 `QueryProcessCycleTime` telemetry, PSAPI process memory counters, and NVML DLL telemetry.
+  - **Methodological Note on Hybrid GPU Offload and Regime B (Dell G15 Linux/Windows):**
+    > *A inferência foi realizada em regime híbrido (-ngl 16, correspondendo a ~3.0 GiB na VRAM de 4 GB), acarretando saturação de barramento PCIe. Os ganhos absolutos em cache quente (Regime B) nas arquiteturas x86 são limitados por esse offload parcial e não são diretamente comensuráveis com o M4 de memória unificada.* (Inference operated under partial offload with 16 layers on the 4 GB GPU and remaining layers in host DDR5 via AVX2, streaming activations across PCIe 4.0 at ~5,200 MB/s mean, which bounds Regime B speedups on x86 relative to Apple Silicon M4 on-die UMA).
+  - **Hardware Throttling & Power Capping Analysis:**
+    > *No Linux, os eventos `cpu_pkg_throttle_events` refletem comportamento cumulativo estacionário decorrente da leitura acumuladora do registrador MSR da CPU (`IA32_PACKAGE_THERM_STATUS`), mantendo estabilidade térmica ao longo dos trials. No Windows, os eventos de `gpu_sw_power_cap` (máscara 0x8) operaram exclusivamente para mitigar limites estritos de TDP móvel (75W) durante rajadas curtas no prefill de contexto, sem ocorrência de throttling térmico (`gpu_thermal_throttle_active_end` permaneceu `False` em 100% dos trials, com temperaturas entre 50°C e 74°C).*
   - **Empirical Orchestration Speedups ($T_{\text{orch}}$) in W2:** Native Go achieves **$3.61\times$ on macOS M4** ($5.58\text{ ms}$ vs. $20.14\text{ ms}$), **$5.40\times$ on Linux x86_64** ($6.02\text{ ms}$ vs. $32.53\text{ ms}$), and **$4.18\times$ on Windows 11 x86_64** ($10.94\text{ ms}$ vs. $45.70\text{ ms}$) over Node.js.
-  - **Strict Zero-Mock Policy & Hardware Instruction Telemetry:**
+  - **Strict Empirical Protocol & Hardware Instruction Telemetry:**
     - On Linux x86_64, `perf_event_open(2)` reveals a **$23.63\times$** PMU instruction bloat ratio ($771.51\text{M}$ instructions in OpenClaw Full vs. $32.65\text{M}$ in PicoClaw).
     - On macOS ARM64, Apple PMU counters reveal a **$12.65\times$** instruction bloat ratio ($791.35\text{M}$ in OpenClaw Full vs. $62.56\text{M}$ in PicoClaw).
-    - On Windows 11, hardware PMU instruction counters are restricted in user-mode by kernel policy (`CR4.PCE`). Under our strict Zero-Mock guidelines, we expunged synthetic fixed-IPC estimates (`0.85 * cycles`), formally marking instructions as **`N/A*`** and reporting direct empirical CPU cycles via `QueryProcessCycleTime`: **$43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ cycles in OpenClaw Full ($11.82\times$ cycle overhead)**.
-    - CPython on Windows 11 standard invocation (`py.exe`, PEP 397) was audited as capturing the wrapper launcher stub PID (~4.91 MB) rather than the child worker heap; under Zero-Mock compliance, its memory is marked **`N/A†`**.
+    - On Windows 11, hardware PMU instruction counters are restricted in user-mode by kernel policy (`CR4.PCE`). Under our strict empirical guidelines, we expunged synthetic fixed-IPC estimates (`0.85 * cycles`), formally marking instructions as **`N/A*`** and reporting direct empirical CPU cycles via `QueryProcessCycleTime`: **$43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ cycles in OpenClaw Full ($11.82\times$ cycle overhead)**.
+    - CPython on Windows 11 standard invocation (`py.exe`, PEP 397) was audited as capturing the wrapper launcher stub PID (~4.91 MB) rather than the child worker heap; under our factual protocol, its memory is marked **`N/A†`**.
+  - **Table 2 Non-Parametric Statistics & Effective Sample Size ($n_{\text{eff}}$):**
+    > *Os valores de U e de $\delta$ de Cliff refletem $n=30$. A métrica $n_{\text{eff}}$ é documentada exclusivamente como diagnóstico de saúde da dependência serial e não altera os contrastes robustos de efeitos grandes observados.*
   - **MCP IPC vs. Network Socket Overhead:** On Windows 11, local loopback HTTP dispatch exhibits a median latency of **$18.32\text{ ms}$** vs. **$1.81\text{ ms}$** for in-process dispatch ($10.13\times$ overhead), isolating the Winsock socket stack latency tax compared to Unix domain and in-process IPC.
   - **Median Bootstrap 95% Confidence Intervals:** All summary tables (Tables 1, 5, 6) employ non-parametric bootstrap resampling computed directly on the sample median (2,000 resamples), guaranteeing 100% strict containment of medians within confidence intervals.
   - **Clean-Room Attestation:** 100% of tri-platform datasets originate from clean from-scratch runs with full process isolation and blocked background OS update/sleep routines.

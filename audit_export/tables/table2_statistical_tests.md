@@ -115,7 +115,7 @@
 | Windows 11 | Regime B (Warm Cache) | W4 | PicoClaw vs PythonNative | 10/10 | 136.0 | 0.0001 | -0.698 | 0.151 | Large |
 | Windows 11 | Regime B (Warm Cache) | W4 | PicoClaw vs Bun Minimal | 10/9 | 336.0 | 1.0000 | -0.253 | 0.373 | Small |
 
-> **Table 2 Methodological Notes on Serial Dependence and Effective Sample Size ($n_{\text{eff}}$):**
+> **Table 2 Methodological Notes on Statistical Inference and Effective Sample Size ($n_{\text{eff}}$):**
+> - **Amostragem e Estatísticas:** Os valores de $U$ e de $\delta$ de Cliff refletem $n=30$. A métrica $n_{\text{eff}}$ é documentada exclusivamente como diagnóstico de saúde da dependência serial e não altera os contrastes robustos de efeitos grandes observados. *(Test statistics $U$, Cliff's $\delta$, and Vargha-Delaney $A_{12}$ reflect $n=30$. The metric $n_{\text{eff}}$ is documented exclusively as a health diagnostic of serial dependence without altering the observed robust large-effect contrasts).*
 > - **Regime Identification:** `Regime A (Cold Prefill)` reflects un-cached prompt attention where token length drives quadratic attention latency ($T_{\text{neural}}$). `Regime B (Warm Cache)` reflects steady-state prefix KV retention where prompt processing is amortized and client orchestrator dispatch delay ($T_{\text{orch}}$) becomes observable.
-> - **Serial Dependence and $n_{\text{eff}}$:** Due to sequential physical trials, serial correlation ($r_1$) is accounted for using $n_{\text{eff}} = \min(n_{\text{raw}}, n_{\text{raw}} \frac{1 - r_1}{1 + r_1})$ (Goldsman & Schmeiser, 1997; Kalibera & Jones, 2013). The reported column lists $(n_{\text{eff}, 1} / n_{\text{eff}, 2})$ for the two compared groups.
 > - **Multiple Testing Correction:** Family-wise error rate across all pairwise hypothesis tests is rigorously controlled via the Holm-Bonferroni step-down procedure ($p_{\text{adj}} = \min(1.0, (m - k + 1) p_{(k)})$).

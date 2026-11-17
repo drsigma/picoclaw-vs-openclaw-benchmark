@@ -3,13 +3,23 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2D: SUITE DE TESTES UNITARIOS, REPLICACAO E TUTORIAIS
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-17T22:46:01.203378+00:00
-Git HEAD: 81494a80b05b3dbc01d8a2e1393d68148be6cbeb
+Data de Geracao (UTC): 2026-11-17T23:15:27.587008+00:00
+Git HEAD: 38e49416eb217026fa9adb42c0828c44eb24e0ed
 Hardware Host: Apple Silicon M4 ()
 Sistema Operacional: macOS Darwin arm64 (Error: [Errno 2] No such file or directory: 'sw_vers')
 Python Version: 3.14.4
 Status Git:
-(clean working tree)
+M README.md
+ D audit_export/AUDIT_REPORT_MASTER.md
+ D audit_export/CONFORMANCE_REPORT_TRI_PLATFORM.md
+ M audit_export/figures/fig1_architecture_topology.png
+ M audit_export/tables/table2_statistical_tests.md
+ M audit_export_tri_platform.zip
+ M figures/fig1_architecture_topology.png
+ M paper/RESPONSE_TO_REVIEWERS.md
+ M paper/softwarex_manuscript.tex
+ M scripts/reproduce_tri_platform_analysis.py
+?? audit_export/Systems_Replication_Report.md
 ================================================================================
 
 

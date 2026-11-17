@@ -259,8 +259,7 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── reproduce_linux_gold.sh                    <- Script de reprodução física automatizada em Linux x86_64
 ├── windows_gold.ps1                           <- Script PowerShell de reprodução no Windows 11
 ├── audit_export/                              <- Artefatos consolidados da auditoria forense tri-plataforma
-│   ├── CONFORMANCE_REPORT_TRI_PLATFORM.md     <- Relatório mestre de conformidade tri-plataforma (SoftwareX standard)
-│   ├── AUDIT_REPORT_MASTER.md                 <- Cópia canônica de auditoria forense
+│   ├── Systems_Replication_Report.md          <- Relatório consolidado de replicação de sistemas (SoftwareX standard)
 │   ├── audit_summary_metrics.json             <- Métricas consolidadas em formato JSON estruturado
 │   ├── tri_platform_consolidated_summary.csv  <- Sumário estatístico comparativo tri-plataforma
 │   ├── anomaly_and_cache_diagnostics.csv      <- Diagnóstico de dependência serial, drift e telemetria térmica

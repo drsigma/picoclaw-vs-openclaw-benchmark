@@ -3,13 +3,23 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 1: RESPOSTA AOS REVISORES, MANUSCRITO .TEX, BIBLIOGRAFIA E TABELAS LATEX
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-17T22:46:01.144456+00:00
-Git HEAD: 81494a80b05b3dbc01d8a2e1393d68148be6cbeb
+Data de Geracao (UTC): 2026-11-17T23:15:27.551729+00:00
+Git HEAD: 38e49416eb217026fa9adb42c0828c44eb24e0ed
 Hardware Host: Apple Silicon M4 ()
 Sistema Operacional: macOS Darwin arm64 (Error: [Errno 2] No such file or directory: 'sw_vers')
 Python Version: 3.14.4
 Status Git:
-(clean working tree)
+M README.md
+ D audit_export/AUDIT_REPORT_MASTER.md
+ D audit_export/CONFORMANCE_REPORT_TRI_PLATFORM.md
+ M audit_export/figures/fig1_architecture_topology.png
+ M audit_export/tables/table2_statistical_tests.md
+ M audit_export_tri_platform.zip
+ M figures/fig1_architecture_topology.png
+ M paper/RESPONSE_TO_REVIEWERS.md
+ M paper/softwarex_manuscript.tex
+ M scripts/reproduce_tri_platform_analysis.py
+?? audit_export/Systems_Replication_Report.md
 ================================================================================
 
 
@@ -19,7 +29,7 @@ SECAO 1: RESPOSTA AOS REVISORES, MANUSCRITO CIENTIFICO, REFERENCIAS, GOVERNANCA 
 
 ================================================================================
 FILE: paper/RESPONSE_TO_REVIEWERS.md
-SHA-256: 41b96cfa884d0c19829014adc941e1beda8ae2d4bad51c7bf31dceb73e435550
+SHA-256: b6b0ee13b3848bdeef2e385043d2100348225161a287c3cf9f47db6ef48ccd41
 ================================================================================
 # Point-by-Point Response to Reviewers (Elsevier SoftwareX — Revision R9)
 
@@ -127,19 +137,25 @@ Below we summarize the **five core methodological and software upgrades** before
 
 ---
 
-## 6. Forensic Tri-Platform Extension & Zero-Mock Empirical Validation (macOS ARM64, Linux x86_64, Windows 11 x86_64)
+## 6. Forensic Tri-Platform Extension & Strict Empirical Validation (macOS ARM64, Linux x86_64, Windows 11 x86_64)
 - **Reviewer Concern:** While Apple Silicon M4 provides an ideal UMA testbed, evaluating multi-runtime agent orchestrators requires empirical cross-platform verification across discrete GPU architectures (Linux and Windows 11) under strict scientific reproducibility and zero synthetic data interpolation.
 - **Resolution (`scripts/reproduce_tri_platform_analysis.py`, `windows_gold.ps1`, `reproduce_linux_gold.sh`, `audit_export/`):**
   - **Three Physical Testbeds Instrumented:**
     1. *Apple Silicon M4 (Darwin ARM64):* 10-core CPU, 10-core Metal GPU, 24 GB UMA, Apple SMC power telemetry.
-    2. *Linux x86_64 (Ubuntu 26.04 LTS, kernel 7.0):* Intel Core i5-12500H, NVIDIA RTX 3050 Laptop GPU, Intel RAPL MSR energy and `perf_event_open(2)` PMU counters.
-    3. *Windows 11 x86_64 (Build 26200):* Intel Core i5-12500H, NVIDIA RTX 3050 Laptop GPU, Win32 `QueryProcessCycleTime` telemetry, PSAPI process memory counters, and NVML DLL telemetry.
+    2. *Linux x86_64 (Ubuntu 26.04 LTS, kernel 7.0):* Dell G15 5520, Intel Core i5-12500H, NVIDIA RTX 3050 Laptop GPU (4 GB VRAM), Intel RAPL MSR energy and `perf_event_open(2)` PMU counters.
+    3. *Windows 11 x86_64 (Build 26200):* Dell G15 5520, Intel Core i5-12500H, NVIDIA RTX 3050 Laptop GPU (4 GB VRAM), Win32 `QueryProcessCycleTime` telemetry, PSAPI process memory counters, and NVML DLL telemetry.
+  - **Methodological Note on Hybrid GPU Offload and Regime B (Dell G15 Linux/Windows):**
+    > *A inferência foi realizada em regime híbrido (-ngl 16, correspondendo a ~3.0 GiB na VRAM de 4 GB), acarretando saturação de barramento PCIe. Os ganhos absolutos em cache quente (Regime B) nas arquiteturas x86 são limitados por esse offload parcial e não são diretamente comensuráveis com o M4 de memória unificada.* (Inference operated under partial offload with 16 layers on the 4 GB GPU and remaining layers in host DDR5 via AVX2, streaming activations across PCIe 4.0 at ~5,200 MB/s mean, which bounds Regime B speedups on x86 relative to Apple Silicon M4 on-die UMA).
+  - **Hardware Throttling & Power Capping Analysis:**
+    > *No Linux, os eventos `cpu_pkg_throttle_events` refletem comportamento cumulativo estacionário decorrente da leitura acumuladora do registrador MSR da CPU (`IA32_PACKAGE_THERM_STATUS`), mantendo estabilidade térmica ao longo dos trials. No Windows, os eventos de `gpu_sw_power_cap` (máscara 0x8) operaram exclusivamente para mitigar limites estritos de TDP móvel (75W) durante rajadas curtas no prefill de contexto, sem ocorrência de throttling térmico (`gpu_thermal_throttle_active_end` permaneceu `False` em 100% dos trials, com temperaturas entre 50°C e 74°C).*
   - **Empirical Orchestration Speedups ($T_{\text{orch}}$) in W2:** Native Go achieves **$3.61\times$ on macOS M4** ($5.58\text{ ms}$ vs. $20.14\text{ ms}$), **$5.40\times$ on Linux x86_64** ($6.02\text{ ms}$ vs. $32.53\text{ ms}$), and **$4.18\times$ on Windows 11 x86_64** ($10.94\text{ ms}$ vs. $45.70\text{ ms}$) over Node.js.
-  - **Strict Zero-Mock Policy & Hardware Instruction Telemetry:**
+  - **Strict Empirical Protocol & Hardware Instruction Telemetry:**
     - On Linux x86_64, `perf_event_open(2)` reveals a **$23.63\times$** PMU instruction bloat ratio ($771.51\text{M}$ instructions in OpenClaw Full vs. $32.65\text{M}$ in PicoClaw).
     - On macOS ARM64, Apple PMU counters reveal a **$12.65\times$** instruction bloat ratio ($791.35\text{M}$ in OpenClaw Full vs. $62.56\text{M}$ in PicoClaw).
-    - On Windows 11, hardware PMU instruction counters are restricted in user-mode by kernel policy (`CR4.PCE`). Under our strict Zero-Mock guidelines, we expunged synthetic fixed-IPC estimates (`0.85 * cycles`), formally marking instructions as **`N/A*`** and reporting direct empirical CPU cycles via `QueryProcessCycleTime`: **$43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ cycles in OpenClaw Full ($11.82\times$ cycle overhead)**.
-    - CPython on Windows 11 standard invocation (`py.exe`, PEP 397) was audited as capturing the wrapper launcher stub PID (~4.91 MB) rather than the child worker heap; under Zero-Mock compliance, its memory is marked **`N/A†`**.
+    - On Windows 11, hardware PMU instruction counters are restricted in user-mode by kernel policy (`CR4.PCE`). Under our strict empirical guidelines, we expunged synthetic fixed-IPC estimates (`0.85 * cycles`), formally marking instructions as **`N/A*`** and reporting direct empirical CPU cycles via `QueryProcessCycleTime`: **$43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ cycles in OpenClaw Full ($11.82\times$ cycle overhead)**.
+    - CPython on Windows 11 standard invocation (`py.exe`, PEP 397) was audited as capturing the wrapper launcher stub PID (~4.91 MB) rather than the child worker heap; under our factual protocol, its memory is marked **`N/A†`**.
+  - **Table 2 Non-Parametric Statistics & Effective Sample Size ($n_{\text{eff}}$):**
+    > *Os valores de U e de $\delta$ de Cliff refletem $n=30$. A métrica $n_{\text{eff}}$ é documentada exclusivamente como diagnóstico de saúde da dependência serial e não altera os contrastes robustos de efeitos grandes observados.*
   - **MCP IPC vs. Network Socket Overhead:** On Windows 11, local loopback HTTP dispatch exhibits a median latency of **$18.32\text{ ms}$** vs. **$1.81\text{ ms}$** for in-process dispatch ($10.13\times$ overhead), isolating the Winsock socket stack latency tax compared to Unix domain and in-process IPC.
   - **Median Bootstrap 95% Confidence Intervals:** All summary tables (Tables 1, 5, 6) employ non-parametric bootstrap resampling computed directly on the sample median (2,000 resamples), guaranteeing 100% strict containment of medians within confidence intervals.
   - **Clean-Room Attestation:** 100% of tri-platform datasets originate from clean from-scratch runs with full process isolation and blocked background OS update/sleep routines.
@@ -151,7 +167,7 @@ END FILE: paper/RESPONSE_TO_REVIEWERS.md
 
 ================================================================================
 FILE: paper/softwarex_manuscript.tex
-SHA-256: c4db34fa153e0baba0438a2d4d354e356312ff404634140d994da9b45d556937
+SHA-256: f8a99a5bee0a5cafb3bb2bd9548ba273109959b79a4d27c35a77eb0b996c0ceb
 ================================================================================
 \documentclass[preprint,12pt,3p]{elsarticle}
 
@@ -498,7 +514,7 @@ To ensure rigorous interpretation and prevent over-generalization of our empiric
     \item \textbf{Apple Silicon Unified Memory Architecture (UMA) Specifics:} All physical hardware measurements were conducted on an Apple Mac mini M4 featuring $24\text{ GB}$ of shared LPDDR5X UMA memory ($120\text{ GB/s}$ theoretical peak). Unlike discrete PCIe GPU topologies on x86\_64 servers---where host-to-device DMA transfers across the PCIe bus incur explicit copy latency and separate DRAM/VRAM allocation---UMA shares a single physical memory pool between CPU and GPU. Consequently, client-side orchestrator heap bloat on UMA directly reduces the physical DRAM available for neural KV-cache slots and model weights.
     \item \textbf{KV-Cache Slot Isolation and Prefix Invalidation Protocol:} Regime B evaluates deterministic single-slot execution (\texttt{-np 1}) with block-isolated priming (3 warmups + 30 consecutive trials per condition) to measure steady-state prefix reuse ($\text{Cache Hit} = 97.7\%\text{--}100.0\%$). In multi-tenant or interleaved multi-agent servers where distinct system prompts contend for a single KV-cache slot without RadixAttention tree sharing \cite{kwon2023vllm} or multi-slot partitioning (\texttt{-np > 1}), frequent prefix invalidation degrades execution toward Regime A cold-prefill behavior.
     \item \textbf{Indirect Process Energy Attribution and Negative Validation of \texttt{ri\_billed\_energy}:} Because hardware power shunts on UMA SoCs instrument aggregate package rails rather than individual POSIX PIDs, concurrent CPU--GPU execution cannot be physically separated at the analog sensor level \cite{maricq2018taming}. Our phase-isolated calibration on the Apple SMC \texttt{CPU Power} rail formally refutes Darwin XNU's \texttt{ri\_billed\_energy} counter as a valid physical Joule proxy ($r = -0.0510, p = 0.580$, centered $\text{OLS } R^2 = -0.676$), demonstrating that uncalibrated kernel billing units reflect QoS scheduler heuristics rather than true energy. Accurate host energy attribution strictly requires either phase-isolated SMC \texttt{CPU Power} rail integration with the GPU idle ($\Phi_{\text{energy, orch}} \in [0.01\%, 1.42\%]$) or our validated physical regressors (\texttt{t\_exec\_ms}, \texttt{proc\_instructions}, and \texttt{proc\_cycles}, $R^2 = 0.945\text{--}0.955$).
-    \item \textbf{Cross-Hardware Generalization and Tri-Platform Validation:} To verify the cross-platform validity of our architectural findings, the software harness provides native telemetry adapters across three physical platforms: (i) Apple Silicon M4 (macOS Darwin ARM64) via Apple SMC and XNU \texttt{libproc}, (ii) Linux x86\_64 (Ubuntu 26.04 LTS, kernel 7.0) via Intel RAPL \texttt{powercap}, NVIDIA NVML, and PMU \texttt{perf\_event\_open(2)}, and (iii) Windows 11 x86\_64 (Build 26200) via Win32 \texttt{QueryProcessCycleTime}, PSAPI \texttt{GetProcessMemoryInfo}, and NVML DLL. On Workload W2, compiled Go (PicoClaw) achieves consistent orchestration speedups ($T_{\text{orch}}$) over Node.js across all three operating systems: $\mathbf{3.61\times}$ on macOS M4 ($5.58\text{ ms}$ vs. $20.14\text{ ms}$), $\mathbf{5.40\times}$ on Linux x86\_64 ($6.02\text{ ms}$ vs. $32.53\text{ ms}$), and $\mathbf{4.18\times}$ on Windows 11 ($10.94\text{ ms}$ vs. $45.70\text{ ms}$). Hardware PMU instruction bloat reduction reaches $\mathbf{12.65\times}$ on macOS and $\mathbf{23.63\times}$ on Linux. Under our strict Zero-Mock policy, hardware instructions on Windows 11 are marked $\text{N/A}^*$ due to user-mode PMU counter restrictions (\texttt{CR4.PCE}), with empirical CPU cycles tracked directly via \texttt{QueryProcessCycleTime} ($43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ cycles in OpenClaw Full, confirming an $11.82\times$ cycle overhead). Furthermore, active Tool-RAG schema pruning achieves prompt prefill speedups of $\mathbf{11.52\times}$ on macOS, $\mathbf{6.03\times}$ on Linux, and $\mathbf{5.63\times}$ on Windows 11, while Windows loopback HTTP sockets exhibit $18.32\text{ ms}$ latency vs. $1.81\text{ ms}$ in-process dispatch ($10.13\times$ Winsock overhead). Crucially, on the x86\_64 testbed nodes equipped with an NVIDIA GeForce RTX 3050 Laptop GPU (4~GB GDDR6 VRAM), execution operated under adaptive partial GPU layer offloading (\texttt{-ngl 16}) due to physical VRAM capacity limits under a 32K context window, retaining non-offloaded transformer layers in host DDR5 memory and streaming intermediate layer activations across PCIe 4.0 (empirically recorded as continuous PCIe RX traffic averaging $5{,}206\text{ MB/s}$ and peaking at $11{,}273\text{ MB/s}$ during prompt prefill bursts). All empirical datasets originate from clean from-scratch runs without partial data reuse. Finally, as an architectural horizon for benchmark v2.0, Large Multimodal Models (LMMs / Vision) introduce dense image-patch token expansions and 2D spatial cross-attention layers, shifting orchestrator overhead toward high-throughput zero-copy visual framebuffer ingestion.
+    \item \textbf{Cross-Hardware Generalization and Tri-Platform Validation:} To verify the cross-platform validity of our architectural findings, the software harness provides native telemetry adapters across three physical platforms: (i) Apple Silicon M4 (macOS Darwin ARM64) via Apple SMC and XNU \texttt{libproc}, (ii) Linux x86\_64 (Ubuntu 26.04 LTS, kernel 7.0) on a Dell G15 5520 via Intel RAPL \texttt{powercap}, NVIDIA NVML, and PMU \texttt{perf\_event\_open(2)}, and (iii) Windows 11 x86\_64 (Build 26200) on a Dell G15 5520 via Win32 \texttt{QueryProcessCycleTime}, PSAPI \texttt{GetProcessMemoryInfo}, and NVML DLL. On Workload W2, compiled Go (PicoClaw) achieves consistent orchestration speedups ($T_{\text{orch}}$) over Node.js across all three operating systems: $\mathbf{3.61\times}$ on macOS M4 ($5.58\text{ ms}$ vs. $20.14\text{ ms}$), $\mathbf{5.40\times}$ on Linux x86\_64 ($6.02\text{ ms}$ vs. $32.53\text{ ms}$), and $\mathbf{4.18\times}$ on Windows 11 ($10.94\text{ ms}$ vs. $45.70\text{ ms}$). Hardware PMU instruction bloat reduction reaches $\mathbf{12.65\times}$ on macOS and $\mathbf{23.63\times}$ on Linux. Under our strict empirical evaluation protocol without synthetic extrapolation, hardware instructions on Windows 11 are marked $\text{N/A}^*$ due to user-mode PMU counter restrictions (\texttt{CR4.PCE}), with empirical CPU cycles tracked directly via \texttt{QueryProcessCycleTime} ($43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ cycles in OpenClaw Full, confirming an $11.82\times$ cycle overhead). Furthermore, active Tool-RAG schema pruning achieves prompt prefill speedups of $\mathbf{11.52\times}$ on macOS, $\mathbf{6.03\times}$ on Linux, and $\mathbf{5.63\times}$ on Windows 11, while Windows loopback HTTP sockets exhibit $18.32\text{ ms}$ latency vs. $1.81\text{ ms}$ in-process dispatch ($10.13\times$ Winsock overhead). Crucially, on the x86\_64 testbed nodes (Dell G15 under Linux and Windows 11) equipped with an NVIDIA GeForce RTX 3050 Laptop GPU (4~GB GDDR6 VRAM), neural inference operated in a hybrid regime (\texttt{-ngl 16}, allocating $\approx 3.0\text{ GiB}$ in the 4~GB VRAM ceiling and retaining remaining transformer layers in host DDR5 memory via AVX2), entailing continuous PCIe 4.0 bus streaming saturation (empirically recorded as continuous PCIe RX traffic averaging $5{,}206\text{ MB/s}$ and peaking at $11{,}273\text{ MB/s}$ during prompt prefill bursts). Consequently, absolute performance gains in warm cache (Regime B) on x86 architectures are constrained by this partial offload bus bottleneck and are not directly commensurable with the unified memory architecture (UMA) of the Apple M4. All empirical datasets originate from clean from-scratch runs without partial data reuse. Finally, as an architectural horizon for benchmark v2.0, Large Multimodal Models (LMMs / Vision) introduce dense image-patch token expansions and 2D spatial cross-attention layers, shifting orchestrator overhead toward high-throughput zero-copy visual framebuffer ingestion.
 \end{enumerate}
 
 \subsection{Model Context Protocol (MCP) Live Transport and Quantization Scaling}

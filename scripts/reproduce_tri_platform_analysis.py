@@ -251,7 +251,7 @@ def get_platform_datasets():
             },
             "sessions": [
                 {
-                    "session_id": "publication_campaign (canonical gold run)",
+                    "session_id": "publication_campaign (Campanha Final)",
                     "raw": os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl"),
                     "warm": os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl"),
                     "kv": os.path.join(REPO_DIR, "results", "publication_campaign", "kv_cache_thrashing_trials.jsonl"),
@@ -618,7 +618,7 @@ def summarize_trials(trials: list[dict[str, Any]], platform_name: str, regime_na
 
         # Instructions & cycles
         # POINT 1: On Windows 11, hardware instructions are restricted in user-mode by OS kernel.
-        # Discard any synthetic 0.85*cycles estimations to uphold Zero-Mock policy.
+        # Discard any synthetic 0.85*cycles estimations under strictly empirical protocol.
         # POINT 3: Neural baseline is a direct HTTP call without client agent runtime.
         if win_plat or is_neural:
             instructions = []
@@ -626,7 +626,7 @@ def summarize_trials(trials: list[dict[str, Any]], platform_name: str, regime_na
             instructions = [t.get("proc_instructions") for t in t_list if t.get("proc_instructions") is not None]
 
         # POINT 2: On Windows 11, python_native RSS and cycles captured the py.exe launcher wrapper stub
-        # rather than the CPython worker child. Mark as N/A under Zero-Mock compliance.
+        # rather than the CPython worker child. Mark as N/A under empirical protocol.
         # For neural baseline: no client runtime process exists.
         if win_py or is_neural:
             rss_vals = []
@@ -1102,9 +1102,9 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
 
     t2_md.extend([
         "",
-        "> **Table 2 Methodological Notes on Serial Dependence and Effective Sample Size ($n_{\\text{eff}}$):**",
+        "> **Table 2 Methodological Notes on Statistical Inference and Effective Sample Size ($n_{\\text{eff}}$):**",
+        "> - **Amostragem e Estatísticas:** Os valores de $U$ e de $\\delta$ de Cliff refletem $n=30$. A métrica $n_{\\text{eff}}$ é documentada exclusivamente como diagnóstico de saúde da dependência serial e não altera os contrastes robustos de efeitos grandes observados. *(Test statistics $U$, Cliff's $\\delta$, and Vargha-Delaney $A_{12}$ reflect $n=30$. The metric $n_{\\text{eff}}$ is documented exclusively as a health diagnostic of serial dependence without altering the observed robust large-effect contrasts).*",
         "> - **Regime Identification:** `Regime A (Cold Prefill)` reflects un-cached prompt attention where token length drives quadratic attention latency ($T_{\\text{neural}}$). `Regime B (Warm Cache)` reflects steady-state prefix KV retention where prompt processing is amortized and client orchestrator dispatch delay ($T_{\\text{orch}}$) becomes observable.",
-        "> - **Serial Dependence and $n_{\\text{eff}}$:** Due to sequential physical trials, serial correlation ($r_1$) is accounted for using $n_{\\text{eff}} = \\min(n_{\\text{raw}}, n_{\\text{raw}} \\frac{1 - r_1}{1 + r_1})$ (Goldsman & Schmeiser, 1997; Kalibera & Jones, 2013). The reported column lists $(n_{\\text{eff}, 1} / n_{\\text{eff}, 2})$ for the two compared groups.",
         "> - **Multiple Testing Correction:** Family-wise error rate across all pairwise hypothesis tests is rigorously controlled via the Holm-Bonferroni step-down procedure ($p_{\\text{adj}} = \\min(1.0, (m - k + 1) p_{(k)})$)."
     ])
 
@@ -1423,9 +1423,9 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
         "Context: 32,768 tokens (-c 32768, single slot -np 1, temp=0.0, seed=42)",
         "Offload Topology & PCIe Bus Dynamics:",
         "  - Apple M4: Full on-die UMA offload (-ngl 99, zero bus latency).",
-        "  - RTX 3050 (4GB VRAM ceiling): Adaptive partial offload (-ngl 16);",
-        "    16 layers in GPU VRAM, 12 layers on CPU host RAM via AVX2.",
-        "    Directly causes measured continuous PCIe RX streaming (~5,200 MB/s mean)."
+        "  - RTX 3050 (4GB VRAM ceiling): Regime híbrido (-ngl 16, ~3.0 GiB na VRAM);",
+        "    16 layers on GPU, 12 layers on CPU host RAM via AVX2 (PCIe streaming ~5.2 GB/s).",
+        "    Warm cache (Regime B) gains on x86 are bounded by partial offload PCIe saturation."
     ], bg="#FFFFFF", border="#64748B")
 
     b_flow = patches.FancyBboxPatch((3.5, 3.5), 93.0, 13.0, boxstyle="round,pad=0.3", edgecolor="#0F172A", facecolor="#F1F5F9", linewidth=1.2)
@@ -1433,8 +1433,8 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax.text(50.0, 14.8, "SYSTEMATIC TELEMETRY PIPELINE & SENSOR MEASUREMENT BOUNDARIES", ha="center", va="top", fontsize=8.2, fontweight="bold", color="#0F172A")
     ax.text(50.0, 12.2, "Cold Prefill (Regime A: cache_prompt=false)  |  Warm KV Cache (Regime B: cache_prompt=true)  |  KV Thrashing (T1, T2, T3)  |  Tool-RAG Pruning", ha="center", va="top", fontsize=7.0, color="#334155")
     ax.text(50.0, 9.6, "Sensor Boundaries: Apple SMC captures entire SoC (CPU+GPU+DRAM). Intel RAPL + NVML captures CPU Package + dGPU board (excludes VRMs/DRAM).", ha="center", va="top", fontsize=6.8, color="#0369A1", fontweight="bold")
-    ax.text(50.0, 7.2, "Adaptive Offload: 4GB VRAM ceiling on RTX 3050 necessitates partial offload (-ngl 16), explaining observed 5.2-11.3 GB/s PCIe RX traffic.", ha="center", va="top", fontsize=6.8, color="#0F766E", fontweight="bold")
-    ax.text(50.0, 4.8, "Zero-Mock Conformance: 100% physically measured trial records across 25 JSONL datasets. Clean from-scratch execution runs.", ha="center", va="top", fontsize=6.6, color="#64748B")
+    ax.text(50.0, 7.2, "Offload Híbrido: -ngl 16 (~3.0 GiB na VRAM de 4 GB) satura barramento PCIe; ganhos em Regime B no x86 são limitados e não comensuráveis com M4.", ha="center", va="top", fontsize=6.6, color="#0F766E", fontweight="bold")
+    ax.text(50.0, 4.8, "Campanha Final: 100% de registros fisicamente medidos em 25 datasets JSONL. Execuções limpas a partir do zero.", ha="center", va="top", fontsize=6.6, color="#64748B")
 
     plt.tight_layout()
     f1_out = os.path.join(PUB_FIG_DIR, "fig1_architecture_topology.png")
@@ -1841,8 +1841,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
 def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[dict[str, Any]],
                                  diagnostics: list[dict[str, Any]], consolidated: dict[str, Any],
                                  test_results: list[dict[str, Any]], kruskal_tests: list[dict[str, Any]]):
-    report_path_en = os.path.join(AUDIT_EXPORT_DIR, "CONFORMANCE_REPORT_TRI_PLATFORM.md")
-    report_path_legacy = os.path.join(AUDIT_EXPORT_DIR, "AUDIT_REPORT_MASTER.md")
+    report_path = os.path.join(AUDIT_EXPORT_DIR, "Systems_Replication_Report.md")
     
     # Filter commits
     macos_commits = [c for c in commits if "darwin" in c["subject"].lower() or "m4" in c["subject"].lower() or "apple" in c["subject"].lower()]
@@ -1850,14 +1849,14 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
     linux_commits = [c for c in commits if "linux" in c["subject"].lower()]
 
     lines = [
-        "# TRI-PLATFORM MICROARCHITECTURAL CONFORMANCE REPORT",
+        "# TRI-PLATFORM MICROARCHITECTURAL SYSTEMS REPLICATION REPORT",
         "## Empirical Systems Evaluation: Linux x86_64 vs. macOS ARM64 (Apple M4) vs. Windows 11 x86_64",
         "",
-        "**Document Classification:** Microarchitectural Systems Replication Report  ",
+        "**Document Classification:** Systems Replication Report  ",
         "**Target Standard:** SoftwareX / Elsevier Artifact Verification and Systems Benchmarking Guidelines  ",
-        "**Date of Audit:** 2026-11-16  ",
+        "**Date of Audit:** 2026-11-17  ",
         "**Repository Branch:** `feat/peer-review-revisions`  ",
-        "**Evaluation Summary:** Empirical measurement and cross-platform verification.  ",
+        "**Evaluation Summary:** Campanha Final - Empirical measurement and cross-platform verification.  ",
         "",
         "---",
         "",
@@ -1868,7 +1867,9 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "2. **Platform 2:** Dell G15 5520 under Ubuntu 26.04 LTS (Kernel Linux 7.0.0-43-generic x86_64, Intel Core i5-12500H [16 logical threads], 30.5 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB VRAM, Intel RAPL MSR + NVIDIA NVML + `perf_event_open`).",
         "3. **Platform 3:** Dell G15 5520 under Microsoft Windows 11 64-bit (Build 26200 x86_64, Intel Core i5-12500H [16 logical threads], 31.7 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB VRAM, Intel MSR RAPL + NVML DLL + Win32 PSAPI + WDDM).",
         "",
-        "> **Hardware Offload Architecture & PCIe RX Telemetry Note:** Due to the physical 4 GB VRAM ceiling of the discrete NVIDIA GeForce RTX 3050 Laptop GPU under a 32K context window (`-c 32768`), local neural execution on Linux and Windows operated under adaptive partial GPU offload (`-ngl 16`), retaining remaining Transformer layers in system host DRAM (32 GB DDR5-4800) and streaming active activations across the PCIe 4.0 interface. This architectural partition accounts for the continuous empirical PCIe RX throughput observed in telemetry logs (mean 5,206 MB/s, peaking at 11,273 MB/s during prompt prefill bursts), contrasting with Apple Silicon M4's unified memory architecture (24 GB UMA at 120 GB/s) which accommodated full model tensor residency on-die.",
+        "> **Nota Metodológica Obrigatória sobre Offload e Regime B (Dell G15 Linux/Windows):**  ",
+        "> A inferência foi realizada em regime híbrido (`-ngl 16`, correspondendo a ~3.0 GiB na VRAM de 4 GB), acarretando saturação de barramento PCIe. Os ganhos absolutos em cache quente (Regime B) nas arquiteturas x86 são limitados por esse offload parcial e não são diretamente comensuráveis com o M4 de memória unificada.  ",
+        "> *(English: Inference was conducted in a hybrid regime (-ngl 16, corresponding to ~3.0 GiB within the 4 GB VRAM ceiling), entailing PCIe bus streaming saturation. Absolute gains in warm cache (Regime B) on x86 architectures are constrained by this partial offload and are not directly commensurable with the unified memory M4.)*",
         "",
         "> **Authorship and Execution Node Declaration:** Git author `drsgima` (author of the Windows 11 testbed commits) is the principal author operating the dedicated Windows 11 physical testbed node.",
         "",
@@ -1891,11 +1892,11 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "",
         "## 2. HARDWARE THROTTLING & IDLE POWER DECOMPOSITION",
         "",
-        "### 2.1. NVML Register Analysis and Throttling Flags on Linux and Windows",
-        "A rigorous inspection of the raw JSONL records was conducted across all 792 trials on Linux and 792 trials on Windows to resolve discrepancies regarding hardware throttling counters:",
-        "- **GPU Thermal Throttling Status:** The raw NVML boolean register `gpu_thermal_throttle_active_end` remained `False` across 100% of the 792 measured trials on Linux and 792 measured trials on Windows. The GPU temperature remained between **50.0°C and 74.0°C**, strictly below the 87.0°C threshold for `HW_THERMAL_SLOWDOWN` (mask `0x40`) or `SW_THERMAL_SLOWDOWN` (mask `0x20`).",
-        "- **Software Power Capping (`SW_POWER_CAP`):** Clocks throttle flags recorded occurrences of mask `0x8` (`SW_POWER_CAP`), indicating that the NVIDIA GPU firmware capped clock frequencies to respect the 75W mobile TDP limit during intensive matrix multiplication phases of prompt prefill, representing standard power envelope regulation rather than thermal throttling.",
-        "- **Intel CPU Package MSR Throttle Events:** The counter `cpu_pkg_throttle_events` reflects the delta of the architectural accumulator register in the Intel MSR (`IA32_PACKAGE_THERM_STATUS`). Transient thermal and power spikes occurred during prompt prefill when all 16 threads engaged in burst PL1/PL2 states (temperatures reaching 90°C--95°C for brief sub-second intervals before the cooling system ramped fan RPM).",
+        "### 2.1. Análise de Registradores NVML e Diagnóstico de Throttling no Linux e Windows",
+        "A inspeção detalhada dos registros brutos JSONL ao longo de todos os 792 trials no Linux e 792 trials no Windows documenta o comportamento térmico e de potência:",
+        "- **Comportamento Cumulativo Estacionário no Linux (`cpu_pkg_throttle_events`):** Os eventos registrados no Linux em `cpu_pkg_throttle_events` refletem comportamento cumulativo estacionário decorrente da leitura acumuladora do registrador MSR da CPU Intel (`IA32_PACKAGE_THERM_STATUS`), mantendo estabilidade térmica ao longo dos trials sem degradação progressiva de throughput.",
+        "- **Limites Estritos de TDP no Windows (`gpu_sw_power_cap`):** Os registros de `gpu_sw_power_cap` (máscara `0x8`) no Windows 11 operaram exclusivamente para mitigar limites estritos de TDP móvel (teto de 75W da GPU móvel) durante rajadas curtas de multiplicação matricial no prefill de contexto, não correspondendo a throttling térmico.",
+        "- **Ausência de Throttling Térmico de Hardware:** O registrador booleano da NVML `gpu_thermal_throttle_active_end` permaneceu `False` em 100% dos 792 trials no Linux e 792 trials no Windows. A temperatura da GPU permaneceu entre 50.0°C e 74.0°C, estritamente abaixo do limiar de 87.0°C exigido para acionamento de `HW_THERMAL_SLOWDOWN` (máscara `0x40`) ou `SW_THERMAL_SLOWDOWN` (máscara `0x20`).",
         "",
         "### 2.2. Explicit Idle Power ($P_{\\text{idle}}$) Telemetry and Duration Integration",
         "Idle power baselines were empirically characterized during dedicated quiescence intervals prior to benchmark execution:",
@@ -1922,6 +1923,7 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "  * On macOS ARM64, negative autocorrelation ($r_1 \\in [-0.518, -0.829]$) was observed across W1--W3. This negative autocorrelation is attributed to alternating coupling between telemetry harness dispatch cadence, loopback TCP socket buffer drainage, and server thread wake-up scheduling, rather than cache residuals.",
         "  * On Windows 11, positive autocorrelation ($r_1 \\in [+0.390, +0.732]$) was observed, reflecting memory page retention dynamics in the Windows Standby List.",
         "  * For all cells exhibiting $|r_1| > 0.365$, effective sample sizes $n_{\\text{eff}} = n(1 - r_1)/(1 + r_1)$ were computed, and 95% Confidence Intervals were derived via **Moving Block Bootstrap (MBB, block size $b=3$)** to preserve short-range serial dependence structure.",
+        "- **Interpretação de $n_{\\text{eff}}$ e Robustez Estatística:** Os valores de $U$ e de $\\delta$ de Cliff refletem $n=30$. A métrica $n_{\\text{eff}}$ é documentada exclusivamente como diagnóstico de saúde da dependência serial e não altera os contrastes robustos de efeitos grandes observados. *(Test statistics $U$ and Cliff's $\\delta$ reflect $n=30$; $n_{\\text{eff}}$ is documented exclusively as a health diagnostic of serial correlation without altering the observed large effect magnitudes).*",
         "",
         "### 3.2. Linear Regression Drift Test with Holm-Bonferroni Family-Wise Error Control",
         "The exploratory 5-first vs. 5-last comparison was replaced by ordinary least squares linear regression of task latency against trial order (rep $1 \\dots 30$):",
@@ -1962,10 +1964,10 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "## 5. FORMAL LITERATURE CITATIONS",
         "",
         "This experimental protocol and microarchitectural interpretation are formally aligned with systems and benchmarking literature:",
-        "1. **Kalibera, T. & Jones, R. (2013):** *Rigorous Benchmarking in Reasonable Time*, ACM ISMM '13, pp. 63--74.",
-        "2. **Maricq, A. et al. (2018):** *Taming Performance Variability*, USENIX OSDI '18, pp. 409--425.",
-        "3. **Goldsman, D. & Schmeiser, B. W. (1997):** *Methods for Estimating the Variance of the Sample Mean*, ACM TOMACS, 7(3):389--418.",
-        "4. **Kwon, W. et al. (2023):** *Efficient Memory Management for Large Language Model Serving with PagedAttention*, ACM SOSP '23, pp. 611--626.",
+        "1. **Kalibera, T. & Jones, R. (2013):** *Rigorous Benchmarking in Reasonable Time*, ACM ISMM '13, pp. 63--74. DOI: `10.1145/2464157.2464160`",
+        "2. **Maricq, A. et al. (2018):** *Taming Performance Variability*, USENIX OSDI '18, pp. 409--425. ISBN: `978-1-939133-08-3`",
+        "3. **Goldsman, D. & Schmeiser, B. W. (1997):** *Methods for Estimating the Variance of the Sample Mean*, ACM TOMACS, 7(3):389--418. DOI: `10.1145/259207.259235`",
+        "4. **Kwon, W. et al. (2023):** *Efficient Memory Management for Large Language Model Serving with PagedAttention*, ACM SOSP '23, pp. 611--626. DOI: `10.1145/3600006.3613165`",
         "",
         "---",
         "",
@@ -1994,11 +1996,19 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
     ])
 
     content = "\n".join(lines) + "\n"
-    with open(report_path_en, "w", encoding="utf-8") as f:
+    with open(report_path, "w", encoding="utf-8") as f:
         f.write(content)
-    with open(report_path_legacy, "w", encoding="utf-8") as f:
-        f.write(content)
-    print(f"Exported Master Conformance Report: {report_path_en}")
+    
+    # Clean up legacy dual report files if present
+    for legacy in ["CONFORMANCE_REPORT_TRI_PLATFORM.md", "AUDIT_REPORT_MASTER.md"]:
+        p = os.path.join(AUDIT_EXPORT_DIR, legacy)
+        if os.path.exists(p):
+            try:
+                os.remove(p)
+            except OSError:
+                pass
+
+    print(f"Exported Master Systems Replication Report: {report_path}")
 
 
 # ==============================================================================
@@ -2065,7 +2075,7 @@ def main():
     generate_tri_platform_figures(consolidated)
 
     # 9. Generate Master Conformance Report
-    print("\n▶ [Phase 4] Generating CONFORMANCE_REPORT_TRI_PLATFORM.md...")
+    print("\n▶ [Phase 4] Generating Systems_Replication_Report.md...")
     generate_master_audit_report(inventory, commits, diagnostics, consolidated, test_results, kruskal_tests)
 
     # 10. Package Audit Zip

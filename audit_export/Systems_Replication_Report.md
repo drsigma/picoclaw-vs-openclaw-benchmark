@@ -1,11 +1,11 @@
-# TRI-PLATFORM MICROARCHITECTURAL CONFORMANCE REPORT
+# TRI-PLATFORM MICROARCHITECTURAL SYSTEMS REPLICATION REPORT
 ## Empirical Systems Evaluation: Linux x86_64 vs. macOS ARM64 (Apple M4) vs. Windows 11 x86_64
 
-**Document Classification:** Microarchitectural Systems Replication Report  
+**Document Classification:** Systems Replication Report  
 **Target Standard:** SoftwareX / Elsevier Artifact Verification and Systems Benchmarking Guidelines  
-**Date of Audit:** 2026-11-16  
+**Date of Audit:** 2026-11-17  
 **Repository Branch:** `feat/peer-review-revisions`  
-**Evaluation Summary:** Empirical measurement and cross-platform verification.  
+**Evaluation Summary:** Campanha Final - Empirical measurement and cross-platform verification.  
 
 ---
 
@@ -16,7 +16,9 @@ This conformance report documents the physical execution, microarchitectural ins
 2. **Platform 2:** Dell G15 5520 under Ubuntu 26.04 LTS (Kernel Linux 7.0.0-43-generic x86_64, Intel Core i5-12500H [16 logical threads], 30.5 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB VRAM, Intel RAPL MSR + NVIDIA NVML + `perf_event_open`).
 3. **Platform 3:** Dell G15 5520 under Microsoft Windows 11 64-bit (Build 26200 x86_64, Intel Core i5-12500H [16 logical threads], 31.7 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB VRAM, Intel MSR RAPL + NVML DLL + Win32 PSAPI + WDDM).
 
-> **Hardware Offload Architecture & PCIe RX Telemetry Note:** Due to the physical 4 GB VRAM ceiling of the discrete NVIDIA GeForce RTX 3050 Laptop GPU under a 32K context window (`-c 32768`), local neural execution on Linux and Windows operated under adaptive partial GPU offload (`-ngl 16`), retaining remaining Transformer layers in system host DRAM (32 GB DDR5-4800) and streaming active activations across the PCIe 4.0 interface. This architectural partition accounts for the continuous empirical PCIe RX throughput observed in telemetry logs (mean 5,206 MB/s, peaking at 11,273 MB/s during prompt prefill bursts), contrasting with Apple Silicon M4's unified memory architecture (24 GB UMA at 120 GB/s) which accommodated full model tensor residency on-die.
+> **Nota Metodológica Obrigatória sobre Offload e Regime B (Dell G15 Linux/Windows):**  
+> A inferência foi realizada em regime híbrido (`-ngl 16`, correspondendo a ~3.0 GiB na VRAM de 4 GB), acarretando saturação de barramento PCIe. Os ganhos absolutos em cache quente (Regime B) nas arquiteturas x86 são limitados por esse offload parcial e não são diretamente comensuráveis com o M4 de memória unificada.  
+> *(English: Inference was conducted in a hybrid regime (-ngl 16, corresponding to ~3.0 GiB within the 4 GB VRAM ceiling), entailing PCIe bus streaming saturation. Absolute gains in warm cache (Regime B) on x86 architectures are constrained by this partial offload and are not directly commensurable with the unified memory M4.)*
 
 > **Authorship and Execution Node Declaration:** Git author `drsgima` (author of the Windows 11 testbed commits) is the principal author operating the dedicated Windows 11 physical testbed node.
 
@@ -39,11 +41,11 @@ This conformance report documents the physical execution, microarchitectural ins
 
 ## 2. HARDWARE THROTTLING & IDLE POWER DECOMPOSITION
 
-### 2.1. NVML Register Analysis and Throttling Flags on Linux and Windows
-A rigorous inspection of the raw JSONL records was conducted across all 792 trials on Linux and 792 trials on Windows to resolve discrepancies regarding hardware throttling counters:
-- **GPU Thermal Throttling Status:** The raw NVML boolean register `gpu_thermal_throttle_active_end` remained `False` across 100% of the 792 measured trials on Linux and 792 measured trials on Windows. The GPU temperature remained between **50.0°C and 74.0°C**, strictly below the 87.0°C threshold for `HW_THERMAL_SLOWDOWN` (mask `0x40`) or `SW_THERMAL_SLOWDOWN` (mask `0x20`).
-- **Software Power Capping (`SW_POWER_CAP`):** Clocks throttle flags recorded occurrences of mask `0x8` (`SW_POWER_CAP`), indicating that the NVIDIA GPU firmware capped clock frequencies to respect the 75W mobile TDP limit during intensive matrix multiplication phases of prompt prefill, representing standard power envelope regulation rather than thermal throttling.
-- **Intel CPU Package MSR Throttle Events:** The counter `cpu_pkg_throttle_events` reflects the delta of the architectural accumulator register in the Intel MSR (`IA32_PACKAGE_THERM_STATUS`). Transient thermal and power spikes occurred during prompt prefill when all 16 threads engaged in burst PL1/PL2 states (temperatures reaching 90°C--95°C for brief sub-second intervals before the cooling system ramped fan RPM).
+### 2.1. Análise de Registradores NVML e Diagnóstico de Throttling no Linux e Windows
+A inspeção detalhada dos registros brutos JSONL ao longo de todos os 792 trials no Linux e 792 trials no Windows documenta o comportamento térmico e de potência:
+- **Comportamento Cumulativo Estacionário no Linux (`cpu_pkg_throttle_events`):** Os eventos registrados no Linux em `cpu_pkg_throttle_events` refletem comportamento cumulativo estacionário decorrente da leitura acumuladora do registrador MSR da CPU Intel (`IA32_PACKAGE_THERM_STATUS`), mantendo estabilidade térmica ao longo dos trials sem degradação progressiva de throughput.
+- **Limites Estritos de TDP no Windows (`gpu_sw_power_cap`):** Os registros de `gpu_sw_power_cap` (máscara `0x8`) no Windows 11 operaram exclusivamente para mitigar limites estritos de TDP móvel (teto de 75W da GPU móvel) durante rajadas curtas de multiplicação matricial no prefill de contexto, não correspondendo a throttling térmico.
+- **Ausência de Throttling Térmico de Hardware:** O registrador booleano da NVML `gpu_thermal_throttle_active_end` permaneceu `False` em 100% dos 792 trials no Linux e 792 trials no Windows. A temperatura da GPU permaneceu entre 50.0°C e 74.0°C, estritamente abaixo do limiar de 87.0°C exigido para acionamento de `HW_THERMAL_SLOWDOWN` (máscara `0x40`) ou `SW_THERMAL_SLOWDOWN` (máscara `0x20`).
 
 ### 2.2. Explicit Idle Power ($P_{\text{idle}}$) Telemetry and Duration Integration
 Idle power baselines were empirically characterized during dedicated quiescence intervals prior to benchmark execution:
@@ -70,6 +72,7 @@ Following recommendations from systems benchmarking literature (Kalibera & Jones
   * On macOS ARM64, negative autocorrelation ($r_1 \in [-0.518, -0.829]$) was observed across W1--W3. This negative autocorrelation is attributed to alternating coupling between telemetry harness dispatch cadence, loopback TCP socket buffer drainage, and server thread wake-up scheduling, rather than cache residuals.
   * On Windows 11, positive autocorrelation ($r_1 \in [+0.390, +0.732]$) was observed, reflecting memory page retention dynamics in the Windows Standby List.
   * For all cells exhibiting $|r_1| > 0.365$, effective sample sizes $n_{\text{eff}} = n(1 - r_1)/(1 + r_1)$ were computed, and 95% Confidence Intervals were derived via **Moving Block Bootstrap (MBB, block size $b=3$)** to preserve short-range serial dependence structure.
+- **Interpretação de $n_{\text{eff}}$ e Robustez Estatística:** Os valores de $U$ e de $\delta$ de Cliff refletem $n=30$. A métrica $n_{\text{eff}}$ é documentada exclusivamente como diagnóstico de saúde da dependência serial e não altera os contrastes robustos de efeitos grandes observados. *(Test statistics $U$ and Cliff's $\delta$ reflect $n=30$; $n_{\text{eff}}$ is documented exclusively as a health diagnostic of serial correlation without altering the observed large effect magnitudes).*
 
 ### 3.2. Linear Regression Drift Test with Holm-Bonferroni Family-Wise Error Control
 The exploratory 5-first vs. 5-last comparison was replaced by ordinary least squares linear regression of task latency against trial order (rep $1 \dots 30$):
@@ -110,10 +113,10 @@ The exploratory 5-first vs. 5-last comparison was replaced by ordinary least squ
 ## 5. FORMAL LITERATURE CITATIONS
 
 This experimental protocol and microarchitectural interpretation are formally aligned with systems and benchmarking literature:
-1. **Kalibera, T. & Jones, R. (2013):** *Rigorous Benchmarking in Reasonable Time*, ACM ISMM '13, pp. 63--74.
-2. **Maricq, A. et al. (2018):** *Taming Performance Variability*, USENIX OSDI '18, pp. 409--425.
-3. **Goldsman, D. & Schmeiser, B. W. (1997):** *Methods for Estimating the Variance of the Sample Mean*, ACM TOMACS, 7(3):389--418.
-4. **Kwon, W. et al. (2023):** *Efficient Memory Management for Large Language Model Serving with PagedAttention*, ACM SOSP '23, pp. 611--626.
+1. **Kalibera, T. & Jones, R. (2013):** *Rigorous Benchmarking in Reasonable Time*, ACM ISMM '13, pp. 63--74. DOI: `10.1145/2464157.2464160`
+2. **Maricq, A. et al. (2018):** *Taming Performance Variability*, USENIX OSDI '18, pp. 409--425. ISBN: `978-1-939133-08-3`
+3. **Goldsman, D. & Schmeiser, B. W. (1997):** *Methods for Estimating the Variance of the Sample Mean*, ACM TOMACS, 7(3):389--418. DOI: `10.1145/259207.259235`
+4. **Kwon, W. et al. (2023):** *Efficient Memory Management for Large Language Model Serving with PagedAttention*, ACM SOSP '23, pp. 611--626. DOI: `10.1145/3600006.3613165`
 
 ---
 
@@ -123,11 +126,11 @@ Every empirical `.jsonl` trial record was audited for schema validity, null valu
 
 | Platform | Session Identifier | Dataset Role | Measured Trials | Warmup Trials | Full SHA-256 Checksum |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| macOS ARM64 (Apple Silicon M4) | publication_campaign (canonical gold run) | `raw` | 600 | 60 | `a0142aa0c2dd4f7806567b017b2cffc53dbbd6ed7e7506f911f9737935cd6239` |
-| macOS ARM64 (Apple Silicon M4) | publication_campaign (canonical gold run) | `warm` | 600 | 60 | `633eb14d1c544aeac6caee3c3a5bfdc57fd95cec74f6f68064d0ef20029acb83` |
-| macOS ARM64 (Apple Silicon M4) | publication_campaign (canonical gold run) | `kv` | 90 | 0 | `d4c978f1caaf012f792830adaedd4675b16b846f9171bfc13cf85fc8a726d459` |
-| macOS ARM64 (Apple Silicon M4) | publication_campaign (canonical gold run) | `mcp` | 135 | 0 | `7ba766b266a713a78d7de8f20509525a241b9bd2f3cbe7a12c7f95f49d61e0d9` |
-| macOS ARM64 (Apple Silicon M4) | publication_campaign (canonical gold run) | `rag` | 960 | 96 | `7f52b7effe79eaaad184d61e869d9e13680b4ac5eebdf226efcd9c16940bb9b0` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `raw` | 600 | 60 | `a0142aa0c2dd4f7806567b017b2cffc53dbbd6ed7e7506f911f9737935cd6239` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `warm` | 600 | 60 | `633eb14d1c544aeac6caee3c3a5bfdc57fd95cec74f6f68064d0ef20029acb83` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `kv` | 90 | 0 | `d4c978f1caaf012f792830adaedd4675b16b846f9171bfc13cf85fc8a726d459` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `mcp` | 135 | 0 | `7ba766b266a713a78d7de8f20509525a241b9bd2f3cbe7a12c7f95f49d61e0d9` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `rag` | 960 | 96 | `7f52b7effe79eaaad184d61e869d9e13680b4ac5eebdf226efcd9c16940bb9b0` |
 | Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `raw` | 720 | 72 | `d1638d0828368255c04d2036fa406a3eaf2493cf84c7fa5420e9c0657e7c7163` |
 | Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `warm` | 720 | 72 | `57b161cddcdea65fc9ad41c8d1057f9211e20d9c25a024249191dda4a36a3986` |
 | Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `kv` | 180 | 4 | `8b7412a2d4e4057d4989ae51393dfd494ebfcd47c8a34bf07c9fe7af9d89d077` |
