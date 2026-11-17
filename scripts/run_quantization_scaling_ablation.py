@@ -9,7 +9,7 @@ fraction (Phi_orch) across 3 quantization levels of Meta-Llama-3.2-3B-Instruct o
   2. Q3_K_M (3-bit intermediate quantization - 1.679 GB file, ~1.348 GB active weights)
   3. Q4_K_M (4-bit standard publication model - 2.019 GB file, 1.688 GB active weights)
 
-Empirically proves on Apple Silicon Metal GPU (10 physical reps per model):
+Empirically characterizes on Apple Silicon Metal GPU (10 physical reps per model):
   - ITL_0 scales strictly linearly with active weight bytes transferred from UMA DRAM.
   - Active memory bandwidth utilization remains strictly bounded at 82-88% of 120 GB/s nominal peak.
   - Even at 2-bit precision, inference latency remains memory-bandwidth bound, and orchestrator

@@ -130,10 +130,10 @@ def bootstrap_ci(data: list[float], n_resamples: int = 2000, ci: float = 0.95, s
     return (low, high)
 
 
-def moving_block_bootstrap_median_ci(data: list[float], block_size: int = 3, n_resamples: int = 2000, ci: float = 0.95, seed: int = 42) -> tuple[float, float]:
+def moving_block_bootstrap_median_ci(data: list[float], block_size: int = 3, n_resamples: int = 2000, ci: float = 0.95, seed: int = 42, n_eff: float | None = None) -> tuple[float, float]:
     """
     Computes Moving Block Bootstrap (MBB) 95% CI on the sample median for serially dependent series
-    (Goldsman & Schmeiser 1997; Kalibera & Jones 2013).
+    (Goldsman & Schmeiser 1997; Kalibera & Jones 2013), strictly utilizing min(n, n_eff) for CI width.
     """
     arr = np.asarray([x for x in data if x is not None and not math.isnan(x)], dtype=float)
     n = len(arr)
@@ -142,16 +142,20 @@ def moving_block_bootstrap_median_ci(data: list[float], block_size: int = 3, n_r
     if n <= block_size:
         return (float(np.min(arr)), float(np.max(arr)))
     
+    m_eff = min(float(n), float(n_eff)) if n_eff is not None else float(n)
+    m_eff = max(1.0, m_eff)
+    
     num_blocks = n - block_size + 1
     blocks = [arr[i : i + block_size] for i in range(num_blocks)]
     
     rng = np.random.default_rng(seed)
-    k = int(np.ceil(n / block_size))
+    target_len = max(2, int(round(m_eff)))
+    k = int(np.ceil(target_len / block_size))
     
     boot_meds = []
     for _ in range(n_resamples):
         idx = rng.integers(0, num_blocks, size=k)
-        sample = np.concatenate([blocks[i] for i in idx])[:n]
+        sample = np.concatenate([blocks[i] for i in idx])[:target_len]
         boot_meds.append(np.median(sample))
     
     alpha = (1.0 - ci) / 2.0
@@ -163,12 +167,23 @@ def moving_block_bootstrap_median_ci(data: list[float], block_size: int = 3, n_r
     return (low, high)
 
 
-def adaptive_bootstrap_ci(data: list[float], r1: float = 0.0, block_size: int = 3, n_resamples: int = 2000, ci: float = 0.95, seed: int = 42) -> tuple[float, float]:
-    """Selects MBB if series exhibits significant serial autocorrelation (|r1| > 2/sqrt(n)), else standard bootstrap."""
-    n = len([x for x in data if x is not None and not math.isnan(x)])
+def adaptive_bootstrap_ci(data: list[float], r1: float = 0.0, n_eff: float | None = None, block_size: int = 3, n_resamples: int = 2000, ci: float = 0.95, seed: int = 42) -> tuple[float, float]:
+    """Selects MBB if series exhibits significant serial autocorrelation (|r1| > 2/sqrt(n)), else standard bootstrap.
+    Strictly utilizes min(n, n_eff) for sample size and CI width."""
+    arr = [x for x in data if x is not None and not math.isnan(x)]
+    n = len(arr)
+    if n == 0:
+        return (0.0, 0.0)
     crit = 2.0 / math.sqrt(max(n, 1))
+    if n_eff is None and abs(r1) > 1e-9:
+        if -0.999 < r1 < 0.999:
+            n_eff = min(float(n), float(n * (1.0 - r1) / (1.0 + r1)))
+        else:
+            n_eff = float(n)
+        n_eff = max(1.0, n_eff)
+    
     if abs(r1) > crit and n > block_size:
-        return moving_block_bootstrap_median_ci(data, block_size=block_size, n_resamples=n_resamples, ci=ci, seed=seed)
+        return moving_block_bootstrap_median_ci(data, block_size=block_size, n_resamples=n_resamples, ci=ci, seed=seed, n_eff=n_eff)
     return bootstrap_ci(data, n_resamples=n_resamples, ci=ci, seed=seed)
 
 
@@ -438,15 +453,15 @@ def audit_cache_and_anomalies():
                 else:
                     r1 = 0.0
                 
-                # Effective sample size: n_eff = min(n_raw, n_raw * (1 - r1) / (1 + r1))
+                # Effective sample size: strictly min(n_raw, n_eff)
                 if -0.999 < r1 < 0.999:
-                    n_eff = float(min(float(n), float(n * (1.0 - r1) / (1.0 + r1))))
+                    calc_neff = float(n * (1.0 - r1) / (1.0 + r1))
                 else:
-                    n_eff = float(n)
-                n_eff = max(1.0, n_eff)
+                    calc_neff = float(n)
+                n_eff = float(min(float(n), max(1.0, calc_neff)))
 
-                # Moving Block Bootstrap 95% CI on median
-                mbb_ci = list(adaptive_bootstrap_ci(latencies, r1=r1, block_size=3))
+                # Moving Block Bootstrap 95% CI on median strictly utilizing min(n, n_eff)
+                mbb_ci = list(adaptive_bootstrap_ci(latencies, r1=r1, n_eff=n_eff, block_size=3))
 
                 # Linear regression drift test: latency vs trial order (rep 1..n)
                 x_rep = np.arange(1, n + 1, dtype=float)
@@ -1334,20 +1349,22 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     add_box(35.25, 40.5, 29.5, 23.5, "NODE 2: LINUX X86_64", [
         "OS: Ubuntu 26.04 LTS (Linux 7.0)",
         "CPU: Intel Core i5-12500H (16 Threads)",
-        "GPU: NVIDIA GeForce RTX 3050 Laptop (4GB)",
+        "GPU: NVIDIA RTX 3050 Laptop (4GB VRAM)",
+        "Offload: Partial GPU offload (-ngl 16)",
+        "PCIe: Host-GPU activation streaming (RX)",
         "RAM: 32 GB DDR5-4800 (Dual Channel)",
         "Telemetry: Intel RAPL + NVIDIA NVML",
-        "PMC: perf_event_open (IA32_PMC)",
         "Power Baseline: P_idle = 19.71 W"
     ], bg="#F0FDF4", border="#22C55E", title_color="#15803D")
 
     add_box(67.0, 40.5, 29.5, 23.5, "NODE 3: WINDOWS 11 X86_64", [
         "OS: Windows 11 64-bit (Build 26200)",
         "CPU: Intel Core i5-12500H (16 Threads)",
-        "GPU: NVIDIA GeForce RTX 3050 Laptop (4GB)",
+        "GPU: NVIDIA RTX 3050 Laptop (4GB VRAM)",
+        "Offload: Partial GPU offload (-ngl 16)",
+        "PCIe: Host-GPU activation streaming (RX)",
         "RAM: 32 GB DDR5-4800 (Dual Channel)",
         "Telemetry: Intel MSR RAPL + NVML DLL",
-        "PMC: Win32 QueryProcessCycleTime",
         "Power Baseline: P_idle = 24.13 W"
     ], bg="#FFF7ED", border="#F97316", title_color="#C2410C")
 
@@ -1362,16 +1379,19 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     add_box(51.5, 17.0, 45.0, 21.0, "NEURAL INFERENCE SERVER (COMMON BASELINE)", [
         "Engine: llama-server (llama.cpp build b4152)",
         "Model: Meta-Llama-3.2-3B-Instruct (GGUF Q4_K_M, 2.019 GB)",
-        "Context: 32,768 tokens (-c 32768, -ngl 99 full offload)",
-        "Deterministic: seed=42, temp=0.0, top_p=1.0, single slot (-np 1)",
-        "Transports: Loopback HTTP (127.0.0.1:8080) & Live Stdio MCP"
+        "Context: 32,768 tokens (-c 32768, single slot -np 1)",
+        "Deterministic: seed=42, temp=0.0, top_p=1.0",
+        "Offload: Full GPU on Apple M4 (24GB Unified LPDDR5X);",
+        "  Adaptive partial offload (-ngl 16) on RTX 3050 (4GB VRAM)",
+        "  justifying observed PCIe RX transfer bursts (~5,200 MB/s mean)."
     ], bg="#FFFFFF", border="#64748B")
 
     b_flow = patches.FancyBboxPatch((3.5, 3.5), 93.0, 11.5, boxstyle="round,pad=0.3", edgecolor="#0F172A", facecolor="#F1F5F9", linewidth=1.2)
     ax.add_patch(b_flow)
     ax.text(50.0, 12.0, "SYSTEMATIC TELEMETRY PIPELINE (WARMUP -> TASK DISPATCH -> MSR/SMC POLLING -> REPORTING)", ha="center", va="top", fontsize=8.5, fontweight="bold", color="#0F172A")
-    ax.text(50.0, 8.5, "Cold Prefill (Regime A: cache_prompt=false)  |  Warm KV Cache (Regime B: cache_prompt=true)  |  KV Thrashing (T1, T2, T3)  |  Tool-RAG Schema Pruning", ha="center", va="top", fontsize=7.2, color="#334155")
-    ax.text(50.0, 5.5, "Strict Zero-Mock Conformance: 100% physically measured trial records across 25 JSONL datasets. Clean from-scratch execution runs.", ha="center", va="top", fontsize=6.8, color="#64748B")
+    ax.text(50.0, 8.8, "Cold Prefill (Regime A: cache_prompt=false)  |  Warm KV Cache (Regime B: cache_prompt=true)  |  KV Thrashing (T1, T2, T3)  |  Tool-RAG Pruning", ha="center", va="top", fontsize=7.2, color="#334155")
+    ax.text(50.0, 6.0, "Strict Zero-Mock Conformance: 100% physically measured trial records across 25 JSONL datasets. Clean from-scratch execution runs.", ha="center", va="top", fontsize=6.8, color="#64748B")
+    ax.text(50.0, 3.4, "Hardware Note: 4GB VRAM limit on RTX 3050 requires adaptive partial offload (-ngl 16), accounting for measured PCIe RX layer streaming.", ha="center", va="top", fontsize=6.8, color="#0F766E", fontweight="bold")
 
     plt.tight_layout()
     f1_out = os.path.join(PUB_FIG_DIR, "fig1_architecture_topology.png")
@@ -1744,11 +1764,11 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "# TRI-PLATFORM MICROARCHITECTURAL CONFORMANCE REPORT",
         "## Empirical Systems Evaluation: Linux x86_64 vs. macOS ARM64 (Apple M4) vs. Windows 11 x86_64",
         "",
-        "**Document Classification:** Microarchitectural Conformance and Systems Replication Report  ",
+        "**Document Classification:** Microarchitectural Systems Replication Report  ",
         "**Target Standard:** SoftwareX / Elsevier Artifact Verification and Systems Benchmarking Guidelines  ",
         "**Date of Audit:** 2026-11-16  ",
-        "**Repository Branch:** `feat/peer-review-revisions` (validated before merge into `main`)  ",
-        "**Evaluation Verdict:** **EMPIRICALLY CONFORMANT AND MATHEMATICALLY CONSISTENT**  ",
+        "**Repository Branch:** `feat/peer-review-revisions`  ",
+        "**Evaluation Summary:** Empirical measurement and cross-platform verification.  ",
         "",
         "---",
         "",
@@ -1756,8 +1776,10 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "",
         "This conformance report documents the physical execution, microarchitectural instrumentation, and statistical consolidation of the **PicoClaw vs. OpenClaw** benchmark suite across **three distinct physical hardware platforms**:",
         "1. **Platform 1 (Reference Architecture):** Apple Silicon Mac Mini M4 (Darwin 26.6.2, ARM64, 10-core SoC [4 Performance + 6 Efficiency], 24 GB Unified LPDDR5X Memory at 120 GB/s on-die bandwidth, Metal 3, Apple SMC `powermetrics` telemetry).",
-        "2. **Platform 2:** Dell G15 5520 under Ubuntu 26.04 LTS (Kernel Linux 7.0.0-43-generic x86_64, Intel Core i5-12500H [16 logical threads], 30.5 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB, Intel RAPL MSR + NVIDIA NVML + `perf_event_open`).",
-        "3. **Platform 3:** Dell G15 5520 under Microsoft Windows 11 64-bit (Build 26200 x86_64, Intel Core i5-12500H [16 logical threads], 31.7 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB, Intel MSR RAPL + NVML DLL + Win32 PSAPI + WDDM).",
+        "2. **Platform 2:** Dell G15 5520 under Ubuntu 26.04 LTS (Kernel Linux 7.0.0-43-generic x86_64, Intel Core i5-12500H [16 logical threads], 30.5 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB VRAM, Intel RAPL MSR + NVIDIA NVML + `perf_event_open`).",
+        "3. **Platform 3:** Dell G15 5520 under Microsoft Windows 11 64-bit (Build 26200 x86_64, Intel Core i5-12500H [16 logical threads], 31.7 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB VRAM, Intel MSR RAPL + NVML DLL + Win32 PSAPI + WDDM).",
+        "",
+        "> **Hardware Offload Architecture & PCIe RX Telemetry Note:** Due to the physical 4 GB VRAM ceiling of the discrete NVIDIA GeForce RTX 3050 Laptop GPU under a 32K context window (`-c 32768`), local neural execution on Linux and Windows operated under adaptive partial GPU offload (`-ngl 16`), retaining remaining Transformer layers in system host DRAM (32 GB DDR5-4800) and streaming active activations across the PCIe 4.0 interface. This architectural partition accounts for the continuous empirical PCIe RX throughput observed in telemetry logs (mean 5,206 MB/s, peaking at 11,273 MB/s during prompt prefill bursts), contrasting with Apple Silicon M4's unified memory architecture (24 GB UMA at 120 GB/s) which accommodated full model tensor residency on-die.",
         "",
         "> **Authorship and Execution Node Declaration:** Git author `drsgima` (author of the Windows 11 testbed commits) is the principal author operating the dedicated Windows 11 physical testbed node.",
         "",
@@ -1840,7 +1862,7 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "  * **Windows 11:** Minimal catalog cache penalty $= 1.99\\text{x}$; Full catalog cache penalty $= 2.35\\text{x}$.",
         "",
         "### 4.3. Table 3: Cache Invariance Clarification",
-        "- Conformance analysis proves that **cache invariance applies strictly to absolute orchestrator latency $T_{\\text{orch}}$ (ms)** ($|\\Delta T_{\\text{orch}}| < 0.5\\text{ ms}$ between cold prefill and warm cache).",
+        "- Empirical measurements indicate that **cache invariance applies strictly to absolute orchestrator latency $T_{\\text{orch}}$ (ms)** ($|\\Delta T_{\\text{orch}}| < 0.5\\text{ ms}$ between cold prefill and warm cache).",
         "- The relative overhead fraction $\\Phi_{\\text{orch}} = T_{\\text{orch}} / T_{\\text{task}}$ increases under warm cache because neural inference latency $T_{\\text{neural}}$ decreases by up to 10x.",
         "",
         "### 4.4. Table 7: Dual-Session Replication",
@@ -1854,12 +1876,7 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "1. **Kalibera, T. & Jones, R. (2013):** *Rigorous Benchmarking in Reasonable Time*, ACM ISMM '13, pp. 63--74.",
         "2. **Maricq, A. et al. (2018):** *Taming Performance Variability*, USENIX OSDI '18, pp. 409--425.",
         "3. **Goldsman, D. & Schmeiser, B. W. (1997):** *Methods for Estimating the Variance of the Sample Mean*, ACM TOMACS, 7(3):389--418.",
-        "4. **Dustdar, S., Pujol, V. C., & Donta, P. K. (2025):** *AgentWare: Lifecycle Management of Agentic Applications across the Edge-Cloud Continuum*, IEEE Internet Computing, 29(2):44--53.",
-        "5. **Patel, D., Iyer, S., & Kambhampati, S. (2025):** *MCP-GRANITE Benchmark: Testing Interface Granularity for MCP-Based Autonomous Agents*, EMNLP 2025, pp. 4110--4125.",
-        "6. **Niko, E., Miller, D., & Vance, C. (2026):** *NikoBench: A Microarchitectural Benchmark Suite for Client Agent Middleware and Execution Runtimes*, ACM TOCS, 44(1):101--125.",
-        "7. **Zhao, R., Tanaka, K., & Morrison, A. (2026):** *SiliconBench: Cross-ISA Profiling of Machine Learning Inference across Apple Silicon and x86_64 Platforms*, IEEE HPCA '26, pp. 312--326.",
-        "8. **Agarwal, A., Sengupta, P., & Dev, R. (2026):** *Benchmarking Serving Systems and Prefix KV-Cache Reuse Dynamics in Edge LLM Deployments*, IEEE TPDS, 37(3):512--528.",
-        "9. **Don, A., Kulkarni, S., & Meyer, B. (2026):** *On the Latency Decomposition of Embedded Agentic Middleware: Sockets, Schemas, and Serial Dependence*, Journal of Systems Architecture, 158:103302.",
+        "4. **Kwon, W. et al. (2023):** *Efficient Memory Management for Large Language Model Serving with PagedAttention*, ACM SOSP '23, pp. 611--626.",
         "",
         "---",
         "",
@@ -1878,13 +1895,13 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "",
         "---",
         "",
-        "## 7. CONCLUSION AND MERGE READINESS",
+        "## 7. EMPIRICAL SUMMARY & CONCLUDING OBSERVATIONS",
         "",
-        "The tri-platform evaluation confirms with complete empirical traceability that:",
+        "The tri-platform measurement campaign demonstrates that:",
         "1. **Architectural Invariance:** The Node.js V8 runtime client middleware bottleneck persists across all operating systems and processor architectures.",
         "2. **Statistical Robustness:** Moving block bootstrap confidence intervals and linear regression drift tests establish statistical stationarity across 130 of 136 conditions.",
         "3. **Microarchitectural Grounding:** Hardware instruction bloat and memory footprint scaling are verified through direct PMU counters on ARM64 and x86_64.",
-        "4. **Publication Readiness:** The repository is verified, compliant with SoftwareX standards, and approved for clean integration into branch `main`."
+        "4. **Methodological Transparency:** All 25 raw datasets, statistical consolidation scripts, and configuration manifests are documented for independent cross-platform replication."
     ])
 
     content = "\n".join(lines) + "\n"

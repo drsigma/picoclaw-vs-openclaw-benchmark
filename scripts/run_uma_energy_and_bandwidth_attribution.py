@@ -286,7 +286,7 @@ def calibrate_billed_energy_coefficient(trial_records: List[Dict[str, Any]]) -> 
             "ols_r2_no_intercept_vs_mean": round(float(ols_r2_no_intercept_vs_mean), 4),
             "rejected_spurious_proxy": True,
             "finding": (
-                "Empirical validation against Apple SMC CPU Power rail shunts proves that Darwin XNU ri_billed_energy "
+                "Empirical validation against Apple SMC CPU Power rail shunts demonstrates that Darwin XNU ri_billed_energy "
                 "exhibits zero statistical correlation with physical CPU Joules (r = -0.0510, p = 0.580; centered OLS R² = -0.676, "
                 "worse than predicting the sample mean) and over-weights single-threaded CPython bytecode loops by 10-30x due to "
                 "internal XNU QoS thread-accounting weights, corroborating prior literature on on-chip energy counter inaccuracies (Fahad et al., 2019)."

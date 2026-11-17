@@ -1,11 +1,11 @@
 # TRI-PLATFORM MICROARCHITECTURAL CONFORMANCE REPORT
 ## Empirical Systems Evaluation: Linux x86_64 vs. macOS ARM64 (Apple M4) vs. Windows 11 x86_64
 
-**Document Classification:** Microarchitectural Conformance and Systems Replication Report  
+**Document Classification:** Microarchitectural Systems Replication Report  
 **Target Standard:** SoftwareX / Elsevier Artifact Verification and Systems Benchmarking Guidelines  
 **Date of Audit:** 2026-11-16  
-**Repository Branch:** `feat/peer-review-revisions` (validated before merge into `main`)  
-**Evaluation Verdict:** **EMPIRICALLY CONFORMANT AND MATHEMATICALLY CONSISTENT**  
+**Repository Branch:** `feat/peer-review-revisions`  
+**Evaluation Summary:** Empirical measurement and cross-platform verification.  
 
 ---
 
@@ -13,8 +13,10 @@
 
 This conformance report documents the physical execution, microarchitectural instrumentation, and statistical consolidation of the **PicoClaw vs. OpenClaw** benchmark suite across **three distinct physical hardware platforms**:
 1. **Platform 1 (Reference Architecture):** Apple Silicon Mac Mini M4 (Darwin 26.6.2, ARM64, 10-core SoC [4 Performance + 6 Efficiency], 24 GB Unified LPDDR5X Memory at 120 GB/s on-die bandwidth, Metal 3, Apple SMC `powermetrics` telemetry).
-2. **Platform 2:** Dell G15 5520 under Ubuntu 26.04 LTS (Kernel Linux 7.0.0-43-generic x86_64, Intel Core i5-12500H [16 logical threads], 30.5 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB, Intel RAPL MSR + NVIDIA NVML + `perf_event_open`).
-3. **Platform 3:** Dell G15 5520 under Microsoft Windows 11 64-bit (Build 26200 x86_64, Intel Core i5-12500H [16 logical threads], 31.7 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB, Intel MSR RAPL + NVML DLL + Win32 PSAPI + WDDM).
+2. **Platform 2:** Dell G15 5520 under Ubuntu 26.04 LTS (Kernel Linux 7.0.0-43-generic x86_64, Intel Core i5-12500H [16 logical threads], 30.5 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB VRAM, Intel RAPL MSR + NVIDIA NVML + `perf_event_open`).
+3. **Platform 3:** Dell G15 5520 under Microsoft Windows 11 64-bit (Build 26200 x86_64, Intel Core i5-12500H [16 logical threads], 31.7 GiB DDR5-4800, discrete NVIDIA GeForce RTX 3050 Laptop GPU 4GB VRAM, Intel MSR RAPL + NVML DLL + Win32 PSAPI + WDDM).
+
+> **Hardware Offload Architecture & PCIe RX Telemetry Note:** Due to the physical 4 GB VRAM ceiling of the discrete NVIDIA GeForce RTX 3050 Laptop GPU under a 32K context window (`-c 32768`), local neural execution on Linux and Windows operated under adaptive partial GPU offload (`-ngl 16`), retaining remaining Transformer layers in system host DRAM (32 GB DDR5-4800) and streaming active activations across the PCIe 4.0 interface. This architectural partition accounts for the continuous empirical PCIe RX throughput observed in telemetry logs (mean 5,206 MB/s, peaking at 11,273 MB/s during prompt prefill bursts), contrasting with Apple Silicon M4's unified memory architecture (24 GB UMA at 120 GB/s) which accommodated full model tensor residency on-die.
 
 > **Authorship and Execution Node Declaration:** Git author `drsgima` (author of the Windows 11 testbed commits) is the principal author operating the dedicated Windows 11 physical testbed node.
 
@@ -97,7 +99,7 @@ The exploratory 5-first vs. 5-last comparison was replaced by ordinary least squ
   * **Windows 11:** Minimal catalog cache penalty $= 1.99\text{x}$; Full catalog cache penalty $= 2.35\text{x}$.
 
 ### 4.3. Table 3: Cache Invariance Clarification
-- Conformance analysis proves that **cache invariance applies strictly to absolute orchestrator latency $T_{\text{orch}}$ (ms)** ($|\Delta T_{\text{orch}}| < 0.5\text{ ms}$ between cold prefill and warm cache).
+- Empirical measurements indicate that **cache invariance applies strictly to absolute orchestrator latency $T_{\text{orch}}$ (ms)** ($|\Delta T_{\text{orch}}| < 0.5\text{ ms}$ between cold prefill and warm cache).
 - The relative overhead fraction $\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$ increases under warm cache because neural inference latency $T_{\text{neural}}$ decreases by up to 10x.
 
 ### 4.4. Table 7: Dual-Session Replication
@@ -111,12 +113,7 @@ This experimental protocol and microarchitectural interpretation are formally al
 1. **Kalibera, T. & Jones, R. (2013):** *Rigorous Benchmarking in Reasonable Time*, ACM ISMM '13, pp. 63--74.
 2. **Maricq, A. et al. (2018):** *Taming Performance Variability*, USENIX OSDI '18, pp. 409--425.
 3. **Goldsman, D. & Schmeiser, B. W. (1997):** *Methods for Estimating the Variance of the Sample Mean*, ACM TOMACS, 7(3):389--418.
-4. **Dustdar, S., Pujol, V. C., & Donta, P. K. (2025):** *AgentWare: Lifecycle Management of Agentic Applications across the Edge-Cloud Continuum*, IEEE Internet Computing, 29(2):44--53.
-5. **Patel, D., Iyer, S., & Kambhampati, S. (2025):** *MCP-GRANITE Benchmark: Testing Interface Granularity for MCP-Based Autonomous Agents*, EMNLP 2025, pp. 4110--4125.
-6. **Niko, E., Miller, D., & Vance, C. (2026):** *NikoBench: A Microarchitectural Benchmark Suite for Client Agent Middleware and Execution Runtimes*, ACM TOCS, 44(1):101--125.
-7. **Zhao, R., Tanaka, K., & Morrison, A. (2026):** *SiliconBench: Cross-ISA Profiling of Machine Learning Inference across Apple Silicon and x86_64 Platforms*, IEEE HPCA '26, pp. 312--326.
-8. **Agarwal, A., Sengupta, P., & Dev, R. (2026):** *Benchmarking Serving Systems and Prefix KV-Cache Reuse Dynamics in Edge LLM Deployments*, IEEE TPDS, 37(3):512--528.
-9. **Don, A., Kulkarni, S., & Meyer, B. (2026):** *On the Latency Decomposition of Embedded Agentic Middleware: Sockets, Schemas, and Serial Dependence*, Journal of Systems Architecture, 158:103302.
+4. **Kwon, W. et al. (2023):** *Efficient Memory Management for Large Language Model Serving with PagedAttention*, ACM SOSP '23, pp. 611--626.
 
 ---
 
@@ -154,10 +151,10 @@ Every empirical `.jsonl` trial record was audited for schema validity, null valu
 
 ---
 
-## 7. CONCLUSION AND MERGE READINESS
+## 7. EMPIRICAL SUMMARY & CONCLUDING OBSERVATIONS
 
-The tri-platform evaluation confirms with complete empirical traceability that:
+The tri-platform measurement campaign demonstrates that:
 1. **Architectural Invariance:** The Node.js V8 runtime client middleware bottleneck persists across all operating systems and processor architectures.
 2. **Statistical Robustness:** Moving block bootstrap confidence intervals and linear regression drift tests establish statistical stationarity across 130 of 136 conditions.
 3. **Microarchitectural Grounding:** Hardware instruction bloat and memory footprint scaling are verified through direct PMU counters on ARM64 and x86_64.
-4. **Publication Readiness:** The repository is verified, compliant with SoftwareX standards, and approved for clean integration into branch `main`.
+4. **Methodological Transparency:** All 25 raw datasets, statistical consolidation scripts, and configuration manifests are documented for independent cross-platform replication.
