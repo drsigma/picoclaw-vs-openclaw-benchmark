@@ -78,6 +78,7 @@ function pruneToolsVectorRAG(catalog, toolEmb, tier, topK = 5) {
   if (tier === "W2") tierSeed = 2.0;
   else if (tier === "W3") tierSeed = 3.0;
   else if (tier === "W4") tierSeed = 4.0;
+  else if (tier === "W5") tierSeed = 5.0;
 
   const qVec = new Float32Array(dim);
   let qNormSq = 0.0;
@@ -501,6 +502,32 @@ async function runWorkload(tier, warmth, rssIdle) {
       history.push({ role: "assistant", content: r.outText });
     }
     itlAvg = itlSum / 10.0;
+  } else if (tier === "W5") {
+    const tTool0 = performance.now();
+    let polStr = "";
+    try {
+      const polPath = path.join(repoDir, "W5_langchain_real_world", "data", "governance_policy.txt");
+      polStr = fs.readFileSync(polPath, "utf-8").slice(0, 1000);
+    } catch (_) {}
+    tDispatchTotal = tCatalogMs + (performance.now() - tTool0);
+    toolCalls = 2;
+
+    const msgs = [
+      { role: "system", content: "You are a concise technical systems assistant." },
+      { role: "user", content: `Enterprise Policy:\n${polStr}\nCross-Domain Query: Identify latency SLA thresholds and compliance quarantine actions.` }
+    ];
+    const r = await callLlamaStream(msgs, toolCatalog, 256);
+    tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
+    ttftFirst = r.ttftMs;
+    itlAvg = r.itlMs;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedPromptTokens = r.uncachedPromptTokens;
+    lastFinishReason = r.finishReason;
+    lastHttpStatus = r.httpStatus;
   }
 
   if (totalPromptTokens <= 0 || totalCompletionTokens <= 0) {
@@ -543,7 +570,11 @@ async function runWorkload(tier, warmth, rssIdle) {
     completion_tokens: totalCompletionTokens,
     output_tokens: totalCompletionTokens,
     cached_tokens: totalCachedTokens,
+    tokens_cached: totalCachedTokens,
     uncached_prompt_tokens: totalUncachedPromptTokens,
+    prompt_eval_count: totalUncachedPromptTokens,
+    eval_count: totalCompletionTokens,
+    cache_hit: totalCachedTokens > 0 && (totalUncachedPromptTokens <= 4 || totalUncachedPromptTokens === 0),
     cache_hit_pct: cacheHitPct,
     tool_calls: toolCalls,
     http_status: lastHttpStatus,

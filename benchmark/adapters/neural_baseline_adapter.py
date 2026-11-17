@@ -261,6 +261,27 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
                 history.append({"role": "assistant", "content": reply})
             itl_avg = itl_sum / 10.0
 
+        elif workload_id == "W5":
+            p_path = os.path.join(REPO_DIR, "W5_langchain_real_world", "data", "governance_policy.txt")
+            pol = ""
+            if os.path.exists(p_path):
+                with open(p_path, "r", encoding="utf-8") as f:
+                    pol = f.read()[:1000]
+            msgs = [
+                {"role": "system", "content": "You are a concise technical systems assistant."},
+                {"role": "user", "content": f"Enterprise Governance Policy:\n{pol}\nIdentify latency SLA thresholds."},
+            ]
+            tn, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = self._call_stream(msgs, self.tools, 128)
+            t_neural_total = tn
+            ttft_first = ttft
+            itl_avg = itl
+            total_prompt_tokens = ptok
+            total_completion_tokens = ctok
+            total_cached_tokens = c_tok
+            total_uncached_prompt_tokens = unc_tok
+            last_finish_reason = fr
+            last_http_status = hstatus
+
         if total_prompt_tokens <= 0 or total_completion_tokens <= 0:
             raise RuntimeError(f"FATAL: Validation failed - prompt_tokens ({total_prompt_tokens}) <= 0 or completion_tokens ({total_completion_tokens}) <= 0")
 
@@ -295,6 +316,10 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             "completion_tokens": total_completion_tokens,
             "output_tokens": total_completion_tokens,
             "cached_tokens": total_cached_tokens,
+            "tokens_cached": total_cached_tokens,
+            "prompt_eval_count": total_uncached_prompt_tokens,
+            "eval_count": total_completion_tokens,
+            "cache_hit": bool(total_cached_tokens > 0 and (total_uncached_prompt_tokens <= 4 or total_uncached_prompt_tokens == 0)),
             "uncached_prompt_tokens": total_uncached_prompt_tokens,
             "cache_hit_pct": cache_hit_pct,
             "tool_calls": 0,

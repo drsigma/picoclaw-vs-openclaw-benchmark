@@ -178,7 +178,7 @@ class CrossPlatformPowerMonitor:
 
 def main() -> int:
     dry_run = "--dry-run" in sys.argv
-    all_arms = "--all-arms" in sys.argv or "--four-arms" in sys.argv
+    all_arms = not ("--pruned-only" in sys.argv)
     mock_server = "--mock-server" in sys.argv or dry_run
 
     out_trials_path = OUT_TRIALS_PATH
@@ -320,6 +320,10 @@ def main() -> int:
                             "prompt_tokens": pt,
                             "completion_tokens": ct,
                             "cached_tokens": cached_t,
+                            "tokens_cached": cached_t,
+                            "prompt_eval_count": int(res.get("prompt_eval_count", res.get("uncached_prompt_tokens", 0))),
+                            "eval_count": ct,
+                            "cache_hit": bool(cached_t > 0 and (int(res.get("uncached_prompt_tokens", 0)) <= 4)),
                             "uncached_prompt_tokens": int(res.get("uncached_prompt_tokens", 0)),
                             "cache_hit_pct": round(cache_hit, 2),
                             "energy_total_j": None,
@@ -403,6 +407,10 @@ def main() -> int:
                             "prompt_tokens": pt,
                             "completion_tokens": ct,
                             "cached_tokens": cached_t,
+                            "tokens_cached": cached_t,
+                            "prompt_eval_count": int(res.get("prompt_eval_count", res.get("uncached_prompt_tokens", 0))),
+                            "eval_count": ct,
+                            "cache_hit": bool(cached_t > 0 and (int(res.get("uncached_prompt_tokens", 0)) <= 4)),
                             "uncached_prompt_tokens": int(res.get("uncached_prompt_tokens", 0)),
                             "cache_hit_pct": round(cache_hit, 2),
                             "energy_total_j": e_tot,

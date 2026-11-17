@@ -429,6 +429,32 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
       history.push({ role: "assistant", content: r.assistantText });
     }
     itlAvg = itlSum / 10.0;
+  } else if (tier === "W5") {
+    const tTool0 = nowMs();
+    let polStr = "";
+    try {
+      const polPath = path.join(REPO_DIR, "W5_langchain_real_world", "data", "governance_policy.txt");
+      polStr = fs.readFileSync(polPath, "utf-8").slice(0, 1000);
+    } catch (_) {}
+    tDispatchTotal = tCatalogMs + (nowMs() - tTool0);
+    toolCalls = 2;
+
+    const msgs = [
+      { role: "system", content: "You are a concise technical systems assistant." },
+      { role: "user", content: `Enterprise Policy:\n${polStr}\nCross-Domain Query: Identify latency SLA thresholds and compliance quarantine actions.` }
+    ];
+    const r = await callLlamaStream(msgs, toolCatalog, 256);
+    tNeuralTotal = r.totalNeuralMs;
+    totalPromptMs = r.promptMs;
+    totalPredictedMs = r.predictedMs;
+    ttftFirst = r.ttftMs;
+    itlAvg = r.itlMs;
+    totalPromptTokens = r.promptTokens;
+    totalCompletionTokens = r.completionTokens;
+    totalCachedTokens = r.cachedTokens;
+    totalUncachedTokens = r.uncachedTokens;
+    finishReason = r.finishReason;
+    httpStatus = r.httpStatus;
   } else {
     throw new Error(`FATAL: Unsupported workload tier: ${tier}`);
   }
@@ -469,7 +495,11 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
     completion_tokens: totalCompletionTokens,
     output_tokens: totalCompletionTokens,
     cached_tokens: totalCachedTokens,
+    tokens_cached: totalCachedTokens,
     uncached_prompt_tokens: totalUncachedTokens,
+    prompt_eval_count: totalUncachedTokens,
+    eval_count: totalCompletionTokens,
+    cache_hit: totalCachedTokens > 0 && (totalUncachedTokens <= 4 || totalUncachedTokens === 0),
     cache_hit_pct: cacheHitPct,
     tool_calls: toolCalls,
     http_status: httpStatus,

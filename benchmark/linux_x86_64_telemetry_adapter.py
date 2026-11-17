@@ -406,6 +406,7 @@ class ThermalController:
             "fan_rpm": self.fan_rpm(),
             "cpu_pkg_throttle_count": self.throttle_count(),
             "gpu_throttle_reasons": self.nvml.throttle_reasons(),
+            **self.nvml.vram_info_mb(),
         }
 
     def wait_until_cool(self, cpu_max_c: float, gpu_max_c: float, timeout_s: float) -> float:
@@ -481,6 +482,28 @@ class Nvml:
         r = ctypes.c_ulonglong()
         self._chk(self.lib.nvmlDeviceGetCurrentClocksThrottleReasons(self.dev, ctypes.byref(r)), "ThrottleReasons")
         return int(r.value)
+
+    def vram_info_mb(self) -> dict[str, float]:
+        class nvmlMemory_t(ctypes.Structure):
+            _fields_ = [
+                ("total", ctypes.c_ulonglong),
+                ("free", ctypes.c_ulonglong),
+                ("used", ctypes.c_ulonglong),
+            ]
+        mem = nvmlMemory_t()
+        try:
+            self._chk(self.lib.nvmlDeviceGetMemoryInfo(self.dev, ctypes.byref(mem)), "GetMemoryInfo")
+            return {
+                "gpu_vram_total_mb": round(mem.total / (1024 * 1024), 2),
+                "gpu_vram_free_mb": round(mem.free / (1024 * 1024), 2),
+                "gpu_vram_used_mb": round(mem.used / (1024 * 1024), 2),
+            }
+        except Exception:
+            return {
+                "gpu_vram_total_mb": 0.0,
+                "gpu_vram_free_mb": 0.0,
+                "gpu_vram_used_mb": 0.0,
+            }
 
 
 class PCIeTrafficMonitor:
@@ -637,6 +660,9 @@ class LinuxHardwarePowerMonitor:
         d = self._delta(self._snap0, s1)
         total = d["package-0"] + d["gpu"]
         net = total - self.idle_total_w * dt
+        vram = self.nvml.vram_info_mb()
+        pcie_rx = pcie_stats.get("pcie_rx_mean_mb_s", 0.0)
+        pcie_tx = pcie_stats.get("pcie_tx_mean_mb_s", 0.0)
         return {
             "energy_cpu_pkg_j": d["package-0"],
             "energy_cpu_core_j": d.get("core", float("nan")),
@@ -647,5 +673,9 @@ class LinuxHardwarePowerMonitor:
             "p_net_w": net / dt,
             "avg_power_w": total / dt,
             "duration_s": dt,
+            "gpu_vram_used_mb": vram.get("gpu_vram_used_mb", 0.0),
+            "gpu_vram_total_mb": vram.get("gpu_vram_total_mb", 0.0),
+            "server_vram_mb": vram.get("gpu_vram_used_mb", 0.0),
+            "pcie_bandwidth_mb_s": round(pcie_rx + pcie_tx, 2),
             **pcie_stats,
         }

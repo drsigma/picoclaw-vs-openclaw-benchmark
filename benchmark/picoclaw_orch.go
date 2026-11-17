@@ -80,7 +80,11 @@ type TrialResult struct {
 	CompletionTokens int     `json:"completion_tokens"`
 	OutputTokens     int     `json:"output_tokens"`
 	CachedTokens     int     `json:"cached_tokens"`
+	TokensCached     int     `json:"tokens_cached"`
 	UncachedPromptTokens int `json:"uncached_prompt_tokens"`
+	PromptEvalCount  int     `json:"prompt_eval_count"`
+	EvalCount        int     `json:"eval_count"`
+	CacheHit         bool    `json:"cache_hit"`
 	CacheHitPct      float64 `json:"cache_hit_pct"`
 	ToolCalls        int     `json:"tool_calls"`
 	HttpStatus       int     `json:"http_status"`
@@ -163,6 +167,8 @@ func pruneToolsVectorRAG(catalog []ToolDefinition, toolEmb []float32, tier strin
 		tierSeed = 3.0
 	case "W4":
 		tierSeed = 4.0
+	case "W5":
+		tierSeed = 5.0
 	}
 
 	qVec := make([]float32, dim)
@@ -699,6 +705,33 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 			history = append(history, ChatMessage{Role: "assistant", Content: sr.OutputText})
 		}
 		itlAvg = itlSum / 10.0
+
+	case "W5":
+		tTool0 := time.Now()
+		polBytes, _ := os.ReadFile(filepath.Join(baseDir, "..", "..", "W5_langchain_real_world", "data", "governance_policy.txt"))
+		polStr := string(polBytes)
+		if len(polStr) > 1000 {
+			polStr = polStr[:1000]
+		}
+		tDispatchTotal = tCatalogMs + float64(time.Since(tTool0).Nanoseconds())/1e6
+		toolCalls = 2
+
+		msgs := []ChatMessage{
+			{Role: "system", Content: "You are a concise technical systems assistant."},
+			{Role: "user", Content: "Enterprise Policy:\n" + polStr + "\nCross-Domain Query: Identify latency SLA thresholds and compliance quarantine actions."},
+		}
+		sr := callLlamaStream(client, apiURL, msgs, toolCatalog, 256)
+		tNeuralTotal = sr.TotalNeuralMs
+		totalPromptMs = sr.PromptMs
+		totalPredictedMs = sr.PredictedMs
+		ttftFirst = sr.TTFTMs
+		itlAvg = sr.ITLMs
+		totalPromptTokens = sr.PromptTokens
+		totalCompletionTokens = sr.CompletionTokens
+		totalCachedTokens = sr.CachedTokens
+		totalUncachedPromptTokens = sr.UncachedPromptTokens
+		lastFinishReason = sr.FinishReason
+		lastHttpStatus = sr.HttpStatus
 	}
 
 	if totalPromptTokens <= 0 || totalCompletionTokens <= 0 {
@@ -754,7 +787,11 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 		CompletionTokens:     totalCompletionTokens,
 		OutputTokens:         totalCompletionTokens,
 		CachedTokens:         totalCachedTokens,
+		TokensCached:         totalCachedTokens,
 		UncachedPromptTokens: totalUncachedPromptTokens,
+		PromptEvalCount:      totalUncachedPromptTokens,
+		EvalCount:            totalCompletionTokens,
+		CacheHit:             totalCachedTokens > 0 && (totalUncachedPromptTokens <= 4 || totalUncachedPromptTokens == 0),
 		CacheHitPct:          cacheHitPct,
 		ToolCalls:            toolCalls,
 		HttpStatus:           lastHttpStatus,

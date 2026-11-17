@@ -132,7 +132,7 @@ API_URL = "http://127.0.0.1:8080/v1/chat/completions"
 HEALTH_URL = "http://127.0.0.1:8080/health"
 MAIN_ARMS = ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native", "bun_minimal", "neural_baseline"]
 TOOL_RAG_ARMS = ["openclaw_tool_rag", "picoclaw_tool_rag"]
-WORKLOADS = ["W1", "W2", "W3", "W4"]
+WORKLOADS = ["W1", "W2", "W3", "W4", "W5"]
 GPU_THERMAL_MASK = 0x20 | 0x40  # SW thermal slowdown | HW thermal slowdown
 
 
@@ -346,8 +346,14 @@ def run_trial(ctx: Ctx, ak: str, wl: str, rep: int, warmup: bool, regime: str, o
         "itl_ms": res.get("itl_ms"), "t_prune_ms": res.get("t_prune_ms"),
         "prompt_tokens": int(require(res, "prompt_tokens", ak, wl)),
         "completion_tokens": int(res.get("completion_tokens", res.get("output_tokens", 0))),
-        "cached_tokens": res.get("cached_tokens"), "uncached_prompt_tokens": res.get("uncached_prompt_tokens"),
+        "cached_tokens": res.get("cached_tokens"),
+        "tokens_cached": res.get("tokens_cached", res.get("cached_tokens")),
+        "prompt_eval_count": res.get("prompt_eval_count", res.get("uncached_prompt_tokens")),
+        "eval_count": res.get("eval_count", res.get("completion_tokens", res.get("output_tokens", 0))),
+        "cache_hit": res.get("cache_hit", bool((res.get("cached_tokens") or 0) > 0 and ((res.get("uncached_prompt_tokens") or 0) <= 4))),
+        "uncached_prompt_tokens": res.get("uncached_prompt_tokens"),
         "cache_hit_pct": res.get("cache_hit_pct"), "tool_calls": res.get("tool_calls"),
+        "ngl": getattr(ctx.args, "ngl", None),
         "http_status": int(require(res, "http_status", ak, wl)), "finish_reason": res.get("finish_reason"),
         "proc_counters_applicable": orch_proc,
         "proc_instructions": res.get("proc_instructions") if orch_proc else None,
@@ -358,6 +364,10 @@ def run_trial(ctx: Ctx, ak: str, wl: str, rep: int, warmup: bool, regime: str, o
         "page_faults": res.get("page_faults") if orch_proc else None,
         "pmu_instructions_by_core_type": res.get("pmu_instructions_by_core_type") if orch_proc else None,
         "rss_peak_mb": res.get("rss_peak_mb"),
+        "gpu_vram_used_mb": e.get("gpu_vram_used_mb", s1.get("gpu_vram_used_mb")),
+        "gpu_vram_total_mb": e.get("gpu_vram_total_mb", s1.get("gpu_vram_total_mb")),
+        "server_vram_mb": e.get("server_vram_mb", s1.get("server_vram_mb")),
+        "pcie_bandwidth_mb_s": e.get("pcie_bandwidth_mb_s"),
         "energy_cpu_pkg_j": e["energy_cpu_pkg_j"], "energy_cpu_core_j": e["energy_cpu_core_j"],
         "energy_cpu_uncore_j": e["energy_cpu_uncore_j"], "energy_gpu_j": e["energy_gpu_j"],
         "energy_total_j": e["energy_total_j"], "energy_net_above_idle_j": e["energy_net_above_idle_j"],
