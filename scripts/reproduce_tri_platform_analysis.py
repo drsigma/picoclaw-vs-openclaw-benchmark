@@ -1318,80 +1318,86 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     # --------------------------------------------------------------------------
     # Figure 1: Architecture Topology Diagram
     # --------------------------------------------------------------------------
-    fig, ax = plt.subplots(figsize=(12, 7.2))
+    fig, ax = plt.subplots(figsize=(12, 7.6))
     ax.set_xlim(0, 100)
-    ax.set_ylim(0, 70)
+    ax.set_ylim(0, 74)
     ax.axis("off")
 
-    outer = patches.FancyBboxPatch((1.5, 1.5), 97, 67, boxstyle="round,pad=0.8", edgecolor="#1E293B", facecolor="#F8FAFC", linewidth=2.0)
+    outer = patches.FancyBboxPatch((1.5, 1.5), 97, 71, boxstyle="round,pad=0.8", edgecolor="#1E293B", facecolor="#F8FAFC", linewidth=2.0)
     ax.add_patch(outer)
-    ax.text(50, 66.5, "TRI-PLATFORM EXPERIMENTAL TESTBED & MICROARCHITECTURAL TELEMETRY", ha="center", va="center", fontsize=11, fontweight="bold", color="#0F172A")
+    ax.text(50, 70.5, "TRI-PLATFORM EXPERIMENTAL TESTBED & MICROARCHITECTURAL TELEMETRY", ha="center", va="center", fontsize=11, fontweight="bold", color="#0F172A")
 
     def add_box(x, y, w, h, title, lines, bg="#FFFFFF", border="#334155", title_color="#0F172A"):
         b = patches.FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.4", edgecolor=border, facecolor=bg, linewidth=1.2)
         ax.add_patch(b)
-        ax.text(x + w / 2, y + h - 2.0, title, ha="center", va="top", fontsize=8.5, fontweight="bold", color=title_color)
-        curr_y = y + h - 5.0
+        ax.text(x + w / 2, y + h - 1.8, title, ha="center", va="top", fontsize=8.2, fontweight="bold", color=title_color)
+        curr_y = y + h - 4.6
         for l in lines:
-            ax.text(x + 1.2, curr_y, l, ha="left", va="top", fontsize=7.2, color="#334155")
-            curr_y -= 2.6
+            ax.text(x + 1.2, curr_y, l, ha="left", va="top", fontsize=7.0, color="#334155")
+            curr_y -= 2.4
 
-    add_box(3.5, 40.5, 29.5, 23.5, "NODE 1: APPLE SILICON M4", [
+    add_box(3.5, 42.5, 29.5, 25.5, "NODE 1: APPLE SILICON M4", [
         "OS: macOS 26.6.2 (Darwin ARM64)",
         "CPU: 10-Core Apple M4 (4P + 6E)",
         "GPU: 10-Core Metal 3 Unified",
         "RAM: 24 GB Unified LPDDR5X (120 GB/s)",
         "Telemetry: Apple SMC (powermetrics)",
+        "Sensor Boundary: Full SoC package (on-die)",
         "PMC: Apple PMU Hardware Counters",
-        "Power Baseline: P_idle = 1.20 W"
+        "Power Baseline: P_idle = 1.20 W",
+        "Offload: 100% GPU VRAM offload (-ngl 99)"
     ], bg="#EFF6FF", border="#3B82F6", title_color="#1D4ED8")
 
-    add_box(35.25, 40.5, 29.5, 23.5, "NODE 2: LINUX X86_64", [
+    add_box(35.25, 42.5, 29.5, 25.5, "NODE 2: LINUX X86_64", [
         "OS: Ubuntu 26.04 LTS (Linux 7.0)",
         "CPU: Intel Core i5-12500H (16 Threads)",
         "GPU: NVIDIA RTX 3050 Laptop (4GB VRAM)",
-        "Offload: Partial GPU offload (-ngl 16)",
-        "PCIe: Host-GPU activation streaming (RX)",
-        "RAM: 32 GB DDR5-4800 (Dual Channel)",
+        "Sensor Boundary: CPU Pkg (RAPL) + dGPU (NVML)",
+        "Motherboard/VRMs: Excluded from sensor scope",
+        "Offload: Partial GPU offload (-ngl 16, 4GB limit)",
+        "PCIe: Host-GPU activation streaming (~5.2 GB/s)",
         "Telemetry: Intel RAPL + NVIDIA NVML",
         "Power Baseline: P_idle = 19.71 W"
     ], bg="#F0FDF4", border="#22C55E", title_color="#15803D")
 
-    add_box(67.0, 40.5, 29.5, 23.5, "NODE 3: WINDOWS 11 X86_64", [
+    add_box(67.0, 42.5, 29.5, 25.5, "NODE 3: WINDOWS 11 X86_64", [
         "OS: Windows 11 64-bit (Build 26200)",
         "CPU: Intel Core i5-12500H (16 Threads)",
         "GPU: NVIDIA RTX 3050 Laptop (4GB VRAM)",
-        "Offload: Partial GPU offload (-ngl 16)",
-        "PCIe: Host-GPU activation streaming (RX)",
-        "RAM: 32 GB DDR5-4800 (Dual Channel)",
+        "Sensor Boundary: CPU Pkg (MSR) + dGPU (NVML)",
+        "Motherboard/VRMs: Excluded from sensor scope",
+        "Offload: Partial GPU offload (-ngl 16, 4GB limit)",
+        "PCIe: Host-GPU activation streaming (~5.2 GB/s)",
         "Telemetry: Intel MSR RAPL + NVML DLL",
         "Power Baseline: P_idle = 24.13 W"
     ], bg="#FFF7ED", border="#F97316", title_color="#C2410C")
 
-    add_box(3.5, 17.0, 45.0, 21.0, "CLIENT AGENT RUNTIME ENGINES", [
-        "1. PicoClaw: Native Go 1.24 static binary (zero VM, zero JIT)",
-        "2. OpenClaw Minimal: Node.js v26.12.1 (Google V8 JIT, 15 tools)",
-        "3. OpenClaw Full: Node.js v26.12.1 (Google V8 JIT, 54 tools)",
+    add_box(3.5, 18.0, 45.0, 22.5, "CLIENT AGENT RUNTIME ENGINES", [
+        "1. PicoClaw: Native Go 1.24 static binary (zero VM, zero JIT overhead)",
+        "2. OpenClaw Minimal: Node.js v26.12.1 (Google V8 JIT, 15 equalized tools)",
+        "3. OpenClaw Full: Node.js v26.12.1 (Google V8 JIT, 54 enterprise tools)",
         "4. PythonNative: CPython 3.12 (standard reference runtime)",
         "5. Bun Minimal: Bun v1.3.9 (JavaScriptCore JIT engine)"
     ], bg="#FFFFFF", border="#64748B")
 
-    add_box(51.5, 17.0, 45.0, 21.0, "NEURAL INFERENCE SERVER (COMMON BASELINE)", [
+    add_box(51.5, 18.0, 45.0, 22.5, "NEURAL INFERENCE SERVER (COMMON BASELINE)", [
         "Engine: llama-server (llama.cpp build b4152)",
         "Model: Meta-Llama-3.2-3B-Instruct (GGUF Q4_K_M, 2.019 GB)",
-        "Context: 32,768 tokens (-c 32768, single slot -np 1)",
-        "Deterministic: seed=42, temp=0.0, top_p=1.0",
-        "Offload: Full GPU on Apple M4 (24GB Unified LPDDR5X);",
-        "  Adaptive partial offload (-ngl 16) on RTX 3050 (4GB VRAM)",
-        "  justifying observed PCIe RX transfer bursts (~5,200 MB/s mean)."
+        "Context: 32,768 tokens (-c 32768, single slot -np 1, temp=0.0, seed=42)",
+        "Offload Topology & PCIe Bus Dynamics:",
+        "  - Apple M4: Full on-die UMA offload (-ngl 99, zero bus latency).",
+        "  - RTX 3050 (4GB VRAM ceiling): Adaptive partial offload (-ngl 16);",
+        "    16 layers in GPU VRAM, 12 layers on CPU host RAM via AVX2.",
+        "    Directly causes measured continuous PCIe RX streaming (~5,200 MB/s mean)."
     ], bg="#FFFFFF", border="#64748B")
 
-    b_flow = patches.FancyBboxPatch((3.5, 3.5), 93.0, 11.5, boxstyle="round,pad=0.3", edgecolor="#0F172A", facecolor="#F1F5F9", linewidth=1.2)
+    b_flow = patches.FancyBboxPatch((3.5, 3.5), 93.0, 13.0, boxstyle="round,pad=0.3", edgecolor="#0F172A", facecolor="#F1F5F9", linewidth=1.2)
     ax.add_patch(b_flow)
-    ax.text(50.0, 12.0, "SYSTEMATIC TELEMETRY PIPELINE (WARMUP -> TASK DISPATCH -> MSR/SMC POLLING -> REPORTING)", ha="center", va="top", fontsize=8.5, fontweight="bold", color="#0F172A")
-    ax.text(50.0, 8.8, "Cold Prefill (Regime A: cache_prompt=false)  |  Warm KV Cache (Regime B: cache_prompt=true)  |  KV Thrashing (T1, T2, T3)  |  Tool-RAG Pruning", ha="center", va="top", fontsize=7.2, color="#334155")
-    ax.text(50.0, 6.0, "Strict Zero-Mock Conformance: 100% physically measured trial records across 25 JSONL datasets. Clean from-scratch execution runs.", ha="center", va="top", fontsize=6.8, color="#64748B")
-    ax.text(50.0, 3.4, "Hardware Note: 4GB VRAM limit on RTX 3050 requires adaptive partial offload (-ngl 16), accounting for measured PCIe RX layer streaming.", ha="center", va="top", fontsize=6.8, color="#0F766E", fontweight="bold")
+    ax.text(50.0, 14.8, "SYSTEMATIC TELEMETRY PIPELINE & SENSOR MEASUREMENT BOUNDARIES", ha="center", va="top", fontsize=8.2, fontweight="bold", color="#0F172A")
+    ax.text(50.0, 12.2, "Cold Prefill (Regime A: cache_prompt=false)  |  Warm KV Cache (Regime B: cache_prompt=true)  |  KV Thrashing (T1, T2, T3)  |  Tool-RAG Pruning", ha="center", va="top", fontsize=7.0, color="#334155")
+    ax.text(50.0, 9.6, "Sensor Boundaries: Apple SMC captures entire SoC (CPU+GPU+DRAM). Intel RAPL + NVML captures CPU Package + dGPU board (excludes VRMs/DRAM).", ha="center", va="top", fontsize=6.8, color="#0369A1", fontweight="bold")
+    ax.text(50.0, 7.2, "Adaptive Offload: 4GB VRAM ceiling on RTX 3050 necessitates partial offload (-ngl 16), explaining observed 5.2-11.3 GB/s PCIe RX traffic.", ha="center", va="top", fontsize=6.8, color="#0F766E", fontweight="bold")
+    ax.text(50.0, 4.8, "Zero-Mock Conformance: 100% physically measured trial records across 25 JSONL datasets. Clean from-scratch execution runs.", ha="center", va="top", fontsize=6.6, color="#64748B")
 
     plt.tight_layout()
     f1_out = os.path.join(PUB_FIG_DIR, "fig1_architecture_topology.png")
@@ -1402,7 +1408,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     # --------------------------------------------------------------------------
     # Figure 2: Exp 1 Startup & Peak Resident Memory Footprint (With Error Bars)
     # --------------------------------------------------------------------------
-    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.6))
+    fig, axes = plt.subplots(1, 2, figsize=(12.0, 5.0))
     
     # Subplot A: Cold Task Latency across Platforms (W1)
     ax1 = axes[0]
@@ -1443,7 +1449,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     for ak in agents:
         c = consolidated["windows_x86_64"]["regime_a"].get(ak, {}).get("W2", {}).get("rss_mb", {})
         if c.get("status") == "N/A":
-            w_rss_vals.append(0.0)
+            w_rss_vals.append(np.nan)
             w_rss_errs.append([0.0, 0.0])
         else:
             med = c.get("median", 0.0) or 0.0
@@ -1455,8 +1461,15 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax2.bar(x, l_rss, bw, yerr=np.array(l_r_err).T, capsize=3, label="Linux x86_64", color=COLOR_LINUX, edgecolor="#0F172A", alpha=0.9)
     ax2.bar(x + bw, w_rss_vals, bw, yerr=np.array(w_rss_errs).T, capsize=3, label="Windows 11", color=COLOR_WINDOWS, edgecolor="#0F172A", alpha=0.9)
     
+    # Missing data hatched placeholder for Windows python_native (no zero-height bar)
     py_idx = agents.index("python_native")
-    ax2.text(py_idx + bw, 2.5, "N/A†\n(Stub PID)", ha="center", va="bottom", fontsize=7.0, color="#DC2626", fontweight="bold")
+    placeholder = patches.Rectangle(
+        (x[py_idx] + bw - bw * 0.42, 0.5), bw * 0.84, 25.0,
+        facecolor="#FEF2F2", edgecolor="#DC2626", linestyle="--", linewidth=1.2,
+        hatch="///", alpha=0.9, zorder=2
+    )
+    ax2.add_patch(placeholder)
+    ax2.text(x[py_idx] + bw, 13.0, "N/A*\n(Stub PID\nExcluded)", ha="center", va="center", fontsize=6.8, color="#991B1B", fontweight="bold", zorder=3)
 
     ax2.set_ylabel("Peak Resident Memory RSS [MB]")
     ax2.set_title("(b) Peak Resident Memory Footprint (W2 Tier, 95% CI)")
@@ -1465,7 +1478,8 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax2.grid(axis="y", linestyle="--", alpha=0.5)
     ax2.legend(loc="upper left")
 
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.04, 1, 0.98])
+    fig.text(0.5, 0.01, "* Note: Windows 11 python_native peak RSS marked N/A: wrapper launcher PID was captured instead of child CPython worker; excluded to prevent zero-height distortion.", ha="center", fontsize=7.2, color="#334155")
     f2_out = os.path.join(PUB_FIG_DIR, "fig2_exp1_cold_start_rss.png")
     plt.savefig(f2_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig2_exp1_cold_start_rss.png"), dpi=300, bbox_inches="tight")
@@ -1474,7 +1488,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     # --------------------------------------------------------------------------
     # Figure 3: Exp 2 Orchestration Latency Overhead (With Error Bars & Rank Inversion Note)
     # --------------------------------------------------------------------------
-    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.6))
+    fig, axes = plt.subplots(1, 2, figsize=(12.0, 5.2))
     
     # Subplot A: Absolute Orchestration Latency T_orch (W2)
     ax1 = axes[0]
@@ -1517,18 +1531,28 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax2.bar(xw + 1.5 * bww, open_l, bww, yerr=np.array(open_l_err).T, capsize=2, label="OpenClaw Full (Linux)", color="#14532D", edgecolor="#0F172A")
     ax2.bar(xw + 2.5 * bww, open_w, bww, yerr=np.array(open_w_err).T, capsize=2, label="OpenClaw Full (Windows)", color="#7C2D12", edgecolor="#0F172A")
 
+    # Highlight W3 ranking inversion with shaded background accent band and callout
+    ax2.axvspan(xw[2] - 0.44, xw[2] + 0.44, facecolor="#FEF3C7", alpha=0.45, zorder=0, linestyle="--", linewidth=1.2, edgecolor="#D97706")
+    ax2.annotate(
+        "W3 Ranking Inversion:\nGo scalar loops\nvs. SIMD NumPy",
+        xy=(xw[2] - 0.5 * bww, 1.66),
+        xytext=(xw[2] - 0.42, 2.05),
+        arrowprops=dict(arrowstyle="->", color="#B45309", lw=1.5, connectionstyle="arc3,rad=-0.10"),
+        fontsize=7.2, fontweight="bold", color="#92400E",
+        bbox=dict(boxstyle="round,pad=0.25", fc="#FFFBEB", ec="#F59E0B", lw=1.0, alpha=0.95),
+        zorder=5
+    )
+
     ax2.set_ylabel("Orchestration Fraction $\\Phi_{\\text{orch}}$ [%]")
-    ax2.set_title("(b) Middleware Latency Ratio (W1--W4, 95% CI)")
+    ax2.set_title("(b) Middleware Latency Ratio with W3 Ranking Inversion (95% CI)")
     ax2.set_xticks(xw)
     ax2.set_xticklabels(workloads)
+    ax2.set_ylim(0, 2.7)
     ax2.grid(axis="y", linestyle="--", alpha=0.5)
     ax2.legend(loc="upper right", fontsize=7.0)
 
-    # Footnote acknowledging W3 scalar Go loop rank inversion
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
-    fig.text(0.5, 0.01, "* Note on W3: PicoClaw exhibits higher T_orch in W3 due to in-memory vector search with scalar Go loops vs. SIMD/BLAS-accelerated NumPy bindings in Python/Bun.", ha="center", fontsize=7.5, color="#334155")
-
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.04, 1, 0.98])
+    fig.text(0.5, 0.01, "* Note on W3 Ranking Inversion: PicoClaw exhibits higher T_orch in W3 due to in-memory vector search with scalar Go loops vs. SIMD/BLAS-accelerated NumPy bindings in Python/Bun.", ha="center", fontsize=7.2, color="#334155")
     f3_out = os.path.join(PUB_FIG_DIR, "fig3_exp2_latency_overhead.png")
     plt.savefig(f3_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig3_exp2_latency_overhead.png"), dpi=300, bbox_inches="tight")
@@ -1537,7 +1561,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     # --------------------------------------------------------------------------
     # Figure 4: Exp 3 Net Dynamic Energy & EDP (With Mean Power & Sensor Boundary Note)
     # --------------------------------------------------------------------------
-    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.6))
+    fig, axes = plt.subplots(1, 2, figsize=(12.0, 5.0))
     
     # Subplot A: Net Energy Above Idle (W2)
     ax1 = axes[0]
@@ -1549,9 +1573,9 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     l_e, l_e_err = zip(*[get_med_and_err("linux_x86_64", ak, "W2", "energy_net_j") for ak in agents_e])
     w_e, w_e_err = zip(*[get_med_and_err("windows_x86_64", ak, "W2", "energy_net_j") for ak in agents_e])
 
-    bars_d = ax1.bar(xe - bw, d_e, bw, yerr=np.array(d_e_err).T, capsize=3, label="macOS (M4 SoC SMC)", color=COLOR_DARWIN, edgecolor="#0F172A", alpha=0.9)
-    bars_l = ax1.bar(xe, l_e, bw, yerr=np.array(l_e_err).T, capsize=3, label="Linux (RAPL+NVML)", color=COLOR_LINUX, edgecolor="#0F172A", alpha=0.9)
-    bars_w = ax1.bar(xe + bw, w_e, bw, yerr=np.array(w_e_err).T, capsize=3, label="Windows (RAPL+NVML)", color=COLOR_WINDOWS, edgecolor="#0F172A", alpha=0.9)
+    bars_d = ax1.bar(xe - bw, d_e, bw, yerr=np.array(d_e_err).T, capsize=3, label="macOS (Apple M4 SoC SMC)", color=COLOR_DARWIN, edgecolor="#0F172A", alpha=0.9)
+    bars_l = ax1.bar(xe, l_e, bw, yerr=np.array(l_e_err).T, capsize=3, label="Linux (Intel RAPL + NVML dGPU)", color=COLOR_LINUX, edgecolor="#0F172A", alpha=0.9)
+    bars_w = ax1.bar(xe + bw, w_e, bw, yerr=np.array(w_e_err).T, capsize=3, label="Windows 11 (Intel MSR + NVML dGPU)", color=COLOR_WINDOWS, edgecolor="#0F172A", alpha=0.9)
 
     # Annotate mean power (Watts) above bars
     for i, ak in enumerate(agents_e):
@@ -1567,7 +1591,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax1.set_xticks(xe)
     ax1.set_xticklabels(labels_e)
     ax1.grid(axis="y", linestyle="--", alpha=0.5)
-    ax1.legend(loc="upper left")
+    ax1.legend(loc="upper left", title="Sensor Domains (Intra-Node Only; Not Cross-OS)", title_fontsize=6.8, fontsize=6.8)
 
     # Subplot B: Energy-Delay Product EDP (W2)
     ax2 = axes[1]
@@ -1575,20 +1599,24 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     l_edp, l_edp_err = zip(*[get_med_and_err("linux_x86_64", ak, "W2", "edp_js") for ak in agents_e])
     w_edp, w_edp_err = zip(*[get_med_and_err("windows_x86_64", ak, "W2", "edp_js") for ak in agents_e])
 
-    ax2.bar(xe - bw, d_edp, bw, yerr=np.array(d_edp_err).T, capsize=3, label="macOS (M4)", color=COLOR_DARWIN, edgecolor="#0F172A", alpha=0.9)
-    ax2.bar(xe, l_edp, bw, yerr=np.array(l_edp_err).T, capsize=3, label="Linux x86_64", color=COLOR_LINUX, edgecolor="#0F172A", alpha=0.9)
-    ax2.bar(xe + bw, w_edp, bw, yerr=np.array(w_edp_err).T, capsize=3, label="Windows 11", color=COLOR_WINDOWS, edgecolor="#0F172A", alpha=0.9)
+    ax2.bar(xe - bw, d_edp, bw, yerr=np.array(d_edp_err).T, capsize=3, label="macOS (Apple M4 SoC SMC)", color=COLOR_DARWIN, edgecolor="#0F172A", alpha=0.9)
+    ax2.bar(xe, l_edp, bw, yerr=np.array(l_edp_err).T, capsize=3, label="Linux (Intel RAPL + NVML dGPU)", color=COLOR_LINUX, edgecolor="#0F172A", alpha=0.9)
+    ax2.bar(xe + bw, w_edp, bw, yerr=np.array(w_edp_err).T, capsize=3, label="Windows 11 (Intel MSR + NVML dGPU)", color=COLOR_WINDOWS, edgecolor="#0F172A", alpha=0.9)
     ax2.set_ylabel("Energy-Delay Product EDP [$J \\cdot s$]")
     ax2.set_title("(b) Energy-Delay Product Inflation (W2, 95% CI)")
     ax2.set_xticks(xe)
     ax2.set_xticklabels(labels_e)
     ax2.grid(axis="y", linestyle="--", alpha=0.5)
-    ax2.legend(loc="upper left")
+    ax2.legend(loc="upper left", title="Sensor Domains (Intra-Node Only; Not Cross-OS)", title_fontsize=6.8, fontsize=6.8)
 
-    plt.tight_layout(rect=[0, 0.05, 1, 1])
-    fig.text(0.5, 0.01, "* Telemetry note: macOS energy captured via Apple SMC SoC; Linux/Windows via Intel RAPL (CPU Package) + NVIDIA NVML (dGPU). Sensors capture different physical domains and are not directly cross-comparable.", ha="center", fontsize=7.2, color="#334155")
+    # Warning banners on both subplots
+    for ax_p in [ax1, ax2]:
+        ax_p.text(0.5, 0.94, "⚠️ Sensor Domains Differ: Compare Agents Within Node Only",
+                  transform=ax_p.transAxes, ha="center", va="top", fontsize=6.6, fontweight="bold",
+                  color="#991B1B", bbox=dict(boxstyle="round,pad=0.2", fc="#FEF2F2", ec="#F87171", lw=0.8, alpha=0.95))
 
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.04, 1, 0.98])
+    fig.text(0.5, 0.01, "* Telemetry Domain Delimitation: Energy and EDP are strictly comparable within each hardware node/sensor domain. Apple SMC captures full SoC die dissipation; Intel RAPL and NVIDIA NVML capture CPU package and dGPU board power (excluding motherboard VRMs and system RAM). Cross-platform absolute comparisons between SoC and discrete setups are physically incommensurable.", ha="center", fontsize=7.0, color="#334155")
     f4_out = os.path.join(PUB_FIG_DIR, "fig4_exp3_energy_edp.png")
     plt.savefig(f4_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig4_exp3_energy_edp.png"), dpi=300, bbox_inches="tight")
@@ -1597,7 +1625,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     # --------------------------------------------------------------------------
     # Figure 5: Exp 4 Tools and Context Bloat Mitigation (Separating Cold vs Warm)
     # --------------------------------------------------------------------------
-    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.6))
+    fig, axes = plt.subplots(1, 2, figsize=(12.0, 5.0))
     
     # Subplot A: Full Catalog (54 tools) vs Pruned Schema (15 tools) across W1-W4 on Linux
     ax1 = axes[0]
@@ -1624,46 +1652,72 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     xr = np.arange(len(plats_rag))
     wr = 0.35
 
-    # Compute cold speedups vs warm speedups
+    # Compute internal baseline speedups with 95% bootstrap CIs
     cold_speedups = []
+    cold_errs = []
     warm_speedups = []
+    warm_errs = []
 
+    def compute_speedup_ratio_and_ci(base_lats: list[float], rag_lats: list[float], n_boot: int = 2000, seed: int = 42):
+        rng = np.random.default_rng(seed)
+        b_arr = np.array(base_lats, dtype=float)
+        r_arr = np.array(rag_lats, dtype=float)
+        pt = float(np.median(b_arr) / np.median(r_arr))
+        boot_ratios = [float(np.median(rng.choice(b_arr, len(b_arr), True)) / np.median(rng.choice(r_arr, len(r_arr), True))) for _ in range(n_boot)]
+        c_low = float(np.percentile(boot_ratios, 2.5))
+        c_high = float(np.percentile(boot_ratios, 97.5))
+        return pt, [max(0.0, pt - c_low), max(0.0, c_high - pt)]
+
+    p_datasets = get_platform_datasets()
+    
     # macOS internal RAG dataset
-    m_cold_full = consolidated["darwin_m4"]["rag_mitigation"]["cold"]["openclaw_full"]["W2"]["median_latency_ms"]
-    m_cold_rag = consolidated["darwin_m4"]["rag_mitigation"]["cold"]["openclaw_tool_rag"]["W2"]["median_latency_ms"]
-    m_warm_full = consolidated["darwin_m4"]["rag_mitigation"]["warm"]["openclaw_full"]["W2"]["median_latency_ms"]
-    m_warm_rag = consolidated["darwin_m4"]["rag_mitigation"]["warm"]["openclaw_tool_rag"]["W2"]["median_latency_ms"]
-    cold_speedups.append(m_cold_full / m_cold_rag)
-    warm_speedups.append(m_warm_full / m_warm_rag)
+    m_rag_trials = load_trials_active(p_datasets["darwin_m4"]["active"]["rag"])
+    m_c_full = [t["t_task_ms"] for t in m_rag_trials if t.get("agent_key", t.get("arm")) == "openclaw_full" and "cold" in t.get("regime", "") and t.get("workload") == "W2"]
+    m_c_rag = [t["t_task_ms"] for t in m_rag_trials if t.get("agent_key", t.get("arm")) == "openclaw_tool_rag" and "cold" in t.get("regime", "") and t.get("workload") == "W2"]
+    m_w_full = [t["t_task_ms"] for t in m_rag_trials if t.get("agent_key", t.get("arm")) == "openclaw_full" and "warm" in t.get("regime", "") and t.get("workload") == "W2"]
+    m_w_rag = [t["t_task_ms"] for t in m_rag_trials if t.get("agent_key", t.get("arm")) == "openclaw_tool_rag" and "warm" in t.get("regime", "") and t.get("workload") == "W2"]
 
-    # Linux & Windows (full from primary, rag from rag_mitigation)
+    pt_mc, err_mc = compute_speedup_ratio_and_ci(m_c_full, m_c_rag)
+    pt_mw, err_mw = compute_speedup_ratio_and_ci(m_w_full, m_w_rag)
+    cold_speedups.append(pt_mc); cold_errs.append(err_mc)
+    warm_speedups.append(pt_mw); warm_errs.append(err_mw)
+
+    # Linux & Windows internal baselines
     for pk in ["linux_x86_64", "windows_x86_64"]:
-        l_c_full = consolidated[pk]["regime_a"]["openclaw_full"]["W2"]["t_task_ms"]["median"]
-        l_c_rag = consolidated[pk]["rag_mitigation"]["cold"]["openclaw_tool_rag"]["W2"]["median_latency_ms"]
-        l_w_full = consolidated[pk]["regime_b"]["openclaw_full"]["W2"]["t_task_ms"]["median"]
-        l_w_rag = consolidated[pk]["rag_mitigation"]["warm"]["openclaw_tool_rag"]["W2"]["median_latency_ms"]
-        cold_speedups.append(l_c_full / l_c_rag)
-        warm_speedups.append(l_w_full / l_w_rag)
+        raw_t = load_trials_active(p_datasets[pk]["active"]["raw"])
+        warm_t = load_trials_active(p_datasets[pk]["active"]["warm"])
+        rag_t = load_trials_active(p_datasets[pk]["active"]["rag"])
+        
+        c_full = [t["t_task_ms"] for t in raw_t if t.get("agent_key") == "openclaw_full" and t.get("workload") == "W2"]
+        w_full = [t["t_task_ms"] for t in warm_t if t.get("agent_key") == "openclaw_full" and t.get("workload") == "W2"]
+        c_rag = [t["t_task_ms"] for t in rag_t if t.get("agent_key", t.get("arm")) == "openclaw_tool_rag" and "cold" in t.get("regime", "") and t.get("workload") == "W2"]
+        w_rag = [t["t_task_ms"] for t in rag_t if t.get("agent_key", t.get("arm")) == "openclaw_tool_rag" and "warm" in t.get("regime", "") and t.get("workload") == "W2"]
+        
+        pt_c, err_c = compute_speedup_ratio_and_ci(c_full, c_rag)
+        pt_w, err_w = compute_speedup_ratio_and_ci(w_full, w_rag)
+        cold_speedups.append(pt_c); cold_errs.append(err_c)
+        warm_speedups.append(pt_w); warm_errs.append(err_w)
 
-    b_cold = ax2.bar(xr - wr/2, cold_speedups, wr, label="Cold Prefill (Regime A)", color="#2563EB", edgecolor="#0F172A")
-    b_warm = ax2.bar(xr + wr/2, warm_speedups, wr, label="Warm Cache (Regime B)", color="#93C5FD", edgecolor="#0F172A")
+    b_cold = ax2.bar(xr - wr/2, cold_speedups, wr, yerr=np.array(cold_errs).T, capsize=3, label="Cold Prefill (Regime A)", color="#2563EB", edgecolor="#0F172A")
+    b_warm = ax2.bar(xr + wr/2, warm_speedups, wr, yerr=np.array(warm_errs).T, capsize=3, label="Warm Cache (Regime B)", color="#93C5FD", edgecolor="#0F172A")
 
-    for b in b_cold:
+    for i, b in enumerate(b_cold):
         h = b.get_height()
-        ax2.text(b.get_x() + b.get_width() / 2, h + 0.15, f"{h:.2f}x", ha="center", va="bottom", fontsize=8, fontweight="bold")
-    for b in b_warm:
+        ax2.text(b.get_x() + b.get_width() / 2, h + cold_errs[i][1] + 0.15, f"{h:.2f}x", ha="center", va="bottom", fontsize=8, fontweight="bold")
+    for i, b in enumerate(b_warm):
         h = b.get_height()
-        ax2.text(b.get_x() + b.get_width() / 2, h + 0.15, f"{h:.2f}x", ha="center", va="bottom", fontsize=8, fontweight="bold")
+        ax2.text(b.get_x() + b.get_width() / 2, h + warm_errs[i][1] + 0.15, f"{h:.2f}x", ha="center", va="bottom", fontsize=8, fontweight="bold")
 
     ax2.set_ylabel("Latency Speedup vs 54-Tool Full [x]")
-    ax2.set_title("(b) Tool-RAG Speedup: Cold vs Warm (W2, -87.1% Tokens)")
+    ax2.set_title("(b) Tool-RAG Speedup: Cold vs Warm (Internal Baselines, 95% CI)")
     ax2.set_xticks(xr)
     ax2.set_xticklabels(plat_labels)
     ax2.set_ylim(0, 9.5)
     ax2.grid(axis="y", linestyle="--", alpha=0.5)
     ax2.legend(loc="upper right")
 
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0.04, 1, 0.98])
+    fig.text(0.5, 0.01, "* Methodological Note: Tool-RAG speedups use strictly internal baselines per platform (macOS internal session; Linux/Windows primary campaign). Error bars represent 95% bootstrap confidence intervals (2,000 resamples).", ha="center", fontsize=7.2, color="#334155")
     f5_out = os.path.join(PUB_FIG_DIR, "fig5_exp4_tools_and_bloat.png")
     plt.savefig(f5_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig5_exp4_tools_and_bloat.png"), dpi=300, bbox_inches="tight")
@@ -1672,10 +1726,10 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     # --------------------------------------------------------------------------
     # Figure 6: Exp 5 Microarchitectural PMC Hardware Counters (Separate ARM64 vs x86_64 Panels)
     # --------------------------------------------------------------------------
-    fig, axes = plt.subplots(1, 3, figsize=(14.0, 4.6))
+    fig, axes = plt.subplots(1, 3, figsize=(14.5, 5.0))
     
     agents_inst = ["picoclaw", "openclaw_minimal", "openclaw_full"]
-    labels_inst = ["PicoClaw\n(Native Go)", "OpenClaw\n(Node Min)", "OpenClaw\n(Node Full)"]
+    labels_inst = ["PicoClaw\n(Native Go)", "OpenClaw Min\n(15 Tools, Node.js)", "OpenClaw Full\n(54 Tools, Node.js)"]
     xi = np.arange(len(agents_inst))
 
     # Panel A1: macOS ARM64 Instructions (Apple PMU)
@@ -1687,12 +1741,12 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     bars_a1 = ax1.bar(xi, d_inst_m, 0.45, yerr=np.array(d_inst_err_m).T, capsize=3, color=COLOR_DARWIN, edgecolor="#0F172A", alpha=0.9)
     for b in bars_a1:
         h = b.get_height()
-        ax1.text(b.get_x() + b.get_width() / 2, h + 15.0, f"{h:.1f}M", ha="center", va="bottom", fontsize=8)
-    ax1.set_ylabel("Hardware Instructions [Millions]")
-    ax1.set_title("(a) macOS ARM64 (Apple PMU)")
+        ax1.text(b.get_x() + b.get_width() / 2, h + 18.0, f"{h:.1f}M", ha="center", va="bottom", fontsize=8, fontweight="bold")
+    ax1.set_ylabel("Retired Hardware Instructions [Millions]")
+    ax1.set_title("(a) macOS ARM64 Instructions (Apple PMU)")
     ax1.set_xticks(xi)
     ax1.set_xticklabels(labels_inst)
-    ax1.set_ylim(0, 620)
+    ax1.set_ylim(0, 950)
     ax1.grid(axis="y", linestyle="--", alpha=0.5)
 
     # Panel A2: Linux x86_64 Instructions (perf_event_open)
@@ -1704,15 +1758,15 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     bars_a2 = ax2.bar(xi, l_inst_m, 0.45, yerr=np.array(l_inst_err_m).T, capsize=3, color=COLOR_LINUX, edgecolor="#0F172A", alpha=0.9)
     for b in bars_a2:
         h = b.get_height()
-        ax2.text(b.get_x() + b.get_width() / 2, h + 15.0, f"{h:.1f}M", ha="center", va="bottom", fontsize=8)
-    ax2.set_ylabel("Hardware Instructions [Millions]")
-    ax2.set_title("(b) Linux x86_64 (perf_event_open)")
+        ax2.text(b.get_x() + b.get_width() / 2, h + 18.0, f"{h:.1f}M", ha="center", va="bottom", fontsize=8, fontweight="bold")
+    ax2.set_ylabel("Retired Hardware Instructions [Millions]")
+    ax2.set_title("(b) Linux x86_64 Instructions (perf_event_open)")
     ax2.set_xticks(xi)
     ax2.set_xticklabels(labels_inst)
-    ax2.set_ylim(0, 620)
+    ax2.set_ylim(0, 950)
     ax2.grid(axis="y", linestyle="--", alpha=0.5)
 
-    # Subplot B: Instruction Elimination Ratio (OpenClaw Full / PicoClaw)
+    # Subplot B: Instruction Bloat Factor (OpenClaw Full / PicoClaw)
     ax3 = axes[2]
     d_ratio = d_inst[2] / d_inst[0] if d_inst[0] > 0 else 1.0
     l_ratio = l_inst[2] / l_inst[0] if l_inst[0] > 0 else 1.0
@@ -1725,18 +1779,16 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     bars_ratio = ax3.bar(xr, ratios, 0.45, color=bar_colors, edgecolor="#0F172A")
     for b in bars_ratio:
         h = b.get_height()
-        ax3.text(b.get_x() + b.get_width() / 2, h + 0.5, f"{h:.2f}x", ha="center", va="bottom", fontsize=9.5, fontweight="bold")
-    ax3.set_ylabel("Instruction Elimination Ratio [x]")
-    ax3.set_title("(c) Instruction Bloat Ratio (Full / PicoClaw)")
+        ax3.text(b.get_x() + b.get_width() / 2, h + 0.6, f"{h:.2f}x", ha="center", va="bottom", fontsize=9.5, fontweight="bold")
+    ax3.set_ylabel("Instruction Bloat Ratio [x]")
+    ax3.set_title("(c) Instruction Bloat Factor (Full / PicoClaw)")
     ax3.set_xticks(xr)
     ax3.set_xticklabels(plat_names)
-    ax3.set_ylim(0, 32)
+    ax3.set_ylim(0, 30)
     ax3.grid(axis="y", linestyle="--", alpha=0.5)
 
     plt.tight_layout(rect=[0, 0.05, 1, 1])
-    fig.text(0.5, 0.01, "* Cross-ISA note: ARM64 and x86_64 instructions are segregated on distinct panels to avoid cross-ISA invalid comparisons. Windows 11 instructions marked N/A due to user-mode PMU restrictions (cycles: 43.0M vs 507.9M, 11.82x ratio).", ha="center", fontsize=7.2, color="#334155")
-
-    plt.tight_layout()
+    fig.text(0.5, 0.01, "* Cross-ISA Telemetry Note: Hardware instructions for ARM64 and x86_64 are isolated into separate panels due to differing microarchitectural instruction densities. Windows 11 instructions are reported as N/A due to unprivileged user-mode PMU restrictions (cycles measured: 43.0M for PicoClaw vs. 507.9M for OpenClaw Full, an 11.82x bloat ratio).", ha="center", fontsize=7.2, color="#334155")
     f6_out = os.path.join(PUB_FIG_DIR, "fig6_pmc_hardware_counters.png")
     plt.savefig(f6_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig6_pmc_hardware_counters.png"), dpi=300, bbox_inches="tight")
