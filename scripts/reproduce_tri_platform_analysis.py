@@ -438,12 +438,12 @@ def audit_cache_and_anomalies():
                 else:
                     r1 = 0.0
                 
-                # Effective sample size: n_eff = n * (1 - r1) / (1 + r1)
+                # Effective sample size: n_eff = min(n_raw, n_raw * (1 - r1) / (1 + r1))
                 if -0.999 < r1 < 0.999:
-                    n_eff = float(n * (1.0 - r1) / (1.0 + r1))
+                    n_eff = float(min(float(n), float(n * (1.0 - r1) / (1.0 + r1))))
                 else:
                     n_eff = float(n)
-                n_eff = max(1.0, min(float(2 * n), n_eff))
+                n_eff = max(1.0, n_eff)
 
                 # Moving Block Bootstrap 95% CI on median
                 mbb_ci = list(adaptive_bootstrap_ci(latencies, r1=r1, block_size=3))
@@ -766,7 +766,15 @@ def summarize_rag_mitigation(trials: list[dict[str, Any]], platform_name: str) -
 def summarize_mcp_transport(trials: list[dict[str, Any]], platform_name: str) -> dict[str, Any]:
     cells = collections.defaultdict(list)
     for r in trials:
-        trans = r.get("transport", r.get("mode", r.get("transport_mode", "in_process")))
+        raw_trans = str(r.get("transport", r.get("mode", r.get("transport_mode", "in_process")))).lower()
+        if "in_process" in raw_trans:
+            trans = "in_process"
+        elif "stdio" in raw_trans:
+            trans = "stdio"
+        elif "http" in raw_trans or "sse" in raw_trans:
+            trans = "http"
+        else:
+            trans = raw_trans
         cells[trans].append(r)
     
     summary = {}
@@ -1191,6 +1199,17 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         "| Platform | Transport Protocol | Median IPC Dispatch (ms) [IQR] | 95% Bootstrap CI | Overhead vs In-Process |",
         "| :--- | :--- | :--- | :--- | :--- |"
     ]
+    t6_tex = [
+        r"\begin{table}[t]",
+        r"\centering",
+        r"\small",
+        r"\caption{Model Context Protocol (MCP) live IPC overhead across transports (W2 Tool Chain, empirical medians). Native in-process dispatch provides baseline function-call execution, standard I/O pipes add sub-millisecond process boundary isolation, and loopback HTTP/REST introduces network stack latency while remaining under $0.3\%$ of total task time on Unix systems.}",
+        r"\label{tab:mcp_transport_ablation}",
+        r"\begin{tabular}{llccc}",
+        r"\toprule",
+        r"\textbf{Platform} & \textbf{Transport Protocol} & \textbf{Median IPC (ms) [IQR]} & \textbf{95\% Bootstrap CI} & \textbf{Overhead Ratio} \\",
+        r"\midrule"
+    ]
     for p_key, p_disp in plat_order:
         mcp_data = consolidated[p_key]["mcp_transport"]
         base_med = mcp_data.get("in_process", {}).get("median_ms", 1.0)
@@ -1204,9 +1223,23 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
                 ci = cell["ci_95"]
                 ratio = med / base_med if base_med > 0 else 1.0
                 t6_md.append(f"| {p_disp} | {t_label} | {med:.3f} [{iqr:.3f}] | [{ci[0]:.3f}, {ci[1]:.3f}] | {ratio:.2f}x |")
+                t6_tex.append(f"{p_disp} & {t_label} & {med:.3f} [{iqr:.3f}] & [{ci[0]:.3f}, {ci[1]:.3f}] & {ratio:.2f}$\\times$ \\\\")
+        t6_tex.append(r"\midrule")
+    if t6_tex[-1] == r"\midrule":
+        t6_tex.pop()
+    t6_tex.extend([
+        r"\bottomrule",
+        r"\end{tabular}",
+        r"\end{table}"
+    ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table6_mcp_transport_ablation.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(t6_md) + "\n")
+    with open(os.path.join(AUDIT_TABLES_DIR, "table6_mcp_transport_ablation.tex"), "w", encoding="utf-8") as f:
+        f.write("\n".join(t6_tex) + "\n")
+    if os.path.exists(PUB_TABLES_DIR):
+        with open(os.path.join(PUB_TABLES_DIR, "table6_mcp_transport_ablation.tex"), "w", encoding="utf-8") as f:
+            f.write("\n".join(t6_tex) + "\n")
 
     # Table 7: Dual Session Replication Comparison (Linux & Windows)
     t7_md = [

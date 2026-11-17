@@ -2,9 +2,9 @@ name: Benchmark Suite CI / CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feat/peer-review-revisions ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, feat/peer-review-revisions ]
 
 jobs:
   test:
@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Checkout Code
@@ -36,12 +36,12 @@ jobs:
 
       - name: Run Pytest Suite
         run: |
-          pytest -v tests/
+          pytest -q tests/
 
       - name: Run Reviewer Fast Dry-Run Integration Test
         run: |
-          python3 benchmark/run_unified_benchmark.py --dry-run --output-dir /tmp/ci_dry_run
+          python benchmark/run_unified_benchmark.py --dry-run --output-dir ci_dry_run_output
 
       - name: Run Cryptographic Manifest Verification
         run: |
-          python3 scripts/verify_manifest.py
+          python scripts/verify_manifest.py

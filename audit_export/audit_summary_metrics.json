@@ -8427,7 +8427,7 @@
       }
     },
     "mcp_transport": {
-      "in_process_dispatch": {
+      "in_process": {
         "n": 45,
         "median_ms": 2.573,
         "iqr_ms": 0.542,
@@ -8436,7 +8436,7 @@
           2.603
         ]
       },
-      "mcp_stdio_server": {
+      "stdio": {
         "n": 45,
         "median_ms": 2.306,
         "iqr_ms": 0.447,
@@ -8445,7 +8445,7 @@
           2.449
         ]
       },
-      "mcp_http_sse_server": {
+      "http": {
         "n": 45,
         "median_ms": 3.85,
         "iqr_ms": 0.637,
@@ -18272,7 +18272,7 @@
       }
     },
     "mcp_transport": {
-      "in_process_dispatch": {
+      "in_process": {
         "n": 90,
         "median_ms": 1.109,
         "iqr_ms": 0.061,
@@ -18281,7 +18281,7 @@
           1.119
         ]
       },
-      "mcp_stdio_server": {
+      "stdio": {
         "n": 90,
         "median_ms": 1.406,
         "iqr_ms": 0.415,
@@ -18290,7 +18290,7 @@
           1.495
         ]
       },
-      "mcp_http_sse_server": {
+      "http": {
         "n": 90,
         "median_ms": 1.707,
         "iqr_ms": 0.218,
@@ -28117,7 +28117,7 @@
       }
     },
     "mcp_transport": {
-      "in_process_dispatch": {
+      "in_process": {
         "n": 90,
         "median_ms": 1.808,
         "iqr_ms": 0.088,
@@ -28126,7 +28126,7 @@
           1.824
         ]
       },
-      "mcp_stdio_server": {
+      "stdio": {
         "n": 90,
         "median_ms": 2.102,
         "iqr_ms": 0.181,
@@ -28135,7 +28135,7 @@
           2.149
         ]
       },
-      "mcp_http_sse_server": {
+      "http": {
         "n": 90,
         "median_ms": 18.32,
         "iqr_ms": 20.768,

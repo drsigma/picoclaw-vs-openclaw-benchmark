@@ -1,11 +1,17 @@
+<p align="center">
+  <img src="figures/benchmark_logo.png" alt="PicoClaw vs. OpenClaw Benchmark Suite Logo" width="850"/>
+</p>
+
 # A Reproducible Tri-Platform Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and Microarchitectural Dynamics in Local LLM Agents (macOS, Linux, Windows 11)
 
-[![CI](https://github.com/drsigma/picoclaw-vs-openclaw-benchmark/actions/workflows/ci.yml/badge.svg)](https://github.com/drsigma/picoclaw-vs-openclaw-benchmark/actions)
-[![Code License: MIT](https://img.shields.io/badge/Code%20License-MIT-yellow.svg)](LICENSE)
-[![Data License: CC BY 4.0](https://img.shields.io/badge/Data%20License-CC%20BY%204.0-lightgrey.svg)](DATA_LICENSE)
-[![Hardware: Tri-Platform](https://img.shields.io/badge/Hardware-M4%20%7C%20Linux%20x86__64%20%7C%20Win11-purple.svg)](https://github.com/drsigma/picoclaw-vs-openclaw-benchmark)
-[![Documentation: Bilingual](https://img.shields.io/badge/Docs-Bilingual%20(PT--BR%20%7C%20EN--US)-blue.svg)](#)
-[![DOI](https://img.shields.io/badge/DOI-10.5281%2Fzenodo.14187265-blue.svg)](CITATION.cff)
+<p align="center">
+  <a href="https://github.com/drsigma/picoclaw-vs-openclaw-benchmark/actions"><img src="https://github.com/drsigma/picoclaw-vs-openclaw-benchmark/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/Code%20License-MIT-yellow.svg" alt="Code License: MIT"/></a>
+  <a href="DATA_LICENSE"><img src="https://img.shields.io/badge/Data%20License-CC%20BY%204.0-lightgrey.svg" alt="Data License: CC BY 4.0"/></a>
+  <a href="https://github.com/drsigma/picoclaw-vs-openclaw-benchmark"><img src="https://img.shields.io/badge/Hardware-M4%20%7C%20Linux%20x86__64%20%7C%20Win11-purple.svg" alt="Hardware: Tri-Platform"/></a>
+  <a href="#"><img src="https://img.shields.io/badge/Docs-Bilingual%20(PT--BR%20%7C%20EN--US)-blue.svg" alt="Documentation: Bilingual"/></a>
+  <a href="CITATION.cff"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.14187265-blue.svg" alt="DOI"/></a>
+</p>
 
 **Author / Autor:** Rafael Paniccia Cassetta  
 **Affiliation / Afiliação:** Universidade Federal do ABC (UFABC), Santo André, SP, Brazil  
@@ -95,6 +101,10 @@ flowchart TD
     ADAPTER -->|"Loopback TCP 127.0.0.1:8080"| SERVER
     TELEM -.->|"Non-Intrusive Hardware Telemetry"| ADAPTER
 ```
+
+<p align="center">
+  <img src="figures/fig1_architecture_topology.png" alt="Hardware Telemetry Topology and Pipeline" width="850"/>
+</p>
 
 ### Explicação do Fluxo / Architecture Description:
 * **🇧🇷 PT-BR:** O gerador de carga submete os 4 níveis de dificuldade padronizados (W1–W4) através da camada de adaptação (*Adapter Pattern*). Os agentes executam suas ferramentas e se comunicam exclusivamente via loopback TCP local com o servidor `llama.cpp` na GPU Metal, eliminando latências de rede externa. Paralelamente, daemons independentes de telemetria coletam miliwatts do SoC M4 via SMC e contadores de ciclo do kernel Darwin via `libproc`.
@@ -385,7 +395,65 @@ python scripts/reproduce_tri_platform_analysis.py
 
 ## 🔄 Continuous Integration (CI) & Reproducibility
 
-Artifact consistency and cross-platform protocol invariants are automatically validated via a Continuous Integration (CI) pipeline using GitHub Actions. Upon every commit, the `.github/workflows/audit.yml` workflow triggers `pytest tests/test_artifact_consistency.py` across isolated runners to guarantee zero-drift reproducibility and strict adherence to the Zero-Mock empirical guidelines.
+Artifact consistency, protocol invariants, and multi-platform telemetry backends are automatically validated on every push and pull request via a Continuous Integration (CI) pipeline using GitHub Actions (`.github/workflows/ci.yml`). The matrix tests against:
+* **Ubuntu Linux (`ubuntu-latest`)**
+* **Microsoft Windows (`windows-latest`)**
+* **Apple macOS (`macos-latest`)**
+
+The pipeline executes `ruff check`, `pytest -q tests/`, the fast reviewer dry-run integration test, and the cryptographic manifest verification to guarantee zero-drift reproducibility and strict adherence to empirical Zero-Mock guidelines.
+
+---
+
+## 🔐 Inventário Criptográfico dos 25 Datasets Empíricos / Cryptographic SHA-256 Manifest
+
+Em conformidade com a política **Zero-Mock** e os padrões de reproducibilidade científica de artefatos da *SoftwareX / Elsevier*, todos os 25 arquivos `.jsonl` brutos contêm registros medidos diretamente no hardware físico em execuções limpas (*clean-room from-scratch runs*). A integridade de cada arquivo pode ser verificada a qualquer momento executando `python scripts/verify_manifest.py`:
+
+| # | Plataforma / Platform | Sessão / Session | Tipo / Type | Caminho Relativo / Relative Path | Registros / Records | Assinatura Criptográfica / SHA-256 Checksum |
+| :---: | :--- | :--- | :--- | :--- | :---: | :--- |
+| 1 | macOS ARM64 (Apple M4) | publication_campaign | RAW | `results/publication_campaign/raw_trials.jsonl` | 660 (600/60) | `a0142aa0c2dd4f7806567b017b2cffc53dbbd6ed7e7506f911f9737935cd6239` |
+| 2 | macOS ARM64 (Apple M4) | publication_campaign | WARM | `results/publication_campaign/warm_cache_trials.jsonl` | 660 (600/60) | `633eb14d1c544aeac6caee3c3a5bfdc57fd95cec74f6f68064d0ef20029acb83` |
+| 3 | macOS ARM64 (Apple M4) | publication_campaign | KV | `results/publication_campaign/kv_cache_thrashing_trials.jsonl` | 90 (90/0) | `d4c978f1caaf012f792830adaedd4675b16b846f9171bfc13cf85fc8a726d459` |
+| 4 | macOS ARM64 (Apple M4) | publication_campaign | MCP | `data/mcp_live_transport_trials.jsonl` | 135 (135/0) | `7ba766b266a713a78d7de8f20509525a241b9bd2f3cbe7a12c7f95f49d61e0d9` |
+| 5 | macOS ARM64 (Apple M4) | publication_campaign | RAG | `results/publication_campaign/tool_rag_mitigation_trials.jsonl` | 1056 (960/96) | `7f52b7effe79eaaad184d61e869d9e13680b4ac5eebdf226efcd9c16940bb9b0` |
+| 6 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_1 | RAW | `reproducibility/clean_run_linux_session_1/data/raw/raw_trials.jsonl` | 792 (720/72) | `d1638d0828368255c04d2036fa406a3eaf2493cf84c7fa5420e9c0657e7c7163` |
+| 7 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_1 | WARM | `reproducibility/clean_run_linux_session_1/data/raw/warm_cache_trials.jsonl` | 792 (720/72) | `57b161cddcdea65fc9ad41c8d1057f9211e20d9c25a024249191dda4a36a3986` |
+| 8 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_1 | KV | `reproducibility/clean_run_linux_session_1/data/raw/kv_cache_thrashing_trials.jsonl` | 184 (180/4) | `8b7412a2d4e4057d4989ae51393dfd494ebfcd47c8a34bf07c9fe7af9d89d077` |
+| 9 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_1 | MCP | `reproducibility/clean_run_linux_session_1/data/raw/mcp_live_transport_trials.jsonl` | 297 (270/27) | `7c564aea727a8b5e96b5b84e04ddb2ba4ea3229881a459992c037258b76c3162` |
+| 10 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_1 | RAG | `reproducibility/clean_run_linux_session_1/data/raw/tool_rag_mitigation_trials.jsonl` | 528 (480/48) | `4aa33319210e6b10e648df12f1da1d290a3ed8d2c4d34a4af7f9568ca159ece9` |
+| 11 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_2 | RAW | `reproducibility/clean_run_linux_session_2/data/raw/raw_trials.jsonl` | 792 (720/72) | `b93043922cb156324ef7593568747634c7a65471eaaecadc45020719395e037a` |
+| 12 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_2 | WARM | `reproducibility/clean_run_linux_session_2/data/raw/warm_cache_trials.jsonl` | 792 (720/72) | `fa6889e7dcc500624f333c7e050edb13541a4cd7baacb2859cb708ff75f6f663` |
+| 13 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_2 | KV | `reproducibility/clean_run_linux_session_2/data/raw/kv_cache_thrashing_trials.jsonl` | 184 (180/4) | `548ac456d8996e18d4682b46f40f7fa2f69ef85e505e8ebb65dd94b9d67e4c0f` |
+| 14 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_2 | MCP | `reproducibility/clean_run_linux_session_2/data/raw/mcp_live_transport_trials.jsonl` | 297 (270/27) | `5df9cbfe446f82bead1459ae491db087f4e75c829c0ed7969e35aa1e216b62cd` |
+| 15 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_2 | RAG | `reproducibility/clean_run_linux_session_2/data/raw/tool_rag_mitigation_trials.jsonl` | 528 (480/48) | `077b0c75beb580df9fb8ef61c6d367c27d88a431720aa694219407e0ff077669` |
+| 16 | Windows 11 (Build 26200) | windows_x86_64_session1 | RAW | `data/windows_x86_64_session1/raw/raw_trials.jsonl` | 792 (720/72) | `b0c12519c729945f8380da4fd7e6466014a0a93d3e5168f44211ca5629ef1187` |
+| 17 | Windows 11 (Build 26200) | windows_x86_64_session1 | WARM | `data/windows_x86_64_session1/raw/warm_cache_trials.jsonl` | 792 (720/72) | `b69a174e5b3263180f2fddcb2d2503e2a72b2984bc38449687fbcfcb92d633ce` |
+| 18 | Windows 11 (Build 26200) | windows_x86_64_session1 | KV | `data/windows_x86_64_session1/raw/kv_cache_thrashing_trials.jsonl` | 184 (180/4) | `5f783e701f9374d56f909a24ebb32048f83b67dd2f36581aa07226c933d7d6da` |
+| 19 | Windows 11 (Build 26200) | windows_x86_64_session1 | MCP | `data/windows_x86_64_session1/raw/mcp_live_transport_trials.jsonl` | 297 (270/27) | `00847706082ede44aedaa9bee8e9248e420875a87bd7f30090f5d82183d34080` |
+| 20 | Windows 11 (Build 26200) | windows_x86_64_session1 | RAG | `data/windows_x86_64_session1/raw/tool_rag_mitigation_trials.jsonl` | 528 (480/48) | `e640f0d6bb596343e1e72d001c01157fed98a2b06dac6da1aed58f23ad3d7478` |
+| 21 | Windows 11 (Build 26200) | windows_x86_64_session2 | RAW | `data/windows_x86_64_session2/raw/raw_trials.jsonl` | 792 (720/72) | `d683bbf72e943fdbe9b19cb2c400e8c5460b50ba20c3e4356d1e5e3f6cc306f1` |
+| 22 | Windows 11 (Build 26200) | windows_x86_64_session2 | WARM | `data/windows_x86_64_session2/raw/warm_cache_trials.jsonl` | 792 (720/72) | `0f5e5fb43aeaff34844f56f655902aa2e40f787e73917609f042414b1fb01695` |
+| 23 | Windows 11 (Build 26200) | windows_x86_64_session2 | KV | `data/windows_x86_64_session2/raw/kv_cache_thrashing_trials.jsonl` | 184 (180/4) | `c26d8242e33799e6fafdd62bbe5210007b9c9e3c255bf2ed16eac619d8015a28` |
+| 24 | Windows 11 (Build 26200) | windows_x86_64_session2 | MCP | `data/windows_x86_64_session2/raw/mcp_live_transport_trials.jsonl` | 297 (270/27) | `917911b61a80640c38e90701c9b5216effd58f3779ae1d634067e48382e2b79e` |
+| 25 | Windows 11 (Build 26200) | windows_x86_64_session2 | RAG | `data/windows_x86_64_session2/raw/tool_rag_mitigation_trials.jsonl` | 528 (480/48) | `7cbcb3ceea59d5bb2529f5ca2a5c7de07ab7c50ea7bce9d77aab54eee47b9853` |
+
+---
+
+## 💖 Apoio à Pesquisa / Support the Research (Pix)
+
+<p align="center">
+  <img src="figures/pix_qr_code.png" alt="Chave Pix QR Code" width="220"/>
+</p>
+
+### 🇧🇷 Apoie a Pesquisa Científica Aberta (Pix)
+Se esta suíte de testes, os dados empíricos tri-plataforma e as ferramentas abertas foram úteis para a sua pesquisa, dissertação, benchmark de hardware ou desenvolvimento de engenharia, você pode apoiar a infraestrutura computacional e publicações abertas do projeto via **Pix**:
+
+* **Chave Pix (E-mail):** `rafael.paniccia@aluno.ufabc.edu.br`
+* **Favorecido:** Rafael Paniccia Cassetta
+* **Instituição:** Universidade Federal do ABC (UFABC)
+* **Finalidade:** Manutenção de servidores de teste, infraestrutura de telemetria de hardware e publicação científica *open-access*.
+
+### 🇺🇸 Support Independent Open-Access Systems Research
+If this benchmark framework, empirical tri-platform telemetry, or reproducible analysis helped your research or engineering workflows, you can support our academic infrastructure and open-access publications via Brazilian Pix transfer using the QR code above or key `rafael.paniccia@aluno.ufabc.edu.br`.
 
 ---
 
