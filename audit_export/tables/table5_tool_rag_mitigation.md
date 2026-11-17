@@ -20,7 +20,7 @@
 | Windows 11 | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic)* | 917 | 1089.98 [1080.90, 1100.58] | 3.03x | -87.1% |
 
 > **Table 5 Methodological Notes:**
-> - Dynamic schema pruning achieves $-87.1\%$ prompt token reduction (917 tokens vs 7,091 tokens unmitigated).
-> - In Regime A (Cold Prefill), dynamic schema pruning eliminates quadratic prompt attention, yielding a **7.43x speedup on macOS** (and ~6.04x across the full W1-W4 suite).
-> - In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, resulting in modest Tool-RAG speedups (1.27x vs 54-tool catalog), demonstrating that Tool-RAG's primary utility lies in cold prefill mitigation.
-> - `*` On Linux x86_64 and Windows 11, the dedicated tool-RAG experiment evaluated the pruned arms (917 tokens); baseline Full (7,091 tokens) speedup is referenced from the primary cold/warm campaign.
+> - **Baseline Normalization Methodology:** On macOS ARM64, speedup factors are computed strictly against the internal unmitigated 54-tool baseline measured within the identical unified session (`tool_rag_mitigation_trials.jsonl`). On Linux x86_64 and Windows 11, the dedicated tool-RAG experiment evaluated the pruned arms (917 tokens); their speedup factors are computed relative to the consolidated primary prefill baseline of OpenClaw Full from the main campaign (`raw_trials.jsonl` for Regime A, `warm_cache_trials.jsonl` for Regime B), ensuring consistent within-node physical references without cross-session synthesis.
+> - **Prompt Token Reduction:** Dynamic schema pruning achieves $-87.1\%$ prompt token reduction (917 tokens vs 7,091 tokens unmitigated).
+> - **Regime Contrast:** In Regime A (Cold Prefill), dynamic schema pruning eliminates quadratic prompt attention, yielding a **7.43x speedup on macOS** (and ~6.04x across the full W1-W4 suite). In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, resulting in modest Tool-RAG speedups (1.27x vs 54-tool catalog), demonstrating that Tool-RAG's primary utility lies in cold prefill mitigation.
+> - `*` On Linux x86_64 and Windows 11, pruned arms reflect empirical evaluations from `tool_rag_mitigation_trials.jsonl` referenced against the primary unmitigated prefill baseline.

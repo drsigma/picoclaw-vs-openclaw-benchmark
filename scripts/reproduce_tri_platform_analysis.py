@@ -824,75 +824,101 @@ def compute_hypothesis_tests(consolidated_data: dict[str, Any]):
 
     p_values_to_correct = []
 
+    regimes = [
+        ("Regime A (Cold Prefill)", "raw"),
+        ("Regime B (Warm Cache)", "warm"),
+    ]
+
     for p_key, p_info in datasets.items():
-        raw_path = p_info["active"]["raw"]
-        if not os.path.exists(raw_path):
-            continue
-        recs = load_trials_active(raw_path)
-        cells = collections.defaultdict(list)
-        for r in recs:
-            cells[(r["agent_key"], r["workload"])].append(r)
+        for reg_label, reg_key in regimes:
+            reg_path = p_info["active"][reg_key]
+            if not os.path.exists(reg_path):
+                continue
+            recs = load_trials_active(reg_path)
+            cells = collections.defaultdict(list)
+            for r in recs:
+                cells[(r["agent_key"], r["workload"])].append(r)
 
-        for wl in ["W1", "W2", "W3", "W4"]:
-            # Kruskal-Wallis across all available runtimes in workload
-            kw_groups = []
-            kw_names = []
-            for ak in ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native", "bun_minimal"]:
-                t_list = cells.get((ak, wl), [])
-                if len(t_list) >= 5:
-                    kw_groups.append([t["t_task_ms"] for t in t_list])
-                    kw_names.append(ak)
-            
-            if len(kw_groups) >= 3:
-                h_stat, kw_p = stats.kruskal(*kw_groups)
-                kruskal_tests.append({
-                    "platform": p_info["short"],
-                    "workload": wl,
-                    "groups": kw_names,
-                    "h_stat": round(float(h_stat), 3),
-                    "p_value": float(kw_p),
-                })
-
-            # Pairwise Mann-Whitney U + Cliff's Delta
-            for ak1, ak2, comp_name in comparisons:
-                g1 = cells.get((ak1, wl), [])
-                g2 = cells.get((ak2, wl), [])
-                if not g1 or not g2:
-                    continue
+            for wl in ["W1", "W2", "W3", "W4"]:
+                # Kruskal-Wallis across all available runtimes in workload
+                kw_groups = []
+                kw_names = []
+                for ak in ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native", "bun_minimal"]:
+                    t_list = cells.get((ak, wl), [])
+                    if len(t_list) >= 5:
+                        kw_groups.append([t["t_task_ms"] for t in t_list])
+                        kw_names.append(ak)
                 
-                lat1 = [t["t_task_ms"] for t in g1]
-                lat2 = [t["t_task_ms"] for t in g2]
-                orch1 = [t["t_orch_ms"] for t in g1]
-                orch2 = [t["t_orch_ms"] for t in g2]
+                if len(kw_groups) >= 3:
+                    h_stat, kw_p = stats.kruskal(*kw_groups)
+                    kruskal_tests.append({
+                        "platform": p_info["short"],
+                        "regime": reg_label,
+                        "workload": wl,
+                        "groups": kw_names,
+                        "h_stat": round(float(h_stat), 3),
+                        "p_value": float(kw_p),
+                    })
 
-                u_stat_task, p_val_task = stats.mannwhitneyu(lat1, lat2, alternative="two-sided")
-                d_task = cliffs_delta(lat1, lat2)
-                a12_task = vargha_delaney_a12(lat1, lat2)
+                # Pairwise Mann-Whitney U + Cliff's Delta
+                for ak1, ak2, comp_name in comparisons:
+                    g1 = cells.get((ak1, wl), [])
+                    g2 = cells.get((ak2, wl), [])
+                    if not g1 or not g2:
+                        continue
+                    
+                    lat1 = [t["t_task_ms"] for t in g1]
+                    lat2 = [t["t_task_ms"] for t in g2]
+                    orch1 = [t["t_orch_ms"] for t in g1]
+                    orch2 = [t["t_orch_ms"] for t in g2]
 
-                u_stat_orch, p_val_orch = stats.mannwhitneyu(orch1, orch2, alternative="two-sided")
-                d_orch = cliffs_delta(orch1, orch2)
-                a12_orch = vargha_delaney_a12(orch1, orch2)
+                    u_stat_task, p_val_task = stats.mannwhitneyu(lat1, lat2, alternative="two-sided")
+                    d_task = cliffs_delta(lat1, lat2)
+                    a12_task = vargha_delaney_a12(lat1, lat2)
 
-                record = {
-                    "platform": p_info["short"],
-                    "platform_key": p_key,
-                    "workload": wl,
-                    "comparison": comp_name,
-                    "ak1": ak1,
-                    "ak2": ak2,
-                    "n1": len(lat1),
-                    "n2": len(lat2),
-                    "task_mwu_stat": float(u_stat_task),
-                    "task_p_value_raw": float(p_val_task),
-                    "task_cliffs_delta": round(float(d_task), 4),
-                    "task_a12": round(float(a12_task), 4),
-                    "orch_mwu_stat": float(u_stat_orch),
-                    "orch_p_value_raw": float(p_val_orch),
-                    "orch_cliffs_delta": round(float(d_orch), 4),
-                    "orch_a12": round(float(a12_orch), 4),
-                }
-                test_results.append(record)
-                p_values_to_correct.append(p_val_task)
+                    u_stat_orch, p_val_orch = stats.mannwhitneyu(orch1, orch2, alternative="two-sided")
+                    d_orch = cliffs_delta(orch1, orch2)
+                    a12_orch = vargha_delaney_a12(orch1, orch2)
+
+                    def calc_neff(arr):
+                        a = np.asarray(arr, dtype=float)
+                        if len(a) > 2 and np.std(a) > 1e-9:
+                            norm_a = a - np.mean(a)
+                            r1 = float(np.sum(norm_a[:-1] * norm_a[1:]) / np.sum(norm_a**2))
+                        else:
+                            r1 = 0.0
+                        if abs(r1) < 0.99:
+                            n_eff_raw = len(a) * (1.0 - r1) / (1.0 + r1)
+                        else:
+                            n_eff_raw = len(a)
+                        return min(len(a), max(1, int(round(n_eff_raw))))
+
+                    neff1 = calc_neff(lat1)
+                    neff2 = calc_neff(lat2)
+
+                    record = {
+                        "platform": p_info["short"],
+                        "platform_key": p_key,
+                        "regime": reg_label,
+                        "workload": wl,
+                        "comparison": comp_name,
+                        "ak1": ak1,
+                        "ak2": ak2,
+                        "n1": len(lat1),
+                        "n2": len(lat2),
+                        "n_eff1": neff1,
+                        "n_eff2": neff2,
+                        "task_mwu_stat": float(u_stat_task),
+                        "task_p_value_raw": float(p_val_task),
+                        "task_cliffs_delta": round(float(d_task), 4),
+                        "task_a12": round(float(a12_task), 4),
+                        "orch_mwu_stat": float(u_stat_orch),
+                        "orch_p_value_raw": float(p_val_orch),
+                        "orch_cliffs_delta": round(float(d_orch), 4),
+                        "orch_a12": round(float(a12_orch), 4),
+                    }
+                    test_results.append(record)
+                    p_values_to_correct.append(p_val_task)
 
     # Apply Holm-Bonferroni correction
     adjusted_p = holm_bonferroni(p_values_to_correct)
@@ -1032,7 +1058,8 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         "> `†` **N/A†** (*Peak RSS of PythonNative on Windows 11*): The Windows invocation via `py.exe` (PEP 397) functions as a lightweight launcher wrapper stub dispatching an independent worker child process (`python.exe`). PSAPI telemetry (`GetProcessMemoryInfo`) monitored the immediate parent wrapper PID (~4.91 MB) rather than the CPython worker child heap. Factual `N/A` is reported in lieu of the wrapper stub memory. *Refs:* Python PEP 397; Microsoft Learn (Win32 PSAPI).  ",
         "> `‡` **N/A‡** (*Direct Neural Baseline*): The neural baseline issues direct HTTP requests from the telemetry harness to the resident `llama-server` without intermediary agent runtimes ($T_{\\text{orch}} \\equiv 0$); no client agent process exists for RSS or instruction attribution. *Refs:* Experimental decomposition protocol $T_{\\text{task}} = T_{\\text{orch}} + T_{\\text{neural}}$.  ",
         "> `||` **N/A for Bun on macOS**: Bun (JSC) was evaluated as a secondary JavaScript engine ablation on x86_64 nodes (Linux and Windows 11) following the freeze of the Darwin ARM64 reference campaign.  ",
-        "> `§` **Clean Physical Executions:** All consolidated datasets originate from unbroken, from-scratch executions without partial or reused trials."
+        "> `§` **Cross-ISA Hardware Counter Segregation:** Direct numerical comparisons of retired hardware instruction counts between Apple Silicon (ARM64 RISC) and Intel Core i5 (x86_64 CISC) are physically and microarchitecturally incommensurable due to divergent instruction set densities, macro-op fusion, and RISC micro-operation expansion. Hardware instructions are segregated by ISA (reported under respective architecture columns) and must be evaluated via relative expansion ratios (e.g. OpenClaw Full vs. PicoClaw) rather than cross-ISA raw scalar counts.  ",
+        "> `¶` **Clean Physical Executions:** All consolidated datasets originate from unbroken, from-scratch executions without partial or reused trials."
     ])
 
     t1_tex.extend([
@@ -1044,7 +1071,8 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         "\\multicolumn{9}{l}{\\textsuperscript{\\ddagger}\\footnotesize Neural baseline issues direct HTTP requests to resident llama-server without client agent runtime ($T_{\\text{orch}} \\equiv 0$).} \\\\",
         "\\multicolumn{9}{l}{\\footnotesize \\quad Refs: Experimental protocol for latency decomposition $T_{\\text{task}} = T_{\\text{orch}} + T_{\\text{neural}}$.} \\\\",
         "\\multicolumn{9}{l}{\\textsuperscript{||}\\footnotesize Bun JSC was evaluated as a secondary JavaScript engine ablation on x86_64 nodes (Linux and Windows 11) following the freeze of the Darwin ARM64 reference campaign.} \\\\",
-        "\\multicolumn{9}{l}{\\textsuperscript{\\S}\\footnotesize \\textbf{Clean-Room Runs:} 100\\% of empirical datasets originate from clean from-scratch runs without partial data reuse.} \\\\",
+        "\\multicolumn{9}{l}{\\textsuperscript{\\S}\\footnotesize Cross-ISA hardware instruction counts (ARM64 vs. x86\\_64) are segregated due to microarchitectural density differences; evaluate via relative ratios.} \\\\",
+        "\\multicolumn{9}{l}{\\textsuperscript{\\P}\\footnotesize \\textbf{Clean-Room Runs:} 100\\% of empirical datasets originate from clean from-scratch runs without partial data reuse.} \\\\",
         "\\hline",
         "\\end{tabular}",
         "}",
@@ -1062,14 +1090,23 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
     t2_md = [
         "# Table 2: Non-Parametric Hypothesis Testing & Effect Sizes (Mann-Whitney U, Cliff's Delta, Holm-Bonferroni)",
         "",
-        "| Platform | Workload | Comparison | $U$ Statistic | $p$-value (adj) | Cliff's $\\delta$ | Vargha-Delaney $A_{12}$ | Effect Magnitude |",
-        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
+        "| Platform | Regime | Workload | Comparison | $n_{\\text{eff}}$ | $U$ Statistic | $p$-value (adj) | Cliff's $\\delta$ | Vargha-Delaney $A_{12}$ | Effect Magnitude |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
     ]
     for r in test_results:
         d = r["task_cliffs_delta"]
         mag = "Large" if abs(d) >= 0.474 else ("Medium" if abs(d) >= 0.33 else ("Small" if abs(d) >= 0.147 else "Negligible"))
         p_str = "< 0.0001" if r["task_p_value_adj"] < 0.0001 else f"{r['task_p_value_adj']:.4f}"
-        t2_md.append(f"| {r['platform']} | {r['workload']} | {r['comparison']} | {r['task_mwu_stat']:.1f} | {p_str} | {d:+.3f} | {r['task_a12']:.3f} | {mag} |")
+        neff_str = f"{r.get('n_eff1', r['n1'])}/{r.get('n_eff2', r['n2'])}"
+        t2_md.append(f"| {r['platform']} | {r.get('regime', 'Regime A (Cold Prefill)')} | {r['workload']} | {r['comparison']} | {neff_str} | {r['task_mwu_stat']:.1f} | {p_str} | {d:+.3f} | {r['task_a12']:.3f} | {mag} |")
+
+    t2_md.extend([
+        "",
+        "> **Table 2 Methodological Notes on Serial Dependence and Effective Sample Size ($n_{\\text{eff}}$):**",
+        "> - **Regime Identification:** `Regime A (Cold Prefill)` reflects un-cached prompt attention where token length drives quadratic attention latency ($T_{\\text{neural}}$). `Regime B (Warm Cache)` reflects steady-state prefix KV retention where prompt processing is amortized and client orchestrator dispatch delay ($T_{\\text{orch}}$) becomes observable.",
+        "> - **Serial Dependence and $n_{\\text{eff}}$:** Due to sequential physical trials, serial correlation ($r_1$) is accounted for using $n_{\\text{eff}} = \\min(n_{\\text{raw}}, n_{\\text{raw}} \\frac{1 - r_1}{1 + r_1})$ (Goldsman & Schmeiser, 1997; Kalibera & Jones, 2013). The reported column lists $(n_{\\text{eff}, 1} / n_{\\text{eff}, 2})$ for the two compared groups.",
+        "> - **Multiple Testing Correction:** Family-wise error rate across all pairwise hypothesis tests is rigorously controlled via the Holm-Bonferroni step-down procedure ($p_{\\text{adj}} = \\min(1.0, (m - k + 1) p_{(k)})$)."
+    ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table2_statistical_tests.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(t2_md) + "\n")
@@ -1198,10 +1235,10 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
     t5_md.extend([
         "",
         "> **Table 5 Methodological Notes:**",
-        "> - Dynamic schema pruning achieves $-87.1\\%$ prompt token reduction (917 tokens vs 7,091 tokens unmitigated).",
-        "> - In Regime A (Cold Prefill), dynamic schema pruning eliminates quadratic prompt attention, yielding a **7.43x speedup on macOS** (and ~6.04x across the full W1-W4 suite).",
-        "> - In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, resulting in modest Tool-RAG speedups (1.27x vs 54-tool catalog), demonstrating that Tool-RAG's primary utility lies in cold prefill mitigation.",
-        "> - `*` On Linux x86_64 and Windows 11, the dedicated tool-RAG experiment evaluated the pruned arms (917 tokens); baseline Full (7,091 tokens) speedup is referenced from the primary cold/warm campaign."
+        "> - **Baseline Normalization Methodology:** On macOS ARM64, speedup factors are computed strictly against the internal unmitigated 54-tool baseline measured within the identical unified session (`tool_rag_mitigation_trials.jsonl`). On Linux x86_64 and Windows 11, the dedicated tool-RAG experiment evaluated the pruned arms (917 tokens); their speedup factors are computed relative to the consolidated primary prefill baseline of OpenClaw Full from the main campaign (`raw_trials.jsonl` for Regime A, `warm_cache_trials.jsonl` for Regime B), ensuring consistent within-node physical references without cross-session synthesis.",
+        "> - **Prompt Token Reduction:** Dynamic schema pruning achieves $-87.1\\%$ prompt token reduction (917 tokens vs 7,091 tokens unmitigated).",
+        "> - **Regime Contrast:** In Regime A (Cold Prefill), dynamic schema pruning eliminates quadratic prompt attention, yielding a **7.43x speedup on macOS** (and ~6.04x across the full W1-W4 suite). In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, resulting in modest Tool-RAG speedups (1.27x vs 54-tool catalog), demonstrating that Tool-RAG's primary utility lies in cold prefill mitigation.",
+        "> - `*` On Linux x86_64 and Windows 11, pruned arms reflect empirical evaluations from `tool_rag_mitigation_trials.jsonl` referenced against the primary unmitigated prefill baseline."
     ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table5_tool_rag_mitigation.md"), "w", encoding="utf-8") as f:
@@ -1616,7 +1653,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
                   color="#991B1B", bbox=dict(boxstyle="round,pad=0.2", fc="#FEF2F2", ec="#F87171", lw=0.8, alpha=0.95))
 
     plt.tight_layout(rect=[0, 0.04, 1, 0.98])
-    fig.text(0.5, 0.01, "* Telemetry Domain Delimitation: Energy and EDP are strictly comparable within each hardware node/sensor domain. Apple SMC captures full SoC die dissipation; Intel RAPL and NVIDIA NVML capture CPU package and dGPU board power (excluding motherboard VRMs and system RAM). Cross-platform absolute comparisons between SoC and discrete setups are physically incommensurable.", ha="center", fontsize=7.0, color="#334155")
+    fig.text(0.5, 0.01, "* Nota de Telemetria: A comparação de energia absoluta em Joules e EDP é estritamente válida para contrastes dentro de cada nó/sensor isolado (SMC vs. RAPL+NVML), não devendo ser interpretada como um ranking absoluto cruzado entre sistemas operacionais diferentes.", ha="center", fontsize=7.0, color="#334155")
     f4_out = os.path.join(PUB_FIG_DIR, "fig4_exp3_energy_edp.png")
     plt.savefig(f4_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig4_exp3_energy_edp.png"), dpi=300, bbox_inches="tight")

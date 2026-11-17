@@ -55,7 +55,7 @@ To address this with methodological rigor and scientific integrity:
 
 ### Question 6: What is the original contribution and practical engineering takeaway of this study?
 **Rigorous Response:**  
-This study proves for the first time on Apple Silicon M4 with UMA that agent orchestrator runtime architecture is critical:
+This empirical study demonstrates on Apple Silicon M4 with UMA that agent orchestrator runtime architecture is critical:
 * **Edge & Background Agents:** PicoClaw (native Go) is overwhelmingly superior. It requires 13x less RAM, boots 23x faster (9.6 ms vs. 225 ms), and serializes tools 5x to 7x faster, keeping the local host responsive without cache thrashing or UMA bus contention.
 * **Desktop & Server Environments:** OpenClaw (Node.js/TypeScript) is viable only if relying on the NPM ecosystem on machines with abundant memory (>16 GB to 32 GB), provided that developers aggressively prune inactive tool schemas to prevent *Prompt Token Bloat*.
 
