@@ -9,10 +9,11 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${REPO_DIR}"
 
-# 0. Desativa imediatamente a suspensão e proteção de tela
+# 0. Desativa imediatamente a suspensão e proteção de tela & libera RAPL
 echo "▶ [Passo 0] Desativando suspensão e proteção de tela (xset)..."
 xset s off 2>/dev/null || true
 xset -dpms 2>/dev/null || true
+sudo chmod -R a+r /sys/class/powercap/intel-rapl* 2>/dev/null || true
 
 # Ativa virtual environment
 if [ -d ".venv_repro" ]; then
