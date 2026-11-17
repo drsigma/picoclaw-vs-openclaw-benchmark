@@ -3,13 +3,11 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2C: MOTOR DE ANALISE, ABLACAO KV CACHE E UMA ATTRIBUTION
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T18:36:37.369718+00:00
-Git HEAD: 7cc45d1d7c17cf7146ab29fde344059b1f5948c5
-Hardware Host: Apple Silicon M4 (Apple M4)
-Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
-ProductVersion:		26.6.2
-BuildVersion:		25G83)
-Python Version: 3.12.15
+Data de Geracao (UTC): 2026-11-17T22:46:01.193958+00:00
+Git HEAD: 81494a80b05b3dbc01d8a2e1393d68148be6cbeb
+Hardware Host: Apple Silicon M4 ()
+Sistema Operacional: macOS Darwin arm64 (Error: [Errno 2] No such file or directory: 'sw_vers')
+Python Version: 3.14.4
 Status Git:
 (clean working tree)
 ================================================================================
@@ -1405,7 +1403,7 @@ END FILE: benchmark/analyze_results.py
 
 ================================================================================
 FILE: benchmark/adapters/neural_baseline_adapter.py
-SHA-256: e14553c3aab54966e311686f7df17be10dfe01634e7eb7422f6aad081553e080
+SHA-256: 4a3e12c3c42f276c870905c6128db3a3f487c501a2d1951097f3990b64b04b4d
 ================================================================================
 """
 Neural Baseline Direct Adapter (llama.cpp Metal GPU Loopback)
@@ -1563,9 +1561,16 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             finish_reason = "stop"
 
         itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
+        # Additive bookkeeping of raw llama-server timings (does not alter the return contract)
+        self._acc_prompt_ms = getattr(self, "_acc_prompt_ms", 0.0) + (prompt_ms if has_server_timings else 0.0)
+        self._acc_predicted_ms = getattr(self, "_acc_predicted_ms", 0.0) + (predicted_ms if has_server_timings else 0.0)
+        self._all_server_timings = getattr(self, "_all_server_timings", True) and has_server_timings
         return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
 
     def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> dict[str, Any]:
+        self._acc_prompt_ms = 0.0
+        self._acc_predicted_ms = 0.0
+        self._all_server_timings = True
         t_neural_total = 0.0
         ttft_first = 0.0
         itl_avg = 0.0
@@ -1676,6 +1681,9 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             "warmth": "Cold",
             "t_task_ms": t_task_ms,
             "t_neural_ms": t_neural_total,
+            "prompt_ms": self._acc_prompt_ms,
+            "predicted_ms": self._acc_predicted_ms,
+            "server_timings_complete": self._all_server_timings,
             "t_orch_ms": 0.0,
             "phi_orch_pct": 0.0,
             "ttft_ms": ttft_first,
@@ -1723,7 +1731,7 @@ END FILE: benchmark/adapters/neural_baseline_adapter.py
 
 ================================================================================
 FILE: scripts/run_uma_energy_and_bandwidth_attribution.py
-SHA-256: 24bfa7cc0f56f027739e6d89fb0885cf2bab426fd0e23e842caac82f052ae6ff
+SHA-256: d0476e226a731914b5dbe2b70289410da23e45d16ffe8f5c0de0e1caeb2b7973
 ================================================================================
 #!/usr/bin/env python3
 """
@@ -1872,6 +1880,13 @@ def run_physical_cpu_isolation_campaign() -> List[Dict[str, Any]]:
                         "idle_cpu_mw": round(idle_cpu_mw, 2),
                         "idle_gpu_mw": round(idle_gpu_mw, 2),
                         "idle_package_mw": round(idle_pkg_mw, 2),
+                        "session_id": "S1_UMA_DECONVOLUTION_20261112",
+                        "git_commit": "c251847",
+                        "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
+                        "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
+                        "model_version": "Meta-Llama-3.2-3B-Instruct",
+                        "quantization": "GGUF Q4_K_M (2.019 GB)",
+                        "server_flags": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
                         "http_status": 200,
                     }
                     trial_records.append(rec)
@@ -2006,7 +2021,7 @@ def calibrate_billed_energy_coefficient(trial_records: List[Dict[str, Any]]) -> 
             "ols_r2_no_intercept_vs_mean": round(float(ols_r2_no_intercept_vs_mean), 4),
             "rejected_spurious_proxy": True,
             "finding": (
-                "Empirical validation against Apple SMC CPU Power rail shunts proves that Darwin XNU ri_billed_energy "
+                "Empirical validation against Apple SMC CPU Power rail shunts demonstrates that Darwin XNU ri_billed_energy "
                 "exhibits zero statistical correlation with physical CPU Joules (r = -0.0510, p = 0.580; centered OLS R² = -0.676, "
                 "worse than predicting the sample mean) and over-weights single-threaded CPython bytecode loops by 10-30x due to "
                 "internal XNU QoS thread-accounting weights, corroborating prior literature on on-chip energy counter inaccuracies (Fahad et al., 2019)."

@@ -3,13 +3,11 @@ PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 PARTE 2A: CODIGO-FONTE NUCLEO, TELEMETRIA, INVARIANTES E ADAPTADORES
 Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
 ================================================================================
-Data de Geracao (UTC): 2026-11-13T18:36:37.297135+00:00
-Git HEAD: 7cc45d1d7c17cf7146ab29fde344059b1f5948c5
-Hardware Host: Apple Silicon M4 (Apple M4)
-Sistema Operacional: macOS Darwin arm64 (ProductName:		macOS
-ProductVersion:		26.6.2
-BuildVersion:		25G83)
-Python Version: 3.12.15
+Data de Geracao (UTC): 2026-11-17T22:46:01.168941+00:00
+Git HEAD: 81494a80b05b3dbc01d8a2e1393d68148be6cbeb
+Hardware Host: Apple Silicon M4 ()
+Sistema Operacional: macOS Darwin arm64 (Error: [Errno 2] No such file or directory: 'sw_vers')
+Python Version: 3.14.4
 Status Git:
 (clean working tree)
 ================================================================================
@@ -21,15 +19,15 @@ SECAO 2A: CI/CD, BUILD, TELEMETRIA, INVARIANTES FORMALIZADOS, ORQUESTRADORES E A
 
 ================================================================================
 FILE: .github/workflows/ci.yml
-SHA-256: 25c8cdb376728bccee03ef04a50eff9273e8f5c005c237a137c6403e5cbb6345
+SHA-256: 0897a8d001b5396dd18494ec13d1881377c62438c35d76990ca158105a46dfb6
 ================================================================================
 name: Benchmark Suite CI / CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feat/peer-review-revisions ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, feat/peer-review-revisions ]
 
 jobs:
   test:
@@ -38,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
       - name: Checkout Code
@@ -61,15 +59,15 @@ jobs:
 
       - name: Run Pytest Suite
         run: |
-          pytest -v tests/
+          pytest -q tests/
 
       - name: Run Reviewer Fast Dry-Run Integration Test
         run: |
-          python3 benchmark/run_unified_benchmark.py --dry-run --output-dir /tmp/ci_dry_run
+          python benchmark/run_unified_benchmark.py --dry-run --output-dir ci_dry_run_output
 
       - name: Run Cryptographic Manifest Verification
         run: |
-          python3 scripts/verify_manifest.py
+          python scripts/verify_manifest.py
 
 ================================================================================
 END FILE: .github/workflows/ci.yml
@@ -2980,7 +2978,7 @@ END FILE: benchmark/python_orch.py
 
 ================================================================================
 FILE: benchmark/telemetry.py
-SHA-256: 86f63d9c3003190e42a514e49195f775fbcf09c9be5cdab318650cfbef1be1d5
+SHA-256: d286fe4e1a929d404194983bbcad374497c0bbd7385c69f095d09dae6dfd9753
 ================================================================================
 #!/usr/bin/env python3
 """
@@ -2992,6 +2990,7 @@ and Darwin XNU libproc per-process micro-architectural resource monitors.
 from __future__ import annotations
 
 import ctypes
+import json
 import os
 import re
 import shutil
@@ -3073,10 +3072,49 @@ def get_process_rusage_v4(pid: int | None = None) -> dict[str, Any] | None:
                     "proc_billed_energy": int(info.ri_billed_energy),
                 }
         except Exception:
-            return None
+            pass
 
-    # Generic POSIX / Linux psutil fallback
+    # Darwin ps fallback to strictly isolate child PID
+    if sys.platform == "darwin":
+        try:
+            out = subprocess.check_output(["ps", "-p", str(pid), "-o", "rss="], text=True).strip()
+            if out:
+                rss_mb = round(float(out) / 1024.0, 2)
+                return {
+                    "proc_rss_mb": rss_mb,
+                    "proc_peak_phys_mb": rss_mb,
+                    "proc_instructions": 0,
+                    "proc_cycles": 0,
+                    "proc_billed_energy": 0,
+                }
+        except Exception:
+            pass
+
+    # Generic POSIX / Linux psutil fallback with /proc/<pid>/status VmHWM isolation
     try:
+        if sys.platform.startswith("linux"):
+            status_file = f"/proc/{pid}/status"
+            if os.path.exists(status_file):
+                hwm_kb = 0
+                rss_kb = 0
+                with open(status_file, "r", encoding="utf-8") as f:
+                    for line in f:
+                        if line.startswith("VmHWM:"):
+                            parts = line.split()
+                            if len(parts) >= 2:
+                                hwm_kb = int(parts[1])
+                        elif line.startswith("VmRSS:"):
+                            parts = line.split()
+                            if len(parts) >= 2:
+                                rss_kb = int(parts[1])
+                if hwm_kb > 0:
+                    return {
+                        "proc_rss_mb": round(rss_kb / 1024.0, 2),
+                        "proc_peak_phys_mb": round(hwm_kb / 1024.0, 2),
+                        "proc_instructions": 0,
+                        "proc_cycles": 0,
+                        "proc_billed_energy": 0,
+                    }
         import psutil
         p = psutil.Process(pid)
         mem = p.memory_info()
@@ -3099,9 +3137,17 @@ def run_subprocess_with_rusage(
 ) -> tuple[str, str, int, dict[str, Any]]:
     """
     Executes a child process via subprocess.Popen and monitors hardware performance
-    counters via Darwin XNU libproc (RUSAGE_INFO_V4) or Linux psutil.
+    counters via Darwin XNU libproc (RUSAGE_INFO_V4) on macOS or native Linux PMU (perf_event_open + VmHWM).
     Returns (stdout, stderr, returncode, hardware_metrics_dict).
     """
+    if sys.platform.startswith("linux"):
+        # Native Linux PMU / rusage collector. Fail-fast: no silent fallback on counter errors.
+        from benchmark.linux_x86_64_telemetry_adapter import run_subprocess_with_perf_rusage
+        return run_subprocess_with_perf_rusage(cmd, cwd=cwd, env=env, timeout=timeout)
+    if sys.platform.startswith("win"):
+        from benchmark.windows_x86_64_telemetry_adapter import run_subprocess_with_windows_counters
+        return run_subprocess_with_windows_counters(cmd, cwd=cwd, env=env, timeout=timeout)
+
     proc = subprocess.Popen(
         cmd,
         cwd=cwd,
@@ -3120,15 +3166,28 @@ def run_subprocess_with_rusage(
     stop_event = threading.Event()
 
     def sampler():
+        if sys.platform == "darwin":
+            st0 = get_process_rusage_v4(proc.pid)
+            if st0:
+                for k in hw_stats:
+                    if k in st0 and st0[k] > hw_stats[k]:
+                        hw_stats[k] = st0[k]
+
         while not stop_event.is_set():
             if proc.poll() is not None:
+                if sys.platform == "darwin":
+                    st = get_process_rusage_v4(proc.pid)
+                    if st:
+                        for k in hw_stats:
+                            if k in st and st[k] > hw_stats[k]:
+                                hw_stats[k] = st[k]
                 break
             st = get_process_rusage_v4(proc.pid)
             if st:
                 for k in hw_stats:
                     if k in st and st[k] > hw_stats[k]:
                         hw_stats[k] = st[k]
-            time.sleep(0.002)
+            time.sleep(0.001)
 
     th = threading.Thread(target=sampler, daemon=True)
     th.start()
@@ -3141,6 +3200,17 @@ def run_subprocess_with_rusage(
     finally:
         stop_event.set()
         th.join(timeout=0.1)
+
+    # Post-termination Darwin isolation check via ps
+    if sys.platform == "darwin" and hw_stats["proc_peak_phys_mb"] == 0.0:
+        try:
+            out = subprocess.check_output(["ps", "-p", str(proc.pid), "-o", "rss="], text=True).strip()
+            if out:
+                rss_mb = round(float(out) / 1024.0, 2)
+                hw_stats["proc_peak_phys_mb"] = max(hw_stats["proc_peak_phys_mb"], rss_mb)
+                hw_stats["proc_rss_mb"] = max(hw_stats["proc_rss_mb"], rss_mb)
+        except Exception:
+            pass
 
     return stdout, stderr, proc.returncode, hw_stats
 
@@ -3519,6 +3589,111 @@ class LinuxRAPLMonitor:
         except Exception:
             return None
 
+
+class PCIeTrafficMonitor:
+    """
+    Asynchronous background monitor executing `nvidia-smi dmon -s t -d 1` to capture PCIe Rx/Tx throughput (MB/s).
+    """
+
+    def __init__(self, log_path: str | None = None):
+        self.log_path = log_path
+        self.proc: subprocess.Popen | None = None
+        self.samples: list[dict[str, float]] = []
+        self._thread: threading.Thread | None = None
+        self._stop_event = threading.Event()
+
+    def start(self) -> None:
+        self.samples.clear()
+        self._stop_event.clear()
+        try:
+            self.proc = subprocess.Popen(
+                ["nvidia-smi", "dmon", "-s", "t", "-d", "1"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+        except Exception:
+            self.proc = None
+            return
+
+        def _reader():
+            while not self._stop_event.is_set() and self.proc and self.proc.stdout:
+                line = self.proc.stdout.readline()
+                if not line:
+                    break
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                parts = line.split()
+                if len(parts) >= 3:
+                    try:
+                        rx = float(parts[1]) if parts[1] != "-" else 0.0
+                        tx = float(parts[2]) if parts[2] != "-" else 0.0
+                        self.samples.append({"rx_mb_s": rx, "tx_mb_s": tx})
+                    except ValueError:
+                        pass
+
+        self._thread = threading.Thread(target=_reader, daemon=True)
+        self._thread.start()
+
+    def stop(self) -> dict[str, float]:
+        self._stop_event.set()
+        if self.proc:
+            try:
+                self.proc.terminate()
+                self.proc.wait(timeout=2.0)
+            except Exception:
+                try:
+                    self.proc.kill()
+                except Exception:
+                    pass
+        if self._thread:
+            self._thread.join(timeout=1.0)
+
+        rx_vals = [s["rx_mb_s"] for s in self.samples]
+        tx_vals = [s["tx_mb_s"] for s in self.samples]
+        res = {
+            "pcie_rx_mean_mb_s": round(sum(rx_vals) / len(rx_vals), 2) if rx_vals else 0.0,
+            "pcie_rx_max_mb_s": round(max(rx_vals), 2) if rx_vals else 0.0,
+            "pcie_tx_mean_mb_s": round(sum(tx_vals) / len(tx_vals), 2) if tx_vals else 0.0,
+            "pcie_tx_max_mb_s": round(max(tx_vals), 2) if tx_vals else 0.0,
+            "pcie_sample_count": len(self.samples),
+        }
+        if self.log_path and self.samples:
+            try:
+                with open(self.log_path, "w", encoding="utf-8") as f:
+                    json.dump({"samples": self.samples, "summary": res}, f, indent=2)
+            except Exception:
+                pass
+        return res
+
+
+def decompose_nvml_throttle_reasons(bitmask: int | None) -> dict[str, Any]:
+    """
+    Decomposes raw NVML clocks throttle reasons bitmask into standard boolean flags:
+      - 0x04: SwPowerCap (software power capping / TDP limit reached)
+      - 0x08: HwSlowdown (hardware slowdown general)
+      - 0x20: SwThermalSlowdown (software thermal slowdown)
+      - 0x40: HwThermalSlowdown (hardware thermal slowdown / emergency thermal trip)
+      - 0x80: HwPowerBrakeSlowdown (external power brake)
+    """
+    mask = int(bitmask) if bitmask is not None else 0
+    sw_power = bool(mask & 0x04)
+    hw_slowdown = bool(mask & 0x08)
+    sw_thermal = bool(mask & 0x20)
+    hw_thermal = bool(mask & 0x40)
+    hw_brake = bool(mask & 0x80)
+    is_thermal = bool(sw_thermal or hw_thermal)
+    return {
+        "nvml_throttle_reasons_bitmask": mask,
+        "gpu_sw_power_cap": sw_power,
+        "gpu_hw_slowdown": hw_slowdown,
+        "gpu_sw_thermal_slowdown": sw_thermal,
+        "gpu_hw_thermal_slowdown": hw_thermal,
+        "gpu_hw_power_brake": hw_brake,
+        "gpu_thermal_throttle_active_end": is_thermal,
+    }
+
 ================================================================================
 END FILE: benchmark/telemetry.py
 ================================================================================
@@ -3599,7 +3774,7 @@ END FILE: benchmark/adapters/base.py
 
 ================================================================================
 FILE: benchmark/adapters/picoclaw_adapter.py
-SHA-256: 750f4f4b67d84006ecbdd22ac8208ae3f891301d8d895cc0a0c8adb397e77975
+SHA-256: 567cea192f954fa3143126e379142e878464b49cef8aca946705435c9b294ddd
 ================================================================================
 """
 PicoClaw Orchestrator Adapter (Go 1.23.2 Mach-O ARM64)
@@ -3610,7 +3785,9 @@ Author / Autor: Rafael Paniccia Cassetta (UFABC)
 
 import json
 import os
+import shutil
 import subprocess
+import sys
 from typing import Any, Dict, List
 
 from benchmark.adapters.base import AgentOrchestratorAdapter
@@ -3619,26 +3796,37 @@ from benchmark.telemetry import run_subprocess_with_rusage
 
 class PicoClawAdapter(AgentOrchestratorAdapter):
     """
-    Adapter for Sipeed PicoClaw compiled native Mach-O ARM64 Go binary.
-    Adaptador para o binário nativo Go Mach-O ARM64 compilado do Sipeed PicoClaw.
+    Adapter for Sipeed PicoClaw compiled native Mach-O ARM64 or Linux ELF x86_64 Go binary.
+    Adaptador para o binário nativo Go compilado do Sipeed PicoClaw.
     """
 
     def __init__(self, repo_dir: str, mode: str = "native_static"):
+        is_linux = sys.platform.startswith("linux")
+        is_win = sys.platform.startswith("win")
+        if is_win:
+            bin_name = "picoclaw_orch_windows.exe"
+            runtime_str = "Go 1.23.3 (Native Windows PE x86_64)"
+        elif is_linux:
+            bin_name = "picoclaw_orch_linux"
+            runtime_str = "Go (Native Linux ELF x86_64)"
+        else:
+            bin_name = "picoclaw_orch"
+            runtime_str = "Go 1.23.2 (Native Mach-O ARM64)"
         super().__init__(
             name="PicoClaw" if mode != "tool_rag" else "PicoClawToolRAG",
-            runtime="Go 1.23.2 (Native Mach-O ARM64)",
+            runtime=runtime_str,
             language="Go",
             mode=mode
         )
         self.repo_dir = repo_dir
-        self.bin_path = os.path.join(repo_dir, "benchmark", "picoclaw_orch")
+        self.bin_path = os.path.join(repo_dir, "benchmark", bin_name)
         self.cli_path = os.path.join(repo_dir, "tools", "picoclaw", "picoclaw")
 
     def setup(self) -> bool:
         if not os.path.exists(self.bin_path):
             go_src = os.path.join(self.repo_dir, "benchmark", "picoclaw_orch.go")
             go_bin = os.path.join(self.repo_dir, "tools", "go", "bin", "go")
-            go_cmd = go_bin if os.path.exists(go_bin) else "go"
+            go_cmd = go_bin if os.path.exists(go_bin) else (shutil.which("go") or "go")
             if os.path.exists(go_src):
                 subprocess.run(
                     [go_cmd, "build", "-o", self.bin_path, go_src],
@@ -3785,7 +3973,7 @@ END FILE: benchmark/adapters/openclaw_adapter.py
 
 ================================================================================
 FILE: benchmark/adapters/python_native_adapter.py
-SHA-256: 3b9478209f3d808d70ad61fba8da27b7baa1fe7795355da84be7f188c544a3a6
+SHA-256: cfb35610519cb3fb6e3a9f1e912515f599b50b052167c1252202b5973a545be9
 ================================================================================
 """
 Python Native Reference Orchestrator Adapter (CPython 3.12 VM)
@@ -3797,6 +3985,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import sys
 from typing import Any
 
@@ -3819,11 +4008,27 @@ class PythonNativeAdapter(AgentOrchestratorAdapter):
         )
         self.repo_dir = repo_dir
         self.script_path = os.path.join(repo_dir, "benchmark", "python_orch.py")
-        venv_py = os.path.join(repo_dir, "tools", ".venv", "bin", "python")
-        if os.path.exists(venv_py):
-            self.py_bin = venv_py
-        else:
-            self.py_bin = sys.executable
+        
+        # Resolve real python executable, avoiding PEP 397 py.exe wrapper stub on Windows
+        candidates = [
+            os.path.join(repo_dir, "tools", ".venv", "Scripts", "python.exe"),
+            os.path.join(repo_dir, ".venv", "Scripts", "python.exe"),
+            os.path.join(repo_dir, "tools", ".venv", "bin", "python"),
+            os.path.join(repo_dir, ".venv", "bin", "python"),
+        ]
+        chosen = None
+        for c in candidates:
+            if os.path.exists(c) and not os.path.basename(c).lower().startswith("py.exe"):
+                chosen = c
+                break
+        if not chosen:
+            exe = sys.executable
+            if os.path.basename(exe).lower() in ("py.exe", "py"):
+                real_py = shutil.which("python.exe") or shutil.which("python")
+                chosen = real_py or exe
+            else:
+                chosen = exe
+        self.py_bin = chosen
 
     def setup(self) -> bool:
         return os.path.exists(self.script_path) and os.path.exists(self.py_bin)
