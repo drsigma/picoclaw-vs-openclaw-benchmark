@@ -24,16 +24,16 @@ This conformance report documents the physical execution, microarchitectural ins
 
 ### Key Empirical Findings (Workload W2 -- Standard 15-Tool Chain):
 - **Client Middleware Dispatch Latency ($T_{\text{orch}}$):**
-  * **macOS ARM64 (M4):** PicoClaw Go achieved a median latency of **7.11 ms** vs. OpenClaw Full at **25.68 ms** (**3.61x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
+  * **macOS ARM64 (M4):** PicoClaw Go achieved a median latency of **5.53 ms** vs. OpenClaw Full at **24.55 ms** (**4.44x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
   * **Linux x86_64:** PicoClaw Go achieved a median latency of **6.66 ms** vs. OpenClaw Full at **35.99 ms** (**5.40x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
   * **Windows 11 x86_64:** PicoClaw Go achieved a median latency of **10.94 ms** vs. OpenClaw Full at **45.70 ms** (**4.18x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
 - **Peak Resident Physical Memory (Peak RSS):**
-  * macOS M4: PicoClaw requires **5.0 MB** vs. **37.8 MB** in OpenClaw Full (**7.53x memory expansion**).
+  * macOS M4: PicoClaw requires **5.1 MB** vs. **37.7 MB** in OpenClaw Full (**7.41x memory expansion**).
   * Linux x86_64: PicoClaw requires **9.7 MB** vs. **86.7 MB** in OpenClaw Full (**8.94x memory expansion**).
   * Windows 11 x86_64: PicoClaw requires **10.2 MB** vs. **72.8 MB** in OpenClaw Full (**7.17x memory expansion**).
   * *(Windows Process Note): The `python_native` telemetry on Windows 11 captured the `py.exe` launcher stub PID (PEP 397) rather than the CPython worker child heap; RSS and CPU cycles are marked as `N/A (launcher stub PID)` to preserve empirical integrity.*
 - **Hardware PMU Instructions:**
-  * **macOS ARM64 (Apple PMU):** OpenClaw Full executed **791.3M instructions**, compared to **62.6M** in PicoClaw (**12.65x instruction elimination ratio**).
+  * **macOS ARM64 (Apple PMU):** OpenClaw Full executed **791.7M instructions**, compared to **62.3M** in PicoClaw (**12.71x instruction elimination ratio**).
   * **Linux x86_64 (`perf_event_open`):** OpenClaw Full executed **771.5M instructions**, compared to **32.7M** in PicoClaw (**23.63x instruction elimination ratio**).
   * **Windows 11 x86_64:** Hardware instruction counters are restricted in user-mode by the OS kernel (marked `N/A`); CPU cycles tracked empirically via `QueryProcessCycleTime` confirm **507.9M cycles** in OpenClaw Full vs. **43.0M** in PicoClaw (**11.82x cycle overhead**).
 
@@ -126,11 +126,11 @@ Every empirical `.jsonl` trial record was audited for schema validity, null valu
 
 | Platform | Session Identifier | Dataset Role | Measured Trials | Warmup Trials | Full SHA-256 Checksum |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `raw` | 600 | 60 | `a0142aa0c2dd4f7806567b017b2cffc53dbbd6ed7e7506f911f9737935cd6239` |
-| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `warm` | 600 | 60 | `633eb14d1c544aeac6caee3c3a5bfdc57fd95cec74f6f68064d0ef20029acb83` |
-| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `kv` | 90 | 0 | `d4c978f1caaf012f792830adaedd4675b16b846f9171bfc13cf85fc8a726d459` |
-| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `mcp` | 135 | 0 | `7ba766b266a713a78d7de8f20509525a241b9bd2f3cbe7a12c7f95f49d61e0d9` |
-| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `rag` | 960 | 96 | `7f52b7effe79eaaad184d61e869d9e13680b4ac5eebdf226efcd9c16940bb9b0` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `raw` | 750 | 75 | `9f624bd429c810fbbaa2c952b18ea718b17d42b7b8667d6419c561ec7f60ed01` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `warm` | 750 | 75 | `bd2854fd866a1d1b963ef7cfe8e659e6c68b59794c1cf6c3ac4f38952f79dea6` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `kv` | 90 | 0 | `48532324bcb7ad5c0d072c80571480e308dfdf48029312cded4677f47bbd3081` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `mcp` | 135 | 0 | `03e8d3bd247e29c498e87a727daaa41d47e4d3b6005713d25a0a33301d3232c4` |
+| macOS ARM64 (Apple Silicon M4) | publication_campaign (Campanha Final) | `rag` | 960 | 96 | `3631f7843cef17e9a6c53fd2fc0970164c10ec090433d1f034e4d3238e35dc22` |
 | Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `raw` | 720 | 72 | `d1638d0828368255c04d2036fa406a3eaf2493cf84c7fa5420e9c0657e7c7163` |
 | Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `warm` | 720 | 72 | `57b161cddcdea65fc9ad41c8d1057f9211e20d9c25a024249191dda4a36a3986` |
 | Ubuntu 26.04 LTS (Linux 7.0 x86_64) | clean_run_linux_session_1 | `kv` | 180 | 4 | `8b7412a2d4e4057d4989ae51393dfd494ebfcd47c8a34bf07c9fe7af9d89d077` |

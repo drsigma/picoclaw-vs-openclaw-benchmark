@@ -444,7 +444,7 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
       { role: "user", content: `Enterprise Policy:\n${polStr}\nCross-Domain Query: Identify latency SLA thresholds and compliance quarantine actions.` }
     ];
     const r = await streamCompletionJSC(msgs, toolCatalog, 256);
-    tNeuralTotal = r.totalNeuralMs;
+    tNeuralTotal = r.neuralMs;
     totalPromptMs = r.promptMs;
     totalPredictedMs = r.predictedMs;
     ttftFirst = r.ttftMs;

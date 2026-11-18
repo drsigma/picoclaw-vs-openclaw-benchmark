@@ -228,12 +228,14 @@ def run_w5_trial(warmth: str = "Warm", max_tokens: int = 256) -> Dict[str, Any]:
                         fr = c0.get("finish_reason")
                         if fr:
                             finish_reason = str(fr)
-                        content = c0.get("delta", {}).get("content")
+                        delta = c0.get("delta", {})
+                        content = delta.get("content")
+                        tool_calls = delta.get("tool_calls")
                         if content:
                             out_chunks.append(content)
-                            if first_chunk:
-                                ttft_ms = (time.monotonic() - t0_neural) * 1000.0
-                                first_chunk = False
+                        if (content or tool_calls) and first_chunk:
+                            ttft_ms = (time.monotonic() - t0_neural) * 1000.0
+                            first_chunk = False
                 except Exception:
                     pass
     except Exception as e:
@@ -275,7 +277,9 @@ def run_w5_trial(warmth: str = "Warm", max_tokens: int = 256) -> Dict[str, Any]:
     alpha_mem = rss_peak / max(1.0, rss_idle)
     cache_hit_pct = (total_cached_tokens / total_prompt_tokens * 100.0) if total_prompt_tokens > 0 else 0.0
 
-    itl_ms = (t_neural_ms - ttft_ms) / float(total_completion_tokens - 1) if total_completion_tokens > 1 else 0.0
+    if ttft_ms <= 0.0:
+        ttft_ms = prompt_ms if prompt_ms > 0.0 else max(1.0, (time.monotonic() - t0_neural) * 1000.0)
+    itl_ms = max(0.01, (t_neural_ms - ttft_ms) / float(total_completion_tokens - 1)) if total_completion_tokens > 1 else max(0.01, t_neural_ms / max(1, total_completion_tokens))
 
     return {
         "architecture": "LangChain Real-World Agent",

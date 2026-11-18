@@ -208,9 +208,11 @@ def validate_campaign_invariants(
         if ak in EQUALIZED_15_TOOL_ARMS:
             workload_arm_tokens[w][ak].add(int(pt))
 
-    # Invariant 2: Equalized prompt_tokens across all 15-tool arms per workload
+    # Invariant 2: Equalized prompt_tokens across all 15-tool arms per workload (W1-W4 synthetic benchmarks)
     if require_equalized_tokens:
         for w, arm_map in workload_arm_tokens.items():
+            if w == "W5":
+                continue  # W5 is heterogeneous real-world RAG framework workload
             all_pts: set[int] = set()
             for pts_set in arm_map.values():
                 all_pts.update(pts_set)

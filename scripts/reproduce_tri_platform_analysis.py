@@ -36,7 +36,16 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
-from statsmodels.stats.weightstats import ttost_ind
+try:
+    from statsmodels.stats.weightstats import ttost_ind
+except ImportError:
+    def ttost_ind(c1, c2, low, upp):
+        c1 = np.asarray(c1, dtype=float)
+        c2 = np.asarray(c2, dtype=float)
+        res1 = stats.ttest_ind(c1 - low, c2, alternative="greater")
+        res2 = stats.ttest_ind(c1 - upp, c2, alternative="less")
+        p_tost = max(float(res1.pvalue), float(res2.pvalue))
+        return p_tost, (float(res1.statistic), float(res1.pvalue), None), (float(res2.statistic), float(res2.pvalue), None)
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AUDIT_EXPORT_DIR = os.path.join(REPO_DIR, "audit_export")

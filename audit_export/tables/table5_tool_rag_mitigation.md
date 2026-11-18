@@ -2,14 +2,14 @@
 
 | Platform | Regime | Catalog Condition | Prompt Tokens | Median Latency (ms) [95% CI] | Speedup vs 54-Tool Full | Token Reduction |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Full (54 tools static) | 7091 | 18335.53 [18328.75, 18349.69] | 1.00x | 0.0% (Baseline) |
-| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Minimal (15 tools static) | 2177 | 5269.28 [5261.62, 5277.70] | 3.48x | -69.3% |
-| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 2467.33 [2463.82, 2470.64] | 7.43x | -87.1% |
-| macOS ARM64 (M4) | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 2531.35 [2527.06, 2542.49] | 7.24x | -87.1% |
-| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Full (54 tools static) | 7091 | 914.49 [910.84, 919.15] | 1.00x | 0.0% (Baseline) |
-| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Minimal (15 tools static) | 2177 | 768.61 [764.01, 771.38] | 1.19x | -69.3% |
-| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 722.01 [716.50, 723.62] | 1.27x | -87.1% |
-| macOS ARM64 (M4) | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 703.83 [698.28, 706.90] | 1.30x | -87.1% |
+| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Full (54 tools static) | 7091 | 18468.46 [18464.22, 18476.83] | 1.00x | 0.0% (Baseline) |
+| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Minimal (15 tools static) | 2177 | 5324.84 [5317.16, 5348.39] | 3.47x | -69.3% |
+| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 2537.07 [2522.85, 2540.24] | 7.28x | -87.1% |
+| macOS ARM64 (M4) | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 2568.31 [2561.18, 2578.78] | 7.19x | -87.1% |
+| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Full (54 tools static) | 7091 | 971.45 [959.08, 982.65] | 1.00x | 0.0% (Baseline) |
+| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Minimal (15 tools static) | 2177 | 819.37 [813.60, 831.71] | 1.19x | -69.3% |
+| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 767.86 [756.62, 772.89] | 1.27x | -87.1% |
+| macOS ARM64 (M4) | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 751.05 [743.25, 759.51] | 1.29x | -87.1% |
 | Linux x86_64 | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic)* | 917 | 1589.16 [1574.89, 1596.55] | 4.97x | -87.1% |
 | Linux x86_64 | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic)* | 917 | 1550.23 [1537.74, 1557.13] | 5.09x | -87.1% |
 | Linux x86_64 | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic)* | 917 | 1020.78 [1014.40, 1035.71] | 2.74x | -87.1% |
