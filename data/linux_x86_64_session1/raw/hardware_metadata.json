@@ -1,11 +1,11 @@
 {
   "session_id": "session_linux_x86_64_c3b843c0aa90",
-  "created_utc": "2026-11-18T00:11:14.373982+00:00",
+  "created_utc": "2026-11-18T00:12:54.242315+00:00",
   "arch_tag": "linux_x86_64",
   "provenance": {
     "hardware": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 30.5 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02",
     "os": "Ubuntu 26.04 LTS (Linux 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64)",
-    "git_commit": "bee6f4bde1ab6188daad875da6c146310bf9c31d",
+    "git_commit": "06d79184def0758ac0742a4f347285ee77d33a21",
     "cpu_model": "12th Gen Intel(R) Core(TM) i5-12500H",
     "gpu_info": "NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02",
     "total_ram": "30.5 GiB RAM",
@@ -50,12 +50,12 @@
     "p_idle_rapl_psys_w": 34.85495383904274
   },
   "thermal_plateau": {
-    "waited_s": 30.012549799000226,
+    "waited_s": 20.00929375099986,
     "cpu_c": 46.46666666666667,
     "gpu_c": 44.0,
     "fan_rpm": [
-      4013,
-      4285
+      3989,
+      4264
     ],
     "fan_max_rpm": [
       4000,
@@ -69,8 +69,8 @@
   },
   "fans": {
     "rpm": [
-      4005,
-      4322
+      4029,
+      4341
     ],
     "max_rpm": [
       4000,
@@ -142,7 +142,7 @@
       },
       {
         "field": "CPU(s) MHz de escala:",
-        "data": "47%"
+        "data": "42%"
       },
       {
         "field": "CPU MHz m\u00e1x.:",

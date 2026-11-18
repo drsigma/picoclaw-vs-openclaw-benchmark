@@ -10,7 +10,7 @@
   "benchmark/adapters/__init__.py": "8597048a836553ec48192a65522c466f371e9ae52d0d5dc919cf9e9454674d45",
   "benchmark/adapters/base.py": "65a4f485692ead175d82a48631f69051ed2caff44fa844a7c871db0ed4092098",
   "benchmark/adapters/bun_minimal_adapter.py": "1619f81b887b7d5559ccacb1eab2cf6e92a8481cab0c7f9a9796d9f38bc1acad",
-  "benchmark/adapters/neural_baseline_adapter.py": "f7907428ff40f83642c4f559df65d9c54877c1d717dfd65781ef19dad22e92f0",
+  "benchmark/adapters/neural_baseline_adapter.py": "114b2aac11f3d6bdee2df24dd240727a2dbde1cedac5782b0b0718a20338424e",
   "benchmark/adapters/openclaw_adapter.py": "336c38edb449a86a05ebf46a9be35e59f985e437daa11efb008a460be6854ff4",
   "benchmark/adapters/picoclaw_adapter.py": "567cea192f954fa3143126e379142e878464b49cef8aca946705435c9b294ddd",
   "benchmark/adapters/python_native_adapter.py": "cfb35610519cb3fb6e3a9f1e912515f599b50b052167c1252202b5973a545be9",

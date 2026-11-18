@@ -155,9 +155,11 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
 
         itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
         # Additive bookkeeping of raw llama-server timings (does not alter the return contract)
-        self._acc_prompt_ms = getattr(self, "_acc_prompt_ms", 0.0) + (prompt_ms if has_server_timings else 0.0)
-        self._acc_predicted_ms = getattr(self, "_acc_predicted_ms", 0.0) + (predicted_ms if has_server_timings else 0.0)
-        self._all_server_timings = getattr(self, "_all_server_timings", True) and has_server_timings
+        cur_p_ms = prompt_ms if (has_server_timings and prompt_ms > 0.0) else ttft_ms
+        cur_pred_ms = predicted_ms if (has_server_timings and predicted_ms > 0.0) else max(0.0, total_neural_ms - ttft_ms)
+        self._acc_prompt_ms = getattr(self, "_acc_prompt_ms", 0.0) + cur_p_ms
+        self._acc_predicted_ms = getattr(self, "_acc_predicted_ms", 0.0) + cur_pred_ms
+        self._all_server_timings = getattr(self, "_all_server_timings", True) and (has_server_timings or (cur_p_ms > 0 and cur_pred_ms > 0))
         return total_neural_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
 
     def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> dict[str, Any]:
