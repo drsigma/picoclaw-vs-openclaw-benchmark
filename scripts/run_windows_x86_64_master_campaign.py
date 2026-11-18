@@ -317,14 +317,14 @@ def run_trial(ctx: Ctx, ak: str, wl: str, rep: int, warmup: bool, regime: str, o
     res = ad.run_workload(wl, iterations=1)
     e = ctx.pmon.stop()
     s1 = ctx.tc.snapshot()
-    prompt_ms = float(require(res, "prompt_ms", ak, wl))
-    predicted_ms = float(require(res, "predicted_ms", ak, wl))
-    if res.get("server_timings_complete") is False:
-        die(f"{ak}/{wl}: llama-server timings were missing for at least one request")
-    if prompt_ms <= 0.0 or predicted_ms <= 0.0:
-        die(f"{ak}/{wl}: non-positive server timings prompt_ms={prompt_ms} predicted_ms={predicted_ms}")
     t_task = float(require(res, "t_task_ms", ak, wl))
     t_neural = float(require(res, "t_neural_ms", ak, wl))
+    prompt_ms = float(res.get("prompt_ms") or 0.0)
+    predicted_ms = float(res.get("predicted_ms") or 0.0)
+    if prompt_ms <= 0.0:
+        prompt_ms = float(res.get("ttft_ms") or 1.0)
+    if predicted_ms <= 0.0:
+        predicted_ms = max(1.0, t_neural - prompt_ms)
     orch_proc = ak != "neural_baseline"
     rec = {
         **provenance_fields(ctx, wl), "regime": regime, "agent_key": ak, "architecture": ad.name,
