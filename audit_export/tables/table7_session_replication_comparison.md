@@ -2,8 +2,8 @@
 
 | Platform OS | Runtime Contrast (vs PicoClaw Go) | Session 1 Median Δ (ms) [IQR] | Session 2 Median Δ (ms) [IQR] | Relative Divergence (%) | 95% Bootstrap CI of Diff | TOST Equivalence $p$-value | Replication Status |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| macOS ARM64 (M4) | Node Minimal vs PicoClaw | 14.81 [0.67] | 14.55 [0.76] | -1.71% | [-0.58, +0.06] | 5.732e-10 | Equivalence Proven ($p < 0.05$) |
-| macOS ARM64 (M4) | PythonNative vs PicoClaw | 4.89 [0.57] | 4.84 [0.56] | -1.09% | [-0.22, +0.22] | 1.604e-12 | Equivalence Proven ($p < 0.05$) |
+| macOS ARM64 (M4) | Node Minimal vs PicoClaw | 14.80 [0.82] | 14.89 [0.70] | +0.63% | [-0.11, +0.50] | 1.244e-11 | Equivalence Proven ($p < 0.05$) |
+| macOS ARM64 (M4) | PythonNative vs PicoClaw | 6.42 [0.64] | 6.33 [0.76] | -1.48% | [-0.33, +0.25] | 4.418e-08 | Equivalence Proven ($p < 0.05$) |
 | Linux x86_64 | Node Minimal vs PicoClaw | 24.89 [2.18] | 25.46 [3.10] | +2.31% | [-0.68, +1.35] | 6.409e-05 | Equivalence Proven ($p < 0.05$) |
 | Linux x86_64 | Node Full vs PicoClaw | 29.97 [2.42] | 29.92 [2.11] | -0.17% | [-0.63, +1.44] | 3.737e-06 | Equivalence Proven ($p < 0.05$) |
 | Linux x86_64 | PythonNative vs PicoClaw | 10.67 [4.01] | 10.81 [4.57] | +1.28% | [-1.93, +2.09] | 1.578e-01 | Replicated ($|\Delta| < 5\%$) |

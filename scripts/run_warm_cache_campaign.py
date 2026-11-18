@@ -36,7 +36,7 @@ from benchmark.analyze_results import (  # noqa: E402
 )
 from benchmark.protocol_invariants import validate_campaign_invariants  # noqa: E402
 from benchmark.run_unified_benchmark import collect_host_metadata  # noqa: E402
-from benchmark.telemetry import SMCPowerMonitor  # noqa: E402
+from benchmark.telemetry import SMCPowerMonitor, get_darwin_system_metrics  # noqa: E402
 
 
 def check_server_health(url: str = "http://127.0.0.1:8080/health") -> bool:
@@ -57,7 +57,7 @@ def generate_warm_cache_latex_table(
     telemetry_backend: str = "Apple Silicon SMC (50 ms)",
     data_source: str = "measured_hardware_warm_cache",
 ) -> str:
-    workloads = ["W1", "W2", "W3", "W4"]
+    workloads = ["W1", "W2", "W3", "W4", "W5"]
     configs = [
         ("neural_baseline", "Direct Local LLM Baseline"),
         ("picoclaw", "Go Native Orchestrator (PicoClaw Ref.)"),
@@ -181,7 +181,7 @@ def main():
     warm_cache_trials_path = os.path.join(output_dir, "warm_cache_trials.jsonl")
 
     agents = ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native", "neural_baseline"]
-    workloads = ["W1", "W2", "W3", "W4"]
+    workloads = ["W1", "W2", "W3", "W4", "W5"]
     reps_per_condition = 30
     total_evals = len(agents) * len(workloads) * reps_per_condition
 
@@ -263,6 +263,9 @@ def main():
                     prompt_ms = round(res.get("prompt_ms", ttft_ms), 2)
                     predicted_ms = round(res.get("predicted_ms", max(0.0, t_neural_ms - prompt_ms)), 2)
 
+                    sys_metrics = get_darwin_system_metrics()
+                    cached_tok = int(res.get("cached_tokens", res.get("tokens_cached", 0)))
+                    uncached_tok = int(res.get("uncached_prompt_tokens", res.get("prompt_eval_count", 0)))
                     rec = {
                         "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                         "agent_key": ak,
@@ -294,12 +297,25 @@ def main():
                         "prompt_tokens": prompt_tokens,
                         "completion_tokens": c_tokens,
                         "output_tokens": res.get("output_tokens", 0),
-                        "cached_tokens": cached_tokens,
-                        "uncached_prompt_tokens": uncached_prompt_tokens,
+                        "cached_tokens": cached_tok,
+                        "tokens_cached": cached_tok,
+                        "uncached_prompt_tokens": uncached_tok,
+                        "prompt_eval_count": uncached_tok,
+                        "eval_count": c_tokens,
+                        "cache_hit": res.get("cache_hit", bool(cached_tok > 0 and (uncached_tok <= 4 or uncached_tok == 0))),
                         "cache_hit_pct": round(cache_hit_pct, 2),
                         "tool_calls": res.get("tool_calls", 0),
                         "http_status": res.get("http_status", 200),
                         "finish_reason": res.get("finish_reason", "stop"),
+                        "quality_score": res.get("quality_score"),
+                        "evaluation_reasoning": res.get("evaluation_reasoning"),
+                        "ngl": 99,
+                        "gpu_backend": "Metal",
+                        "unified_memory_architecture": True,
+                        "thermal_throttled": sys_metrics.get("thermal_throttled", False),
+                        "thermal_pressure_level": sys_metrics.get("thermal_pressure_level", "Nominal"),
+                        "vm_ram_used_mb": sys_metrics.get("vm_ram_used_mb", 0.0),
+                        "vm_ram_total_mb": sys_metrics.get("vm_ram_total_mb", 24576.0),
                         "energy_total_j": None,
                         "energy_net_above_idle_j": None,
                         "edp_js": None,
@@ -352,6 +368,7 @@ def main():
                         edp_js = round(energy_net_j * (t_task_ms / 1000.0), 4)
 
                     phi_orch_pct = (t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0
+                    sys_metrics = get_darwin_system_metrics()
 
                     eval_ttft_ms = round(res.get("ttft_ms", max(50.0, t_neural_ms - (res.get("itl_ms", 19.5) * completion_tokens))), 2)
                     eval_prompt_ms = round(res.get("prompt_ms", eval_ttft_ms), 2)
@@ -389,11 +406,24 @@ def main():
                         "completion_tokens": completion_tokens,
                         "output_tokens": tokens,
                         "cached_tokens": cached_tokens,
+                        "tokens_cached": cached_tokens,
                         "uncached_prompt_tokens": uncached_prompt_tokens,
+                        "prompt_eval_count": uncached_prompt_tokens,
+                        "eval_count": completion_tokens,
+                        "cache_hit": res.get("cache_hit", bool(cached_tokens > 0 and (uncached_prompt_tokens <= 4 or uncached_prompt_tokens == 0))),
                         "cache_hit_pct": round(cache_hit_pct, 2),
                         "tool_calls": res.get("tool_calls", 0),
                         "http_status": res.get("http_status", 200),
                         "finish_reason": res.get("finish_reason", "stop"),
+                        "quality_score": res.get("quality_score"),
+                        "evaluation_reasoning": res.get("evaluation_reasoning"),
+                        "ngl": 99,
+                        "gpu_backend": "Metal",
+                        "unified_memory_architecture": True,
+                        "thermal_throttled": energy_dict.get("thermal_throttled", False) if energy_dict else sys_metrics.get("thermal_throttled", False),
+                        "thermal_pressure_level": energy_dict.get("thermal_pressure_level", "Nominal") if energy_dict else sys_metrics.get("thermal_pressure_level", "Nominal"),
+                        "vm_ram_used_mb": sys_metrics.get("vm_ram_used_mb", 0.0),
+                        "vm_ram_total_mb": sys_metrics.get("vm_ram_total_mb", 24576.0),
                         "energy_total_j": energy_total_j,
                         "energy_net_above_idle_j": energy_net_j,
                         "edp_js": edp_js,

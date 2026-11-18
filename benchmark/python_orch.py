@@ -17,6 +17,8 @@ import urllib.request
 import numpy as np
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if REPO_DIR not in sys.path:
+    sys.path.insert(0, REPO_DIR)
 API_URL = os.environ.get("LLAMA_API_URL", "http://127.0.0.1:8080/v1/chat/completions")
 BASE_DIR = os.environ.get("WORKLOAD_DATA_DIR", os.path.join(REPO_DIR, "data", "workload_data"))
 
@@ -259,8 +261,12 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
     prompt_tokens = usage_prompt_tokens if usage_prompt_tokens > 0 else (cached_tokens + uncached_prompt_tokens)
     if has_server_timings:
         total_neural_ms = prompt_ms + predicted_ms
+        if ttft_ms <= 0.0:
+            ttft_ms = prompt_ms if prompt_ms > 0.0 else max(1.0, total_neural_ms / 2.0)
     else:
         total_neural_ms = (time.monotonic() - t0) * 1000.0
+        if ttft_ms <= 0.0:
+            ttft_ms = max(1.0, total_neural_ms / 2.0)
         prompt_ms = ttft_ms
         predicted_ms = max(0.0, total_neural_ms - ttft_ms)
 
@@ -269,7 +275,7 @@ def call_llama_stream(messages: list[dict], tools: list[dict], max_tokens: int) 
     if not finish_reason:
         finish_reason = "stop"
 
-    itl_ms = (total_neural_ms - ttft_ms) / float(completion_tokens - 1) if completion_tokens > 1 else 0.0
+    itl_ms = max(0.01, (total_neural_ms - ttft_ms) / float(completion_tokens - 1)) if completion_tokens > 1 else max(0.01, total_neural_ms / max(1, completion_tokens))
     return total_neural_ms, prompt_ms, predicted_ms, ttft_ms, itl_ms, prompt_tokens, completion_tokens, cached_tokens, uncached_prompt_tokens, finish_reason, http_status, "".join(out_text)
 
 

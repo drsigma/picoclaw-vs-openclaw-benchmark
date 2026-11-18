@@ -1,14 +1,14 @@
 {
   "benchmark_gate": "Gate R10: Extreme Quantization Scaling Ablation",
-  "timestamp_iso": "2026-11-15T10:10:04.493853+00:00",
+  "timestamp_iso": "2026-11-18T11:53:29.531102+00:00",
   "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
   "nominal_uma_bandwidth_gbs": 120.0,
   "n_repetitions_per_model": 10,
   "scaling_regression": {
     "formula": "ITL_0(S_active) = slope * S_active + intercept",
-    "slope_ms_per_gb": 3.285,
-    "intercept_ms": 17.679,
-    "r_squared": 0.1677,
+    "slope_ms_per_gb": 4.189,
+    "intercept_ms": 17.196,
+    "r_squared": 0.2434,
     "physical_interpretation": "Linear scaling of ITL_0 with active DRAM footprint confirms memory-bandwidth saturation across all quantization regimes."
   },
   "quantization_profiles": [
@@ -17,21 +17,21 @@
       "bits_per_weight": 2.25,
       "s_file_gb": 1.356,
       "s_active_weights_gb": 1.025,
-      "prompt_throughput_tok_s": 505.66,
-      "prompt_throughput_std_tok_s": 8.25,
-      "generation_throughput_tok_s": 50.99,
-      "generation_throughput_std_tok_s": 0.14,
-      "itl_0_median_ms": 19.61,
-      "itl_0_std_ms": 0.05,
-      "active_bandwidth_gbs": 52.26,
-      "active_bandwidth_util_pct": 43.6,
+      "prompt_throughput_tok_s": 503.65,
+      "prompt_throughput_std_tok_s": 8.23,
+      "generation_throughput_tok_s": 49.91,
+      "generation_throughput_std_tok_s": 0.32,
+      "itl_0_median_ms": 20.04,
+      "itl_0_std_ms": 0.13,
+      "active_bandwidth_gbs": 51.16,
+      "active_bandwidth_util_pct": 42.6,
       "is_within_physical_limits": true,
-      "w2_t_neural_ms": 328.8,
+      "w2_t_neural_ms": 335.6,
       "phi_orch_pct": {
-        "go_native": 0.379,
-        "node_openclaw": 0.115,
-        "python_native": 0.409,
-        "langchain_core": 2.346
+        "go_native": 0.371,
+        "node_openclaw": 0.113,
+        "python_native": 0.401,
+        "langchain_core": 2.3
       }
     },
     {
@@ -39,21 +39,21 @@
       "bits_per_weight": 3.38,
       "s_file_gb": 1.679,
       "s_active_weights_gb": 1.348,
-      "prompt_throughput_tok_s": 492.68,
-      "prompt_throughput_std_tok_s": 5.24,
-      "generation_throughput_tok_s": 40.14,
-      "generation_throughput_std_tok_s": 0.11,
-      "itl_0_median_ms": 24.91,
-      "itl_0_std_ms": 0.07,
-      "active_bandwidth_gbs": 54.11,
-      "active_bandwidth_util_pct": 45.1,
+      "prompt_throughput_tok_s": 487.84,
+      "prompt_throughput_std_tok_s": 7.88,
+      "generation_throughput_tok_s": 38.95,
+      "generation_throughput_std_tok_s": 0.72,
+      "itl_0_median_ms": 25.67,
+      "itl_0_std_ms": 0.47,
+      "active_bandwidth_gbs": 52.51,
+      "active_bandwidth_util_pct": 43.8,
       "is_within_physical_limits": true,
-      "w2_t_neural_ms": 413.6,
+      "w2_t_neural_ms": 425.8,
       "phi_orch_pct": {
-        "go_native": 0.301,
-        "node_openclaw": 0.092,
-        "python_native": 0.325,
-        "langchain_core": 1.874
+        "go_native": 0.293,
+        "node_openclaw": 0.089,
+        "python_native": 0.316,
+        "langchain_core": 1.822
       }
     },
     {
@@ -61,21 +61,21 @@
       "bits_per_weight": 4.5,
       "s_file_gb": 2.019,
       "s_active_weights_gb": 1.688,
-      "prompt_throughput_tok_s": 508.47,
-      "prompt_throughput_std_tok_s": 5.74,
-      "generation_throughput_tok_s": 45.76,
-      "generation_throughput_std_tok_s": 0.24,
-      "itl_0_median_ms": 21.86,
-      "itl_0_std_ms": 0.11,
-      "active_bandwidth_gbs": 77.23,
-      "active_bandwidth_util_pct": 64.4,
+      "prompt_throughput_tok_s": 503.1,
+      "prompt_throughput_std_tok_s": 3.11,
+      "generation_throughput_tok_s": 43.69,
+      "generation_throughput_std_tok_s": 0.33,
+      "itl_0_median_ms": 22.89,
+      "itl_0_std_ms": 0.17,
+      "active_bandwidth_gbs": 73.76,
+      "active_bandwidth_util_pct": 61.5,
       "is_within_physical_limits": true,
-      "w2_t_neural_ms": 364.7,
+      "w2_t_neural_ms": 381.2,
       "phi_orch_pct": {
-        "go_native": 0.342,
-        "node_openclaw": 0.104,
-        "python_native": 0.369,
-        "langchain_core": 2.12
+        "go_native": 0.327,
+        "node_openclaw": 0.1,
+        "python_native": 0.353,
+        "langchain_core": 2.03
       }
     }
   ]

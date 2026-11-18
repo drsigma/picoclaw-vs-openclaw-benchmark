@@ -31,6 +31,7 @@ from benchmark.generate_charts import generate_all_charts  # noqa: E402
 from benchmark.telemetry import (  # noqa: E402
     LinuxRAPLMonitor,
     SMCPowerMonitor,
+    get_darwin_system_metrics,
 )
 
 
@@ -236,7 +237,7 @@ def run_campaign(
 
     host_meta = collect_host_metadata()
     agents = ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native", "neural_baseline"]
-    workloads = ["W1", "W2", "W3", "W4"]
+    workloads = ["W1", "W2", "W3", "W4", "W5"]
 
     total_eval_trials = len(agents) * len(workloads) * reps_per_condition
     print(f"📊 Matrix: {len(agents)} agents x {len(workloads)} workloads x {reps_per_condition} reps = {total_eval_trials} evaluation trials.")
@@ -271,6 +272,10 @@ def run_campaign(
                             p_ms = float(res.get("prompt_ms", ttft))
                             pred_ms = float(res.get("predicted_ms", max(0.0, tn - p_ms)))
 
+                            sys_metrics = get_darwin_system_metrics()
+                            cached_tok = int(res.get("cached_tokens", res.get("tokens_cached", 0)))
+                            uncached_tok = int(res.get("uncached_prompt_tokens", res.get("prompt_eval_count", 0)))
+                            ch_pct = float(res.get("cache_hit_pct", (cached_tok / max(1, res.get("prompt_tokens", 1)) * 100.0) if cached_tok > 0 else 0.0))
                             record = {
                                 "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                                 "agent_key": ak,
@@ -299,9 +304,25 @@ def run_campaign(
                                 "prompt_tokens": res.get("prompt_tokens", 0),
                                 "completion_tokens": c_tok,
                                 "output_tokens": res.get("output_tokens", 0),
+                                "cached_tokens": cached_tok,
+                                "tokens_cached": cached_tok,
+                                "uncached_prompt_tokens": uncached_tok,
+                                "prompt_eval_count": uncached_tok,
+                                "eval_count": c_tok,
+                                "cache_hit": res.get("cache_hit", bool(cached_tok > 0 and (uncached_tok <= 4 or uncached_tok == 0))),
+                                "cache_hit_pct": round(ch_pct, 2),
                                 "tool_calls": res.get("tool_calls", 0),
                                 "http_status": res.get("http_status", 200),
                                 "finish_reason": res.get("finish_reason", "stop"),
+                                "quality_score": res.get("quality_score"),
+                                "evaluation_reasoning": res.get("evaluation_reasoning"),
+                                "ngl": 99,
+                                "gpu_backend": "Metal",
+                                "unified_memory_architecture": True,
+                                "thermal_throttled": sys_metrics.get("thermal_throttled", False),
+                                "thermal_pressure_level": sys_metrics.get("thermal_pressure_level", "Nominal"),
+                                "vm_ram_used_mb": sys_metrics.get("vm_ram_used_mb", 0.0),
+                                "vm_ram_total_mb": sys_metrics.get("vm_ram_total_mb", 24576.0),
                                 "energy_total_j": None,
                                 "energy_net_above_idle_j": None,
                                 "edp_js": None,
@@ -377,6 +398,11 @@ def run_campaign(
                     p_ms = float(res.get("prompt_ms", ttft))
                     pred_ms = float(res.get("predicted_ms", max(0.0, tn - p_ms)))
 
+                    sys_metrics = get_darwin_system_metrics()
+                    cached_tok = int(res.get("cached_tokens", res.get("tokens_cached", 0)))
+                    uncached_tok = int(res.get("uncached_prompt_tokens", res.get("prompt_eval_count", 0)))
+                    ch_pct = float(res.get("cache_hit_pct", (cached_tok / max(1, prompt_tokens) * 100.0) if cached_tok > 0 else 0.0))
+
                     trial_record = {
                         "timestamp_iso": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                         "agent_key": ak,
@@ -410,9 +436,25 @@ def run_campaign(
                         "prompt_tokens": prompt_tokens,
                         "completion_tokens": completion_tokens,
                         "output_tokens": tokens,
+                        "cached_tokens": cached_tok,
+                        "tokens_cached": cached_tok,
+                        "uncached_prompt_tokens": uncached_tok,
+                        "prompt_eval_count": uncached_tok,
+                        "eval_count": completion_tokens,
+                        "cache_hit": res.get("cache_hit", bool(cached_tok > 0 and (uncached_tok <= 4 or uncached_tok == 0))),
+                        "cache_hit_pct": round(ch_pct, 2),
                         "tool_calls": res.get("tool_calls", 0),
                         "http_status": res.get("http_status", 200),
                         "finish_reason": res.get("finish_reason", "stop"),
+                        "quality_score": res.get("quality_score"),
+                        "evaluation_reasoning": res.get("evaluation_reasoning"),
+                        "ngl": 99,
+                        "gpu_backend": "Metal",
+                        "unified_memory_architecture": True,
+                        "thermal_throttled": energy_dict.get("thermal_throttled", False) if energy_dict else sys_metrics.get("thermal_throttled", False),
+                        "thermal_pressure_level": energy_dict.get("thermal_pressure_level", "Nominal") if energy_dict else sys_metrics.get("thermal_pressure_level", "Nominal"),
+                        "vm_ram_used_mb": sys_metrics.get("vm_ram_used_mb", 0.0),
+                        "vm_ram_total_mb": sys_metrics.get("vm_ram_total_mb", 24576.0),
                         "energy_total_j": energy_total_j,
                         "energy_net_above_idle_j": energy_net_j,
                         "edp_js": edp_js,

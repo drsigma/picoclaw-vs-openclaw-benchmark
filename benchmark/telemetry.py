@@ -265,6 +265,9 @@ def parse_powermetrics_sample(sample_text: str, default_timestamp_ns: int | None
     m_elapsed = re.search(r"\(([\d\.]+)ms elapsed\)", sample_text)
     elapsed_ms = float(m_elapsed.group(1)) if m_elapsed else 50.0
 
+    m_therm = re.search(r"Current pressure level:\s*(\w+)", sample_text)
+    thermal_pressure = m_therm.group(1) if m_therm else "Nominal"
+
     ts_ns = default_timestamp_ns if default_timestamp_ns is not None else time.monotonic_ns()
 
     return {
@@ -274,6 +277,7 @@ def parse_powermetrics_sample(sample_text: str, default_timestamp_ns: int | None
         "gpu_mw": gpu_mw,
         "ane_mw": ane_mw,
         "package_mw": combined_mw,
+        "thermal_pressure": thermal_pressure,
     }
 
 
@@ -337,6 +341,8 @@ def integrate_energy_trapezoidal(samples: list[dict[str, Any]], idle_package_mw:
     e_idle = (idle_package_mw / 1000.0) * duration_s
     e_net = max(0.0, e_total - e_idle)
     avg_power_w = (e_total / duration_s) if duration_s > 0 else 0.0
+    thermal_throttled = any(s.get("thermal_pressure", "Nominal") not in ("Nominal", "") for s in samples)
+    thermal_level = samples[-1].get("thermal_pressure", "Nominal") if samples else "Nominal"
 
     return {
         "energy_cpu_j": round(e_cpu, 4),
@@ -346,7 +352,52 @@ def integrate_energy_trapezoidal(samples: list[dict[str, Any]], idle_package_mw:
         "energy_net_above_idle_j": round(e_net, 4),
         "duration_s": round(duration_s, 4),
         "avg_power_w": round(avg_power_w, 4),
+        "thermal_throttled": thermal_throttled,
+        "thermal_pressure_level": thermal_level,
     }
+
+
+def get_darwin_system_metrics() -> dict[str, Any]:
+    """Reads system-wide physical memory statistics and thermal throttling status on Apple Silicon."""
+    stats = {
+        "vm_ram_used_mb": 0.0,
+        "vm_ram_total_mb": 24576.0,
+        "thermal_throttled": False,
+        "thermal_pressure_level": "Nominal",
+    }
+    if sys.platform != "darwin":
+        return stats
+    try:
+        out = subprocess.check_output(["sysctl", "-n", "hw.memsize"], text=True, stderr=subprocess.DEVNULL).strip()
+        stats["vm_ram_total_mb"] = round(float(out) / (1024.0 * 1024.0), 2)
+        vm_out = subprocess.check_output(["vm_stat"], text=True, stderr=subprocess.DEVNULL)
+        page_size = 16384
+        m_ps = re.search(r"page size of (\d+) bytes", vm_out)
+        if m_ps:
+            page_size = int(m_ps.group(1))
+        m_active = re.search(r"Pages active:\s*(\d+)", vm_out)
+        m_wired = re.search(r"Pages wired down:\s*(\d+)", vm_out)
+        m_comp = re.search(r"Pages occupied by compressor:\s*(\d+)", vm_out)
+        active = int(m_active.group(1)) if m_active else 0
+        wired = int(m_wired.group(1)) if m_wired else 0
+        comp = int(m_comp.group(1)) if m_comp else 0
+        used_b = (active + wired + comp) * page_size
+        stats["vm_ram_used_mb"] = round(used_b / (1024.0 * 1024.0), 2)
+    except Exception:
+        pass
+
+    try:
+        th_out = subprocess.check_output(["pmset", "-g", "therm"], text=True, stderr=subprocess.DEVNULL)
+        m_speed = re.search(r"CPU_Speed_Limit\s*=\s*(\d+)", th_out)
+        if m_speed and int(m_speed.group(1)) < 100:
+            stats["thermal_throttled"] = True
+            stats["thermal_pressure_level"] = "Moderate"
+        if "warning level" in th_out.lower() and "no thermal warning" not in th_out.lower():
+            stats["thermal_throttled"] = True
+            stats["thermal_pressure_level"] = "Warning"
+    except Exception:
+        pass
+    return stats
 
 
 class SMCPowerMonitor:
@@ -404,7 +455,7 @@ class SMCPowerMonitor:
             "-n",
             str(sample_count),
             "--samplers",
-            "cpu_power,gpu_power,ane_power",
+            "cpu_power,gpu_power,ane_power,thermal",
         ]
         if self.is_root:
             cmd = cmd[2:]  # Remove 'sudo', '-n'
@@ -446,7 +497,7 @@ class SMCPowerMonitor:
             "-i",
             str(self.sample_interval_ms),
             "--samplers",
-            "cpu_power,gpu_power,ane_power",
+            "cpu_power,gpu_power,ane_power,thermal",
         ]
         if self.is_root:
             cmd = cmd[2:]

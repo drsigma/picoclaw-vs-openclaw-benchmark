@@ -8,45 +8,45 @@
 \toprule
 \textbf{Regime} & \textbf{Workload / Arm} & \textbf{Schemas} & \textbf{Prompt Tok} & \textbf{$T_{\text{prune}}$ [ms]} & \textbf{Median $T_{\text{task}}$ [ms]} & \textbf{Net Energy [J]} & \textbf{EDP [J$\cdot$s]} & \textbf{$\Delta T_{\text{task}}$ vs. 54-Tool} \\
 \midrule
-Regime A (Cold) & W1 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7067 & --- & 18637.7 & 295.34 & 5826.78 & --- \\
-Regime A (Cold) & W1 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2153 & --- & 5475.3 & 87.12 & 505.05 & -70.6\% \\
-Regime A (Cold) & W1 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.735 & 2636.2 & 43.28 & 114.12 & -85.9\% \\
-Regime A (Cold) & W1 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.040 & 2625.3 & 42.63 & 111.90 & -85.9\% \\
+Regime A (Cold) & W1 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7067 & --- & 18766.9 & 285.82 & 5371.97 & --- \\
+Regime A (Cold) & W1 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2153 & --- & 5621.3 & 84.17 & 473.28 & -70.0\% \\
+Regime A (Cold) & W1 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.716 & 2742.8 & 40.83 & 111.75 & -85.4\% \\
+Regime A (Cold) & W1 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.031 & 2714.3 & 39.24 & 106.38 & -85.5\% \\
 \midrule
-Regime A (Cold) & W2 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7091 & --- & 18335.5 & 291.34 & 5654.20 & --- \\
-Regime A (Cold) & W2 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2177 & --- & 5269.3 & 84.64 & 471.86 & -71.3\% \\
-Regime A (Cold) & W2 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.730 & 2467.3 & 41.07 & 101.30 & -86.5\% \\
-Regime A (Cold) & W2 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.040 & 2531.3 & 37.21 & 94.34 & -86.2\% \\
+Regime A (Cold) & W2 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7091 & --- & 18468.5 & 281.39 & 5204.12 & --- \\
+Regime A (Cold) & W2 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2177 & --- & 5324.8 & 82.36 & 439.63 & -71.2\% \\
+Regime A (Cold) & W2 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.687 & 2537.1 & 38.03 & 96.28 & -86.3\% \\
+Regime A (Cold) & W2 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.032 & 2568.3 & 37.22 & 95.60 & -86.1\% \\
 \midrule
-Regime A (Cold) & W3 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7337 & --- & 19372.4 & 307.30 & 6301.05 & --- \\
-Regime A (Cold) & W3 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2423 & --- & 5781.1 & 92.59 & 566.64 & -70.2\% \\
-Regime A (Cold) & W3 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 1163 & 0.724 & 3016.4 & 48.14 & 145.56 & -84.4\% \\
-Regime A (Cold) & W3 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 1163 & 0.041 & 2998.0 & 49.08 & 147.21 & -84.5\% \\
+Regime A (Cold) & W3 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7337 & --- & 19573.3 & 300.23 & 5879.16 & --- \\
+Regime A (Cold) & W3 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2423 & --- & 5857.0 & 88.98 & 521.05 & -70.1\% \\
+Regime A (Cold) & W3 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 1163 & 0.698 & 3131.6 & 45.55 & 142.82 & -84.0\% \\
+Regime A (Cold) & W3 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 1163 & 0.032 & 3065.3 & 46.03 & 141.12 & -84.3\% \\
 \midrule
-Regime A (Cold) & W4 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 72120 & --- & 187723.1 & 2961.69 & 588685.54 & --- \\
-Regime A (Cold) & W4 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 22980 & --- & 55251.9 & 861.22 & 50407.37 & -70.6\% \\
-Regime A (Cold) & W4 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 10380 & 3.426 & 27226.1 & 457.34 & 12458.45 & -85.5\% \\
-Regime A (Cold) & W4 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 10380 & 0.333 & 27568.7 & 444.53 & 12254.97 & -85.3\% \\
+Regime A (Cold) & W4 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 72120 & --- & 188948.9 & 2884.49 & 545045.16 & --- \\
+Regime A (Cold) & W4 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 22980 & --- & 55780.4 & 842.16 & 47008.16 & -70.5\% \\
+Regime A (Cold) & W4 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 9197 & 3.049 & 28986.9 & 427.42 & 12396.49 & -84.7\% \\
+Regime A (Cold) & W4 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 10380 & 0.297 & 28171.2 & 419.38 & 11829.52 & -85.1\% \\
 \midrule
-Regime B (Warm) & W1 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7067 & --- & 1308.2 & 16.23 & 21.24 & --- \\
-Regime B (Warm) & W1 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2153 & --- & 1037.7 & 13.16 & 13.67 & -20.7\% \\
-Regime B (Warm) & W1 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.742 & 951.3 & 12.39 & 11.77 & -27.3\% \\
-Regime B (Warm) & W1 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.041 & 933.7 & 11.58 & 10.81 & -28.6\% \\
+Regime B (Warm) & W1 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7067 & --- & 1393.6 & 17.71 & 24.88 & --- \\
+Regime B (Warm) & W1 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2153 & --- & 1094.0 & 14.12 & 15.49 & -21.5\% \\
+Regime B (Warm) & W1 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.704 & 1005.0 & 12.93 & 12.98 & -27.9\% \\
+Regime B (Warm) & W1 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 893 & 0.032 & 989.3 & 11.56 & 11.43 & -29.0\% \\
 \midrule
-Regime B (Warm) & W2 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7091 & --- & 914.5 & 10.71 & 9.79 & --- \\
-Regime B (Warm) & W2 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2177 & --- & 768.6 & 9.41 & 7.21 & -16.0\% \\
-Regime B (Warm) & W2 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.718 & 722.0 & 9.20 & 6.62 & -21.0\% \\
-Regime B (Warm) & W2 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.040 & 703.8 & 8.52 & 5.98 & -23.0\% \\
+Regime B (Warm) & W2 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7091 & --- & 971.5 & 11.52 & 11.19 & --- \\
+Regime B (Warm) & W2 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2177 & --- & 819.4 & 10.37 & 8.52 & -15.7\% \\
+Regime B (Warm) & W2 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.710 & 767.9 & 9.47 & 7.24 & -21.0\% \\
+Regime B (Warm) & W2 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 917 & 0.032 & 751.0 & 9.25 & 6.94 & -22.7\% \\
 \midrule
-Regime B (Warm) & W3 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7337 & --- & 1183.1 & 14.45 & 17.11 & --- \\
-Regime B (Warm) & W3 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2423 & --- & 761.3 & 9.20 & 6.98 & -35.7\% \\
-Regime B (Warm) & W3 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 1163 & 0.738 & 720.3 & 9.09 & 6.53 & -39.1\% \\
-Regime B (Warm) & W3 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 1163 & 0.041 & 716.1 & 8.64 & 6.29 & -39.5\% \\
+Regime B (Warm) & W3 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 7337 & --- & 1268.9 & 15.70 & 19.98 & --- \\
+Regime B (Warm) & W3 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 2423 & --- & 807.6 & 9.62 & 7.75 & -36.4\% \\
+Regime B (Warm) & W3 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 1163 & 0.708 & 777.5 & 9.95 & 7.73 & -38.7\% \\
+Regime B (Warm) & W3 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 1163 & 0.032 & 762.9 & 9.03 & 6.83 & -39.9\% \\
 \midrule
-Regime B (Warm) & W4 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 72120 & --- & 10738.8 & 143.06 & 1537.11 & --- \\
-Regime B (Warm) & W4 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 22980 & --- & 8323.2 & 104.62 & 870.39 & -22.5\% \\
-Regime B (Warm) & W4 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 10380 & 3.726 & 8168.2 & 104.95 & 857.31 & -23.9\% \\
-Regime B (Warm) & W4 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 10380 & 0.346 & 8149.8 & 108.55 & 882.06 & -24.1\% \\
+Regime B (Warm) & W4 Node.js V8 Full (OpenClaw Ref.) & 54 (Static) & 72120 & --- & 11283.1 & 146.29 & 1653.16 & --- \\
+Regime B (Warm) & W4 Node.js V8 Min (OpenClaw Ref.) & 15 (Static) & 22980 & --- & 8799.4 & 108.26 & 953.70 & -22.0\% \\
+Regime B (Warm) & W4 Node.js V8 Tool-RAG (OpenClaw Ref.) & $54 \rightarrow 5$ & 9197 & 3.264 & 9458.3 & 117.87 & 1115.50 & -16.2\% \\
+Regime B (Warm) & W4 Go Native Tool-RAG (PicoClaw Ref.) & $54 \rightarrow 5$ & 10380 & 0.288 & 8553.1 & 104.79 & 896.55 & -24.2\% \\
 \bottomrule
 \end{tabular}
 \end{table*}

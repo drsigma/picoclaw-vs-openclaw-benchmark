@@ -2,9 +2,9 @@
 
 | Platform | Regime Mode | Description | OpenClaw Minimal (ms) [IQR] | OpenClaw Full (ms) [IQR] | Full-to-Minimal Catalog Ratio | Minimal Cache Penalty ($T_2/T_3$) | Full Cache Penalty ($T_2/T_3$) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| macOS ARM64 (M4) | T1 | Sequential Interleaved Tasks | 5269.8 [17.6] | 18333.2 [24.1] | 3.48x | --- | --- |
-| macOS ARM64 (M4) | T2 | Uncontrolled Context Thrashing | 5323.0 [198.4] | 18141.0 [402.9] | 3.41x | 7.15x | 20.24x |
-| macOS ARM64 (M4) | T3 | Block-Isolated Allocation | 744.3 [9.3] | 896.4 [3.9] | 1.20x | --- | --- |
+| macOS ARM64 (M4) | T1 | Sequential Interleaved Tasks | 5267.6 [26.5] | 18406.4 [14.3] | 3.49x | --- | --- |
+| macOS ARM64 (M4) | T2 | Uncontrolled Context Thrashing | 5399.2 [50.6] | 18425.6 [177.4] | 3.41x | 6.85x | 19.46x |
+| macOS ARM64 (M4) | T3 | Block-Isolated Allocation | 788.2 [32.7] | 946.8 [24.4] | 1.20x | --- | --- |
 | Linux x86_64 | T1 | Sequential Interleaved Tasks | 3113.4 [25.6] | 8167.0 [31.6] | 2.62x | --- | --- |
 | Linux x86_64 | T2 | Uncontrolled Context Thrashing | 4128.8 [27.4] | 8172.6 [25.4] | 1.98x | 1.96x | 2.63x |
 | Linux x86_64 | T3 | Block-Isolated Allocation | 2101.6 [22.7] | 3112.8 [29.5] | 1.48x | --- | --- |
