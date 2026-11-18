@@ -1,18 +1,18 @@
 {
   "session_id": "session_linux_x86_64_c3b843c0aa90",
-  "created_utc": "2026-11-17T23:49:28.645143+00:00",
+  "created_utc": "2026-11-18T00:11:14.373982+00:00",
   "arch_tag": "linux_x86_64",
   "provenance": {
     "hardware": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 30.5 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02",
     "os": "Ubuntu 26.04 LTS (Linux 7.0.0-43-generic #43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026 x86_64)",
-    "git_commit": "51204c1ee2dc9e7230fc9b9996579973430ffe52",
+    "git_commit": "bee6f4bde1ab6188daad875da6c146310bf9c31d",
     "cpu_model": "12th Gen Intel(R) Core(TM) i5-12500H",
     "gpu_info": "NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02",
     "total_ram": "30.5 GiB RAM",
     "sys_vendor": "Dell Inc.",
     "product_name": "Dell G15 5520"
   },
-  "git_dirty_files": 1,
+  "git_dirty_files": 0,
   "llama_server": {
     "flags_effective": "-c 32768 -np 1 -t 4 --temp 0.0 --seed 42 -ngl 16",
     "reference_flags_darwin": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
@@ -50,12 +50,12 @@
     "p_idle_rapl_psys_w": 34.85495383904274
   },
   "thermal_plateau": {
-    "waited_s": 84.0297217569996,
-    "cpu_c": 40.0,
-    "gpu_c": 39.0,
+    "waited_s": 30.012549799000226,
+    "cpu_c": 46.46666666666667,
+    "gpu_c": 44.0,
     "fan_rpm": [
-      4005,
-      4294
+      4013,
+      4285
     ],
     "fan_max_rpm": [
       4000,
@@ -69,8 +69,8 @@
   },
   "fans": {
     "rpm": [
-      4029,
-      4313
+      4005,
+      4322
     ],
     "max_rpm": [
       4000,
@@ -81,7 +81,7 @@
     "powersave"
   ],
   "platform_profile": "performance",
-  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 595.99.02, 4096 MiB, 3486 MiB, 1972 MHz, 2100 MHz, 6001 MHz, [N/A], Disabled",
+  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 595.99.02, 4096 MiB, 3487 MiB, 1987 MHz, 2100 MHz, 6001 MHz, [N/A], Disabled",
   "lscpu": {
     "lscpu": [
       {
@@ -142,7 +142,7 @@
       },
       {
         "field": "CPU(s) MHz de escala:",
-        "data": "46%"
+        "data": "47%"
       },
       {
         "field": "CPU MHz m\u00e1x.:",
