@@ -34,10 +34,13 @@ class PythonNativeAdapter(AgentOrchestratorAdapter):
         
         # Resolve real python executable, avoiding PEP 397 py.exe wrapper stub on Windows
         candidates = [
-            os.path.join(repo_dir, "tools", ".venv", "Scripts", "python.exe"),
+            sys.executable,
+            os.path.join(repo_dir, ".venv_repro", "bin", "python"),
+            os.path.join(repo_dir, ".venv", "bin", "python"),
+            os.path.join(repo_dir, ".venv_repro", "Scripts", "python.exe"),
             os.path.join(repo_dir, ".venv", "Scripts", "python.exe"),
             os.path.join(repo_dir, "tools", ".venv", "bin", "python"),
-            os.path.join(repo_dir, ".venv", "bin", "python"),
+            os.path.join(repo_dir, "tools", ".venv", "Scripts", "python.exe"),
         ]
         chosen = None
         for c in candidates:
