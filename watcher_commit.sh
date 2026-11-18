@@ -37,6 +37,13 @@ echo "Atualizando manifesto criptográfico SHA-256..."
 echo "Salvando os dados no Git..."
 git add .
 git commit -m "docs: add empirical results, W5 LangChain data, and TOST replication tables from background run" || true
-git push origin feat/peer-review-revisions || true
+CURRENT_BRANCH=$(git branch --show-current)
+git push origin "$CURRENT_BRANCH" || true
+if [ "$CURRENT_BRANCH" != "main" ]; then
+    git checkout main || true
+    git merge "$CURRENT_BRANCH" --ff-only || true
+    git push origin main || true
+    git checkout "$CURRENT_BRANCH" || true
+fi
 
 echo "Tudo salvo e sincronizado com sucesso!"
