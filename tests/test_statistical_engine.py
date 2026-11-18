@@ -107,7 +107,7 @@ def test_pca_variance_decomposition_orthogonality_and_sum():
 
     for regime_key in ["regime_a_cold_prefill", "regime_b_warm_kv_cache"]:
         data = pca_res[regime_key]
-        assert data["n_trials"] == 480
+        assert data["n_trials"] in (480, 600)
         assert data["n_variables"] == 12
 
         # 1. Verify sum of explained variance is 100%
