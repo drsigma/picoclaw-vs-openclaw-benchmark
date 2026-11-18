@@ -436,14 +436,14 @@ async function executeWorkloadTier(tier, warmth, rssIdle) {
       const polPath = path.join(REPO_DIR, "W5_langchain_real_world", "data", "governance_policy.txt");
       polStr = fs.readFileSync(polPath, "utf-8").slice(0, 1000);
     } catch (_) {}
-    tDispatchTotal = tCatalogMs + (nowMs() - tTool0);
+    tDispatchTotal = tCatMs + (nowMs() - tTool0);
     toolCalls = 2;
 
     const msgs = [
       { role: "system", content: "You are a concise technical systems assistant." },
       { role: "user", content: `Enterprise Policy:\n${polStr}\nCross-Domain Query: Identify latency SLA thresholds and compliance quarantine actions.` }
     ];
-    const r = await callLlamaStream(msgs, toolCatalog, 256);
+    const r = await streamCompletionJSC(msgs, toolCatalog, 256);
     tNeuralTotal = r.totalNeuralMs;
     totalPromptMs = r.promptMs;
     totalPredictedMs = r.predictedMs;

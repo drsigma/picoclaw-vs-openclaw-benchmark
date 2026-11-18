@@ -15,7 +15,7 @@
   "benchmark/adapters/picoclaw_adapter.py": "567cea192f954fa3143126e379142e878464b49cef8aca946705435c9b294ddd",
   "benchmark/adapters/python_native_adapter.py": "cfb35610519cb3fb6e3a9f1e912515f599b50b052167c1252202b5973a545be9",
   "benchmark/analyze_results.py": "5a88db0ef459a73e95446281cfad740cadeb2f7a3db8e4d5e327f5f7c759d5a0",
-  "benchmark/bun_jsc_agent.mjs": "6b02ae7711dd675997f84305e752209970549860e4ac93c4ee61aaff05697ff2",
+  "benchmark/bun_jsc_agent.mjs": "97ccefb93b4309659c4f118a84c756b7522d2adce0ae9235f4d99d959ff3ad96",
   "benchmark/generate_charts.py": "3c7d853242fa1ad3d843adc26ece12f2495ae2fad97ca7fdb6313019d7e671ea",
   "benchmark/generate_datasets.py": "b837fa629118c8df16c13f23f12bad54f325a024b217470eb54c7c3d54136f51",
   "benchmark/mcp_server.py": "39d07d4e2499f4383d67f5ca8e2a5ee57fef5030b2865d0274fce1182c45a27c",

@@ -17,9 +17,11 @@ sudo chmod -R a+r /sys/class/powercap/intel-rapl* 2>/dev/null || true
 
 # Ativa virtual environment
 if [ -d ".venv_repro" ]; then
-    source .venv_repro/bin/activate
+    PYTHON_BIN="${REPO_DIR}/.venv_repro/bin/python"
 elif [ -d ".venv" ]; then
-    source .venv/bin/activate
+    PYTHON_BIN="${REPO_DIR}/.venv/bin/python"
+else
+    PYTHON_BIN="$(which python3)"
 fi
 
 REPS="${REPS:-30}"
@@ -31,12 +33,13 @@ MODEL="${MODEL:-${REPO_DIR}/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf}"
 echo "========================================================================"
 echo "🚀 INICIANDO CAMPANHA COMPLETA LINUX x86_64 (NGL=${NGL}, REPS=${REPS})"
 echo "   Sessão 1 + Sessão 2 (W1-W5, Cold & Warm)"
+echo "   Python: ${PYTHON_BIN}"
 echo "========================================================================"
 
 # SESSÃO 1
 echo ""
 echo "▶ [1/3] Executando Sessão 1 (W1-W5, Cold Prefill & Warm Cache)..."
-python3 scripts/run_linux_x86_64_master_campaign.py \
+"${PYTHON_BIN}" scripts/run_linux_x86_64_master_campaign.py \
     --ngl "${NGL}" \
     --model "${MODEL}" \
     --reps "${REPS}" \
@@ -55,7 +58,7 @@ sleep 10
 # SESSÃO 2
 echo ""
 echo "▶ [3/3] Executando Sessão 2 (Réplica Inter-Sessões W1-W5, Cold & Warm)..."
-python3 scripts/run_linux_x86_64_master_campaign.py \
+"${PYTHON_BIN}" scripts/run_linux_x86_64_master_campaign.py \
     --ngl "${NGL}" \
     --model "${MODEL}" \
     --reps "${REPS}" \
@@ -65,7 +68,7 @@ python3 scripts/run_linux_x86_64_master_campaign.py \
 
 echo ""
 echo "▶ Consolidando Análise Estatística TOST e Contratos..."
-python3 scripts/reproduce_tri_platform_analysis.py
+"${PYTHON_BIN}" scripts/reproduce_tri_platform_analysis.py
 
 echo "========================================================================"
 echo "✅ Campanha Completa (Sessão 1 + Sessão 2) concluída com sucesso!"
