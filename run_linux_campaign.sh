@@ -29,6 +29,8 @@ WARMUPS="${WARMUPS:-3}"
 IDLE_SEC="${IDLE_SEC:-10}"
 NGL="${NGL:-16}"
 MODEL="${MODEL:-${REPO_DIR}/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf}"
+COOL_CPU_C="${COOL_CPU_C:-70.0}"
+COOL_GPU_C="${COOL_GPU_C:-60.0}"
 
 echo "========================================================================"
 echo "🚀 INICIANDO CAMPANHA COMPLETA LINUX x86_64 (NGL=${NGL}, REPS=${REPS})"
@@ -45,6 +47,8 @@ echo "▶ [1/3] Executando Sessão 1 (W1-W5, Cold Prefill & Warm Cache)..."
     --reps "${REPS}" \
     --warmups "${WARMUPS}" \
     --idle-sec "${IDLE_SEC}" \
+    --cool-cpu-c "${COOL_CPU_C}" \
+    --cool-gpu-c "${COOL_GPU_C}" \
     --suffix "_session1"
 
 # Higienização e resfriamento
@@ -53,7 +57,7 @@ echo "▶ [2/3] Higienização e Resfriamento Inter-Sessões..."
 killall -9 llama-server 2>/dev/null || true
 sleep 3
 sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches' 2>/dev/null || true
-sleep 10
+sleep 30
 
 # SESSÃO 2
 echo ""
@@ -64,6 +68,8 @@ echo "▶ [3/3] Executando Sessão 2 (Réplica Inter-Sessões W1-W5, Cold & Warm
     --reps "${REPS}" \
     --warmups "${WARMUPS}" \
     --idle-sec "${IDLE_SEC}" \
+    --cool-cpu-c "${COOL_CPU_C}" \
+    --cool-gpu-c "${COOL_GPU_C}" \
     --suffix "_session2"
 
 echo ""
