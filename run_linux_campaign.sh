@@ -39,6 +39,9 @@ echo "   Python: ${PYTHON_BIN}"
 echo "========================================================================"
 
 # SESSÃO 1
+sudo fuser -k 8080/tcp 2>/dev/null || true
+killall -9 llama-server 2>/dev/null || true
+sleep 1
 echo ""
 echo "▶ [1/3] Executando Sessão 1 (W1-W5, Cold Prefill & Warm Cache)..."
 "${PYTHON_BIN}" scripts/run_linux_x86_64_master_campaign.py \
