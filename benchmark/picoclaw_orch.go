@@ -525,6 +525,11 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 	} else {
 		promptTokens = cachedTokens + uncachedPromptTokens
 	}
+	if promptTokens <= 0 {
+		bJson, _ := json.Marshal(messages)
+		tJson, _ := json.Marshal(tools)
+		promptTokens = int(math.Max(1, math.Round(float64(len(bJson)+len(tJson))/3.8)))
+	}
 
 	if completionTokens == 0 {
 		completionTokens = tokenCount
