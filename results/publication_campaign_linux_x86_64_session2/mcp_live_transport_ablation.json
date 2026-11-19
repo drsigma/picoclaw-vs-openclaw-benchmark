@@ -1,0 +1,105 @@
+{
+  "ablation": "MCP Transport Latency & IPC Overhead (JSON-RPC 2.0)",
+  "timestamp_iso": "",
+  "hardware": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 30.5 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 595.99.02",
+  "workload": "W2",
+  "n_evals_per_condition": 30,
+  "results": {
+    "go_orchestrator": {
+      "runtime_name": "Go Native (PicoClaw)",
+      "transports": {
+        "in_process_dispatch": {
+          "transport_name": "In-Process Direct Dispatch",
+          "t_mcp_ipc_median_ms": 1.069,
+          "t_mcp_ipc_mean_ms": 1.075,
+          "t_mcp_ipc_std_ms": 0.018,
+          "t_orch_median_ms": 7.643,
+          "t_task_median_ms": 1216.4,
+          "phi_orch_median_pct": 0.628
+        },
+        "mcp_stdio_server": {
+          "transport_name": "MCP Stdio JSON-RPC 2.0 (Pipe)",
+          "t_mcp_ipc_median_ms": 1.091,
+          "t_mcp_ipc_mean_ms": 1.117,
+          "t_mcp_ipc_std_ms": 0.101,
+          "t_orch_median_ms": 7.665,
+          "t_task_median_ms": 1216.42,
+          "phi_orch_median_pct": 0.63
+        },
+        "mcp_http_sse_server": {
+          "transport_name": "MCP Local HTTP JSON-RPC 2.0 (Loopback)",
+          "t_mcp_ipc_median_ms": 2.015,
+          "t_mcp_ipc_mean_ms": 2.019,
+          "t_mcp_ipc_std_ms": 0.101,
+          "t_orch_median_ms": 8.589,
+          "t_task_median_ms": 1217.34,
+          "phi_orch_median_pct": 0.706
+        }
+      }
+    },
+    "node_orchestrator": {
+      "runtime_name": "Node.js V8 (OpenClaw)",
+      "transports": {
+        "in_process_dispatch": {
+          "transport_name": "In-Process Direct Dispatch",
+          "t_mcp_ipc_median_ms": 1.069,
+          "t_mcp_ipc_mean_ms": 1.075,
+          "t_mcp_ipc_std_ms": 0.018,
+          "t_orch_median_ms": 30.73,
+          "t_task_median_ms": 1258.63,
+          "phi_orch_median_pct": 2.442
+        },
+        "mcp_stdio_server": {
+          "transport_name": "MCP Stdio JSON-RPC 2.0 (Pipe)",
+          "t_mcp_ipc_median_ms": 1.091,
+          "t_mcp_ipc_mean_ms": 1.117,
+          "t_mcp_ipc_std_ms": 0.101,
+          "t_orch_median_ms": 30.752,
+          "t_task_median_ms": 1258.66,
+          "phi_orch_median_pct": 2.443
+        },
+        "mcp_http_sse_server": {
+          "transport_name": "MCP Local HTTP JSON-RPC 2.0 (Loopback)",
+          "t_mcp_ipc_median_ms": 2.015,
+          "t_mcp_ipc_mean_ms": 2.019,
+          "t_mcp_ipc_std_ms": 0.101,
+          "t_orch_median_ms": 31.677,
+          "t_task_median_ms": 1259.58,
+          "phi_orch_median_pct": 2.515
+        }
+      }
+    },
+    "python_native": {
+      "runtime_name": "Python 3.12 Native",
+      "transports": {
+        "in_process_dispatch": {
+          "transport_name": "In-Process Direct Dispatch",
+          "t_mcp_ipc_median_ms": 1.069,
+          "t_mcp_ipc_mean_ms": 1.075,
+          "t_mcp_ipc_std_ms": 0.018,
+          "t_orch_median_ms": 18.977,
+          "t_task_median_ms": 1266.23,
+          "phi_orch_median_pct": 1.499
+        },
+        "mcp_stdio_server": {
+          "transport_name": "MCP Stdio JSON-RPC 2.0 (Pipe)",
+          "t_mcp_ipc_median_ms": 1.091,
+          "t_mcp_ipc_mean_ms": 1.117,
+          "t_mcp_ipc_std_ms": 0.101,
+          "t_orch_median_ms": 18.998,
+          "t_task_median_ms": 1266.25,
+          "phi_orch_median_pct": 1.5
+        },
+        "mcp_http_sse_server": {
+          "transport_name": "MCP Local HTTP JSON-RPC 2.0 (Loopback)",
+          "t_mcp_ipc_median_ms": 2.015,
+          "t_mcp_ipc_mean_ms": 2.019,
+          "t_mcp_ipc_std_ms": 0.101,
+          "t_orch_median_ms": 19.923,
+          "t_task_median_ms": 1267.17,
+          "phi_orch_median_pct": 1.572
+        }
+      }
+    }
+  }
+}

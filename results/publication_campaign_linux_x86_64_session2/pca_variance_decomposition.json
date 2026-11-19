@@ -1,0 +1,61 @@
+{
+  "n_samples": 1500,
+  "variables": [
+    "proc_instructions",
+    "proc_cycles",
+    "proc_peak_phys_mb",
+    "energy_total_j",
+    "t_task_ms"
+  ],
+  "explained_variance_ratio": [
+    0.4126,
+    0.4022,
+    0.1831,
+    0.0018,
+    0.0003
+  ],
+  "cumulative_variance_ratio": [
+    0.4126,
+    0.8148,
+    0.9979,
+    0.9997,
+    1.0
+  ],
+  "components": {
+    "PC1": {
+      "proc_instructions": -0.6301,
+      "proc_cycles": -0.5914,
+      "proc_peak_phys_mb": -0.2996,
+      "energy_total_j": -0.2852,
+      "t_task_ms": -0.2865
+    },
+    "PC2": {
+      "proc_instructions": -0.2902,
+      "proc_cycles": -0.3138,
+      "proc_peak_phys_mb": 0.01,
+      "energy_total_j": 0.6389,
+      "t_task_ms": 0.6395
+    },
+    "PC3": {
+      "proc_instructions": -0.0885,
+      "proc_cycles": -0.2886,
+      "proc_peak_phys_mb": 0.9431,
+      "energy_total_j": -0.1062,
+      "t_task_ms": -0.0903
+    },
+    "PC4": {
+      "proc_instructions": 0.7148,
+      "proc_cycles": -0.6844,
+      "proc_peak_phys_mb": -0.1434,
+      "energy_total_j": -0.0083,
+      "t_task_ms": -0.0009
+    },
+    "PC5": {
+      "proc_instructions": -0.0032,
+      "proc_cycles": 0.0064,
+      "proc_peak_phys_mb": -0.0101,
+      "energy_total_j": -0.7064,
+      "t_task_ms": 0.7077
+    }
+  }
+}

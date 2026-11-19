@@ -1,0 +1,42 @@
+% Master Summary Statistics - Regime A (Cold Prefill, Linux x86_64)
+\begin{table*}[t]
+\centering\small
+\caption{Benchmark Performance Across Workloads: Linux x86_64 Intel Core / NVIDIA RTX 3050 (Regime A: Cold Prefill, -c 32768, -ngl 16)}
+\label{tab:linux_master_summary}
+\begin{tabular}{llrrrrrrrr}
+\toprule
+Workload & Orchestrator & $T_{\text{task}}$ (ms) & $T_{\text{orch}}$ (ms) & $\\Phi_{\text{orch}}$ (\%) & $E_{\text{tot}}$ (J) & Peak RSS (MB) & Instructions ($10^6$) & Cycles ($10^6$) & Decode (tok/s) \\
+\midrule
+W1 & neural\_baseline & 3200.9 & 0.00 & 0.00\% & 328.76 & 0.0 & - & - & 23.8 \\
+W1 & picoclaw & 3180.6 & 5.18 & 0.16\% & 330.00 & 8.9 & 11.47 & 19.75 & 24.1 \\
+W1 & openclaw\_minimal & 3202.6 & 28.38 & 0.89\% & 331.22 & 85.0 & 746.35 & 493.72 & 24.1 \\
+W1 & openclaw\_full & 9005.7 & 34.26 & 0.38\% & 807.73 & 85.3 & 858.90 & 575.19 & 11.0 \\
+W1 & python\_native & 3194.1 & 14.50 & 0.46\% & 332.80 & 40.2 & 2654.69 & 4758.77 & 24.0 \\
+W1 & bun\_minimal & 3181.5 & 4.82 & 0.15\% & 327.17 & 23.0 & 51.84 & 66.78 & 24.1 \\
+\midrule
+W2 & neural\_baseline & 2702.8 & 0.00 & 0.00\% & 271.94 & 0.0 & - & - & 24.0 \\
+W2 & picoclaw & 2684.6 & 6.68 & 0.25\% & 273.70 & 9.7 & 32.37 & 24.71 & 24.4 \\
+W2 & openclaw\_minimal & 2721.1 & 31.36 & 1.15\% & 273.61 & 86.4 & 766.92 & 493.70 & 24.3 \\
+W2 & openclaw\_full & 7829.0 & 35.53 & 0.46\% & 723.71 & 86.6 & 771.35 & 493.19 & 11.0 \\
+W2 & python\_native & 2713.5 & 17.10 & 0.63\% & 276.95 & 40.2 & 2655.56 & 4737.84 & 24.2 \\
+W2 & bun\_minimal & 2695.6 & 6.12 & 0.23\% & 271.36 & 24.2 & 55.04 & 61.16 & 24.3 \\
+\midrule
+W3 & neural\_baseline & 2867.3 & 0.00 & 0.00\% & 282.58 & 0.0 & - & - & 23.1 \\
+W3 & picoclaw & 2884.5 & 45.09 & 1.57\% & 283.22 & 51.7 & 584.59 & 191.51 & 23.3 \\
+W3 & openclaw\_minimal & 2903.0 & 57.44 & 1.98\% & 282.49 & 94.3 & 1051.19 & 605.47 & 23.1 \\
+W3 & openclaw\_full & 9006.2 & 61.52 & 0.69\% & 810.60 & 94.3 & 1170.66 & 701.96 & 10.6 \\
+W3 & python\_native & 2894.4 & 35.20 & 1.22\% & 291.49 & 64.8 & 4113.45 & 7549.07 & 23.2 \\
+W3 & bun\_minimal & 2879.5 & 28.32 & 0.99\% & 280.36 & 58.5 & 352.47 & 200.31 & 23.1 \\
+\midrule
+W4 & neural\_baseline & 27233.2 & 0.00 & 0.00\% & 2551.76 & 0.0 & - & - & 23.5 \\
+W4 & picoclaw & 27126.5 & 72.91 & 0.27\% & 2532.97 & 13.9 & 265.05 & 166.82 & 23.7 \\
+W4 & openclaw\_minimal & 27208.8 & 95.49 & 0.35\% & 2564.60 & 86.6 & 1090.13 & 883.86 & 23.6 \\
+W4 & openclaw\_full & 81780.9 & 149.44 & 0.18\% & 7348.55 & 86.4 & 1116.77 & 917.48 & 10.8 \\
+W4 & python\_native & 27218.9 & 74.56 & 0.27\% & 2580.13 & 40.3 & 2848.35 & 4909.70 & 23.5 \\
+W4 & bun\_minimal & 27185.0 & 55.69 & 0.20\% & 2555.87 & 28.8 & 164.04 & 264.49 & 23.6 \\
+\midrule
+\multicolumn{10}{l}{\footnotesize Note: For W2 tool chaining, PicoClaw median $T_{\text{orch}} = 6.93\text{ ms}$ (Bootstrap 95\% CI: $[6.60, 7.20]\text{ ms}$) vs. OpenClaw Full $37.46\text{ ms}$ (95\% CI: $[36.79, 38.83]\text{ ms}$),} \\
+\multicolumn{10}{l}{\footnotesize establishing a $5.41\times$ speedup (Bootstrap 95\% CI for difference: $[29.86, 31.94]\text{ ms}$, $p < 0.001$, Cliff's $\delta \approx 1.00$; 10,000 resamples \cite{efron1979}).} \\
+\bottomrule
+\end{tabular}
+\end{table*}

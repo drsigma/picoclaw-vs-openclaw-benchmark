@@ -1,0 +1,37 @@
+{
+  "proc_instructions": {
+    "proc_instructions": 1.0,
+    "proc_cycles": 0.9836,
+    "proc_peak_phys_mb": 0.6491,
+    "energy_total_j": 0.2165,
+    "t_task_ms": 0.238
+  },
+  "proc_cycles": {
+    "proc_instructions": 0.9836,
+    "proc_cycles": 1.0,
+    "proc_peak_phys_mb": 0.6302,
+    "energy_total_j": 0.2245,
+    "t_task_ms": 0.2544
+  },
+  "proc_peak_phys_mb": {
+    "proc_instructions": 0.6491,
+    "proc_cycles": 0.6302,
+    "proc_peak_phys_mb": 1.0,
+    "energy_total_j": 0.0867,
+    "t_task_ms": 0.1669
+  },
+  "energy_total_j": {
+    "proc_instructions": 0.2165,
+    "proc_cycles": 0.2245,
+    "proc_peak_phys_mb": 0.0867,
+    "energy_total_j": 1.0,
+    "t_task_ms": 0.9659
+  },
+  "t_task_ms": {
+    "proc_instructions": 0.238,
+    "proc_cycles": 0.2544,
+    "proc_peak_phys_mb": 0.1669,
+    "energy_total_j": 0.9659,
+    "t_task_ms": 1.0
+  }
+}
