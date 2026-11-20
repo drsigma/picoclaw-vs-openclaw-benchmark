@@ -91,6 +91,12 @@ try {
     powercfg /change standby-timeout-ac 0 2>$null
     powercfg /change hibernate-timeout-ac 0 2>$null
 
+    # Ativa G-Mode no Dell G15 para fluxo de ar máximo e estabilidade térmica
+    if (Test-Path "$env:TEMP\alienfx\alienfan-cli.exe") {
+        Write-Host "  - Ativando perfil térmico G-Mode (ventoinhas máximas)..."
+        & "$env:TEMP\alienfx\alienfan-cli.exe" setgmode=1 2>$null
+    }
+
     # Encerramento de processos de ruído em background (não essenciais)
     $NoiseProcesses = @("steam", "brave", "chrome", "msedge", "discord", "obs64", "OneDrive", "Teams", "Battle.net")
     foreach ($proc in $NoiseProcesses) {
@@ -123,7 +129,7 @@ try {
 
     Write-Host "  - Instalando dependências científicas..."
     & $PythonExe -m pip install --upgrade pip --quiet
-    & $PythonExe -m pip install numpy scipy pytest psutil matplotlib requests --quiet
+    & $PythonExe -m pip install numpy scipy pytest psutil matplotlib requests langchain-core pydantic --quiet
 
     # Compilação do binário Go do PicoClaw para Windows se necessário
     $PicoClawWin = Join-Path $ScriptDir "benchmark\picoclaw_orch_windows.exe"
@@ -181,12 +187,16 @@ try {
         Get-Process -Name "llama-server" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
         Start-Sleep -Seconds 2
 
+        if (Test-Path "$env:TEMP\alienfx\alienfan-cli.exe") {
+            & "$env:TEMP\alienfx\alienfan-cli.exe" setgmode=1 2>$null
+        }
+
         # Limpeza de working set / memória
         [System.GC]::Collect()
         [System.GC]::WaitForPendingFinalizers()
 
-        Write-Host "  - Pausa de resfriamento e estabilização (10s)..."
-        Start-Sleep -Seconds 10
+        Write-Host "  - Pausa de resfriamento e estabilização térmica (20s)..."
+        Start-Sleep -Seconds 20
 
         # ----------------------------------------------------------------------
         # 6. Execução da Sessão 2 (Réplica Inter-Sessões)
@@ -215,9 +225,9 @@ try {
     Write-Host "========================================================================" -ForegroundColor Green
 
     # --------------------------------------------------------------------------
-    # 7. Git Auto-Commit dos Resultados Exclusivos do Windows
+    # 7. Git Auto-Commit dos Resultados na branch main
     # --------------------------------------------------------------------------
-    Write-Host "`n📦 Realizando Git commit isolado na branch feat/windows-gold-run..." -ForegroundColor Cyan
+    Write-Host "`n📦 Realizando Git commit na branch main..." -ForegroundColor Cyan
     & git add windows_gold.ps1
     & git add .gitignore
     & git add scripts/*windows*
@@ -231,14 +241,14 @@ try {
     
     $Status = (& git status --porcelain)
     if ($Status) {
-        & git commit -m "data(benchmark): add clean empirical Windows 11 x86_64 Gold Run results"
-        Write-Host "✔ Commit realizado com sucesso na branch feat/windows-gold-run." -ForegroundColor Green
+        & git commit -m "feat(windows-nvidia): add empirical campaign results, W5/W2 telemetry, and computed statistics to main"
+        Write-Host "✔ Commit realizado com sucesso na branch main." -ForegroundColor Green
     } else {
         Write-Host "Nenhuma alteração pendente para commit." -ForegroundColor Gray
     }
 
-    Write-Host "🚀 Enviando resultados para origin feat/windows-gold-run..." -ForegroundColor Cyan
-    & git push -u origin feat/windows-gold-run
+    Write-Host "🚀 Enviando resultados para origin main..." -ForegroundColor Cyan
+    & git push origin main
 
 } finally {
     Restore-Environment

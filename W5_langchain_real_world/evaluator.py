@@ -83,7 +83,8 @@ def evaluate_quality(agent_output: str, timeout_s: float = 10.0) -> Dict[str, An
             {"role": "user", "content": prompt}
         ],
         "temperature": 0.0,
-        "max_tokens": 150
+        "max_tokens": 150,
+        "cache_prompt": False
     }
 
     try:

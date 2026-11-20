@@ -63,8 +63,9 @@ class PythonNativeAdapter(AgentOrchestratorAdapter):
         return [self.py_bin, "-c", "import sys; print(sys.version)"]
 
     def run_workload(self, workload_id: str, prompt: str = "", iterations: int = 1) -> dict[str, Any]:
-        cmd = [self.py_bin, self.script_path, workload_id, "Warm", str(iterations)]
-        stdout, stderr, rc, hw_stats = run_subprocess_with_rusage(cmd, cwd=self.repo_dir)
+        warmth = "Cold" if os.environ.get("BENCH_CACHE_PROMPT", "").lower() == "false" else "Warm"
+        cmd = [self.py_bin, self.script_path, workload_id, warmth, str(iterations)]
+        stdout, stderr, rc, hw_stats = run_subprocess_with_rusage(cmd, cwd=self.repo_dir, env={**os.environ})
         if rc != 0:
             raise RuntimeError(f"PythonNative execution failed (code {rc}): {stderr}")
         raw_output = stdout.strip()

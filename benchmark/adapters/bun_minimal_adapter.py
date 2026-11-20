@@ -53,8 +53,8 @@ class BunJSCOrchestratorAdapter(AgentOrchestratorAdapter):
             "language": self.language,
             "mode": self.mode,
             "worker_script": "benchmark/bun_jsc_agent.mjs",
-            "runner_binary_used": os.path.basename(self.runner_bin),
-            "is_fallback_node": "bun" not in os.path.basename(self.runner_bin),
+            "runner_binary_used": os.path.splitext(os.path.basename(self.runner_bin))[0].lower(),
+            "is_fallback_node": "bun" not in os.path.basename(self.runner_bin).lower(),
         }
 
     def run_workload(
@@ -65,7 +65,8 @@ class BunJSCOrchestratorAdapter(AgentOrchestratorAdapter):
         cmd = [self.runner_bin]
         if is_bun:
             cmd.append("run")
-        cmd.extend([self.script_path, workload_id, "Warm", str(iterations)])
+        warmth = "Cold" if os.environ.get("BENCH_CACHE_PROMPT", "").lower() == "false" else "Warm"
+        cmd.extend([self.script_path, workload_id, warmth, str(iterations)])
 
         stdout, stderr, rc, hw = run_subprocess_with_rusage(
             cmd,

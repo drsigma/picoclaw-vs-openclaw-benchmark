@@ -11,7 +11,10 @@ from __future__ import annotations
 
 import json
 import os
-import resource
+try:
+    import resource
+except ImportError:
+    resource = None
 import sqlite3
 import sys
 import time
@@ -40,10 +43,13 @@ from W5_langchain_real_world.evaluator import evaluate_quality
 
 def get_rss_mb() -> float:
     try:
-        rusage = resource.getrusage(resource.RUSAGE_SELF)
-        if sys.platform == "darwin":
-            return rusage.ru_maxrss / (1024.0 * 1024.0)
-        return rusage.ru_maxrss / 1024.0
+        if resource is not None:
+            rusage = resource.getrusage(resource.RUSAGE_SELF)
+            if sys.platform == "darwin":
+                return rusage.ru_maxrss / (1024.0 * 1024.0)
+            return rusage.ru_maxrss / 1024.0
+        import psutil
+        return psutil.Process().memory_info().rss / (1024.0 * 1024.0)
     except Exception:
         return 0.0
 
@@ -164,13 +170,15 @@ def run_w5_trial(warmth: str = "Warm", max_tokens: int = 256) -> Dict[str, Any]:
     tools_catalog = build_w5_langchain_tools()
 
     # 3. Call local LLM
+    cache_prompt = os.environ.get("BENCH_CACHE_PROMPT", "true" if warmth.lower() == "warm" else "false").lower() == "true"
     payload = {
         "model": "local-llama",
         "messages": messages,
         "tools": tools_catalog,
         "temperature": 0.0,
         "max_tokens": max_tokens,
-        "stream": True
+        "stream": True,
+        "cache_prompt": cache_prompt
     }
 
     t0_neural = time.monotonic()

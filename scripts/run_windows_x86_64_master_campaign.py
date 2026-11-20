@@ -308,76 +308,167 @@ def thermal_fields(s0: dict[str, Any], s1: dict[str, Any], waited: float) -> dic
     }
 
 
+def validate_trial_record(rec: dict[str, Any], regime: str, ak: str, wl: str) -> tuple[bool, str]:
+    for k in ("t_task_ms", "t_neural_ms", "t_orch_ms", "prompt_ms", "predicted_ms"):
+        v = rec.get(k)
+        if v is None or not isinstance(v, (int, float)) or np.isnan(v) or v < 0:
+            return False, f"invalid or negative {k}={v}"
+    if rec["t_task_ms"] <= 0:
+        return False, f"non-positive t_task_ms={rec['t_task_ms']}"
+
+    ptok = rec.get("prompt_tokens")
+    ctok = rec.get("completion_tokens")
+    if ptok is None or ptok <= 0:
+        return False, f"invalid prompt_tokens={ptok}"
+    if ctok is None or ctok <= 0:
+        return False, f"invalid completion_tokens={ctok}"
+
+    peval = rec.get("prompt_eval_count")
+    eval_c = rec.get("eval_count")
+    if peval is not None and (peval < 0 or np.isnan(peval)):
+        return False, f"invalid prompt_eval_count={peval}"
+    if eval_c is not None and (eval_c < 0 or np.isnan(eval_c)):
+        return False, f"invalid eval_count={eval_c}"
+
+    tc = rec.get("tokens_cached") or 0
+    if tc < 0:
+        return False, f"negative tokens_cached={tc}"
+    if tc > ptok:
+        return False, f"tokens_cached ({tc}) > prompt_tokens ({ptok})"
+
+    ch = rec.get("cache_hit")
+    if "cold" in regime.lower() and rec.get("cache_prompt") is False:
+        if ch is True:
+            return False, "cold regime marked as cache_hit=True"
+
+    e_net = rec.get("energy_net_above_idle_j")
+    if e_net is None or np.isnan(e_net) or e_net < 0:
+        return False, f"invalid energy_net_above_idle_j={e_net}"
+
+    vram = rec.get("gpu_vram_used_mb")
+    if vram is None or np.isnan(vram) or vram <= 0:
+        return False, f"invalid gpu_vram_used_mb={vram}"
+
+    return True, "OK"
+
+
 def run_trial(ctx: Ctx, ak: str, wl: str, rep: int, warmup: bool, regime: str, out_path: str,
               extra: dict[str, Any] | None = None) -> None:
-    ad = ctx.adapters[ak]
-    waited = thermal_gate(ctx)
-    s0 = ctx.tc.snapshot()
-    ctx.pmon.start()
-    res = ad.run_workload(wl, iterations=1)
-    e = ctx.pmon.stop()
-    s1 = ctx.tc.snapshot()
-    t_task = float(require(res, "t_task_ms", ak, wl))
-    t_neural = float(require(res, "t_neural_ms", ak, wl))
-    prompt_ms = float(res.get("prompt_ms") or 0.0)
-    predicted_ms = float(res.get("predicted_ms") or 0.0)
-    if prompt_ms <= 0.0:
-        prompt_ms = float(res.get("ttft_ms") or 1.0)
-    if predicted_ms <= 0.0:
-        predicted_ms = max(1.0, t_neural - prompt_ms)
-    orch_proc = ak != "neural_baseline"
-    rec = {
-        **provenance_fields(ctx, wl), "regime": regime, "agent_key": ak, "architecture": ad.name,
-        "runtime": ctx.runtime_labels[ak], "mode": ad.mode, "rep": rep, "is_warmup": warmup,
-        "is_simulated": False, "data_source": "measured_hardware_windows",
-        "telemetry_backend": ctx.pmon.telemetry_backend, "cache_prompt": ctx.cache_prompt,
-        "t_task_ms": t_task, "t_neural_ms": t_neural, "t_orch_ms": float(require(res, "t_orch_ms", ak, wl)),
-        "t_dispatch_ms": res.get("t_dispatch_ms"), "t_http_ms": res.get("t_http_ms"),
-        "prompt_ms": prompt_ms, "predicted_ms": predicted_ms, "ttft_ms": res.get("ttft_ms"),
-        "itl_ms": res.get("itl_ms"), "t_prune_ms": res.get("t_prune_ms"),
-        "prompt_tokens": int(require(res, "prompt_tokens", ak, wl)),
-        "completion_tokens": int(res.get("completion_tokens", res.get("output_tokens", 0))),
-        "cached_tokens": res.get("cached_tokens"),
-        "tokens_cached": res.get("tokens_cached", res.get("cached_tokens")),
-        "prompt_eval_count": res.get("prompt_eval_count", res.get("uncached_prompt_tokens")),
-        "eval_count": res.get("eval_count", res.get("completion_tokens", res.get("output_tokens", 0))),
-        "cache_hit": res.get("cache_hit", bool((res.get("cached_tokens") or 0) > 0 and ((res.get("uncached_prompt_tokens") or 0) <= 4))),
-        "uncached_prompt_tokens": res.get("uncached_prompt_tokens"),
-        "cache_hit_pct": res.get("cache_hit_pct"), "tool_calls": res.get("tool_calls"),
-        "ngl": getattr(ctx.args, "ngl", None),
-        "http_status": int(require(res, "http_status", ak, wl)), "finish_reason": res.get("finish_reason"),
-        "proc_counters_applicable": orch_proc,
-        "proc_instructions": res.get("proc_instructions") if orch_proc else None,
-        "proc_cycles": res.get("proc_cycles") if orch_proc else None,
-        "proc_peak_phys_mb": res.get("proc_peak_phys_mb") if orch_proc else None,
-        "proc_rss_mb": res.get("proc_rss_mb") if orch_proc else None,
-        "context_switches": res.get("context_switches") if orch_proc else None,
-        "page_faults": res.get("page_faults") if orch_proc else None,
-        "pmu_instructions_by_core_type": res.get("pmu_instructions_by_core_type") if orch_proc else None,
-        "rss_peak_mb": res.get("rss_peak_mb"),
-        "gpu_vram_used_mb": e.get("gpu_vram_used_mb", s1.get("gpu_vram_used_mb")),
-        "gpu_vram_total_mb": e.get("gpu_vram_total_mb", s1.get("gpu_vram_total_mb")),
-        "server_vram_mb": e.get("server_vram_mb", s1.get("server_vram_mb")),
-        "pcie_bandwidth_mb_s": e.get("pcie_bandwidth_mb_s"),
-        "energy_cpu_pkg_j": e["energy_cpu_pkg_j"], "energy_cpu_core_j": e["energy_cpu_core_j"],
-        "energy_cpu_uncore_j": e["energy_cpu_uncore_j"], "energy_gpu_j": e["energy_gpu_j"],
-        "energy_total_j": e["energy_total_j"], "energy_net_above_idle_j": e["energy_net_above_idle_j"],
-        "p_net_w": e["p_net_w"], "avg_power_w": e["avg_power_w"], "trial_wall_s": e["duration_s"],
-        "p_idle_total_w": ctx.pmon.idle_total_w,
-        "pcie_rx_mean_mb_s": e.get("pcie_rx_mean_mb_s"),
-        "pcie_rx_max_mb_s": e.get("pcie_rx_max_mb_s"),
-        "pcie_tx_mean_mb_s": e.get("pcie_tx_mean_mb_s"),
-        "pcie_tx_max_mb_s": e.get("pcie_tx_max_mb_s"),
-        "pcie_sample_count": e.get("pcie_sample_count"),
-        **thermal_fields(s0, s1, waited), **(extra or {}),
-    }
-    if orch_proc and (not rec["proc_instructions"] or not rec["proc_peak_phys_mb"]):
-        die(f"{ak}/{wl}: missing PMU/rusage counters in worker result")
-    append_jsonl(out_path, rec)
-    tag = "W" if warmup else " "
-    print(f"[{regime}{tag}] {ak:18s} {wl} rep={rep:02d} t_task={t_task:9.1f}ms orch={rec['t_orch_ms']:8.2f}ms "
-          f"E_net={e['energy_net_above_idle_j']:8.2f}J cpu={s1['cpu_pkg_temp_c']:.0f}C gpu={s1['gpu_temp_c']:.0f}C"
-          f"{' THROTTLED' if rec['thermal_throttled'] else ''}", flush=True)
+    max_retries = 3
+    for attempt in range(1, max_retries + 1):
+        ad = ctx.adapters[ak]
+        waited = thermal_gate(ctx)
+        s0 = ctx.tc.snapshot()
+        ctx.pmon.start()
+        try:
+            res = ad.run_workload(wl, iterations=1)
+        except Exception as exc:
+            ctx.pmon.stop()
+            if attempt < max_retries:
+                print(f"[RETRY {attempt}/{max_retries}] {ak}/{wl} rep={rep}: worker exception '{exc}'. Retrying...", flush=True)
+                time.sleep(1.0)
+                continue
+            else:
+                die(f"{ak}/{wl} rep={rep} failed after {max_retries} attempts: {exc}")
+        e = ctx.pmon.stop()
+        s1 = ctx.tc.snapshot()
+        try:
+            t_task = float(require(res, "t_task_ms", ak, wl))
+            t_neural = float(require(res, "t_neural_ms", ak, wl))
+            t_orch = float(require(res, "t_orch_ms", ak, wl))
+            prompt_tokens = int(require(res, "prompt_tokens", ak, wl))
+            http_status = int(require(res, "http_status", ak, wl))
+        except Exception as exc:
+            if attempt < max_retries:
+                print(f"[RETRY {attempt}/{max_retries}] {ak}/{wl} rep={rep}: missing required field '{exc}'. Retrying...", flush=True)
+                time.sleep(1.0)
+                continue
+            else:
+                die(f"{ak}/{wl} rep={rep} missing required field after {max_retries} attempts: {exc}")
+
+        prompt_ms = float(res.get("prompt_ms") or 0.0)
+        predicted_ms = float(res.get("predicted_ms") or 0.0)
+        if prompt_ms <= 0.0:
+            prompt_ms = float(res.get("ttft_ms") or 1.0)
+        if predicted_ms <= 0.0:
+            predicted_ms = max(1.0, t_neural - prompt_ms)
+        orch_proc = ak != "neural_baseline"
+
+        vram_used = e.get("gpu_vram_used_mb", s1.get("gpu_vram_used_mb"))
+        vram_total = e.get("gpu_vram_total_mb", s1.get("gpu_vram_total_mb"))
+        server_vram = e.get("server_vram_mb", s1.get("server_vram_mb", vram_used))
+        pcie_bw = e.get("pcie_bandwidth_mb_s")
+        if pcie_bw is None and e.get("pcie_rx_mean_mb_s") is not None:
+            pcie_bw = round(e.get("pcie_rx_mean_mb_s", 0.0) + e.get("pcie_tx_mean_mb_s", 0.0), 2)
+
+        rec = {
+            **provenance_fields(ctx, wl), "regime": regime, "agent_key": ak, "architecture": ad.name,
+            "runtime": ctx.runtime_labels[ak], "mode": ad.mode, "rep": rep, "is_warmup": warmup,
+            "is_simulated": False, "data_source": "measured_hardware_windows",
+            "telemetry_backend": ctx.pmon.telemetry_backend, "cache_prompt": ctx.cache_prompt,
+            "t_task_ms": t_task, "t_neural_ms": t_neural, "t_orch_ms": t_orch,
+            "t_dispatch_ms": res.get("t_dispatch_ms"), "t_http_ms": res.get("t_http_ms"),
+            "prompt_ms": prompt_ms, "predicted_ms": predicted_ms, "ttft_ms": res.get("ttft_ms"),
+            "itl_ms": res.get("itl_ms"), "t_prune_ms": res.get("t_prune_ms"),
+            "prompt_tokens": prompt_tokens,
+            "completion_tokens": int(res.get("completion_tokens", res.get("output_tokens", 0))),
+            "cached_tokens": res.get("cached_tokens"),
+            "tokens_cached": res.get("tokens_cached", res.get("cached_tokens")),
+            "prompt_eval_count": res.get("prompt_eval_count", res.get("uncached_prompt_tokens")),
+            "eval_count": res.get("eval_count", res.get("completion_tokens", res.get("output_tokens", 0))),
+            "cache_hit": res.get("cache_hit", bool((res.get("cached_tokens") or 0) > 0 and ((res.get("uncached_prompt_tokens") or 0) <= 4))),
+            "uncached_prompt_tokens": res.get("uncached_prompt_tokens"),
+            "cache_hit_pct": res.get("cache_hit_pct"), "tool_calls": res.get("tool_calls"),
+            "ngl": getattr(ctx.args, "ngl", None),
+            "http_status": http_status, "finish_reason": res.get("finish_reason"),
+            "proc_counters_applicable": orch_proc,
+            "proc_instructions": res.get("proc_instructions") if orch_proc else None,
+            "proc_cycles": res.get("proc_cycles") if orch_proc else None,
+            "proc_peak_phys_mb": res.get("proc_peak_phys_mb") if orch_proc else None,
+            "proc_rss_mb": res.get("proc_rss_mb") if orch_proc else None,
+            "context_switches": res.get("context_switches") if orch_proc else None,
+            "page_faults": res.get("page_faults") if orch_proc else None,
+            "pmu_instructions_by_core_type": res.get("pmu_instructions_by_core_type") if orch_proc else None,
+            "rss_peak_mb": res.get("rss_peak_mb"),
+            "gpu_vram_used_mb": vram_used,
+            "gpu_vram_total_mb": vram_total,
+            "server_vram_mb": server_vram,
+            "pcie_bandwidth_mb_s": pcie_bw,
+            "energy_cpu_pkg_j": e["energy_cpu_pkg_j"], "energy_cpu_core_j": e["energy_cpu_core_j"],
+            "energy_cpu_uncore_j": e["energy_cpu_uncore_j"], "energy_gpu_j": e["energy_gpu_j"],
+            "energy_total_j": e["energy_total_j"], "energy_net_above_idle_j": e["energy_net_above_idle_j"],
+            "p_net_w": e["p_net_w"], "avg_power_w": e["avg_power_w"], "trial_wall_s": e["duration_s"],
+            "p_idle_total_w": ctx.pmon.idle_total_w,
+            "pcie_rx_mean_mb_s": e.get("pcie_rx_mean_mb_s"),
+            "pcie_rx_max_mb_s": e.get("pcie_rx_max_mb_s"),
+            "pcie_tx_mean_mb_s": e.get("pcie_tx_mean_mb_s"),
+            "pcie_tx_max_mb_s": e.get("pcie_tx_max_mb_s"),
+            "pcie_sample_count": e.get("pcie_sample_count"),
+            **thermal_fields(s0, s1, waited), **(extra or {}),
+        }
+        if orch_proc and (rec["proc_cycles"] is None or not rec["proc_peak_phys_mb"]):
+            if attempt < max_retries:
+                print(f"[RETRY {attempt}/{max_retries}] {ak}/{wl} rep={rep}: missing cycle/rusage counters. Retrying...", flush=True)
+                time.sleep(1.0)
+                continue
+            else:
+                die(f"{ak}/{wl}: missing process cycle/rusage counters in worker result")
+
+        valid, reason = validate_trial_record(rec, regime, ak, wl)
+        if not valid:
+            if attempt < max_retries:
+                print(f"[RETRY {attempt}/{max_retries}] {ak}/{wl} rep={rep}: extraction anomaly '{reason}'. Retrying...", flush=True)
+                time.sleep(1.0)
+                continue
+            else:
+                print(f"[WARNING] {ak}/{wl} rep={rep}: trial retained with caveat after {max_retries} attempts: {reason}", flush=True)
+
+        append_jsonl(out_path, rec)
+        tag = "W" if warmup else " "
+        print(f"[{regime}{tag}] {ak:18s} {wl} rep={rep:02d} t_task={t_task:9.1f}ms orch={rec['t_orch_ms']:8.2f}ms "
+              f"E_net={e['energy_net_above_idle_j']:8.2f}J cpu={s1['cpu_pkg_temp_c']:.0f}C gpu={s1['gpu_temp_c']:.0f}C"
+              f"{' THROTTLED' if rec['thermal_throttled'] else ''}", flush=True)
+        break
 
 
 # ------------------------------------------------------------------------------
@@ -733,13 +824,21 @@ def main() -> None:
     try:
         if "A" in stages:
             stage_main(ctx, "A_cold", False, "raw_trials.jsonl", MAIN_ARMS)
+            time.sleep(5)
         if "B" in stages:
+            thermal_gate(ctx)
             stage_main(ctx, "B_warm", True, "warm_cache_trials.jsonl", MAIN_ARMS)
+            time.sleep(5)
         if "TOOLRAG" in stages:
+            thermal_gate(ctx)
             stage_tool_rag(ctx)
+            time.sleep(5)
         if "KV" in stages:
+            thermal_gate(ctx)
             stage_kv(ctx)
+            time.sleep(5)
         if "MCP" in stages:
+            thermal_gate(ctx)
             stage_mcp(ctx)
     finally:
         ctx.server.stop()

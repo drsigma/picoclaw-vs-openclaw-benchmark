@@ -261,6 +261,15 @@ class Nvml:
 class ThermalController:
     def __init__(self) -> None:
         self.nvml = Nvml.instance()
+        self._ensure_high_airflow()
+
+    def _ensure_high_airflow(self) -> None:
+        alien_cli = os.path.expandvars(r"%TEMP%\alienfx\alienfan-cli.exe")
+        if os.path.exists(alien_cli):
+            try:
+                subprocess.run([alien_cli, "setgmode=1"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
+            except Exception:
+                pass
 
     def cpu_temp_c(self) -> float:
         # Fallback to GPU temp / WMI thermal reading
@@ -279,13 +288,15 @@ class ThermalController:
         return 0
 
     def snapshot(self) -> dict[str, Any]:
+        vram = self.nvml.vram_info_mb()
         return {
             "cpu_pkg_temp_c": self.cpu_temp_c(),
             "gpu_temp_c": self.gpu_temp_c(),
             "fan_rpm": self.fan_rpm(),
             "cpu_pkg_throttle_count": self.throttle_count(),
             "gpu_throttle_reasons": self.nvml.throttle_reasons(),
-            **self.nvml.vram_info_mb(),
+            **vram,
+            "server_vram_mb": vram.get("gpu_vram_used_mb", 0.0),
         }
 
     def wait_until_cool(self, cpu_max_c: float, gpu_max_c: float, timeout_s: float) -> float:
@@ -477,6 +488,9 @@ class WindowsHardwarePowerMonitor:
         e_net_j = max(0.01, e_total_j - (self.idle_total_w * duration_s))
         p_net_w = e_net_j / duration_s
 
+        vram = self.nvml.vram_info_mb()
+        pcie_bw = round(pcie_stats.get("pcie_rx_mean_mb_s", 0.0) + pcie_stats.get("pcie_tx_mean_mb_s", 0.0), 2)
+
         return {
             "energy_cpu_pkg_j": round(e_cpu_pkg_j, 6),
             "energy_cpu_core_j": round(e_cpu_core_j, 6),
@@ -487,6 +501,10 @@ class WindowsHardwarePowerMonitor:
             "p_net_w": round(p_net_w, 6),
             "avg_power_w": round(avg_p, 6),
             "duration_s": duration_s,
+            "pcie_bandwidth_mb_s": pcie_bw,
+            "server_vram_mb": vram.get("gpu_vram_used_mb", 0.0),
+            "gpu_vram_used_mb": vram.get("gpu_vram_used_mb", 0.0),
+            "gpu_vram_total_mb": vram.get("gpu_vram_total_mb", 0.0),
             **pcie_stats,
         }
 
