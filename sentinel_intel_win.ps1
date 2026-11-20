@@ -108,6 +108,8 @@ $proc = Start-Process -FilePath $PyExe `
     -RedirectStandardError $CampaignErrLog `
     -WindowStyle Hidden `
     -PassThru
+# Cache Win32 process handle immediately so PowerShell 5.1 populates $proc.ExitCode after exit
+$null = $proc.Handle
 
 Write-Heartbeat "Campaign PID=$($proc.Id) started. Entering active monitoring loop..."
 Save-Status "RUNNING" @{ campaign_pid = $proc.Id; stdout_log = $CampaignOutLog; stderr_log = $CampaignErrLog }

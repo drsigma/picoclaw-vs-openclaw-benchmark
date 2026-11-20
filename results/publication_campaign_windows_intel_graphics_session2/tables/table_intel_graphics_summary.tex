@@ -1,0 +1,31 @@
+% Windows Intel Graphics (iGPU Shared Memory / CPU AVX2) Empirical Summary
+\begin{table*}[t]
+\centering\small
+\caption{Windows 10 Intel HD Graphics 4600 Host (Core i7-4790K, Shared RAM, -ngl 0): Orchestration & W5 Quality}
+\begin{tabular}{lllrrrrrr}
+\toprule
+Regime & WL & Arm & $T_{\text{task}}$ (ms) & $T_{\text{orch}}$ (ms) & Peak RSS (MB) & Cycles ($10^6$) & Cache Hit (\%) & W5 Score \\
+\midrule
+Cold & W2 & bun\_minimal & 53454.8 & 23.94 & 23.7 & 469.68 & 0.0\% & N/A \\
+Cold & W2 & neural\_baseline & 51509.9 & 0.00 & 0.0 & N/A & 0.0\% & N/A \\
+Cold & W5 & neural\_baseline & 54271.7 & 0.00 & 0.0 & N/A & 0.0\% & N/A \\
+Cold & W2 & openclaw\_full & 226002.1 & 69.82 & 54.8 & 1432.49 & 0.0\% & N/A \\
+Cold & W2 & openclaw\_minimal & 53205.9 & 57.73 & 54.7 & 1349.11 & 0.0\% & N/A \\
+Cold & W5 & openclaw\_minimal & 49560.8 & 51.29 & 52.2 & 1318.39 & 0.0\% & N/A \\
+Cold & W2 & picoclaw & 53338.5 & 14.30 & 8.2 & 89.23 & 0.0\% & N/A \\
+Cold & W5 & picoclaw & 56557.8 & 11.26 & 7.3 & 79.51 & 0.0\% & N/A \\
+Cold & W2 & python\_native & 53429.5 & 44.23 & 34.9 & 54.53 & 0.0\% & N/A \\
+Cold & W5 & python\_native & 30761.3 & 114.38 & 62.6 & 55.62 & 0.0\% & 3.0 \\
+Warm & W2 & bun\_minimal & 4882.1 & 23.61 & 23.7 & 252.13 & 100.0\% & N/A \\
+Warm & W2 & neural\_baseline & 4548.9 & 0.00 & 0.0 & N/A & 100.0\% & N/A \\
+Warm & W5 & neural\_baseline & 5302.8 & 0.00 & 0.0 & N/A & 100.0\% & N/A \\
+Warm & W2 & openclaw\_full & 11670.8 & 68.80 & 54.7 & 1293.14 & 100.0\% & N/A \\
+Warm & W2 & openclaw\_minimal & 4946.7 & 56.80 & 56.0 & 1155.54 & 100.0\% & N/A \\
+Warm & W5 & openclaw\_minimal & 5684.1 & 51.30 & 53.5 & 1134.89 & 100.0\% & N/A \\
+Warm & W2 & picoclaw & 4833.2 & 13.78 & 8.2 & 87.78 & 100.0\% & N/A \\
+Warm & W5 & picoclaw & 6415.2 & 10.73 & 7.3 & 78.31 & 100.0\% & N/A \\
+Warm & W2 & python\_native & 4890.5 & 46.23 & 35.0 & 53.95 & 100.0\% & N/A \\
+Warm & W5 & python\_native & 3745.7 & 71.00 & 62.6 & 55.32 & 100.0\% & 3.0 \\
+\bottomrule
+\end{tabular}
+\end{table*}
