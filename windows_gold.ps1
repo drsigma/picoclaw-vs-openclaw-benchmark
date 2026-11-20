@@ -30,6 +30,10 @@ Set-Location $ScriptDir
 
 $env:PATH = "C:\Program Files\Git\cmd;C:\Users\rafal\AppData\Local\Programs\go\bin;C:\Users\rafal\AppData\Local\Programs\Python\Python312;C:\Users\rafal\AppData\Local\Programs\Python\Python312\Scripts;C:\Users\rafal\AppData\Local\Programs\node;C:\Users\rafal\AppData\Local\Programs\bun;C:\Users\rafal\AppData\Local\Programs\llama_server;" + $env:PATH
 
+if (-not (Test-Path $Model) -and (Test-Path "C:\benchmark_gold\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf")) {
+    $Model = "C:\benchmark_gold\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+}
+
 
 if ($DryRun) {
     Write-Host "[DRY-RUN MODE] Overriding reps=1, warmups=1, idle-sec=2 for sanity check." -ForegroundColor Yellow
