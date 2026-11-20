@@ -475,7 +475,11 @@ def run_trial(ctx: Ctx, ak: str, wl: str, rep: int, warmup: bool, regime: str, o
 # Experiment stages
 # ------------------------------------------------------------------------------
 def done_keys(path: str) -> set[tuple]:
-    return {(r["agent_key"], r["workload"], r["rep"], r["is_warmup"]) for r in load_jsonl(path)}
+    valid = set()
+    for r in load_jsonl(path):
+        if r.get("ngl") is not None and r.get("gpu_vram_used_mb") is not None and "tokens_cached" in r:
+            valid.add((r["agent_key"], r["workload"], r["rep"], r.get("is_warmup", False)))
+    return valid
 
 
 def stage_main(ctx: Ctx, regime: str, cache: bool, out_name: str, arms: list[str]) -> None:

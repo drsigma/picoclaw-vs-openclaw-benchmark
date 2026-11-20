@@ -63,21 +63,23 @@ if (-not $IsAdmin) {
 $OriginalPowerScheme = (powercfg /getactivescheme) -replace '.*:\s*([a-f0-9\-]+)\s*\(.*', '$1'
 
 function Restore-Environment {
-    Write-Host "`n🔄 Restaurando estado do sistema..." -ForegroundColor Yellow
+    Write-Host "`n🔄 Finalizando e mantendo blindagem de energia..." -ForegroundColor Yellow
     
-    # Restaura plano de energia original se capturado
-    if ($OriginalPowerScheme) {
-        powercfg /setactive $OriginalPowerScheme 2>$null
-    }
-    
-    # Reativa tempos de espera padrão de tela e suspensão
-    powercfg /change monitor-timeout-ac 15 2>$null
-    powercfg /change standby-timeout-ac 30 2>$null
+    # Mantem timeouts em 0 para evitar hibernacao/suspensao inadvertida
+    powercfg /change monitor-timeout-ac 0 2>$null
+    powercfg /change monitor-timeout-dc 0 2>$null
+    powercfg /change standby-timeout-ac 0 2>$null
+    powercfg /change standby-timeout-dc 0 2>$null
+    powercfg /change hibernate-timeout-ac 0 2>$null
+    powercfg /change hibernate-timeout-dc 0 2>$null
+    powercfg /change disk-timeout-ac 0 2>$null
+    powercfg /change disk-timeout-dc 0 2>$null
+    powercfg /hibernate off 2>$null
     
     # Encerra qualquer processo remanescente do llama-server
     Get-Process -Name "llama-server" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
     
-    Write-Host "✔ Sistema restaurado para operação padrão." -ForegroundColor Green
+    Write-Host "✔ Processos limpos e blindagem de energia ativa mantida." -ForegroundColor Green
 }
 
 # ------------------------------------------------------------------------------
@@ -148,9 +150,17 @@ try {
         }
     }
 
-    # Cria diretórios de reprodutibilidade
+    # Cria diretórios de reprodutibilidade e garante sessão limpa
     $ReproDir1 = Join-Path $ScriptDir "reproducibility\clean_run_windows_session_1"
     $ReproDir2 = Join-Path $ScriptDir "reproducibility\clean_run_windows_session_2"
+    Remove-Item -Recurse -Force (Join-Path $ScriptDir "data\windows_x86_64_session1") -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force (Join-Path $ScriptDir "data\windows_x86_64_session2") -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force (Join-Path $ScriptDir "results\publication_campaign_windows_x86_64_session1") -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force (Join-Path $ScriptDir "results\publication_campaign_windows_x86_64_session2") -ErrorAction SilentlyContinue
+    Remove-Item -Force (Join-Path $ScriptDir "data\manifest_sha256_windows_x86_64_session1.json") -ErrorAction SilentlyContinue
+    Remove-Item -Force (Join-Path $ScriptDir "data\manifest_sha256_windows_x86_64_session2.json") -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force $ReproDir1 -ErrorAction SilentlyContinue
+    Remove-Item -Recurse -Force $ReproDir2 -ErrorAction SilentlyContinue
     New-Item -ItemType Directory -Path $ReproDir1 -Force | Out-Null
     New-Item -ItemType Directory -Path $ReproDir2 -Force | Out-Null
 
