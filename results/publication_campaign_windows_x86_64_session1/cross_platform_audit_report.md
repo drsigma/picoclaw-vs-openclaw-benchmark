@@ -5,7 +5,7 @@
 **Verification Standard:** Empirical Systems Benchmarking Guidelines (Zero-Mock, Strictly Empirical)
 **Host Architecture:** `Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 31.7 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 581.95`
 **Operating System & Kernel:** `Microsoft Windows 11 64bit (Windows-11-10.0.26200-SP0 build 26200)`
-**Git Base Commit (Origin):** `bb901459f49d4f27093e15eca755e925eec07b09`
+**Git Base Commit (Origin):** `132b213a7058839f4779c2c354bb1e25eeaf64c2`
 **Inference Context Parity:** `-c 32768` (Strict Parity with Darwin) | `-ngl 16` (GPU Offloaded Layers on 4 GiB VRAM)
 
 ---
@@ -17,7 +17,7 @@ This conformance report evaluates the empirical reproduction of the **PicoClaw v
 ### Core Cross-Platform Observations:
 1. **Orchestration Latency Reduction ($\Phi_{\text{orch}}$):**
    * On Windows 11 x86_64 (W2 Tool Chain), PicoClaw Go native dispatch achieved a median orchestration latency of **10.94 ms** (Bootstrap 95% CI: [6.93, 6.93] ms; $\Phi_{\text{orch}} = 0.40\%$), compared to OpenClaw Node.js Full at **45.70 ms** (Bootstrap 95% CI: [37.46, 37.46] ms; $\Phi_{\text{orch}} = 0.59\%$), establishing a **4.18$\times$ orchestration speedup** (Bootstrap 95% CI for the difference: [30.53, 30.53] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$, indicating a substantial and statistically significant effect size).
-   * On Darwin aarch64, the measured speedup was **4.46$\times$** (Bootstrap 95% CI for the difference: [19.01, 19.77] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$), demonstrating that client-side orchestration latency (encompassing HTTP client socket dispatch, Server-Sent Events stream parsing, JSON serialization/deserialization, and tool fetch handling in each language runtime) represents a persistent overhead across both evaluated operating systems and instruction set architectures (ISAs).
+   * On Darwin aarch64, the measured speedup was **4.44$\times$** (Bootstrap 95% CI for the difference: [19.01, 19.77] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$), demonstrating that client-side orchestration latency (encompassing HTTP client socket dispatch, Server-Sent Events stream parsing, JSON serialization/deserialization, and tool fetch handling in each language runtime) represents a persistent overhead across both evaluated operating systems and instruction set architectures (ISAs).
 
 2. **Microarchitectural Instruction Elimination:**
    * Hardware PMU counters extracted via `perf_event_open(2)` confirm that OpenClaw Node.js executes **11.84$\times$ more hardware instructions** than PicoClaw (434.41M vs. 36.69M instructions on W2).
@@ -97,12 +97,12 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 
 | Metric | Metric Definition | Windows 11 x86_64 (PicoClaw) | Windows 11 x86_64 (OpenClaw Full) | Darwin ARM64 (PicoClaw) | Darwin ARM64 (OpenClaw Full) | Empirical Cross-Platform Pattern |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **$T_{\text{orch}}$ (ms)** | Client-Side Orchestration Latency | **10.94 ms** | **45.70 ms** | **5.58 ms** | **24.88 ms** | Go $\approx 4-6\times$ faster than Node.js |
+| **$T_{\text{orch}}$ (ms)** | Client-Side Orchestration Latency | **10.94 ms** | **45.70 ms** | **5.53 ms** | **24.55 ms** | Go $\approx 4-6\times$ faster than Node.js |
 | **Instructions** | PMU Hardware Retired | **36.69M** | **434.41M** | **N/A** *(XNU PMC locked)* | **N/A** *(XNU PMC locked)* | Node.js requires $> 10\times$ instructions (V8 JIT, HTTP parser, GC) |
-| **Cycles** | PMU CPU Cycles | **43.16M** | **511.08M** | **28.83M** | **302.45M** | Go cycles bounded $< 200\text{M}$ |
+| **Cycles** | PMU CPU Cycles | **43.16M** | **511.08M** | **28.69M** | **297.83M** | Go cycles bounded $< 200\text{M}$ |
 | **Peak Memory** | Resident Physical MB | **10.2 MB** | **72.8 MB** | **5.1 MB** | **37.8 MB** | V8 heap baseline $\approx 35-45$ MB |
-| **Energy Net** | Joules above Idle | **128.46 J** | **461.84 J** | **84.81 J** | **308.56 J** | Governed primarily by neural turn |
-| **Energy per Agent Cycle (Mach-O Billed Energy)** | SMC Task Accounting Units | **N/A** *(RAPL mJ)* | **N/A** *(RAPL mJ)* | **4,641** | **5,313** | Attributed exclusively to the agent thread by Apple's SMC |
+| **Energy Net** | Joules above Idle | **128.46 J** | **461.84 J** | **88.43 J** | **306.03 J** | Governed primarily by neural turn |
+| **Energy per Agent Cycle (Mach-O Billed Energy)** | SMC Task Accounting Units | **N/A** *(RAPL mJ)* | **N/A** *(RAPL mJ)* | **12,376** | **12,777** | Attributed exclusively to the agent thread by Apple's SMC |
 
 > **Energy Metric Clarification (Apple SMC Mach-O Billed Energy):** The metric *Energy per Agent Cycle (Mach-O Billed Energy)* refers exclusively to the microarchitectural energy units attributed to the agent's execution threads by the Apple System Management Controller (SMC) via Darwin XNU's `RUSAGE_INFO_V4` (`ri_billed_energy`). On Windows 11 x86_64, host energy is instead sampled at full physical hardware resolution via Intel RAPL (`energy_uj`) and NVIDIA NVML, making the Mach-O thread-billing unit not applicable (`N/A`).
 
@@ -126,8 +126,8 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 ## 8. KV-Cache Thrashing (Regime T2) & Tool-RAG Mitigation
 
 ### KV-Cache Thrashing Sensitivity:
-*   **15-Tool Catalog Thrashing Penalty:** **1.99$\times$** latency inflation on Windows (vs. **7.37$\times$** on Darwin).
-*   **54-Tool Catalog Thrashing Penalty:** **2.35$\times$** latency inflation on Windows (vs. **19.91$\times$** on Darwin).
+*   **15-Tool Catalog Thrashing Penalty:** **1.99$\times$** latency inflation on Windows (vs. **6.85$\times$** on Darwin).
+*   **54-Tool Catalog Thrashing Penalty:** **2.35$\times$** latency inflation on Windows (vs. **19.46$\times$** on Darwin).
 
 ### Tool-RAG Schema Pruning:
 *   On W1, dynamic vector pruner reduced prompt tokens from **7067** down to **893** (**87.4\% reduction**).
@@ -139,9 +139,9 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 
 | Protocol / Transport | Windows 11 x86_64 (Go) | Darwin ARM64 (Go) | Windows 11 x86_64 (Node) | Darwin ARM64 (Node) |
 | :--- | :--- | :--- | :--- | :--- |
-| **In-Process Direct Dispatch** | **1.808 ms** | **0.895 ms** | **1.808 ms** | **1.625 ms** |
-| **MCP Stdio Pipe (JSON-RPC)** | **2.102 ms** | **1.904 ms** | **2.102 ms** | **1.808 ms** |
-| **MCP Loopback HTTP (SSE)** | **18.320 ms** | **3.222 ms** | **18.320 ms** | **3.150 ms** |
+| **In-Process Direct Dispatch** | **1.808 ms** | **1.263 ms** | **1.808 ms** | **1.365 ms** |
+| **MCP Stdio Pipe (JSON-RPC)** | **2.102 ms** | **1.238 ms** | **2.102 ms** | **1.478 ms** |
+| **MCP Loopback HTTP (SSE)** | **18.320 ms** | **2.868 ms** | **18.320 ms** | **2.316 ms** |
 
 ---
 

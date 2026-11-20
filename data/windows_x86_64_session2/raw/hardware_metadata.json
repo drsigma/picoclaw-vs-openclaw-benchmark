@@ -1,13 +1,13 @@
 {
   "session_id": "session_windows_x86_64_6b2a07f460c6",
-  "created_utc": "2026-11-15T19:16:42.033821+00:00",
+  "created_utc": "2026-11-20T03:36:44.309830+00:00",
   "arch_tag": "windows_x86_64",
   "provenance": {
     "hardware": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 31.7 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 581.95",
     "os": "Microsoft Windows 11 64bit (Windows-11-10.0.26200-SP0 build 26200)",
-    "git_commit": "bb901459f49d4f27093e15eca755e925eec07b09"
+    "git_commit": "132b213a7058839f4779c2c354bb1e25eeaf64c2"
   },
-  "git_dirty_files": 4,
+  "git_dirty_files": 9,
   "llama_server": {
     "flags_effective": "-c 32768 -np 1 -t 4 --temp 0.0 --seed 42 -ngl 16",
     "reference_flags_darwin": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
@@ -61,7 +61,7 @@
       5200
     ]
   },
-  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 581.95, 4096 MiB, 3801 MiB, 1957 MHz, 2100 MHz, 6001 MHz, [N/A], [N/A]",
+  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 581.95, 4096 MiB, 3724 MiB, 1957 MHz, 2100 MHz, 6001 MHz, [N/A], [N/A]",
   "lscpu": {
     "Architecture": "x86_64",
     "Model name": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 31.7 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 581.95"
