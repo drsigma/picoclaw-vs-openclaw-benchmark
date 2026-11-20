@@ -1,13 +1,13 @@
 {
-  "session_id": "session_windows_x86_64_6b2a07f460c6",
-  "created_utc": "2026-11-15T19:16:42.033821+00:00",
+  "session_id": "session_windows_x86_64_3d9f065300d2",
+  "created_utc": "2026-11-20T08:28:29.182779+00:00",
   "arch_tag": "windows_x86_64",
   "provenance": {
     "hardware": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 31.7 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 581.95",
     "os": "Microsoft Windows 11 64bit (Windows-11-10.0.26200-SP0 build 26200)",
-    "git_commit": "bb901459f49d4f27093e15eca755e925eec07b09"
+    "git_commit": "a545d1058af65625fe016a77ef279dc54c356ac6"
   },
-  "git_dirty_files": 4,
+  "git_dirty_files": 172,
   "llama_server": {
     "flags_effective": "-c 32768 -np 1 -t 4 --temp 0.0 --seed 42 -ngl 16",
     "reference_flags_darwin": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
@@ -28,10 +28,10 @@
     "total_definition": "Hardware NVML GPU TotalEnergyConsumption + CPU package dynamic power model"
   },
   "idle_baseline": {
-    "duration_s": 10.001214699997945,
+    "duration_s": 10.00100559999919,
     "p_idle_cpu_pkg_w": 15.2,
-    "p_idle_gpu_w": 6.762678537439448,
-    "p_idle_total_w": 21.962678537439448
+    "p_idle_gpu_w": 6.701126134756432,
+    "p_idle_total_w": 21.90112613475643
   },
   "thermal_plateau": {
     "waited_s": 2.0,
@@ -61,7 +61,7 @@
       5200
     ]
   },
-  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 581.95, 4096 MiB, 3801 MiB, 1957 MHz, 2100 MHz, 6001 MHz, [N/A], [N/A]",
+  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 581.95, 4096 MiB, 3776 MiB, 1957 MHz, 2100 MHz, 6001 MHz, [N/A], [N/A]",
   "lscpu": {
     "Architecture": "x86_64",
     "Model name": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 31.7 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 581.95"

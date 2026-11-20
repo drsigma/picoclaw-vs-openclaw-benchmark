@@ -1,13 +1,13 @@
 {
-  "session_id": "session_windows_x86_64_b1e3f6342c44",
-  "created_utc": "2026-11-15T13:34:34.787114+00:00",
+  "session_id": "session_windows_x86_64_ace546f6ef1a",
+  "created_utc": "2026-11-20T04:16:26.272752+00:00",
   "arch_tag": "windows_x86_64",
   "provenance": {
     "hardware": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 31.7 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 581.95",
     "os": "Microsoft Windows 11 64bit (Windows-11-10.0.26200-SP0 build 26200)",
-    "git_commit": "bb901459f49d4f27093e15eca755e925eec07b09"
+    "git_commit": "a545d1058af65625fe016a77ef279dc54c356ac6"
   },
-  "git_dirty_files": 0,
+  "git_dirty_files": 172,
   "llama_server": {
     "flags_effective": "-c 32768 -np 1 -t 4 --temp 0.0 --seed 42 -ngl 16",
     "reference_flags_darwin": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
@@ -28,18 +28,18 @@
     "total_definition": "Hardware NVML GPU TotalEnergyConsumption + CPU package dynamic power model"
   },
   "idle_baseline": {
-    "duration_s": 10.001585999999975,
+    "duration_s": 10.00136509999993,
     "p_idle_cpu_pkg_w": 15.2,
-    "p_idle_gpu_w": 8.93048362529705,
-    "p_idle_total_w": 24.13048362529705
+    "p_idle_gpu_w": 6.509411400249797,
+    "p_idle_total_w": 21.709411400249795
   },
   "thermal_plateau": {
     "waited_s": 2.0,
-    "cpu_c": 45.0,
-    "gpu_c": 41.0,
+    "cpu_c": 59.0,
+    "gpu_c": 55.0,
     "fan_rpm": [
-      3580,
-      3830
+      4700,
+      4950
     ],
     "fan_max_rpm": [
       5000,
@@ -53,15 +53,15 @@
   },
   "fans": {
     "rpm": [
-      4140,
-      4390
+      5000,
+      5250
     ],
     "max_rpm": [
       5000,
       5200
     ]
   },
-  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 581.95, 4096 MiB, 3821 MiB, 1995 MHz, 2100 MHz, 6001 MHz, [N/A], [N/A]",
+  "nvidia_smi": "NVIDIA GeForce RTX 3050 Laptop GPU, 581.95, 4096 MiB, 3776 MiB, 1965 MHz, 2100 MHz, 6001 MHz, [N/A], [N/A]",
   "lscpu": {
     "Architecture": "x86_64",
     "Model name": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 31.7 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 581.95"

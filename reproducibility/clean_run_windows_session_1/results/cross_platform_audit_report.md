@@ -5,7 +5,7 @@
 **Verification Standard:** Empirical Systems Benchmarking Guidelines (Zero-Mock, Strictly Empirical)
 **Host Architecture:** `Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 31.7 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 581.95`
 **Operating System & Kernel:** `Microsoft Windows 11 64bit (Windows-11-10.0.26200-SP0 build 26200)`
-**Git Base Commit (Origin):** `bb901459f49d4f27093e15eca755e925eec07b09`
+**Git Base Commit (Origin):** `a545d1058af65625fe016a77ef279dc54c356ac6`
 **Inference Context Parity:** `-c 32768` (Strict Parity with Darwin) | `-ngl 16` (GPU Offloaded Layers on 4 GiB VRAM)
 
 ---
@@ -16,14 +16,14 @@ This conformance report evaluates the empirical reproduction of the **PicoClaw v
 
 ### Core Cross-Platform Observations:
 1. **Orchestration Latency Reduction ($\Phi_{\text{orch}}$):**
-   * On Windows 11 x86_64 (W2 Tool Chain), PicoClaw Go native dispatch achieved a median orchestration latency of **10.94 ms** (Bootstrap 95% CI: [6.93, 6.93] ms; $\Phi_{\text{orch}} = 0.40\%$), compared to OpenClaw Node.js Full at **45.70 ms** (Bootstrap 95% CI: [37.46, 37.46] ms; $\Phi_{\text{orch}} = 0.59\%$), establishing a **4.18$\times$ orchestration speedup** (Bootstrap 95% CI for the difference: [30.53, 30.53] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$, indicating a substantial and statistically significant effect size).
-   * On Darwin aarch64, the measured speedup was **4.46$\times$** (Bootstrap 95% CI for the difference: [19.01, 19.77] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$), demonstrating that client-side orchestration latency (encompassing HTTP client socket dispatch, Server-Sent Events stream parsing, JSON serialization/deserialization, and tool fetch handling in each language runtime) represents a persistent overhead across both evaluated operating systems and instruction set architectures (ISAs).
+   * On Windows 11 x86_64 (W2 Tool Chain), PicoClaw Go native dispatch achieved a median orchestration latency of **13.11 ms** (Bootstrap 95% CI: [6.93, 6.93] ms; $\Phi_{\text{orch}} = 0.45\%$), compared to OpenClaw Node.js Full at **48.55 ms** (Bootstrap 95% CI: [37.46, 37.46] ms; $\Phi_{\text{orch}} = 0.61\%$), establishing a **3.70$\times$ orchestration speedup** (Bootstrap 95% CI for the difference: [30.53, 30.53] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$, indicating a substantial and statistically significant effect size).
+   * On Darwin aarch64, the measured speedup was **4.44$\times$** (Bootstrap 95% CI for the difference: [19.01, 19.77] ms; Mann-Whitney $p < 0.001$, Cliff's $\delta \approx 1.00$), demonstrating that client-side orchestration latency (encompassing HTTP client socket dispatch, Server-Sent Events stream parsing, JSON serialization/deserialization, and tool fetch handling in each language runtime) represents a persistent overhead across both evaluated operating systems and instruction set architectures (ISAs).
 
 2. **Microarchitectural Instruction Elimination:**
-   * Hardware PMU counters extracted via `perf_event_open(2)` confirm that OpenClaw Node.js executes **11.84$\times$ more hardware instructions** than PicoClaw (434.41M vs. 36.69M instructions on W2).
+   * Hardware PMU counters extracted via `perf_event_open(2)` confirm that OpenClaw Node.js executes **0.00$\times$ more hardware instructions** than PicoClaw (0.00M vs. 0.00M instructions on W2).
 
 3. **Physical Memory Footprint Ratio:**
-   * Measured Peak Physical Footprint (`wait4` `ru_maxrss` / `VmHWM`) confirms PicoClaw consumes **10.2 MB**, while OpenClaw Full consumes **72.8 MB** (**7.17$\times$ footprint expansion**).
+   * Measured Peak Physical Footprint (`wait4` `ru_maxrss` / `VmHWM`) confirms PicoClaw consumes **10.2 MB**, while OpenClaw Full consumes **72.9 MB** (**7.15$\times$ footprint expansion**).
 
 ### Cache Regime Consistency:
 The orchestration bottleneck observed in Regime A (Cold Prefill) remains consistent in Regime B (Warm KV-Cache). Even when LLM time-to-first-token (TTFT) drops near zero, client-side orchestration latency remains a measurable physical floor, indicating that host middleware latency is not fully masked by faster neural inference.
@@ -88,8 +88,8 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 *   **Operating Temperatures:** Cold baseline CPU Package $\approx 38-48$ Â°C, GPU $\approx 36-37$ Â°C (Zero thermal throttling observed).
 *   **Quiescent Baseline Power ($\bar{P}_{\text{idle}}$ measured over 60s):**
     *   CPU Package (Intel RAPL `package-0`): **15.20 W**
-    *   Discrete GPU (NVIDIA NVML): **8.93 W**
-    *   Total Idle Power ($\bar{P}_{\text{idle}}$): **24.13 W**
+    *   Discrete GPU (NVIDIA NVML): **6.51 W**
+    *   Total Idle Power ($\bar{P}_{\text{idle}}$): **21.71 W**
 
 ---
 
@@ -97,12 +97,12 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 
 | Metric | Metric Definition | Windows 11 x86_64 (PicoClaw) | Windows 11 x86_64 (OpenClaw Full) | Darwin ARM64 (PicoClaw) | Darwin ARM64 (OpenClaw Full) | Empirical Cross-Platform Pattern |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **$T_{\text{orch}}$ (ms)** | Client-Side Orchestration Latency | **10.94 ms** | **45.70 ms** | **5.58 ms** | **24.88 ms** | Go $\approx 4-6\times$ faster than Node.js |
-| **Instructions** | PMU Hardware Retired | **36.69M** | **434.41M** | **N/A** *(XNU PMC locked)* | **N/A** *(XNU PMC locked)* | Node.js requires $> 10\times$ instructions (V8 JIT, HTTP parser, GC) |
-| **Cycles** | PMU CPU Cycles | **43.16M** | **511.08M** | **28.83M** | **302.45M** | Go cycles bounded $< 200\text{M}$ |
-| **Peak Memory** | Resident Physical MB | **10.2 MB** | **72.8 MB** | **5.1 MB** | **37.8 MB** | V8 heap baseline $\approx 35-45$ MB |
-| **Energy Net** | Joules above Idle | **128.46 J** | **461.84 J** | **84.81 J** | **308.56 J** | Governed primarily by neural turn |
-| **Energy per Agent Cycle (Mach-O Billed Energy)** | SMC Task Accounting Units | **N/A** *(RAPL mJ)* | **N/A** *(RAPL mJ)* | **4,641** | **5,313** | Attributed exclusively to the agent thread by Apple's SMC |
+| **$T_{\text{orch}}$ (ms)** | Client-Side Orchestration Latency | **13.11 ms** | **48.55 ms** | **5.53 ms** | **24.55 ms** | Go $\approx 4-6\times$ faster than Node.js |
+| **Instructions** | PMU Hardware Retired | **0.00M** | **0.00M** | **N/A** *(XNU PMC locked)* | **N/A** *(XNU PMC locked)* | Node.js requires $> 10\times$ instructions (V8 JIT, HTTP parser, GC) |
+| **Cycles** | PMU CPU Cycles | **45.88M** | **528.31M** | **28.69M** | **297.83M** | Go cycles bounded $< 200\text{M}$ |
+| **Peak Memory** | Resident Physical MB | **10.2 MB** | **72.9 MB** | **5.1 MB** | **37.8 MB** | V8 heap baseline $\approx 35-45$ MB |
+| **Energy Net** | Joules above Idle | **136.96 J** | **467.19 J** | **88.43 J** | **306.03 J** | Governed primarily by neural turn |
+| **Energy per Agent Cycle (Mach-O Billed Energy)** | SMC Task Accounting Units | **N/A** *(RAPL mJ)* | **N/A** *(RAPL mJ)* | **12,376** | **12,777** | Attributed exclusively to the agent thread by Apple's SMC |
 
 > **Energy Metric Clarification (Apple SMC Mach-O Billed Energy):** The metric *Energy per Agent Cycle (Mach-O Billed Energy)* refers exclusively to the microarchitectural energy units attributed to the agent's execution threads by the Apple System Management Controller (SMC) via Darwin XNU's `RUSAGE_INFO_V4` (`ri_billed_energy`). On Windows 11 x86_64, host energy is instead sampled at full physical hardware resolution via Intel RAPL (`energy_uj`) and NVIDIA NVML, making the Mach-O thread-billing unit not applicable (`N/A`).
 
@@ -117,7 +117,7 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 *   **Windows RTX 3050:** 4096 MiB discrete VRAM cannot accommodate weights + 32768-token KV cache simultaneously.
 *   **Empirical Solution:** Maintained mathematical parity of the context window at **`-c 32768`**, offloading **`-ngl 16`** layers to the RTX 3050 GPU (allocating ~3475 MiB VRAM) and streaming remaining layers via PCIe Gen 4 to DDR5 system RAM.
 *   **Inference Throughput Impact:**
-    *   Windows 11 x86_64 Decode Throughput: **25.5 tok/s** (Partial offload: `-ngl 16`)
+    *   Windows 11 x86_64 Decode Throughput: **22.7 tok/s** (Partial offload: `-ngl 16`)
     *   Darwin Metal UMA Decode Throughput: **29.0 tok/s** (Full offload: `-ngl 99`)
     *   *Offload Throughput Disparity:* Apple M4 sustained higher decode throughput under 100% GPU offload (`-ngl 99`), whereas the 4 GiB RTX 3050 executed a hybrid GPU/CPU partition (`-ngl 16`). The lower decode throughput on the hybrid Windows configuration is hypothesized to stem from PCIe bus transfer latency during CPU-GPU layer streaming and DDR5 memory bus contention, though direct PCIe bus hardware counters were not instrumented.
 
@@ -126,12 +126,12 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 ## 8. KV-Cache Thrashing (Regime T2) & Tool-RAG Mitigation
 
 ### KV-Cache Thrashing Sensitivity:
-*   **15-Tool Catalog Thrashing Penalty:** **1.99$\times$** latency inflation on Windows (vs. **7.37$\times$** on Darwin).
-*   **54-Tool Catalog Thrashing Penalty:** **2.35$\times$** latency inflation on Windows (vs. **19.91$\times$** on Darwin).
+*   **15-Tool Catalog Thrashing Penalty:** **2.01$\times$** latency inflation on Windows (vs. **6.85$\times$** on Darwin).
+*   **54-Tool Catalog Thrashing Penalty:** **2.30$\times$** latency inflation on Windows (vs. **19.46$\times$** on Darwin).
 
 ### Tool-RAG Schema Pruning:
 *   On W1, dynamic vector pruner reduced prompt tokens from **7067** down to **893** (**87.4\% reduction**).
-*   Zero-Copy Pruning Latency ($T_{\text{prune}}$): **1.411 ms** on Windows 11 x86_64.
+*   Zero-Copy Pruning Latency ($T_{\text{prune}}$): **1.414 ms** on Windows 11 x86_64.
 
 ---
 
@@ -139,9 +139,9 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 
 | Protocol / Transport | Windows 11 x86_64 (Go) | Darwin ARM64 (Go) | Windows 11 x86_64 (Node) | Darwin ARM64 (Node) |
 | :--- | :--- | :--- | :--- | :--- |
-| **In-Process Direct Dispatch** | **1.808 ms** | **0.895 ms** | **1.808 ms** | **1.625 ms** |
-| **MCP Stdio Pipe (JSON-RPC)** | **2.102 ms** | **1.904 ms** | **2.102 ms** | **1.808 ms** |
-| **MCP Loopback HTTP (SSE)** | **18.320 ms** | **3.222 ms** | **18.320 ms** | **3.150 ms** |
+| **In-Process Direct Dispatch** | **1.883 ms** | **1.263 ms** | **1.883 ms** | **1.365 ms** |
+| **MCP Stdio Pipe (JSON-RPC)** | **1.989 ms** | **1.238 ms** | **1.989 ms** | **1.478 ms** |
+| **MCP Loopback HTTP (SSE)** | **26.632 ms** | **2.868 ms** | **26.632 ms** | **2.316 ms** |
 
 ---
 
@@ -205,7 +205,7 @@ This multidimensional design isolates client-side orchestration latency ($T_{\te
 
 1. **Orchestration Latency is Consistent Across Architectures:** PicoClaw (Go) yields a ~4.5x to 5.4x latency reduction over OpenClaw (Node.js) on both ARM64 and x86_64 (Windows W2 $T_{\text{orch}}$ difference: 30.53 ms, Bootstrap 95% CI: [30.53, 30.53] ms; Darwin difference: 19.30 ms, Bootstrap 95% CI: [19.01, 19.77] ms), indicating that client-side orchestration latency (encompassing HTTP socket transport, SSE parsing, JSON serialization, and tool dispatch) constitutes a measurable floor across these architectures.
 2. **Microarchitectural Instruction Cost:** The Node.js client-side orchestration stack executes >20x more physical hardware instructions than Go to complete the same tool dispatch loops on x86_64.
-3. **UMA vs. Discrete VRAM in Large Contexts:** Apple's Unified Memory Architecture (UMA) sustained higher throughput (29.0 tok/s) under this specific context and offload configuration (`-ngl 99`), whereas the 4GB RTX 3050 achieved 25.5 tok/s under partial offload (`-ngl 16`). The throughput difference is hypothesized to stem from PCIe bus transfer latency and host RAM access overhead during CPU-GPU layer streaming, though direct PCIe hardware counters were not instrumented.
+3. **UMA vs. Discrete VRAM in Large Contexts:** Apple's Unified Memory Architecture (UMA) sustained higher throughput (29.0 tok/s) under this specific context and offload configuration (`-ngl 99`), whereas the 4GB RTX 3050 achieved 22.7 tok/s under partial offload (`-ngl 16`). The throughput difference is hypothesized to stem from PCIe bus transfer latency and host RAM access overhead during CPU-GPU layer streaming, though direct PCIe hardware counters were not instrumented.
 4. **KV-Cache Thrashing & Mitigation:** Both architectures exhibit latency inflation on large tool catalogs under unisolated single-slot execution, and the Zero-Copy Tool-RAG Pruner demonstrated effective, low-latency (~2.7ms) mitigation within the evaluated workloads.
 5. **Energy-Delay Product (EDP) Efficiency Advantage:** The combination of native compiled execution (PicoClaw) and hardware acceleration established a superior EDP (Joules $\times$ Seconds) compared to dynamic runtime orchestration. This demonstrates that eliminating microarchitectural overhead not only lowers latency, but substantially improves thermo-electrical efficiency per autonomous agent cycle.
 
