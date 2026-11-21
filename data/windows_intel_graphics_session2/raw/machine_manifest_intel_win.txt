@@ -1,0 +1,14 @@
+================================================================================
+MACHINE MANIFEST — WINDOWS INTEL GRAPHICS (DEDICATED ADAPTER)
+================================================================================
+Collected At (UTC): 2026-11-20T12:06:11.068496+00:00
+Computer / User   : DESKTOP-9GGQONK / pc (Admin=False)
+System / Board    : MSI Z97 XPOWER AC (MS-7914) (BIOS V1.10)
+CPU               : Intel(R) Core(TM) i7-4790K CPU @ 4.00GHz (4C/8T @ 4001 MHz)
+RAM               : 15.88 GB usable (Shared with Intel iGPU)
+Primary GPU       : Intel(R) HD Graphics 4600 | Driver: 20.19.15.4531 | UMA Shared Memory
+NVIDIA dGPU       : False (nvidia-smi / NVML strictly disabled)
+OS / Kernel       : Microsoft Windows 10 Pro 22H2 Build 19045.6466 (Kernel 10.0.19041.6456)
+Active Power Plan : GUID do Esquema de Energia: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c  (Alto desempenho)
+Git Commit        : 3dbae29c0e41ad7feca2d4f0b4c8544c35312bb4
+================================================================================

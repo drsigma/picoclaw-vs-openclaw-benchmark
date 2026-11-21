@@ -1,0 +1,66 @@
+{
+  "session_id": "session_windows_intel_graphics_session2_acc186dfd222",
+  "created_utc": "2026-11-20T12:06:21.245389+00:00",
+  "arch_tag": "windows_intel_graphics",
+  "session_tag": "windows_intel_graphics_session2",
+  "provenance": {
+    "hardware": "MSI Z97 XPOWER AC (MS-7914) | Intel(R) Core(TM) i7-4790K CPU @ 4.00GHz (4C/8T) | 15.88 GiB Shared RAM | Intel(R) HD Graphics 4600 (driver 20.19.15.4531, iGPU UMA, no dGPU)",
+    "os": "Microsoft Windows 10 Pro 22H2 (Build 19045.6466, kernel 10.0.19041.6456, 64 bits)",
+    "git_commit": "3dbae29c0e41ad7feca2d4f0b4c8544c35312bb4"
+  },
+  "git_dirty_files": 4,
+  "llama_server": {
+    "flags_effective": "-c 32768 -np 1 -ngl 0 -t 4 --temp 0.0 --seed 42",
+    "n_gpu_layers_final": 0,
+    "n_ctx": 32768,
+    "threads": 4,
+    "model_path": "C:\\bench_intel\\models\\Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    "model_version": "Llama-3.2-3B-Instruct",
+    "quantization": "GGUF Q4_K_M (2.019 GB)",
+    "execution_backend": "llama.cpp_cpu_avx2_intel_igpu_host",
+    "offload_mode": "cpu_avx2_ngl_0_shared_ddr3_no_vulkan_icd_on_igpu",
+    "vulkan_devices_detected": [],
+    "rationale": "Empirically verified via llama-server --list-devices: Intel HD Graphics 4600 (Haswell GT2) exposes no Vulkan compute ICD on Windows 10; inference runs deterministically on CPU AVX2 (-ngl 0) within the shared 16 GiB RAM pool alongside the Intel iGPU."
+  },
+  "telemetry_policy": {
+    "nvml_or_nvidia_smi_used": false,
+    "zero_mock_strict_na": true,
+    "delta_per_trial_enforced": true,
+    "unavailable_in_user_mode": [
+      "proc_instructions",
+      "energy_gpu_j",
+      "energy_total_j",
+      "energy_net_above_idle_j",
+      "pcie_bandwidth_mb_s",
+      "gpu_temp_c"
+    ]
+  },
+  "thermal_safeguard": {
+    "cpu_temp_threshold_c": 82.0,
+    "min_clock_under_load_mhz": 3100,
+    "min_free_ram_mb": 1800.0,
+    "cooldown_duration_s": 20.0
+  },
+  "campaign_config": {
+    "reps": 30,
+    "warmups": 3,
+    "workloads": [
+      "W2",
+      "W5"
+    ],
+    "stages": [
+      "B",
+      "TOOLRAG",
+      "A",
+      "ANALYZE"
+    ],
+    "arms": [
+      "picoclaw",
+      "openclaw_minimal",
+      "openclaw_full",
+      "python_native",
+      "bun_minimal",
+      "neural_baseline"
+    ]
+  }
+}

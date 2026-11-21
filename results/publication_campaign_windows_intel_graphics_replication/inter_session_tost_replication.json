@@ -1,0 +1,975 @@
+{
+  "platform": "windows_intel_graphics",
+  "regime_a_cold_tost": {
+    "regime": "A_cold",
+    "a_priori_equivalence_margins": {
+      "t_task_ms": "+/- 10% of pooled Session 1/2 mean",
+      "t_orch_ms": "+/- max(5.0 ms, 15% of pooled Session 1/2 mean)",
+      "alpha": 0.05,
+      "test_implementation": "statsmodels.stats.weightstats.ttost_ind (usevar='unequal')"
+    },
+    "total_cells_compared": 10,
+    "t_task_equivalent_cells": 10,
+    "t_orch_equivalent_cells": 3,
+    "cells": {
+      "W2": {
+        "bun_minimal": {
+          "session_1_t_task_median_ms": 53564.676,
+          "session_2_t_task_median_ms": 53454.838,
+          "session_1_t_orch_median_ms": 23.697,
+          "session_2_t_orch_median_ms": 23.937,
+          "inter_session_rel_diff_task_pct": 0.57,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5359.2093,
+            "margin_upp": 5359.2093,
+            "mean_diff_s1_minus_s2": 303.2564,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 30.235,
+              "p_value": 0.0,
+              "df": 57.97
+            },
+            "upper_test": {
+              "t_stat": -26.9965,
+              "p_value": 0.0,
+              "df": 57.97
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -7.2596,
+            "margin_upp": 7.2596,
+            "mean_diff_s1_minus_s2": 0.5498,
+            "tost_p_value": 0.314388,
+            "lower_test": {
+              "t_stat": 0.5657,
+              "p_value": 0.286896,
+              "df": 58.0
+            },
+            "upper_test": {
+              "t_stat": -0.486,
+              "p_value": 0.314388,
+              "df": 58.0
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": false,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "neural_baseline": {
+          "session_1_t_task_median_ms": 51817.812,
+          "session_2_t_task_median_ms": 51509.895,
+          "session_1_t_orch_median_ms": 0.0,
+          "session_2_t_orch_median_ms": 0.0,
+          "inter_session_rel_diff_task_pct": 0.27,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5152.9307,
+            "margin_upp": 5152.9307,
+            "mean_diff_s1_minus_s2": 137.287,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 17.0931,
+              "p_value": 0.0,
+              "df": 58.0
+            },
+            "upper_test": {
+              "t_stat": -16.206,
+              "p_value": 0.0,
+              "df": 58.0
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5.0,
+            "margin_upp": 5.0,
+            "mean_diff_s1_minus_s2": 0.0,
+            "tost_p_value": 0.0,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (zero-variance exact)"
+          }
+        },
+        "openclaw_full": {
+          "session_1_t_task_median_ms": 226696.862,
+          "session_2_t_task_median_ms": 226002.083,
+          "session_1_t_orch_median_ms": 68.893,
+          "session_2_t_orch_median_ms": 69.823,
+          "inter_session_rel_diff_task_pct": 0.05,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -22632.6599,
+            "margin_upp": 22632.6599,
+            "mean_diff_s1_minus_s2": -103.4097,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 22.8368,
+              "p_value": 0.0,
+              "df": 51.61
+            },
+            "upper_test": {
+              "t_stat": -23.0464,
+              "p_value": 0.0,
+              "df": 51.61
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -13.1868,
+            "margin_upp": 13.1868,
+            "mean_diff_s1_minus_s2": -0.6035,
+            "tost_p_value": 0.181705,
+            "lower_test": {
+              "t_stat": 0.9161,
+              "p_value": 0.181705,
+              "df": 57.99
+            },
+            "upper_test": {
+              "t_stat": -1.004,
+              "p_value": 0.159783,
+              "df": 57.99
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": false,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "openclaw_minimal": {
+          "session_1_t_task_median_ms": 53505.916,
+          "session_2_t_task_median_ms": 53205.93,
+          "session_1_t_orch_median_ms": 57.86,
+          "session_2_t_orch_median_ms": 57.733,
+          "inter_session_rel_diff_task_pct": 1.08,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5365.3038,
+            "margin_upp": 5365.3038,
+            "mean_diff_s1_minus_s2": 580.6768,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 15.9115,
+              "p_value": 0.0,
+              "df": 36.64
+            },
+            "upper_test": {
+              "t_stat": -12.8037,
+              "p_value": 0.0,
+              "df": 36.64
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -12.3049,
+            "margin_upp": 12.3049,
+            "mean_diff_s1_minus_s2": -3.7879,
+            "tost_p_value": 0.298354,
+            "lower_test": {
+              "t_stat": 0.5322,
+              "p_value": 0.298354,
+              "df": 56.4
+            },
+            "upper_test": {
+              "t_stat": -1.0055,
+              "p_value": 0.159476,
+              "df": 56.4
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": false,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "picoclaw": {
+          "session_1_t_task_median_ms": 53505.8,
+          "session_2_t_task_median_ms": 53338.497,
+          "session_1_t_orch_median_ms": 14.03,
+          "session_2_t_orch_median_ms": 14.3,
+          "inter_session_rel_diff_task_pct": 0.34,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5356.9181,
+            "margin_upp": 5356.9181,
+            "mean_diff_s1_minus_s2": 182.7122,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 27.7699,
+              "p_value": 0.0,
+              "df": 57.99
+            },
+            "upper_test": {
+              "t_stat": -25.938,
+              "p_value": 0.0,
+              "df": 57.99
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5.0,
+            "margin_upp": 5.0,
+            "mean_diff_s1_minus_s2": -0.2006,
+            "tost_p_value": 0.295471,
+            "lower_test": {
+              "t_stat": 0.5405,
+              "p_value": 0.295471,
+              "df": 57.99
+            },
+            "upper_test": {
+              "t_stat": -0.5857,
+              "p_value": 0.28019,
+              "df": 57.99
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": false,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "python_native": {
+          "session_1_t_task_median_ms": 53578.0,
+          "session_2_t_task_median_ms": 53429.5,
+          "session_1_t_orch_median_ms": 45.635,
+          "session_2_t_orch_median_ms": 44.231,
+          "inter_session_rel_diff_task_pct": 0.21,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5369.765,
+            "margin_upp": 5369.765,
+            "mean_diff_s1_minus_s2": 113.9,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 21.3382,
+              "p_value": 0.0,
+              "df": 57.04
+            },
+            "upper_test": {
+              "t_stat": -20.4518,
+              "p_value": 0.0,
+              "df": 57.04
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -8.593,
+            "margin_upp": 8.593,
+            "mean_diff_s1_minus_s2": 4.749,
+            "tost_p_value": 0.376401,
+            "lower_test": {
+              "t_stat": 1.0985,
+              "p_value": 0.138343,
+              "df": 56.01
+            },
+            "upper_test": {
+              "t_stat": -0.3165,
+              "p_value": 0.376401,
+              "df": 56.01
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": false,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        }
+      },
+      "W5": {
+        "neural_baseline": {
+          "session_1_t_task_median_ms": 54282.971,
+          "session_2_t_task_median_ms": 54271.7,
+          "session_1_t_orch_median_ms": 0.0,
+          "session_2_t_orch_median_ms": 0.0,
+          "inter_session_rel_diff_task_pct": 0.11,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5407.6026,
+            "margin_upp": 5407.6026,
+            "mean_diff_s1_minus_s2": 56.8635,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 14.8996,
+              "p_value": 0.0,
+              "df": 58.0
+            },
+            "upper_test": {
+              "t_stat": -14.5895,
+              "p_value": 0.0,
+              "df": 58.0
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5.0,
+            "margin_upp": 5.0,
+            "mean_diff_s1_minus_s2": 0.0,
+            "tost_p_value": 0.0,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (zero-variance exact)"
+          }
+        },
+        "openclaw_minimal": {
+          "session_1_t_task_median_ms": 50064.299,
+          "session_2_t_task_median_ms": 49560.758,
+          "session_1_t_orch_median_ms": 51.303,
+          "session_2_t_orch_median_ms": 51.289,
+          "inter_session_rel_diff_task_pct": 1.87,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5010.4713,
+            "margin_upp": 5010.4713,
+            "mean_diff_s1_minus_s2": 935.3952,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 13.1061,
+              "p_value": 0.0,
+              "df": 32.84
+            },
+            "upper_test": {
+              "t_stat": -8.9824,
+              "p_value": 0.0,
+              "df": 32.84
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -9.1262,
+            "margin_upp": 9.1262,
+            "mean_diff_s1_minus_s2": 1.568,
+            "tost_p_value": 0.240926,
+            "lower_test": {
+              "t_stat": 1.0016,
+              "p_value": 0.160351,
+              "df": 57.75
+            },
+            "upper_test": {
+              "t_stat": -0.7079,
+              "p_value": 0.240926,
+              "df": 57.75
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": false,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "picoclaw": {
+          "session_1_t_task_median_ms": 56885.098,
+          "session_2_t_task_median_ms": 56557.787,
+          "session_1_t_orch_median_ms": 11.324,
+          "session_2_t_orch_median_ms": 11.256,
+          "inter_session_rel_diff_task_pct": 1.35,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5696.7154,
+            "margin_upp": 5696.7154,
+            "mean_diff_s1_minus_s2": 770.5137,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 18.0221,
+              "p_value": 0.0,
+              "df": 37.43
+            },
+            "upper_test": {
+              "t_stat": -13.7277,
+              "p_value": 0.0,
+              "df": 37.43
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5.0,
+            "margin_upp": 5.0,
+            "mean_diff_s1_minus_s2": -0.6393,
+            "tost_p_value": 0.372349,
+            "lower_test": {
+              "t_stat": 0.3272,
+              "p_value": 0.372349,
+              "df": 57.95
+            },
+            "upper_test": {
+              "t_stat": -0.4231,
+              "p_value": 0.336883,
+              "df": 57.95
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": false,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "python_native": {
+          "session_1_t_task_median_ms": 31058.584,
+          "session_2_t_task_median_ms": 30761.266,
+          "session_1_t_orch_median_ms": 116.108,
+          "session_2_t_orch_median_ms": 114.38,
+          "inter_session_rel_diff_task_pct": 1.15,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -3097.9151,
+            "margin_upp": 3097.9151,
+            "mean_diff_s1_minus_s2": 357.7244,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 17.6236,
+              "p_value": 0.0,
+              "df": 39.07
+            },
+            "upper_test": {
+              "t_stat": -13.9749,
+              "p_value": 0.0,
+              "df": 39.07
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -17.2076,
+            "margin_upp": 17.2076,
+            "mean_diff_s1_minus_s2": 1.095,
+            "tost_p_value": 0.025514,
+            "lower_test": {
+              "t_stat": 2.2649,
+              "p_value": 0.013697,
+              "df": 56.21
+            },
+            "upper_test": {
+              "t_stat": -1.9939,
+              "p_value": 0.025514,
+              "df": 56.21
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        }
+      }
+    }
+  },
+  "regime_b_warm_tost": {
+    "regime": "B_warm",
+    "a_priori_equivalence_margins": {
+      "t_task_ms": "+/- 10% of pooled Session 1/2 mean",
+      "t_orch_ms": "+/- max(5.0 ms, 15% of pooled Session 1/2 mean)",
+      "alpha": 0.05,
+      "test_implementation": "statsmodels.stats.weightstats.ttost_ind (usevar='unequal')"
+    },
+    "total_cells_compared": 10,
+    "t_task_equivalent_cells": 9,
+    "t_orch_equivalent_cells": 10,
+    "cells": {
+      "W2": {
+        "bun_minimal": {
+          "session_1_t_task_median_ms": 5017.58,
+          "session_2_t_task_median_ms": 4882.081,
+          "session_1_t_orch_median_ms": 23.188,
+          "session_2_t_orch_median_ms": 23.608,
+          "inter_session_rel_diff_task_pct": 3.08,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -496.7816,
+            "margin_upp": 496.7816,
+            "mean_diff_s1_minus_s2": 153.0216,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 32.6958,
+              "p_value": 0.0,
+              "df": 54.26
+            },
+            "upper_test": {
+              "t_stat": -17.2968,
+              "p_value": 0.0,
+              "df": 54.26
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5.0,
+            "margin_upp": 5.0,
+            "mean_diff_s1_minus_s2": -0.1852,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 23.9641,
+              "p_value": 0.0,
+              "df": 53.37
+            },
+            "upper_test": {
+              "t_stat": -25.8073,
+              "p_value": 0.0,
+              "df": 53.37
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "neural_baseline": {
+          "session_1_t_task_median_ms": 4701.833,
+          "session_2_t_task_median_ms": 4548.935,
+          "session_1_t_orch_median_ms": 0.0,
+          "session_2_t_orch_median_ms": 0.0,
+          "inter_session_rel_diff_task_pct": 3.68,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -465.0992,
+            "margin_upp": 465.0992,
+            "mean_diff_s1_minus_s2": 171.3731,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 19.8795,
+              "p_value": 0.0,
+              "df": 43.94
+            },
+            "upper_test": {
+              "t_stat": -9.1742,
+              "p_value": 0.0,
+              "df": 43.94
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5.0,
+            "margin_upp": 5.0,
+            "mean_diff_s1_minus_s2": 0.0,
+            "tost_p_value": 0.0,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (zero-variance exact)"
+          }
+        },
+        "openclaw_full": {
+          "session_1_t_task_median_ms": 11819.537,
+          "session_2_t_task_median_ms": 11670.772,
+          "session_1_t_orch_median_ms": 68.962,
+          "session_2_t_orch_median_ms": 68.8,
+          "inter_session_rel_diff_task_pct": 1.2,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -1176.4483,
+            "margin_upp": 1176.4483,
+            "mean_diff_s1_minus_s2": 141.6503,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 44.2983,
+              "p_value": 0.0,
+              "df": 57.4
+            },
+            "upper_test": {
+              "t_stat": -34.7772,
+              "p_value": 0.0,
+              "df": 57.4
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -10.4071,
+            "margin_upp": 10.4071,
+            "mean_diff_s1_minus_s2": 0.7118,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 12.5153,
+              "p_value": 0.0,
+              "df": 44.36
+            },
+            "upper_test": {
+              "t_stat": -10.913,
+              "p_value": 0.0,
+              "df": 44.36
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "openclaw_minimal": {
+          "session_1_t_task_median_ms": 4894.065,
+          "session_2_t_task_median_ms": 4946.722,
+          "session_1_t_orch_median_ms": 56.801,
+          "session_2_t_orch_median_ms": 56.802,
+          "inter_session_rel_diff_task_pct": 1.02,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -492.4124,
+            "margin_upp": 492.4124,
+            "mean_diff_s1_minus_s2": -50.1592,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 21.028,
+              "p_value": 0.0,
+              "df": 56.62
+            },
+            "upper_test": {
+              "t_stat": -25.7979,
+              "p_value": 0.0,
+              "df": 56.62
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -8.5484,
+            "margin_upp": 8.5484,
+            "mean_diff_s1_minus_s2": 0.0034,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 18.0426,
+              "p_value": 0.0,
+              "df": 57.66
+            },
+            "upper_test": {
+              "t_stat": -18.0281,
+              "p_value": 0.0,
+              "df": 57.66
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "picoclaw": {
+          "session_1_t_task_median_ms": 5036.507,
+          "session_2_t_task_median_ms": 4833.18,
+          "session_1_t_orch_median_ms": 14.085,
+          "session_2_t_orch_median_ms": 13.784,
+          "inter_session_rel_diff_task_pct": 3.65,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -493.8983,
+            "margin_upp": 493.8983,
+            "mean_diff_s1_minus_s2": 180.4156,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 43.7406,
+              "p_value": 0.0,
+              "df": 53.92
+            },
+            "upper_test": {
+              "t_stat": -20.3346,
+              "p_value": 0.0,
+              "df": 53.92
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5.0,
+            "margin_upp": 5.0,
+            "mean_diff_s1_minus_s2": 0.4045,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 21.046,
+              "p_value": 0.0,
+              "df": 56.63
+            },
+            "upper_test": {
+              "t_stat": -17.8957,
+              "p_value": 0.0,
+              "df": 56.63
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "python_native": {
+          "session_1_t_task_median_ms": 5039.0,
+          "session_2_t_task_median_ms": 4890.5,
+          "session_1_t_orch_median_ms": 43.752,
+          "session_2_t_orch_median_ms": 46.23,
+          "inter_session_rel_diff_task_pct": 3.05,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -497.16,
+            "margin_upp": 497.16,
+            "mean_diff_s1_minus_s2": 151.5333,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 36.6835,
+              "p_value": 0.0,
+              "df": 56.99
+            },
+            "upper_test": {
+              "t_stat": -19.5451,
+              "p_value": 0.0,
+              "df": 56.99
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -6.695,
+            "margin_upp": 6.695,
+            "mean_diff_s1_minus_s2": -2.2008,
+            "tost_p_value": 0.00812,
+            "lower_test": {
+              "t_stat": 2.4757,
+              "p_value": 0.00812,
+              "df": 57.99
+            },
+            "upper_test": {
+              "t_stat": -4.9003,
+              "p_value": 4e-06,
+              "df": 57.99
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        }
+      },
+      "W5": {
+        "neural_baseline": {
+          "session_1_t_task_median_ms": 5271.65,
+          "session_2_t_task_median_ms": 5302.842,
+          "session_1_t_orch_median_ms": 0.0,
+          "session_2_t_orch_median_ms": 0.0,
+          "inter_session_rel_diff_task_pct": 25.76,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -610.8875,
+            "margin_upp": 610.8875,
+            "mean_diff_s1_minus_s2": 1573.347,
+            "tost_p_value": 0.718397,
+            "lower_test": {
+              "t_stat": 1.3272,
+              "p_value": 0.097405,
+              "df": 29.0
+            },
+            "upper_test": {
+              "t_stat": 0.5848,
+              "p_value": 0.718397,
+              "df": 29.0
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": false,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5.0,
+            "margin_upp": 5.0,
+            "mean_diff_s1_minus_s2": 0.0,
+            "tost_p_value": 0.0,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (zero-variance exact)"
+          }
+        },
+        "openclaw_minimal": {
+          "session_1_t_task_median_ms": 5671.657,
+          "session_2_t_task_median_ms": 5684.131,
+          "session_1_t_orch_median_ms": 50.817,
+          "session_2_t_orch_median_ms": 51.297,
+          "inter_session_rel_diff_task_pct": 0.38,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -570.5774,
+            "margin_upp": 570.5774,
+            "mean_diff_s1_minus_s2": 21.6055,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 15.5967,
+              "p_value": 0.0,
+              "df": 45.48
+            },
+            "upper_test": {
+              "t_stat": -14.4586,
+              "p_value": 0.0,
+              "df": 45.48
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -7.7182,
+            "margin_upp": 7.7182,
+            "mean_diff_s1_minus_s2": -0.1484,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 13.8506,
+              "p_value": 0.0,
+              "df": 57.81
+            },
+            "upper_test": {
+              "t_stat": -14.3935,
+              "p_value": 0.0,
+              "df": 57.81
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "picoclaw": {
+          "session_1_t_task_median_ms": 6280.329,
+          "session_2_t_task_median_ms": 6415.238,
+          "session_1_t_orch_median_ms": 10.914,
+          "session_2_t_orch_median_ms": 10.73,
+          "inter_session_rel_diff_task_pct": 2.01,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -635.1969,
+            "margin_upp": 635.1969,
+            "mean_diff_s1_minus_s2": -127.9422,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 22.9921,
+              "p_value": 0.0,
+              "df": 58.0
+            },
+            "upper_test": {
+              "t_stat": -34.5904,
+              "p_value": 0.0,
+              "df": 58.0
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -5.0,
+            "margin_upp": 5.0,
+            "mean_diff_s1_minus_s2": 0.253,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 24.4833,
+              "p_value": 0.0,
+              "df": 54.6
+            },
+            "upper_test": {
+              "t_stat": -22.125,
+              "p_value": 0.0,
+              "df": 54.6
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        },
+        "python_native": {
+          "session_1_t_task_median_ms": 3733.717,
+          "session_2_t_task_median_ms": 3745.749,
+          "session_1_t_orch_median_ms": 71.984,
+          "session_2_t_orch_median_ms": 70.995,
+          "inter_session_rel_diff_task_pct": 0.11,
+          "tost_t_task_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -374.3634,
+            "margin_upp": 374.3634,
+            "mean_diff_s1_minus_s2": -4.2901,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 38.5897,
+              "p_value": 0.0,
+              "df": 54.38
+            },
+            "upper_test": {
+              "t_stat": -39.4844,
+              "p_value": 0.0,
+              "df": 54.38
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          },
+          "tost_t_orch_ms": {
+            "n_s1": 30,
+            "n_s2": 30,
+            "margin_low": -10.9433,
+            "margin_upp": 10.9433,
+            "mean_diff_s1_minus_s2": 1.2581,
+            "tost_p_value": 0.0,
+            "lower_test": {
+              "t_stat": 9.1293,
+              "p_value": 0.0,
+              "df": 56.7
+            },
+            "upper_test": {
+              "t_stat": -7.2466,
+              "p_value": 0.0,
+              "df": 56.7
+            },
+            "alpha": 0.05,
+            "equivalent_at_alpha": true,
+            "method": "statsmodels.stats.weightstats.ttost_ind (Welch unequal variance)"
+          }
+        }
+      }
+    }
+  }
+}
