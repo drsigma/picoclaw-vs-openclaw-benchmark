@@ -12,6 +12,18 @@
 | macOS ARM64 (M4) | Regime B (Warm) | openclaw_full | 1131.8 [24.3] | [1126.1, 1135.8] | 22.60 | 37.3 | 777.2M / 294.7M | 14.7J / 16.7J·s | N/A† |
 | macOS ARM64 (M4) | Regime B (Warm) | python_native | 650.7 [16.6] | [647.0, 655.3] | 8.73 | 56.5 | 2615.5M / 1083.8M | 10.0J / 6.5J·s | 1.0/5.0 |
 | macOS ARM64 (M4) | Regime B (Warm) | neural_baseline | 851.9 [20.2] | [846.2, 858.3] | 0.00 | N/A* | N/A | 11.0J / 9.3J·s | N/A† |
+| Linux x86_64 | Regime A (Cold) | picoclaw | 3100.7 [28.0] | [3084.6, 3119.2] | 4.34 | 8.8 | 11.0M / 18.7M | 245.6J / 762.3J·s | N/A† |
+| Linux x86_64 | Regime A (Cold) | openclaw_minimal | 2711.1 [28.4] | [2702.3, 2721.5] | 28.92 | 85.0 | 745.5M / 480.9M | 213.9J / 581.3J·s | N/A† |
+| Linux x86_64 | Regime A (Cold) | openclaw_full | 8258.5 [39.7] | [8142.4, 8294.0] | 34.07 | 85.6 | 802.1M / 523.8M | 594.4J / 4909.0J·s | N/A† |
+| Linux x86_64 | Regime A (Cold) | python_native | 3114.1 [30.1] | [3097.6, 3809.2] | 17.12 | 40.2 | 2674.4M / 4799.1M | 252.6J / 784.4J·s | N/A† |
+| Linux x86_64 | Regime A (Cold) | bun_minimal | 3092.7 [38.3] | [3078.3, 3104.8] | 4.95 | 23.0 | 51.2M / 64.7M | 246.2J / 761.6J·s | N/A† |
+| Linux x86_64 | Regime A (Cold) | neural_baseline | 2896.6 [33.1] | [2861.7, 2912.2] | 0.00 | N/A* | N/A | 220.5J / 634.3J·s | N/A† |
+| Linux x86_64 | Regime B (Warm) | picoclaw | 1580.9 [32.6] | [1564.2, 1585.0] | 4.92 | 8.8 | 11.2M / 19.2M | 111.2J / 175.8J·s | N/A† |
+| Linux x86_64 | Regime B (Warm) | openclaw_minimal | 1419.6 [31.0] | [1408.4, 1425.6] | 27.78 | 85.1 | 744.6M / 502.8M | 100.8J / 143.5J·s | N/A† |
+| Linux x86_64 | Regime B (Warm) | openclaw_full | 3117.6 [29.7] | [3111.0, 3127.8] | 33.28 | 85.6 | 747.1M / 510.4M | 177.9J / 554.9J·s | N/A† |
+| Linux x86_64 | Regime B (Warm) | python_native | 2992.4 [56.8] | [2980.0, 3027.3] | 1416.32 | 87.4 | 4669.0M / 6471.4M | 196.5J / 588.2J·s | N/A† |
+| Linux x86_64 | Regime B (Warm) | bun_minimal | 1571.4 [32.1] | [1565.2, 1576.7] | 5.39 | 22.8 | 48.1M / 59.4M | 109.1J / 171.0J·s | N/A† |
+| Linux x86_64 | Regime B (Warm) | neural_baseline | 1387.0 [23.9] | [1377.3, 1394.2] | 0.00 | N/A* | N/A | 95.7J / 133.9J·s | N/A† |
 | Windows 11 NVIDIA | Regime A (Cold) | picoclaw | 3296.4 [115.2] | [3263.3, 3351.8] | 10.00 | 9.3 | N/A / 41.7M | 154.1J / 510.1J·s | N/A† |
 | Windows 11 NVIDIA | Regime A (Cold) | openclaw_minimal | 2921.1 [101.4] | [2908.5, 2960.2] | 37.20 | 71.7 | N/A / 511.3M | 135.7J / 397.4J·s | N/A† |
 | Windows 11 NVIDIA | Regime A (Cold) | openclaw_full | 8333.4 [114.6] | [8303.3, 8379.0] | 44.66 | 71.7 | N/A / 560.0M | 472.6J / 3940.3J·s | N/A† |
@@ -33,4 +45,7 @@
 | Windows Intel iGPU | Regime B (Warm) | python_native | 3733.7 [54.7] | [3721.7, 3754.0] | 71.98 | N/A* | N/A | N/A** | 3.0/5.0 |
 | Windows Intel iGPU | Regime B (Warm) | neural_baseline | 5271.6 [93.4] | [5223.1, 5284.9] | 0.00 | N/A* | N/A | N/A** | N/A† |
 
-> **Table 8 Notes (W5 Enterprise Evaluation):** Evaluates the cross-domain LangChain + SQLite tool-calling agent with LLM-as-a-judge quality scoring. Quality scores (1-5) confirm high schema and SQL generation fidelity on tested agents. Hardware instructions on Windows marked N/A* (user-mode PMU restriction); package energy on Windows Intel iGPU marked N/A** (UMA shared host memory without discrete NVML/RAPL sensors).
+> **Table 8 Notes (W5 Enterprise Evaluation):** Evaluates the cross-domain LangChain + SQLite tool-calling agent with LLM-as-a-judge quality scoring across all 4 platforms.
+> - `N/A†` (**Quality Score**): LLM-as-a-Judge semantic quality scoring uninstrumented on client agent runs (evaluated on PythonNative LangChain core with schema/SQL judge scoring: 1.0/5.0 on macOS M4 due to strict validation mismatch, and 3.0/5.0 on Windows Intel iGPU due to partial query completion).
+> - `N/A*` (**Instructions**): Hardware instructions on Windows marked N/A* due to NT kernel user-mode PMU counter restrictions (`CR4.PCE`); CPU cycles tracked via `QueryProcessCycleTime`.
+> - `N/A**` (**Energy / EDP**): Package energy on Windows Intel iGPU marked N/A** (UMA shared host DDR3 memory without discrete NVML or ring-0 RAPL MSR drivers in user mode).

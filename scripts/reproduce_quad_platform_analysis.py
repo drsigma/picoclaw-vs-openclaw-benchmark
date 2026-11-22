@@ -279,12 +279,12 @@ def get_platform_datasets():
             "os_family": "linux",
             "p_idle_w": 19.71,
             "active": {
-                "raw": os.path.join(REPO_DIR, "data", "linux_x86_64", "raw", "raw_trials.jsonl"),
-                "warm": os.path.join(REPO_DIR, "data", "linux_x86_64", "raw", "warm_cache_trials.jsonl"),
-                "kv": os.path.join(REPO_DIR, "data", "linux_x86_64", "raw", "kv_cache_thrashing_trials.jsonl"),
-                "mcp": os.path.join(REPO_DIR, "data", "linux_x86_64", "raw", "mcp_live_transport_trials.jsonl"),
-                "rag": os.path.join(REPO_DIR, "data", "linux_x86_64", "raw", "tool_rag_mitigation_trials.jsonl"),
-                "metadata": os.path.join(REPO_DIR, "data", "linux_x86_64", "raw", "hardware_metadata.json"),
+                "raw": os.path.join(REPO_DIR, "data", "linux_x86_64_session1", "raw", "raw_trials.jsonl"),
+                "warm": os.path.join(REPO_DIR, "data", "linux_x86_64_session1", "raw", "warm_cache_trials.jsonl"),
+                "kv": os.path.join(REPO_DIR, "data", "linux_x86_64_session1", "raw", "kv_cache_thrashing_trials.jsonl"),
+                "mcp": os.path.join(REPO_DIR, "data", "linux_x86_64_session1", "raw", "mcp_live_transport_trials.jsonl"),
+                "rag": os.path.join(REPO_DIR, "data", "linux_x86_64_session1", "raw", "tool_rag_mitigation_trials.jsonl"),
+                "metadata": os.path.join(REPO_DIR, "data", "linux_x86_64_session1", "raw", "hardware_metadata.json"),
             },
             "sessions": [
                 {
@@ -1144,7 +1144,7 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
     t1_md.extend([
         "",
         "> **Table 1 Methodological Notes and Microarchitectural References:**  ",
-        "> `*` **N/A\\*** (*PMU Instruction Counters on Windows 11*): In Windows 11 user-mode, CPU PMU architectural instruction counters are restricted by the NT kernel without elevated driver tracing (kernel ETW/WPR profiling introduces unviable asynchronous latency for isolated process measurement). Win32 user-mode API exposes thread cycles via `QueryProcessCycleTime` (`realtimeapiset.h`), precluding access to `IA32_FIXED_CTR0` (`INST_RETIRED.ANY`). Under strict empirical methodology, synthetic IPC extrapolations are avoided; CPU cycles are reported directly (43.0M cycles in PicoClaw vs. 507.9M cycles in OpenClaw Full, an 11.82x ratio). *Refs:* Microsoft Learn (`QueryProcessCycleTime`); Intel® 64 and IA-32 SDM Vol. 3B Ch. 20; Weaver, V. M. (IEEE ISPASS 2013).  ",
+        "> `*` **N/A\\*** (*PMU Instruction Counters on Windows 11*): In Windows 11 user-mode, CPU PMU architectural instruction counters are restricted by the NT kernel without elevated driver tracing (kernel ETW/WPR profiling introduces unviable asynchronous latency for isolated process measurement). Win32 user-mode API exposes thread cycles via `QueryProcessCycleTime` (`realtimeapiset.h`), precluding access to `IA32_FIXED_CTR0` (`INST_RETIRED.ANY`). Under strict empirical methodology, synthetic IPC extrapolations are avoided; CPU cycles are reported directly (45.8M cycles in PicoClaw vs. 528.1M cycles in OpenClaw Full, an 11.54x ratio). *Technical Specifications:* Microsoft Learn (`QueryProcessCycleTime`); Intel® 64 and IA-32 SDM Vol. 3B Ch. 20; Weaver, V. M. (IEEE ISPASS 2013).  ",
         "> `†` **N/A†** (*Peak RSS of PythonNative on Windows 11*): The Windows invocation via `py.exe` (PEP 397) functions as a lightweight launcher wrapper stub dispatching an independent worker child process (`python.exe`). PSAPI telemetry (`GetProcessMemoryInfo`) monitored the immediate parent wrapper PID (~4.91 MB) rather than the CPython worker child heap. Factual `N/A` is reported in lieu of the wrapper stub memory. *Refs:* Python PEP 397; Microsoft Learn (Win32 PSAPI).  ",
         "> `‡` **N/A‡** (*Direct Neural Baseline*): The neural baseline issues direct HTTP requests from the telemetry harness to the resident `llama-server` without intermediary agent runtimes ($T_{\\text{orch}} \\equiv 0$); no client agent process exists for RSS or instruction attribution. *Refs:* Experimental decomposition protocol $T_{\\text{task}} = T_{\\text{orch}} + T_{\\text{neural}}$.  ",
         "> `||` **N/A for Bun on macOS**: Bun (JSC) was evaluated as a secondary JavaScript engine ablation on x86_64 nodes (Linux and Windows 11) following the freeze of the Darwin ARM64 reference campaign.  ",
@@ -1155,10 +1155,10 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
 
     t1_tex.extend([
         "\\hline",
-        "\\multicolumn{9}{l}{\\textsuperscript{*}\\footnotesize PMU instruction counters restricted in Windows user-mode; empirical CPU cycles tracked via QueryProcessCycleTime (43.0M in PicoClaw vs. 507.9M in OpenClaw Full, 11.82x ratio).} \\\\",
-        "\\multicolumn{9}{l}{\\footnotesize \\quad Refs: Microsoft Learn (QueryProcessCycleTime); Intel SDM Vol. 3B Ch. 20; Weaver (IEEE ISPASS 2013).} \\\\",
+        "\\multicolumn{9}{l}{\\textsuperscript{*}\\footnotesize PMU instruction counters restricted in Windows user-mode; empirical CPU cycles tracked via QueryProcessCycleTime (45.8M in PicoClaw vs. 528.1M in OpenClaw Full, 11.54x ratio).} \\\\",
+        "\\multicolumn{9}{l}{\\footnotesize \\quad Technical Specs: Microsoft Learn (QueryProcessCycleTime); Intel SDM Vol. 3B Ch. 20; Weaver (IEEE ISPASS 2013).} \\\\",
         "\\multicolumn{9}{l}{\\textsuperscript{\\dagger}\\footnotesize python\\_native on Windows 11 captured py.exe launcher stub PID (PEP 397) instead of worker child (Win32 PSAPI).} \\\\",
-        "\\multicolumn{9}{l}{\\footnotesize \\quad Refs: Python PEP 397; Microsoft Learn (GetProcessMemoryInfo / PROCESS\\_MEMORY\\_COUNTERS).} \\\\",
+        "\\multicolumn{9}{l}{\\footnotesize \\quad Technical Specs: Python PEP 397; Microsoft Learn (GetProcessMemoryInfo / PROCESS\\_MEMORY\\_COUNTERS).} \\\\",
         "\\multicolumn{9}{l}{\\textsuperscript{\\ddagger}\\footnotesize Neural baseline issues direct HTTP requests to resident llama-server without client agent runtime ($T_{\\text{orch}} \\equiv 0$).} \\\\",
         "\\multicolumn{9}{l}{\\footnotesize \\quad Refs: Experimental protocol for latency decomposition $T_{\\text{task}} = T_{\\text{orch}} + T_{\\text{neural}}$.} \\\\",
         "\\multicolumn{9}{l}{\\textsuperscript{||}\\footnotesize Bun JSC was evaluated as a secondary JavaScript engine ablation on x86_64 nodes (Linux and Windows 11) following the freeze of the Darwin ARM64 reference campaign.} \\\\",
@@ -1228,7 +1228,7 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
 
     t3_md.extend([
         "",
-        "> **Table 3 Note on Invariance:** Invariance applies strictly to *absolute* client orchestrator runtime $T_{\\text{orch}}$ (ms) ($|\\Delta T_{\\text{orch}}| < 0.5\\text{ ms}$). The relative fraction $\\Phi_{\\text{orch}}$ increases in warm cache because neural inference latency $T_{\\text{neural}}$ drops substantially under KV cache hits."
+        "> **Table 3 Note on Invariance:** Invariance applies strictly to *absolute* client orchestrator runtime $T_{\\text{orch}}$ (ms) ($|\\Delta T_{\\text{orch}}| < 2.0\\text{ ms}$, with a maximum difference of $1.95\\text{ ms}$ observed on Windows NVIDIA). The relative fraction $\\Phi_{\\text{orch}}$ increases in warm cache because neural inference latency $T_{\\text{neural}}$ drops substantially under KV cache hits."
     ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table3_warm_cache_summary.md"), "w", encoding="utf-8") as f:
@@ -1271,7 +1271,8 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         "> **Table 4 Notes:**",
         "> - `Full-to-Minimal Catalog Ratio`: Latency ratio of 54-tool catalog to 15-tool minimal catalog under identical memory regime.",
         "> - `Minimal Cache Penalty (T2/T3)`: Slowdown induced by uncontrolled context thrashing ($T_2$) relative to isolated slot retention ($T_3$) for minimal catalog.",
-        "> - `Full Cache Penalty (T2/T3)`: Slowdown induced by uncontrolled context thrashing ($T_2$) relative to isolated slot retention ($T_3$) for full catalog."
+        "> - `Full Cache Penalty (T2/T3)`: Slowdown induced by uncontrolled context thrashing ($T_2$) relative to isolated slot retention ($T_3$) for full catalog.",
+        "> - `Platform Scope`: Evaluated across primary physical testbed nodes (macOS M4, Linux x86_64, Windows 11 NVIDIA). Windows Intel iGPU was dedicated to W2 and W5 model scaling on shared DDR3 memory."
     ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table4_kv_thrashing.md"), "w", encoding="utf-8") as f:
@@ -1383,6 +1384,11 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         r"\end{table}"
     ])
 
+    t6_md.extend([
+        "",
+        "> **Table 6 Notes:** Evaluates live MCP tool transport mechanisms. Evaluated across the 3 primary physical testbed nodes (macOS M4, Linux x86_64, Windows 11 NVIDIA). Windows Intel iGPU was dedicated to W2 and W5 workloads."
+    ])
+
     with open(os.path.join(AUDIT_TABLES_DIR, "table6_mcp_transport_ablation.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(t6_md) + "\n")
     with open(os.path.join(AUDIT_TABLES_DIR, "table6_mcp_transport_ablation.tex"), "w", encoding="utf-8") as f:
@@ -1407,7 +1413,7 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         r"\label{tab:session_replication_tost}",
         r"\begin{tabular}{llcccccc}",
         r"\toprule",
-        r"\textbf{Platform OS} & \textbf{Runtime Contrast} & \textbf{Session 1 $\Delta$ (ms)} & \textbf{Session 2 $\Delta$ (ms)} & \textbf{Divergence (\%)} & \textbf{95\% CI of Diff (ms)} & \textbf{$p_{\text{TOST}}$} & \textbf{Replication Status} \\\\",
+        r"\textbf{Platform OS} & \textbf{Runtime Contrast} & \textbf{Session 1 $\Delta$ (ms)} & \textbf{Session 2 $\Delta$ (ms)} & \textbf{Divergence (\%)} & \textbf{95\% CI of Diff (ms)} & \textbf{$p_{\text{TOST}}$} & \textbf{Replication Status} \\",
         r"\midrule"
     ]
 
@@ -1536,7 +1542,7 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         r"\label{tab:w5_enterprise_workload}",
         r"\begin{tabular}{lllccccccc}",
         r"\toprule",
-        r"\textbf{Platform OS} & \textbf{Regime} & \textbf{Runtime} & \textbf{$T_{\text{task}}$ (ms) [IQR]} & \textbf{95\% CI} & \textbf{$T_{\text{orch}}$} & \textbf{RSS (MB)} & \textbf{Instr / Cycles} & \textbf{Energy / EDP} & \textbf{Score} \\\\",
+        r"\textbf{Platform OS} & \textbf{Regime} & \textbf{Runtime} & \textbf{$T_{\text{task}}$ (ms) [IQR]} & \textbf{95\% CI} & \textbf{$T_{\text{orch}}$} & \textbf{RSS (MB)} & \textbf{Instr / Cycles} & \textbf{Energy / EDP} & \textbf{Score} \\",
         r"\midrule"
     ]
 
@@ -1575,22 +1581,29 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
                     energy_str = f"{energy_cell["median"]:.1f}J / {edp_cell["median"]:.1f}J·s"
 
                 qs_cell = cell.get("quality_score", {})
-                if qs_cell.get("status") == "OK" and qs_cell.get("median"):
+                if qs_cell.get("status") == "OK" and qs_cell.get("median") is not None:
                     qs_str = f"{qs_cell["median"]:.1f}/5.0"
                 else:
                     qs_str = "N/A†"
 
+                ak_escaped = ak.replace("_", r"\_")
                 t8_md.append(f"| {p_disp} | {reg_name} | {ak} | {lat_med:.1f} [{lat_iqr:.1f}] | [{ci[0]:.1f}, {ci[1]:.1f}] | {orch_med:.2f} | {rss_str} | {inst_str} | {energy_str} | {qs_str} |")
-                t8_tex.append(f"{p_disp} & {reg_name} & {ak} & {lat_med:.1f} [{lat_iqr:.1f}] & [{ci[0]:.1f}, {ci[1]:.1f}] & {orch_med:.1f} & {rss_str} & {inst_str} & {energy_str} & {qs_str} \\\\")
+                t8_tex.append(f"{p_disp} & {reg_name} & {ak_escaped} & {lat_med:.1f} [{lat_iqr:.1f}] & [{ci[0]:.1f}, {ci[1]:.1f}] & {orch_med:.1f} & {rss_str} & {inst_str} & {energy_str} & {qs_str} \\\\")
 
     t8_tex.extend([
         r"\bottomrule",
+        r"\multicolumn{10}{l}{\textsuperscript{\dagger}\footnotesize Quality score uninstrumented on client runs (evaluated on PythonNative LangChain core with schema/SQL judge scoring: 1.0/5.0 on macOS M4, and 3.0/5.0 on Windows Intel iGPU).} \\",
+        r"\multicolumn{10}{l}{\textsuperscript{*}\footnotesize Hardware instructions on Windows marked N/A* (user-mode PMU restriction); CPU cycles tracked via QueryProcessCycleTime.} \\",
+        r"\multicolumn{10}{l}{\textsuperscript{**}\footnotesize Package energy on Windows Intel iGPU marked N/A** (UMA shared host memory without discrete NVML/RAPL sensors).} \\",
         r"\end{tabular}",
         r"\end{table*}"
     ])
     t8_md.extend([
         "",
-        "> **Table 8 Notes (W5 Enterprise Evaluation):** Evaluates the cross-domain LangChain + SQLite tool-calling agent with LLM-as-a-judge quality scoring. Quality scores (1-5) confirm high schema and SQL generation fidelity on tested agents. Hardware instructions on Windows marked N/A* (user-mode PMU restriction); package energy on Windows Intel iGPU marked N/A** (UMA shared host memory without discrete NVML/RAPL sensors)."
+        "> **Table 8 Notes (W5 Enterprise Evaluation):** Evaluates the cross-domain LangChain + SQLite tool-calling agent with LLM-as-a-judge quality scoring across all 4 platforms.",
+        "> - `N/A†` (**Quality Score**): LLM-as-a-Judge semantic quality scoring uninstrumented on client agent runs (evaluated on PythonNative LangChain core with schema/SQL judge scoring: 1.0/5.0 on macOS M4 due to strict validation mismatch, and 3.0/5.0 on Windows Intel iGPU due to partial query completion).",
+        "> - `N/A*` (**Instructions**): Hardware instructions on Windows marked N/A* due to NT kernel user-mode PMU counter restrictions (`CR4.PCE`); CPU cycles tracked via `QueryProcessCycleTime`.",
+        "> - `N/A**` (**Energy / EDP**): Package energy on Windows Intel iGPU marked N/A** (UMA shared host DDR3 memory without discrete NVML or ring-0 RAPL MSR drivers in user mode)."
     ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table8_w5_enterprise_workload.md"), "w", encoding="utf-8") as f:
@@ -1697,13 +1710,14 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
         "    Warm cache (Regime B) gains on x86 are bounded by partial offload saturation."
     ], bg="#FFFFFF", border="#64748B")
 
-    b_flow = patches.FancyBboxPatch((2.0, 3.5), 95.0, 13.0, boxstyle="round,pad=0.3", edgecolor="#0F172A", facecolor="#F1F5F9", linewidth=1.2)
+    b_flow = patches.FancyBboxPatch((2.0, 3.0), 95.0, 13.5, boxstyle="round,pad=0.3", edgecolor="#0F172A", facecolor="#F1F5F9", linewidth=1.2)
     ax.add_patch(b_flow)
-    ax.text(50.0, 14.8, "SYSTEMATIC TELEMETRY PIPELINE & SENSOR MEASUREMENT BOUNDARIES", ha="center", va="top", fontsize=8.2, fontweight="bold", color="#0F172A")
-    ax.text(50.0, 12.2, "Cold Prefill (Regime A: cache_prompt=false)  |  Warm KV Cache (Regime B: cache_prompt=true)  |  KV Thrashing (T1, T2, T3)  |  Tool-RAG Pruning", ha="center", va="top", fontsize=7.0, color="#334155")
-    ax.text(50.0, 9.6, "Sensor Boundaries: Apple SMC captures entire SoC (CPU+GPU+DRAM). Intel RAPL + NVML captures CPU Package + dGPU board. Intel iGPU operates via Win32 PSAPI (N/A** for package energy).", ha="center", va="top", fontsize=6.7, color="#0369A1", fontweight="bold")
-    ax.text(50.0, 7.2, "Offload Híbrido & UMA: -ngl 16 satura barramento PCIe/RAM; ganhos em Regime B no x86 são limitados e não comensuráveis com M4.", ha="center", va="top", fontsize=6.6, color="#0F766E", fontweight="bold")
-    ax.text(50.0, 4.8, "Campanha Quad-Platform: 100% de registros fisicamente medidos em 31 datasets JSONL. Execuções limpas a partir do zero.", ha="center", va="top", fontsize=6.6, color="#64748B")
+    ax.text(50.0, 15.2, "SYSTEMATIC TELEMETRY PIPELINE & SENSOR MEASUREMENT BOUNDARIES", ha="center", va="top", fontsize=8.2, fontweight="bold", color="#0F172A")
+    ax.text(50.0, 12.8, "Cold Prefill (Regime A: cache_prompt=false)  |  Warm KV Cache (Regime B: cache_prompt=true)  |  KV Thrashing (T1, T2, T3)  |  Tool-RAG Pruning", ha="center", va="top", fontsize=7.0, color="#334155")
+    ax.text(50.0, 10.4, "Sensor Boundaries: Apple SMC captures entire SoC (CPU+GPU+DRAM). Intel RAPL + NVML captures CPU Package + dGPU.", ha="center", va="top", fontsize=6.6, color="#0369A1", fontweight="bold")
+    ax.text(50.0, 8.4, "Intel iGPU operates in unprivileged user-mode via Win32 PSAPI (N/A** for package energy & discrete VRAM).", ha="center", va="top", fontsize=6.6, color="#0369A1", fontweight="bold")
+    ax.text(50.0, 6.4, "Hybrid Offload & UMA: Partial offload (-ngl 16) saturates PCIe/RAM bus; Regime B x86 gains bounded and not commensurable with M4.", ha="center", va="top", fontsize=6.5, color="#0F766E", fontweight="bold")
+    ax.text(50.0, 4.4, "Quad-Platform Campaign: 100% physically measured trials across 31 empirical JSONL datasets. Clean executions from scratch.", ha="center", va="top", fontsize=6.5, color="#64748B")
 
     plt.tight_layout()
     f1_out = os.path.join(PUB_FIG_DIR, "fig1_architecture_topology.png")
@@ -1739,7 +1753,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax1.bar(x, l_lats, bw, yerr=np.array(l_err).T, capsize=3, label="Linux x86_64", color=COLOR_LINUX, edgecolor="#0F172A", alpha=0.9)
     ax1.bar(x + bw, w_lats, bw, yerr=np.array(w_err).T, capsize=3, label="Windows 11", color=COLOR_WINDOWS, edgecolor="#0F172A", alpha=0.9)
     ax1.set_ylabel("Task Latency W1 [ms]")
-    ax1.set_title("(a) Cold Task Execution Latency (W1 Tier, 95% CI)")
+    ax1.set_title("(a) Cold Task Latency (W1 Tier, 95% CI; Intel iGPU N/A*)")
     ax1.set_xticks(x)
     ax1.set_xticklabels(labels)
     ax1.grid(axis="y", linestyle="--", alpha=0.5)
@@ -1774,16 +1788,17 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax2.bar(x + 0.5 * bw2, w_rss_vals, bw2, yerr=np.array(w_rss_errs).T, capsize=2, label="Windows NVIDIA", color=COLOR_WINDOWS, edgecolor="#0F172A", alpha=0.9)
     ax2.bar(x + 1.5 * bw2, wi_rss_vals, bw2, yerr=np.array(wi_rss_errs).T, capsize=2, label="Windows Intel iGPU", color=COLOR_WIN_INTEL, edgecolor="#0F172A", alpha=0.9)
     
-    # Missing data hatched placeholder for Windows python_native (no zero-height bar)
+    # Combined hatched placeholder for Windows python_native (no label overlap)
     py_idx = agents.index("python_native")
-    for off, lbl in [(0.5 * bw2, "N/A*\n(NVIDIA)"), (1.5 * bw2, "N/A*\n(Intel)")]:
-        placeholder = patches.Rectangle(
-            (x[py_idx] + off - bw2 * 0.42, 0.5), bw2 * 0.84, 25.0,
-            facecolor="#FEF2F2", edgecolor="#DC2626", linestyle="--", linewidth=1.0,
-            hatch="///", alpha=0.9, zorder=2
-        )
-        ax2.add_patch(placeholder)
-        ax2.text(x[py_idx] + off, 13.0, lbl, ha="center", va="center", fontsize=5.8, color="#991B1B", fontweight="bold", zorder=3)
+    x_left = x[py_idx] + 0.5 * bw2 - bw2 * 0.45
+    tot_width = 1.0 * bw2 + bw2 * 0.90
+    placeholder = patches.Rectangle(
+        (x_left, 0.5), tot_width, 25.0,
+        facecolor="#FEF2F2", edgecolor="#DC2626", linestyle="--", linewidth=1.0,
+        hatch="///", alpha=0.9, zorder=2
+    )
+    ax2.add_patch(placeholder)
+    ax2.text(x[py_idx] + 1.0 * bw2, 13.0, "N/A†\n(Win Stub)", ha="center", va="center", fontsize=6.8, color="#991B1B", fontweight="bold", zorder=3)
 
     ax2.set_ylabel("Peak Resident Memory RSS [MB]")
     ax2.set_title("(b) Peak Resident Memory Footprint (W2 Tier, 95% CI)")
@@ -1793,7 +1808,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax2.legend(loc="upper left", fontsize=7.2)
 
     plt.tight_layout(rect=[0, 0.04, 1, 0.98])
-    fig.text(0.5, 0.01, "* Note: Windows python_native peak RSS marked N/A: wrapper launcher PID was captured instead of child CPython worker; excluded to prevent zero-height distortion.", ha="center", fontsize=7.2, color="#334155")
+    fig.text(0.5, 0.01, "* Methodological Notes: Workload W1 was evaluated on the 3 primary architectures (Intel iGPU dedicated to W2 & W5). Windows python_native peak RSS marked N/A†: wrapper stub PID captured instead of worker; excluded to prevent zero-height distortion.", ha="center", fontsize=7.1, color="#334155")
     f2_out = os.path.join(PUB_FIG_DIR, "fig2_exp1_cold_start_rss.png")
     plt.savefig(f2_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig2_exp1_cold_start_rss.png"), dpi=300, bbox_inches="tight")
@@ -1853,7 +1868,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax2.annotate(
         "W3 Ranking Inversion:\nGo scalar loops\nvs. SIMD NumPy",
         xy=(xw[2] - 0.5 * bww, 1.66),
-        xytext=(xw[2] - 0.42, 2.05),
+        xytext=(xw[2] + 0.05, 2.40),
         arrowprops=dict(arrowstyle="->", color="#B45309", lw=1.5, connectionstyle="arc3,rad=-0.10"),
         fontsize=7.2, fontweight="bold", color="#92400E",
         bbox=dict(boxstyle="round,pad=0.25", fc="#FFFBEB", ec="#F59E0B", lw=1.0, alpha=0.95),
@@ -1861,15 +1876,15 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     )
 
     ax2.set_ylabel("Orchestration Fraction $\\Phi_{\\text{orch}}$ [%]")
-    ax2.set_title("(b) Middleware Latency Ratio with W3 Ranking Inversion (95% CI)")
+    ax2.set_title("(b) Middleware Latency Ratio with W3 Ranking Inversion (95% CI; W1-W4 Profiles)")
     ax2.set_xticks(xw)
     ax2.set_xticklabels(workloads)
-    ax2.set_ylim(0, 2.7)
+    ax2.set_ylim(0, 3.2)
     ax2.grid(axis="y", linestyle="--", alpha=0.5)
-    ax2.legend(loc="upper right", fontsize=7.0)
+    ax2.legend(loc="upper left", fontsize=6.8, ncol=2)
 
     plt.tight_layout(rect=[0, 0.04, 1, 0.98])
-    fig.text(0.5, 0.01, "* Note on W3 Ranking Inversion: PicoClaw exhibits higher T_orch in W3 due to in-memory vector search with scalar Go loops vs. SIMD/BLAS-accelerated NumPy bindings in Python/Bun.", ha="center", fontsize=7.2, color="#334155")
+    fig.text(0.5, 0.01, "* Note on W3 Ranking Inversion & Platform Scope: Intel iGPU testbed evaluated on W2 and W5. PicoClaw exhibits higher T_orch in W3 due to in-memory vector search with scalar Go loops vs. SIMD NumPy in Python/Bun.", ha="center", fontsize=7.1, color="#334155")
     f3_out = os.path.join(PUB_FIG_DIR, "fig3_exp2_latency_overhead.png")
     plt.savefig(f3_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig3_exp2_latency_overhead.png"), dpi=300, bbox_inches="tight")
@@ -1907,6 +1922,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax1.set_title("(a) Dynamic Energy Dissipation (W2, with Mean Watts)")
     ax1.set_xticks(xe)
     ax1.set_xticklabels(labels_e)
+    ax1.set_ylim(0, max(w_e) * 1.30)
     ax1.grid(axis="y", linestyle="--", alpha=0.5)
     ax1.legend(loc="upper left", title="Sensor Domains (Intra-Node Only; Not Cross-OS)", title_fontsize=6.8, fontsize=6.8)
 
@@ -1923,17 +1939,15 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax2.set_title("(b) Energy-Delay Product Inflation (W2, 95% CI)")
     ax2.set_xticks(xe)
     ax2.set_xticklabels(labels_e)
+    ax2.set_ylim(0, max(w_edp) * 1.30)
     ax2.grid(axis="y", linestyle="--", alpha=0.5)
     ax2.legend(loc="upper left", title="Sensor Domains (Intra-Node Only; Not Cross-OS)", title_fontsize=6.8, fontsize=6.8)
 
-    # Warning banners on both subplots
-    for ax_p in [ax1, ax2]:
-        ax_p.text(0.5, 0.94, "⚠️ Sensor Domains Differ: Compare Agents Within Node Only",
-                  transform=ax_p.transAxes, ha="center", va="top", fontsize=6.6, fontweight="bold",
-                  color="#991B1B", bbox=dict(boxstyle="round,pad=0.2", fc="#FEF2F2", ec="#F87171", lw=0.8, alpha=0.95))
+    # Clean subtitle without overlapping inner subplot legends
+    fig.suptitle("⚠️ Sensor Domains Differ: Contrast Agents Within Identical Physical Node Only (SMC vs. RAPL+NVML)", fontsize=8.6, fontweight="bold", color="#991B1B", y=0.98)
 
-    plt.tight_layout(rect=[0, 0.04, 1, 0.98])
-    fig.text(0.5, 0.01, "* Nota de Telemetria: A comparação de energia absoluta em Joules e EDP é estritamente válida para contrastes dentro de cada nó/sensor isolado (SMC vs. RAPL+NVML), não devendo ser interpretada como um ranking absoluto cruzado entre sistemas operacionais diferentes.", ha="center", fontsize=7.0, color="#334155")
+    plt.tight_layout(rect=[0, 0.04, 1, 0.95])
+    fig.text(0.5, 0.01, "* Telemetry Note: Absolute energy in Joules and EDP are valid strictly for within-node contrasts (Apple SMC on-die vs. Intel RAPL + NVML dGPU). Windows Intel iGPU is excluded (N/A**) due to unprivileged user-mode execution lacking ring-0 MSR RAPL access on shared DDR3 memory.", ha="center", fontsize=7.1, color="#334155")
     f4_out = os.path.join(PUB_FIG_DIR, "fig4_exp3_energy_edp.png")
     plt.savefig(f4_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig4_exp3_energy_edp.png"), dpi=300, bbox_inches="tight")
@@ -2034,7 +2048,7 @@ def generate_tri_platform_figures(consolidated: dict[str, Any]):
     ax2.legend(loc="upper right")
 
     plt.tight_layout(rect=[0, 0.04, 1, 0.98])
-    fig.text(0.5, 0.01, "* Methodological Note: Tool-RAG speedups use strictly internal baselines per platform. Error bars represent 95% bootstrap confidence intervals (2,000 resamples).", ha="center", fontsize=7.2, color="#334155")
+    fig.text(0.5, 0.01, "* Methodological Note: On macOS ARM64, speedups reference the internal unmitigated 54-tool baseline measured in the same session. On Linux, Windows NVIDIA, and Windows Intel, pruned arms reference the node's primary unmitigated baseline (raw_trials.jsonl / warm_cache_trials.jsonl). Error bars denote 95% bootstrap CIs.", ha="center", fontsize=7.1, color="#334155")
     f5_out = os.path.join(PUB_FIG_DIR, "fig5_exp4_tools_and_bloat.png")
     plt.savefig(f5_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig5_exp4_tools_and_bloat.png"), dpi=300, bbox_inches="tight")
@@ -2238,24 +2252,24 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "",
         "### 4.1. Table 5: Tool-RAG Schema Pruning Analysis",
         "- **Token Reduction:** Tool-RAG dynamic pruning reduces active prompt tokens from 7,091 tokens (unmitigated 54-tool catalog) to **917 tokens** (retrieved Top-5 schema), representing an **$-87.1\\%$ token reduction**.",
-        "- **Regime Separation:** In Regime A (Cold Prefill), dynamic schema pruning eliminates quadratic attention overhead, providing substantial speedup (up to 9.96x on Intel Graphics and 7.43x on macOS M4). In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, confirming that Tool-RAG's primary microarchitectural value is cold prefill mitigation.",
+        "- **Regime Separation & Dynamic Speedups:** In Regime A (Cold Prefill), dynamic schema pruning eliminates quadratic attention overhead, providing empirical speedups of **7.28x** on macOS M4, **4.97x** on Linux x86_64, **4.64x** on Windows 11 NVIDIA, and **9.96x** on Windows Intel iGPU. In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, confirming that Tool-RAG's primary microarchitectural value is cold prefill mitigation.",
         "",
         "### 4.2. Table 4: KV-Cache Thrashing & Slot Isolation",
         "- The column `Thrashing Overhead` was renamed to `Full-to-Minimal Catalog Ratio` to accurately reflect architectural schema scaling.",
         "- Actual cache eviction penalties were quantified directly as the ratio of uncontrolled thrashing to isolated retention ($T_2/T_3$):",
-        "  * **macOS ARM64:** Minimal catalog cache penalty $= 7.15\\text{x}$; Full catalog cache penalty $= 20.24\\text{x}$.",
+        "  * **macOS ARM64:** Minimal catalog cache penalty $= 6.85\\text{x}$; Full catalog cache penalty $= 19.46\\text{x}$.",
         "  * **Linux x86_64:** Minimal catalog cache penalty $= 1.96\\text{x}$; Full catalog cache penalty $= 2.63\\text{x}$.",
-        "  * **Windows 11:** Minimal catalog cache penalty $= 1.99\\text{x}$; Full catalog cache penalty $= 2.35\\text{x}$.",
+        "  * **Windows 11:** Minimal catalog cache penalty $= 2.01\\text{x}$; Full catalog cache penalty $= 2.30\\text{x}$.",
         "",
         "### 4.3. Table 3: Cache Invariance Clarification",
-        "- Empirical measurements indicate that **cache invariance applies strictly to absolute orchestrator latency $T_{\\text{orch}}$ (ms)** ($|\\Delta T_{\\text{orch}}| < 0.5\\text{ ms}$ between cold prefill and warm cache).",
+        "- Empirical measurements indicate that **cache invariance applies strictly to absolute orchestrator latency $T_{\\text{orch}}$ (ms)** ($|\\Delta T_{\\text{orch}}| < 2.0\\text{ ms}$, with a maximum difference of $1.95\\text{ ms}$ observed on Windows NVIDIA).",
         "- The relative overhead fraction $\\Phi_{\\text{orch}} = T_{\\text{orch}} / T_{\\text{task}}$ increases under warm cache because neural inference latency $T_{\\text{neural}}$ decreases by up to 10x.",
         "",
         "### 4.4. Table 7: Multi-Platform Dual-Session Replication",
-        "- Complete dual-session replication across platforms demonstrated cross-session median divergence below $2.0\\%$ across all tested agent runtimes, with formal two one-sided equivalence tests (TOST) confirming statistical equivalence within $\\pm 15\\%$.",
+        "- Dual-session contrast analysis across 102 platform/workload pairs established **52.0% (53/102) Equivalence Proven** ($p < 0.05$ via TOST), **28.4% (29/102) Replicated** ($|\\text{Divergence}| < 15\\%$), and **19.6% (20/102) Divergence Detected** ($|\\text{Divergence}| \\ge 15\\%$). Divergences occurred predominantly in PythonNative on W5 (e.g. macOS +15,360% and Linux +11,936% in Regime A) driven by dynamic LangChain module import initialization across distinct session states.",
         "",
         "### 4.5. Table 8: Enterprise LangChain Workload (W5)",
-        "- Consolidated telemetry and LLM-as-a-judge quality scores (1–5) across platforms confirm that PicoClaw maintains deterministic task success while eliminating 75–85% of Node.js resident memory bloat.",
+        "- Semantic LLM-as-a-judge quality scoring was instrumented on the PythonNative LangChain core adapter (scoring 1.0/5.0 on macOS M4 due to strict syntax validation failures, and 3.0/5.0 on Windows Intel iGPU due to partial query completion). Baseline client runtimes (PicoClaw Go, OpenClaw Node.js, Bun JSC) operate via deterministic client tool dispatch without the judge scoring harness (marked N/A†).",
         "",
         "---",
         "",

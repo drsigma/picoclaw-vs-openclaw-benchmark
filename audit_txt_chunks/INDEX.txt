@@ -45,17 +45,17 @@ LOCALIZAÇÃO DAS TABELAS COMPLETAS (MARKDOWN E LATEX):
 LOCALIZAÇÃO DAS FIGURAS DE ALTA RESOLUÇÃO (300 DPI):
 --------------------------------------------------------------------------------
 - Diretório de figuras: figures/ e audit_export/figures/
-- fig1_architecture_topology.png (753,893 bytes | SHA-256: 14a6907e9dbfbdfaae498fc54ad47f3d71261d1340e178bda4b5023c1a518979)
+- fig1_architecture_topology.png (773,402 bytes | SHA-256: c93b9d2e6187841568d934dea362250aa7b6b28eaa0eda09bf8220d0088062a3)
   Figura 1: Topologia Quad-Platform do Testbed Experimental
-- fig2_exp1_cold_start_rss.png (295,886 bytes | SHA-256: 6150e2383bea6e9c554c47eb0dea7f82bbe009db8cbb5731b145542bec2fc888)
+- fig2_exp1_cold_start_rss.png (318,807 bytes | SHA-256: f82ecb723d1a4758aad3fb76d1cef13ad0fdb8345e32e4913be5c1898572c60a)
   Figura 2: Experimento 1 - Cold Start Hyperfine e Resident Set Size (RSS)
-- fig3_exp2_latency_overhead.png (319,880 bytes | SHA-256: 19fa1055344900c0e8e4d884901ce90a320f81ccd18a87cbf77bf573103c90c7)
+- fig3_exp2_latency_overhead.png (330,272 bytes | SHA-256: 5f4395344c27356ea85daea061573e1d1aa1058218142c77725f957506ecee7b)
   Figura 3: Experimento 2 - Latência de Orquestração T_orch e Fração Phi_orch
-- fig4_exp3_energy_edp.png (349,892 bytes | SHA-256: 665eb817e4a6f33a08430c4d939fd347208db086aa232c6064079beb4f962548)
+- fig4_exp3_energy_edp.png (364,397 bytes | SHA-256: b26139d52faedf36c01afc80b9962cefbf8f3211eb0a86db0952e32fbf000d53)
   Figura 4: Experimento 3 - Energia Dinâmica Líquida (J) e Energy-Delay Product (EDP)
-- fig5_exp4_tools_and_bloat.png (253,614 bytes | SHA-256: 6b307f259bdb0862507f5ab604824fe9f2ffe6ea791d0cb63ac251ac914faa90)
+- fig5_exp4_tools_and_bloat.png (288,740 bytes | SHA-256: 0f27389b074a99778f1759b1ee8eb9c1277b1bab5d676b6383c344542364cd70)
   Figura 5: Experimento 4 - Speedups de Prefill com Tool-RAG Schema Pruning
-- fig6_pmc_hardware_counters.png (308,717 bytes | SHA-256: 8c215827a8ef94c0db1ff9123b7b998dd10493eda5662f4f91d22c9410f3c1b5)
+- fig6_pmc_hardware_counters.png (308,897 bytes | SHA-256: a8bbb2a575d3a28ea0b7ee15d9f9bcd89b5ec07895eff54547b2f5bb7e574056)
   Figura 6: Experimento 5 - Contadores PMC de Instruções e Ciclos de Hardware
 
 ================================================================================

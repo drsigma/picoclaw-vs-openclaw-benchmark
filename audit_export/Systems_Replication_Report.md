@@ -26,17 +26,17 @@ This conformance report documents the physical execution, microarchitectural ins
 ### Key Empirical Findings (Workload W2 -- Standard 15-Tool Chain):
 - **Client Middleware Dispatch Latency ($T_{\text{orch}}$):**
   * **macOS ARM64 (M4):** PicoClaw Go achieved a median latency of **5.53 ms** vs. OpenClaw Full at **24.55 ms** (**4.44x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
-  * **Linux x86_64:** PicoClaw Go achieved a median latency of **6.66 ms** vs. OpenClaw Full at **35.99 ms** (**5.40x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
+  * **Linux x86_64:** PicoClaw Go achieved a median latency of **6.68 ms** vs. OpenClaw Full at **35.53 ms** (**5.31x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
   * **Windows 11 NVIDIA:** PicoClaw Go achieved a median latency of **13.11 ms** vs. OpenClaw Full at **48.55 ms** (**3.70x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
   * **Windows Intel iGPU:** PicoClaw Go achieved a median latency of **14.03 ms** vs. OpenClaw Full at **68.89 ms** (**4.91x speedup**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
 - **Resident Physical Memory Footprint (Peak RSS):**
   * **macOS ARM64 (M4):** PicoClaw Go stabilized at **5.09 MB** vs. OpenClaw Full at **37.71 MB** (**7.41x memory reduction**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
-  * **Linux x86_64:** PicoClaw Go stabilized at **9.70 MB** vs. OpenClaw Full at **86.67 MB** (**8.94x memory reduction**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
+  * **Linux x86_64:** PicoClaw Go stabilized at **9.69 MB** vs. OpenClaw Full at **86.64 MB** (**8.94x memory reduction**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
   * **Windows 11 NVIDIA:** PicoClaw Go stabilized at **10.20 MB** vs. OpenClaw Full at **72.93 MB** (**7.15x memory reduction**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
   * **Windows Intel iGPU:** PicoClaw Go stabilized at **8.19 MB** vs. OpenClaw Full at **54.76 MB** (**6.69x memory reduction**; Cliff's $\delta = 1.00$, Mann-Whitney $p < 0.0001$).
 - **Instruction bloat and Hardware PMC Telemetry:**
   * **macOS ARM64 (Apple PMU):** OpenClaw Full executed **791.7M instructions**, compared to **62.3M** in PicoClaw (**12.71x instruction elimination ratio**).
-  * **Linux x86_64 (`perf_event_open`):** OpenClaw Full executed **771.5M instructions**, compared to **32.7M** in PicoClaw (**23.63x instruction elimination ratio**).
+  * **Linux x86_64 (`perf_event_open`):** OpenClaw Full executed **772.1M instructions**, compared to **32.4M** in PicoClaw (**23.87x instruction elimination ratio**).
   * **Windows Platforms (NVIDIA and Intel iGPU):** Hardware instruction counters are restricted in user-mode by the OS kernel (marked `N/A*`); CPU cycles tracked empirically via `QueryProcessCycleTime` confirm **528.1M cycles** in OpenClaw Full vs. **45.8M** in PicoClaw (**11.54x cycle overhead**).
 
 ---
@@ -89,24 +89,24 @@ The exploratory comparison was conducted via ordinary least squares linear regre
 
 ### 4.1. Table 5: Tool-RAG Schema Pruning Analysis
 - **Token Reduction:** Tool-RAG dynamic pruning reduces active prompt tokens from 7,091 tokens (unmitigated 54-tool catalog) to **917 tokens** (retrieved Top-5 schema), representing an **$-87.1\%$ token reduction**.
-- **Regime Separation:** In Regime A (Cold Prefill), dynamic schema pruning eliminates quadratic attention overhead, providing substantial speedup (up to 9.96x on Intel Graphics and 7.43x on macOS M4). In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, confirming that Tool-RAG's primary microarchitectural value is cold prefill mitigation.
+- **Regime Separation & Dynamic Speedups:** In Regime A (Cold Prefill), dynamic schema pruning eliminates quadratic attention overhead, providing empirical speedups of **7.28x** on macOS M4, **4.97x** on Linux x86_64, **4.64x** on Windows 11 NVIDIA, and **9.96x** on Windows Intel iGPU. In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, confirming that Tool-RAG's primary microarchitectural value is cold prefill mitigation.
 
 ### 4.2. Table 4: KV-Cache Thrashing & Slot Isolation
 - The column `Thrashing Overhead` was renamed to `Full-to-Minimal Catalog Ratio` to accurately reflect architectural schema scaling.
 - Actual cache eviction penalties were quantified directly as the ratio of uncontrolled thrashing to isolated retention ($T_2/T_3$):
-  * **macOS ARM64:** Minimal catalog cache penalty $= 7.15\text{x}$; Full catalog cache penalty $= 20.24\text{x}$.
+  * **macOS ARM64:** Minimal catalog cache penalty $= 6.85\text{x}$; Full catalog cache penalty $= 19.46\text{x}$.
   * **Linux x86_64:** Minimal catalog cache penalty $= 1.96\text{x}$; Full catalog cache penalty $= 2.63\text{x}$.
-  * **Windows 11:** Minimal catalog cache penalty $= 1.99\text{x}$; Full catalog cache penalty $= 2.35\text{x}$.
+  * **Windows 11:** Minimal catalog cache penalty $= 2.01\text{x}$; Full catalog cache penalty $= 2.30\text{x}$.
 
 ### 4.3. Table 3: Cache Invariance Clarification
-- Empirical measurements indicate that **cache invariance applies strictly to absolute orchestrator latency $T_{\text{orch}}$ (ms)** ($|\Delta T_{\text{orch}}| < 0.5\text{ ms}$ between cold prefill and warm cache).
+- Empirical measurements indicate that **cache invariance applies strictly to absolute orchestrator latency $T_{\text{orch}}$ (ms)** ($|\Delta T_{\text{orch}}| < 2.0\text{ ms}$, with a maximum difference of $1.95\text{ ms}$ observed on Windows NVIDIA).
 - The relative overhead fraction $\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$ increases under warm cache because neural inference latency $T_{\text{neural}}$ decreases by up to 10x.
 
 ### 4.4. Table 7: Multi-Platform Dual-Session Replication
-- Complete dual-session replication across platforms demonstrated cross-session median divergence below $2.0\%$ across all tested agent runtimes, with formal two one-sided equivalence tests (TOST) confirming statistical equivalence within $\pm 15\%$.
+- Dual-session contrast analysis across 102 platform/workload pairs established **52.0% (53/102) Equivalence Proven** ($p < 0.05$ via TOST), **28.4% (29/102) Replicated** ($|\text{Divergence}| < 15\%$), and **19.6% (20/102) Divergence Detected** ($|\text{Divergence}| \ge 15\%$). Divergences occurred predominantly in PythonNative on W5 (e.g. macOS +15,360% and Linux +11,936% in Regime A) driven by dynamic LangChain module import initialization across distinct session states.
 
 ### 4.5. Table 8: Enterprise LangChain Workload (W5)
-- Consolidated telemetry and LLM-as-a-judge quality scores (1–5) across platforms confirm that PicoClaw maintains deterministic task success while eliminating 75–85% of Node.js resident memory bloat.
+- Semantic LLM-as-a-judge quality scoring was instrumented on the PythonNative LangChain core adapter (scoring 1.0/5.0 on macOS M4 due to strict syntax validation failures, and 3.0/5.0 on Windows Intel iGPU due to partial query completion). Baseline client runtimes (PicoClaw Go, OpenClaw Node.js, Bun JSC) operate via deterministic client tool dispatch without the judge scoring harness (marked N/A†).
 
 ---
 
