@@ -1186,7 +1186,8 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         "> `‡` **N/A‡** (*Direct Neural Baseline*): The neural baseline issues direct HTTP requests from the telemetry harness to the resident `llama-server` without intermediary agent runtimes ($T_{\\text{orch}} \\equiv 0$); no client agent process exists for RSS or instruction attribution.  ",
         "> `||` **N/A||** (*Bun JSC on macOS*): Bun (JSC) was evaluated as a secondary JavaScript engine ablation on x86_64 nodes (Linux and Windows) following the completion of the Darwin ARM64 reference campaign.  ",
         "> `**` **N/A\\*\\*** (*Host Package Energy on Windows Intel Graphics*): Intel HD Graphics 4600 operates on unified host memory aperture (UMA); without a kernel RAPL MSR driver or discrete NVML, host package energy and EDP are not instrumented in unprivileged user-mode.  ",
-        "> `¶` **Cross-ISA Hardware Counter Segregation & Clean Physical Executions:** Direct numerical comparisons of retired hardware instruction counts between Apple Silicon (ARM64 RISC) and Intel Core (x86_64 CISC) are microarchitecturally incommensurable due to divergent instruction densities, macro-op fusion, and RISC micro-operation expansion; evaluate hardware instructions via within-ISA relative ratios (e.g., OpenClaw Full vs. PicoClaw). All consolidated datasets originate from unbroken, from-scratch executions without partial or reused trials."
+        "> **Note — Cross-ISA Hardware Counter Segregation:** Direct numerical comparisons of retired hardware instruction counts between Apple Silicon (ARM64 RISC) and Intel Core (x86_64 CISC) are microarchitecturally incommensurable due to divergent instruction densities, macro-op fusion, and RISC micro-operation expansion; evaluate hardware instructions via within-ISA relative ratios (e.g., OpenClaw Full vs. PicoClaw).  ",
+        "> **Note — Clean Physical Executions:** All consolidated datasets originate from unbroken, from-scratch executions without partial or reused trials."
     ])
 
     t1_tex.extend([
@@ -1198,7 +1199,8 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         "\\multicolumn{9}{l}{\\textsuperscript{\\ddagger}\\footnotesize Neural baseline issues direct HTTP requests to resident llama-server without client agent runtime ($T_{\\text{orch}} \\equiv 0$).} \\\\",
         "\\multicolumn{9}{l}{\\textsuperscript{||}\\footnotesize Bun JSC was evaluated as a secondary JavaScript engine ablation on x86\\_64 nodes (Linux and Windows) following the Darwin ARM64 reference campaign.} \\\\",
         "\\multicolumn{9}{l}{\\textsuperscript{**}\\footnotesize Host energy \\& EDP on Intel Graphics UMA uninstrumented in Windows user-mode (requires ring-0 MSR driver).} \\\\",
-        "\\multicolumn{9}{l}{\\textsuperscript{\\P}\\footnotesize Cross-ISA hardware instruction counts (ARM64 vs. x86\\_64) are segregated due to microarchitectural density differences; evaluate via relative ratios. All datasets originate from clean from-scratch runs.} \\\\",
+        "\\multicolumn{9}{l}{\\footnotesize \\textbf{Note --- Cross-ISA Hardware Counter Segregation:} Hardware instruction counts (ARM64 vs. x86\\_64) are segregated due to microarchitectural density differences; evaluate via within-ISA relative ratios.} \\\\",
+        "\\multicolumn{9}{l}{\\footnotesize \\textbf{Note --- Clean Physical Executions:} All empirical datasets originate from clean from-scratch runs without partial data reuse.} \\\\",
         "\\hline",
         "\\end{tabular}",
         "}",
@@ -2730,7 +2732,7 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
         f"| `N/A*` | Windows (NVIDIA e Intel iGPU) — Hardware Instructions | O kernel do Windows NT bloqueia leitura de contadores PMU (`CR4.PCE`) em user-mode sem driver privilegiado. Ciclos de CPU são medidos diretamente via Win32 `QueryProcessCycleTime` ({wn_cyc['ratio']:.2f}x no NVIDIA; {wi_cyc['ratio']:.2f}x no Intel iGPU). |",
         "| `N/A†` | Tabela 8 — `quality_score` | Ausência de instrumentação do avaliador semântico LLM-as-a-Judge nos runtimes cliente não-LangChain e nas execuções Linux/Windows NVIDIA W5 (uso exclusivo para `quality_score`). |",
         "| `N/A‡` | Todas as Plataformas — `neural_baseline` (RSS, Instr/Cycles) | A linha de base neural envia chamadas HTTP diretamente ao `llama-server` sem processo orquestrador cliente ($T_{\\text{orch}} \\equiv 0$). |",
-        "| `N/A§` | **Unificado (`fig2(b)`, Tabela 1 e Tabela 8)** — `python_native` no Windows (Peak RSS e Cycles) | A invocação via wrapper `py.exe` (PEP 397) captura o PID pai efêmero (~4.9 MB) em vez do processo filho `python.exe`; os dados do stub são excluídos uniformemente em todo o pacote. |",
+        "| `N/A§` | Tabelas 1, 8 e Figura 2(b) — `python_native` no Windows (RSS e Cycles) | A invocação via wrapper `py.exe` (PEP 397) captura o PID pai efêmero (~4.9 MB) em vez do processo filho `python.exe`; os dados do stub são excluídos uniformemente em todo o pacote. |",
         "| `N/A||` | macOS ARM64 — Bun JSC Engine | Motor secundário avaliado como ablação nas plataformas x86_64 (Linux e Windows) após o congelamento da campanha de referência ARM64. |",
         "| `N/A**` | Windows Intel iGPU — Energia de Pacote e EDP | Intel HD Graphics 4600 opera sobre memória DDR3 compartilhada (UMA) sem sensores NVML dedicados ou driver MSR RAPL em anel zero no modo de usuário ($P_{\\text{idle}} = 28.50\\text{ W}$). |",
         "",

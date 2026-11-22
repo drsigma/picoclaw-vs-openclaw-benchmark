@@ -38,7 +38,8 @@ Neural Baseline (Direct Server) & Windows Intel iGPU & 51817.8 & 0.00 [0.0, 0.0]
 \multicolumn{9}{l}{\textsuperscript{\ddagger}\footnotesize Neural baseline issues direct HTTP requests to resident llama-server without client agent runtime ($T_{\text{orch}} \equiv 0$).} \\
 \multicolumn{9}{l}{\textsuperscript{||}\footnotesize Bun JSC was evaluated as a secondary JavaScript engine ablation on x86\_64 nodes (Linux and Windows) following the Darwin ARM64 reference campaign.} \\
 \multicolumn{9}{l}{\textsuperscript{**}\footnotesize Host energy \& EDP on Intel Graphics UMA uninstrumented in Windows user-mode (requires ring-0 MSR driver).} \\
-\multicolumn{9}{l}{\textsuperscript{\P}\footnotesize Cross-ISA hardware instruction counts (ARM64 vs. x86\_64) are segregated due to microarchitectural density differences; evaluate via relative ratios. All datasets originate from clean from-scratch runs.} \\
+\multicolumn{9}{l}{\footnotesize \textbf{Note --- Cross-ISA Hardware Counter Segregation:} Hardware instruction counts (ARM64 vs. x86\_64) are segregated due to microarchitectural density differences; evaluate via within-ISA relative ratios.} \\
+\multicolumn{9}{l}{\footnotesize \textbf{Note --- Clean Physical Executions:} All empirical datasets originate from clean from-scratch runs without partial data reuse.} \\
 \hline
 \end{tabular}
 }
