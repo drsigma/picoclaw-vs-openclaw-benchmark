@@ -34,7 +34,7 @@ make test
 make reproduce-figures
 ```
 
-### Reprodução Física nas 3 Plataformas Nativas / Physical Tri-Platform Execution
+### Reprodução Física nas 4 Plataformas Nativas / Physical Quad-Platform Execution
 
 * **🍎 macOS ARM64 (Apple Silicon M1/M2/M3/M4):**
   * Execute `make benchmark` para rodar a campanha física real em espaço de usuário comum;
@@ -42,11 +42,13 @@ make reproduce-figures
 * **🐧 Linux x86_64 (Ubuntu 24.04/26.04 com NVIDIA GPU):**
   * Execute `sudo bash reproduce_linux_gold.sh` para a campanha completa automatizada com telemetria Intel RAPL e NVIDIA NVML;
   * Ou invoque diretamente `python scripts/run_linux_x86_64_master_campaign.py --ngl 16 --reps 30`.
-* **🪟 Windows 11 x86_64 (PowerShell 7+ / Prompt de Administrador):**
+* **🪟 Windows 11 x86_64 (PowerShell 7+ / Prompt de Administrador com NVIDIA dGPU):**
   * Execute `.\windows_gold.ps1 -Reps 30 -Ngl 16` no PowerShell para execução com isolamento e telemetria Win32 / NVML;
   * Ou invoque diretamente `python scripts\run_windows_x86_64_master_campaign.py --ngl 16 --reps 30`.
-* **📊 Consolidação Tri-Plataforma e Pacote de Auditoria:**
-  * Execute `python scripts/reproduce_tri_platform_analysis.py` para reprocessar todos os dados brutos dos 3 sistemas operacionais, computar intervalos bootstrap 95% da mediana, regenerar as 6 figuras e exportar o pacote `audit_export_tri_platform.zip`.
+* **💻 Windows 10/11 x86_64 (Intel HD Graphics 4600 iGPU UMA):**
+  * Execute `powershell -ExecutionPolicy Bypass -File .\launch_sentinel_intel_win.ps1` para executar a campanha com telemetria Win32 PSAPI e monitoramento sentinela em user-mode.
+* **📊 Consolidação Quad-Plataforma e Pacote de Auditoria:**
+  * Execute `python scripts/reproduce_quad_platform_analysis.py` para reprocessar todos os dados brutos das 4 plataformas, computar intervalos bootstrap 95% da mediana, testes TOST de replicação e exportar os pacotes `audit_export_quad_platform.zip` e `audit_export_tri_platform.zip`.
 
 ---
 

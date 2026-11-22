@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# run_all.sh - Tri-Platform Master Replication Launcher
+# run_all.sh - Quad-Platform Master Replication Launcher
 # Automates Double-Session Replication (Session 1 + Session 2) across
 # ALL workloads (W1, W2, W3, W4, W5) in BOTH regimes (A - Cold Prefill, B - Warm Cache)
-# Compatible with macOS ARM64 (Darwin), Linux x86_64, and Windows x86_64 (Git Bash/WSL).
+# Compatible with macOS ARM64 (Darwin), Linux x86_64, Windows NVIDIA, and Windows Intel Graphics.
 # ==============================================================================
 set -euo pipefail
 
@@ -13,7 +13,7 @@ cd "${REPO_DIR}"
 UNAME_S="$(uname -s)"
 
 echo "========================================================================"
-echo "🚀 INICIANDO ORQUESTRADOR MESTRE TRI-PLATAFORMA (run_all.sh)"
+echo "🚀 INICIANDO ORQUESTRADOR MESTRE QUAD-PLATAFORMA (run_all.sh)"
 echo "   Plataforma Detectada: ${UNAME_S}"
 echo "   Workloads: W1, W2, W3, W4, W5 | Regimes: Cold (A) & Warm (B)"
 echo "   Sessões: Sessão 1 + Sessão 2 (Double Session Replication)"

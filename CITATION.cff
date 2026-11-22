@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this benchmark suite, datasets, or experimental findings in your research, please cite it as below."
-title: "A Reproducible Tri-Platform Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and Microarchitectural Dynamics in Local LLM Agents (macOS, Linux, Windows 11)"
-abstract: "A forensic, reproducible tri-platform experimental benchmark suite comparing autonomous AI agent orchestration runtimes (Go native, Node.js V8, Bun JSC, CPython) across Apple Silicon M4 (macOS Darwin ARM64), Ubuntu Linux x86_64, and Windows 11 x86_64. Incorporates hardware microarchitectural telemetry, non-parametric hypothesis testing, and active Tool-RAG schema pruning under a strict Zero-Mock empirical protocol."
+title: "A Reproducible Quad-Platform Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and Microarchitectural Dynamics in Local LLM Agents (macOS, Linux, Windows NVIDIA, Windows Intel iGPU)"
+abstract: "A forensic, reproducible quad-platform experimental benchmark suite comparing autonomous AI agent orchestration runtimes (Go native, Node.js V8, Bun JSC, CPython) across Apple Silicon M4 (macOS Darwin ARM64), Ubuntu Linux x86_64, Windows 11 x86_64 (NVIDIA dGPU), and Windows 10/11 x86_64 (Intel HD Graphics 4600 iGPU UMA). Incorporates hardware microarchitectural telemetry, non-parametric hypothesis testing, and active Tool-RAG schema pruning under a strict Zero-Mock empirical protocol."
 authors:
   - family-names: "Paniccia Cassetta"
     given-names: "Rafael"
@@ -10,10 +10,11 @@ authors:
 keywords:
   - "AI Agents"
   - "Autonomous Agent Benchmarking"
-  - "Tri-Platform Systems"
+  - "Quad-Platform Systems"
   - "Apple Silicon M4"
   - "Linux x86_64"
   - "Windows 11"
+  - "Intel Graphics iGPU"
   - "Go Architecture"
   - "TypeScript V8 Runtime"
   - "Energy-Delay Product"

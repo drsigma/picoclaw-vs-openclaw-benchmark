@@ -2,13 +2,13 @@
   <img src="figures/benchmark_logo.png" alt="PicoClaw vs. OpenClaw Benchmark Suite Logo" width="850"/>
 </p>
 
-# A Reproducible Tri-Platform Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and Microarchitectural Dynamics in Local LLM Agents (macOS, Linux, Windows 11)
+# A Reproducible Quad-Platform Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and Microarchitectural Dynamics in Local LLM Agents (macOS, Linux, Windows NVIDIA, Windows Intel iGPU)
 
 <p align="center">
   <a href="https://github.com/drsigma/picoclaw-vs-openclaw-benchmark/actions"><img src="https://github.com/drsigma/picoclaw-vs-openclaw-benchmark/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/Code%20License-MIT-yellow.svg" alt="Code License: MIT"/></a>
   <a href="DATA_LICENSE"><img src="https://img.shields.io/badge/Data%20License-CC%20BY%204.0-lightgrey.svg" alt="Data License: CC BY 4.0"/></a>
-  <a href="https://github.com/drsigma/picoclaw-vs-openclaw-benchmark"><img src="https://img.shields.io/badge/Hardware-M4%20%7C%20Linux%20x86__64%20%7C%20Win11-purple.svg" alt="Hardware: Tri-Platform"/></a>
+  <a href="https://github.com/drsigma/picoclaw-vs-openclaw-benchmark"><img src="https://img.shields.io/badge/Hardware-M4%20%7C%20Linux%20x86__64%20%7C%20Win11%20NVIDIA%20%7C%20Intel%20iGPU-purple.svg" alt="Hardware: Quad-Platform"/></a>
   <a href="#"><img src="https://img.shields.io/badge/Docs-Bilingual%20(PT--BR%20%7C%20EN--US)-blue.svg" alt="Documentation: Bilingual"/></a>
   <a href="CITATION.cff"><img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.14187265-blue.svg" alt="DOI"/></a>
 </p>
@@ -22,30 +22,30 @@
 ## 📌 Resumo Executivo / Executive Summary
 
 ### 🇧🇷 Português (PT-BR)
-Este repositório apresenta um framework experimental reprodutível e uma avaliação comparativa rigorosa entre arquiteturas paradigmáticas de orquestração de agentes autônomos de Inteligência Artificial avaliadas em **três plataformas físicas de computação**: **macOS ARM64 (Apple M4)**, **Linux x86_64 (Ubuntu 26.04 LTS)** e **Windows 11 x86_64 (Build 26200)**:
+Este repositório apresenta um framework experimental reprodutível e uma avaliação comparativa rigorosa entre arquiteturas paradigmáticas de orquestração de agentes autônomos de Inteligência Artificial avaliadas em **quatro plataformas físicas de computação**: **macOS ARM64 (Apple M4)**, **Linux x86_64 (Ubuntu 26.04 LTS)**, **Windows 11 x86_64 (NVIDIA dGPU)** e **Windows 10/11 x86_64 (Intel HD Graphics 4600 iGPU UMA)**:
 1. **PicoClaw v0.3.1 (Sipeed):** Binário nativo compilado em Go 1.23.2, com concorrência leve baseada em *goroutines* (~2 KB por pilha) e coletor de lixo não-geracional tri-color com pausas sub-milissegundo.
 2. **OpenClaw v2026.10.7:** Orquestrador corporativo modular em TypeScript/Node.js v26.12.1 executando sobre a Google V8 (compilação JIT multinível), com validação de esquemas via TypeBox e persistência nativa `node:sqlite`.
 3. **Runtimes Isomórficos Secundários:** CPython 3.12/3.14 (referência dinâmica) e Bun v1.4.4 (JavaScriptCore AOT micro-VM).
 
 Ambos os agentes comunicam-se via loopback TCP (`127.0.0.1:8080`) com uma instância neural local servida por **llama.cpp** hospedando o modelo **Meta Llama-3.2-3B-Instruct (GGUF Q4_K_M)** sob decodificação gulosa determinística (`temperature = 0.0`, `seed = 42`). O estudo inclui:
-* **Speedups de Orquestração ($T_{\text{orch}}$) no Workload W2:** PicoClaw atinge **$3{,}61\times$ no macOS M4**, **$5{,}40\times$ no Linux x86_64** e **$4{,}18\times$ no Windows 11 x86_64** em relação ao OpenClaw.
-* **Redução de Instruções de Hardware (PMU):** Redução de **$12{,}65\times$ no macOS ARM64** (Apple PMU) e **$23{,}63\times$ no Linux x86_64** (`perf_event_open`). No Windows 11, contadores de instruções de PMU em *user-mode* são restritos pelo SO, mantendo-se a telemetria empírica direta de ciclos de CPU via `QueryProcessCycleTime` (**$43{,}0\text{M}$ ciclos no PicoClaw vs. $507{,}9\text{M}$ no OpenClaw Full, sobrecarga de $11{,}82\times$**), em estrita conformidade com a política **Zero-Mock**.
-* **Mitigação Tool-RAG:** Pruning dinâmico de esquemas ($54 \rightarrow \text{Top-}15$) gerando speedups empíricos de **$11{,}52\times$ no macOS**, **$6{,}03\times$ no Linux** e **$5{,}63\times$ no Windows 11**.
-* **Telemetria de Potência e Energia:** Apple SMC Shunts no macOS, Intel RAPL + NVIDIA NVML no Linux e Windows 11.
-* **Estatística Não-Paramétrica:** Intervalos de confiança Bootstrap de 95% calculados diretamente sobre a mediana (100% das medianas contidas nos intervalos), testes Mann-Whitney U com correção de Holm-Bonferroni, Cliff's Delta $d$ e $\hat{A}_{12}$ de Vargha-Delaney.
+* **Speedups de Orquestração ($T_{\text{orch}}$) no Workload W2:** PicoClaw atinge **$4{,}44\times$ no macOS M4**, **$5{,}40\times$ no Linux x86_64**, **$3{,}70\times$ no Windows 11 NVIDIA** e **$4{,}91\times$ no Windows Intel iGPU** em relação ao OpenClaw.
+* **Redução de Instruções de Hardware (PMU):** Redução de **$12{,}71\times$ no macOS ARM64** (Apple PMU) e **$23{,}63\times$ no Linux x86_64** (`perf_event_open`). No Windows (NVIDIA e Intel iGPU), contadores de instruções de PMU em *user-mode* são restritos pelo SO, mantendo-se a telemetria empírica direta de ciclos de CPU via `QueryProcessCycleTime` (**$43{,}0\text{M}$ ciclos no PicoClaw vs. $507{,}9\text{M}$ no OpenClaw Full, sobrecarga de $11{,}82\times$**), em estrita conformidade com a política **Zero-Mock**.
+* **Mitigação Tool-RAG:** Pruning dinâmico de esquemas ($54 \rightarrow \text{Top-}15$) gerando speedups empíricos de **$7{,}43\times$ no macOS**, **$6{,}03\times$ no Linux**, **$5{,}63\times$ no Windows NVIDIA** e **$9{,}96\times$ no Windows Intel Graphics**.
+* **Telemetria de Potência e Energia:** Apple SMC Shunts no macOS, Intel RAPL + NVIDIA NVML no Linux e Windows 11. Na iGPU Intel, energia de pacote é transparentemente identificada como `N/A**` por limitações de modo usuário.
+* **Estatística Não-Paramétrica:** Intervalos de confiança Bootstrap de 95% calculados diretamente sobre a mediana (100% das medianas contidas nos intervalos), testes Mann-Whitney U com correção de Holm-Bonferroni, testes de equivalência TOST, Cliff's Delta $d$ e $\hat{A}_{12}$ de Vargha-Delaney.
 
 ### 🇺🇸 English (EN-US)
-This repository delivers an open-source, reproducible experimental benchmark framework comparing autonomous AI agent orchestration architectures evaluated across **three physical computing platforms**: **macOS ARM64 (Apple M4)**, **Linux x86_64 (Ubuntu 26.04 LTS)**, and **Windows 11 x86_64 (Build 26200)**:
+This repository delivers an open-source, reproducible experimental benchmark framework comparing autonomous AI agent orchestration architectures evaluated across **four physical computing platforms**: **macOS ARM64 (Apple M4)**, **Linux x86_64 (Ubuntu 26.04 LTS)**, **Windows 11 x86_64 (NVIDIA dGPU)**, and **Windows 10/11 x86_64 (Intel HD Graphics 4600 iGPU UMA)**:
 1. **PicoClaw v0.3.1 (Sipeed):** Statically compiled Go 1.23.2 binary leveraging concurrent goroutines (~2 KB starting stack) and non-generational tri-color mark-sweep garbage collection with sub-millisecond pauses.
 2. **OpenClaw v2026.10.7:** Enterprise-grade TypeScript agent orchestrator executing atop Node.js v26.12.1 (Google V8 tiered JIT), dynamic TypeBox schema validation, and native `node:sqlite` session state storage.
 3. **Secondary Isomorphic Runtimes:** CPython 3.12/3.14 (dynamic reference) and Bun v1.4.4 (JavaScriptCore AOT micro-VM).
 
 All orchestrators interface via local loopback (`127.0.0.1:8080`) with a unified neural server powered by **llama.cpp** serving **Meta Llama-3.2-3B-Instruct (Q4_K_M)** under greedy deterministic decoding (`temperature = 0.0`, `seed = 42`). Key findings include:
-* **Orchestration Speedups ($T_{\text{orch}}$) on W2:** PicoClaw achieves **$3.61\times$ on macOS M4**, **$5.40\times$ on Linux x86_64**, and **$4.18\times$ on Windows 11 x86_64** over OpenClaw.
-* **Hardware Instruction Reduction (PMU):** **$12.65\times$ on macOS ARM64** (Apple PMU) and **$23.63\times$ on Linux x86_64** (`perf_event_open`). On Windows 11, user-mode PMU instruction counters are restricted by kernel policy; empirical CPU cycles tracked via `QueryProcessCycleTime` confirm **$43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ in OpenClaw Full ($11.82\times$ cycle overhead)** under strict **Zero-Mock** guidelines.
-* **Tool-RAG Mitigation:** Dynamic schema pruning ($54 \rightarrow \text{Top-}15$) yields speedups of **$11.52\times$ on macOS**, **$6.03\times$ on Linux**, and **$5.63\times$ on Windows 11**.
-* **Power & Energy Telemetry:** Apple SMC Shunts on macOS, Intel RAPL + NVIDIA NVML on Linux and Windows 11.
-* **Non-Parametric Statistics:** 95% Bootstrap confidence intervals computed directly on sample medians (guaranteeing 100% containment), Mann-Whitney U tests with step-down Holm-Bonferroni adjustment, Cliff's Delta $d$, and Vargha-Delaney $\hat{A}_{12}$.
+* **Orchestration Speedups ($T_{\text{orch}}$) on W2:** PicoClaw achieves **$4.44\times$ on macOS M4**, **$5.40\times$ on Linux x86_64**, **$3.70\times$ on Windows 11 NVIDIA**, and **$4.91\times$ on Windows Intel Graphics** over OpenClaw.
+* **Hardware Instruction Reduction (PMU):** **$12.71\times$ on macOS ARM64** (Apple PMU) and **$23.63\times$ on Linux x86_64** (`perf_event_open`). On Windows, user-mode PMU instruction counters are restricted by kernel policy; empirical CPU cycles tracked via `QueryProcessCycleTime` confirm **$43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ in OpenClaw Full ($11.82\times$ cycle overhead)** under strict **Zero-Mock** guidelines.
+* **Tool-RAG Mitigation:** Dynamic schema pruning ($54 \rightarrow \text{Top-}15$) yields speedups of **$7.43\times$ on macOS**, **$6.03\times$ on Linux**, **$5.63\times$ on Windows NVIDIA**, and **$9.96\times$ on Windows Intel Graphics**.
+* **Power & Energy Telemetry:** Apple SMC Shunts on macOS, Intel RAPL + NVIDIA NVML on Linux and Windows 11. Uninstrumented user-mode package energy on Intel iGPU is explicitly reported as `N/A**`.
+* **Non-Parametric Statistics:** 95% Bootstrap confidence intervals computed directly on sample medians (guaranteeing 100% containment), Mann-Whitney U tests with step-down Holm-Bonferroni adjustment, TOST equivalence testing, Cliff's Delta $d$, and Vargha-Delaney $\hat{A}_{12}$.
 
 ---
 
@@ -343,7 +343,7 @@ Para revisores acadêmicos (*SoftwareX*) testando o repositório em ambientes is
 make dry-run
 ```
 
-### 2. Modelo de Segurança e Execução Completa nas 3 Plataformas Físicas / Security Model & Tri-Platform Physical Runs
+### 2. Modelo de Segurança e Execução Completa nas 4 Plataformas Físicas / Security Model & Quad-Platform Physical Runs
 > [!IMPORTANT]
 > **Privilégios e Segurança:** Os agentes avaliados (`PicoClaw` e `OpenClaw`) e o servidor neural (`llama-server`) **sempre executam estritamente em espaço de usuário comum** (`euid != 0`). A exigência de `sudo` restringe-se exclusivamente à amostragem física de sensores de hardware bloqueada pelo kernel (Apple SMC `powermetrics` no macOS, Intel RAPL e NVIDIA NVML no Linux).
 
@@ -352,7 +352,7 @@ make dry-run
 # 1. Configurar o ambiente isolado automaticamente (Python venv, Node.js e ferramentas)
 make setup
 
-# 2. Executar os 45 testes automatizados (pytest e ruff linter)
+# 2. Executar a suíte de testes automatizados (pytest e ruff linter)
 make test
 
 # 3. Execução em espaço de usuário comum (Sem Sudo / Degradação Graciosa)
@@ -374,7 +374,7 @@ sudo bash reproduce_linux_gold.sh
 python scripts/run_linux_x86_64_master_campaign.py --ngl 16 --reps 30
 ```
 
-#### 🪟 Windows 11 x86_64 (PowerShell 7+ / Prompt de Administrador)
+#### 🪟 Windows 11 x86_64 (PowerShell 7+ / Prompt de Administrador com NVIDIA dGPU)
 ```powershell
 # Execução da campanha padrão ouro com telemetria Win32 QueryProcessCycleTime e NVML
 .\windows_gold.ps1 -Reps 30 -Ngl 16
@@ -383,11 +383,17 @@ python scripts/run_linux_x86_64_master_campaign.py --ngl 16 --reps 30
 python scripts\run_windows_x86_64_master_campaign.py --ngl 16 --reps 30
 ```
 
-#### 📊 Pipeline Mestre de Auditoria Forense e Consolidação Tri-Plataforma
+#### 💻 Windows 10/11 x86_64 (Intel HD Graphics 4600 iGPU UMA)
+```powershell
+# Execução da campanha automatizada com sentinela e telemetria Win32 PSAPI em user-mode
+powershell -ExecutionPolicy Bypass -File .\launch_sentinel_intel_win.ps1
+```
+
+#### 📊 Pipeline Mestre de Auditoria Forense e Consolidação Quad-Plataforma
 ```bash
-# Executa a auditoria cruzada de ponta a ponta, computa ICs Bootstrap da mediana,
-# regenera as 6 figuras científicas em 300 DPI e empacota audit_export_tri_platform.zip
-python scripts/reproduce_tri_platform_analysis.py
+# Executa a auditoria cruzada de ponta a ponta nas 4 plataformas, computa ICs Bootstrap da mediana,
+# testes TOST de replicação, regenera as 6 figuras científicas em 300 DPI e empacota os arquivos de auditoria
+python scripts/reproduce_quad_platform_analysis.py
 ```
 
 ---
@@ -452,7 +458,7 @@ Se esta suíte de testes, os dados empíricos tri-plataforma e as ferramentas ab
 * **Finalidade:** Manutenção de servidores de teste, infraestrutura de telemetria de hardware e publicação científica *open-access*.
 
 ### 🇺🇸 Support Independent Open-Access Systems Research
-If this benchmark framework, empirical tri-platform telemetry, or reproducible analysis helped your research or engineering workflows, you can support our academic infrastructure and open-access publications via Brazilian Pix transfer using the QR code above or key `rafael.paniccia@aluno.ufabc.edu.br`.
+If this benchmark framework, empirical quad-platform telemetry, or reproducible analysis helped your research or engineering workflows, you can support our academic infrastructure and open-access publications via Brazilian Pix transfer using the QR code above or key `rafael.paniccia@aluno.ufabc.edu.br`.
 
 ---
 

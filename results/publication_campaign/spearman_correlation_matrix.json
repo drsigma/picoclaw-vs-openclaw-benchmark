@@ -40,7 +40,7 @@
       },
       "regime_b_warm": {
         "rho": 0.6029,
-        "p_raw": 1.9731773762914628e-75,
+        "p_raw": 1.9731773762914824e-75,
         "p_adj_holm": 0.0
       }
     },
@@ -61,12 +61,12 @@
       "interaction": "$T_{\\text{task}}$ vs $T_{\\text{orch}}$ (Orchestrator Overhead Share)",
       "regime_a_cold": {
         "rho": 0.4897,
-        "p_raw": 1.770194646999901e-46,
+        "p_raw": 1.770194646999898e-46,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
         "rho": 0.4812,
-        "p_raw": 1.0026313034952375e-44,
+        "p_raw": 1.0026313034952321e-44,
         "p_adj_holm": 0.0
       }
     },
@@ -79,7 +79,7 @@
       },
       "regime_b_warm": {
         "rho": 0.587,
-        "p_raw": 1.2293799522562625e-70,
+        "p_raw": 1.2293799522563119e-70,
         "p_adj_holm": 0.0
       }
     },
@@ -92,7 +92,7 @@
       },
       "regime_b_warm": {
         "rho": 0.5434,
-        "p_raw": 7.6605866105136985e-59,
+        "p_raw": 7.660586610513772e-59,
         "p_adj_holm": 0.0
       }
     },
@@ -113,12 +113,12 @@
       "interaction": "Retired Instructions vs $T_{\\text{orch}}$",
       "regime_a_cold": {
         "rho": 0.7794,
-        "p_raw": 4.5089491758044175e-154,
+        "p_raw": 4.508949175804253e-154,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
         "rho": 0.7623,
-        "p_raw": 1.7667748013012853e-143,
+        "p_raw": 1.766774801301385e-143,
         "p_adj_holm": 0.0
       }
     },
@@ -126,12 +126,12 @@
       "interaction": "Retired Instructions vs Peak RSS",
       "regime_a_cold": {
         "rho": 0.8998,
-        "p_raw": 1.1206098873531091e-271,
+        "p_raw": 1.1206098873532175e-271,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
         "rho": 0.9054,
-        "p_raw": 1.7561855669496573e-280,
+        "p_raw": 1.7561855669496304e-280,
         "p_adj_holm": 0.0
       }
     },
@@ -139,12 +139,12 @@
       "interaction": "Peak Phys RAM vs $T_{\\text{orch}}$",
       "regime_a_cold": {
         "rho": 0.7364,
-        "p_raw": 4.7021637491128217e-129,
+        "p_raw": 4.702163749112819e-129,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
         "rho": 0.7293,
-        "p_raw": 1.9574285194498096e-125,
+        "p_raw": 1.9574285194497863e-125,
         "p_adj_holm": 0.0
       }
     },
@@ -152,12 +152,12 @@
       "interaction": "$T_{\\text{disp}}$ vs $T_{\\text{orch}}$ (Dispatch Dominance)",
       "regime_a_cold": {
         "rho": 0.8012,
-        "p_raw": 6.030173783837542e-169,
+        "p_raw": 6.030173783837811e-169,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
         "rho": 0.8632,
-        "p_raw": 3.0905931474923846e-224,
+        "p_raw": 3.0905931474922546e-224,
         "p_adj_holm": 0.0
       }
     },
@@ -165,12 +165,12 @@
       "interaction": "Condition Means ($n=20$): $T_{\\text{task}}$ vs $N_{\\text{prompt}}$",
       "regime_a_cold": {
         "rho": 0.9318,
-        "p_raw": 1.320508544162293e-11,
+        "p_raw": 1.3205085441622924e-11,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
         "rho": 0.6039,
-        "p_raw": 0.0013908092141386912,
+        "p_raw": 0.0013908092141386925,
         "p_adj_holm": 0.001391
       }
     },
@@ -178,12 +178,12 @@
       "interaction": "Intra-Workload W2 (Fixed $N_{\\text{prompt}}$): $T_{\\text{orch}}$ vs Instr",
       "regime_a_cold": {
         "rho": 0.866,
-        "p_raw": 2.1356991549917755e-46,
+        "p_raw": 2.135699154991792e-46,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
         "rho": 0.9437,
-        "p_raw": 5.4800830863080846e-73,
+        "p_raw": 5.480083086308168e-73,
         "p_adj_holm": 0.0
       }
     },
@@ -191,12 +191,12 @@
       "interaction": "Intra-Workload W3 (Vector I/O): $T_{\\text{disp}}$ vs $T_{\\text{task}}$",
       "regime_a_cold": {
         "rho": 0.4261,
-        "p_raw": 5.4191198365647555e-08,
+        "p_raw": 5.4191198365647575e-08,
         "p_adj_holm": 0.0
       },
       "regime_b_warm": {
         "rho": 0.5985,
-        "p_raw": 6.06554696542519e-16,
+        "p_raw": 6.065546965425169e-16,
         "p_adj_holm": 0.0
       }
     }

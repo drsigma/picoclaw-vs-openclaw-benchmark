@@ -1,7 +1,7 @@
 \begin{table*}[t]
 \centering
-\caption{Tri-Platform Systems and Microarchitectural Conformance on Workload W2 (15 tools, 2,177 prompt tokens, 30 repetitions). Numbers represent empirical medians with 95\% Bootstrap CIs.}
-\label{tab:tri_platform_master}
+\caption{Quad-Platform Systems and Microarchitectural Conformance on Workload W2 (15 tools, 2,177 prompt tokens, 30 repetitions). Numbers represent empirical medians with 95\% Bootstrap CIs.}
+\label{tab:quad_platform_master}
 \resizebox{\textwidth}{!}{%
 \begin{tabular}{llrrrrrrr}
 \hline
@@ -9,21 +9,27 @@
 \hline
 PicoClaw (Native Go) & macOS ARM64 (M4) & 5272.7 & 5.53 [5.2, 6.5] & 0.10\% & 5.1 & 88.3 & 464.6 & 62.27M \\
 PicoClaw (Native Go) & Linux x86_64 & 2725.0 & 6.66 [6.1, 7.3] & 0.24\% & 9.7 & 204.6 & 555.9 & 32.65M \\
-PicoClaw (Native Go) & Windows 11 x86_64 & 2746.7 & 10.94 [10.7, 11.1] & 0.40\% & 10.2 & 128.2 & 352.0 & N/A\textsuperscript{*} \\
+PicoClaw (Native Go) & Windows 11 NVIDIA & 2928.3 & 13.11 [11.5, 14.0] & 0.45\% & 10.2 & 137.0 & 402.6 & N/A\textsuperscript{*} \\
+PicoClaw (Native Go) & Windows Intel iGPU & 53505.8 & 14.03 [13.8, 14.7] & 0.03\% & 8.2 & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
 OpenClaw (Node.js Minimal 15) & macOS ARM64 (M4) & 5284.8 & 20.60 [20.4, 21.0] & 0.39\% & 37.5 & 89.3 & 474.2 & 789.72M \\
 OpenClaw (Node.js Minimal 15) & Linux x86_64 & 2760.5 & 31.45 [31.0, 32.1] & 1.14\% & 86.4 & 203.8 & 560.2 & 768.09M \\
-OpenClaw (Node.js Minimal 15) & Windows 11 x86_64 & 2767.7 & 38.80 [38.5, 39.2] & 1.40\% & 72.8 & 130.2 & 360.9 & N/A\textsuperscript{*} \\
+OpenClaw (Node.js Minimal 15) & Windows 11 NVIDIA & 2906.8 & 40.68 [40.5, 41.0] & 1.40\% & 72.9 & 136.7 & 400.3 & N/A\textsuperscript{*} \\
+OpenClaw (Node.js Minimal 15) & Windows Intel iGPU & 53505.9 & 57.86 [56.9, 58.4] & 0.11\% & 54.7 & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
 OpenClaw (Node.js Full 54) & macOS ARM64 (M4) & 18406.9 & 24.55 [24.4, 24.8] & 0.13\% & 37.7 & 305.8 & 5628.9 & 791.65M \\
 OpenClaw (Node.js Full 54) & Linux x86_64 & 7891.1 & 35.99 [35.6, 37.4] & 0.46\% & 86.7 & 553.8 & 4364.6 & 771.51M \\
-OpenClaw (Node.js Full 54) & Windows 11 x86_64 & 7663.8 & 45.70 [45.5, 46.2] & 0.59\% & 72.8 & 461.7 & 3529.6 & N/A\textsuperscript{*} \\
+OpenClaw (Node.js Full 54) & Windows 11 NVIDIA & 7896.4 & 48.55 [48.2, 48.8] & 0.61\% & 72.9 & 467.4 & 3694.0 & N/A\textsuperscript{*} \\
+OpenClaw (Node.js Full 54) & Windows Intel iGPU & 226696.9 & 68.89 [68.1, 69.7] & 0.03\% & 54.8 & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
 PythonNative (CPython VM) & macOS ARM64 (M4) & 5286.3 & 11.63 [11.3, 11.8] & 0.22\% & 24.1 & 88.9 & 468.1 & 649.57M \\
 PythonNative (CPython VM) & Linux x86_64 & 2747.6 & 17.13 [16.9, 18.2] & 0.62\% & 40.2 & 205.5 & 567.2 & 2544.43M \\
-PythonNative (CPython VM) & Windows 11 x86_64 & 2750.0 & 34.49 [28.5, 36.3] & 1.26\% & N/A\textsuperscript{\dagger} & 130.8 & 361.8 & N/A\textsuperscript{*} \\
+PythonNative (CPython VM) & Windows 11 NVIDIA & 2859.5 & 26.99 [25.8, 30.3] & 0.94\% & N/A\textsuperscript{\dagger} & 137.8 & 394.0 & N/A\textsuperscript{*} \\
+PythonNative (CPython VM) & Windows Intel iGPU & 53578.0 & 45.63 [41.2, 49.7] & 0.09\% & N/A\textsuperscript{\dagger} & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
 Bun JSC Minimal 15 & Linux x86_64 & 2773.7 & 7.28 [7.1, 7.4] & 0.26\% & 23.9 & 206.7 & 572.7 & 54.47M \\
-Bun JSC Minimal 15 & Windows 11 x86_64 & 2745.9 & 15.16 [15.0, 15.7] & 0.56\% & 24.6 & 131.5 & 361.9 & N/A\textsuperscript{*} \\
+Bun JSC Minimal 15 & Windows 11 NVIDIA & 2856.4 & 16.48 [16.3, 17.9] & 0.58\% & 24.6 & 136.2 & 387.5 & N/A\textsuperscript{*} \\
+Bun JSC Minimal 15 & Windows Intel iGPU & 53564.7 & 23.70 [23.4, 24.1] & 0.04\% & 23.6 & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
 Neural Baseline (Direct Server) & macOS ARM64 (M4) & 5279.5 & 0.00 [0.0, 0.0] & 0.00\% & N/A\textsuperscript{\ddagger} & 88.2 & 463.2 & N/A\textsuperscript{\ddagger} \\
 Neural Baseline (Direct Server) & Linux x86_64 & 2735.6 & 0.00 [0.0, 0.0] & 0.00\% & N/A\textsuperscript{\ddagger} & 204.4 & 558.6 & N/A\textsuperscript{\ddagger} \\
-Neural Baseline (Direct Server) & Windows 11 x86_64 & 2733.7 & 0.00 [0.0, 0.0] & 0.00\% & N/A\textsuperscript{\ddagger} & 126.3 & 345.6 & N/A\textsuperscript{\ddagger} \\
+Neural Baseline (Direct Server) & Windows 11 NVIDIA & 2773.5 & 0.00 [0.0, 0.0] & 0.00\% & N/A\textsuperscript{\ddagger} & 131.1 & 363.5 & N/A\textsuperscript{\ddagger} \\
+Neural Baseline (Direct Server) & Windows Intel iGPU & 51817.8 & 0.00 [0.0, 0.0] & 0.00\% & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{\ddagger} \\
 \hline
 \multicolumn{9}{l}{\textsuperscript{*}\footnotesize PMU instruction counters restricted in Windows user-mode; empirical CPU cycles tracked via QueryProcessCycleTime (43.0M in PicoClaw vs. 507.9M in OpenClaw Full, 11.82x ratio).} \\
 \multicolumn{9}{l}{\footnotesize \quad Refs: Microsoft Learn (QueryProcessCycleTime); Intel SDM Vol. 3B Ch. 20; Weaver (IEEE ISPASS 2013).} \\
@@ -32,6 +38,7 @@ Neural Baseline (Direct Server) & Windows 11 x86_64 & 2733.7 & 0.00 [0.0, 0.0] &
 \multicolumn{9}{l}{\textsuperscript{\ddagger}\footnotesize Neural baseline issues direct HTTP requests to resident llama-server without client agent runtime ($T_{\text{orch}} \equiv 0$).} \\
 \multicolumn{9}{l}{\footnotesize \quad Refs: Experimental protocol for latency decomposition $T_{\text{task}} = T_{\text{orch}} + T_{\text{neural}}$.} \\
 \multicolumn{9}{l}{\textsuperscript{||}\footnotesize Bun JSC was evaluated as a secondary JavaScript engine ablation on x86_64 nodes (Linux and Windows 11) following the freeze of the Darwin ARM64 reference campaign.} \\
+\multicolumn{9}{l}{\textsuperscript{**}\footnotesize Host energy \& EDP on Intel Graphics UMA uninstrumented in Windows user-mode (requires ring-0 MSR driver).} \\
 \multicolumn{9}{l}{\textsuperscript{\S}\footnotesize Cross-ISA hardware instruction counts (ARM64 vs. x86\_64) are segregated due to microarchitectural density differences; evaluate via relative ratios.} \\
 \multicolumn{9}{l}{\textsuperscript{\P}\footnotesize \textbf{Clean-Room Runs:} 100\% of empirical datasets originate from clean from-scratch runs without partial data reuse.} \\
 \hline
