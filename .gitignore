@@ -32,4 +32,5 @@ models/
 audit_export_chunks/
 audit_export_quad_platform/
 audit_export_quad_platform (*)/
+peer_review_bundle/
 .venv_win/
