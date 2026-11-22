@@ -741,6 +741,95 @@ def test_gatekeeper_audit_certificate_verified():
     assert cert["total_datasets_audited"] >= 7
 
 
+def test_reviewer2_e9_no_residual_promotional_labels():
+    """Reviewer 2 E9: Enforces neutral factual language with zero residual self-certifying labels in reports."""
+    import re
+    targets = [
+        os.path.join(REPO_DIR, "AUDIT_REPORT_FINAL.md"),
+        os.path.join(REPO_DIR, "audit_export", "Systems_Replication_Report.md"),
+    ]
+    forbidden = [
+        "ZERO HARDCODE",
+        "PASSED/VERIFIED",
+        "0 entradas inventadas",
+        "Verified on Disk",
+        "Complete Artifact Traceability",
+        "strictly",
+        "estritamente",
+        "100%",
+        "100 %",
+    ]
+    for path in targets:
+        assert os.path.exists(path), f"Missing report: {path}"
+        text = open(path, "r", encoding="utf-8").read()
+        for phrase in forbidden:
+            assert re.search(re.escape(phrase), text, re.IGNORECASE) is None, (
+                f"Residual label '{phrase}' found in {path}"
+            )
+
+
+def test_reviewer2_e3_e8_judge_descoping_and_scope_justification():
+    """Reviewer 2 E3 & E8: Enforces W5 prototype judge documentation/de-scoping and unequal platform scope rationale."""
+    rep_path = os.path.join(REPO_DIR, "audit_export", "Systems_Replication_Report.md")
+    t8_path = os.path.join(REPO_DIR, "audit_export", "tables", "table8_w5_enterprise_workload.md")
+    audit_path = os.path.join(REPO_DIR, "AUDIT_REPORT_FINAL.md")
+
+    rep_txt = open(rep_path, "r", encoding="utf-8").read()
+    t8_txt = open(t8_path, "r", encoding="utf-8").read()
+    audit_txt = open(audit_path, "r", encoding="utf-8").read()
+
+    # E3: Judge model, rubric, N=30, same-family bias, no comparative quality claims, Empty output schema failure
+    for txt in (rep_txt, t8_txt):
+        assert "Llama-3.2-3B-Instruct" in txt
+        assert "N=30" in txt
+        assert "same-family" in txt.lower()
+        assert "no comparative output-quality evaluation" in txt.lower()
+        assert "Empty output" in txt
+
+    # E8: Intel iGPU W2/W5 DDR3 latency range and Bun x86_64 rationale in Limitations
+    for txt in (rep_txt, audit_txt):
+        assert "53.5" in txt and "226.7" in txt
+        assert "DDR3-1600" in txt
+        assert "Bun" in txt and "x86_64" in txt
+
+
+def test_reviewer2_e1_review_package_zip_contents():
+    """Reviewer 2 E1: Verifies audit_export_quad_platform.zip contains bibliography, analysis script, pytest output, figures, tables, and 35-JSONL access guide."""
+    import zipfile
+    zip_path = os.path.join(REPO_DIR, "audit_export_quad_platform.zip")
+    assert os.path.exists(zip_path), f"Missing {zip_path}"
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        names = set(zf.namelist())
+
+    required = [
+        "references.bib",
+        "scripts/reproduce_quad_platform_analysis.py",
+        "scripts/verify_manifest.py",
+        "data/manifest_sha256.json",
+        "audit_export/pytest_output.txt",
+        "audit_export/REVIEW_PACKAGE_README.md",
+        "audit_export/AUDIT_REPORT_FINAL.md",
+        "audit_export/Systems_Replication_Report.md",
+        "audit_export/figures/fig1_architecture_topology.png",
+        "audit_export/figures/fig2_exp1_cold_start_rss.png",
+        "audit_export/figures/fig3_exp2_latency_overhead.png",
+        "audit_export/figures/fig4_exp3_energy_edp.png",
+        "audit_export/figures/fig5_exp4_tools_and_bloat.png",
+        "audit_export/figures/fig6_pmc_hardware_counters.png",
+        "audit_export/tables/table1_master_summary.md",
+        "audit_export/tables/table2_statistical_tests.md",
+        "audit_export/tables/table3_warm_cache_summary.md",
+        "audit_export/tables/table4_kv_thrashing.md",
+        "audit_export/tables/table5_tool_rag_mitigation.md",
+        "audit_export/tables/table6_mcp_transport_ablation.md",
+        "audit_export/tables/table7_session_replication_comparison.md",
+        "audit_export/tables/table8_w5_enterprise_workload.md",
+    ]
+    missing = [r for r in required if r not in names]
+    assert not missing, f"Missing entries in audit_export_quad_platform.zip: {missing}"
+
+
+
 
 
 

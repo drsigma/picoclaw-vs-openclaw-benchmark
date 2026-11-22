@@ -1,0 +1,8 @@
+.........................................................                [100%]
+=============================== warnings summary ===============================
+.venv_repro/lib/python3.14/site-packages/langsmith/_internal/_beta_decorator.py:92: 17 warnings
+  /home/rafalince/Desktop/mestrado/picoclaw-vs-openclaw-benchmark/.venv_repro/lib/python3.14/site-packages/langsmith/_internal/_beta_decorator.py:92: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+57 passed, 17 warnings in 4.01s

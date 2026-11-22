@@ -2,7 +2,7 @@
 ## Empirical Systems Evaluation: macOS ARM64 (Apple M4) vs. Linux x86_64 vs. Windows 11 x86_64 (NVIDIA) vs. Windows 10/11 x86_64 (Intel Graphics)
 
 **Document Classification:** Systems Replication Report  
-**Date of Consolidation:** 2026-11-21  
+**Date of Consolidation:** 2026-11-22  
 **Repository Branch:** `main`  
 **Evaluation Scope:** Empirical measurement and quad-platform consolidation across 4 distinct physical hardware/OS profiles (35 raw JSONL datasets, 190 experimental cells).  
 
@@ -99,7 +99,7 @@ Ordinary least-squares regression of task latency against repetition index ($1 \
   * **Platform Scope:** Evaluated on the 3 primary nodes (macOS M4, Linux x86_64, Windows 11 NVIDIA); Windows Intel iGPU was scoped to W2 and W5 workloads.
 
 ### 4.3. Table 3: Cache Invariance Clarification
-- Empirical measurements confirm that **cache invariance applies strictly to absolute orchestrator latency $T_{\text{orch}}$ (ms)** ($|\Delta T_{\text{orch}}| < 2.0\text{ ms}$, with a maximum observed difference of $1.95\text{ ms}$ for PicoClaw (Go) on Windows 11 NVIDIA).
+- Empirical measurements confirm that **cache invariance applies only to absolute orchestrator latency $T_{\text{orch}}$ (ms)** ($|\Delta T_{\text{orch}}| < 2.0\text{ ms}$, with a maximum observed difference of $1.95\text{ ms}$ for PicoClaw (Go) on Windows 11 NVIDIA).
 - The relative overhead fraction $\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$ increases under warm cache because neural inference latency $T_{\text{neural}}$ drops substantially under KV prefix reuse.
 
 ### 4.4. Table 7: Multi-Platform Dual-Session Replication (Fixed-SESOI Block-Bootstrap TOST; M2--M5)
@@ -108,10 +108,14 @@ Ordinary least-squares regression of task latency against repetition index ($1 \
   * **`Different` (90% CI wholly outside $[-5.0, +5.0]\text{ ms}$):** **0/95 (0.0%)**
   * **`Inconclusive` (90% CI straddles SESOI boundary):** **19/95 (20.0%)** (concentrated in 10-turn W4 loops and Windows `python_native` startup variance)
 
-### 4.5. Table 8: Enterprise LangChain + SQLite Workload (W5) & Token/Schema Audit (M1)
+### 4.5. Table 8: Enterprise LangChain + SQLite Workload (W5), Token Audit (M1) & Prototype Judge De-Scoping (E3)
 - Table 8 consolidates W5 across **all 4 physical platforms** (macOS M4, Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU) in both Cold and Warm regimes, adding exact `Prompt / Comp. Tokens` audited from the raw JSONLs (`audit_export/w5_token_and_schema_audit.csv`).
-- **Token Audit & Segregation of `python_native` (M1, Option A):** Comparable client orchestrators (`picoclaw`, `openclaw_minimal`, `openclaw_full`, `bun_minimal`, `neural_baseline`) processed `2,007--6,921` prompt tokens and `33--38` completion tokens with `finish_reason=tool_calls` across all four platforms. In contrast, `python_native` (LangChain Core) on macOS M4, Windows 11 NVIDIA, and Windows Intel iGPU executed a confounded/truncated prompt (`1,287` prompt / `26` completion tokens; TTFT `50.0 ms` vs. `4,939.5 ms` in macOS Regime A; `finish_reason=stop` on Intel iGPU; `quality_score = 1.0/5.0` on macOS M4 and `3.0/5.0` on Windows Intel iGPU), while Linux x86_64 Regime B exhibited a `1,416.3 ms` LangChain initialization anomaly. Accordingly, `python_native` in W5 is **excluded from all latency, energy, and TOST contrasts (Tables 2 and 7)** and explicitly **segregated into Part B of Table 8**; any lower latency or energy in Part B is strictly a schema-failure/truncation artifact rather than runtime efficiency.
-- **Quality Score Audit (`quality_score`):** LLM-as-a-Judge scoring (Zheng et al. 2023) was instrumented on `python_native` LangChain Core runs on macOS M4 (**1.0/5.0**) and Windows Intel iGPU (**3.0/5.0**); comparable client orchestrators and Linux/Windows NVIDIA W5 runs did not run the LLM-as-a-Judge wrapper and are marked `N/A†`.
+- **Token Audit & Segregation of `python_native` (M1, Option A):** Comparable client orchestrators (`picoclaw`, `openclaw_minimal`, `openclaw_full`, `bun_minimal`, `neural_baseline`) processed `2,007--6,921` prompt tokens and `33--38` completion tokens with `finish_reason=tool_calls` across all four platforms. In contrast, `python_native` (LangChain Core) on macOS M4, Windows 11 NVIDIA, and Windows Intel iGPU executed a confounded/truncated prompt (`1,287` prompt / `26` completion tokens; TTFT `50.0 ms` vs. `4,939.5 ms` in macOS Regime A; `finish_reason=stop` on Intel iGPU; `quality_score = 1.0/5.0` on macOS M4 and `3.0/5.0` on Windows Intel iGPU), while Linux x86_64 Regime B exhibited a `1,416.3 ms` LangChain initialization anomaly. Accordingly, `python_native` in W5 is **excluded from all latency, energy, and TOST contrasts (Tables 2 and 7)** and explicitly **segregated into Part B of Table 8**; any lower latency or energy in Part B is a schema-failure/truncation artifact rather than runtime efficiency.
+- **Prototype LLM-as-a-Judge Documentation & De-Scoping (E3):** **No comparative output-quality evaluation was conducted across runtimes.** The prototype evaluator (`W5_langchain_real_world/evaluator.py`) was instrumented solely on the segregated `python_native` W5 arm and left uninstrumented (`N/A†`) on all comparable runtimes (`picoclaw`, `openclaw_minimal`, `openclaw_full`, `bun_minimal`, `neural_baseline`) and all Linux/Windows NVIDIA W5 runs:
+  * **Judge Model & Inference Configuration:** Local `llama-server` endpoint (`http://127.0.0.1:8080/v1/chat/completions`, `model="local-llm"`) serving **`Meta-Llama-3.2-3B-Instruct` (`Q4_K_M`)** at `temperature = 0.0`, `max_tokens = 150`, `cache_prompt = False`, with deterministic keyword fallback (`heuristic_evaluate()`) if HTTP/JSON parsing fails.
+  * **Prompt & 5-Point Rubric (`RUBRIC`, `evaluator.py` lines 17--32):** Scores a cross-domain infrastructure and compliance audit summary on an integer 1--5 scale against three seeded database/policy checks — (1) financial budget overrun (`Alpha-Neural-Gateway > 5%`), (2) SLA latency breach (`Beta-Vector-Search > 120 ms`), and (3) compliance quarantine (`Gamma-Tool-Router`) — requesting JSON output `{"quality_score": <1..5>, "reasoning": "<concise explanation>"}` (`5` = all 3 issues accurately cross-referenced; `4` = at least 2 accurate; `3` = 1--2 issues with imprecise values or missing cross-reference; `2` = factual errors/hallucinations or single-domain failure; `1` = irrelevant, empty, or completely wrong output).
+  * **Scored Output Counts ($N=30$ per Regime) & Recorded Diagnostics:** On macOS ARM64 (`N=30` measured outputs in Regime A Cold and `N=30` in Regime B Warm), all `30/30` Cold and `30/30` Warm trials recorded `quality_score = 1.0/5.0` with `evaluation_reasoning = "Empty output"`, triggered immediately by the empty-string guard (`evaluator.py` lines 75--76) because strict LangChain schema validation failed to emit a synthesized text response. Thus, **`1.0/5.0` directly reflects strict schema-validation failure / empty output rather than comparative runtime quality**. On Windows Intel iGPU (`N=30` outputs per regime in Session 1 Cold/Warm and Session 2 Cold/Warm), all `30/30` trials per cell scored `3.0/5.0` (identifying 1 database issue without policy-document cross-referencing).
+  * **Same-Family / Self-Evaluation Bias Risk:** Because the prototype judge queries the exact same local `Llama-3.2-3B-Instruct` model used by the agent, it carries explicit **same-family / self-evaluation bias** (Zheng et al. 2023) and 3B-model judging limitations. Consequently, `quality_score` is retained only as diagnostic telemetry explaining the segregated `python_native` W5 failure mode and supports no claims of comparative output quality across runtimes.
 
 ---
 
@@ -141,9 +145,9 @@ Ordinary least-squares regression of task latency against repetition index ($1 \
 
 ---
 
-## 6. CRYPTOGRAPHIC MANIFEST AUDIT & TRIAL INVENTORY
+## 6. FILE INVENTORY AND SHA-256 DIGESTS
 
-Every empirical `.jsonl` file validated on disk is listed below with its exact relative path, total record count, measured trial count, warmup count, workloads, and SHA-256 digest:
+Every empirical `.jsonl` file on disk is listed below with its exact relative path, total record count, measured trial count, warmup count, workloads, and computed SHA-256 digest:
 
 | Relative Path | Platform | Session Identifier | Role | Workloads | Total Lines | Measured Trials | Warmup Trials | SHA-256 Checksum |
 | :--- | :--- | :--- | :--- | :--- | ---: | ---: | ---: | :--- |
@@ -182,14 +186,25 @@ Every empirical `.jsonl` file validated on disk is listed below with its exact r
 | `data/windows_intel_graphics_session2/raw/raw_trials.jsonl` | Windows Intel iGPU | `windows_intel_graphics_session2` | `raw` | W2, W5 | 330 | 300 | 30 | `920d68b0197e3039021a1ca327b41807c2cd7b60ed1b606371f6d30e65854a33` |
 | `data/windows_intel_graphics_session2/raw/warm_cache_trials.jsonl` | Windows Intel iGPU | `windows_intel_graphics_session2` | `warm` | W2, W5 | 330 | 300 | 30 | `d922a01b5dd42bd5ce8b4b9248bf6a4cb636a45384c025d9bffcb010f021e22c` |
 | `data/windows_intel_graphics_session2/raw/tool_rag_mitigation_trials.jsonl` | Windows Intel iGPU | `windows_intel_graphics_session2` | `rag` | W2 | 132 | 120 | 12 | `34736fbad16b3fb5d499c14805a4e4700d21337ed7a57090bad8b98811a04157` |
-| **TOTAL (35 files)** | **4 Platforms** | **All Sessions** | **All** | **W1--W5 + Ablations** | **18,616** | **16,995** | **1,621** | **Verified on Disk** |
+| **TOTAL (35 files)** | **4 Platforms** | **All Sessions** | **All** | **W1--W5 + Ablations** | **18,616** | **16,995** | **1,621** | **SHA-256 Computed** |
 
 ---
 
-## 7. EMPIRICAL SUMMARY & CONCLUDING OBSERVATIONS
+## 7. METHODOLOGICAL LIMITATIONS & THREATS TO VALIDITY
+
+1. **Offload & Memory Topology Asymmetry (UMA vs. Hybrid PCIe vs. Shared DDR3):** Apple M4 executes full on-die GPU offload (`-ngl 99`, 120 GB/s unified LPDDR5X). Both Dell G15 nodes (Linux x86_64 and Windows 11 NVIDIA) operate under hybrid offload (`-ngl 16`) bounded by 4 GB GDDR6 VRAM with continuous PCIe 4.0 host-to-GPU streaming (~5.2 GB/s). Intel HD Graphics 4600 executes over a shared DDR3-1600 host memory aperture. Consequently, absolute Regime B neural latency and package energy comparisons are confined to within-node contrasts.
+2. **Unequal Workload Scope on Windows Intel iGPU (Restricted to W2, W5, and Tool-RAG — E8):** On shared DDR3-1600 memory, measured Regime A (Cold Prefill) trial durations on the Intel HD Graphics 4600 node spanned **53.5 s** (`picoclaw` / 15-tool `openclaw_minimal` W2) to **226.7 s** (54-tool `openclaw_full` W2), with comparable W5 arms requiring **50.1 s--56.9 s** per trial. Executing the complete W1--W4 workload matrix (especially 10-turn multi-step W4 dialogues exceeding 8--15 minutes per cold trial), KV-thrashing ablations (Table 4), and MCP transport ablations (Table 6) across two 30-repetition sessions would require multi-day continuous runtime and expose measurements to severe thermal and OS background drift. Scoping the Intel iGPU node to W2 (standard 3-tool chain), W5 (enterprise workflow), and W2 Tool-RAG captures cross-architecture middleware overhead ($T_{\text{orch}}$, Peak RSS, Win32 CPU cycles) and cold-prefill schema pruning within tractable, stationary dual-session windows.
+3. **Unequal Runtime Scope for Bun JSC (Evaluated on x86_64 Only in Consolidated Matrix — E8):** Bun (`bun_minimal`, JavaScriptCore engine) is marked `N/A||` in the macOS ARM64 consolidated Cold/Warm matrix (Tables 1, 2, and 8) because Bun was introduced as a secondary JavaScript-engine ablation (isolating V8 runtime overhead from JavaScript semantics) after the Apple Silicon M4 primary Cold/Warm campaign (`raw_trials.jsonl`, `warm_cache_trials.jsonl`) was frozen. Bun was subsequently evaluated across both Cold and Warm regimes on all three x86_64 nodes (Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU); standalone macOS ARM64 Warm Session 2 Bun JSC measurements remain preserved in `results/publication_campaign/inter_session_trials.jsonl` without synthesizing unmeasured macOS Regime A baselines.
+4. **Windows User-Mode Telemetry Boundaries (`N/A*`, `N/A§`, `N/A**`):** Unprivileged Windows user-mode restricts PMU retired instruction counters (`CR4.PCE`, reported via empirical Win32 `QueryProcessCycleTime` cycles instead), excludes `py.exe` PEP 397 wrapper stub PID metrics (`N/A§`), and lacks kernel MSR RAPL access on Intel HD Graphics 4600 (`N/A**`).
+5. **Segregation of W5 `python_native` & Prototype Judge Bias (M1, E3):** `python_native` (LangChain Core) in W5 experienced schema-validation failure and prompt truncation (`1,287/26` tokens) and is excluded from Tables 2 and 7. The prototype LLM-as-a-Judge (`W5_langchain_real_world/evaluator.py`) queried the same local `Llama-3.2-3B-Instruct` model (same-family / self-evaluation bias risk) solely on `python_native` W5 ($N=30$/regime); no comparative output-quality evaluation was performed across runtimes.
+6. **Linux Mobile CPU Thermal/PL Throttling (M8):** Under `-ngl 16` AVX2 hybrid offload on Linux x86_64, positive intra-trial deltas in `cpu_pkg_throttle_events` elevated positive lag-1 autocorrelation ($r_1$), mitigated via $n_{\text{eff}}$-adjusted Mann-Whitney $U$ variance (Table 2) and Moving Block Bootstrap ($b=3$, Table 7).
+
+---
+
+## 8. EMPIRICAL SUMMARY & CONCLUDING OBSERVATIONS
 
 The quad-platform measurement campaign shows that:
 1. **Cross-Platform Persistence of Middleware Overhead:** Compiled Go (`PicoClaw`) exhibits lower client dispatch latency ($T_{\text{orch}}$) and smaller Peak RSS than Node.js V8 (`OpenClaw`) across all four hardware and operating system profiles.
 2. **Quantified Replicability:** Moving Block Bootstrap confidence intervals and dual-session TOST tests quantify both replicated contrasts and session-level outliers (`PythonNative` on W5).
 3. **Segregated Microarchitectural Grounding:** Retired hardware instruction ratios are evaluated within-ISA on ARM64 and x86_64 Linux, complemented by empirical Win32 CPU cycle ratios on both Windows platforms.
-4. **Complete Artifact Traceability:** All raw JSONL datasets, analysis scripts, regenerated tables, figures, and SHA-256 manifests are synchronized in `main` for independent verification.
+4. **Artifact Traceability:** Raw JSONL datasets, analysis scripts, regenerated tables, figures, saved test outputs, and SHA-256 manifests are synchronized in `main` for independent reproduction.

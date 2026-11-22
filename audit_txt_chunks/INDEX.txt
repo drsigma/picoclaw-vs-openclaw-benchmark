@@ -6,12 +6,12 @@ a todo o acervo empírico e analítico do benchmark PicoClaw vs. OpenClaw (Quad-
 
 ARQUIVOS DE TEXTO FATIADOS (.TXT):
 --------------------------------------------------------------------------------
-1. audit_pt1_report_and_checklist.txt  (52.5 KB)
+1. audit_pt1_report_and_checklist.txt  (61.2 KB)
    - Contém: AUDIT_REPORT_FINAL.md + audit_export/Systems_Replication_Report.md
    - Foco: Inventário real de 35 datasets JSONL em disco, verificação de integridade,
            taxonomia completa de N/A, auditoria bibliográfica e replicação de sistemas.
 
-2. audit_pt2_tables.txt  (65.7 KB)
+2. audit_pt2_tables.txt  (66.9 KB)
    - Contém: Tabelas 1 a 8 consolidadas em formato Markdown
      * Table 1: Master Systems & Microarchitectural Conformance (W2)
      * Table 2: Non-Parametric Hypothesis Tests (Mann-Whitney, Cliff's delta, Holm-Bonferroni)
@@ -45,13 +45,13 @@ LOCALIZAÇÃO DAS TABELAS COMPLETAS (MARKDOWN E LATEX):
 LOCALIZAÇÃO DAS FIGURAS DE ALTA RESOLUÇÃO (300 DPI):
 --------------------------------------------------------------------------------
 - Diretório de figuras: figures/ e audit_export/figures/
-- fig1_architecture_topology.png (773,566 bytes | SHA-256: 8e964a1d5f24a3182a989df4d72fc458036b00f2a09d63eed75287dd85e7c5bf)
+- fig1_architecture_topology.png (768,886 bytes | SHA-256: f9a1bcb1a54ff2aeee6a99407effc742dca7bc31a692cae2f97d48a1fdc16dcb)
   Figure 1: Quad-Platform Experimental Testbed & Microarchitectural Telemetry
 - fig2_exp1_cold_start_rss.png (349,620 bytes | SHA-256: 47a036c7ddcc1068da100170c050a4fef3730fada580acbe3001dee4bda7ea8b)
   Figure 2: Cold Task Latency (W1) & Peak Resident Memory Footprint (W2 across 4 Platforms)
 - fig3_exp2_latency_overhead.png (392,886 bytes | SHA-256: 15082798b8d7601f3a9a358a99cf355bc55ed9577c9597fb3f56a1941c0522f1)
   Figure 3: Client Orchestration Latency T_orch (4 Platforms) & Middleware Ratio Phi_orch with W3 Inversion
-- fig4_exp3_energy_edp.png (404,056 bytes | SHA-256: 10ce315ede6898d6ce9579d3b3093f59e22880b1db1f66000c3864e0e4e4b475)
+- fig4_exp3_energy_edp.png (403,353 bytes | SHA-256: 7a7eb616b580dff400f54942d57bbb51ba21c2fe1a4cea12ccf9c28970fae2b6)
   Figure 4: Net Dynamic Energy Dissipation & Energy-Delay Product (W2, Within-Node Sensor Domains)
 - fig5_exp4_tools_and_bloat.png (297,202 bytes | SHA-256: 9eabf3b4d538c0930c8674cd2b2aad66efdbff0da77d845c8d0088ea0787791f)
   Figure 5: Tool Context Bloat Overhead (Linux) & Quad-Platform Tool-RAG Speedups

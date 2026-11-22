@@ -15,4 +15,4 @@
 | OpenClaw Full | Windows 11 NVIDIA | 7896.41 | 3526.98 | 48.55 | 48.20 | 0.61% | 1.37% | Confirmed (Δ=0.35 ms) |
 | OpenClaw Full | Windows Intel iGPU | 226696.86 | 11819.54 | 68.89 | 68.96 | 0.03% | 0.58% | Confirmed (Δ=0.07 ms) |
 
-> **Table 3 Note on Invariance:** Invariance applies strictly to *absolute* client orchestrator runtime $T_{\text{orch}}$ (ms) ($|\Delta T_{\text{orch}}| < 2.0\text{ ms}$, with a maximum observed difference of $1.95\text{ ms}$ for PicoClaw (Go) on Windows 11 NVIDIA). The relative fraction $\Phi_{\text{orch}}$ increases in warm cache because neural inference latency $T_{\text{neural}}$ drops substantially under KV cache hits.
+> **Table 3 Note on Invariance:** Invariance applies only to *absolute* client orchestrator runtime $T_{\text{orch}}$ (ms) ($|\Delta T_{\text{orch}}| < 2.0\text{ ms}$, with a maximum observed difference of $1.95\text{ ms}$ for PicoClaw (Go) on Windows 11 NVIDIA). The relative fraction $\Phi_{\text{orch}}$ increases in warm cache because neural inference latency $T_{\text{neural}}$ drops substantially under KV cache hits.
