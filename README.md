@@ -258,13 +258,15 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── references.bib                             <- Base bibliográfica formal BibTeX (IEEE/ACM/Elsevier)
 ├── reproduce_linux_gold.sh                    <- Script de reprodução física automatizada em Linux x86_64
 ├── windows_gold.ps1                           <- Script PowerShell de reprodução no Windows 11
-├── audit_export/                              <- Artefatos consolidados da auditoria forense tri-plataforma
+├── audit_export/                              <- Artefatos consolidados da auditoria forense quad-plataforma
 │   ├── Systems_Replication_Report.md          <- Relatório consolidado de replicação de sistemas (SoftwareX standard)
 │   ├── audit_summary_metrics.json             <- Métricas consolidadas em formato JSON estruturado
-│   ├── tri_platform_consolidated_summary.csv  <- Sumário estatístico comparativo tri-plataforma
+│   ├── quad_platform_consolidated_summary.csv <- Sumário estatístico comparativo quad-plataforma
 │   ├── anomaly_and_cache_diagnostics.csv      <- Diagnóstico de dependência serial, drift e telemetria térmica
-│   └── tables/                                <- Tabelas consolidadas em Markdown e LaTeX (Tabelas 1 a 7)
-├── audit_export_tri_platform.zip              <- Pacote zip autocontido da auditoria tri-plataforma
+│   ├── figures/                               <- Figuras consolidadas em 300 DPI (Figuras 1 a 6)
+│   └── tables/                                <- Tabelas consolidadas em Markdown e LaTeX (Tabelas 1 a 8)
+├── audit_export_quad_platform.zip             <- Pacote zip autocontido da auditoria quad-plataforma
+├── audit_txt_chunks/                          <- Arquivos de auditoria em texto fatiados (.txt) para avaliador digital
 ├── tutorial/                                  <- Guia didático passo a passo e logs ilustrativos
 │   └── README.md                              <- Tutorial prático bilíngue com passos 1 a 9 e traces ilustrativos
 ├── benchmark/                                 <- Harness de execução, adaptadores e orquestradores

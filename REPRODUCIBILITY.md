@@ -104,7 +104,7 @@ This single command executes the following phases:
    - Tables 1–8 in Markdown and LaTeX format in `audit_export/tables/` and `results/tri_platform_tables/`.
    - Figures 1–6 in 300 DPI PNG in `figures/` and `audit_export/figures/`.
    - Comprehensive systems replication report in `audit_export/Systems_Replication_Report.md`.
-   - Consolidated audit packages `audit_export_quad_platform.zip` and `audit_export_tri_platform.zip`.
+   - Consolidated audit package `audit_export_quad_platform.zip`.
 
 ---
 

@@ -48,7 +48,7 @@ make reproduce-figures
 * **💻 Windows 10/11 x86_64 (Intel HD Graphics 4600 iGPU UMA):**
   * Execute `powershell -ExecutionPolicy Bypass -File .\launch_sentinel_intel_win.ps1` para executar a campanha com telemetria Win32 PSAPI e monitoramento sentinela em user-mode.
 * **📊 Consolidação Quad-Plataforma e Pacote de Auditoria:**
-  * Execute `python scripts/reproduce_quad_platform_analysis.py` para reprocessar todos os dados brutos das 4 plataformas, computar intervalos bootstrap 95% da mediana, testes TOST de replicação e exportar os pacotes `audit_export_quad_platform.zip` e `audit_export_tri_platform.zip`.
+  * Execute `python scripts/reproduce_quad_platform_analysis.py` para reprocessar todos os dados brutos das 4 plataformas, computar intervalos bootstrap 95% da mediana, testes TOST de replicação e exportar o pacote `audit_export_quad_platform.zip`.
 
 ---
 

@@ -1009,7 +1009,6 @@ def export_structured_summaries(consolidated: dict[str, Any], diagnostics: list[
     # Flat Quad-Platform Consolidated CSV Table
     csv_paths = [
         os.path.join(AUDIT_EXPORT_DIR, "quad_platform_consolidated_summary.csv"),
-        os.path.join(AUDIT_EXPORT_DIR, "tri_platform_consolidated_summary.csv"),
     ]
     for csv_path in csv_paths:
         with open(csv_path, "w", encoding="utf-8") as f:
@@ -2315,17 +2314,20 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
 # ==============================================================================
 
 def package_audit_zip():
+    # Copy root AUDIT_REPORT_FINAL.md to AUDIT_EXPORT_DIR if present
+    audit_md_root = os.path.join(REPO_DIR, "AUDIT_REPORT_FINAL.md")
+    if os.path.exists(audit_md_root):
+        shutil.copy2(audit_md_root, os.path.join(AUDIT_EXPORT_DIR, "AUDIT_REPORT_FINAL.md"))
+
     zip_path_quad = os.path.join(REPO_DIR, "audit_export_quad_platform.zip")
-    zip_path_tri = os.path.join(REPO_DIR, "audit_export_tri_platform.zip")
-    print(f"Packaging {AUDIT_EXPORT_DIR} into {zip_path_quad} and {zip_path_tri}...")
+    print(f"Packaging {AUDIT_EXPORT_DIR} into {zip_path_quad}...")
     
-    for zp in [zip_path_quad, zip_path_tri]:
-        with zipfile.ZipFile(zp, "w", zipfile.ZIP_DEFLATED) as zf:
-            for root, dirs, files in os.walk(AUDIT_EXPORT_DIR):
-                for file in files:
-                    abs_path = os.path.join(root, file)
-                    rel_path = os.path.relpath(abs_path, REPO_DIR)
-                    zf.write(abs_path, rel_path)
+    with zipfile.ZipFile(zip_path_quad, "w", zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(AUDIT_EXPORT_DIR):
+            for file in sorted(files):
+                abs_path = os.path.join(root, file)
+                rel_path = os.path.relpath(abs_path, REPO_DIR)
+                zf.write(abs_path, rel_path)
     
     size_bytes = os.path.getsize(zip_path_quad)
     print(f"Audit package created: {zip_path_quad} ({size_bytes:,} bytes)")

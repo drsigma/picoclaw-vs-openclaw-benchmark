@@ -1,0 +1,281 @@
+#!/usr/bin/env python3
+"""
+scripts/generate_audit_txt_chunks.py
+Generates sliced lightweight .txt files for digital evaluation in audit_txt_chunks/.
+Each chunk is <= 150 KB and includes full headers and origins.
+"""
+import os
+import json
+import shutil
+import hashlib
+
+REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUTPUT_DIR = os.path.join(REPO_DIR, "audit_txt_chunks")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+def sha256_file(filepath: str) -> str:
+    h = hashlib.sha256()
+    with open(filepath, "rb") as f:
+        while chunk := f.read(65536):
+            h.update(chunk)
+    return h.hexdigest()
+
+# ------------------------------------------------------------------------------
+# 1. audit_pt1_report_and_checklist.txt (~40 KB <= 150 KB)
+# ------------------------------------------------------------------------------
+pt1_path = os.path.join(OUTPUT_DIR, "audit_pt1_report_and_checklist.txt")
+audit_report_final_path = os.path.join(REPO_DIR, "AUDIT_REPORT_FINAL.md")
+sys_rep_report_path = os.path.join(REPO_DIR, "audit_export", "Systems_Replication_Report.md")
+
+with open(audit_report_final_path, "r", encoding="utf-8") as f:
+    audit_report_content = f.read()
+
+with open(sys_rep_report_path, "r", encoding="utf-8") as f:
+    sys_rep_content = f.read()
+
+pt1_header = """================================================================================
+AUDIT CHUNK PART 1: FINAL AUDIT REPORT & SYSTEMS REPLICATION REPORT
+================================================================================
+Arquivos Originais Incluídos / Source Files Included:
+  1. AUDIT_REPORT_FINAL.md (Relatório Final de Auditoria, Testes e Conformidade)
+  2. audit_export/Systems_Replication_Report.md (Relatório Físico-Arquitetural de Sistemas)
+Padrão Alvo: SoftwareX / JOSS 9.0+ Rigorous Systems Auditing (Quad-Platform)
+Data de Exportação: 2026-11-21
+Tamanho Máximo do Chunk: <= 150 KB
+================================================================================
+
+"""
+
+with open(pt1_path, "w", encoding="utf-8") as f:
+    f.write(pt1_header)
+    f.write(">>> INÍCIO DO ARQUIVO: AUDIT_REPORT_FINAL.md <<<\n\n")
+    f.write(audit_report_content)
+    f.write("\n\n>>> FIM DO ARQUIVO: AUDIT_REPORT_FINAL.md <<<\n")
+    f.write("\n" + "=" * 80 + "\n\n")
+    f.write(">>> INÍCIO DO ARQUIVO: audit_export/Systems_Replication_Report.md <<<\n\n")
+    f.write(sys_rep_content)
+    f.write("\n\n>>> FIM DO ARQUIVO: audit_export/Systems_Replication_Report.md <<<\n")
+
+print(f"Generated {pt1_path}: {os.path.getsize(pt1_path):,} bytes")
+
+# ------------------------------------------------------------------------------
+# 2. audit_pt2_tables.txt (~61 KB <= 150 KB)
+# ------------------------------------------------------------------------------
+pt2_path = os.path.join(OUTPUT_DIR, "audit_pt2_tables.txt")
+tables_dir = os.path.join(REPO_DIR, "audit_export", "tables")
+table_files = [
+    "table1_master_summary.md",
+    "table2_statistical_tests.md",
+    "table3_warm_cache_summary.md",
+    "table4_kv_thrashing.md",
+    "table5_tool_rag_mitigation.md",
+    "table6_mcp_transport_ablation.md",
+    "table7_session_replication_comparison.md",
+    "table8_w5_enterprise_workload.md",
+]
+
+pt2_header = """================================================================================
+AUDIT CHUNK PART 2: CONSOLIDATED PUBLICATION TABLES (TABLES 1 TO 8)
+================================================================================
+Arquivos Originais Incluídos / Source Files Included:
+  1. audit_export/tables/table1_master_summary.md (Master W2 Systems & Telemetry)
+  2. audit_export/tables/table2_statistical_tests.md (Non-Parametric Hypothesis Tests)
+  3. audit_export/tables/table3_warm_cache_summary.md (Prefix Retention & Cache Invariance)
+  4. audit_export/tables/table4_kv_thrashing.md (KV-Cache Thrashing & Slot Isolation)
+  5. audit_export/tables/table5_tool_rag_mitigation.md (Tool-RAG Schema Pruning Speedups)
+  6. audit_export/tables/table6_mcp_transport_ablation.md (Live MCP Transport Ablation)
+  7. audit_export/tables/table7_session_replication_comparison.md (TOST Dual-Session Equivalence)
+  8. audit_export/tables/table8_w5_enterprise_workload.md (LangChain SQLite Enterprise RAG)
+Padrão Alvo: SoftwareX / JOSS Quad-Platform Publication Tables (Markdown & Raw Data)
+Data de Exportação: 2026-11-21
+Tamanho Máximo do Chunk: <= 150 KB
+================================================================================
+
+"""
+
+with open(pt2_path, "w", encoding="utf-8") as f:
+    f.write(pt2_header)
+    for tf in table_files:
+        tpath = os.path.join(tables_dir, tf)
+        if os.path.exists(tpath):
+            with open(tpath, "r", encoding="utf-8") as tf_in:
+                f.write(f">>> INÍCIO DO ARQUIVO: audit_export/tables/{tf} <<<\n\n")
+                f.write(tf_in.read())
+                f.write(f"\n\n>>> FIM DO ARQUIVO: audit_export/tables/{tf} <<<\n")
+                f.write("\n" + "=" * 80 + "\n\n")
+
+print(f"Generated {pt2_path}: {os.path.getsize(pt2_path):,} bytes")
+
+# ------------------------------------------------------------------------------
+# 3. audit_pt3_summary_and_diagnostics.txt (~103 KB <= 150 KB)
+# ------------------------------------------------------------------------------
+pt3_path = os.path.join(OUTPUT_DIR, "audit_pt3_summary_and_diagnostics.txt")
+csv_summary_path = os.path.join(REPO_DIR, "audit_export", "quad_platform_consolidated_summary.csv")
+anomaly_csv_path = os.path.join(REPO_DIR, "audit_export", "anomaly_and_cache_diagnostics.csv")
+metrics_json_path = os.path.join(REPO_DIR, "audit_export", "audit_summary_metrics.json")
+
+with open(csv_summary_path, "r", encoding="utf-8") as f:
+    csv_summary_content = f.read()
+
+with open(anomaly_csv_path, "r", encoding="utf-8") as f:
+    anomaly_csv_content = f.read()
+
+# Build concise structured digest from audit_summary_metrics.json (no giant nested arrays)
+with open(metrics_json_path, "r", encoding="utf-8") as f:
+    raw_metrics = json.load(f)
+
+concise_digest = {}
+for p_key, p_data in raw_metrics.items():
+    concise_digest[p_key] = {
+        "name": p_data.get("name"),
+        "os_family": p_data.get("os_family"),
+        "p_idle_w": p_data.get("p_idle_w"),
+        "regime_a_w2_cold": {},
+        "regime_b_w2_warm": {},
+        "w5_enterprise_langchain": {},
+        "tool_rag_pruning": p_data.get("rag_mitigation", {}),
+        "kv_cache_thrashing": p_data.get("kv_thrashing", {}),
+        "mcp_transport_ablation": p_data.get("mcp_transport", {})
+    }
+    # Extract W2 Regime A
+    for ag_key, wls in p_data.get("regime_a", {}).items():
+        if "W2" in wls:
+            m = wls["W2"]
+            concise_digest[p_key]["regime_a_w2_cold"][ag_key] = {
+                "t_task_ms": m.get("t_task_ms", {}).get("median"),
+                "t_task_ci95": m.get("t_task_ms", {}).get("ci_95"),
+                "t_orch_ms": m.get("t_orch_ms", {}).get("median"),
+                "t_orch_ci95": m.get("t_orch_ms", {}).get("ci_95"),
+                "phi_orch_pct": m.get("phi_orch_pct", {}).get("median"),
+                "rss_mb": m.get("rss_mb", {}).get("median"),
+                "energy_j": m.get("energy_net_j", {}).get("median") if "energy_net_j" in m else "N/A",
+                "instructions_m": m.get("proc_instructions", {}).get("median") if "proc_instructions" in m else "N/A",
+                "cycles_m": m.get("proc_cycles", {}).get("median") if "proc_cycles" in m else "N/A"
+            }
+    # Extract W2 Regime B
+    for ag_key, wls in p_data.get("regime_b", {}).items():
+        if "W2" in wls:
+            m = wls["W2"]
+            concise_digest[p_key]["regime_b_w2_warm"][ag_key] = {
+                "t_task_ms": m.get("t_task_ms", {}).get("median"),
+                "t_task_ci95": m.get("t_task_ms", {}).get("ci_95"),
+                "t_orch_ms": m.get("t_orch_ms", {}).get("median"),
+                "t_orch_ci95": m.get("t_orch_ms", {}).get("ci_95"),
+                "phi_orch_pct": m.get("phi_orch_pct", {}).get("median")
+            }
+    # Extract W5
+    for ag_key, wls in p_data.get("regime_a", {}).items():
+        if "W5" in wls:
+            m = wls["W5"]
+            concise_digest[p_key]["w5_enterprise_langchain"][ag_key] = {
+                "t_task_ms": m.get("t_task_ms", {}).get("median"),
+                "t_task_ci95": m.get("t_task_ms", {}).get("ci_95"),
+                "t_orch_ms": m.get("t_orch_ms", {}).get("median"),
+                "t_orch_ci95": m.get("t_orch_ms", {}).get("ci_95"),
+                "rss_mb": m.get("rss_mb", {}).get("median")
+            }
+
+concise_json_str = json.dumps(concise_digest, indent=2)
+
+pt3_header = """================================================================================
+AUDIT CHUNK PART 3: CONSOLIDATED CSV SUMMARY, ANOMALY DIAGNOSTICS & METRICS
+================================================================================
+Arquivos Originais Incluídos / Source Files Included:
+  1. audit_export/quad_platform_consolidated_summary.csv (Todas as 178 células nas 4 plataformas)
+  2. audit_export/anomaly_and_cache_diagnostics.csv (Autocorrelação r1, n_eff, p-adj drift e teto térmico)
+  3. audit_export/audit_summary_metrics.json (Resumo condensado estruturado de medianas, CIs e diagnósticos)
+Padrão Alvo: SoftwareX / JOSS Quad-Platform Microarchitectural Telemetry
+Data de Exportação: 2026-11-21
+Tamanho Máximo do Chunk: <= 150 KB
+================================================================================
+
+"""
+
+with open(pt3_path, "w", encoding="utf-8") as f:
+    f.write(pt3_header)
+    f.write(">>> SEÇÃO 1: audit_export/quad_platform_consolidated_summary.csv <<<\n\n")
+    f.write(csv_summary_content)
+    f.write("\n\n>>> FIM DE: audit_export/quad_platform_consolidated_summary.csv <<<\n")
+    f.write("\n" + "=" * 80 + "\n\n")
+    f.write(">>> SEÇÃO 2: audit_export/anomaly_and_cache_diagnostics.csv <<<\n\n")
+    f.write(anomaly_csv_content)
+    f.write("\n\n>>> FIM DE: audit_export/anomaly_and_cache_diagnostics.csv <<<\n")
+    f.write("\n" + "=" * 80 + "\n\n")
+    f.write(">>> SEÇÃO 3: CONDENSED STRUCTURED SUMMARY (from audit_summary_metrics.json) <<<\n\n")
+    f.write(concise_json_str)
+    f.write("\n\n>>> FIM DE: CONDENSED STRUCTURED SUMMARY <<<\n")
+
+print(f"Generated {pt3_path}: {os.path.getsize(pt3_path):,} bytes")
+
+# ------------------------------------------------------------------------------
+# 4. INDEX.txt (Audit Directory Inventory, Figures & Tables Manifest)
+# ------------------------------------------------------------------------------
+index_path = os.path.join(OUTPUT_DIR, "INDEX.txt")
+figures_dir = os.path.join(REPO_DIR, "audit_export", "figures")
+fig_files = [
+    ("fig1_architecture_topology.png", "Figura 1: Topologia Quad-Platform do Testbed Experimental"),
+    ("fig2_exp1_cold_start_rss.png", "Figura 2: Experimento 1 - Cold Start Hyperfine e Resident Set Size (RSS)"),
+    ("fig3_exp2_latency_overhead.png", "Figura 3: Experimento 2 - Latência de Orquestração T_orch e Fração Phi_orch"),
+    ("fig4_exp3_energy_edp.png", "Figura 4: Experimento 3 - Energia Dinâmica Líquida (J) e Energy-Delay Product (EDP)"),
+    ("fig5_exp4_tools_and_bloat.png", "Figura 5: Experimento 4 - Speedups de Prefill com Tool-RAG Schema Pruning"),
+    ("fig6_pmc_hardware_counters.png", "Figura 6: Experimento 5 - Contadores PMC de Instruções e Ciclos de Hardware"),
+]
+
+with open(index_path, "w", encoding="utf-8") as f:
+    f.write("""================================================================================
+PASTA DE AUDITORIA: audit_txt_chunks/ - ÍNDICE GERAL PARA O AVALIADOR
+================================================================================
+Objetivo: Fornecer acesso textual modular, transparente e leve (<= 150 KB por arquivo)
+a todo o acervo empírico e analítico do benchmark PicoClaw vs. OpenClaw (Quad-Platform).
+
+ARQUIVOS DE TEXTO FATIADOS (.TXT):
+--------------------------------------------------------------------------------
+1. audit_pt1_report_and_checklist.txt  (~40 KB)
+   - Contém: AUDIT_REPORT_FINAL.md + audit_export/Systems_Replication_Report.md
+   - Foco: Relatório de conformidade, inventário de trials, verificação de integridade,
+           taxonomia de N/A, purificação bibliográfica e rigor de sistemas.
+
+2. audit_pt2_tables.txt  (~61 KB)
+   - Contém: Tabelas 1 a 8 consolidadas em formato Markdown
+     * Table 1: Master Systems & Microarchitectural Conformance (W2)
+     * Table 2: Non-Parametric Hypothesis Tests (Mann-Whitney, Cliff's delta, Holm-Bonferroni)
+     * Table 3: Warm Cache Summary & Absolute T_orch Invariance
+     * Table 4: Dynamic KV-Cache Eviction & Thrashing Penalties (T2/T3)
+     * Table 5: Tool-RAG Schema Pruning Speedups (-87.1% tokens)
+     * Table 6: In-Process vs. stdio vs. Loopback HTTP MCP Transport Ablation
+     * Table 7: Dual-Session TOST Equivalence Tests (+-15% margin)
+     * Table 8: Enterprise Workload W5 (LangChain + SQLite + LLM-as-a-Judge)
+
+3. audit_pt3_summary_and_diagnostics.txt  (~103 KB)
+   - Contém:
+     * quad_platform_consolidated_summary.csv (Todas as 178 células em CSV plano)
+     * anomaly_and_cache_diagnostics.csv (Autocorrelação r1, n_eff, drift e thermal masks)
+     * Resumo estruturado condensado de métricas (medianas, CIs e speedups)
+
+--------------------------------------------------------------------------------
+LOCALIZAÇÃO DAS TABELAS COMPLETAS (MARKDOWN E LATEX):
+--------------------------------------------------------------------------------
+- Diretório de tabelas: audit_export/tables/ (e espelhado em results/tri_platform_tables/)
+  * table1_master_summary.md / .tex
+  * table2_statistical_tests.md
+  * table3_warm_cache_summary.md
+  * table4_kv_thrashing.md
+  * table5_tool_rag_mitigation.md
+  * table6_mcp_transport_ablation.md / .tex
+  * table7_session_replication_comparison.md / .tex
+  * table8_w5_enterprise_workload.md / .tex
+
+--------------------------------------------------------------------------------
+LOCALIZAÇÃO DAS FIGURAS DE ALTA RESOLUÇÃO (300 DPI):
+--------------------------------------------------------------------------------
+- Diretório de figuras: figures/ e audit_export/figures/
+""")
+    for fname, desc in fig_files:
+        fpath = os.path.join(figures_dir, fname)
+        if os.path.exists(fpath):
+            f_hash = sha256_file(fpath)
+            f_size = os.path.getsize(fpath)
+            f.write(f"- {fname} ({f_size:,} bytes | SHA-256: {f_hash})\n  {desc}\n")
+    f.write("\n================================================================================\n")
+
+print(f"Generated {index_path}: {os.path.getsize(index_path):,} bytes")

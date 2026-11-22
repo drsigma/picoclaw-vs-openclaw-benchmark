@@ -1,0 +1,61 @@
+================================================================================
+PASTA DE AUDITORIA: audit_txt_chunks/ - ÍNDICE GERAL PARA O AVALIADOR
+================================================================================
+Objetivo: Fornecer acesso textual modular, transparente e leve (<= 150 KB por arquivo)
+a todo o acervo empírico e analítico do benchmark PicoClaw vs. OpenClaw (Quad-Platform).
+
+ARQUIVOS DE TEXTO FATIADOS (.TXT):
+--------------------------------------------------------------------------------
+1. audit_pt1_report_and_checklist.txt  (~40 KB)
+   - Contém: AUDIT_REPORT_FINAL.md + audit_export/Systems_Replication_Report.md
+   - Foco: Relatório de conformidade, inventário de trials, verificação de integridade,
+           taxonomia de N/A, purificação bibliográfica e rigor de sistemas.
+
+2. audit_pt2_tables.txt  (~61 KB)
+   - Contém: Tabelas 1 a 8 consolidadas em formato Markdown
+     * Table 1: Master Systems & Microarchitectural Conformance (W2)
+     * Table 2: Non-Parametric Hypothesis Tests (Mann-Whitney, Cliff's delta, Holm-Bonferroni)
+     * Table 3: Warm Cache Summary & Absolute T_orch Invariance
+     * Table 4: Dynamic KV-Cache Eviction & Thrashing Penalties (T2/T3)
+     * Table 5: Tool-RAG Schema Pruning Speedups (-87.1% tokens)
+     * Table 6: In-Process vs. stdio vs. Loopback HTTP MCP Transport Ablation
+     * Table 7: Dual-Session TOST Equivalence Tests (+-15% margin)
+     * Table 8: Enterprise Workload W5 (LangChain + SQLite + LLM-as-a-Judge)
+
+3. audit_pt3_summary_and_diagnostics.txt  (~103 KB)
+   - Contém:
+     * quad_platform_consolidated_summary.csv (Todas as 178 células em CSV plano)
+     * anomaly_and_cache_diagnostics.csv (Autocorrelação r1, n_eff, drift e thermal masks)
+     * Resumo estruturado condensado de métricas (medianas, CIs e speedups)
+
+--------------------------------------------------------------------------------
+LOCALIZAÇÃO DAS TABELAS COMPLETAS (MARKDOWN E LATEX):
+--------------------------------------------------------------------------------
+- Diretório de tabelas: audit_export/tables/ (e espelhado em results/tri_platform_tables/)
+  * table1_master_summary.md / .tex
+  * table2_statistical_tests.md
+  * table3_warm_cache_summary.md
+  * table4_kv_thrashing.md
+  * table5_tool_rag_mitigation.md
+  * table6_mcp_transport_ablation.md / .tex
+  * table7_session_replication_comparison.md / .tex
+  * table8_w5_enterprise_workload.md / .tex
+
+--------------------------------------------------------------------------------
+LOCALIZAÇÃO DAS FIGURAS DE ALTA RESOLUÇÃO (300 DPI):
+--------------------------------------------------------------------------------
+- Diretório de figuras: figures/ e audit_export/figures/
+- fig1_architecture_topology.png (753,893 bytes | SHA-256: 14a6907e9dbfbdfaae498fc54ad47f3d71261d1340e178bda4b5023c1a518979)
+  Figura 1: Topologia Quad-Platform do Testbed Experimental
+- fig2_exp1_cold_start_rss.png (295,886 bytes | SHA-256: 6150e2383bea6e9c554c47eb0dea7f82bbe009db8cbb5731b145542bec2fc888)
+  Figura 2: Experimento 1 - Cold Start Hyperfine e Resident Set Size (RSS)
+- fig3_exp2_latency_overhead.png (319,880 bytes | SHA-256: 19fa1055344900c0e8e4d884901ce90a320f81ccd18a87cbf77bf573103c90c7)
+  Figura 3: Experimento 2 - Latência de Orquestração T_orch e Fração Phi_orch
+- fig4_exp3_energy_edp.png (349,892 bytes | SHA-256: 665eb817e4a6f33a08430c4d939fd347208db086aa232c6064079beb4f962548)
+  Figura 4: Experimento 3 - Energia Dinâmica Líquida (J) e Energy-Delay Product (EDP)
+- fig5_exp4_tools_and_bloat.png (253,614 bytes | SHA-256: 6b307f259bdb0862507f5ab604824fe9f2ffe6ea791d0cb63ac251ac914faa90)
+  Figura 5: Experimento 4 - Speedups de Prefill com Tool-RAG Schema Pruning
+- fig6_pmc_hardware_counters.png (308,717 bytes | SHA-256: 8c215827a8ef94c0db1ff9123b7b998dd10493eda5662f4f91d22c9410f3c1b5)
+  Figura 6: Experimento 5 - Contadores PMC de Instruções e Ciclos de Hardware
+
+================================================================================

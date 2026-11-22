@@ -5,7 +5,7 @@
   "DATA_LICENSE": "28c5c1ca68684f48dd4b4333657bcdbfd9f2222ddcd1e15a1ea40ba543117492",
   "LICENSE": "4c391846d226468fc7c446e8e962f9bca63dfef0096fb88dd29243987d4892b1",
   "Makefile": "6ab2186272578a5912f96e00eff35d8baa31c988ec4fbe119a84edc1f79839d2",
-  "README.md": "6004c95616515ff49f21a50dec9769ebc38a16904839463c5faf00df9ecf7bb8",
+  "README.md": "7ba7fff547ddee26159d395650f7854637fbec8c84a8d780af41b43a74aa5ffc",
   "benchmark/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
   "benchmark/adapters/__init__.py": "8597048a836553ec48192a65522c466f371e9ae52d0d5dc919cf9e9454674d45",
   "benchmark/adapters/base.py": "65a4f485692ead175d82a48631f69051ed2caff44fa844a7c871db0ed4092098",
@@ -222,5 +222,5 @@
   "tests/test_dataset_generator.py": "66a08eaed0f641aaad41aadfbcd241aa09a157549884fdf6dfe89f914dae5bf9",
   "tests/test_statistical_engine.py": "f423100a9375541f4ebb9fe8b65d3052d3f32698465522faca556f49937d9199",
   "tests/test_telemetry_parser.py": "f6373e073f257d086e14ff712a87987a7326c650a3f1f42e4dfc80e730752f26",
-  "tutorial/README.md": "f64d58f5ca27701e7ff4da36255b231aad8508a42706f039714b59e401ccdf7b"
+  "tutorial/README.md": "5ce81bead15dbc713179f4ed4d458be5359f4b5c5dd4fbd1d19f0f22052a899f"
 }
