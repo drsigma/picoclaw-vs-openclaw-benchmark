@@ -156,9 +156,11 @@ Summary:
 ---
 
 #### Passo 5: Verificação de Integridade Criptográfica (SHA-256)
-Auditoria automática dos 160 arquivos do repositório contra a assinatura digital:
+Auditoria automática de todos os arquivos rastreados em `data/manifest_sha256.json` (incluindo os 35 datasets `.jsonl` brutos das 4 plataformas) contra suas assinaturas digitais:
 ```bash
 make verify
+# ou diretamente:
+python scripts/verify_manifest.py
 ```
 ```text
 ========================================================================
@@ -381,9 +383,11 @@ Summary:
 ---
 
 #### Step 5: Cryptographic Integrity Verification (SHA-256)
-Automated audit of all 160 tracked repository files against their cryptographic hashes:
+Automated audit of all tracked repository files in `data/manifest_sha256.json` (including all 35 raw `.jsonl` datasets across all 4 platforms) against their cryptographic hashes:
 ```bash
 make verify
+# or directly:
+python scripts/verify_manifest.py
 ```
 ```text
 ========================================================================

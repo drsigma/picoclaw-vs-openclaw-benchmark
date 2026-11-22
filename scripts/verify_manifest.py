@@ -108,7 +108,30 @@ def update_manifest() -> int:
         "results/publication_campaign/tables/table_mcp_transport_ablation.tex",
         "results/publication_campaign/tables/table_quantization_scaling.tex",
         "data/uma_energy_bandwidth_attribution.json",
+        "data/mcp_live_transport_trials.jsonl",
+        "data/external_framework_langchain_trials.jsonl",
+        "scripts/reproduce_quad_platform_analysis.py",
+        "scripts/generate_audit_txt_chunks.py",
+        "AUDIT_REPORT_FINAL.md",
+        "audit_export/Systems_Replication_Report.md",
+        "audit_export/quad_platform_consolidated_summary.csv",
+        "audit_export/anomaly_and_cache_diagnostics.csv",
     ]
+    # Dynamically include all raw quad-platform session JSONL datasets and consolidated tables
+    import glob as _glob
+    for pattern in (
+        "data/linux_x86_64_session1/raw/*.jsonl",
+        "data/linux_x86_64_session2/raw/*.jsonl",
+        "data/windows_x86_64_session1/raw/*.jsonl",
+        "data/windows_x86_64_session2/raw/*.jsonl",
+        "data/windows_intel_graphics_session1/raw/*.jsonl",
+        "data/windows_intel_graphics_session2/raw/*.jsonl",
+        "audit_export/tables/*.md",
+        "audit_export/tables/*.tex",
+        "results/quad_platform_tables/*.tex",
+    ):
+        for abs_match in sorted(_glob.glob(os.path.join(REPO_DIR, pattern))):
+            additional.append(os.path.relpath(abs_match, REPO_DIR).replace("\\", "/"))
     for rel_path in additional:
         abs_path = os.path.join(REPO_DIR, rel_path)
         if os.path.exists(abs_path) and rel_path not in manifest:

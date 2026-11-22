@@ -21,8 +21,8 @@ OpenClaw (Node.js Full 54) & Windows 11 NVIDIA & 7896.4 & 48.55 [48.2, 48.8] & 0
 OpenClaw (Node.js Full 54) & Windows Intel iGPU & 226696.9 & 68.89 [68.1, 69.7] & 0.03\% & 54.8 & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
 PythonNative (CPython VM) & macOS ARM64 (M4) & 5286.3 & 11.63 [11.3, 11.8] & 0.22\% & 24.1 & 88.9 & 468.1 & 649.57M \\
 PythonNative (CPython VM) & Linux x86\_64 & 2713.5 & 17.10 [16.3, 18.7] & 0.63\% & 40.2 & 216.1 & 587.6 & 2654.20M \\
-PythonNative (CPython VM) & Windows 11 NVIDIA & 2859.5 & 26.99 [25.8, 30.3] & 0.94\% & N/A\textsuperscript{\dagger} & 137.8 & 394.0 & N/A\textsuperscript{*} \\
-PythonNative (CPython VM) & Windows Intel iGPU & 53578.0 & 45.63 [41.2, 49.7] & 0.09\% & N/A\textsuperscript{\dagger} & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
+PythonNative (CPython VM) & Windows 11 NVIDIA & 2859.5 & 26.99 [25.8, 30.3] & 0.94\% & N/A\textsuperscript{\S} & 137.8 & 394.0 & N/A\textsuperscript{*} \\
+PythonNative (CPython VM) & Windows Intel iGPU & 53578.0 & 45.63 [41.2, 49.7] & 0.09\% & N/A\textsuperscript{\S} & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
 Bun JSC Minimal 15 & Linux x86\_64 & 2695.6 & 6.12 [5.9, 6.6] & 0.23\% & 24.2 & 207.2 & 560.5 & 55.04M \\
 Bun JSC Minimal 15 & Windows 11 NVIDIA & 2856.4 & 16.48 [16.3, 17.9] & 0.58\% & 24.6 & 136.2 & 387.5 & N/A\textsuperscript{*} \\
 Bun JSC Minimal 15 & Windows Intel iGPU & 53564.7 & 23.70 [23.4, 24.1] & 0.04\% & 23.6 & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
@@ -33,13 +33,12 @@ Neural Baseline (Direct Server) & Windows Intel iGPU & 51817.8 & 0.00 [0.0, 0.0]
 \hline
 \multicolumn{9}{l}{\textsuperscript{*}\footnotesize PMU instruction counters restricted in Windows user-mode; empirical CPU cycles tracked via QueryProcessCycleTime (45.8M in PicoClaw vs. 528.1M in OpenClaw Full, 11.54x ratio).} \\
 \multicolumn{9}{l}{\footnotesize \quad Refs \& Technical Docs: Weaver et al. (IEEE ISPASS 2013); Microsoft Learn (QueryProcessCycleTime); Intel SDM Vol. 3B Ch. 20.} \\
-\multicolumn{9}{l}{\textsuperscript{\dagger}\footnotesize python\_native on Windows captured py.exe launcher stub PID (PEP 397) instead of worker child (Win32 PSAPI).} \\
+\multicolumn{9}{l}{\textsuperscript{\S}\footnotesize \texttt{python\_native} on Windows captured \texttt{py.exe} launcher stub PID (PEP 397) instead of worker child (Win32 PSAPI); unified as N/A\textsuperscript{\S} across Fig.~2(b), Table~1, and Table~8.} \\
 \multicolumn{9}{l}{\footnotesize \quad Technical Docs: Python PEP 397; Microsoft Learn (GetProcessMemoryInfo / PROCESS\_MEMORY\_COUNTERS).} \\
 \multicolumn{9}{l}{\textsuperscript{\ddagger}\footnotesize Neural baseline issues direct HTTP requests to resident llama-server without client agent runtime ($T_{\text{orch}} \equiv 0$).} \\
 \multicolumn{9}{l}{\textsuperscript{||}\footnotesize Bun JSC was evaluated as a secondary JavaScript engine ablation on x86\_64 nodes (Linux and Windows) following the Darwin ARM64 reference campaign.} \\
 \multicolumn{9}{l}{\textsuperscript{**}\footnotesize Host energy \& EDP on Intel Graphics UMA uninstrumented in Windows user-mode (requires ring-0 MSR driver).} \\
-\multicolumn{9}{l}{\textsuperscript{\S}\footnotesize Cross-ISA hardware instruction counts (ARM64 vs. x86\_64) are segregated due to microarchitectural density differences; evaluate via relative ratios.} \\
-\multicolumn{9}{l}{\textsuperscript{\P}\footnotesize \textbf{Clean-Room Runs:} All empirical datasets originate from clean from-scratch runs without partial data reuse.} \\
+\multicolumn{9}{l}{\textsuperscript{\P}\footnotesize Cross-ISA hardware instruction counts (ARM64 vs. x86\_64) are segregated due to microarchitectural density differences; evaluate via relative ratios. All datasets originate from clean from-scratch runs.} \\
 \hline
 \end{tabular}
 }

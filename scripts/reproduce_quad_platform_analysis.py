@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """
-scripts/reproduce_tri_platform_analysis.py - Master Quad-Platform Conformance Audit,
-Statistical Consolidation, and Publication Artifact Generator.
+scripts/reproduce_quad_platform_analysis.py - Master Quad-Platform Conformance Audit,
+Statistical Consolidation, and Artifact Generator.
 
 Platforms:
-  - Linux x86_64 (Ubuntu 26.04 LTS, Intel i5-12500H, RTX 3050 Laptop GPU, RAPL+NVML+perf)
   - macOS ARM64 (Apple Silicon Mac Mini M4, 10-core, 24GB Unified LPDDR5X, Apple SMC)
-  - Windows 11 x86_64 (Windows 11 build 26200, Intel i5-12500H, RTX 3050 Laptop GPU, RAPL+NVML+WDDM)
+  - Linux x86_64 (Ubuntu 26.04 LTS, Intel i5-12500H, RTX 3050 Laptop GPU, RAPL+NVML+perf)
+  - Windows 11 x86_64 (Windows 11 build 26200, Intel i5-12500H, RTX 3050 Laptop GPU, RAPL+NVML+Win32)
+  - Windows 10/11 x86_64 (Intel Core i7-4790K, Intel HD Graphics 4600 iGPU UMA, Win32 PSAPI/Cycles)
 
 Strict Empirical Rigor:
   - Zero synthetic interpolation or simulated numbers; 100% data-driven from empirical JSONL records
@@ -52,7 +53,7 @@ AUDIT_EXPORT_DIR = os.path.join(REPO_DIR, "audit_export")
 AUDIT_FIG_DIR = os.path.join(AUDIT_EXPORT_DIR, "figures")
 AUDIT_TABLES_DIR = os.path.join(AUDIT_EXPORT_DIR, "tables")
 PUB_FIG_DIR = os.path.join(REPO_DIR, "figures")
-PUB_TABLES_DIR = os.path.join(REPO_DIR, "results", "tri_platform_tables")
+PUB_TABLES_DIR = os.path.join(REPO_DIR, "results", "quad_platform_tables")
 
 os.makedirs(AUDIT_EXPORT_DIR, exist_ok=True)
 os.makedirs(AUDIT_FIG_DIR, exist_ok=True)
@@ -1136,13 +1137,13 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
             to_ci = cell["t_orch_ms"]["ci_95"]
             phi_med = cell["phi_orch_pct"]["median"]
             
-            # Peak RSS formatting
+            # Peak RSS formatting (unified N/A§ for Windows py.exe stub across Fig. 2b, Table 1, and Table 8)
             if ak == "neural_baseline":
                 rss_str_md = "N/A‡"
                 rss_str_tex = "N/A\\textsuperscript{\\ddagger}"
             elif cell["rss_mb"].get("status") == "N/A":
-                rss_str_md = "N/A†"
-                rss_str_tex = "N/A\\textsuperscript{\\dagger}"
+                rss_str_md = "N/A§"
+                rss_str_tex = "N/A\\textsuperscript{\\S}"
             else:
                 rss_med = cell["rss_mb"]["median"]
                 rss_str_md = f"{rss_med:.2f}"
@@ -1181,25 +1182,23 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         "",
         "> **Table 1 Methodological Notes and Technical Specifications:**  ",
         f"> `*` **N/A\\*** (*PMU Instruction Counters on Windows*): In Windows user-mode, CPU PMU architectural instruction counters are restricted by the NT kernel without elevated driver tracing (kernel ETW/WPR profiling introduces asynchronous latency unsuited to isolated process measurement). Win32 user-mode API exposes thread cycles via `QueryProcessCycleTime` (`realtimeapiset.h`), precluding access to `IA32_FIXED_CTR0` (`INST_RETIRED.ANY`). Synthetic IPC extrapolations are avoided; CPU cycles are reported directly ({win_nv_cyc['picoclaw_m']:.1f}M cycles in PicoClaw vs. {win_nv_cyc['openclaw_full_m']:.1f}M cycles in OpenClaw Full on Windows 11 NVIDIA, a {win_nv_cyc['ratio']:.2f}x ratio). *References & Technical Documentation:* Weaver et al. (IEEE ISPASS 2013); Microsoft Learn (`QueryProcessCycleTime`); Intel 64 and IA-32 SDM Vol. 3B Ch. 20.  ",
-        "> `†` **N/A†** (*Peak RSS of PythonNative on Windows*): Windows invocation via `py.exe` (PEP 397) acts as a lightweight launcher wrapper stub dispatching an independent worker child process (`python.exe`). PSAPI telemetry (`GetProcessMemoryInfo`) monitored the parent wrapper PID (~4.91 MB) rather than the CPython worker heap; `N/A†` is reported instead of the wrapper stub figure. *Technical Documentation:* Python PEP 397; Microsoft Learn (Win32 PSAPI).  ",
+        "> `§` **N/A§** (*Peak RSS of PythonNative on Windows — unified with Fig. 2(b) and Table 8*): Windows invocation via `py.exe` (PEP 397) acts as a lightweight launcher wrapper stub dispatching an independent worker child process (`python.exe`). PSAPI telemetry (`GetProcessMemoryInfo`) monitored the parent wrapper PID (~4.91 MB) rather than the CPython worker heap; `N/A§` is reported uniformly instead of the wrapper stub figure. *Technical Documentation:* Python PEP 397; Microsoft Learn (Win32 PSAPI).  ",
         "> `‡` **N/A‡** (*Direct Neural Baseline*): The neural baseline issues direct HTTP requests from the telemetry harness to the resident `llama-server` without intermediary agent runtimes ($T_{\\text{orch}} \\equiv 0$); no client agent process exists for RSS or instruction attribution.  ",
-        "> `||` **N/A for Bun on macOS**: Bun (JSC) was evaluated as a secondary JavaScript engine ablation on x86_64 nodes (Linux and Windows) following the completion of the Darwin ARM64 reference campaign.  ",
+        "> `||` **N/A||** (*Bun JSC on macOS*): Bun (JSC) was evaluated as a secondary JavaScript engine ablation on x86_64 nodes (Linux and Windows) following the completion of the Darwin ARM64 reference campaign.  ",
         "> `**` **N/A\\*\\*** (*Host Package Energy on Windows Intel Graphics*): Intel HD Graphics 4600 operates on unified host memory aperture (UMA); without a kernel RAPL MSR driver or discrete NVML, host package energy and EDP are not instrumented in unprivileged user-mode.  ",
-        "> `§` **Cross-ISA Hardware Counter Segregation:** Direct numerical comparisons of retired hardware instruction counts between Apple Silicon (ARM64 RISC) and Intel Core (x86_64 CISC) are microarchitecturally incommensurable due to divergent instruction densities, macro-op fusion, and RISC micro-operation expansion. Hardware instructions are segregated by ISA and evaluated via within-ISA relative ratios (e.g., OpenClaw Full vs. PicoClaw).  ",
-        "> `¶` **Clean Physical Executions:** All consolidated datasets originate from unbroken, from-scratch executions without partial or reused trials."
+        "> `¶` **Cross-ISA Hardware Counter Segregation & Clean Physical Executions:** Direct numerical comparisons of retired hardware instruction counts between Apple Silicon (ARM64 RISC) and Intel Core (x86_64 CISC) are microarchitecturally incommensurable due to divergent instruction densities, macro-op fusion, and RISC micro-operation expansion; evaluate hardware instructions via within-ISA relative ratios (e.g., OpenClaw Full vs. PicoClaw). All consolidated datasets originate from unbroken, from-scratch executions without partial or reused trials."
     ])
 
     t1_tex.extend([
         "\\hline",
         f"\\multicolumn{{9}}{{l}}{{\\textsuperscript{{*}}\\footnotesize PMU instruction counters restricted in Windows user-mode; empirical CPU cycles tracked via QueryProcessCycleTime ({win_nv_cyc['picoclaw_m']:.1f}M in PicoClaw vs. {win_nv_cyc['openclaw_full_m']:.1f}M in OpenClaw Full, {win_nv_cyc['ratio']:.2f}x ratio).}} \\\\",
         "\\multicolumn{9}{l}{\\footnotesize \\quad Refs \\& Technical Docs: Weaver et al. (IEEE ISPASS 2013); Microsoft Learn (QueryProcessCycleTime); Intel SDM Vol. 3B Ch. 20.} \\\\",
-        "\\multicolumn{9}{l}{\\textsuperscript{\\dagger}\\footnotesize python\\_native on Windows captured py.exe launcher stub PID (PEP 397) instead of worker child (Win32 PSAPI).} \\\\",
+        "\\multicolumn{9}{l}{\\textsuperscript{\\S}\\footnotesize \\texttt{python\\_native} on Windows captured \\texttt{py.exe} launcher stub PID (PEP 397) instead of worker child (Win32 PSAPI); unified as N/A\\textsuperscript{\\S} across Fig.~2(b), Table~1, and Table~8.} \\\\",
         "\\multicolumn{9}{l}{\\footnotesize \\quad Technical Docs: Python PEP 397; Microsoft Learn (GetProcessMemoryInfo / PROCESS\\_MEMORY\\_COUNTERS).} \\\\",
         "\\multicolumn{9}{l}{\\textsuperscript{\\ddagger}\\footnotesize Neural baseline issues direct HTTP requests to resident llama-server without client agent runtime ($T_{\\text{orch}} \\equiv 0$).} \\\\",
         "\\multicolumn{9}{l}{\\textsuperscript{||}\\footnotesize Bun JSC was evaluated as a secondary JavaScript engine ablation on x86\\_64 nodes (Linux and Windows) following the Darwin ARM64 reference campaign.} \\\\",
         "\\multicolumn{9}{l}{\\textsuperscript{**}\\footnotesize Host energy \\& EDP on Intel Graphics UMA uninstrumented in Windows user-mode (requires ring-0 MSR driver).} \\\\",
-        "\\multicolumn{9}{l}{\\textsuperscript{\\S}\\footnotesize Cross-ISA hardware instruction counts (ARM64 vs. x86\\_64) are segregated due to microarchitectural density differences; evaluate via relative ratios.} \\\\",
-        "\\multicolumn{9}{l}{\\textsuperscript{\\P}\\footnotesize \\textbf{Clean-Room Runs:} All empirical datasets originate from clean from-scratch runs without partial data reuse.} \\\\",
+        "\\multicolumn{9}{l}{\\textsuperscript{\\P}\\footnotesize Cross-ISA hardware instruction counts (ARM64 vs. x86\\_64) are segregated due to microarchitectural density differences; evaluate via relative ratios. All datasets originate from clean from-scratch runs.} \\\\",
         "\\hline",
         "\\end{tabular}",
         "}",
@@ -1754,7 +1753,7 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
 # 10. High-Resolution Publication Figure Generation (Quad-Platform)
 # ==============================================================================
 
-def generate_tri_platform_figures(consolidated: dict[str, Any], num_datasets: int = 35):
+def generate_quad_platform_figures(consolidated: dict[str, Any], num_datasets: int = 35):
     print("Generating Quad-Platform High-Resolution Figures (300 DPI)...")
 
     # --------------------------------------------------------------------------
@@ -2729,9 +2728,9 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
         "| Símbolo | Escopo | Justificativa Físico-Arquitetural |",
         "| :--- | :--- | :--- |",
         f"| `N/A*` | Windows (NVIDIA e Intel iGPU) — Hardware Instructions | O kernel do Windows NT bloqueia leitura de contadores PMU (`CR4.PCE`) em user-mode sem driver privilegiado. Ciclos de CPU são medidos diretamente via Win32 `QueryProcessCycleTime` ({wn_cyc['ratio']:.2f}x no NVIDIA; {wi_cyc['ratio']:.2f}x no Intel iGPU). |",
-        "| `N/A†` | Tabela 8 — `quality_score` (e Tabela 1 — `python_native` RSS) | Na Tabela 8, indica ausência de instrumentação do avaliador semântico LLM-as-a-Judge nos runtimes cliente não-LangChain e nas execuções Linux/Windows NVIDIA W5. (Na Tabela 1, `†` denota o stub `py.exe`.) |",
+        "| `N/A†` | Tabela 8 — `quality_score` | Ausência de instrumentação do avaliador semântico LLM-as-a-Judge nos runtimes cliente não-LangChain e nas execuções Linux/Windows NVIDIA W5 (uso exclusivo para `quality_score`). |",
         "| `N/A‡` | Todas as Plataformas — `neural_baseline` (RSS, Instr/Cycles) | A linha de base neural envia chamadas HTTP diretamente ao `llama-server` sem processo orquestrador cliente ($T_{\\text{orch}} \\equiv 0$). |",
-        "| `N/A§` | Tabela 8 — `python_native` no Windows (RSS e Cycles) | A invocação via wrapper `py.exe` (PEP 397) captura o PID pai efêmero (~4.9 MB) em vez do processo filho `python.exe`; os dados do stub são excluídos. |",
+        "| `N/A§` | **Unificado (`fig2(b)`, Tabela 1 e Tabela 8)** — `python_native` no Windows (Peak RSS e Cycles) | A invocação via wrapper `py.exe` (PEP 397) captura o PID pai efêmero (~4.9 MB) em vez do processo filho `python.exe`; os dados do stub são excluídos uniformemente em todo o pacote. |",
         "| `N/A||` | macOS ARM64 — Bun JSC Engine | Motor secundário avaliado como ablação nas plataformas x86_64 (Linux e Windows) após o congelamento da campanha de referência ARM64. |",
         "| `N/A**` | Windows Intel iGPU — Energia de Pacote e EDP | Intel HD Graphics 4600 opera sobre memória DDR3 compartilhada (UMA) sem sensores NVML dedicados ou driver MSR RAPL em anel zero no modo de usuário ($P_{\\text{idle}} = 28.50\\text{ W}$). |",
         "",
@@ -2849,7 +2848,7 @@ def main():
 
     # 8. Generate Figures
     print("\n▶ [Phase 3] Regenerating All 6 Publication Figures (300 DPI)...")
-    generate_tri_platform_figures(consolidated, num_datasets=len(inventory))
+    generate_quad_platform_figures(consolidated, num_datasets=len(inventory))
 
     # 9. Generate Master Replication Report & Final Audit Report
     print("\n▶ [Phase 4] Generating Systems_Replication_Report.md and AUDIT_REPORT_FINAL.md...")

@@ -54,7 +54,7 @@ All orchestrators interface via local loopback (`127.0.0.1:8080`) with a unified
 * **🇺🇸 EN-US:** This benchmark evaluates clean-room, isomorphic reference implementations in Go (`picoclaw_orch.go`), Node.js/TypeScript (`openclaw_orch.mjs`), and Python (`python_orch.py`) designed to isolate systems runtime overhead (native compiled vs. JIT/interpreted) under strictly identical prompts and tool schemas. PicoClaw and OpenClaw are trademarks of their respective owners; this software is an independent academic performance benchmark not affiliated with or endorsed by upstream project maintainers.
 
 > [!WARNING]
-> **Provenance Notice / Aviso de Proveniência:** All consolidated findings, statistical tables, and 300 DPI figures derive strictly from physical, hardware-instrumented trials across 35 validated raw `.jsonl` datasets spanning all 4 platforms (`results/publication_campaign/`, `data/linux_x86_64_session{1,2}/`, `data/windows_x86_64_session{1,2}/`, `data/windows_intel_graphics_session{1,2}/`). Legacy exploratory files in `results/exploratory_campaigns/` (including early calibration runs, synthetic checks in `poisson_results.json`, and exploratory figures `fig7`/`fig8`) represent historical engineering milestones prior to protocol standardization and are excluded from consolidated tables and canonical manifests.
+> **Provenance Notice / Aviso de Proveniência:** All consolidated findings, statistical tables, and 300 DPI figures derive strictly from physical, hardware-instrumented trials across 35 validated raw `.jsonl` datasets spanning all 4 platforms (`results/publication_campaign/`, `data/linux_x86_64_session{1,2}/raw/`, `data/windows_x86_64_session{1,2}/raw/`, `data/windows_intel_graphics_session{1,2}/raw/`). Legacy exploratory files in `results/exploratory_campaigns/` (including early calibration runs, synthetic checks in `poisson_results.json`, and exploratory figures `fig7`/`fig8`) represent historical engineering milestones prior to protocol standardization and are excluded from consolidated tables and canonical manifests.
 
 ---
 
@@ -202,7 +202,7 @@ Para visualizar a analogia didática do "Carro e os Dois Motoristas", o mini tut
 | **Passo 2** | Inspeção física dos datasets determinísticos em `data/workload_data/`. |
 | **Passo 3** | Execução ao vivo dos traces W1 a W4 com cálculo de $\Delta\text{RSS}$ e latência. |
 | **Passo 4** | Medição estatística de cold-start via `hyperfine` com vantagem de $3{,}81\times$ na média ($3{,}46\times$ na mediana, e $7{,}29\times$ nos workers isomórficos) para o Go. |
-| **Passo 5** | Verificação de integridade criptográfica SHA-256 de todos os 191 arquivos (`make verify`). |
+| **Passo 5** | Verificação de integridade criptográfica SHA-256 de todos os arquivos rastreados em `data/manifest_sha256.json` (`make verify` / `python scripts/verify_manifest.py`). |
 | **Passo 6** | Modo Dry-Run portátil de validação completa do pipeline (`make dry-run`). |
 | **Passo 7** | Leitura dos shunts elétricos do chip M4 via Apple SMC (`powermetrics -i 50`). |
 | **Passo 8** | Protocolo de quiescência operacional do macOS (`caffeinate -dims`). |
@@ -255,21 +255,26 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── CITATION.cff                               <- Metadados acadêmicos para citação e Zenodo DOI
 ├── LICENSE                                    <- Licença MIT para código-fonte
 ├── DATA_LICENSE                               <- Licença Creative Commons CC-BY 4.0 para dados e figuras
-├── references.bib                             <- Base bibliográfica formal BibTeX (17 referências primárias verificadas)
+├── references.bib                             <- Base bibliográfica formal BibTeX (20 referências primárias verificadas)
 ├── reproduce_linux_gold.sh                    <- Script de reprodução física automatizada em Linux x86_64
 ├── windows_gold.ps1                           <- Script PowerShell de reprodução no Windows 11
+├── launch_sentinel_intel_win.ps1              <- Script PowerShell de reprodução no Windows Intel HD Graphics 4600
+├── AUDIT_REPORT_FINAL.md                      <- Relatório final dinâmico de auditoria (inventário real dos 35 .jsonl)
 ├── audit_export/                              <- Artefatos consolidados da auditoria quad-plataforma
-│   ├── AUDIT_REPORT_FINAL.md                  <- Relatório de auditoria dinâmica (inventário real e hashes)
-│   ├── Systems_Replication_Report.md          <- Relatório consolidado de replicação de sistemas (em inglês)
+│   ├── AUDIT_REPORT_FINAL.md                  <- Espelho do relatório final de auditoria
+│   ├── Systems_Replication_Report.md          <- Relatório consolidado de replicação de sistemas (100% inglês)
 │   ├── audit_summary_metrics.json             <- Métricas consolidadas em formato JSON estruturado
 │   ├── quad_platform_consolidated_summary.csv <- Sumário estatístico comparativo quad-plataforma
 │   ├── anomaly_and_cache_diagnostics.csv      <- Diagnóstico de dependência serial, drift e telemetria térmica
 │   ├── figures/                               <- Figuras consolidadas em 300 DPI (Figuras 1 a 6)
 │   └── tables/                                <- Tabelas consolidadas em Markdown e LaTeX (Tabelas 1 a 8)
 ├── audit_export_quad_platform.zip             <- Pacote zip autocontido da auditoria quad-plataforma
-├── audit_txt_chunks/                          <- Arquivos de auditoria em texto fatiados (.txt) para avaliador digital
+├── audit_txt_chunks/                          <- Arquivos de auditoria em texto fatiados (.txt <= 150 KB)
 ├── tutorial/                                  <- Guia didático passo a passo e logs ilustrativos
 │   └── README.md                              <- Tutorial prático bilíngue com passos 1 a 9 e traces ilustrativos
+├── adapters/
+│   └── windows_intel_graphics/                <- Adaptadores e workers user-mode para Intel HD Graphics 4600 (W2/W5)
+├── W5_langchain_real_world/                   <- Workload corporativo W5 (agent.py, evaluator.py, SQLite)
 ├── benchmark/                                 <- Harness de execução, adaptadores e orquestradores
 │   ├── adapters/                              <- Implementação do padrão Strategy/Adapter
 │   │   ├── base.py                            <- Interface abstrata AgentOrchestratorAdapter
@@ -285,9 +290,10 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 │   ├── telemetry.py                           <- Coletor de telemetria Apple SMC, libproc e Linux RAPL
 │   ├── run_unified_benchmark.py               <- Executor mestre com randomized block e modo dry-run
 │   ├── analyze_results.py                     <- Análise estatística (Mediana, IQR, Cliff's d, A12, Holm-Bonferroni)
-│   └── generate_charts.py                     <- Gerador das 6 figuras científicas em 300 DPI
+│   └── generate_charts.py                     <- Gerador de figuras da campanha M4
 ├── scripts/                                   <- Scripts utilitários e de campanha
-│   ├── reproduce_tri_platform_analysis.py     <- Script de auditoria mestre, gráficos 300 DPI e consolidação
+│   ├── reproduce_quad_platform_analysis.py    <- Pipeline mestre quad-plataforma (estatística, Tabelas 1–8, Figuras 1–6, relatórios)
+│   ├── generate_audit_txt_chunks.py           <- Gerador dos chunks textuais leves (<= 150 KB) em audit_txt_chunks/
 │   ├── run_linux_x86_64_master_campaign.py    <- Harness de execução física para Linux x86_64 (RAPL/NVML/PMU)
 │   ├── run_windows_x86_64_master_campaign.py  <- Harness de execução física para Windows 11 (Win32/NVML)
 │   ├── run_prefill_ablation.py                <- Caracterização de prefill e ajuste polinomial (Metal GPU)
@@ -295,42 +301,45 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 │   ├── run_w2_resample.py                     <- Script auditável de reamostragem focada de W2 com backup
 │   ├── run_inter_session_replication.py       <- Validação de replicação inter-sessão física independente
 │   ├── run_uma_energy_and_bandwidth_attribution.py <- Deconvolução SMC/libproc e telemetria de banda UMA
-│   ├── verify_manifest.py                     <- Validador criptográfico de integridade SHA-256 (191 arquivos)
+│   ├── verify_manifest.py                     <- Validador criptográfico SHA-256 (todos os arquivos rastreados + 35 .jsonl)
 │   ├── check_quiescence.sh                    <- Auditoria de quiescência operacional
 │   └── legacy/                                <- Scripts exploratórios arquivados
-├── tests/                                     <- Suíte de testes unitários automatizados (pytest)
+├── tests/                                     <- Suíte de testes automatizados (51 testes em pytest)
 │   ├── test_adapters_and_failfast.py          <- Validação dos adaptadores e fail-fast
 │   ├── test_artifact_consistency.py           <- Consistência numérica cruzada JSON/CSV/LaTeX
 │   ├── test_dataset_generator.py              <- Validação de integridade dos datasets determinísticos
 │   ├── test_statistical_engine.py             <- Validação matemática de Cliff's d, A12, Bootstrap e Holm
-│   └── test_telemetry_parser.py               <- Validação de parsing SMC, RAPL e libproc
-├── figures/                                   <- 6 figuras científicas em alta resolução (300 DPI)
+│   ├── test_telemetry_parser.py               <- Validação de parsing SMC, RAPL e libproc
+│   └── test_windows_intel_graphics_adapter.py <- Validação de isolamento e esquema do adaptador Intel iGPU
+├── figures/                                   <- 6 figuras científicas quad-plataforma em 300 DPI (100% inglês)
 ├── results/                                   <- Resultados experimentais estruturados
-│   ├── publication_campaign/                  <- Dados da campanha definitiva (Journal-Ready)
-│   │   ├── raw_trials.jsonl                   <- Traces JSONL do Regime A (660 ensaios: 60 warmups + 600 avaliações)
-│   │   ├── warm_cache_trials.jsonl            <- Traces JSONL do Regime B (660 ensaios com reuso determinístico de KV-cache)
-│   │   ├── prefill_ablation.jsonl             <- Ensaios de ablação de catálogos (8 níveis: 0, 5, 10, 15, 25, 40, 54, 100 ferramentas)
-│   │   ├── uma_energy_bandwidth_trials.jsonl  <- Ensaios físicos de deconvolução SMC e banda de memória UMA (120 trials)
-│   │   ├── prefill_regression_fit.json        <- Ajustes Linear, Quadrático e Power-Law com AICc e Bootstrap 95% CIs
-│   │   ├── campaign_metadata.json             <- Metadados completos do ambiente, flags de hardware e auditoria
-│   │   ├── summary_statistics.json            <- Médias, desvios, p50/p95/p99 e métricas de EDP
+│   ├── publication_campaign/                  <- Dados brutos macOS Apple Silicon M4 (7 arquivos .jsonl)
+│   │   ├── raw_trials.jsonl                   <- Regime A Cold Prefill (825 linhas: 750 medições + 75 warmups, W1–W5)
+│   │   ├── warm_cache_trials.jsonl            <- Regime B Warm KV-Cache (825 linhas: 750 medições + 75 warmups, W1–W5)
+│   │   ├── inter_session_trials.jsonl         <- Sessão 2 de replicação inter-sessão (825 linhas, W1–W5)
+│   │   ├── kv_cache_thrashing_trials.jsonl    <- Ablação KV-Cache Thrashing T1/T2/T3 (90 linhas)
+│   │   ├── tool_rag_mitigation_trials.jsonl   <- Ablação Tool-RAG 54->Top-5 (1.056 linhas, W1–W4)
+│   │   ├── prefill_ablation.jsonl             <- Ablação de catálogos 0..100 ferramentas (528 linhas)
+│   │   ├── uma_energy_bandwidth_trials.jsonl  <- Deconvolução SMC/libproc e banda UMA (120 linhas)
+│   │   ├── campaign_metadata.json             <- Metadados completos do ambiente e flags de hardware
+│   │   ├── summary_statistics.json            <- Estatísticas sumárias e EDP
 │   │   ├── statistical_tests.json             <- Testes Mann-Whitney U, Cliff's Delta e Vargha-Delaney
-│   │   ├── warm_cache_summary.json            <- Estatísticas sumárias do Regime B (Warm Cache)
-│   │   ├── warm_cache_statistical_tests.json  <- Testes estatísticos de hipótese do Regime B
-│   │   ├── inter_session_replication.json     <- Métricas de replicação inter-sessão (CV < 11%)
-│   │   ├── spearman_correlation_matrix.json   <- Matriz de correlação de postos de Spearman (12 dimensões)
-│   │   ├── pca_variance_decomposition.json    <- Decomposição de variância e loadings de PCA (PC1, PC2, PC3)
-│   │   ├── uma_energy_bandwidth_attribution.json <- Atribuição quantitativa de energia e banda efetiva UMA
-│   │   └── tables/                            <- Tabelas formatadas em LaTeX (.tex) e CSV (.csv)
-│   └── exploratory_campaigns/                 <- Campanhas 1 a 5 preservadas com proveniência total
-│       ├── CHANGELOG_CAMPAIGNS.md             <- Histórico de evolução metodológica
-│       └── campaign_run_1..5/                 <- Dados das campanhas preliminares
-├── data/                                      <- Datasets determinísticos e assinaturas SHA-256
+│   │   └── tables/                            <- Tabelas LaTeX (.tex) e CSV (.csv) da campanha M4
+│   ├── quad_platform_tables/                  <- Tabelas LaTeX quad-plataforma (.tex: Tabelas 1, 6, 7 e 8)
+│   └── exploratory_campaigns/                 <- Campanhas exploratórias históricas preservadas
+├── data/                                      <- Datasets brutos (28 .jsonl: 2 macOS + 26 x86_64), workloads e manifesto SHA-256
+│   ├── mcp_live_transport_trials.jsonl        <- macOS M4 MCP Live Transport (135 linhas, W2)
+│   ├── external_framework_langchain_trials.jsonl <- macOS M4 LangChain Core externo (144 linhas, W1–W4)
+│   ├── linux_x86_64_session1/raw/             <- Linux x86_64 NVIDIA Sessão 1 (5 .jsonl: raw, warm, kv, mcp_live_transport, tool_rag)
+│   ├── linux_x86_64_session2/raw/             <- Linux x86_64 NVIDIA Sessão 2 (5 .jsonl: raw, warm, kv, mcp_live_transport, tool_rag)
+│   ├── windows_x86_64_session1/raw/           <- Windows 11 NVIDIA Sessão 1 (5 .jsonl: raw, warm, kv, mcp_live_transport, tool_rag)
+│   ├── windows_x86_64_session2/raw/           <- Windows 11 NVIDIA Sessão 2 (5 .jsonl: raw, warm, kv, mcp_live_transport, tool_rag)
+│   ├── windows_intel_graphics_session1/raw/   <- Windows Intel iGPU Sessão 1 (3 .jsonl: raw, warm, tool_rag)
+│   ├── windows_intel_graphics_session2/raw/   <- Windows Intel iGPU Sessão 2 (3 .jsonl: raw, warm, tool_rag)
 │   ├── workload_data/                         <- 50 mock files, 750 logs JSONL, RAG chunks e pesos 384d
-│   └── manifest_sha256.json                   <- Manifesto criptográfico SHA-256 de todos os arquivos
-├── docs/                                      <- 12 pares de documentação acadêmica detalhada (PT/EN)
-├── figures/                                   <- Figuras científicas em 300 DPI (Figuras 1 a 8)
-├── reports/                                   <- Relatórios acadêmicos submetidos à UFABC (.docx / .pdf)
+│   └── manifest_sha256.json                   <- Manifesto criptográfico SHA-256 dos arquivos rastreados
+├── docs/                                      <- Documentação técnica complementar (PT/EN)
+├── reports/                                   <- Relatórios acadêmicos (.docx / .pdf)
 └── tools/                                     <- Toolchain embarcada portátil (llama_cpp, hyperfine, uv)
 ```
 
@@ -392,11 +401,18 @@ python scripts\run_windows_x86_64_master_campaign.py --ngl 16 --reps 30
 powershell -ExecutionPolicy Bypass -File .\launch_sentinel_intel_win.ps1
 ```
 
-#### 📊 Pipeline Mestre de Auditoria Forense e Consolidação Quad-Plataforma
+#### 📊 Pipeline Mestre de Consolidação Quad-Plataforma e Verificação
 ```bash
-# Executa a auditoria cruzada de ponta a ponta nas 4 plataformas, computa ICs Bootstrap da mediana,
-# testes TOST de replicação, regenera as 6 figuras científicas em 300 DPI e empacota os arquivos de auditoria
+# 1. Recalcula todas as estatísticas a partir dos 35 arquivos .jsonl, gera Tabelas 1–8,
+#    renderiza as 6 figuras em 300 DPI, atualiza os relatórios e empacota audit_export_quad_platform.zip
 python scripts/reproduce_quad_platform_analysis.py
+
+# 2. Exporta os chunks textuais leves (<= 150 KB) em audit_txt_chunks/
+python scripts/generate_audit_txt_chunks.py
+
+# 3. Executa os 51 testes automatizados e valida o manifesto criptográfico SHA-256
+pytest -q
+python scripts/verify_manifest.py
 ```
 
 ---
@@ -435,7 +451,7 @@ Todos os **35 arquivos `.jsonl` brutos** contêm registros medidos diretamente n
 - [`audit_export/Systems_Replication_Report.md`](audit_export/Systems_Replication_Report.md) (Seção 6)
 - [`data/manifest_sha256.json`](data/manifest_sha256.json)
 
-A integridade de todos os 224 arquivos rastreados pode ser verificada a qualquer momento com:
+A integridade de todos os arquivos rastreados (incluindo os 35 datasets `.jsonl` brutos das 4 plataformas) pode ser verificada a qualquer momento com:
 ```bash
 python scripts/verify_manifest.py
 ```

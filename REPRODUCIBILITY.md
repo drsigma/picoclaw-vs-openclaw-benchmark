@@ -82,26 +82,37 @@ powershell -ExecutionPolicy Bypass -File .\launch_sentinel_intel_win.ps1
 
 ### Enterprise Workload W5 (LangChain + SQLite + LLM-as-a-Judge)
 ```bash
-# Run real-world enterprise multi-step tool workload W5
-python -m W5_langchain_real_world.w5_runner --workload W5 --reps 30
+# Run a standalone W5 trial (Warm or Cold regime) against local llama-server
+python -m W5_langchain_real_world.agent Warm
+python -m W5_langchain_real_world.agent Cold
 ```
+*(Multi-trial W5 blocks across all runtimes are orchestrated automatically by `scripts/run_linux_x86_64_master_campaign.py`, `scripts/run_windows_x86_64_master_campaign.py`, and `adapters/windows_intel_graphics/w5_intel_worker.py`.)*
 
 ---
 
 ## 4. Master Quad-Platform Consolidation Pipeline
 
-To recalculate 100% of empirical metrics from raw `.jsonl` datasets, execute hypothesis testing, compute moving-block bootstrap confidence intervals, and regenerate all publication tables and 300 DPI figures:
+All 35 raw empirical `.jsonl` datasets on disk reside under the exact paths listed in Section 3 of `AUDIT_REPORT_FINAL.md`:
+- `results/publication_campaign/` (7 files) and `data/` (2 files) — macOS ARM64 M4 Sessions 1 & 2: `results/publication_campaign/{raw_trials,warm_cache_trials,inter_session_trials,kv_cache_thrashing_trials,tool_rag_mitigation_trials,prefill_ablation,uma_energy_bandwidth_trials}.jsonl` plus `data/mcp_live_transport_trials.jsonl` and `data/external_framework_langchain_trials.jsonl`
+- `data/linux_x86_64_session1/raw/` and `data/linux_x86_64_session2/raw/` (10 files: `raw_trials.jsonl`, `warm_cache_trials.jsonl`, `kv_cache_thrashing_trials.jsonl`, `mcp_live_transport_trials.jsonl`, `tool_rag_mitigation_trials.jsonl` per session)
+- `data/windows_x86_64_session1/raw/` and `data/windows_x86_64_session2/raw/` (10 files: same 5-file campaign structure per session)
+- `data/windows_intel_graphics_session1/raw/` and `data/windows_intel_graphics_session2/raw/` (6 files: `raw_trials.jsonl`, `warm_cache_trials.jsonl`, `tool_rag_mitigation_trials.jsonl` per session)
+
+To recalculate 100% of empirical metrics from these 35 raw `.jsonl` datasets, execute hypothesis testing, compute Moving Block Bootstrap confidence intervals, regenerate Tables 1–8 and all 6 figures at 300 DPI, export plain-text chunks, and verify tests and SHA-256 hashes:
 
 ```bash
 python scripts/reproduce_quad_platform_analysis.py
+python scripts/generate_audit_txt_chunks.py
+pytest -q
+python scripts/verify_manifest.py
 ```
 
-This single command executes the following phases:
+The master pipeline (`scripts/reproduce_quad_platform_analysis.py`) executes four phases:
 1. **Phase 1: Commit & Dataset Auditing:** Scans all **35 raw `.jsonl` files** on disk and computes line counts, measured vs. warmup trial counts, workloads, and SHA-256 checksums.
 2. **Phase 2: Telemetry & Drift Diagnostics:** Evaluates lag-1 serial autocorrelation ($r_1$), effective sample size ($n_{\text{eff}}$), OLS linear regression drift with Holm-Bonferroni FWER control, and NVML/MSR thermal throttle registers across **190 experimental cells**.
 3. **Phase 3: Statistical Consolidation:** Computes empirical medians, IQRs, Moving Block Bootstrap 95% CIs ($b=3$), Kruskal-Wallis omnibus tests, Mann-Whitney $U$, Cliff's $\delta$, Vargha-Delaney $A_{12}$, and dual-session TOST equivalence tests (`ttost_ind`).
 4. **Phase 4: Dynamic Artifact Generation:**
-   - Tables 1–8 in Markdown and LaTeX format in `audit_export/tables/` and `results/tri_platform_tables/`.
+   - Tables 1–8 in Markdown and LaTeX format in `audit_export/tables/` and `results/quad_platform_tables/`.
    - Figures 1–6 in 300 DPI PNG (100% English) in `figures/` and `audit_export/figures/`.
    - Dynamic systems replication report (`audit_export/Systems_Replication_Report.md`) and synchronized audit report (`AUDIT_REPORT_FINAL.md`).
    - Consolidated audit archive `audit_export_quad_platform.zip`.

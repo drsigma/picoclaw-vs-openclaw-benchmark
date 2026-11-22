@@ -11,7 +11,7 @@ ARQUIVOS DE TEXTO FATIADOS (.TXT):
    - Foco: Inventário real de 35 datasets JSONL em disco, verificação de integridade,
            taxonomia completa de N/A, auditoria bibliográfica e replicação de sistemas.
 
-2. audit_pt2_tables.txt  (64.1 KB)
+2. audit_pt2_tables.txt  (64.2 KB)
    - Contém: Tabelas 1 a 8 consolidadas em formato Markdown
      * Table 1: Master Systems & Microarchitectural Conformance (W2)
      * Table 2: Non-Parametric Hypothesis Tests (Mann-Whitney, Cliff's delta, Holm-Bonferroni)
@@ -31,7 +31,7 @@ ARQUIVOS DE TEXTO FATIADOS (.TXT):
 --------------------------------------------------------------------------------
 LOCALIZAÇÃO DAS TABELAS COMPLETAS (MARKDOWN E LATEX):
 --------------------------------------------------------------------------------
-- Diretório de tabelas: audit_export/tables/ (e espelhado em results/tri_platform_tables/)
+- Diretório de tabelas: audit_export/tables/ (e espelhado em results/quad_platform_tables/)
   * table1_master_summary.md / .tex
   * table2_statistical_tests.md
   * table3_warm_cache_summary.md

@@ -1,0 +1,24 @@
+\begin{table}[t]
+\centering
+\small
+\caption{Model Context Protocol (MCP) live IPC overhead across transports (W2 Tool Chain, empirical medians). Native in-process dispatch provides baseline function-call execution, standard I/O pipes add sub-millisecond process boundary isolation, and loopback HTTP/REST introduces network stack latency while remaining under $0.3\%$ of total task time on Unix systems.}
+\label{tab:mcp_transport_ablation}
+\begin{tabular}{llccc}
+\toprule
+\textbf{Platform} & \textbf{Transport Protocol} & \textbf{Median IPC (ms) [IQR]} & \textbf{95\% Bootstrap CI} & \textbf{Overhead Ratio} \\
+\midrule
+macOS ARM64 (M4) & Native In-Process Dispatch & 1.384 [0.360] & [1.353, 1.460] & 1.00$\times$ \\
+macOS ARM64 (M4) & Standard I/O JSON-RPC Pipes & 1.275 [0.799] & [1.237, 1.350] & 0.92$\times$ \\
+macOS ARM64 (M4) & Loopback HTTP REST Sockets & 2.389 [0.614] & [2.342, 2.432] & 1.73$\times$ \\
+\midrule
+Linux x86\_64 & Native In-Process Dispatch & 1.071 [0.038] & [1.066, 1.080] & 1.00$\times$ \\
+Linux x86\_64 & Standard I/O JSON-RPC Pipes & 1.103 [0.320] & [1.097, 1.112] & 1.03$\times$ \\
+Linux x86\_64 & Loopback HTTP REST Sockets & 1.965 [0.095] & [1.944, 1.984] & 1.83$\times$ \\
+\midrule
+Windows 11 NVIDIA & Native In-Process Dispatch & 1.883 [0.138] & [1.860, 1.918] & 1.00$\times$ \\
+Windows 11 NVIDIA & Standard I/O JSON-RPC Pipes & 1.989 [0.208] & [1.953, 2.085] & 1.06$\times$ \\
+Windows 11 NVIDIA & Loopback HTTP REST Sockets & 26.632 [23.945] & [23.307, 27.351] & 14.14$\times$ \\
+\midrule
+\bottomrule
+\end{tabular}
+\end{table}

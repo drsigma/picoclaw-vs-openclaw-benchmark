@@ -261,7 +261,7 @@ ARQUIVOS DE TEXTO FATIADOS (.TXT):
 --------------------------------------------------------------------------------
 LOCALIZAÇÃO DAS TABELAS COMPLETAS (MARKDOWN E LATEX):
 --------------------------------------------------------------------------------
-- Diretório de tabelas: audit_export/tables/ (e espelhado em results/tri_platform_tables/)
+- Diretório de tabelas: audit_export/tables/ (e espelhado em results/quad_platform_tables/)
   * table1_master_summary.md / .tex
   * table2_statistical_tests.md
   * table3_warm_cache_summary.md
