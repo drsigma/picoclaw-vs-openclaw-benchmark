@@ -37,9 +37,9 @@ pt1_header = """================================================================
 AUDIT CHUNK PART 1: FINAL AUDIT REPORT & SYSTEMS REPLICATION REPORT
 ================================================================================
 Arquivos Originais Incluídos / Source Files Included:
-  1. AUDIT_REPORT_FINAL.md (Relatório Final de Auditoria, Testes e Conformidade)
-  2. audit_export/Systems_Replication_Report.md (Relatório Físico-Arquitetural de Sistemas)
-Padrão Alvo: SoftwareX / JOSS 9.0+ Rigorous Systems Auditing (Quad-Platform)
+  1. AUDIT_REPORT_FINAL.md (Relatório Final de Auditoria, Testes e Inventário Real)
+  2. audit_export/Systems_Replication_Report.md (Quad-Platform Systems Replication Report)
+Escopo: Quad-Platform Empirical Systems Benchmark (4 Physical Profiles)
 Data de Exportação: 2026-11-21
 Tamanho Máximo do Chunk: <= 150 KB
 ================================================================================
@@ -75,7 +75,7 @@ table_files = [
 ]
 
 pt2_header = """================================================================================
-AUDIT CHUNK PART 2: CONSOLIDATED PUBLICATION TABLES (TABLES 1 TO 8)
+AUDIT CHUNK PART 2: CONSOLIDATED TABLES (TABLES 1 TO 8)
 ================================================================================
 Arquivos Originais Incluídos / Source Files Included:
   1. audit_export/tables/table1_master_summary.md (Master W2 Systems & Telemetry)
@@ -85,8 +85,8 @@ Arquivos Originais Incluídos / Source Files Included:
   5. audit_export/tables/table5_tool_rag_mitigation.md (Tool-RAG Schema Pruning Speedups)
   6. audit_export/tables/table6_mcp_transport_ablation.md (Live MCP Transport Ablation)
   7. audit_export/tables/table7_session_replication_comparison.md (TOST Dual-Session Equivalence)
-  8. audit_export/tables/table8_w5_enterprise_workload.md (LangChain SQLite Enterprise RAG)
-Padrão Alvo: SoftwareX / JOSS Quad-Platform Publication Tables (Markdown & Raw Data)
+  8. audit_export/tables/table8_w5_enterprise_workload.md (LangChain SQLite Enterprise W5 across 4 Platforms)
+Escopo: Quad-Platform Consolidated Tables (Markdown)
 Data de Exportação: 2026-11-21
 Tamanho Máximo do Chunk: <= 150 KB
 ================================================================================
@@ -177,14 +177,16 @@ for p_key, p_data in raw_metrics.items():
 
 concise_json_str = json.dumps(concise_digest, indent=2)
 
-pt3_header = """================================================================================
+num_diag_cells = max(0, len([l for l in anomaly_csv_content.splitlines() if l.strip()]) - 1)
+
+pt3_header = f"""================================================================================
 AUDIT CHUNK PART 3: CONSOLIDATED CSV SUMMARY, ANOMALY DIAGNOSTICS & METRICS
 ================================================================================
 Arquivos Originais Incluídos / Source Files Included:
-  1. audit_export/quad_platform_consolidated_summary.csv (Todas as 178 células nas 4 plataformas)
+  1. audit_export/quad_platform_consolidated_summary.csv (Todas as {num_diag_cells} células nas 4 plataformas)
   2. audit_export/anomaly_and_cache_diagnostics.csv (Autocorrelação r1, n_eff, p-adj drift e teto térmico)
   3. audit_export/audit_summary_metrics.json (Resumo condensado estruturado de medianas, CIs e diagnósticos)
-Padrão Alvo: SoftwareX / JOSS Quad-Platform Microarchitectural Telemetry
+Escopo: Quad-Platform Microarchitectural Telemetry & Diagnostics
 Data de Exportação: 2026-11-21
 Tamanho Máximo do Chunk: <= 150 KB
 ================================================================================
@@ -213,16 +215,20 @@ print(f"Generated {pt3_path}: {os.path.getsize(pt3_path):,} bytes")
 index_path = os.path.join(OUTPUT_DIR, "INDEX.txt")
 figures_dir = os.path.join(REPO_DIR, "audit_export", "figures")
 fig_files = [
-    ("fig1_architecture_topology.png", "Figura 1: Topologia Quad-Platform do Testbed Experimental"),
-    ("fig2_exp1_cold_start_rss.png", "Figura 2: Experimento 1 - Cold Start Hyperfine e Resident Set Size (RSS)"),
-    ("fig3_exp2_latency_overhead.png", "Figura 3: Experimento 2 - Latência de Orquestração T_orch e Fração Phi_orch"),
-    ("fig4_exp3_energy_edp.png", "Figura 4: Experimento 3 - Energia Dinâmica Líquida (J) e Energy-Delay Product (EDP)"),
-    ("fig5_exp4_tools_and_bloat.png", "Figura 5: Experimento 4 - Speedups de Prefill com Tool-RAG Schema Pruning"),
-    ("fig6_pmc_hardware_counters.png", "Figura 6: Experimento 5 - Contadores PMC de Instruções e Ciclos de Hardware"),
+    ("fig1_architecture_topology.png", "Figure 1: Quad-Platform Experimental Testbed & Microarchitectural Telemetry"),
+    ("fig2_exp1_cold_start_rss.png", "Figure 2: Cold Task Latency (W1) & Peak Resident Memory Footprint (W2 across 4 Platforms)"),
+    ("fig3_exp2_latency_overhead.png", "Figure 3: Client Orchestration Latency T_orch (4 Platforms) & Middleware Ratio Phi_orch with W3 Inversion"),
+    ("fig4_exp3_energy_edp.png", "Figure 4: Net Dynamic Energy Dissipation & Energy-Delay Product (W2, Within-Node Sensor Domains)"),
+    ("fig5_exp4_tools_and_bloat.png", "Figure 5: Tool Context Bloat Overhead (Linux) & Quad-Platform Tool-RAG Speedups"),
+    ("fig6_pmc_hardware_counters.png", "Figure 6: Quad-Platform PMC Retired Instructions (ARM64/Linux), Windows CPU Cycles & Relative Bloat Ratios"),
 ]
 
+pt1_kb = os.path.getsize(pt1_path) / 1024.0
+pt2_kb = os.path.getsize(pt2_path) / 1024.0
+pt3_kb = os.path.getsize(pt3_path) / 1024.0
+
 with open(index_path, "w", encoding="utf-8") as f:
-    f.write("""================================================================================
+    f.write(f"""================================================================================
 PASTA DE AUDITORIA: audit_txt_chunks/ - ÍNDICE GERAL PARA O AVALIADOR
 ================================================================================
 Objetivo: Fornecer acesso textual modular, transparente e leve (<= 150 KB por arquivo)
@@ -230,12 +236,12 @@ a todo o acervo empírico e analítico do benchmark PicoClaw vs. OpenClaw (Quad-
 
 ARQUIVOS DE TEXTO FATIADOS (.TXT):
 --------------------------------------------------------------------------------
-1. audit_pt1_report_and_checklist.txt  (~40 KB)
+1. audit_pt1_report_and_checklist.txt  ({pt1_kb:.1f} KB)
    - Contém: AUDIT_REPORT_FINAL.md + audit_export/Systems_Replication_Report.md
-   - Foco: Relatório de conformidade, inventário de trials, verificação de integridade,
-           taxonomia de N/A, purificação bibliográfica e rigor de sistemas.
+   - Foco: Inventário real de 35 datasets JSONL em disco, verificação de integridade,
+           taxonomia completa de N/A, auditoria bibliográfica e replicação de sistemas.
 
-2. audit_pt2_tables.txt  (~61 KB)
+2. audit_pt2_tables.txt  ({pt2_kb:.1f} KB)
    - Contém: Tabelas 1 a 8 consolidadas em formato Markdown
      * Table 1: Master Systems & Microarchitectural Conformance (W2)
      * Table 2: Non-Parametric Hypothesis Tests (Mann-Whitney, Cliff's delta, Holm-Bonferroni)
@@ -243,12 +249,12 @@ ARQUIVOS DE TEXTO FATIADOS (.TXT):
      * Table 4: Dynamic KV-Cache Eviction & Thrashing Penalties (T2/T3)
      * Table 5: Tool-RAG Schema Pruning Speedups (-87.1% tokens)
      * Table 6: In-Process vs. stdio vs. Loopback HTTP MCP Transport Ablation
-     * Table 7: Dual-Session TOST Equivalence Tests (+-15% margin)
-     * Table 8: Enterprise Workload W5 (LangChain + SQLite + LLM-as-a-Judge)
+     * Table 7: Dual-Session TOST Equivalence Tests
+     * Table 8: Enterprise Workload W5 across all 4 Platforms (LangChain + SQLite)
 
-3. audit_pt3_summary_and_diagnostics.txt  (~103 KB)
+3. audit_pt3_summary_and_diagnostics.txt  ({pt3_kb:.1f} KB)
    - Contém:
-     * quad_platform_consolidated_summary.csv (Todas as 178 células em CSV plano)
+     * quad_platform_consolidated_summary.csv (Todas as {num_diag_cells} células em CSV plano)
      * anomaly_and_cache_diagnostics.csv (Autocorrelação r1, n_eff, drift e thermal masks)
      * Resumo estruturado condensado de métricas (medianas, CIs e speedups)
 

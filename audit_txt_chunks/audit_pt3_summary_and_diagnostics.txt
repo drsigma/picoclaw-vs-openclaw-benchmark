@@ -2,10 +2,10 @@
 AUDIT CHUNK PART 3: CONSOLIDATED CSV SUMMARY, ANOMALY DIAGNOSTICS & METRICS
 ================================================================================
 Arquivos Originais Incluídos / Source Files Included:
-  1. audit_export/quad_platform_consolidated_summary.csv (Todas as 178 células nas 4 plataformas)
+  1. audit_export/quad_platform_consolidated_summary.csv (Todas as 190 células nas 4 plataformas)
   2. audit_export/anomaly_and_cache_diagnostics.csv (Autocorrelação r1, n_eff, p-adj drift e teto térmico)
   3. audit_export/audit_summary_metrics.json (Resumo condensado estruturado de medianas, CIs e diagnósticos)
-Padrão Alvo: SoftwareX / JOSS Quad-Platform Microarchitectural Telemetry
+Escopo: Quad-Platform Microarchitectural Telemetry & Diagnostics
 Data de Exportação: 2026-11-21
 Tamanho Máximo do Chunk: <= 150 KB
 ================================================================================

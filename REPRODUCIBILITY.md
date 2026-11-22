@@ -97,18 +97,34 @@ python scripts/reproduce_quad_platform_analysis.py
 ```
 
 This single command executes the following phases:
-1. **Phase 1: Commit & Dataset Auditing:** Computes SHA-256 for all 31 raw `.jsonl` files.
-2. **Phase 2: Telemetry & Drift Diagnostics:** Evaluates serial dependence ($r_1$, $n_{\text{eff}}$), linear regression drift with Holm-Bonferroni control, and thermal slowdown masks across 178 experimental cells.
-3. **Phase 3: Statistical Consolidation:** Aggregates medians, IQRs, moving-block bootstrap 95% CIs ($b=3$), Kruskal-Wallis omnibus tests, Mann-Whitney $U$, Cliff's $\delta$, Vargha-Delaney $A_{12}$, and dual-session TOST equivalence tests.
-4. **Phase 4: Publication Artifact Generation:**
+1. **Phase 1: Commit & Dataset Auditing:** Scans all **35 raw `.jsonl` files** on disk and computes line counts, measured vs. warmup trial counts, workloads, and SHA-256 checksums.
+2. **Phase 2: Telemetry & Drift Diagnostics:** Evaluates lag-1 serial autocorrelation ($r_1$), effective sample size ($n_{\text{eff}}$), OLS linear regression drift with Holm-Bonferroni FWER control, and NVML/MSR thermal throttle registers across **190 experimental cells**.
+3. **Phase 3: Statistical Consolidation:** Computes empirical medians, IQRs, Moving Block Bootstrap 95% CIs ($b=3$), Kruskal-Wallis omnibus tests, Mann-Whitney $U$, Cliff's $\delta$, Vargha-Delaney $A_{12}$, and dual-session TOST equivalence tests (`ttost_ind`).
+4. **Phase 4: Dynamic Artifact Generation:**
    - Tables 1–8 in Markdown and LaTeX format in `audit_export/tables/` and `results/tri_platform_tables/`.
-   - Figures 1–6 in 300 DPI PNG in `figures/` and `audit_export/figures/`.
-   - Comprehensive systems replication report in `audit_export/Systems_Replication_Report.md`.
-   - Consolidated audit package `audit_export_quad_platform.zip`.
+   - Figures 1–6 in 300 DPI PNG (100% English) in `figures/` and `audit_export/figures/`.
+   - Dynamic systems replication report (`audit_export/Systems_Replication_Report.md`) and synchronized audit report (`AUDIT_REPORT_FINAL.md`).
+   - Consolidated audit archive `audit_export_quad_platform.zip`.
 
 ---
 
-## 5. Cryptographic Manifest Verification
+## 5. Methodological Design Rationale & Core Script Architecture
+
+### Why Each Methodological Choice Was Made
+- **KV-Cache Slot Isolation (`T1`, `T2`, `T3`):** Uncontrolled concurrent requests evict prefix KV blocks (`T2`), causing quadratic prompt re-prefill. Comparing `T2` against block-isolated slot allocation (`T3`) quantifies attention eviction penalties separately from client runtime overhead (Kwon et al., 2023).
+- **Moving Block Bootstrap ($b=3$) & Effective Sample Size ($n_{\text{eff}}$):** Under Regime B (warm cache), OS standby page caching and loopback TCP cadence can induce lag-1 serial dependence ($|r_1| > 2/\sqrt{n}$). Computing $n_{\text{eff}}$ and applying Moving Block Bootstrap (Künsch, 1989) preserves short-range temporal correlation when estimating 95% confidence intervals for medians.
+- **Dual-Session TOST of Contrasts ($\Delta T_{\text{orch}}$):** Conventional null-hypothesis tests cannot prove cross-session replicability. Two One-Sided Tests (Schuirmann, 1987) formally evaluate whether inter-session differences in $\Delta T_{\text{orch}} = T_{\text{orch}}(\text{Runtime}) - T_{\text{orch}}(\text{PicoClaw})$ fall inside explicit equivalence bounds ($\max(5.0\text{ ms}, 15\% \cdot |\bar{\Delta}_1|)$).
+- **Cross-ISA Hardware Counter Segregation:** Raw retired instruction counts are not commensurable between ARM64 (RISC) and x86_64 (CISC) due to instruction density and micro-op expansion (Weaver et al., 2013). Counters are segregated by ISA and compared via within-node ratios; on Windows, where `CR4.PCE` restricts user-mode PMU instructions, Win32 `QueryProcessCycleTime` records process CPU cycles directly without synthetic IPC extrapolation.
+
+### Architecture of Core Scripts
+- **`scripts/reproduce_quad_platform_analysis.py`:** Master zero-hardcode consolidation pipeline covering raw JSONL ingestion, stationarity/drift diagnostics, non-parametric hypothesis tests, Markdown/LaTeX table generation, 300 DPI plotting, dynamic report generation, and ZIP packaging.
+- **`scripts/verify_manifest.py`:** Streaming 64 KB SHA-256 verifier checking every tracked raw dataset, script, figure, and table against `data/manifest_sha256.json` (`--update` refreshes hashes after verified runs).
+- **`benchmark/adapters/` & `adapters/windows_intel_graphics/`:** Strategy/Adapter layer (`AgentOrchestratorAdapter`) isolating runtime engines (Go, Node.js, CPython, Bun, LangChain) and OS-native telemetry hooks (Apple SMC/`libproc`, Linux RAPL/NVML/`perf_event_open`, Windows MSR/NVML/Win32 PSAPI) from the benchmark harness.
+- **`scripts/generate_audit_txt_chunks.py`:** Slices consolidated reports, Tables 1–8, and CSV diagnostics into portable plain-text chunks ($\le 150\text{ KB}$ each) under `audit_txt_chunks/` with explicit source headers.
+
+---
+
+## 6. Cryptographic Manifest Verification
 
 To cryptographically audit that all active raw datasets, configuration manifests, and scripts match their expected SHA-256 signatures:
 

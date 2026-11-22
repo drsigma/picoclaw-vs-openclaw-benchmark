@@ -515,7 +515,7 @@ def test_protocol_invariants_enforced_and_fail_on_violation():
 
 
 def test_all_checklist_gates_0_to_8_verified():
-    """Validates complete fulfillment of SoftwareX Checklist Gates 0 through 8."""
+    """Validates complete fulfillment of Audit Checklist Gates 0 through 8."""
     from benchmark.protocol_invariants import validate_gate_0_provenance_fields
 
     # Gate 0: 9 mandatory fields across all 7 JSONL files

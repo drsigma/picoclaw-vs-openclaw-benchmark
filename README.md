@@ -27,12 +27,12 @@ Este repositório apresenta um framework experimental reprodutível e uma avalia
 2. **OpenClaw v2026.10.7:** Orquestrador corporativo modular em TypeScript/Node.js v26.12.1 executando sobre a Google V8 (compilação JIT multinível), com validação de esquemas via TypeBox e persistência nativa `node:sqlite`.
 3. **Runtimes Isomórficos Secundários:** CPython 3.12/3.14 (referência dinâmica) e Bun v1.4.4 (JavaScriptCore AOT micro-VM).
 
-Ambos os agentes comunicam-se via loopback TCP (`127.0.0.1:8080`) com uma instância neural local servida por **llama.cpp** hospedando o modelo **Meta Llama-3.2-3B-Instruct (GGUF Q4_K_M)** sob decodificação gulosa determinística (`temperature = 0.0`, `seed = 42`). O estudo inclui:
-* **Speedups de Orquestração ($T_{\text{orch}}$) no Workload W2:** PicoClaw atinge **$4{,}44\times$ no macOS M4**, **$5{,}40\times$ no Linux x86_64**, **$3{,}70\times$ no Windows 11 NVIDIA** e **$4{,}91\times$ no Windows Intel iGPU** em relação ao OpenClaw.
-* **Redução de Instruções de Hardware (PMU):** Redução de **$12{,}71\times$ no macOS ARM64** (Apple PMU) e **$23{,}63\times$ no Linux x86_64** (`perf_event_open`). No Windows (NVIDIA e Intel iGPU), contadores de instruções de PMU em *user-mode* são restritos pelo SO, mantendo-se a telemetria empírica direta de ciclos de CPU via `QueryProcessCycleTime` (**$43{,}0\text{M}$ ciclos no PicoClaw vs. $507{,}9\text{M}$ no OpenClaw Full, sobrecarga de $11{,}82\times$**), em estrita conformidade com a política **Zero-Mock**.
-* **Mitigação Tool-RAG:** Pruning dinâmico de esquemas ($54 \rightarrow \text{Top-}15$) gerando speedups empíricos de **$7{,}43\times$ no macOS**, **$6{,}03\times$ no Linux**, **$5{,}63\times$ no Windows NVIDIA** e **$9{,}96\times$ no Windows Intel Graphics**.
-* **Telemetria de Potência e Energia:** Apple SMC Shunts no macOS, Intel RAPL + NVIDIA NVML no Linux e Windows 11. Na iGPU Intel, energia de pacote é transparentemente identificada como `N/A**` por limitações de modo usuário.
-* **Estatística Não-Paramétrica:** Intervalos de confiança Bootstrap de 95% calculados diretamente sobre a mediana (100% das medianas contidas nos intervalos), testes Mann-Whitney U com correção de Holm-Bonferroni, testes de equivalência TOST, Cliff's Delta $d$ e $\hat{A}_{12}$ de Vargha-Delaney.
+Ambos os agentes comunicam-se via loopback TCP (`127.0.0.1:8080`) com uma instância neural local servida por **llama.cpp** hospedando o modelo **Meta Llama-3.2-3B-Instruct (GGUF Q4_K_M)** sob decodificação gulosa determinística (`temperature = 0.0`, `seed = 42`). Principais resultados medidos:
+* **Speedups de Orquestração ($T_{\text{orch}}$) no Workload W2:** PicoClaw atinge **$4{,}44\times$ no macOS M4**, **$5{,}31\times$ no Linux x86_64**, **$3{,}70\times$ no Windows 11 NVIDIA** e **$4{,}91\times$ no Windows Intel iGPU** em relação ao OpenClaw Full.
+* **Redução de Instruções de Hardware (PMU) e Ciclos de CPU:** Redução de **$12{,}71\times$ no macOS ARM64** (Apple PMU) e **$23{,}87\times$ no Linux x86_64** (`perf_event_open`). No Windows, contadores de instruções de PMU em *user-mode* são restritos pelo kernel (`CR4.PCE`), mantendo-se a telemetria empírica direta de ciclos de CPU via `QueryProcessCycleTime` (**$45{,}8\text{M}$ ciclos no PicoClaw vs. $528{,}1\text{M}$ no OpenClaw Full, razão de $11{,}54\times$** no Windows 11 NVIDIA; **$87{,}8\text{M}$ vs. $1{,}446{,}1\text{M}$, razão de $16{,}47\times$** no Windows Intel iGPU).
+* **Mitigação Tool-RAG:** Poda dinâmica de esquemas ($54 \rightarrow \text{Top-}5$, $-87{,}1\%$ tokens de prompt) gerando speedups de cold prefill de **$7{,}28\times$ no macOS M4**, **$5{,}16\times$ no Linux x86_64**, **$4{,}64\times$ no Windows NVIDIA** e **$9{,}96\times$ no Windows Intel Graphics**.
+* **Telemetria de Potência e Energia:** Apple SMC Shunts no macOS, Intel RAPL + NVIDIA NVML no Linux e Windows 11. Na iGPU Intel, energia de pacote é identificada como `N/A**` por limitações de modo usuário (sem acesso ring-0 MSR/NVML).
+* **Estatística Não-Paramétrica:** Intervalos de confiança Bootstrap e Moving Block Bootstrap ($b=3$) de 95% sobre a mediana, testes Mann-Whitney U com correção de Holm-Bonferroni, Kruskal-Wallis, testes de equivalência TOST, Cliff's Delta $d$ e $\hat{A}_{12}$ de Vargha-Delaney.
 
 ### 🇺🇸 English (EN-US)
 This repository delivers an open-source, reproducible experimental benchmark framework comparing autonomous AI agent orchestration architectures evaluated across **four physical computing platforms**: **macOS ARM64 (Apple M4)**, **Linux x86_64 (Ubuntu 26.04 LTS)**, **Windows 11 x86_64 (NVIDIA dGPU)**, and **Windows 10/11 x86_64 (Intel HD Graphics 4600 iGPU UMA)**:
@@ -40,12 +40,12 @@ This repository delivers an open-source, reproducible experimental benchmark fra
 2. **OpenClaw v2026.10.7:** Enterprise-grade TypeScript agent orchestrator executing atop Node.js v26.12.1 (Google V8 tiered JIT), dynamic TypeBox schema validation, and native `node:sqlite` session state storage.
 3. **Secondary Isomorphic Runtimes:** CPython 3.12/3.14 (dynamic reference) and Bun v1.4.4 (JavaScriptCore AOT micro-VM).
 
-All orchestrators interface via local loopback (`127.0.0.1:8080`) with a unified neural server powered by **llama.cpp** serving **Meta Llama-3.2-3B-Instruct (Q4_K_M)** under greedy deterministic decoding (`temperature = 0.0`, `seed = 42`). Key findings include:
-* **Orchestration Speedups ($T_{\text{orch}}$) on W2:** PicoClaw achieves **$4.44\times$ on macOS M4**, **$5.40\times$ on Linux x86_64**, **$3.70\times$ on Windows 11 NVIDIA**, and **$4.91\times$ on Windows Intel Graphics** over OpenClaw.
-* **Hardware Instruction Reduction (PMU):** **$12.71\times$ on macOS ARM64** (Apple PMU) and **$23.63\times$ on Linux x86_64** (`perf_event_open`). On Windows, user-mode PMU instruction counters are restricted by kernel policy; empirical CPU cycles tracked via `QueryProcessCycleTime` confirm **$43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ in OpenClaw Full ($11.82\times$ cycle overhead)** under strict **Zero-Mock** guidelines.
-* **Tool-RAG Mitigation:** Dynamic schema pruning ($54 \rightarrow \text{Top-}15$) yields speedups of **$7.43\times$ on macOS**, **$6.03\times$ on Linux**, **$5.63\times$ on Windows NVIDIA**, and **$9.96\times$ on Windows Intel Graphics**.
+All orchestrators interface via local loopback (`127.0.0.1:8080`) with a unified neural server powered by **llama.cpp** serving **Meta Llama-3.2-3B-Instruct (Q4_K_M)** under greedy deterministic decoding (`temperature = 0.0`, `seed = 42`). Key measured findings:
+* **Orchestration Speedups ($T_{\text{orch}}$) on W2:** PicoClaw achieves **$4.44\times$ on macOS M4**, **$5.31\times$ on Linux x86_64**, **$3.70\times$ on Windows 11 NVIDIA**, and **$4.91\times$ on Windows Intel Graphics** over OpenClaw Full.
+* **Hardware Instruction Reduction (PMU) & CPU Cycles:** **$12.71\times$ on macOS ARM64** (Apple PMU) and **$23.87\times$ on Linux x86_64** (`perf_event_open`). On Windows, user-mode PMU instruction counters are restricted by kernel policy (`CR4.PCE`); empirical CPU cycles tracked via `QueryProcessCycleTime` measure **$45.8\text{M}$ cycles in PicoClaw vs. $528.1\text{M}$ in OpenClaw Full ($11.54\times$ ratio)** on Windows 11 NVIDIA, and **$87.8\text{M}$ vs. $1{,}446.1\text{M}$ ($16.47\times$ ratio)** on Windows Intel iGPU.
+* **Tool-RAG Mitigation:** Dynamic schema pruning ($54 \rightarrow \text{Top-}5$, $-87.1\%$ prompt tokens) yields cold-prefill speedups of **$7.28\times$ on macOS M4**, **$5.16\times$ on Linux x86_64**, **$4.64\times$ on Windows NVIDIA**, and **$9.96\times$ on Windows Intel Graphics**.
 * **Power & Energy Telemetry:** Apple SMC Shunts on macOS, Intel RAPL + NVIDIA NVML on Linux and Windows 11. Uninstrumented user-mode package energy on Intel iGPU is explicitly reported as `N/A**`.
-* **Non-Parametric Statistics:** 95% Bootstrap confidence intervals computed directly on sample medians (guaranteeing 100% containment), Mann-Whitney U tests with step-down Holm-Bonferroni adjustment, TOST equivalence testing, Cliff's Delta $d$, and Vargha-Delaney $\hat{A}_{12}$.
+* **Non-Parametric Statistics:** 95% Bootstrap and Moving Block Bootstrap ($b=3$) confidence intervals on sample medians, Mann-Whitney U tests with step-down Holm-Bonferroni adjustment, Kruskal-Wallis omnibus tests, TOST equivalence testing, Cliff's Delta $d$, and Vargha-Delaney $\hat{A}_{12}$.
 
 ---
 
@@ -54,7 +54,7 @@ All orchestrators interface via local loopback (`127.0.0.1:8080`) with a unified
 * **🇺🇸 EN-US:** This benchmark evaluates clean-room, isomorphic reference implementations in Go (`picoclaw_orch.go`), Node.js/TypeScript (`openclaw_orch.mjs`), and Python (`python_orch.py`) designed to isolate systems runtime overhead (native compiled vs. JIT/interpreted) under strictly identical prompts and tool schemas. PicoClaw and OpenClaw are trademarks of their respective owners; this software is an independent academic performance benchmark not affiliated with or endorsed by upstream project maintainers.
 
 > [!WARNING]
-> **Provenance Notice / Aviso de Proveniência:** All empirical findings, statistical analyses, and LaTeX tables reported in the *SoftwareX* manuscript derive strictly from physical, hardware-instrumented trials in `results/publication_campaign/` (1,320 trials across Regime A and Regime B, plus 528 prefill ablation trials on Apple Silicon M4). Legacy exploratory files in `results/exploratory_campaigns/` (including early calibration runs, Poisson synthetic checks in `poisson_results.json`, and exploratory figures `fig7_poisson_assertiveness.png`, `fig8_three_campaigns_reproducibility.png`) represent historical engineering milestones prior to full protocol standardization and are preserved strictly for chronological auditability; they are excluded from publication claims, canonical manifests, and peer-reviewed summary tables.
+> **Provenance Notice / Aviso de Proveniência:** All consolidated findings, statistical tables, and 300 DPI figures derive strictly from physical, hardware-instrumented trials across 35 validated raw `.jsonl` datasets spanning all 4 platforms (`results/publication_campaign/`, `data/linux_x86_64_session{1,2}/`, `data/windows_x86_64_session{1,2}/`, `data/windows_intel_graphics_session{1,2}/`). Legacy exploratory files in `results/exploratory_campaigns/` (including early calibration runs, synthetic checks in `poisson_results.json`, and exploratory figures `fig7`/`fig8`) represent historical engineering milestones prior to protocol standardization and are excluded from consolidated tables and canonical manifests.
 
 ---
 
@@ -255,11 +255,12 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── CITATION.cff                               <- Metadados acadêmicos para citação e Zenodo DOI
 ├── LICENSE                                    <- Licença MIT para código-fonte
 ├── DATA_LICENSE                               <- Licença Creative Commons CC-BY 4.0 para dados e figuras
-├── references.bib                             <- Base bibliográfica formal BibTeX (IEEE/ACM/Elsevier)
+├── references.bib                             <- Base bibliográfica formal BibTeX (17 referências primárias verificadas)
 ├── reproduce_linux_gold.sh                    <- Script de reprodução física automatizada em Linux x86_64
 ├── windows_gold.ps1                           <- Script PowerShell de reprodução no Windows 11
-├── audit_export/                              <- Artefatos consolidados da auditoria forense quad-plataforma
-│   ├── Systems_Replication_Report.md          <- Relatório consolidado de replicação de sistemas (SoftwareX standard)
+├── audit_export/                              <- Artefatos consolidados da auditoria quad-plataforma
+│   ├── AUDIT_REPORT_FINAL.md                  <- Relatório de auditoria dinâmica (inventário real e hashes)
+│   ├── Systems_Replication_Report.md          <- Relatório consolidado de replicação de sistemas (em inglês)
 │   ├── audit_summary_metrics.json             <- Métricas consolidadas em formato JSON estruturado
 │   ├── quad_platform_consolidated_summary.csv <- Sumário estatístico comparativo quad-plataforma
 │   ├── anomaly_and_cache_diagnostics.csv      <- Diagnóstico de dependência serial, drift e telemetria térmica
@@ -337,8 +338,8 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 
 ## ⚡ Guia Rápido de Reprodução / Quickstart Reproduction
 
-### 1. Verificação Rápida para Revisores (Sem Sudo / Multi-OS) / Reviewer Quick-Verification (No Sudo / Cross-Platform)
-Para revisores acadêmicos (*SoftwareX*) testando o repositório em ambientes isolados (ex: Linux x86_64 ou macOS sem modelo GGUF ou privilégios de superusuário), execute o pipeline simulado de ponta a ponta em menos de 10 segundos:
+### 1. Verificação Rápida para Avaliadores (Sem Sudo / Multi-OS) / Fast Verification (No Sudo / Cross-Platform)
+Para avaliadores testando o repositório em ambientes isolados (ex: Linux x86_64, Windows ou macOS sem modelo GGUF ou privilégios de superusuário), execute o pipeline simulado de ponta a ponta em menos de 10 segundos:
 
 ```bash
 # Executa simulação determinística portátil, testes estatísticos e renderização gráfica (< 5s)
@@ -411,37 +412,33 @@ The pipeline executes `ruff check`, `pytest -q tests/`, the fast reviewer dry-ru
 
 ---
 
-## 🔐 Inventário Criptográfico dos 25 Datasets Empíricos / Cryptographic SHA-256 Manifest
+## 🧠 Decisões Metodológicas e Arquitetura dos Scripts / Methodological Rationale & Code Architecture
 
-Em conformidade com a política **Zero-Mock** e os padrões de reproducibilidade científica de artefatos da *SoftwareX / Elsevier*, todos os 25 arquivos `.jsonl` brutos contêm registros medidos diretamente no hardware físico em execuções limpas (*clean-room from-scratch runs*). A integridade de cada arquivo pode ser verificada a qualquer momento executando `python scripts/verify_manifest.py`:
+### Por que cada decisão metodológica foi adotada / Why Each Methodological Choice Matters
+1. **Isolamento de Slots KV-Cache (`T1`, `T2`, `T3`):** Separa evicção descontrolada (*thrashing*, `T2`) da alocação isolada por bloco (`T3`), isolando o custo de recomputação quadrática de prefill do custo intrínseco do runtime orquestrador (Kwon et al., 2023).
+2. **Moving Block Bootstrap ($b=3$) e Tamanho Amostral Efetivo ($n_{\text{eff}}$):** Execuções em cache quente (Regime B) podem exibir autocorrelação serial lag-1 ($|r_1| > 2/\sqrt{n}$) devido à retenção de páginas de memória pelo SO e drenagem de sockets loopback. O Moving Block Bootstrap (Künsch, 1989) preserva a dependência temporal de curto alcance nos intervalos de confiança de 95% sem assumir independência i.i.d. estrita.
+3. **TOST de Contrastes Inter-Sessão ($\Delta T_{\text{orch}}$):** Testes de hipótese nula tradicionais não provam equivalência. O procedimento *Two One-Sided Tests* (Schuirmann, 1987; `ttost_ind`) testa formalmente se os contrastes $\Delta T_{\text{orch}} = T_{\text{orch}}(\text{Runtime}) - T_{\text{orch}}(\text{PicoClaw})$ replicam entre sessões independentes dentro da margem $\max(5{,}0\text{ ms}, 15\%\cdot|\bar{\Delta}_1|)$.
+4. **Segregação Cross-ISA de Contadores PMU:** Contagens brutas de instruções retiradas diferem estruturalmente entre ARM64 (RISC) e x86_64 (CISC) por densidade de ISA e expansão de micro-ops (Weaver et al., 2013). As contagens são segregadas por ISA e interpretadas por razões intra-nó; no Windows (onde `CR4.PCE` restringe contadores PMU em user-mode), utilizam-se ciclos de CPU diretos via Win32 `QueryProcessCycleTime` sem extrapolações sintéticas de IPC.
 
-| # | Plataforma / Platform | Sessão / Session | Tipo / Type | Caminho Relativo / Relative Path | Registros / Records | Assinatura Criptográfica / SHA-256 Checksum |
-| :---: | :--- | :--- | :--- | :--- | :---: | :--- |
-| 1 | macOS ARM64 (Apple M4) | publication_campaign | RAW | `results/publication_campaign/raw_trials.jsonl` | 660 (600/60) | `a0142aa0c2dd4f7806567b017b2cffc53dbbd6ed7e7506f911f9737935cd6239` |
-| 2 | macOS ARM64 (Apple M4) | publication_campaign | WARM | `results/publication_campaign/warm_cache_trials.jsonl` | 660 (600/60) | `633eb14d1c544aeac6caee3c3a5bfdc57fd95cec74f6f68064d0ef20029acb83` |
-| 3 | macOS ARM64 (Apple M4) | publication_campaign | KV | `results/publication_campaign/kv_cache_thrashing_trials.jsonl` | 90 (90/0) | `d4c978f1caaf012f792830adaedd4675b16b846f9171bfc13cf85fc8a726d459` |
-| 4 | macOS ARM64 (Apple M4) | publication_campaign | MCP | `data/mcp_live_transport_trials.jsonl` | 135 (135/0) | `7ba766b266a713a78d7de8f20509525a241b9bd2f3cbe7a12c7f95f49d61e0d9` |
-| 5 | macOS ARM64 (Apple M4) | publication_campaign | RAG | `results/publication_campaign/tool_rag_mitigation_trials.jsonl` | 1056 (960/96) | `7f52b7effe79eaaad184d61e869d9e13680b4ac5eebdf226efcd9c16940bb9b0` |
-| 6 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_1 | RAW | `reproducibility/clean_run_linux_session_1/data/raw/raw_trials.jsonl` | 792 (720/72) | `d1638d0828368255c04d2036fa406a3eaf2493cf84c7fa5420e9c0657e7c7163` |
-| 7 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_1 | WARM | `reproducibility/clean_run_linux_session_1/data/raw/warm_cache_trials.jsonl` | 792 (720/72) | `57b161cddcdea65fc9ad41c8d1057f9211e20d9c25a024249191dda4a36a3986` |
-| 8 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_1 | KV | `reproducibility/clean_run_linux_session_1/data/raw/kv_cache_thrashing_trials.jsonl` | 184 (180/4) | `8b7412a2d4e4057d4989ae51393dfd494ebfcd47c8a34bf07c9fe7af9d89d077` |
-| 9 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_1 | MCP | `reproducibility/clean_run_linux_session_1/data/raw/mcp_live_transport_trials.jsonl` | 297 (270/27) | `7c564aea727a8b5e96b5b84e04ddb2ba4ea3229881a459992c037258b76c3162` |
-| 10 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_1 | RAG | `reproducibility/clean_run_linux_session_1/data/raw/tool_rag_mitigation_trials.jsonl` | 528 (480/48) | `4aa33319210e6b10e648df12f1da1d290a3ed8d2c4d34a4af7f9568ca159ece9` |
-| 11 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_2 | RAW | `reproducibility/clean_run_linux_session_2/data/raw/raw_trials.jsonl` | 792 (720/72) | `b93043922cb156324ef7593568747634c7a65471eaaecadc45020719395e037a` |
-| 12 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_2 | WARM | `reproducibility/clean_run_linux_session_2/data/raw/warm_cache_trials.jsonl` | 792 (720/72) | `fa6889e7dcc500624f333c7e050edb13541a4cd7baacb2859cb708ff75f6f663` |
-| 13 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_2 | KV | `reproducibility/clean_run_linux_session_2/data/raw/kv_cache_thrashing_trials.jsonl` | 184 (180/4) | `548ac456d8996e18d4682b46f40f7fa2f69ef85e505e8ebb65dd94b9d67e4c0f` |
-| 14 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_2 | MCP | `reproducibility/clean_run_linux_session_2/data/raw/mcp_live_transport_trials.jsonl` | 297 (270/27) | `5df9cbfe446f82bead1459ae491db087f4e75c829c0ed7969e35aa1e216b62cd` |
-| 15 | Linux x86_64 (Ubuntu 26.04) | clean_run_linux_session_2 | RAG | `reproducibility/clean_run_linux_session_2/data/raw/tool_rag_mitigation_trials.jsonl` | 528 (480/48) | `077b0c75beb580df9fb8ef61c6d367c27d88a431720aa694219407e0ff077669` |
-| 16 | Windows 11 (Build 26200) | windows_x86_64_session1 | RAW | `data/windows_x86_64_session1/raw/raw_trials.jsonl` | 792 (720/72) | `b0c12519c729945f8380da4fd7e6466014a0a93d3e5168f44211ca5629ef1187` |
-| 17 | Windows 11 (Build 26200) | windows_x86_64_session1 | WARM | `data/windows_x86_64_session1/raw/warm_cache_trials.jsonl` | 792 (720/72) | `b69a174e5b3263180f2fddcb2d2503e2a72b2984bc38449687fbcfcb92d633ce` |
-| 18 | Windows 11 (Build 26200) | windows_x86_64_session1 | KV | `data/windows_x86_64_session1/raw/kv_cache_thrashing_trials.jsonl` | 184 (180/4) | `5f783e701f9374d56f909a24ebb32048f83b67dd2f36581aa07226c933d7d6da` |
-| 19 | Windows 11 (Build 26200) | windows_x86_64_session1 | MCP | `data/windows_x86_64_session1/raw/mcp_live_transport_trials.jsonl` | 297 (270/27) | `00847706082ede44aedaa9bee8e9248e420875a87bd7f30090f5d82183d34080` |
-| 20 | Windows 11 (Build 26200) | windows_x86_64_session1 | RAG | `data/windows_x86_64_session1/raw/tool_rag_mitigation_trials.jsonl` | 528 (480/48) | `e640f0d6bb596343e1e72d001c01157fed98a2b06dac6da1aed58f23ad3d7478` |
-| 21 | Windows 11 (Build 26200) | windows_x86_64_session2 | RAW | `data/windows_x86_64_session2/raw/raw_trials.jsonl` | 792 (720/72) | `d683bbf72e943fdbe9b19cb2c400e8c5460b50ba20c3e4356d1e5e3f6cc306f1` |
-| 22 | Windows 11 (Build 26200) | windows_x86_64_session2 | WARM | `data/windows_x86_64_session2/raw/warm_cache_trials.jsonl` | 792 (720/72) | `0f5e5fb43aeaff34844f56f655902aa2e40f787e73917609f042414b1fb01695` |
-| 23 | Windows 11 (Build 26200) | windows_x86_64_session2 | KV | `data/windows_x86_64_session2/raw/kv_cache_thrashing_trials.jsonl` | 184 (180/4) | `c26d8242e33799e6fafdd62bbe5210007b9c9e3c255bf2ed16eac619d8015a28` |
-| 24 | Windows 11 (Build 26200) | windows_x86_64_session2 | MCP | `data/windows_x86_64_session2/raw/mcp_live_transport_trials.jsonl` | 297 (270/27) | `917911b61a80640c38e90701c9b5216effd58f3779ae1d634067e48382e2b79e` |
-| 25 | Windows 11 (Build 26200) | windows_x86_64_session2 | RAG | `data/windows_x86_64_session2/raw/tool_rag_mitigation_trials.jsonl` | 528 (480/48) | `7cbcb3ceea59d5bb2529f5ca2a5c7de07ab7c50ea7bce9d77aab54eee47b9853` |
+### Arquitetura dos Scripts Principais / Core Script Architecture
+- **`scripts/reproduce_quad_platform_analysis.py`:** Pipeline central sem hardcode que ingere os 35 arquivos `.jsonl` brutos, calcula diagnósticos de estacionariedade/drift ($r_1$, $n_{\text{eff}}$, Holm-Bonferroni), consolida estatísticas (Mann-Whitney $U$, Kruskal-Wallis, Cliff's $\delta$, Vargha-Delaney $A_{12}$, TOST), exporta Tabelas 1–8 (`.md` e `.tex`), renderiza as 6 figuras em 300 DPI, gera dinamicamente `Systems_Replication_Report.md` e `AUDIT_REPORT_FINAL.md`, e empacota `audit_export_quad_platform.zip`.
+- **`scripts/verify_manifest.py`:** Calcula digests SHA-256 em blocos de 64 KB para todos os arquivos rastreados em `data/manifest_sha256.json`, validando a integridade dos dados brutos, código e saídas (`--update` recalcula o manifesto após execuções físicas).
+- **`benchmark/adapters/` & `adapters/windows_intel_graphics/`:** Implementações do padrão Strategy/Adapter (`AgentOrchestratorAdapter`) desacoplando cada runtime (Go, Node.js, CPython, Bun, LangChain) e cada backend de telemetria nativa (Apple SMC/`libproc`, Linux RAPL/NVML/`perf`, Windows MSR/NVML/Win32 PSAPI) do harness experimental.
+- **`scripts/generate_audit_txt_chunks.py`:** Fatia relatórios, tabelas Markdown e diagnósticos CSV em arquivos `.txt` leves ($\le 150\text{ KB}$) em `audit_txt_chunks/` com cabeçalhos de rastreabilidade.
+
+---
+
+## 🔐 Inventário Criptográfico dos 35 Datasets Empíricos / Cryptographic SHA-256 Manifest
+
+Todos os **35 arquivos `.jsonl` brutos** contêm registros medidos diretamente no hardware físico nas 4 plataformas (Apple M4, Linux x86_64, Windows 11 NVIDIA e Windows Intel iGPU) em execuções limpas (*from-scratch*). Para evitar divergências de manutenção manual, o inventário completo com paths exatos, contagens de linhas/trials medidos/warmups e hashes SHA-256 é gerado dinamicamente em:
+- [`AUDIT_REPORT_FINAL.md`](AUDIT_REPORT_FINAL.md) (Seção 3)
+- [`audit_export/Systems_Replication_Report.md`](audit_export/Systems_Replication_Report.md) (Seção 6)
+- [`data/manifest_sha256.json`](data/manifest_sha256.json)
+
+A integridade de todos os 224 arquivos rastreados pode ser verificada a qualquer momento com:
+```bash
+python scripts/verify_manifest.py
+```
 
 ---
 
@@ -452,7 +449,7 @@ Em conformidade com a política **Zero-Mock** e os padrões de reproducibilidade
 </p>
 
 ### 🇧🇷 Apoie a Pesquisa Científica Aberta (Pix)
-Se esta suíte de testes, os dados empíricos tri-plataforma e as ferramentas abertas foram úteis para a sua pesquisa, dissertação, benchmark de hardware ou desenvolvimento de engenharia, você pode apoiar a infraestrutura computacional e publicações abertas do projeto via **Pix**:
+Se esta suíte de testes, os dados empíricos quad-plataforma e as ferramentas abertas foram úteis para a sua pesquisa, dissertação, benchmark de hardware ou desenvolvimento de engenharia, você pode apoiar a infraestrutura computacional e publicações abertas do projeto via **Pix**:
 
 * **Chave Pix (E-mail):** `rafael.paniccia@aluno.ufabc.edu.br`
 * **Favorecido:** Rafael Paniccia Cassetta

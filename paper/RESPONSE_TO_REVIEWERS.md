@@ -1,16 +1,16 @@
-# Point-by-Point Response to Reviewers (Elsevier SoftwareX — Revision R9)
+# Point-by-Point Technical Revision Summary (Revision Log)
 
-**Manuscript Title:** *"A Reproducible Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and KV-Cache Dynamics in Local LLM Agents on Apple Silicon"*  
+**Manuscript Title:** *"A Reproducible Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and KV-Cache Dynamics in Local LLM Agents (Quad-Platform Empirical Validation: macOS, Linux, and Windows)"*  
 **Author:** Rafael Paniccia Cassetta (Universidade Federal do ABC — UFABC, Brazil)  
-**Hardware Testbed:** Apple Mac mini M4 (`Mac16,10`, 10-Core CPU, 10-Core Metal GPU, 24 GB Unified LPDDR5X @ 120 GB/s)  
+**Hardware Testbeds:** Quad-Platform (Apple Mac mini M4, Linux x86_64 Dell G15, Windows 11 NVIDIA Dell G15, Windows 10/11 Intel HD Graphics 4600)  
 
-We thank Reviewers 1, 2, and 3 for their exceptionally thorough, constructive, and technically rigorous evaluation of our software manuscript and repository. Every single critique (M1–M9, X1–X10, C1–C8) has been resolved through new physical experiments on the Apple Silicon M4 testbed, software engineering upgrades, and complete bibliographic and mathematical alignment.
+We document below how every methodological, statistical, and software engineering revision item has been resolved through empirical measurement across all four physical testbeds, script refactoring, and bibliographic verification.
 
 ---
 
-## SoftwareX Audit Checklist Verification Matrix (Gates 0 to 8 — 100% Verified)
+## Audit Checklist Verification Matrix (Gates 0 to 8)
 
-The table below maps every single gate of the Elsevier SoftwareX Reviewer & Author Audit Checklist directly to its verifiable implementation, physical artifact, source code file, and automated test:
+The table below maps each audit gate directly to its verifiable implementation, empirical artifact, source code file, and automated test:
 
 | Gate & Scope | Criterion / Evaluated Property | Status | Concrete Artifact / Source Code Evidence |
 |---|---|---|---|
@@ -32,7 +32,7 @@ The table below maps every single gate of the Elsevier SoftwareX Reviewer & Auth
 | **Gate 7: Tutorial Logs** | Verifiable physical terminal outputs | **VERIFIED** | `tutorial/README.md` (Steps 1, 4, 7, 9 in PT-BR & EN-US with real line-by-line excerpts and source citations). |
 | **Gate 7: Automated Test** | Full Gate 0–8 automated check | **VERIFIED** | `tests/test_artifact_consistency.py` (`test_all_checklist_gates_0_to_8_verified`, lines 513–575). |
 | **Gate 8: Hype-Free & References** | Eradication of hype superlatives | **VERIFIED** | Zero occurrences of forbidden phrases (`proves superiority`, `energy dominance`, `universally faster`, `direct DRAM bandwidth telemetry`) across all manuscript and summary files. |
-| **Gate 8: Literature Integration** | 6 checklist-inspired papers cited | **VERIFIED** | `references.bib` & `paper/softwarex_manuscript.tex` Table 2 & Section 1: `budgetbench2025`, `openmcp2025`, `edgepi2025`, `reprodataagents2025`, `mcpgranite2025`, `agentware2025`. |
+| **Gate 8: Literature Verification** | 20 verified primary references | **VERIFIED** | `references.bib` & `paper/softwarex_manuscript.tex`: 20 peer-reviewed primary citations with verified DOIs/ISBNs/arXiv IDs (zero unverified or uncited keys). |
 | **Gate 8: Threats to Validity** | Explicit dedicated limitation section | **VERIFIED** | `paper/softwarex_manuscript.tex` Section 4.2 (`Threats to Validity and Methodological Limitations` covering 6 explicit validity boundaries). |
 
 ---
@@ -86,15 +86,15 @@ Below we summarize the **five core methodological and software upgrades** before
 
 ---
 
-## 5. Reframing UMA LPDDR5X Bandwidth as Affine Roofline Estimation (~82–90% Roofline Ceiling) & Complete 19-Paper Literature Integration (Resolves M5, M6, X5, X7, X8, X9, X10, C1, C4, C5, C7)
+## 5. Reframing UMA LPDDR5X Bandwidth as Affine Roofline Estimation (~82–90% Roofline Ceiling) & Verified 20-Paper Literature Alignment
 - **Affine Roofline Memory Bandwidth Estimation (`scripts/run_uma_energy_and_bandwidth_attribution.py`, `data/roofline_kv_affine_model.json`):**
   - Advanced from naive model-weight division to the **Affine Roofline Decode Bandwidth Model** ($B_{\text{eff}} = [S_{\text{active\_weights}} + S_{\text{kv}}(N)] / \text{ITL}(N)$) across all regimes and context tiers.
   - Replaced the naive estimation with the physical **active decode bandwidth of `102.4 GB/s` median (`85.3%` of nominal `120 GB/s` UMA bus) and range of `99.0–108.5 GB/s` (`82.5%–90.4%`)**, resolving naive $S_{\text{file}} \div \text{ITL}$ artifacts ($103\%\text{--}105\%$) via vocabulary embedding table sparsity ($S_{\text{emb}} = 0.323\text{ GB}$) and empirical KV streaming ($\alpha_{\text{kv}} = 0.939\,\mu\text{s/tok}$, OLS $R^2 = 0.9781$; two-point delta $0.966\,\mu\text{s/tok}$).
-  - Explicitly clarified that this analytical-empirical Roofline decomposition aligns with the empirical Apple Silicon memory bus saturation ceiling ($\approx 85\%\text{--}90\%$) documented by **Imamura et al. (2026)** and **Benazir & Lin (2025)**.
+  - Grounded this analytical-empirical Roofline decomposition in the foundational Roofline model (**Williams, Waterman & Patterson, 2009**, CACM 52(4):65–76).
 - **Spearman 12x12 Holm-Bonferroni & Within-Workload Stratification (`benchmark/analyze_results.py`):**
   - Every cell of the $12\times 12$ matrix in `spearman_correlation_matrix.json` now includes `"p_adj_holm"` (adjusted over the 66 upper-triangle pairs), and `"stratified_by_workload"` reports separate correlations within W1, W2, W3, and W4 ($n=150$ trials and $n=5$ arm means per workload).
-- **100% Literature Coverage (`references.bib` & `paper/softwarex_manuscript.tex`):**
-  - Added and cited all 18 requested references across Section 1, Table 2, Section 2.4, and Section 3: `fahad2019comparative`, `imamura2026apple`, `benazir2025llm`, `agentsysbench2025`, `alems2025`, `agentarena2025`, `agentperfbench2025`, `swenergy2025`, `greenbench2025`, `kvflow2025`, `rrevict2025`, `efficientagent2025`, `prefixbench2025`, `toolgap2025`, `promcp2025`, `nexus2025`, `smelt2025`, and `recache2025` (47 total BibTeX keys, 100% cited with zero uncited or missing entries).
+- **100% Verified Primary Literature (`references.bib` & `paper/softwarex_manuscript.tex`):**
+  - Replaced unverified entries with 20 verified peer-reviewed primary citations (`kalibera2013rigorous`, `hoefler2015scientific`, `maricq2018taming`, `kuensch1989jackknife`, `schuirmann1987comparison`, `mann1947test`, `kruskal1952use`, `holm1979simple`, `cliff1993dominance`, `vargha2000critique`, `weaver2013nondeterminism`, `fahad2019comparative`, `kwon2023vllm`, `yao2023react`, `zheng2023judging`, `reddi2020mlperf`, `you2023zeus`, `barroso2007case`, `williams2009roofline`, `smith2016software`), 20/20 cited with zero missing or uncited keys.
 - **Manifest Hygiene, P0–P5 Protocol Hardening & 3-Part Unabridged Audit Bundle (`benchmark/protocol_invariants.py`, `benchmark/bun_jsc_agent.mjs`, `scripts/verify_manifest.py`, `scripts/export_audit_bundle.py`):**
   - **Phase 4.2 (`table_warm_cache.tex` & 5 KV-Cache Operational Behaviors):** Updated `table_warm_cache.tex` and `warm_cache_summary.json` to explicitly report `Prompt (Tot / Cached / New)` (e.g., `2177 / 2176 / 1` in W2; `22980 / 22457 / 523` in W4) and median `TTFT / ITL [ms]` (`234.3 / 18.02` ms for Go in W2; `235.8 / 17.86` ms in W4), and documented the five KV-cache operational behaviors (cold cache, warm cache with identical prefix, prefix switching across blocks, single-slot `-np 1` isolation vs. multi-slot contention, and prefix invalidation/multi-turn growth in W4).
   - **Phase 4.3 (`benchmark/protocol_invariants.py`):** Implemented `validate_campaign_invariants()` enforcing 7 fail-fast protocol invariants across `analyze_results.py`, `run_warm_cache_campaign.py`, and `run_inter_session_replication.py`, validated by `test_protocol_invariants_enforced_and_fail_on_violation()` in `tests/test_artifact_consistency.py`.
@@ -116,12 +116,12 @@ Below we summarize the **five core methodological and software upgrades** before
     > *A inferência foi realizada em regime híbrido (-ngl 16, correspondendo a ~3.0 GiB na VRAM de 4 GB no Dell G15; e abertura UMA em memória DDR3 no Intel iGPU), acarretando saturação de barramento PCIe/RAM. Os ganhos absolutos em cache quente (Regime B) nas arquiteturas x86 são limitados por esse offload parcial e não são diretamente comensuráveis com o M4 de memória unificada.* (Inference operated under partial offload with 16 layers on the 4 GB GPU and remaining layers in host DDR5 via AVX2, streaming activations across PCIe 4.0 at ~5,200 MB/s mean, which bounds Regime B speedups on x86 relative to Apple Silicon M4 on-die UMA).
   - **Hardware Throttling & Power Capping Analysis:**
     > *No Linux, os eventos `cpu_pkg_throttle_events` refletem comportamento cumulativo estacionário decorrente da leitura acumuladora do registrador MSR da CPU (`IA32_PACKAGE_THERM_STATUS`), mantendo estabilidade térmica ao longo dos trials. No Windows, os eventos de `gpu_sw_power_cap` (máscara 0x8) operaram exclusivamente para mitigar limites estritos de TDP móvel (75W) durante rajadas curtas no prefill de contexto, sem ocorrência de throttling térmico (`gpu_thermal_throttle_active_end` permaneceu `False` em 100% dos trials com dGPU, com temperaturas entre 50°C e 74°C).*
-  - **Empirical Orchestration Speedups ($T_{\text{orch}}$) in W2:** Native Go achieves **$4.44\times$ on macOS M4** ($5.53\text{ ms}$ vs. $24.55\text{ ms}$), **$5.40\times$ on Linux x86_64** ($6.66\text{ ms}$ vs. $35.99\text{ ms}$), **$3.70\times$ on Windows 11 NVIDIA** ($13.11\text{ ms}$ vs. $48.55\text{ ms}$), and **$4.91\times$ on Windows Intel Graphics** ($14.03\text{ ms}$ vs. $68.89\text{ ms}$) over Node.js.
+  - **Empirical Orchestration Speedups ($T_{\text{orch}}$) in W2:** Native Go achieves **$4.44\times$ on macOS M4** ($5.53\text{ ms}$ vs. $24.55\text{ ms}$), **$5.31\times$ on Linux x86\_64** ($6.68\text{ ms}$ vs. $35.53\text{ ms}$), **$3.70\times$ on Windows 11 NVIDIA** ($13.11\text{ ms}$ vs. $48.55\text{ ms}$), and **$4.91\times$ on Windows Intel Graphics** ($14.03\text{ ms}$ vs. $68.89\text{ ms}$) over Node.js.
   - **Strict Empirical Protocol & Hardware Instruction Telemetry:**
-    - On Linux x86_64, `perf_event_open(2)` reveals a **$23.63\times$** PMU instruction bloat ratio ($771.51\text{M}$ instructions in OpenClaw Full vs. $32.65\text{M}$ in PicoClaw).
-    - On macOS ARM64, Apple PMU counters reveal a **$12.71\times$** instruction bloat ratio ($791.65\text{M}$ in OpenClaw Full vs. $62.27\text{M}$ in PicoClaw).
-    - On Windows platforms (NVIDIA and Intel iGPU), hardware PMU instruction counters are restricted in user-mode by kernel policy (`CR4.PCE`). Under our strict empirical guidelines, we expunged synthetic fixed-IPC estimates (`0.85 * cycles`), formally marking instructions as **`N/A*`** and reporting direct empirical CPU cycles via `QueryProcessCycleTime`: **$43.0\text{M}$ cycles in PicoClaw vs. $507.9\text{M}$ cycles in OpenClaw Full ($11.82\times$ cycle overhead)**.
-    - CPython on Windows standard invocation (`py.exe`, PEP 397) was audited as capturing the wrapper launcher stub PID (~4.91 MB) rather than the child worker heap; under our factual protocol, its memory is marked **`N/A†`**.
+    - On Linux x86\_64, `perf_event_open(2)` reveals a **$23.87\times$** PMU instruction bloat ratio ($772.1\text{M}$ instructions in OpenClaw Full vs. $32.4\text{M}$ in PicoClaw).
+    - On macOS ARM64, Apple PMU counters reveal a **$12.71\times$** instruction bloat ratio ($791.7\text{M}$ in OpenClaw Full vs. $62.3\text{M}$ in PicoClaw).
+    - On Windows platforms (NVIDIA and Intel iGPU), hardware PMU instruction counters are restricted in user-mode by kernel policy (`CR4.PCE`). Under our empirical protocol, synthetic fixed-IPC estimates (`0.85 * cycles`) are excluded; instructions are formally marked **`N/A*`** and direct empirical CPU cycles via `QueryProcessCycleTime` are reported: **$45.8\text{M}$ cycles in PicoClaw vs. $528.1\text{M}$ cycles in OpenClaw Full ($11.54\times$) on Windows 11 NVIDIA**, and **$87.8\text{M}$ vs. $1446.1\text{M}$ cycles ($16.47\times$) on Windows Intel iGPU**.
+    - CPython on Windows standard invocation (`py.exe`, PEP 397) captures the wrapper launcher stub PID (~4.91 MB) rather than the child worker heap; its memory is marked **`N/A†`** in Table 1 and **`N/A§`** in Table 8.
     - On Windows Intel Graphics, host package energy and discrete VRAM are marked **`N/A**`** due to unprivileged user-mode execution without kernel MSR RAPL or NVML.
   - **Table 2 Non-Parametric Statistics & Effective Sample Size ($n_{\text{eff}}$):**
     > *Os valores de U e de $\delta$ de Cliff refletem $n=30$. A métrica $n_{\text{eff}}$ é documentada exclusivamente como diagnóstico de saúde da dependência serial e não altera os contrastes robustos de efeitos grandes observados.*
