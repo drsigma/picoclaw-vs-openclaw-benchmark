@@ -1,0 +1,278 @@
+================================================================================
+EVALUATOR BUNDLE - COMPLETE ARTIFACT & REPRODUCIBILITY INDEX
+================================================================================
+Repository: picoclaw-vs-openclaw-benchmark
+Date: 2026-11-22
+Evaluation Format: Modular text files (<= 150 KB each) + 6 High-Resolution PNG Figures
+Total Artifacts in Bundle: 55 files (48 text chunks, 6 figures, 1 index)
+Verification Status: 58/58 pytest passed | 282/282 manifest SHA-256 signatures valid
+Scope: Quad-Platform Empirical Systems Benchmark (macOS M4, Linux x86_64, Windows NVIDIA, Windows iGPU)
+================================================================================
+
+SECTION 1: HIGH-RESOLUTION PUBLICATION FIGURES (300 DPI)
+--------------------------------------------------------------------------------
+- fig1_architecture_topology.png (777,722 bytes | SHA-256: e05883699a68bd5d4a4bf3e656a3fa9f18aaef3e4ba792473c15da95f13084da)
+  Description: Figure 1: Quad-Platform Experimental Architecture & Microarchitectural Telemetry (300 DPI)
+
+- fig2_exp1_cold_start_rss.png (354,914 bytes | SHA-256: 90c0ca6275b5e9139398f53adb68130300580b16be6ce245187b8179fcb6e7e5)
+  Description: Figure 2: Cold Task Latency & Peak RSS Footprint Across 4 Platforms (300 DPI)
+
+- fig3_exp2_latency_overhead.png (415,456 bytes | SHA-256: c7c27045097b1ac351bb10ec7e19501bf02ba152afdc7b7bc04ab16f8f2f0647)
+  Description: Figure 3: Client Orchestration Overhead T_orch & Middleware Ratio Phi_orch (300 DPI)
+
+- fig4_exp3_energy_edp.png (403,302 bytes | SHA-256: 5acbd2e2fd656aee1037c9da0412056fede9204668e6acea65fad0fe145578d8)
+  Description: Figure 4: Net Dynamic Energy & EDP (Within-Node Sensor Domains, 300 DPI)
+
+- fig5_exp4_tools_and_bloat.png (305,576 bytes | SHA-256: 95a3103a8515747d6c5b71803424d0a8a2b8af47944898ac9514f0079b1654e2)
+  Description: Figure 5: Tool Context Bloat & Quad-Platform Tool-RAG Speedups (300 DPI)
+
+- fig6_pmc_hardware_counters.png (560,870 bytes | SHA-256: 7c08c8baaf613a9311e08b270d5bfa4b3d26f5b6f65d1a34406ded59e050564e)
+  Description: Figure 6: Quad-Platform PMC Retired Instructions & Cycles vs. PicoClaw (300 DPI)
+
+
+================================================================================
+SECTION 2: MODULAR TEXT ARTIFACTS (<= 150 KB PER FILE)
+--------------------------------------------------------------------------------
+- 01_README.txt                                 |    8,721 bytes |    71 lines | Part: 1/1
+  Source: README.md
+  SHA-256: 972f96645c32f9f247b6c5ad4b0f553789eb5655d5ce126a4026642202bd4988
+  Role: Repository Overview, Experimental Scope & Limitations
+
+- 02_REPRODUCIBILITY.txt                        |   10,827 bytes |   159 lines | Part: 1/1
+  Source: REPRODUCIBILITY.md
+  SHA-256: 1335fb9ac1529af30c69711f1c99e084e683db6abdfb3f95777eb64a9da2ec71
+  Role: Reproducibility Guide & Step-by-Step Execution
+
+- 03_AUDIT_REPORT_FINAL.txt                     |   28,224 bytes |   167 lines | Part: 1/1
+  Source: AUDIT_REPORT_FINAL.md
+  SHA-256: 6f17a17356ed28053c5fd1df403edad8a1f2f291bd98a344aa1603ffbc4ef138
+  Role: Master Audit Report & Cryptographic Dataset Inventory
+
+- 04_Systems_Replication_Report.txt             |   43,747 bytes |   237 lines | Part: 1/1
+  Source: audit_export/Systems_Replication_Report.md
+  SHA-256: 4715367f48362049349f4e5a7f97d7650362d903a36830d788b329a7842eca44
+  Role: Quad-Platform Systems Replication Report & Technical Analysis
+
+- 05_REVIEW_PACKAGE_README.txt                  |   13,145 bytes |   126 lines | Part: 1/1
+  Source: audit_export/REVIEW_PACKAGE_README.md
+  SHA-256: 4ce3e2573fe4b7d709079ad5193ade7257f3656675df2178f4b7d4988c3c07be
+  Role: Review Package Guide & Directory Map
+
+- 06_manuscript_tex.txt                         |   99,003 bytes |   410 lines | Part: 1/1
+  Source: paper/manuscript.tex
+  SHA-256: bbe543545d11b349c517a1fd364177ba6f79c60a6fc710dee7d1662c297e5bd2
+  Role: Full Scientific Manuscript Source (LaTeX Article Class)
+
+- 07_references_bib.txt                         |   11,636 bytes |   309 lines | Part: 1/1
+  Source: references.bib
+  SHA-256: 1d7768c2b4d8ced0be276a8e9a718dec3bd38ba72eaa8d518be76c3c0d4f4c3b
+  Role: Primary Literature Bibliography (All Real DOIs / arXiv IDs)
+
+- 08_LICENSE.txt                                |    1,511 bytes |    30 lines | Part: 1/1
+  Source: LICENSE
+  SHA-256: f610f6a17d19fac97563978a232e546316a7dd483e79fbf33b80aa8c63629e8b
+  Role: Software License (MIT)
+
+- 09_DATA_LICENSE.txt                           |    6,364 bytes |    61 lines | Part: 1/1
+  Source: DATA_LICENSE
+  SHA-256: e7c4584385a82399658eab521f90a2ee919561337be70f96b86b286f4b742232
+  Role: Dataset License (CC-BY-4.0)
+
+- 10_CITATION_cff.txt                           |    2,078 bytes |    41 lines | Part: 1/1
+  Source: CITATION.cff
+  SHA-256: aed0e858a4add9a75bae35cd5edcd8ea6072a7dcb201723e85bfbf2afacf12d1
+  Role: Machine-Readable Citation Metadata
+
+- 11_reproducibility_workflow_yml.txt           |    2,202 bytes |    78 lines | Part: 1/1
+  Source: .github/workflows/reproducibility.yml
+  SHA-256: 0b47e890243af9be1e511c21d740dd9c9eba2fb09dfff8328ce4db8e1ffbd54e
+  Role: Continuous Integration GitHub Workflow
+
+- 12_requirements.txt                           |      600 bytes |    17 lines | Part: 1/1
+  Source: requirements.txt
+  SHA-256: 812d1dd30ea9eec97f781b07b9aba9acb64becaec7a62f469f15b97fbe981ebd
+  Role: Python Dependencies for Reproduction Virtual Environment
+
+- 13_pytest_output.txt                          |    7,010 bytes |    85 lines | Part: 1/1
+  Source: audit_export/pytest_output.txt
+  SHA-256: 78530998c3f0e7e49f40e6bf5b66811835733cbd3c78afe58519f2bdf11c4dc3
+  Role: Automated Pytest Execution Output (59 Passed)
+
+- 14_verify_manifest_output.txt                 |    1,180 bytes |    22 lines | Part: 1/1
+  Source: audit_export/verify_manifest_output.txt
+  SHA-256: 14f598f2655da06f63e853ef2bfe7d146354737fd5a8d864a4b98c427f430ee2
+  Role: Cryptographic Manifest Verification Output (282 Files Valid)
+
+- 15_manifest_sha256_json.txt                   |   34,966 bytes |   298 lines | Part: 1/1
+  Source: data/manifest_sha256.json
+  SHA-256: 52e73fddf02cc133af5454bafdb14e07a862fd1cc159ff60a02941a1f71d2872
+  Role: Cryptographic SHA-256 Manifest of All 282 Repository Files
+
+- 21_table1_master_summary_md.txt               |    6,551 bytes |    46 lines | Part: 1/1
+  Source: audit_export/tables/table1_master_summary.md
+  SHA-256: ad07434ffe4d161ea6ab162a02b4eaf911a8d0caf05a2c2a8b47880efc633912
+  Role: Table 1: Master Systems & Microarchitectural Conformance (Markdown)
+
+- 21_table1_master_summary_tex.txt              |    6,608 bytes |    56 lines | Part: 1/1
+  Source: audit_export/tables/table1_master_summary.tex
+  SHA-256: a7074e70f6a5aab7c1d0586cc3129afe6f1094861137bb2950bb786d6a53ad88
+  Role: Table 1: Master Systems & Microarchitectural Conformance (LaTeX)
+
+- 22_table2_statistical_tests_md.txt            |   25,499 bytes |   165 lines | Part: 1/1
+  Source: audit_export/tables/table2_statistical_tests.md
+  SHA-256: 37457ca670c3b9bdd117ea30b9a35480b01d469eaafa3593f837bea5e6ece32d
+  Role: Table 2: Non-Parametric Hypothesis Tests with Block Permutation (Markdown)
+
+- 23_table3_warm_cache_summary_md.txt           |    2,723 bytes |    27 lines | Part: 1/1
+  Source: audit_export/tables/table3_warm_cache_summary.md
+  SHA-256: cbdc28f8f9ec6c8c1d9b1a8a101e711a119b8b47daf663f4e6b1cc7272d9ccd8
+  Role: Table 3: Warm Cache Summary & Absolute T_orch Invariance (Markdown)
+
+- 24_table4_kv_thrashing_md.txt                 |    2,503 bytes |    28 lines | Part: 1/1
+  Source: audit_export/tables/table4_kv_thrashing.md
+  SHA-256: 49ecdace9e3a72e917a5177756a3c50d021ae138753847379bca6eef2e03d4d4
+  Role: Table 4: Dynamic KV-Cache Eviction & Thrashing Penalties (Markdown)
+
+- 25_table5_tool_rag_mitigation_md.txt          |    5,170 bytes |    38 lines | Part: 1/1
+  Source: audit_export/tables/table5_tool_rag_mitigation.md
+  SHA-256: b52a57e89329e92ff92ede772b9cb0041a6e284055c912ac319c8b46b695a078
+  Role: Table 5: Tool-RAG Schema Pruning Speedups (Markdown)
+
+- 26_table6_mcp_transport_ablation_md.txt       |    1,798 bytes |    24 lines | Part: 1/1
+  Source: audit_export/tables/table6_mcp_transport_ablation.md
+  SHA-256: 8c5b867bb5616ab955e0c87d75fd42459708f4d4657274b64c3f6dbddbe27f44
+  Role: Table 6: MCP Live Transport Ablation (Markdown)
+
+- 26_table6_mcp_transport_ablation_tex.txt      |    2,084 bytes |    33 lines | Part: 1/1
+  Source: audit_export/tables/table6_mcp_transport_ablation.tex
+  SHA-256: 056333d92e4a4092c0f037ae8584ff7e040fdf77dfbafd25abd3429f55e5c07c
+  Role: Table 6: MCP Live Transport Ablation (LaTeX)
+
+- 27_table7_session_replication_comparison_md.txt |   18,587 bytes |   116 lines | Part: 1/1
+  Source: audit_export/tables/table7_session_replication_comparison.md
+  SHA-256: 963bef1934033377f7268da792509af2b645d77982e0aad2edc3d4230644cb60
+  Role: Table 7: Dual-Session TOST Equivalence Tests (Markdown)
+
+- 27_table7_session_replication_comparison_tex.txt |    5,520 bytes |    45 lines | Part: 1/1
+  Source: audit_export/tables/table7_session_replication_comparison.tex
+  SHA-256: 8050c2107de2a8a10cf8b968f30e5ab3c9bb87f7d5f7b4e3b771dc23cba67f7f
+  Role: Table 7: Dual-Session TOST Equivalence Tests (LaTeX)
+
+- 28_table8_w5_enterprise_workload_md.txt       |   13,181 bytes |    85 lines | Part: 1/1
+  Source: audit_export/tables/table8_w5_enterprise_workload.md
+  SHA-256: e03a00824fa469960951333eec442198d73996e00ec1c862948ac3de1ed23b3c
+  Role: Table 8: Enterprise LangChain W5 across 4 Platforms with Segregated Arm (Markdown)
+
+- 28_table8_w5_enterprise_workload_tex.txt      |   11,867 bytes |    76 lines | Part: 1/1
+  Source: audit_export/tables/table8_w5_enterprise_workload.tex
+  SHA-256: 8f7b5b204f808cfc9c80ac3c049ca95754273d1ff76f9f9a4f937df515401dc4
+  Role: Table 8: Enterprise LangChain W5 across 4 Platforms with Segregated Arm (LaTeX)
+
+- 31_quad_platform_consolidated_summary_csv.txt |   27,128 bytes |   200 lines | Part: 1/1
+  Source: audit_export/quad_platform_consolidated_summary.csv
+  SHA-256: 448bebb22d45096d1bb6d7f00d123979123c719ba797e1d0b4c667701dd5638c
+  Role: Consolidated Summary CSV Across All 190 Experimental Cells
+
+- 32_anomaly_and_cache_diagnostics_csv.txt      |   52,608 bytes |   200 lines | Part: 1/1
+  Source: audit_export/anomaly_and_cache_diagnostics.csv
+  SHA-256: 64ffb3627447a53d84119498a2f6837e2c0652752c20673ff997738646af0335
+  Role: Autocorrelation r1, Effective n_eff, Drift %/rep, and Throttling Deltas
+
+- 33_w5_token_and_schema_audit_csv.txt          |    4,695 bytes |    52 lines | Part: 1/1
+  Source: audit_export/w5_token_and_schema_audit.csv
+  SHA-256: 81111542473ae6250734d025ace7a37d43c925c7ea4b64c879cf941544a6f6d1
+  Role: W5 Token Counts, Finish Reason & Schema Conformance Audit
+
+- 34_tost_block_sensitivity_csv.txt             |      748 bytes |    13 lines | Part: 1/1
+  Source: audit_export/tost_block_sensitivity.csv
+  SHA-256: 2b6bdc88362d09935bd955777eb5c37d854d11fbaf6628c4fc5badf35e9762a9
+  Role: TOST Block-Size Sensitivity Analysis across b in {2, 3, 5}
+
+- 35_tost_block_sensitivity_expanded_csv.txt    |      884 bytes |    16 lines | Part: 1/1
+  Source: audit_export/tost_block_sensitivity_expanded.csv
+  SHA-256: 7af7d2ff55c6f6eacab1be297640682308d6f12a4a7b762aa4f211b6ba123671
+  Role: Expanded TOST Block-Size Sensitivity across b in {2, 3, 5, 8, 12, adaptive}
+
+- 36_mbb_coverage_and_tost_power_csv.txt        |      867 bytes |    22 lines | Part: 1/1
+  Source: audit_export/mbb_coverage_and_tost_power.csv
+  SHA-256: 0800ca0e08525549ba4fa845dbb893b6d54caa82dfbb913bd4fdba48454e47e4
+  Role: Monte Carlo AR(1) MBB Coverage and TOST Empirical Power Simulation
+
+- 37_linux_throttling_stratification_csv.txt    |   89,475 bytes |   870 lines | Part: 1/1
+  Source: audit_export/linux_throttling_stratification.csv
+  SHA-256: 2e2b13dc32398e48ab68540965c61a1ddf38ad27cef3ce53667f996148b59027
+  Role: Linux Hardware Throttling Events Stratification Across Trials
+
+- 41_reproduce_quad_platform_analysis_py_part01.txt |  143,262 bytes |  2533 lines | Part: 1/3
+  Source: scripts/reproduce_quad_platform_analysis.py
+  SHA-256: 160b224ebaa12105248b2e2325c87d8226150b4ff7096781088048ca294d8a31
+  Role: Master Statistical & Reproduction Analysis Pipeline
+
+- 41_reproduce_quad_platform_analysis_py_part02.txt |  142,327 bytes |  1527 lines | Part: 2/3
+  Source: scripts/reproduce_quad_platform_analysis.py
+  SHA-256: 0c31a4c47ae148f5a9513707a00f144e79eb9fdff0f57e69bda56b139cf6cf10
+  Role: Master Statistical & Reproduction Analysis Pipeline
+
+- 41_reproduce_quad_platform_analysis_py_part03.txt |   22,722 bytes |   312 lines | Part: 3/3
+  Source: scripts/reproduce_quad_platform_analysis.py
+  SHA-256: 5f798af7e8e494ad3b393d612fd7357ec27d33a69870260443a3ced82f11a5ab
+  Role: Master Statistical & Reproduction Analysis Pipeline
+
+- 42_verify_manifest_py.txt                     |   11,389 bytes |   250 lines | Part: 1/1
+  Source: scripts/verify_manifest.py
+  SHA-256: dc42312df2a594f9ec5eaf43c988e23bb9e328fae84869335dd6e708ff40e8db
+  Role: Cryptographic Manifest Integrity Verification Script
+
+- 43_generate_audit_txt_chunks_py.txt           |   16,016 bytes |   303 lines | Part: 1/1
+  Source: scripts/generate_audit_txt_chunks.py
+  SHA-256: 4706b099cbe42f3af57eaf3a72db63ab4d702dbe648750ddd6f4fcfe051bfb6e
+  Role: Audit Text Chunk Generator Script
+
+- 51_audit_summary_metrics_json_part01.txt      |  143,296 bytes |  5782 lines | Part: 1/9
+  Source: audit_export/audit_summary_metrics.json
+  SHA-256: 92d9cc2ca99929d5b9102755a632ee40e5c50b7dde95f3407eeee2e1a3b171e4
+  Role: Consolidated Numerical Metrics, Medians, and Confidence Intervals (JSON)
+
+- 51_audit_summary_metrics_json_part02.txt      |  143,285 bytes |  5810 lines | Part: 2/9
+  Source: audit_export/audit_summary_metrics.json
+  SHA-256: 62901bb935e1696290b74a9abdc382e7d3f428d0b7673906541499c6eb78c1a5
+  Role: Consolidated Numerical Metrics, Medians, and Confidence Intervals (JSON)
+
+- 51_audit_summary_metrics_json_part03.txt      |  143,277 bytes |  5809 lines | Part: 3/9
+  Source: audit_export/audit_summary_metrics.json
+  SHA-256: 5e362839264fd204fe46a18158d2bc1d158591892d31ea54e4a73d469dc88f80
+  Role: Consolidated Numerical Metrics, Medians, and Confidence Intervals (JSON)
+
+- 51_audit_summary_metrics_json_part04.txt      |  143,279 bytes |  5865 lines | Part: 4/9
+  Source: audit_export/audit_summary_metrics.json
+  SHA-256: 2b27f31ae55f38d60c1ea3c3ef6ca9631da5dadecb15f97cca14601c1d21b12f
+  Role: Consolidated Numerical Metrics, Medians, and Confidence Intervals (JSON)
+
+- 51_audit_summary_metrics_json_part05.txt      |  143,267 bytes |  5863 lines | Part: 5/9
+  Source: audit_export/audit_summary_metrics.json
+  SHA-256: 4d98e98df398a88d3f26b66cb6bbf0228ffcbd4c7e74750167547cae6fee5f4c
+  Role: Consolidated Numerical Metrics, Medians, and Confidence Intervals (JSON)
+
+- 51_audit_summary_metrics_json_part06.txt      |  143,291 bytes |  5834 lines | Part: 6/9
+  Source: audit_export/audit_summary_metrics.json
+  SHA-256: 40a6055579ece9df05f2698d837b5ccd13c4f0608d165c1a41123600a93c1f21
+  Role: Consolidated Numerical Metrics, Medians, and Confidence Intervals (JSON)
+
+- 51_audit_summary_metrics_json_part07.txt      |  143,279 bytes |  5866 lines | Part: 7/9
+  Source: audit_export/audit_summary_metrics.json
+  SHA-256: 2c1171f2d0d6955d3d21dd03bee4405a0b57e33383ff1bf17b03c01d98369f31
+  Role: Consolidated Numerical Metrics, Medians, and Confidence Intervals (JSON)
+
+- 51_audit_summary_metrics_json_part08.txt      |  143,278 bytes |  5715 lines | Part: 8/9
+  Source: audit_export/audit_summary_metrics.json
+  SHA-256: 82692843708158da549a6515e2b6e28b0d3510a77ab4c798f0287b216d231439
+  Role: Consolidated Numerical Metrics, Medians, and Confidence Intervals (JSON)
+
+- 51_audit_summary_metrics_json_part09.txt      |   51,263 bytes |  2006 lines | Part: 9/9
+  Source: audit_export/audit_summary_metrics.json
+  SHA-256: 1272406ae459bab1927f48f2ce84198992b39fdefc2f94ddf71fbed86b07485c
+  Role: Consolidated Numerical Metrics, Medians, and Confidence Intervals (JSON)
+
+================================================================================
+END OF BUNDLE INDEX
+================================================================================

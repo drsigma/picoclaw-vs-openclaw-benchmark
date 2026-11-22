@@ -1,0 +1,78 @@
+#==============================================================================
+# ARTIFACT: 11_reproducibility_workflow_yml.txt
+# ORIGINAL_PATH: .github/workflows/reproducibility.yml
+# PART: 1 / 1
+# ORIGINAL_SHA256: 7d314a29d068bb0396868b9f6bfb4ad94654ff76d260f48b8482c5f7b3f7547a
+# CHUNK_SHA256: 7d314a29d068bb0396868b9f6bfb4ad94654ff76d260f48b8482c5f7b3f7547a
+# DESCRIPTION: Continuous Integration GitHub Workflow
+#==============================================================================
+
+name: Reproducibility Pipeline CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test-matrix:
+    name: Cross-Platform Test Matrix (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Verify Cryptographic SHA-256 Manifest
+        run: |
+          python3 scripts/verify_manifest.py
+
+      - name: Run Automated Test Suite
+        run: |
+          pytest -q
+
+  full-reproduction:
+    name: Full 35-Dataset Offline Reproduction Pipeline
+    needs: test-matrix
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install Dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Reproduce Quad-Platform Analysis over 35 Raw JSONL Datasets
+        run: |
+          python3 scripts/reproduce_quad_platform_analysis.py
+
+      - name: Verify Post-Reproduction Test Suite
+        run: |
+          pytest -q

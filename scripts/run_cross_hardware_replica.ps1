@@ -1,5 +1,5 @@
 # scripts/run_cross_hardware_replica.ps1 - Windows 11 / x86_64 Cross-Hardware Replication Runner
-# Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gates B2 / E3)
+# Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gates B2 / E3)
 #
 # Usage (PowerShell):
 #   powershell -ExecutionPolicy Bypass -File scripts\run_cross_hardware_replica.ps1

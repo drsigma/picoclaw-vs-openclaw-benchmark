@@ -1,0 +1,13 @@
+#==============================================================================
+# ARTIFACT: 34_tost_block_sensitivity_csv.txt
+# ORIGINAL_PATH: audit_export/tost_block_sensitivity.csv
+# PART: 1 / 1
+# ORIGINAL_SHA256: 6bdc29f6bdb848afb700570ba490c029356e8bb9d9488c23f0eef2eaf4ff8935
+# CHUNK_SHA256: 6bdc29f6bdb848afb700570ba490c029356e8bb9d9488c23f0eef2eaf4ff8935
+# DESCRIPTION: TOST Block-Size Sensitivity Analysis across b in {2, 3, 5}
+#==============================================================================
+
+block_size_b,n_boot,n_pairs,sesoi_ms,unadj_equivalent,unadj_different,unadj_inconclusive,holm_equivalent,holm_different,holm_inconclusive
+2,10000,95,5.0,76,0,19,71,0,24
+3,10000,95,5.0,76,0,19,72,0,23
+5,10000,95,5.0,78,0,17,73,0,22

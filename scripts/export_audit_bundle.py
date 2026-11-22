@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 scripts/export_audit_bundle.py - Consolidated Academic Audit Bundle Exporter (< 135 KB Sized)
-Exportador do Pacote Consolidado de Auditoria em Partes Dimensionadas para Submissão Elsevier SoftwareX
+Exportador do Pacote Consolidado de Auditoria em Partes Dimensionadas para Submissão Systems Benchmark Suite
 
 Generates:
   1. auditoria_parte1_manuscrito_tabelas_respostas.txt
@@ -118,7 +118,7 @@ def build_header(part_title: str) -> str:
     return f"""================================================================================
 PACOTE COMPLETO DE AUDITORIA E REPRODUCIBILIDADE CIENTIFICA INTEGRAL
 {part_title}
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
+Systems Benchmark Suite: picoclaw-vs-openclaw-benchmark
 ================================================================================
 Data de Geracao (UTC): {now_iso}
 Git HEAD: {git_head}
@@ -148,7 +148,7 @@ def generate_bundle():
     # PARTE 1: Manuscrito, Resposta aos Revisores, Bibliografia, Governanca e 9 Tabelas LaTeX + Macros
     part1_files = [
         "paper/RESPONSE_TO_REVIEWERS.md",
-        "paper/softwarex_manuscript.tex",
+        "paper/manuscript.tex",
         "references.bib",
         "paper/HIGHLIGHTS.md",
         "paper/COVER_LETTER.md",
@@ -184,7 +184,7 @@ def generate_bundle():
 
     # PARTE 2A: CI/CD, Makefile, Codigo-Nucleo, Telemetria, Invariantes, Orquestradores e Adaptadores (< 135 KB)
     part2a_files = [
-        ".github/workflows/ci.yml",
+        ".github/workflows/reproducibility.yml",
         "Makefile",
         "pyproject.toml",
         "benchmark/protocol_invariants.py",
@@ -423,7 +423,7 @@ def export_compact_jsonl_datasets():
         lines = [
             "=" * 80,
             "PARTE 3 COMPACTA: DADOS DE TODOS OS TRIALS DE AVALIACAO CIENTIFICA",
-            "Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark",
+            "Systems Benchmark Suite: picoclaw-vs-openclaw-benchmark",
             "=" * 80,
             "# SCHEMA: rep,warmup,prompt_tok,cached_tok,new_tok,comp_tok,t_task_ms,prompt_ms,pred_ms,t_orch_ms,t_disp_ms,ttft_ms,itl_ms,phys_mb,rss_mb,instr_M,cycles_M,billed_e,e_net_j,edp_js",
             "=" * 80,
@@ -488,7 +488,7 @@ def export_raw_jsonl_dataset():
     parts = [
         "================================================================================",
         "PARTE 3: DADOS BRUTOS COMPLETOS (100% REGISTROS JSONL SEM CORTES)",
-        "Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark",
+        "Systems Benchmark Suite: picoclaw-vs-openclaw-benchmark",
         "================================================================================\n",
     ]
     for rel_path in jsonl_files:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 scripts/run_quantization_scaling_ablation.py - Extreme Quantization Scaling Ablation
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gate R10 - Quantization Scaling)
+Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gate R10 - Quantization Scaling)
 
 Evaluates the physical scaling of inference memory bandwidth, ITL_0, and orchestrator overhead
 fraction (Phi_orch) across 3 quantization levels of Meta-Llama-3.2-3B-Instruct on Apple Silicon M4:

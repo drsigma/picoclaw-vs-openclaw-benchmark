@@ -5,8 +5,8 @@ This archive consolidates the manuscript source, bibliography, reproduction scri
 ## 1. Contents Included Directly in This Archive
 
 - **Manuscript, Documentation, Licenses & CI Workflow:**
-  - `paper/softwarex_manuscript.tex` — LaTeX manuscript source
-  - `references.bib` — 26 primary bibliographic entries with checked DOIs/ISBNs/arXiv identifiers
+  - `paper/manuscript.tex` — LaTeX manuscript source
+  - `references.bib` — 28 primary bibliographic entries with checked DOIs/ISBNs/arXiv identifiers
   - `README.md` — Installation guide, exact reproduction commands, metadata, and external validity boundaries
   - `LICENSE` (MIT code license) and `DATA_LICENSE` (CC BY 4.0 data license)
   - `.github/workflows/reproducibility.yml` — Executable Ubuntu GitHub Actions reproducibility workflow

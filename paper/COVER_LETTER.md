@@ -36,7 +36,7 @@ Recognizing that reviewers operate across diverse environments (including Linux 
 
 The complete code, datasets, telemetry logs, and documentation are available under open licenses (MIT License for software and Creative Commons CC-BY 4.0 for data) at:  
 `https://github.com/drsigma/picoclaw-vs-openclaw-benchmark`  
-Permanent Zenodo archive DOI: `10.5281/zenodo.14187265`.
+Permanent Zenodo archive DOI: `10.5281/zenodo.PENDING_RELEASE` (reserved for release upon acceptance).
 
 This manuscript has not been published elsewhere and is not currently under consideration by any other venue. All authors have approved the submission.
 

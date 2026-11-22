@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 scripts/audit_submission_gatekeeper.py - Automated Benchmark Submission Gatekeeper & Roofline Validator
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gate R10 - Automated Audit & Peer Review Verification)
+Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gate R10 - Automated Audit & Peer Review Verification)
 
 Inspired by automated software peer-review and rigor frameworks:
   - Pugliese et al. (Automated artifact evaluation in software engineering)

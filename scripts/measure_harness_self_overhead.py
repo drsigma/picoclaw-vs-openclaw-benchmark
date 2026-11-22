@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 scripts/measure_harness_self_overhead.py - Benchmark Harness Observer Effect & Self-Overhead Quantification
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gate D2)
+Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gate D2)
 
 Quantifies the observer effect / self-overhead introduced by telemetry instrumentation:
   - Condition A (Telemetry ON): Full continuous SMCPowerMonitor (50ms interval) + libproc rusage_info_v4 + psutil.

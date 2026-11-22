@@ -21,25 +21,25 @@ Tamanho Máximo do Chunk: <= 150 KB
 
 | Architecture & Runtime | Platform OS | $T_{\text{task}}$ Median (ms) | $T_{\text{orch}}$ Median (ms) [95% CI] | $\Phi_{\text{orch}}$ (%) | Peak RSS (MB) | Net Energy (J) | EDP ($J \cdot s$) | Instructions (M) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| PicoClaw (Native Go) | macOS ARM64 (M4) | 5272.68 | 5.53 [5.16, 6.50] | 0.10% | 5.09 | 88.28 | 464.63 | 62.27M |
-| PicoClaw (Native Go) | Linux x86_64 | 2684.62 | 6.68 [6.49, 7.48] | 0.25% | 9.69 | 206.78 | 563.11 | 32.35M |
-| PicoClaw (Native Go) | Windows 11 NVIDIA | 2928.29 | 13.11 [11.49, 14.04] | 0.45% | 10.20 | 136.97 | 402.65 | N/A* |
-| PicoClaw (Native Go) | Windows Intel iGPU | 53505.80 | 14.03 [13.77, 14.68] | 0.03% | 8.19 | N/A** | N/A** | N/A* |
-| OpenClaw (Node.js Minimal 15) | macOS ARM64 (M4) | 5284.81 | 20.60 [20.43, 21.02] | 0.39% | 37.55 | 89.34 | 474.17 | 789.72M |
-| OpenClaw (Node.js Minimal 15) | Linux x86_64 | 2721.15 | 31.36 [30.59, 31.67] | 1.15% | 86.39 | 209.96 | 573.31 | 765.58M |
-| OpenClaw (Node.js Minimal 15) | Windows 11 NVIDIA | 2906.76 | 40.68 [40.50, 41.01] | 1.40% | 72.89 | 136.74 | 400.27 | N/A* |
-| OpenClaw (Node.js Minimal 15) | Windows Intel iGPU | 53505.92 | 57.86 [56.87, 58.39] | 0.11% | 54.71 | N/A** | N/A** | N/A* |
-| OpenClaw (Node.js Full 54) | macOS ARM64 (M4) | 18406.88 | 24.55 [24.38, 24.82] | 0.13% | 37.71 | 305.82 | 5628.88 | 791.65M |
-| OpenClaw (Node.js Full 54) | Linux x86_64 | 7828.95 | 35.53 [35.29, 35.91] | 0.46% | 86.64 | 567.22 | 4447.07 | 772.13M |
-| OpenClaw (Node.js Full 54) | Windows 11 NVIDIA | 7896.41 | 48.55 [48.15, 48.82] | 0.61% | 72.93 | 467.43 | 3694.01 | N/A* |
-| OpenClaw (Node.js Full 54) | Windows Intel iGPU | 226696.86 | 68.89 [68.08, 69.65] | 0.03% | 54.76 | N/A** | N/A** | N/A* |
-| PythonNative (CPython VM) | macOS ARM64 (M4) | 5286.33 | 11.63 [11.35, 11.81] | 0.22% | 24.13 | 88.89 | 468.11 | 649.57M |
-| PythonNative (CPython VM) | Linux x86_64 | 2713.52 | 17.10 [16.33, 18.72] | 0.63% | 40.25 | 216.10 | 587.55 | 2654.20M |
-| PythonNative (CPython VM) | Windows 11 NVIDIA | 2859.50 | 26.99 [25.81, 30.29] | 0.94% | N/A§ | 137.81 | 394.05 | N/A* |
-| PythonNative (CPython VM) | Windows Intel iGPU | 53578.00 | 45.63 [41.24, 49.75] | 0.09% | N/A§ | N/A** | N/A** | N/A* |
-| Bun JSC Minimal 15 | Linux x86_64 | 2695.62 | 6.12 [5.94, 6.62] | 0.23% | 24.22 | 207.24 | 560.48 | 55.04M |
-| Bun JSC Minimal 15 | Windows 11 NVIDIA | 2856.44 | 16.48 [16.27, 17.85] | 0.58% | 24.64 | 136.16 | 387.46 | N/A* |
-| Bun JSC Minimal 15 | Windows Intel iGPU | 53564.68 | 23.70 [23.43, 24.09] | 0.04% | 23.65 | N/A** | N/A** | N/A* |
+| PicoClaw (Native Go) | macOS ARM64 (M4) | 5272.68 | 5.53 [5.17, 6.48] | 0.10% | 5.09 | 88.28 | 464.63 | 62.27M |
+| PicoClaw (Native Go) | Linux x86_64 | 2684.62 | 6.68 [6.51, 7.50] | 0.25% | 9.69 | 206.78 | 563.11 | 32.35M |
+| PicoClaw (Native Go) | Windows 11 NVIDIA | 2928.29 | 13.11 [11.54, 13.89] | 0.45% | 10.20 | 136.97 | 402.65 | N/A* |
+| PicoClaw (Native Go) | Windows Intel iGPU | 53505.80 | 14.03 [13.83, 14.66] | 0.03% | 8.19 | N/A** | N/A** | N/A* |
+| OpenClaw (Node.js Minimal 15) | macOS ARM64 (M4) | 5284.81 | 20.60 [20.44, 21.02] | 0.39% | 37.55 | 89.34 | 474.17 | 789.72M |
+| OpenClaw (Node.js Minimal 15) | Linux x86_64 | 2721.15 | 31.36 [30.60, 31.70] | 1.15% | 86.39 | 209.96 | 573.31 | 765.58M |
+| OpenClaw (Node.js Minimal 15) | Windows 11 NVIDIA | 2906.76 | 40.68 [40.45, 41.00] | 1.40% | 72.89 | 136.74 | 400.27 | N/A* |
+| OpenClaw (Node.js Minimal 15) | Windows Intel iGPU | 53505.92 | 57.86 [56.90, 58.37] | 0.11% | 54.71 | N/A** | N/A** | N/A* |
+| OpenClaw (Node.js Full 54) | macOS ARM64 (M4) | 18406.88 | 24.55 [24.38, 24.83] | 0.13% | 37.71 | 305.82 | 5628.88 | 791.65M |
+| OpenClaw (Node.js Full 54) | Linux x86_64 | 7828.95 | 35.53 [35.30, 35.91] | 0.46% | 86.64 | 567.22 | 4447.07 | 772.13M |
+| OpenClaw (Node.js Full 54) | Windows 11 NVIDIA | 7896.41 | 48.55 [48.17, 48.76] | 0.61% | 72.93 | 467.43 | 3694.01 | N/A* |
+| OpenClaw (Node.js Full 54) | Windows Intel iGPU | 226696.86 | 68.89 [68.02, 69.53] | 0.03% | 54.76 | N/A** | N/A** | N/A* |
+| PythonNative (CPython VM) | macOS ARM64 (M4) | 5286.33 | 11.63 [11.33, 11.84] | 0.22% | 24.13 | 88.89 | 468.11 | 649.57M |
+| PythonNative (CPython VM) | Linux x86_64 | 2713.52 | 17.10 [16.28, 19.03] | 0.63% | 40.25 | 216.10 | 587.55 | 2654.20M |
+| PythonNative (CPython VM) | Windows 11 NVIDIA | 2859.50 | 26.99 [26.02, 29.46] | 0.94% | N/A§ | 137.81 | 394.05 | N/A* |
+| PythonNative (CPython VM) | Windows Intel iGPU | 53578.00 | 45.63 [41.37, 49.65] | 0.09% | N/A§ | N/A** | N/A** | N/A* |
+| Bun JSC Minimal 15 | Linux x86_64 | 2695.62 | 6.12 [5.95, 6.66] | 0.23% | 24.22 | 207.24 | 560.48 | 55.04M |
+| Bun JSC Minimal 15 | Windows 11 NVIDIA | 2856.44 | 16.48 [16.31, 17.69] | 0.58% | 24.64 | 136.16 | 387.46 | N/A* |
+| Bun JSC Minimal 15 | Windows Intel iGPU | 53564.68 | 23.70 [23.41, 23.95] | 0.04% | 23.65 | N/A** | N/A** | N/A* |
 | Neural Baseline (Direct Server) | macOS ARM64 (M4) | 5279.45 | 0.00 [0.00, 0.00] | 0.00% | N/A‡ | 88.17 | 463.17 | N/A‡ |
 | Neural Baseline (Direct Server) | Linux x86_64 | 2702.79 | 0.00 [0.00, 0.00] | 0.00% | N/A‡ | 209.99 | 569.38 | N/A‡ |
 | Neural Baseline (Direct Server) | Windows 11 NVIDIA | 2773.49 | 0.00 [0.00, 0.00] | 0.00% | N/A‡ | 131.06 | 363.54 | N/A‡ |
@@ -52,6 +52,7 @@ Tamanho Máximo do Chunk: <= 150 KB
 > `||` **N/A||** (*Bun JSC on macOS*): Bun (JSC) was evaluated as a secondary JavaScript engine ablation on x86_64 nodes (Linux and Windows) following the completion of the Darwin ARM64 reference campaign.  
 > `**` **N/A\*\*** (*Host Package Energy on Windows Intel Graphics*): Intel HD Graphics 4600 operates on unified host memory aperture (UMA); without a kernel RAPL MSR driver or discrete NVML, host package energy and EDP are not instrumented in unprivileged user-mode.  
 > **Note — Cross-ISA Hardware Counter Segregation:** Direct numerical comparisons of retired hardware instruction counts between Apple Silicon (ARM64 RISC) and Intel Core (x86_64 CISC) are microarchitecturally incommensurable due to divergent instruction densities, macro-op fusion, and RISC micro-operation expansion; evaluate hardware instructions via within-ISA relative ratios (e.g., OpenClaw Full vs. PicoClaw).  
+> `†` **Autocorrelation Warning**: Cells with lag-1 serial autocorrelation $r_1 > 0.4$ subject to positive serial dependence.  
 > **Note — Clean Physical Executions:** All consolidated datasets originate from unbroken, from-scratch executions without partial or reused trials.
 
 
@@ -61,161 +62,162 @@ Tamanho Máximo do Chunk: <= 150 KB
 
 >>> INÍCIO DO ARQUIVO: audit_export/tables/table2_statistical_tests.md <<<
 
-# Table 2: Non-Parametric Hypothesis Testing & Effect Sizes (Mann-Whitney U, r1-Adjusted Variance, Cliff's Delta, Holm-Bonferroni)
+# Table 2: Non-Parametric Hypothesis Testing & Effect Sizes (Mann-Whitney U, r1-VIF Sensitivity, Block Permutation, Cliff's Delta, Holm-Bonferroni)
 
-| Platform | Regime | Workload | Comparison | $n_{\text{eff}}$ ($r_1>0$) | $U$ Statistic | $p$-value (adj, std) | $p$-value (adj, $r_1$-corrected) | Cliff's $\delta$ | Vargha-Delaney $A_{12}$ | Effect Magnitude |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| macOS (M4) | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Full | 30.0/26.7 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 299.0 | 0.8866 | 0.9909 | -0.336 | 0.332 | Medium |
-| macOS (M4) | Regime A (Cold Prefill) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/26.7 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime A (Cold Prefill) | W1 | PicoClaw vs PythonNative | 30.0/30.0 | 388.0 | 1.0000 | 1.0000 | -0.138 | 0.431 | Negligible |
-| macOS (M4) | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 316.0 | 1.0000 | 1.0000 | -0.298 | 0.351 | Small |
-| macOS (M4) | Regime A (Cold Prefill) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime A (Cold Prefill) | W2 | PicoClaw vs PythonNative | 30.0/30.0 | 352.0 | 1.0000 | 1.0000 | -0.218 | 0.391 | Small |
-| macOS (M4) | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Full | 30.0/14.9 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 509.0 | 1.0000 | 1.0000 | +0.131 | 0.566 | Negligible |
-| macOS (M4) | Regime A (Cold Prefill) | W3 | OpenClaw Minimal vs OpenClaw Full | 30.0/14.9 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime A (Cold Prefill) | W3 | PicoClaw vs PythonNative | 30.0/24.0 | 592.0 | 1.0000 | 1.0000 | +0.316 | 0.658 | Small |
-| macOS (M4) | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 253.0 | 0.1542 | 0.1762 | -0.438 | 0.281 | Medium |
-| macOS (M4) | Regime A (Cold Prefill) | W4 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime A (Cold Prefill) | W4 | PicoClaw vs PythonNative | 30.0/30.0 | 294.0 | 0.7527 | 0.8602 | -0.347 | 0.327 | Medium |
-| macOS (M4) | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Full | 29.6/23.2 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Minimal | 29.6/30.0 | 900.0 | < 0.0001 | < 0.0001 | +1.000 | 1.000 | Large |
-| macOS (M4) | Regime A (Cold Prefill) | W5 | OpenClaw Minimal vs OpenClaw Full | 30.0/23.2 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Full | 30.0/23.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 195.0 | 0.0086 | 0.0099 | -0.567 | 0.217 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/23.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W1 | PicoClaw vs PythonNative | 30.0/30.0 | 388.0 | 1.0000 | 1.0000 | -0.138 | 0.431 | Negligible |
-| macOS (M4) | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 2.0 | < 0.0001 | < 0.0001 | -0.996 | 0.002 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W2 | PicoClaw vs PythonNative | 30.0/30.0 | 198.0 | 0.0100 | 0.0116 | -0.560 | 0.220 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 390.0 | 1.0000 | 1.0000 | -0.133 | 0.433 | Negligible |
-| macOS (M4) | Regime B (Warm Cache) | W3 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W3 | PicoClaw vs PythonNative | 30.0/30.0 | 671.0 | 0.0524 | 0.0590 | +0.491 | 0.746 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Full | 23.4/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Minimal | 23.4/30.0 | 30.0 | < 0.0001 | < 0.0001 | -0.933 | 0.033 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W4 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W4 | PicoClaw vs PythonNative | 23.4/29.3 | 31.0 | < 0.0001 | < 0.0001 | -0.931 | 0.034 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 900.0 | < 0.0001 | < 0.0001 | +1.000 | 1.000 | Large |
-| macOS (M4) | Regime B (Warm Cache) | W5 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Full | 30.0/11.8 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 259.0 | 0.1942 | 0.2282 | -0.424 | 0.288 | Medium |
-| Linux x86_64 | Regime A (Cold Prefill) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/11.8 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W1 | PicoClaw vs PythonNative | 30.0/28.8 | 315.0 | 1.0000 | 1.0000 | -0.300 | 0.350 | Small |
-| Linux x86_64 | Regime A (Cold Prefill) | W1 | PicoClaw vs Bun Minimal | 30.0/14.9 | 435.0 | 1.0000 | 1.0000 | -0.033 | 0.483 | Negligible |
-| Linux x86_64 | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Full | 20.9/7.1 | 0.0 | < 0.0001 | 0.0056 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Minimal | 20.9/30.0 | 216.0 | 0.0267 | 0.0894 (NS*) | -0.520 | 0.240 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/7.1 | 0.0 | < 0.0001 | 0.0029 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W2 | PicoClaw vs PythonNative | 20.9/18.8 | 256.0 | 0.1733 | 0.8508 | -0.431 | 0.284 | Medium |
-| Linux x86_64 | Regime A (Cold Prefill) | W2 | PicoClaw vs Bun Minimal | 20.9/30.0 | 440.0 | 1.0000 | 1.0000 | -0.022 | 0.489 | Negligible |
-| Linux x86_64 | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Full | 17.4/4.0 | 0.0 | < 0.0001 | 0.1130 (NS*) | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Minimal | 17.4/28.3 | 231.0 | 0.0569 | 0.2836 | -0.487 | 0.257 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W3 | OpenClaw Minimal vs OpenClaw Full | 28.3/4.0 | 0.0 | < 0.0001 | 0.0731 (NS*) | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W3 | PicoClaw vs PythonNative | 17.4/21.2 | 292.0 | 0.7158 | 1.0000 | -0.351 | 0.324 | Medium |
-| Linux x86_64 | Regime A (Cold Prefill) | W3 | PicoClaw vs Bun Minimal | 17.4/13.5 | 502.0 | 1.0000 | 1.0000 | +0.116 | 0.558 | Negligible |
-| Linux x86_64 | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Full | 10.7/8.8 | 0.0 | < 0.0001 | 0.0118 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Minimal | 10.7/6.4 | 199.0 | 0.0104 | 1.0000 (NS*) | -0.558 | 0.221 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W4 | OpenClaw Minimal vs OpenClaw Full | 6.4/8.8 | 0.0 | < 0.0001 | 0.0645 (NS*) | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W4 | PicoClaw vs PythonNative | 10.7/7.2 | 171.0 | 0.0021 | 1.0000 (NS*) | -0.620 | 0.190 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W4 | PicoClaw vs Bun Minimal | 10.7/8.4 | 247.0 | 0.1212 | 1.0000 | -0.451 | 0.274 | Medium |
-| Linux x86_64 | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Full | 11.8/7.3 | 0.0 | < 0.0001 | 0.0197 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Minimal | 11.8/23.8 | 900.0 | < 0.0001 | 0.0001 | +1.000 | 1.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W5 | OpenClaw Minimal vs OpenClaw Full | 23.8/7.3 | 0.0 | < 0.0001 | 0.0037 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime A (Cold Prefill) | W5 | PicoClaw vs Bun Minimal | 11.8/17.9 | 513.0 | 1.0000 | 1.0000 | +0.140 | 0.570 | Negligible |
-| Linux x86_64 | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Full | 22.9/28.2 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Minimal | 22.9/30.0 | 191.0 | 0.0069 | 0.0209 | -0.576 | 0.212 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/28.2 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W1 | PicoClaw vs PythonNative | 22.9/30.0 | 124.0 | < 0.0001 | 0.0005 | -0.724 | 0.138 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W1 | PicoClaw vs Bun Minimal | 22.9/15.8 | 500.0 | 1.0000 | 1.0000 | +0.111 | 0.556 | Negligible |
-| Linux x86_64 | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Full | 11.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Minimal | 11.0/17.6 | 96.0 | < 0.0001 | 0.0275 | -0.787 | 0.107 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W2 | OpenClaw Minimal vs OpenClaw Full | 17.6/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W2 | PicoClaw vs PythonNative | 11.0/30.0 | 67.0 | < 0.0001 | 0.0024 | -0.851 | 0.074 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W2 | PicoClaw vs Bun Minimal | 11.0/18.9 | 417.0 | 1.0000 | 1.0000 | -0.073 | 0.463 | Negligible |
-| Linux x86_64 | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Full | 27.3/29.1 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Minimal | 27.3/29.4 | 260.0 | 0.1983 | 0.2869 | -0.422 | 0.289 | Medium |
-| Linux x86_64 | Regime B (Warm Cache) | W3 | OpenClaw Minimal vs OpenClaw Full | 29.4/29.1 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W3 | PicoClaw vs PythonNative | 27.3/30.0 | 35.0 | < 0.0001 | < 0.0001 | -0.922 | 0.039 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W3 | PicoClaw vs Bun Minimal | 27.3/21.9 | 623.0 | 0.3982 | 0.8602 | +0.384 | 0.692 | Medium |
-| Linux x86_64 | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Minimal | 30.0/8.0 | 32.0 | < 0.0001 | 0.0042 | -0.929 | 0.036 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W4 | OpenClaw Minimal vs OpenClaw Full | 8.0/30.0 | 0.0 | < 0.0001 | 0.0012 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W4 | PicoClaw vs PythonNative | 30.0/30.0 | 33.0 | < 0.0001 | < 0.0001 | -0.927 | 0.037 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W4 | PicoClaw vs Bun Minimal | 30.0/24.1 | 50.0 | < 0.0001 | < 0.0001 | -0.889 | 0.056 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Full | 28.7/20.3 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Minimal | 28.7/20.5 | 900.0 | < 0.0001 | < 0.0001 | +1.000 | 1.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W5 | OpenClaw Minimal vs OpenClaw Full | 20.5/20.3 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Linux x86_64 | Regime B (Warm Cache) | W5 | PicoClaw vs Bun Minimal | 28.7/30.0 | 490.0 | 1.0000 | 1.0000 | +0.089 | 0.544 | Negligible |
-| Windows 11 | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 306.0 | 1.0000 | 1.0000 | -0.320 | 0.340 | Small |
-| Windows 11 | Regime A (Cold Prefill) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W1 | PicoClaw vs PythonNative | 30.0/30.0 | 348.0 | 1.0000 | 1.0000 | -0.227 | 0.387 | Small |
-| Windows 11 | Regime A (Cold Prefill) | W1 | PicoClaw vs Bun Minimal | 30.0/30.0 | 458.0 | 1.0000 | 1.0000 | +0.018 | 0.509 | Negligible |
-| Windows 11 | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Full | 20.7/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Minimal | 20.7/30.0 | 598.0 | 0.9638 | 1.0000 | +0.329 | 0.664 | Small |
-| Windows 11 | Regime A (Cold Prefill) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W2 | PicoClaw vs PythonNative | 20.7/30.0 | 648.0 | 0.1505 | 0.3634 | +0.440 | 0.720 | Medium |
-| Windows 11 | Regime A (Cold Prefill) | W2 | PicoClaw vs Bun Minimal | 20.7/25.5 | 667.0 | 0.0617 | 0.2468 | +0.482 | 0.741 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Full | 27.8/28.9 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Minimal | 27.8/23.2 | 399.0 | 1.0000 | 1.0000 | -0.113 | 0.443 | Negligible |
-| Windows 11 | Regime A (Cold Prefill) | W3 | OpenClaw Minimal vs OpenClaw Full | 23.2/28.9 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W3 | PicoClaw vs PythonNative | 27.8/30.0 | 515.0 | 1.0000 | 1.0000 | +0.144 | 0.572 | Negligible |
-| Windows 11 | Regime A (Cold Prefill) | W3 | PicoClaw vs Bun Minimal | 27.8/30.0 | 447.0 | 1.0000 | 1.0000 | -0.007 | 0.497 | Negligible |
-| Windows 11 | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 28.0 | < 0.0001 | < 0.0001 | -0.938 | 0.031 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W4 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W4 | PicoClaw vs PythonNative | 30.0/30.0 | 26.0 | < 0.0001 | < 0.0001 | -0.942 | 0.029 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W4 | PicoClaw vs Bun Minimal | 30.0/30.0 | 55.0 | < 0.0001 | < 0.0001 | -0.878 | 0.061 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Full | 30.0/27.4 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Minimal | 30.0/25.0 | 900.0 | < 0.0001 | < 0.0001 | +1.000 | 1.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W5 | OpenClaw Minimal vs OpenClaw Full | 25.0/27.4 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime A (Cold Prefill) | W5 | PicoClaw vs Bun Minimal | 30.0/30.0 | 536.0 | 1.0000 | 1.0000 | +0.191 | 0.596 | Small |
-| Windows 11 | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Full | 30.0/12.4 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 164.0 | 0.0013 | 0.0016 | -0.636 | 0.182 | Large |
-| Windows 11 | Regime B (Warm Cache) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/12.4 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W1 | PicoClaw vs PythonNative | 30.0/30.0 | 185.0 | 0.0048 | 0.0056 | -0.589 | 0.206 | Large |
-| Windows 11 | Regime B (Warm Cache) | W1 | PicoClaw vs Bun Minimal | 30.0/30.0 | 348.0 | 1.0000 | 1.0000 | -0.227 | 0.387 | Small |
-| Windows 11 | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Full | 30.0/22.4 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 482.0 | 1.0000 | 1.0000 | +0.071 | 0.536 | Negligible |
-| Windows 11 | Regime B (Warm Cache) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/22.4 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W2 | PicoClaw vs PythonNative | 30.0/30.0 | 570.0 | 1.0000 | 1.0000 | +0.267 | 0.633 | Small |
-| Windows 11 | Regime B (Warm Cache) | W2 | PicoClaw vs Bun Minimal | 30.0/30.0 | 775.0 | < 0.0001 | 0.0001 | +0.722 | 0.861 | Large |
-| Windows 11 | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Full | 26.6/19.7 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Minimal | 26.6/30.0 | 114.0 | < 0.0001 | 0.0001 | -0.747 | 0.127 | Large |
-| Windows 11 | Regime B (Warm Cache) | W3 | OpenClaw Minimal vs OpenClaw Full | 30.0/19.7 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W3 | PicoClaw vs PythonNative | 26.6/30.0 | 267.0 | 0.2642 | 0.3741 | -0.407 | 0.297 | Medium |
-| Windows 11 | Regime B (Warm Cache) | W3 | PicoClaw vs Bun Minimal | 26.6/30.0 | 485.0 | 1.0000 | 1.0000 | +0.078 | 0.539 | Negligible |
-| Windows 11 | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Full | 21.3/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Minimal | 21.3/14.0 | 8.0 | < 0.0001 | < 0.0001 | -0.982 | 0.009 | Large |
-| Windows 11 | Regime B (Warm Cache) | W4 | OpenClaw Minimal vs OpenClaw Full | 14.0/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W4 | PicoClaw vs PythonNative | 21.3/23.2 | 4.0 | < 0.0001 | < 0.0001 | -0.991 | 0.004 | Large |
-| Windows 11 | Regime B (Warm Cache) | W4 | PicoClaw vs Bun Minimal | 21.3/18.7 | 7.0 | < 0.0001 | < 0.0001 | -0.984 | 0.008 | Large |
-| Windows 11 | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Full | 30.0/18.5 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 900.0 | < 0.0001 | < 0.0001 | +1.000 | 1.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W5 | OpenClaw Minimal vs OpenClaw Full | 30.0/18.5 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows 11 | Regime B (Warm Cache) | W5 | PicoClaw vs Bun Minimal | 30.0/19.3 | 519.0 | 1.0000 | 1.0000 | +0.153 | 0.577 | Small |
-| Windows Intel iGPU | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Full | 25.3/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows Intel iGPU | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Minimal | 25.3/28.1 | 441.0 | 1.0000 | 1.0000 | -0.020 | 0.490 | Negligible |
-| Windows Intel iGPU | Regime A (Cold Prefill) | W2 | OpenClaw Minimal vs OpenClaw Full | 28.1/30.0 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows Intel iGPU | Regime A (Cold Prefill) | W2 | PicoClaw vs PythonNative | 25.3/23.7 | 456.0 | 1.0000 | 1.0000 | +0.013 | 0.507 | Negligible |
-| Windows Intel iGPU | Regime A (Cold Prefill) | W2 | PicoClaw vs Bun Minimal | 25.3/30.0 | 406.0 | 1.0000 | 1.0000 | -0.098 | 0.451 | Negligible |
-| Windows Intel iGPU | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 871.0 | < 0.0001 | < 0.0001 | +0.936 | 0.968 | Large |
-| Windows Intel iGPU | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Full | 30.0/26.2 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows Intel iGPU | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 | 826.0 | < 0.0001 | < 0.0001 | +0.836 | 0.918 | Large |
-| Windows Intel iGPU | Regime B (Warm Cache) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/26.2 | 0.0 | < 0.0001 | < 0.0001 | -1.000 | 0.000 | Large |
-| Windows Intel iGPU | Regime B (Warm Cache) | W2 | PicoClaw vs PythonNative | 30.0/30.0 | 405.0 | 1.0000 | 1.0000 | -0.100 | 0.450 | Negligible |
-| Windows Intel iGPU | Regime B (Warm Cache) | W2 | PicoClaw vs Bun Minimal | 30.0/28.1 | 422.0 | 1.0000 | 1.0000 | -0.062 | 0.469 | Negligible |
-| Windows Intel iGPU | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Minimal | 22.6/30.0 | 872.0 | < 0.0001 | < 0.0001 | +0.938 | 0.969 | Large |
+| Platform | Regime | Workload | Comparison | $n_{\text{eff}}$ / $b$ | $U$ Statistic | $p$-adj (std) | $p$-adj ($r_1$-VIF, sens.) | $p$-adj (block-perm, primary) | Cliff's $\delta$ | Vargha-Delaney $A_{12}$ | Effect Magnitude |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| macOS (M4) | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Full | 30.0/26.7 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 299.0 | 0.8866 | 0.9909 | 1.0000 | -0.336 | 0.332 | Medium |
+| macOS (M4) | Regime A (Cold Prefill) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/26.7 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime A (Cold Prefill) | W1 | PicoClaw vs PythonNative | 30.0/30.0 (b=3) | 388.0 | 1.0000 | 1.0000 | 1.0000 | -0.138 | 0.431 | Negligible |
+| macOS (M4) | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Full | 30.0/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 316.0 | 1.0000 | 1.0000 | 1.0000 | -0.298 | 0.351 | Small |
+| macOS (M4) | Regime A (Cold Prefill) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime A (Cold Prefill) | W2 | PicoClaw vs PythonNative | 30.0/30.0 (b=3) | 352.0 | 1.0000 | 1.0000 | 1.0000 | -0.218 | 0.391 | Small |
+| macOS (M4) | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Full | 30.0/14.9 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 509.0 | 1.0000 | 1.0000 | 1.0000 | +0.131 | 0.566 | Negligible |
+| macOS (M4) | Regime A (Cold Prefill) | W3 | OpenClaw Minimal vs OpenClaw Full | 30.0/14.9 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime A (Cold Prefill) | W3 | PicoClaw vs PythonNative | 30.0/24.0 (b=3) | 592.0 | 1.0000 | 1.0000 | 1.0000 | +0.316 | 0.658 | Small |
+| macOS (M4) | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Full | 30.0/30.0 (b=5) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 253.0 | 0.1542 | 0.1762 | 1.0000 | -0.438 | 0.281 | Medium |
+| macOS (M4) | Regime A (Cold Prefill) | W4 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 (b=5) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime A (Cold Prefill) | W4 | PicoClaw vs PythonNative | 30.0/30.0 (b=3) | 294.0 | 0.7527 | 0.8602 | 1.0000 | -0.347 | 0.327 | Medium |
+| macOS (M4) | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Full | 29.6/23.2 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Minimal | 29.6/30.0 (b=3) | 900.0 | < 0.0001 | < 0.0001 | 1.0000 | +1.000 | 1.000 | Large |
+| macOS (M4) | Regime A (Cold Prefill) | W5 | OpenClaw Minimal vs OpenClaw Full | 30.0/23.2 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Full | 30.0/23.0 (b=8) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=8) | 195.0 | 0.0086 | 0.0099 | 1.0000 | -0.567 | 0.217 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/23.0 (b=5) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W1 | PicoClaw vs PythonNative | 30.0/30.0 (b=8) | 388.0 | 1.0000 | 1.0000 | 1.0000 | -0.138 | 0.431 | Negligible |
+| macOS (M4) | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Full | 30.0/30.0 (b=12) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=12) | 2.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.996 | 0.002 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 (b=12) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W2 | PicoClaw vs PythonNative | 30.0/30.0 (b=12) | 198.0 | 0.0100 | 0.0116 | 1.0000 | -0.560 | 0.220 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Full | 30.0/30.0 (b=12) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=12) | 390.0 | 1.0000 | 1.0000 | 1.0000 | -0.133 | 0.433 | Negligible |
+| macOS (M4) | Regime B (Warm Cache) | W3 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 (b=12) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W3 | PicoClaw vs PythonNative | 30.0/30.0 (b=12) | 671.0 | 0.0524 | 0.0590 | 1.0000 | +0.491 | 0.746 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Full | 23.4/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Minimal | 23.4/30.0 (b=5) | 30.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.933 | 0.033 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W4 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 (b=5) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W4 | PicoClaw vs PythonNative | 23.4/29.3 (b=3) | 31.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.931 | 0.034 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Full | 30.0/30.0 (b=8) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=8) | 900.0 | < 0.0001 | < 0.0001 | 1.0000 | +1.000 | 1.000 | Large |
+| macOS (M4) | Regime B (Warm Cache) | W5 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 (b=8) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Full | 30.0/11.8 (b=5) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 259.0 | 0.1942 | 0.2282 | 1.0000 | -0.424 | 0.288 | Medium |
+| Linux x86_64 | Regime A (Cold Prefill) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/11.8 (b=5) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W1 | PicoClaw vs PythonNative | 30.0/28.8 (b=3) | 315.0 | 1.0000 | 1.0000 | 1.0000 | -0.300 | 0.350 | Small |
+| Linux x86_64 | Regime A (Cold Prefill) | W1 | PicoClaw vs Bun Minimal | 30.0/14.9 (b=3) | 435.0 | 1.0000 | 1.0000 | 1.0000 | -0.033 | 0.483 | Negligible |
+| Linux x86_64 | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Full | 20.9/7.1 (b=8) | 0.0 | < 0.0001 | 0.0056 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Minimal | 20.9/30.0 (b=5) | 216.0 | 0.0267 | 0.0894 (NS*) | 1.0000 | -0.520 | 0.240 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/7.1 (b=8) | 0.0 | < 0.0001 | 0.0029 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W2 | PicoClaw vs PythonNative | 20.9/18.8 (b=3) | 256.0 | 0.1733 | 0.8508 | 1.0000 | -0.431 | 0.284 | Medium |
+| Linux x86_64 | Regime A (Cold Prefill) | W2 | PicoClaw vs Bun Minimal | 20.9/30.0 (b=3) | 440.0 | 1.0000 | 1.0000 | 1.0000 | -0.022 | 0.489 | Negligible |
+| Linux x86_64 | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Full | 17.4/4.0 (b=8) | 0.0 | < 0.0001 | 0.1130 (NS*) | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Minimal | 17.4/28.3 (b=3) | 231.0 | 0.0569 | 0.2836 | 1.0000 | -0.487 | 0.257 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W3 | OpenClaw Minimal vs OpenClaw Full | 28.3/4.0 (b=8) | 0.0 | < 0.0001 | 0.0731 (NS*) | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W3 | PicoClaw vs PythonNative | 17.4/21.2 (b=3) | 292.0 | 0.7158 | 1.0000 | 1.0000 | -0.351 | 0.324 | Medium |
+| Linux x86_64 | Regime A (Cold Prefill) | W3 | PicoClaw vs Bun Minimal | 17.4/13.5 (b=5) | 502.0 | 1.0000 | 1.0000 | 1.0000 | +0.116 | 0.558 | Negligible |
+| Linux x86_64 | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Full | 10.7/8.8 (b=5) | 0.0 | < 0.0001 | 0.0118 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Minimal | 10.7/6.4 (b=8) | 199.0 | 0.0104 | 1.0000 (NS*) | 1.0000 | -0.558 | 0.221 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W4 | OpenClaw Minimal vs OpenClaw Full | 6.4/8.8 (b=8) | 0.0 | < 0.0001 | 0.0645 (NS*) | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W4 | PicoClaw vs PythonNative | 10.7/7.2 (b=8) | 171.0 | 0.0021 | 1.0000 (NS*) | 1.0000 | -0.620 | 0.190 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W4 | PicoClaw vs Bun Minimal | 10.7/8.4 (b=5) | 247.0 | 0.1212 | 1.0000 | 1.0000 | -0.451 | 0.274 | Medium |
+| Linux x86_64 | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Full | 11.8/7.3 (b=8) | 0.0 | < 0.0001 | 0.0197 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Minimal | 11.8/23.8 (b=5) | 900.0 | < 0.0001 | 0.0001 | 1.0000 | +1.000 | 1.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W5 | OpenClaw Minimal vs OpenClaw Full | 23.8/7.3 (b=8) | 0.0 | < 0.0001 | 0.0037 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime A (Cold Prefill) | W5 | PicoClaw vs Bun Minimal | 11.8/17.9 (b=5) | 513.0 | 1.0000 | 1.0000 | 1.0000 | +0.140 | 0.570 | Negligible |
+| Linux x86_64 | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Full | 22.9/28.2 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Minimal | 22.9/30.0 (b=3) | 191.0 | 0.0069 | 0.0209 | 1.0000 | -0.576 | 0.212 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/28.2 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W1 | PicoClaw vs PythonNative | 22.9/30.0 (b=3) | 124.0 | < 0.0001 | 0.0005 | 1.0000 | -0.724 | 0.138 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W1 | PicoClaw vs Bun Minimal | 22.9/15.8 (b=3) | 500.0 | 1.0000 | 1.0000 | 1.0000 | +0.111 | 0.556 | Negligible |
+| Linux x86_64 | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Full | 11.0/30.0 (b=5) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Minimal | 11.0/17.6 (b=5) | 96.0 | < 0.0001 | 0.0275 | 1.0000 | -0.787 | 0.107 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W2 | OpenClaw Minimal vs OpenClaw Full | 17.6/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W2 | PicoClaw vs PythonNative | 11.0/30.0 (b=5) | 67.0 | < 0.0001 | 0.0024 | 1.0000 | -0.851 | 0.074 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W2 | PicoClaw vs Bun Minimal | 11.0/18.9 (b=5) | 417.0 | 1.0000 | 1.0000 | 1.0000 | -0.073 | 0.463 | Negligible |
+| Linux x86_64 | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Full | 27.3/29.1 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Minimal | 27.3/29.4 (b=3) | 260.0 | 0.1983 | 0.2869 | 1.0000 | -0.422 | 0.289 | Medium |
+| Linux x86_64 | Regime B (Warm Cache) | W3 | OpenClaw Minimal vs OpenClaw Full | 29.4/29.1 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W3 | PicoClaw vs PythonNative | 27.3/30.0 (b=5) | 35.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.922 | 0.039 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W3 | PicoClaw vs Bun Minimal | 27.3/21.9 (b=3) | 623.0 | 0.3982 | 0.8602 | 1.0000 | +0.384 | 0.692 | Medium |
+| Linux x86_64 | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Full | 30.0/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Minimal | 30.0/8.0 (b=5) | 32.0 | < 0.0001 | 0.0042 | 1.0000 | -0.929 | 0.036 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W4 | OpenClaw Minimal vs OpenClaw Full | 8.0/30.0 (b=5) | 0.0 | < 0.0001 | 0.0012 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W4 | PicoClaw vs PythonNative | 30.0/30.0 (b=3) | 33.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.927 | 0.037 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W4 | PicoClaw vs Bun Minimal | 30.0/24.1 (b=3) | 50.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.889 | 0.056 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Full | 28.7/20.3 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Minimal | 28.7/20.5 (b=3) | 900.0 | < 0.0001 | < 0.0001 | 1.0000 | +1.000 | 1.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W5 | OpenClaw Minimal vs OpenClaw Full | 20.5/20.3 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Linux x86_64 | Regime B (Warm Cache) | W5 | PicoClaw vs Bun Minimal | 28.7/30.0 (b=3) | 490.0 | 1.0000 | 1.0000 | 1.0000 | +0.089 | 0.544 | Negligible |
+| Windows 11 | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Full | 30.0/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W1 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 306.0 | 1.0000 | 1.0000 | 1.0000 | -0.320 | 0.340 | Small |
+| Windows 11 | Regime A (Cold Prefill) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W1 | PicoClaw vs PythonNative | 30.0/30.0 (b=3) | 348.0 | 1.0000 | 1.0000 | 1.0000 | -0.227 | 0.387 | Small |
+| Windows 11 | Regime A (Cold Prefill) | W1 | PicoClaw vs Bun Minimal | 30.0/30.0 (b=3) | 458.0 | 1.0000 | 1.0000 | 1.0000 | +0.018 | 0.509 | Negligible |
+| Windows 11 | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Full | 20.7/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Minimal | 20.7/30.0 (b=3) | 598.0 | 0.9638 | 1.0000 | 1.0000 | +0.329 | 0.664 | Small |
+| Windows 11 | Regime A (Cold Prefill) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W2 | PicoClaw vs PythonNative | 20.7/30.0 (b=3) | 648.0 | 0.1505 | 0.3634 | 1.0000 | +0.440 | 0.720 | Medium |
+| Windows 11 | Regime A (Cold Prefill) | W2 | PicoClaw vs Bun Minimal | 20.7/25.5 (b=3) | 667.0 | 0.0617 | 0.2468 | 1.0000 | +0.482 | 0.741 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Full | 27.8/28.9 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W3 | PicoClaw vs OpenClaw Minimal | 27.8/23.2 (b=3) | 399.0 | 1.0000 | 1.0000 | 1.0000 | -0.113 | 0.443 | Negligible |
+| Windows 11 | Regime A (Cold Prefill) | W3 | OpenClaw Minimal vs OpenClaw Full | 23.2/28.9 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W3 | PicoClaw vs PythonNative | 27.8/30.0 (b=3) | 515.0 | 1.0000 | 1.0000 | 1.0000 | +0.144 | 0.572 | Negligible |
+| Windows 11 | Regime A (Cold Prefill) | W3 | PicoClaw vs Bun Minimal | 27.8/30.0 (b=3) | 447.0 | 1.0000 | 1.0000 | 1.0000 | -0.007 | 0.497 | Negligible |
+| Windows 11 | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Full | 30.0/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W4 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 28.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.938 | 0.031 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W4 | OpenClaw Minimal vs OpenClaw Full | 30.0/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W4 | PicoClaw vs PythonNative | 30.0/30.0 (b=3) | 26.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.942 | 0.029 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W4 | PicoClaw vs Bun Minimal | 30.0/30.0 (b=3) | 55.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.878 | 0.061 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Full | 30.0/27.4 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Minimal | 30.0/25.0 (b=3) | 900.0 | < 0.0001 | < 0.0001 | 1.0000 | +1.000 | 1.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W5 | OpenClaw Minimal vs OpenClaw Full | 25.0/27.4 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime A (Cold Prefill) | W5 | PicoClaw vs Bun Minimal | 30.0/30.0 (b=3) | 536.0 | 1.0000 | 1.0000 | 1.0000 | +0.191 | 0.596 | Small |
+| Windows 11 | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Full | 30.0/12.4 (b=5) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W1 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 164.0 | 0.0013 | 0.0016 | 1.0000 | -0.636 | 0.182 | Large |
+| Windows 11 | Regime B (Warm Cache) | W1 | OpenClaw Minimal vs OpenClaw Full | 30.0/12.4 (b=5) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W1 | PicoClaw vs PythonNative | 30.0/30.0 (b=3) | 185.0 | 0.0048 | 0.0056 | 1.0000 | -0.589 | 0.206 | Large |
+| Windows 11 | Regime B (Warm Cache) | W1 | PicoClaw vs Bun Minimal | 30.0/30.0 (b=3) | 348.0 | 1.0000 | 1.0000 | 1.0000 | -0.227 | 0.387 | Small |
+| Windows 11 | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Full | 30.0/22.4 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 482.0 | 1.0000 | 1.0000 | 1.0000 | +0.071 | 0.536 | Negligible |
+| Windows 11 | Regime B (Warm Cache) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/22.4 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W2 | PicoClaw vs PythonNative | 30.0/30.0 (b=3) | 570.0 | 1.0000 | 1.0000 | 1.0000 | +0.267 | 0.633 | Small |
+| Windows 11 | Regime B (Warm Cache) | W2 | PicoClaw vs Bun Minimal | 30.0/30.0 (b=5) | 775.0 | < 0.0001 | 0.0001 | 1.0000 | +0.722 | 0.861 | Large |
+| Windows 11 | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Full | 26.6/19.7 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W3 | PicoClaw vs OpenClaw Minimal | 26.6/30.0 (b=3) | 114.0 | < 0.0001 | 0.0001 | 1.0000 | -0.747 | 0.127 | Large |
+| Windows 11 | Regime B (Warm Cache) | W3 | OpenClaw Minimal vs OpenClaw Full | 30.0/19.7 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W3 | PicoClaw vs PythonNative | 26.6/30.0 (b=3) | 267.0 | 0.2642 | 0.3741 | 1.0000 | -0.407 | 0.297 | Medium |
+| Windows 11 | Regime B (Warm Cache) | W3 | PicoClaw vs Bun Minimal | 26.6/30.0 (b=5) | 485.0 | 1.0000 | 1.0000 | 1.0000 | +0.078 | 0.539 | Negligible |
+| Windows 11 | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Full | 21.3/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W4 | PicoClaw vs OpenClaw Minimal | 21.3/14.0 (b=5) | 8.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.982 | 0.009 | Large |
+| Windows 11 | Regime B (Warm Cache) | W4 | OpenClaw Minimal vs OpenClaw Full | 14.0/30.0 (b=5) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W4 | PicoClaw vs PythonNative | 21.3/23.2 (b=3) | 4.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.991 | 0.004 | Large |
+| Windows 11 | Regime B (Warm Cache) | W4 | PicoClaw vs Bun Minimal | 21.3/18.7 (b=3) | 7.0 | < 0.0001 | < 0.0001 | 1.0000 | -0.984 | 0.008 | Large |
+| Windows 11 | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Full | 30.0/18.5 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 900.0 | < 0.0001 | < 0.0001 | 1.0000 | +1.000 | 1.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W5 | OpenClaw Minimal vs OpenClaw Full | 30.0/18.5 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows 11 | Regime B (Warm Cache) | W5 | PicoClaw vs Bun Minimal | 30.0/19.3 (b=3) | 519.0 | 1.0000 | 1.0000 | 1.0000 | +0.153 | 0.577 | Small |
+| Windows Intel iGPU | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Full | 25.3/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows Intel iGPU | Regime A (Cold Prefill) | W2 | PicoClaw vs OpenClaw Minimal | 25.3/28.1 (b=3) | 441.0 | 1.0000 | 1.0000 | 1.0000 | -0.020 | 0.490 | Negligible |
+| Windows Intel iGPU | Regime A (Cold Prefill) | W2 | OpenClaw Minimal vs OpenClaw Full | 28.1/30.0 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows Intel iGPU | Regime A (Cold Prefill) | W2 | PicoClaw vs PythonNative | 25.3/23.7 (b=3) | 456.0 | 1.0000 | 1.0000 | 1.0000 | +0.013 | 0.507 | Negligible |
+| Windows Intel iGPU | Regime A (Cold Prefill) | W2 | PicoClaw vs Bun Minimal | 25.3/30.0 (b=3) | 406.0 | 1.0000 | 1.0000 | 1.0000 | -0.098 | 0.451 | Negligible |
+| Windows Intel iGPU | Regime A (Cold Prefill) | W5 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 871.0 | < 0.0001 | < 0.0001 | 1.0000 | +0.936 | 0.968 | Large |
+| Windows Intel iGPU | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Full | 30.0/26.2 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows Intel iGPU | Regime B (Warm Cache) | W2 | PicoClaw vs OpenClaw Minimal | 30.0/30.0 (b=3) | 826.0 | < 0.0001 | < 0.0001 | 1.0000 | +0.836 | 0.918 | Large |
+| Windows Intel iGPU | Regime B (Warm Cache) | W2 | OpenClaw Minimal vs OpenClaw Full | 30.0/26.2 (b=3) | 0.0 | < 0.0001 | < 0.0001 | 1.0000 | -1.000 | 0.000 | Large |
+| Windows Intel iGPU | Regime B (Warm Cache) | W2 | PicoClaw vs PythonNative | 30.0/30.0 (b=3) | 405.0 | 1.0000 | 1.0000 | 1.0000 | -0.100 | 0.450 | Negligible |
+| Windows Intel iGPU | Regime B (Warm Cache) | W2 | PicoClaw vs Bun Minimal | 30.0/28.1 (b=3) | 422.0 | 1.0000 | 1.0000 | 1.0000 | -0.062 | 0.469 | Negligible |
+| Windows Intel iGPU | Regime B (Warm Cache) | W5 | PicoClaw vs OpenClaw Minimal | 22.6/30.0 (b=3) | 872.0 | < 0.0001 | < 0.0001 | 1.0000 | +0.938 | 0.969 | Large |
 
-> **Table 2 Methodological Notes on Statistical Inference, $r_1$ Variance Adjustment, and W5 Exclusion:**
-> - **Positive-Autocorrelation Variance Adjustment (M4):** Standard Mann-Whitney $U$ assumes i.i.d. observations ($n=30$). For cells exhibiting positive lag-1 autocorrelation ($r_1 > 0$), effective sample size $n_{\text{eff}} = n(1-r_1)/(1+r_1)$ is used to inflate the asymptotic variance of $U$ by $\text{VIF} = [(n_{\text{eff},1}+n_{\text{eff},2}+1)/(n_{\text{eff},1} n_{\text{eff},2})] / [(n_1+n_2+1)/(n_1 n_2)]$ (for $r_1 \le 0$, $n_{\text{eff}} = n$ is retained conservatively). Across 146 contrasts, **99** are significant under standard Holm-Bonferroni and **93** remain significant under $r_1$-corrected Holm-Bonferroni; **6** contrast(s) marked `(NS*)` lose significance after accounting for positive autocorrelation.
-> - **Workload W5 Segregation (M1):** `python_native` (LangChain Core) in W5 is excluded from all pairwise latency/performance contrasts in Table 2 due to schema validation failure and confounded prompt truncation (see Table 8 and `w5_token_and_schema_audit.csv`).
-> - **Multiple Testing Correction:** Family-wise error rate across all pairwise hypothesis tests is controlled via the Holm-Bonferroni step-down procedure (Holm 1979) applied separately to standard and $r_1$-adjusted $p$-values.
+> **Table 2 Methodological Notes on Statistical Inference, Serial Dependence, and W5 Exclusion:**
+> - **Serial Dependence & Primary Inference via Contiguous Block Permutation:** Standard Mann-Whitney $U$ assumes i.i.d. observations ($n=30$). Contiguous block permutation (`block_permutation_mwu`, $B=5000$) with adaptive block length $b \in \{3, 5, 8, 12\}$ determined by $\max(|r_1|)$ serves as the **primary two-sample inference procedure**, preserving serial dependence without parametric distribution assumptions. Across 146 contrasts, **0** remain significant under Holm-Bonferroni adjusted block permutation.
+> - **First-Order $r_1$-VIF Variance Adjustment as Sensitivity Analysis Only:** Effective sample size $n_{\text{eff}} = n(1-r_1)/(1+r_1)$ is reported solely as sensitivity analysis. Under AR(1) simulation with $n=30$, $n_{\text{eff}}$ does not achieve exact 5% Type I error control (retaining ~8.2% false positives at $r_1=+0.4$ and ~12.7% at $r_1=+0.7$, while shrinking to ~0% for $r_1 < 0$). Under $r_1$-VIF Holm-Bonferroni, **93** contrasts remain significant and **6** contrast(s) marked `(NS*)` lose nominal significance.
+> - **Workload W5 Segregation:** `python_native` (LangChain Core) in W5 is excluded from all pairwise latency/performance contrasts in Table 2 due to schema validation failure and confounded prompt truncation (see Table 8 and `w5_token_and_schema_audit.csv`).
+> - **Multiple Testing Control:** Family-wise error rate across all pairwise hypothesis tests is controlled via the Holm-Bonferroni step-down procedure applied separately to standard, $r_1$-VIF, and block-permutation $p$-values.
 
 
 >>> FIM DO ARQUIVO: audit_export/tables/table2_statistical_tests.md <<<
@@ -281,26 +283,26 @@ Tamanho Máximo do Chunk: <= 150 KB
 
 | Platform | Regime | Catalog Condition | Prompt Tokens | Median Latency (ms) [95% CI] | Speedup vs 54-Tool Full | Speedup vs 15-Tool Minimal | Token Reduction |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Full (54 tools static) | 7091 | 18468.46 [18464.22, 18476.83] | 1.00x | 0.29x | 0.0% (Baseline) |
-| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Minimal (15 tools static) | 2177 | 5324.84 [5317.16, 5348.39] | 3.47x | 1.00x | -69.3% |
-| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 2537.07 [2522.85, 2540.24] | 7.28x | 2.10x | -87.1% |
-| macOS ARM64 (M4) | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 2568.31 [2561.18, 2578.78] | 7.19x | 2.07x | -87.1% |
-| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Full (54 tools static) | 7091 | 971.45 [959.08, 982.65] | 1.00x | 0.84x | 0.0% (Baseline) |
-| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Minimal (15 tools static) | 2177 | 819.37 [813.60, 831.71] | 1.19x | 1.00x | -69.3% |
-| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 767.86 [756.62, 772.89] | 1.27x | 1.07x | -87.1% |
-| macOS ARM64 (M4) | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 751.05 [743.25, 759.51] | 1.29x | 1.09x | -87.1% |
-| Linux x86_64 | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 1516.48 [1505.32, 1535.32] | 5.16x | 1.79x | -87.1% |
-| Linux x86_64 | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 1483.55 [1468.16, 1496.08] | 5.28x | 1.83x | -87.1% |
-| Linux x86_64 | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 972.08 [954.00, 982.73] | 2.71x | 1.31x | -87.1% |
-| Linux x86_64 | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 911.69 [907.03, 930.19] | 2.89x | 1.40x | -87.1% |
-| Windows 11 NVIDIA | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 1700.12 [1683.97, 1728.18] | 4.64x | 1.71x | -87.1% |
-| Windows 11 NVIDIA | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 1656.47 [1631.61, 1680.57] | 4.77x | 1.75x | -87.1% |
-| Windows 11 NVIDIA | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 1263.13 [1242.51, 1274.96] | 2.79x | 1.26x | -87.1% |
-| Windows 11 NVIDIA | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 1217.15 [1208.85, 1224.19] | 2.90x | 1.31x | -87.1% |
-| Windows Intel iGPU | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 22754.52 [22614.32, 22978.52] | 9.96x | 2.35x | -87.1% |
-| Windows Intel iGPU | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 22850.07 [22624.09, 23045.96] | 9.92x | 2.34x | -87.1% |
-| Windows Intel iGPU | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 4006.80 [3998.94, 4037.60] | 2.95x | 1.22x | -87.1% |
-| Windows Intel iGPU | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 3966.00 [3946.33, 3982.04] | 2.98x | 1.23x | -87.1% |
+| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Full (54 tools static) | 7091 | 18468.46 [18464.59, 18477.71] | 1.00x | 0.29x | 0.0% (Baseline) |
+| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Minimal (15 tools static) | 2177 | 5324.84 [5317.52, 5347.40] | 3.47x | 1.00x | -69.3% |
+| macOS ARM64 (M4) | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 2537.07 [2522.98, 2539.66] | 7.28x | 2.10x | -87.1% |
+| macOS ARM64 (M4) | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 2568.31 [2560.66, 2578.39] | 7.19x | 2.07x | -87.1% |
+| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Full (54 tools static) | 7091 | 971.45 [959.21, 982.39] | 1.00x | 0.84x | 0.0% (Baseline) |
+| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Minimal (15 tools static) | 2177 | 819.37 [817.40, 831.35] | 1.19x | 1.00x | -69.3% |
+| macOS ARM64 (M4) | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 767.86 [756.31, 771.19] | 1.27x | 1.07x | -87.1% |
+| macOS ARM64 (M4) | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 751.05 [743.25, 759.09] | 1.29x | 1.09x | -87.1% |
+| Linux x86_64 | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 1516.48 [1506.34, 1535.30] | 5.16x | 1.79x | -87.1% |
+| Linux x86_64 | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 1483.55 [1470.47, 1495.57] | 5.28x | 1.83x | -87.1% |
+| Linux x86_64 | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 972.08 [956.30, 984.56] | 2.71x | 1.31x | -87.1% |
+| Linux x86_64 | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 911.69 [907.31, 931.06] | 2.89x | 1.40x | -87.1% |
+| Windows 11 NVIDIA | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 1700.12 [1684.55, 1722.25] | 4.64x | 1.71x | -87.1% |
+| Windows 11 NVIDIA | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 1656.47 [1627.20, 1680.76] | 4.77x | 1.75x | -87.1% |
+| Windows 11 NVIDIA | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 1263.13 [1249.40, 1274.92] | 2.79x | 1.26x | -87.1% |
+| Windows 11 NVIDIA | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 1217.15 [1208.85, 1221.97] | 2.90x | 1.31x | -87.1% |
+| Windows Intel iGPU | Regime A (Cold Prefill) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 22754.52 [22641.06, 22973.78] | 9.96x | 2.35x | -87.1% |
+| Windows Intel iGPU | Regime A (Cold Prefill) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 22850.07 [22619.67, 23036.46] | 9.92x | 2.34x | -87.1% |
+| Windows Intel iGPU | Regime B (Warm Cache) | OpenClaw Tool-RAG (Top-5 dynamic) | 917 | 4006.80 [3995.33, 4037.07] | 2.95x | 1.22x | -87.1% |
+| Windows Intel iGPU | Regime B (Warm Cache) | PicoClaw Tool-RAG (Top-5 dynamic) | 917 | 3966.00 [3944.61, 3982.38] | 2.98x | 1.23x | -87.1% |
 
 > **Table 5 Methodological Notes (Option B Exploratory x86_64 Qualification & Minimal-Catalog Contrast):**
 > - **Baseline Normalization & Non-Causal Qualification on x86_64:** On **macOS ARM64**, both `Speedup vs 54-Tool Full` and `Speedup vs 15-Tool Minimal` reference controlled same-session unmitigated baselines measured inside the unified session (`tool_rag_mitigation_trials.jsonl`). On **Linux x86_64, Windows 11 NVIDIA, and Windows Intel Graphics**, the pruned Tool-RAG arms are referenced against each node's **primary-campaign baseline** (`raw_trials.jsonl` for Regime A; `warm_cache_trials.jsonl` for Regime B) rather than a same-session baseline. Accordingly, all x86_64 Tool-RAG speedup ratios are reported as **exploratory cross-session reference ratios** (never described as internal baselines) and **support no causal claims** regarding Tool-RAG speedup on x86_64.
@@ -318,15 +320,15 @@ Tamanho Máximo do Chunk: <= 150 KB
 
 | Platform | Transport Protocol | Median IPC Dispatch (ms) [IQR] | 95% Bootstrap CI | Overhead vs In-Process |
 | :--- | :--- | :--- | :--- | :--- |
-| macOS ARM64 (M4) | Native In-Process Dispatch | 1.384 [0.360] | [1.353, 1.460] | 1.00x |
-| macOS ARM64 (M4) | Standard I/O JSON-RPC Pipes | 1.275 [0.799] | [1.237, 1.350] | 0.92x |
+| macOS ARM64 (M4) | Native In-Process Dispatch | 1.384 [0.360] | [1.354, 1.442] | 1.00x |
+| macOS ARM64 (M4) | Standard I/O JSON-RPC Pipes | 1.275 [0.799] | [1.238, 1.331] | 0.92x |
 | macOS ARM64 (M4) | Loopback HTTP REST Sockets | 2.389 [0.614] | [2.342, 2.432] | 1.73x |
-| Linux x86_64 | Native In-Process Dispatch | 1.071 [0.038] | [1.066, 1.080] | 1.00x |
-| Linux x86_64 | Standard I/O JSON-RPC Pipes | 1.103 [0.320] | [1.097, 1.112] | 1.03x |
-| Linux x86_64 | Loopback HTTP REST Sockets | 1.965 [0.095] | [1.944, 1.984] | 1.83x |
-| Windows 11 NVIDIA | Native In-Process Dispatch | 1.883 [0.138] | [1.860, 1.918] | 1.00x |
-| Windows 11 NVIDIA | Standard I/O JSON-RPC Pipes | 1.989 [0.208] | [1.953, 2.085] | 1.06x |
-| Windows 11 NVIDIA | Loopback HTTP REST Sockets | 26.632 [23.945] | [23.307, 27.351] | 14.14x |
+| Linux x86_64 | Native In-Process Dispatch | 1.071 [0.038] | [1.067, 1.079] | 1.00x |
+| Linux x86_64 | Standard I/O JSON-RPC Pipes | 1.103 [0.320] | [1.097, 1.111] | 1.03x |
+| Linux x86_64 | Loopback HTTP REST Sockets | 1.965 [0.095] | [1.944, 1.976] | 1.83x |
+| Windows 11 NVIDIA | Native In-Process Dispatch | 1.883 [0.138] | [1.856, 1.911] | 1.00x |
+| Windows 11 NVIDIA | Standard I/O JSON-RPC Pipes | 1.989 [0.208] | [1.953, 2.086] | 1.06x |
+| Windows 11 NVIDIA | Loopback HTTP REST Sockets | 26.632 [23.945] | [23.374, 27.351] | 14.14x |
 
 > **Table 6 Notes:** Evaluates live MCP tool transport mechanisms. Evaluated across the 3 primary physical testbed nodes (macOS M4, Linux x86_64, Windows 11 NVIDIA). Windows Intel iGPU was dedicated to W2 and W5 workloads.
 
@@ -341,108 +343,109 @@ Tamanho Máximo do Chunk: <= 150 KB
 
 | Platform OS | Regime | Workload | Runtime Contrast (vs PicoClaw Go) | Session 1 Δ (ms) [IQR] | Session 2 Δ (ms) [IQR] | Diff $\Delta_2 - \Delta_1$ (ms) | 90% MBB CI ($b=3$) (ms) | $p_{\text{TOST}}$ | $p_{\text{TOST, adj}}$ (Holm) | Equivalence Status (Lakens 2017) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| macOS ARM64 (M4) | Regime B (Warm) | W1 | Node Minimal vs PicoClaw | 15.57 [0.75] | 15.37 [0.80] | -0.20 | [-0.42, +0.03] | < 0.0001 | < 0.0001 | Equivalent |
+| macOS ARM64 (M4) | Regime B (Warm) | W1 | Node Minimal vs PicoClaw | 15.57 [0.75] | 15.37 [0.80] | -0.20 | [-0.44, +0.00] | < 0.0001 | < 0.0001 | Equivalent |
 | macOS ARM64 (M4) | Regime B (Warm) | W1 | PythonNative vs PicoClaw | 6.86 [0.54] | 6.74 [0.76] | -0.12 | [-0.23, +0.24] | < 0.0001 | < 0.0001 | Equivalent |
-| macOS ARM64 (M4) | Regime B (Warm) | W2 | Node Minimal vs PicoClaw | 14.80 [0.82] | 14.89 [0.70] | +0.09 | [-0.25, +0.37] | < 0.0001 | < 0.0001 | Equivalent |
-| macOS ARM64 (M4) | Regime B (Warm) | W2 | PythonNative vs PicoClaw | 6.42 [0.64] | 6.33 [0.76] | -0.09 | [-0.35, +0.19] | < 0.0001 | < 0.0001 | Equivalent |
-| macOS ARM64 (M4) | Regime B (Warm) | W3 | Node Minimal vs PicoClaw | 0.35 [2.50] | 0.78 [3.81] | +0.43 | [+0.06, +1.34] | < 0.0001 | < 0.0001 | Equivalent |
-| macOS ARM64 (M4) | Regime B (Warm) | W3 | PythonNative vs PicoClaw | -13.17 [2.89] | -12.92 [1.79] | +0.25 | [-0.54, +0.83] | < 0.0001 | < 0.0001 | Equivalent |
-| macOS ARM64 (M4) | Regime B (Warm) | W4 | Node Minimal vs PicoClaw | 15.00 [2.22] | 14.97 [3.70] | -0.03 | [-1.13, +1.04] | < 0.0001 | < 0.0001 | Equivalent |
-| macOS ARM64 (M4) | Regime B (Warm) | W4 | PythonNative vs PicoClaw | 3.98 [3.18] | 3.57 [3.87] | -0.41 | [-1.72, +0.77] | < 0.0001 | < 0.0001 | Equivalent |
-| macOS ARM64 (M4) | Regime B (Warm) | W5 | Node Minimal vs PicoClaw | 15.29 [0.68] | 15.10 [0.86] | -0.19 | [-0.49, +0.04] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W1 | Node Minimal vs PicoClaw | 23.92 [2.03] | 23.65 [1.91] | -0.27 | [-1.24, +0.62] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W1 | Node Full vs PicoClaw | 29.33 [2.46] | 28.34 [1.94] | -0.99 | [-1.62, -0.31] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W1 | PythonNative vs PicoClaw | 9.67 [4.32] | 10.84 [4.11] | +1.17 | [-0.41, +2.45] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W1 | Bun Minimal vs PicoClaw | 0.52 [1.74] | 0.56 [1.70] | +0.04 | [-0.71, +0.49] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W2 | Node Minimal vs PicoClaw | 24.44 [1.79] | 23.09 [2.55] | -1.35 | [-2.23, -0.31] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W2 | Node Full vs PicoClaw | 28.58 [2.04] | 27.79 [2.53] | -0.79 | [-1.70, -0.21] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W2 | PythonNative vs PicoClaw | 9.93 [3.13] | 8.88 [3.25] | -1.05 | [-2.22, +0.06] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W2 | Bun Minimal vs PicoClaw | -0.24 [2.68] | -0.82 [3.37] | -0.58 | [-1.65, +0.75] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W3 | Node Minimal vs PicoClaw | 12.50 [4.80] | 11.35 [4.29] | -1.15 | [-2.32, +1.73] | 0.0019 | 0.0475 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W3 | Node Full vs PicoClaw | 17.01 [3.60] | 17.35 [4.21] | +0.34 | [-1.14, +1.78] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W3 | PythonNative vs PicoClaw | -10.42 [8.41] | -10.07 [6.28] | +0.35 | [-2.70, +3.34] | 0.0088 | 0.1936 | Inconclusive |
-| Linux x86_64 | Regime A (Cold) | W3 | Bun Minimal vs PicoClaw | -16.54 [5.76] | -15.78 [3.99] | +0.76 | [-0.69, +3.00] | 0.0001 | 0.0031 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W4 | Node Minimal vs PicoClaw | 22.40 [7.48] | 24.25 [8.74] | +1.86 | [-1.34, +6.09] | 0.1244 | 1.0000 | Inconclusive |
-| Linux x86_64 | Regime A (Cold) | W4 | Node Full vs PicoClaw | 76.39 [8.46] | 73.19 [8.52] | -3.20 | [-5.29, -0.43] | 0.0654 | 1.0000 | Inconclusive |
-| Linux x86_64 | Regime A (Cold) | W4 | PythonNative vs PicoClaw | 1.54 [6.58] | 3.77 [8.39] | +2.22 | [+0.81, +6.04] | 0.1568 | 1.0000 | Inconclusive |
-| Linux x86_64 | Regime A (Cold) | W4 | Bun Minimal vs PicoClaw | -16.11 [8.26] | -13.78 [6.54] | +2.33 | [-2.23, +5.76] | 0.0900 | 1.0000 | Inconclusive |
-| Linux x86_64 | Regime A (Cold) | W5 | Node Minimal vs PicoClaw | 23.81 [1.99] | 23.24 [1.26] | -0.57 | [-1.01, -0.02] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W5 | Node Full vs PicoClaw | 29.52 [1.53] | 28.93 [2.15] | -0.59 | [-1.16, +0.02] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime A (Cold) | W5 | Bun Minimal vs PicoClaw | 0.74 [1.14] | 0.71 [1.58] | -0.03 | [-0.29, +0.49] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W1 | Node Minimal vs PicoClaw | 22.83 [1.56] | 22.96 [1.66] | +0.13 | [-0.74, +0.96] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W1 | Node Full vs PicoClaw | 28.46 [1.81] | 28.61 [1.62] | +0.15 | [-0.64, +0.82] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W1 | PythonNative vs PicoClaw | 10.67 [4.25] | 10.46 [2.29] | -0.21 | [-1.97, +1.75] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W1 | Bun Minimal vs PicoClaw | -0.26 [1.48] | 0.51 [1.46] | +0.77 | [-0.14, +1.25] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W2 | Node Minimal vs PicoClaw | 22.88 [1.60] | 23.12 [1.80] | +0.24 | [-0.45, +0.73] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W2 | Node Full vs PicoClaw | 27.40 [1.29] | 27.97 [1.73] | +0.56 | [-0.11, +0.96] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W2 | PythonNative vs PicoClaw | 10.74 [3.01] | 11.45 [3.50] | +0.71 | [-0.92, +1.40] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W2 | Bun Minimal vs PicoClaw | -0.39 [1.44] | 0.11 [1.42] | +0.50 | [-0.48, +1.08] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W3 | Node Minimal vs PicoClaw | 11.01 [3.89] | 11.26 [4.31] | +0.25 | [-1.41, +2.44] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W3 | Node Full vs PicoClaw | 15.12 [3.45] | 16.96 [3.93] | +1.83 | [-0.43, +2.89] | 0.0001 | 0.0031 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W3 | PythonNative vs PicoClaw | -12.43 [4.19] | -12.57 [3.62] | -0.13 | [-1.17, +1.71] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W3 | Bun Minimal vs PicoClaw | -15.44 [5.18] | -16.33 [4.16] | -0.89 | [-2.77, +1.36] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W4 | Node Minimal vs PicoClaw | 22.57 [6.68] | 21.73 [9.81] | -0.83 | [-5.17, +2.58] | 0.0569 | 1.0000 | Inconclusive |
-| Linux x86_64 | Regime B (Warm) | W4 | Node Full vs PicoClaw | 72.90 [6.90] | 75.30 [7.37] | +2.40 | [-1.18, +5.11] | 0.0577 | 1.0000 | Inconclusive |
-| Linux x86_64 | Regime B (Warm) | W4 | PythonNative vs PicoClaw | 0.91 [7.39] | -2.52 [6.70] | -3.43 | [-7.61, -1.05] | 0.2694 | 1.0000 | Inconclusive |
-| Linux x86_64 | Regime B (Warm) | W4 | Bun Minimal vs PicoClaw | -16.65 [5.27] | -19.44 [4.37] | -2.79 | [-4.13, -0.37] | 0.0046 | 0.1058 | Inconclusive |
-| Linux x86_64 | Regime B (Warm) | W5 | Node Minimal vs PicoClaw | 23.10 [1.48] | 23.34 [1.91] | +0.23 | [-0.35, +0.73] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W5 | Node Full vs PicoClaw | 28.25 [1.73] | 28.54 [2.11] | +0.29 | [-0.07, +0.94] | < 0.0001 | < 0.0001 | Equivalent |
-| Linux x86_64 | Regime B (Warm) | W5 | Bun Minimal vs PicoClaw | 0.56 [0.96] | 0.68 [1.92] | +0.12 | [-0.44, +0.64] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W1 | Node Minimal vs PicoClaw | 27.90 [3.41] | 28.26 [5.00] | +0.35 | [-1.62, +1.68] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W1 | Node Full vs PicoClaw | 34.57 [3.30] | 34.28 [4.10] | -0.29 | [-1.76, +1.43] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W1 | PythonNative vs PicoClaw | 22.09 [18.42] | 14.38 [21.90] | -7.71 | [-13.67, +2.05] | 0.5539 | 1.0000 | Inconclusive |
-| Windows 11 NVIDIA | Regime A (Cold) | W1 | Bun Minimal vs PicoClaw | 4.05 [2.91] | 5.26 [4.82] | +1.22 | [-0.97, +2.28] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W2 | Node Minimal vs PicoClaw | 27.65 [5.05] | 29.56 [2.26] | +1.92 | [-0.14, +3.39] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W2 | Node Full vs PicoClaw | 35.30 [3.78] | 36.96 [1.85] | +1.66 | [+0.13, +2.43] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W2 | PythonNative vs PicoClaw | 13.86 [8.42] | 15.23 [17.64] | +1.37 | [-3.63, +8.09] | 0.1661 | 1.0000 | Inconclusive |
-| Windows 11 NVIDIA | Regime A (Cold) | W2 | Bun Minimal vs PicoClaw | 3.75 [4.58] | 5.47 [3.38] | +1.72 | [-0.57, +2.94] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W3 | Node Minimal vs PicoClaw | 25.09 [6.58] | 24.94 [5.63] | -0.15 | [-2.08, +2.07] | 0.0001 | 0.0031 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W3 | Node Full vs PicoClaw | 30.48 [5.28] | 32.02 [5.65] | +1.54 | [-0.38, +2.56] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W3 | PythonNative vs PicoClaw | 2.14 [12.30] | 5.59 [14.90] | +3.45 | [-1.45, +8.46] | 0.3577 | 1.0000 | Inconclusive |
-| Windows 11 NVIDIA | Regime A (Cold) | W3 | Bun Minimal vs PicoClaw | -11.27 [6.49] | -9.79 [4.20] | +1.48 | [-2.02, +2.58] | 0.0007 | 0.0189 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W4 | Node Minimal vs PicoClaw | 56.40 [9.98] | 56.15 [11.01] | -0.25 | [-4.76, +2.70] | 0.0419 | 0.8380 | Inconclusive |
-| Windows 11 NVIDIA | Regime A (Cold) | W4 | Node Full vs PicoClaw | 151.39 [11.40] | 153.95 [14.19] | +2.56 | [-2.38, +7.66] | 0.2308 | 1.0000 | Inconclusive |
-| Windows 11 NVIDIA | Regime A (Cold) | W4 | PythonNative vs PicoClaw | 135.11 [37.63] | 150.29 [38.30] | +15.17 | [-3.85, +34.26] | 0.7806 | 1.0000 | Inconclusive |
-| Windows 11 NVIDIA | Regime A (Cold) | W4 | Bun Minimal vs PicoClaw | -2.59 [8.85] | -1.86 [10.93] | +0.74 | [-3.99, +3.64] | 0.0266 | 0.5586 | Inconclusive |
-| Windows 11 NVIDIA | Regime A (Cold) | W5 | Node Minimal vs PicoClaw | 26.96 [2.72] | 26.76 [3.24] | -0.20 | [-1.95, +0.95] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W5 | Node Full vs PicoClaw | 34.46 [3.62] | 34.83 [3.90] | +0.37 | [-1.17, +1.44] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime A (Cold) | W5 | Bun Minimal vs PicoClaw | 3.54 [3.56] | 3.98 [2.97] | +0.44 | [-1.05, +1.65] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W1 | Node Minimal vs PicoClaw | 27.91 [1.35] | 27.67 [1.42] | -0.23 | [-0.82, +0.20] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W1 | Node Full vs PicoClaw | 35.48 [1.76] | 34.74 [1.83] | -0.74 | [-1.31, +0.06] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W1 | PythonNative vs PicoClaw | 17.23 [9.86] | 19.31 [10.23] | +2.08 | [-1.18, +5.72] | 0.0769 | 1.0000 | Inconclusive |
-| Windows 11 NVIDIA | Regime B (Warm) | W1 | Bun Minimal vs PicoClaw | 3.88 [2.33] | 3.57 [2.53] | -0.31 | [-1.21, +1.04] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W2 | Node Minimal vs PicoClaw | 29.94 [1.31] | 30.00 [1.61] | +0.06 | [-0.59, +0.39] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W2 | Node Full vs PicoClaw | 36.51 [2.34] | 36.53 [2.32] | +0.02 | [-1.30, +0.60] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W2 | PythonNative vs PicoClaw | 19.54 [13.05] | 18.41 [13.74] | -1.13 | [-6.62, +2.87] | 0.1117 | 1.0000 | Inconclusive |
-| Windows 11 NVIDIA | Regime B (Warm) | W2 | Bun Minimal vs PicoClaw | 4.84 [2.53] | 4.89 [1.89] | +0.04 | [-0.58, +0.46] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W3 | Node Minimal vs PicoClaw | 22.41 [4.22] | 23.46 [2.22] | +1.04 | [-0.45, +2.62] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W3 | Node Full vs PicoClaw | 30.85 [3.45] | 29.71 [4.03] | -1.14 | [-1.68, +0.17] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W3 | PythonNative vs PicoClaw | 0.60 [11.45] | 0.56 [10.73] | -0.03 | [-6.27, +6.05] | 0.1425 | 1.0000 | Inconclusive |
-| Windows 11 NVIDIA | Regime B (Warm) | W3 | Bun Minimal vs PicoClaw | -12.31 [2.83] | -11.50 [3.79] | +0.81 | [-0.78, +1.84] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W4 | Node Minimal vs PicoClaw | 51.15 [5.43] | 51.41 [5.90] | +0.26 | [-1.95, +1.92] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W4 | Node Full vs PicoClaw | 128.24 [3.04] | 134.18 [5.43] | +5.94 | [+4.04, +6.86] | 0.7929 | 1.0000 | Inconclusive |
-| Windows 11 NVIDIA | Regime B (Warm) | W4 | PythonNative vs PicoClaw | 136.76 [28.46] | 149.11 [35.79] | +12.35 | [-2.41, +24.69] | 0.8185 | 1.0000 | Inconclusive |
-| Windows 11 NVIDIA | Regime B (Warm) | W4 | Bun Minimal vs PicoClaw | -2.67 [5.83] | -3.18 [4.48] | -0.51 | [-2.95, +1.33] | 0.0010 | 0.0260 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W5 | Node Minimal vs PicoClaw | 27.28 [2.08] | 27.40 [2.16] | +0.12 | [-0.91, +0.77] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W5 | Node Full vs PicoClaw | 34.56 [1.37] | 34.14 [1.76] | -0.41 | [-1.08, +0.04] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows 11 NVIDIA | Regime B (Warm) | W5 | Bun Minimal vs PicoClaw | 3.14 [1.92] | 3.60 [2.30] | +0.45 | [-0.77, +1.22] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows Intel iGPU | Regime A (Cold) | W2 | Node Minimal vs PicoClaw | 43.12 [4.01] | 42.48 [6.08] | -0.64 | [-1.73, +1.66] | 0.0003 | 0.0084 | Equivalent |
-| Windows Intel iGPU | Regime A (Cold) | W2 | Node Full vs PicoClaw | 54.37 [3.28] | 54.94 [6.01] | +0.57 | [-1.82, +1.45] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows Intel iGPU | Regime A (Cold) | W2 | PythonNative vs PicoClaw | 30.78 [15.02] | 27.40 [14.89] | -3.38 | [-10.53, +4.48] | 0.3750 | 1.0000 | Inconclusive |
-| Windows Intel iGPU | Regime A (Cold) | W2 | Bun Minimal vs PicoClaw | 9.55 [2.40] | 9.72 [4.85] | +0.17 | [-0.89, +1.65] | 0.0032 | 0.0768 | Inconclusive |
-| Windows Intel iGPU | Regime A (Cold) | W5 | Node Minimal vs PicoClaw | 39.77 [2.40] | 39.44 [2.79] | -0.32 | [-1.09, +0.57] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows Intel iGPU | Regime B (Warm) | W2 | Node Minimal vs PicoClaw | 42.60 [2.34] | 43.45 [2.80] | +0.85 | [-0.52, +1.32] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows Intel iGPU | Regime B (Warm) | W2 | Node Full vs PicoClaw | 54.74 [3.17] | 54.98 [2.40] | +0.24 | [-0.85, +1.57] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows Intel iGPU | Regime B (Warm) | W2 | PythonNative vs PicoClaw | 29.02 [8.26] | 32.56 [8.79] | +3.54 | [+0.90, +7.30] | 0.2985 | 1.0000 | Inconclusive |
-| Windows Intel iGPU | Regime B (Warm) | W2 | Bun Minimal vs PicoClaw | 8.99 [2.21] | 9.46 [1.35] | +0.47 | [-0.22, +1.02] | < 0.0001 | < 0.0001 | Equivalent |
-| Windows Intel iGPU | Regime B (Warm) | W5 | Node Minimal vs PicoClaw | 39.77 [2.06] | 40.60 [2.04] | +0.83 | [-0.33, +1.59] | < 0.0001 | < 0.0001 | Equivalent |
+| macOS ARM64 (M4) | Regime B (Warm) | W2 | Node Minimal vs PicoClaw | 14.80 [0.82] | 14.89 [0.70] | +0.09 | [-0.26, +0.39] | < 0.0001 | < 0.0001 | Equivalent |
+| macOS ARM64 (M4) | Regime B (Warm) | W2 | PythonNative vs PicoClaw | 6.42 [0.64] | 6.33 [0.76] | -0.09 | [-0.36, +0.19] | < 0.0001 | < 0.0001 | Equivalent |
+| macOS ARM64 (M4) | Regime B (Warm) | W3 | Node Minimal vs PicoClaw | 0.35 [2.50] | 0.78 [3.81] | +0.43 | [-0.34, +1.48] | < 0.0001 | < 0.0001 | Equivalent |
+| macOS ARM64 (M4) | Regime B (Warm) | W3 | PythonNative vs PicoClaw | -13.17 [2.89] | -12.92 [1.79] | +0.25 | [-0.45, +0.84] | < 0.0001 | < 0.0001 | Equivalent |
+| macOS ARM64 (M4) | Regime B (Warm) | W4 | Node Minimal vs PicoClaw | 15.00 [2.22] | 14.97 [3.70] | -0.03 | [-1.05, +0.91] | < 0.0001 | < 0.0001 | Equivalent |
+| macOS ARM64 (M4) | Regime B (Warm) | W4 | PythonNative vs PicoClaw | 3.98 [3.18] | 3.57 [3.87] | -0.41 | [-1.67, +0.61] | < 0.0001 | < 0.0001 | Equivalent |
+| macOS ARM64 (M4) | Regime B (Warm) | W5 | Node Minimal vs PicoClaw | 15.29 [0.68] | 15.10 [0.86] | -0.19 | [-0.46, +0.01] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W1 | Node Minimal vs PicoClaw | 23.92 [2.03] | 23.65 [1.91] | -0.27 | [-0.90, +0.72] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W1 | Node Full vs PicoClaw | 29.33 [2.46] | 28.34 [1.94] | -0.99 | [-1.86, -0.26] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W1 | PythonNative vs PicoClaw | 9.67 [4.32] | 10.84 [4.11] | +1.17 | [-0.64, +2.62] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W1 | Bun Minimal vs PicoClaw | 0.52 [1.74] | 0.56 [1.70] | +0.04 | [-0.79, +0.51] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W2 | Node Minimal vs PicoClaw | 24.44 [1.79] | 23.09 [2.55] | -1.35 | [-2.23, -0.26] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W2 | Node Full vs PicoClaw | 28.58 [2.04] | 27.79 [2.53] | -0.79 | [-1.79, -0.24] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W2 | PythonNative vs PicoClaw | 9.93 [3.13] | 8.88 [3.25] | -1.05 | [-2.74, +0.11] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W2 | Bun Minimal vs PicoClaw | -0.24 [2.68] | -0.82 [3.37] | -0.58 | [-1.94, +0.66] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W3 | Node Minimal vs PicoClaw | 12.50 [4.80] | 11.35 [4.29] | -1.15 | [-2.36, +1.57] | 0.0100 | 0.2300 | Inconclusive |
+| Linux x86_64 | Regime A (Cold) | W3 | Node Full vs PicoClaw | 17.01 [3.60] | 17.35 [4.21] | +0.34 | [-1.53, +1.76] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W3 | PythonNative vs PicoClaw | -10.42 [8.41] | -10.07 [6.28] | +0.35 | [-2.61, +3.53] | 0.0100 | 0.2300 | Inconclusive |
+| Linux x86_64 | Regime A (Cold) | W3 | Bun Minimal vs PicoClaw | -16.54 [5.76] | -15.78 [3.99] | +0.76 | [-0.73, +3.36] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W4 | Node Minimal vs PicoClaw | 22.40 [7.48] | 24.25 [8.74] | +1.86 | [-1.17, +5.96] | 0.1400 | 1.0000 | Inconclusive |
+| Linux x86_64 | Regime A (Cold) | W4 | Node Full vs PicoClaw | 76.39 [8.46] | 73.19 [8.52] | -3.20 | [-5.36, +0.23] | 0.0800 | 1.0000 | Inconclusive |
+| Linux x86_64 | Regime A (Cold) | W4 | PythonNative vs PicoClaw | 1.54 [6.58] | 3.77 [8.39] | +2.22 | [+0.99, +6.04] | 0.1600 | 1.0000 | Inconclusive |
+| Linux x86_64 | Regime A (Cold) | W4 | Bun Minimal vs PicoClaw | -16.11 [8.26] | -13.78 [6.54] | +2.33 | [-2.20, +6.31] | 0.1300 | 1.0000 | Inconclusive |
+| Linux x86_64 | Regime A (Cold) | W5 | Node Minimal vs PicoClaw | 23.81 [1.99] | 23.24 [1.26] | -0.57 | [-0.89, -0.02] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W5 | Node Full vs PicoClaw | 29.52 [1.53] | 28.93 [2.15] | -0.59 | [-1.07, -0.04] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime A (Cold) | W5 | Bun Minimal vs PicoClaw | 0.74 [1.14] | 0.71 [1.58] | -0.03 | [-0.27, +0.58] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W1 | Node Minimal vs PicoClaw | 22.83 [1.56] | 22.96 [1.66] | +0.13 | [-0.71, +1.03] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W1 | Node Full vs PicoClaw | 28.46 [1.81] | 28.61 [1.62] | +0.15 | [-0.68, +0.77] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W1 | PythonNative vs PicoClaw | 10.67 [4.25] | 10.46 [2.29] | -0.21 | [-2.06, +1.22] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W1 | Bun Minimal vs PicoClaw | -0.26 [1.48] | 0.51 [1.46] | +0.77 | [-0.17, +1.32] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W2 | Node Minimal vs PicoClaw | 22.88 [1.60] | 23.12 [1.80] | +0.24 | [-0.38, +0.84] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W2 | Node Full vs PicoClaw | 27.40 [1.29] | 27.97 [1.73] | +0.56 | [-0.04, +0.94] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W2 | PythonNative vs PicoClaw | 10.74 [3.01] | 11.45 [3.50] | +0.71 | [-0.59, +1.52] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W2 | Bun Minimal vs PicoClaw | -0.39 [1.44] | 0.11 [1.42] | +0.50 | [-0.48, +1.17] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W3 | Node Minimal vs PicoClaw | 11.01 [3.89] | 11.26 [4.31] | +0.25 | [-1.74, +2.55] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W3 | Node Full vs PicoClaw | 15.12 [3.45] | 16.96 [3.93] | +1.83 | [-0.37, +2.71] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W3 | PythonNative vs PicoClaw | -12.43 [4.19] | -12.57 [3.62] | -0.13 | [-1.21, +1.90] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W3 | Bun Minimal vs PicoClaw | -15.44 [5.18] | -16.33 [4.16] | -0.89 | [-3.21, +1.87] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W4 | Node Minimal vs PicoClaw | 22.57 [6.68] | 21.73 [9.81] | -0.83 | [-6.24, +3.48] | 0.1000 | 1.0000 | Inconclusive |
+| Linux x86_64 | Regime B (Warm) | W4 | Node Full vs PicoClaw | 72.90 [6.90] | 75.30 [7.37] | +2.40 | [-1.66, +5.02] | 0.0500 | 0.9500 | Inconclusive |
+| Linux x86_64 | Regime B (Warm) | W4 | PythonNative vs PicoClaw | 0.91 [7.39] | -2.52 [6.70] | -3.43 | [-7.88, -0.88] | 0.3400 | 1.0000 | Inconclusive |
+| Linux x86_64 | Regime B (Warm) | W4 | Bun Minimal vs PicoClaw | -16.65 [5.27] | -19.44 [4.37] | -2.79 | [-4.32, -1.21] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W5 | Node Minimal vs PicoClaw | 23.10 [1.48] | 23.34 [1.91] | +0.23 | [-0.29, +0.73] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W5 | Node Full vs PicoClaw | 28.25 [1.73] | 28.54 [2.11] | +0.29 | [-0.04, +0.72] | < 0.0001 | < 0.0001 | Equivalent |
+| Linux x86_64 | Regime B (Warm) | W5 | Bun Minimal vs PicoClaw | 0.56 [0.96] | 0.68 [1.92] | +0.12 | [-0.29, +0.62] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W1 | Node Minimal vs PicoClaw | 27.90 [3.41] | 28.26 [5.00] | +0.35 | [-1.70, +1.72] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W1 | Node Full vs PicoClaw | 34.57 [3.30] | 34.28 [4.10] | -0.29 | [-1.88, +1.51] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W1 | PythonNative vs PicoClaw | 22.09 [18.42] | 14.38 [21.90] | -7.71 | [-14.03, +1.97] | 0.6000 | 1.0000 | Inconclusive |
+| Windows 11 NVIDIA | Regime A (Cold) | W1 | Bun Minimal vs PicoClaw | 4.05 [2.91] | 5.26 [4.82] | +1.22 | [-1.38, +2.32] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W2 | Node Minimal vs PicoClaw | 27.65 [5.05] | 29.56 [2.26] | +1.92 | [-0.24, +3.04] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W2 | Node Full vs PicoClaw | 35.30 [3.78] | 36.96 [1.85] | +1.66 | [+0.09, +2.50] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W2 | PythonNative vs PicoClaw | 13.86 [8.42] | 15.23 [17.64] | +1.37 | [-5.61, +8.26] | 0.1700 | 1.0000 | Inconclusive |
+| Windows 11 NVIDIA | Regime A (Cold) | W2 | Bun Minimal vs PicoClaw | 3.75 [4.58] | 5.47 [3.38] | +1.72 | [-0.70, +2.89] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W3 | Node Minimal vs PicoClaw | 25.09 [6.58] | 24.94 [5.63] | -0.15 | [-1.78, +2.27] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W3 | Node Full vs PicoClaw | 30.48 [5.28] | 32.02 [5.65] | +1.54 | [-1.16, +2.44] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W3 | PythonNative vs PicoClaw | 2.14 [12.30] | 5.59 [14.90] | +3.45 | [-3.37, +9.20] | 0.3100 | 1.0000 | Inconclusive |
+| Windows 11 NVIDIA | Regime A (Cold) | W3 | Bun Minimal vs PicoClaw | -11.27 [6.49] | -9.79 [4.20] | +1.48 | [-1.02, +2.81] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W4 | Node Minimal vs PicoClaw | 56.40 [9.98] | 56.15 [11.01] | -0.25 | [-4.84, +2.83] | 0.0400 | 0.8400 | Inconclusive |
+| Windows 11 NVIDIA | Regime A (Cold) | W4 | Node Full vs PicoClaw | 151.39 [11.40] | 153.95 [14.19] | +2.56 | [-3.04, +8.07] | 0.2000 | 1.0000 | Inconclusive |
+| Windows 11 NVIDIA | Regime A (Cold) | W4 | PythonNative vs PicoClaw | 135.11 [37.63] | 150.29 [38.30] | +15.17 | [-8.80, +31.22] | 0.7000 | 1.0000 | Inconclusive |
+| Windows 11 NVIDIA | Regime A (Cold) | W4 | Bun Minimal vs PicoClaw | -2.59 [8.85] | -1.86 [10.93] | +0.74 | [-3.88, +3.00] | 0.0400 | 0.8400 | Inconclusive |
+| Windows 11 NVIDIA | Regime A (Cold) | W5 | Node Minimal vs PicoClaw | 26.96 [2.72] | 26.76 [3.24] | -0.20 | [-1.93, +0.67] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W5 | Node Full vs PicoClaw | 34.46 [3.62] | 34.83 [3.90] | +0.37 | [-1.01, +1.24] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime A (Cold) | W5 | Bun Minimal vs PicoClaw | 3.54 [3.56] | 3.98 [2.97] | +0.44 | [-0.80, +1.64] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W1 | Node Minimal vs PicoClaw | 27.91 [1.35] | 27.67 [1.42] | -0.23 | [-0.92, +0.18] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W1 | Node Full vs PicoClaw | 35.48 [1.76] | 34.74 [1.83] | -0.74 | [-1.28, -0.01] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W1 | PythonNative vs PicoClaw | 17.23 [9.86] | 19.31 [10.23] | +2.08 | [-1.65, +6.02] | 0.1100 | 1.0000 | Inconclusive |
+| Windows 11 NVIDIA | Regime B (Warm) | W1 | Bun Minimal vs PicoClaw | 3.88 [2.33] | 3.57 [2.53] | -0.31 | [-1.22, +1.09] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W2 | Node Minimal vs PicoClaw | 29.94 [1.31] | 30.00 [1.61] | +0.06 | [-0.57, +0.32] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W2 | Node Full vs PicoClaw | 36.51 [2.34] | 36.53 [2.32] | +0.02 | [-0.92, +0.64] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W2 | PythonNative vs PicoClaw | 19.54 [13.05] | 18.41 [13.74] | -1.13 | [-6.84, +2.78] | 0.1100 | 1.0000 | Inconclusive |
+| Windows 11 NVIDIA | Regime B (Warm) | W2 | Bun Minimal vs PicoClaw | 4.84 [2.53] | 4.89 [1.89] | +0.04 | [-0.53, +0.48] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W3 | Node Minimal vs PicoClaw | 22.41 [4.22] | 23.46 [2.22] | +1.04 | [-0.20, +2.77] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W3 | Node Full vs PicoClaw | 30.85 [3.45] | 29.71 [4.03] | -1.14 | [-1.68, +0.32] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W3 | PythonNative vs PicoClaw | 0.60 [11.45] | 0.56 [10.73] | -0.03 | [-6.67, +6.68] | 0.1500 | 1.0000 | Inconclusive |
+| Windows 11 NVIDIA | Regime B (Warm) | W3 | Bun Minimal vs PicoClaw | -12.31 [2.83] | -11.50 [3.79] | +0.81 | [-1.02, +1.84] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W4 | Node Minimal vs PicoClaw | 51.15 [5.43] | 51.41 [5.90] | +0.26 | [-2.33, +1.85] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W4 | Node Full vs PicoClaw | 128.24 [3.04] | 134.18 [5.43] | +5.94 | [+3.86, +6.95] | 0.8100 | 1.0000 | Inconclusive |
+| Windows 11 NVIDIA | Regime B (Warm) | W4 | PythonNative vs PicoClaw | 136.76 [28.46] | 149.11 [35.79] | +12.35 | [-0.17, +24.21] | 0.8500 | 1.0000 | Inconclusive |
+| Windows 11 NVIDIA | Regime B (Warm) | W4 | Bun Minimal vs PicoClaw | -2.67 [5.83] | -3.18 [4.48] | -0.51 | [-2.77, +1.41] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W5 | Node Minimal vs PicoClaw | 27.28 [2.08] | 27.40 [2.16] | +0.12 | [-0.86, +0.93] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W5 | Node Full vs PicoClaw | 34.56 [1.37] | 34.14 [1.76] | -0.41 | [-1.15, +0.04] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows 11 NVIDIA | Regime B (Warm) | W5 | Bun Minimal vs PicoClaw | 3.14 [1.92] | 3.60 [2.30] | +0.45 | [-1.03, +1.26] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows Intel iGPU | Regime A (Cold) | W2 | Node Minimal vs PicoClaw | 43.12 [4.01] | 42.48 [6.08] | -0.64 | [-1.97, +1.72] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows Intel iGPU | Regime A (Cold) | W2 | Node Full vs PicoClaw | 54.37 [3.28] | 54.94 [6.01] | +0.57 | [-2.04, +1.41] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows Intel iGPU | Regime A (Cold) | W2 | PythonNative vs PicoClaw | 30.78 [15.02] | 27.40 [14.89] | -3.38 | [-10.45, +4.69] | 0.4100 | 1.0000 | Inconclusive |
+| Windows Intel iGPU | Regime A (Cold) | W2 | Bun Minimal vs PicoClaw | 9.55 [2.40] | 9.72 [4.85] | +0.17 | [-0.88, +1.81] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows Intel iGPU | Regime A (Cold) | W5 | Node Minimal vs PicoClaw | 39.77 [2.40] | 39.44 [2.79] | -0.32 | [-1.15, +0.60] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows Intel iGPU | Regime B (Warm) | W2 | Node Minimal vs PicoClaw | 42.60 [2.34] | 43.45 [2.80] | +0.85 | [-0.71, +1.53] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows Intel iGPU | Regime B (Warm) | W2 | Node Full vs PicoClaw | 54.74 [3.17] | 54.98 [2.40] | +0.24 | [-0.95, +1.28] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows Intel iGPU | Regime B (Warm) | W2 | PythonNative vs PicoClaw | 29.02 [8.26] | 32.56 [8.79] | +3.54 | [+0.48, +7.59] | 0.3300 | 1.0000 | Inconclusive |
+| Windows Intel iGPU | Regime B (Warm) | W2 | Bun Minimal vs PicoClaw | 8.99 [2.21] | 9.46 [1.35] | +0.47 | [+0.00, +1.19] | < 0.0001 | < 0.0001 | Equivalent |
+| Windows Intel iGPU | Regime B (Warm) | W5 | Node Minimal vs PicoClaw | 39.77 [2.06] | 40.60 [2.04] | +0.83 | [-0.43, +1.50] | < 0.0001 | < 0.0001 | Equivalent |
 
 > **Table 7 Methodological Specification (Fixed-SESOI Moving Block Bootstrap TOST + Holm-Bonferroni; Etapa 2):**
 > - **(a) Estimator:** Difference of session medians $\hat{\theta} = \text{median}(c_2) - \text{median}(c_1)$ evaluated against a fixed, pre-specified data-independent SESOI of $\Delta_{\text{SESOI}} = \pm 5.0\text{ ms}$ (practical orchestration jitter bound, $<0.2\%$ of Regime A task duration).
 > - **(b) Deviation Unit:** Per-trial paired orchestrator contrasts $c_i = T_{\text{orch}, i}(\text{Runtime}) - T_{\text{orch}, i}(\text{PicoClaw})$ ($n=30$ per session) resampled in contiguous overlapping blocks via Moving Block Bootstrap ($B=10{,}000$ resamples; Künsch 1989) to preserve serial dependence without distorting per-trial median dispersion.
 > - **(c) Block-Size Rule:** Primary block size $b = \text{round}(n^{1/3}) = 3$ for $n=30$ trials per session.
-> - **(d) Block-Size Sensitivity ($b \in \{2, 3, 5\}$, exported in `audit_export/tost_block_sensitivity.csv`):** Under Holm-Bonferroni FWER control ($p_{\text{TOST, adj}} < 0.05$), all three block lengths yield identical decisions across the 95 valid pairs: $b=2$: **71 `Equivalent` / 24 `Inconclusive` / 0 `Different`** (unadjusted: 76/19/0); $b=3$: **71 / 24 / 0** (unadjusted: 76/19/0); $b=5$: **71 / 24 / 0** (unadjusted: 78/17/0).
-> - **Three-State Decision Rule (Schuirmann 1987; Lakens 2017) + Multiple-Comparison Control:** Order-statistic **90% MBB CIs** align with one-sided $\alpha = 0.05$ TOST, combined with Holm-Bonferroni FWER adjustment across all 95 valid pairs (7 confounded W5 `python_native` pairs excluded per M1): `Equivalent` (90% CI entirely inside $[-5.0, +5.0]\text{ ms}$ and $p_{\text{TOST, adj}} < 0.05$: **71 [74.7%]**), `Different` (90% CI wholly outside $[-5.0, +5.0]\text{ ms}$: **0 [0.0%]**), or `Inconclusive` (**24 [25.3%]**, comprising 19 pairs whose 90% CI crosses $\pm 5.0\text{ ms}$ plus 5 pairs failing the Holm-Bonferroni adjusted threshold).
+> - **(d) Block-Size Sensitivity ($b \in \{2, 3, 5, 8, 12, \text{adaptive}\}$, exported in `audit_export/tost_block_sensitivity.csv`):** Under Holm-Bonferroni FWER control ($p_{\text{TOST, adj}} < 0.05$), decisions remain stable across all evaluated block lengths: $b=2$: **71 `Equivalent` / 24 `Inconclusive` / 0 `Different`**; $b=3$: **72 / 23 / 0**; $b=5$: **73 / 22 / 0**; $b=8$: **73 / 22 / 0**; $b=12$: **75 / 19 / 1**; adaptive $b$: **72 / 23 / 0**. Crucially, the 13 cells with $|r_1| \in [0.85, 0.91]$ in macOS Regime B maintain invariant decisions across $b \in \{8, 12\}$.
+> - **(e) Proportional SESOI Analysis ($\Delta_{\text{prop}} = \max(2.0\text{ ms}, 0.10 \times |\text{median}(c_1)|)$):** To account for scale differences between workloads (where $\pm 5.0\text{ ms}$ represents $0.38\%$ of W1 but only $0.14\%$ of W4 task latency), proportional SESOI yields **49 `Equivalent`**, **46 `Inconclusive`**, and **0 `Different`** under Holm-Bonferroni control.
+> - **Three-State Decision Rule (Schuirmann 1987; Lakens 2017) + Multiple-Comparison Control:** Order-statistic **90% MBB CIs** align with one-sided $\alpha = 0.05$ TOST, combined with Holm-Bonferroni FWER adjustment across all 95 valid pairs (7 confounded W5 `python_native` pairs excluded per M1): `Equivalent` (90% CI entirely inside $[-5.0, +5.0]\text{ ms}$ and $p_{\text{TOST, adj}} < 0.05$: **72 [75.8%]**), `Different` (90% CI wholly outside $[-5.0, +5.0]\text{ ms}$: **0 [0.0%]**), or `Inconclusive` (**23 [24.2%]**, comprising 19 pairs whose 90% CI crosses $\pm 5.0\text{ ms}$ plus 4 pairs failing the Holm-Bonferroni adjusted threshold).
 
 
 >>> FIM DO ARQUIVO: audit_export/tables/table7_session_replication_comparison.md <<<
@@ -457,53 +460,53 @@ Tamanho Máximo do Chunk: <= 150 KB
 
 | Platform OS | Regime | Runtime | Prompt / Comp. Tokens | Median Task Latency [IQR] (ms) | 95% Bootstrap CI | T_orch (ms) | Peak RSS (MB) | Instructions / Cycles | Energy (J) / EDP (J·s) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| macOS ARM64 (M4) | Regime A (Cold) | picoclaw | 2259 / 38 | 5644.4 [55.5] | [5637.6, 5669.9] | 4.65 | 4.2 | 41.1M / 25.0M | 93.9J / 531.3J·s |
-| macOS ARM64 (M4) | Regime A (Cold) | openclaw_minimal | 2007 / 35 | 4989.1 [27.2] | [4982.4, 5002.9] | 19.89 | 37.2 | 777.7M / 295.1M | 83.7J / 418.0J·s |
-| macOS ARM64 (M4) | Regime A (Cold) | openclaw_full | 6921 / 35 | 18092.6 [46.7] | [18082.5, 18104.0] | 23.78 | 37.3 | 779.8M / 300.0M | 300.8J / 5436.0J·s |
-| macOS ARM64 (M4) | Regime A (Cold) | neural_baseline | 2252 / 33 | 5504.6 [45.9] | [5489.5, 5518.7] | 0.00 | N/A‡ | N/A‡ | 92.2J / 506.3J·s |
-| macOS ARM64 (M4) | Regime B (Warm) | picoclaw | 2259 / 38 | 984.9 [31.4] | [980.1, 992.3] | 3.24 | 4.3 | 40.8M / 24.2M | 12.6J / 12.4J·s |
-| macOS ARM64 (M4) | Regime B (Warm) | openclaw_minimal | 2007 / 35 | 914.7 [26.4] | [907.8, 920.9] | 18.62 | 37.3 | 776.7M / 293.6M | 12.3J / 11.4J·s |
-| macOS ARM64 (M4) | Regime B (Warm) | openclaw_full | 6921 / 35 | 1131.8 [24.3] | [1126.1, 1135.8] | 22.60 | 37.3 | 777.2M / 294.7M | 14.7J / 16.7J·s |
-| macOS ARM64 (M4) | Regime B (Warm) | neural_baseline | 2252 / 33 | 851.9 [20.2] | [846.2, 858.3] | 0.00 | N/A‡ | N/A‡ | 11.0J / 9.3J·s |
-| Linux x86_64 | Regime A (Cold) | picoclaw | 2259 / 38 | 3100.7 [28.0] | [3084.6, 3119.2] | 4.34 | 8.8 | 11.0M / 18.7M | 245.6J / 762.3J·s |
-| Linux x86_64 | Regime A (Cold) | openclaw_minimal | 2007 / 35 | 2711.1 [28.4] | [2702.3, 2721.5] | 28.92 | 85.0 | 745.5M / 480.9M | 213.9J / 581.3J·s |
-| Linux x86_64 | Regime A (Cold) | openclaw_full | 6921 / 35 | 8258.5 [39.7] | [8142.4, 8294.0] | 34.07 | 85.6 | 802.1M / 523.8M | 594.4J / 4909.0J·s |
-| Linux x86_64 | Regime A (Cold) | bun_minimal | 2259 / 38 | 3092.7 [38.3] | [3078.3, 3104.8] | 4.95 | 23.0 | 51.2M / 64.7M | 246.2J / 761.6J·s |
-| Linux x86_64 | Regime A (Cold) | neural_baseline | 2252 / 33 | 2896.6 [33.1] | [2861.7, 2912.2] | 0.00 | N/A‡ | N/A‡ | 220.5J / 634.3J·s |
-| Linux x86_64 | Regime B (Warm) | picoclaw | 2259 / 38 | 1580.9 [32.6] | [1564.2, 1585.0] | 4.92 | 8.8 | 11.2M / 19.2M | 111.2J / 175.8J·s |
-| Linux x86_64 | Regime B (Warm) | openclaw_minimal | 2007 / 35 | 1419.6 [31.0] | [1408.4, 1425.6] | 27.78 | 85.1 | 744.6M / 502.8M | 100.8J / 143.5J·s |
-| Linux x86_64 | Regime B (Warm) | openclaw_full | 6921 / 35 | 3117.6 [29.7] | [3111.0, 3127.8] | 33.28 | 85.6 | 747.1M / 510.4M | 177.9J / 554.9J·s |
-| Linux x86_64 | Regime B (Warm) | bun_minimal | 2259 / 38 | 1571.4 [32.1] | [1565.2, 1576.7] | 5.39 | 22.8 | 48.1M / 59.4M | 109.1J / 171.0J·s |
-| Linux x86_64 | Regime B (Warm) | neural_baseline | 2252 / 33 | 1387.0 [23.9] | [1377.3, 1394.2] | 0.00 | N/A‡ | N/A‡ | 95.7J / 133.9J·s |
-| Windows 11 NVIDIA | Regime A (Cold) | picoclaw | 2254 / 37 | 3296.4 [115.2] | [3263.3, 3351.8] | 10.00 | 9.3 | N/A* / 41.7M | 154.1J / 510.1J·s |
-| Windows 11 NVIDIA | Regime A (Cold) | openclaw_minimal | 2007 / 35 | 2921.1 [101.4] | [2908.5, 2960.2] | 37.20 | 71.7 | N/A* / 511.3M | 135.7J / 397.4J·s |
-| Windows 11 NVIDIA | Regime A (Cold) | openclaw_full | 6921 / 35 | 8333.4 [114.6] | [8303.3, 8379.0] | 44.66 | 71.7 | N/A* / 560.0M | 472.6J / 3940.3J·s |
-| Windows 11 NVIDIA | Regime A (Cold) | bun_minimal | 2254 / 37 | 3279.0 [93.0] | [3240.5, 3307.9] | 13.41 | 24.3 | N/A* / 126.5M | 155.8J / 510.6J·s |
-| Windows 11 NVIDIA | Regime A (Cold) | neural_baseline | 2252 / 33 | 2958.5 [93.8] | [2930.9, 2990.3] | 0.00 | N/A‡ | N/A‡ | 141.6J / 422.2J·s |
-| Windows 11 NVIDIA | Regime B (Warm) | picoclaw | 2254 / 37 | 1969.2 [36.8] | [1960.0, 1985.4] | 9.52 | 9.3 | N/A* / 41.1M | 47.1J / 92.7J·s |
-| Windows 11 NVIDIA | Regime B (Warm) | openclaw_minimal | 2007 / 35 | 1844.9 [54.5] | [1821.2, 1855.3] | 36.62 | 71.7 | N/A* / 563.4M | 46.3J / 85.4J·s |
-| Windows 11 NVIDIA | Regime B (Warm) | openclaw_full | 6921 / 35 | 4122.9 [69.3] | [4103.7, 4152.7] | 44.18 | 71.8 | N/A* / 587.1M | 88.5J / 365.0J·s |
-| Windows 11 NVIDIA | Regime B (Warm) | bun_minimal | 2254 / 37 | 1963.2 [50.8] | [1934.4, 1990.9] | 12.53 | 24.3 | N/A* / 113.0M | 49.2J / 96.6J·s |
-| Windows 11 NVIDIA | Regime B (Warm) | neural_baseline | 2252 / 33 | 1690.7 [45.6] | [1679.2, 1706.1] | 0.00 | N/A‡ | N/A‡ | 40.6J / 68.6J·s |
-| Windows Intel iGPU | Regime A (Cold) | picoclaw | 2254 / 37 | 56885.1 [1330.3] | [56641.5, 57213.9] | 11.32 | 7.3 | N/A* / 77.2M | N/A** |
-| Windows Intel iGPU | Regime A (Cold) | openclaw_minimal | 2007 / 35 | 50064.3 [903.7] | [49850.6, 50503.8] | 51.30 | 52.2 | N/A* / 1319.9M | N/A** |
-| Windows Intel iGPU | Regime A (Cold) | neural_baseline | 2252 / 33 | 54283.0 [1217.2] | [54065.1, 54624.6] | 0.00 | N/A‡ | N/A‡ | N/A** |
-| Windows Intel iGPU | Regime B (Warm) | picoclaw | 2254 / 37 | 6280.3 [113.4] | [6236.5, 6323.3] | 10.91 | 7.4 | N/A* / 76.7M | N/A** |
-| Windows Intel iGPU | Regime B (Warm) | openclaw_minimal | 2007 / 35 | 5671.7 [154.3] | [5630.5, 5745.8] | 50.82 | 53.5 | N/A* / 1157.6M | N/A** |
-| Windows Intel iGPU | Regime B (Warm) | neural_baseline | 2252 / 33 | 5271.6 [93.4] | [5223.1, 5284.9] | 0.00 | N/A‡ | N/A‡ | N/A** |
+| macOS ARM64 (M4) | Regime A (Cold) | picoclaw | 2259 / 38 | 5644.4 [55.5] | [5637.8, 5667.8] | 4.65 | 4.2 | 41.1M / 25.0M | 93.9J / 531.3J·s |
+| macOS ARM64 (M4) | Regime A (Cold) | openclaw_minimal | 2007 / 35 | 4989.1 [27.2] | [4982.4, 5002.7] | 19.89 | 37.2 | 777.7M / 295.1M | 83.7J / 418.0J·s |
+| macOS ARM64 (M4) | Regime A (Cold) | openclaw_full | 6921 / 35 | 18092.6 [46.7] | [18074.9, 18111.1] | 23.78 | 37.3 | 779.8M / 300.0M | 300.8J / 5436.0J·s |
+| macOS ARM64 (M4) | Regime A (Cold) | neural_baseline | 2252 / 33 | 5504.6 [45.9] | [5490.3, 5518.7] | 0.00 | N/A‡ | N/A‡ | 92.2J / 506.3J·s |
+| macOS ARM64 (M4) | Regime B (Warm) | picoclaw | 2259 / 38 | 984.9 [31.4] | [981.3, 992.3] | 3.24 | 4.3 | 40.8M / 24.2M | 12.6J / 12.4J·s |
+| macOS ARM64 (M4) | Regime B (Warm) | openclaw_minimal | 2007 / 35 | 914.7 [26.4] | [906.9, 920.4] | 18.62 | 37.3 | 776.7M / 293.6M | 12.3J / 11.4J·s |
+| macOS ARM64 (M4) | Regime B (Warm) | openclaw_full | 6921 / 35 | 1131.8 [24.3] | [1126.3, 1135.5] | 22.60 | 37.3 | 777.2M / 294.7M | 14.7J / 16.7J·s |
+| macOS ARM64 (M4) | Regime B (Warm) | neural_baseline | 2252 / 33 | 851.9 [20.2] | [846.2, 857.9] | 0.00 | N/A‡ | N/A‡ | 11.0J / 9.3J·s |
+| Linux x86_64 | Regime A (Cold) | picoclaw | 2259 / 38 | 3100.7 [28.0] | [3084.3, 3117.2] | 4.34 | 8.8 | 11.0M / 18.7M | 245.6J / 762.3J·s |
+| Linux x86_64 | Regime A (Cold) | openclaw_minimal | 2007 / 35 | 2711.1 [28.4] | [2700.8, 2721.3] | 28.92 | 85.0 | 745.5M / 480.9M | 213.9J / 581.3J·s |
+| Linux x86_64 | Regime A (Cold) | openclaw_full | 6921 / 35 | 8258.5 [39.7] | [8227.6, 8294.4] | 34.07 | 85.6 | 802.1M / 523.8M | 594.4J / 4909.0J·s |
+| Linux x86_64 | Regime A (Cold) | bun_minimal | 2259 / 38 | 3092.7 [38.3] | [3078.5, 3107.1] | 4.95 | 23.0 | 51.2M / 64.7M | 246.2J / 761.6J·s |
+| Linux x86_64 | Regime A (Cold) | neural_baseline | 2252 / 33 | 2896.6 [33.1] | [2876.1, 2911.7] | 0.00 | N/A‡ | N/A‡ | 220.5J / 634.3J·s |
+| Linux x86_64 | Regime B (Warm) | picoclaw | 2259 / 38 | 1580.9 [32.6] | [1566.4, 1585.0] | 4.92 | 8.8 | 11.2M / 19.2M | 111.2J / 175.8J·s |
+| Linux x86_64 | Regime B (Warm) | openclaw_minimal | 2007 / 35 | 1419.6 [31.0] | [1408.0, 1425.4] | 27.78 | 85.1 | 744.6M / 502.8M | 100.8J / 143.5J·s |
+| Linux x86_64 | Regime B (Warm) | openclaw_full | 6921 / 35 | 3117.6 [29.7] | [3111.7, 3126.6] | 33.28 | 85.6 | 747.1M / 510.4M | 177.9J / 554.9J·s |
+| Linux x86_64 | Regime B (Warm) | bun_minimal | 2259 / 38 | 1571.4 [32.1] | [1566.7, 1586.9] | 5.39 | 22.8 | 48.1M / 59.4M | 109.1J / 171.0J·s |
+| Linux x86_64 | Regime B (Warm) | neural_baseline | 2252 / 33 | 1387.0 [23.9] | [1377.4, 1394.0] | 0.00 | N/A‡ | N/A‡ | 95.7J / 133.9J·s |
+| Windows 11 NVIDIA | Regime A (Cold) | picoclaw | 2254 / 37 | 3296.4 [115.2] | [3265.7, 3350.7] | 10.00 | 9.3 | N/A* / 41.7M | 154.1J / 510.1J·s |
+| Windows 11 NVIDIA | Regime A (Cold) | openclaw_minimal | 2007 / 35 | 2921.1 [101.4] | [2908.5, 2956.0] | 37.20 | 71.7 | N/A* / 511.3M | 135.7J / 397.4J·s |
+| Windows 11 NVIDIA | Regime A (Cold) | openclaw_full | 6921 / 35 | 8333.4 [114.6] | [8308.9, 8377.3] | 44.66 | 71.7 | N/A* / 560.0M | 472.6J / 3940.3J·s |
+| Windows 11 NVIDIA | Regime A (Cold) | bun_minimal | 2254 / 37 | 3279.0 [93.0] | [3235.7, 3307.4] | 13.41 | 24.3 | N/A* / 126.5M | 155.8J / 510.6J·s |
+| Windows 11 NVIDIA | Regime A (Cold) | neural_baseline | 2252 / 33 | 2958.5 [93.8] | [2934.5, 2990.2] | 0.00 | N/A‡ | N/A‡ | 141.6J / 422.2J·s |
+| Windows 11 NVIDIA | Regime B (Warm) | picoclaw | 2254 / 37 | 1969.2 [36.8] | [1961.6, 1985.4] | 9.52 | 9.3 | N/A* / 41.1M | 47.1J / 92.7J·s |
+| Windows 11 NVIDIA | Regime B (Warm) | openclaw_minimal | 2007 / 35 | 1844.9 [54.5] | [1824.1, 1854.7] | 36.62 | 71.7 | N/A* / 563.4M | 46.3J / 85.4J·s |
+| Windows 11 NVIDIA | Regime B (Warm) | openclaw_full | 6921 / 35 | 4122.9 [69.3] | [4098.6, 4152.9] | 44.18 | 71.8 | N/A* / 587.1M | 88.5J / 365.0J·s |
+| Windows 11 NVIDIA | Regime B (Warm) | bun_minimal | 2254 / 37 | 1963.2 [50.8] | [1947.2, 1978.4] | 12.53 | 24.3 | N/A* / 113.0M | 49.2J / 96.6J·s |
+| Windows 11 NVIDIA | Regime B (Warm) | neural_baseline | 2252 / 33 | 1690.7 [45.6] | [1680.0, 1701.2] | 0.00 | N/A‡ | N/A‡ | 40.6J / 68.6J·s |
+| Windows Intel iGPU | Regime A (Cold) | picoclaw | 2254 / 37 | 56885.1 [1330.3] | [56645.3, 57252.6] | 11.32 | 7.3 | N/A* / 77.2M | N/A** |
+| Windows Intel iGPU | Regime A (Cold) | openclaw_minimal | 2007 / 35 | 50064.3 [903.7] | [49895.1, 50351.9] | 51.30 | 52.2 | N/A* / 1319.9M | N/A** |
+| Windows Intel iGPU | Regime A (Cold) | neural_baseline | 2252 / 33 | 54283.0 [1217.2] | [54062.1, 54744.8] | 0.00 | N/A‡ | N/A‡ | N/A** |
+| Windows Intel iGPU | Regime B (Warm) | picoclaw | 2254 / 37 | 6280.3 [113.4] | [6247.2, 6321.5] | 10.91 | 7.4 | N/A* / 76.7M | N/A** |
+| Windows Intel iGPU | Regime B (Warm) | openclaw_minimal | 2007 / 35 | 5671.7 [154.3] | [5640.2, 5746.6] | 50.82 | 53.5 | N/A* / 1157.6M | N/A** |
+| Windows Intel iGPU | Regime B (Warm) | neural_baseline | 2252 / 33 | 5271.6 [93.4] | [5226.3, 5285.1] | 0.00 | N/A‡ | N/A‡ | N/A** |
 
 ### Part B: Segregated / Non-Comparable Arm (`python_native` — Excluded from W5 Performance Contrasts: Schema-Failure / Confounded Prompt)¶
 
 | Platform OS | Regime | Runtime (Segregated) | Prompt / Comp. Tokens | Median Task Latency [IQR] (ms) | 95% Bootstrap CI | T_orch (ms) | Peak RSS (MB) | Instructions / Cycles | Energy (J) / EDP (J·s) |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| macOS ARM64 (M4) | Regime A (Cold) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 670.6 [30.6] | [658.4, 679.1] | 33.41 | 56.5 | 2731.9M / 1177.3M | 9.9J / 6.6J·s |
-| macOS ARM64 (M4) | Regime B (Warm) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 650.7 [16.6] | [647.0, 655.3] | 8.73 | 56.5 | 2615.5M / 1083.8M | 10.0J / 6.5J·s |
-| Linux x86_64 | Regime A (Cold) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 2259 / 38 | 3114.1 [30.1] | [3097.6, 3809.2] | 17.12 | 40.2 | 2674.4M / 4799.1M | 252.6J / 784.4J·s |
-| Linux x86_64 | Regime B (Warm) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 2259 / 38 | 2992.4 [56.8] | [2980.0, 3027.3] | 1416.32 | 87.4 | 4669.0M / 6471.4M | 196.5J / 588.2J·s |
-| Windows 11 NVIDIA | Regime A (Cold) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 2094.0 [101.2] | [2070.5, 2125.5] | 149.70 | N/A§ | N/A* / N/A§ | 92.4J / 192.7J·s |
-| Windows 11 NVIDIA | Regime B (Warm) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 1203.0 [70.2] | [1188.0, 1219.0] | 23.55 | N/A§ | N/A* / N/A§ | 43.7J / 52.2J·s |
-| Windows Intel iGPU | Regime A (Cold) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 31058.6 [732.9] | [30745.6, 31210.2] | 116.11 | N/A§ | N/A* / N/A§ | N/A** |
-| Windows Intel iGPU | Regime B (Warm) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 3733.7 [54.7] | [3721.7, 3754.0] | 71.98 | N/A§ | N/A* / N/A§ | N/A** |
+| macOS ARM64 (M4) | Regime A (Cold) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 670.6 [30.6] | [659.8, 676.7] | 33.41 | 56.5 | 2731.9M / 1177.3M | 9.9J / 6.6J·s |
+| macOS ARM64 (M4) | Regime B (Warm) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 650.7 [16.6] | [647.3, 655.3] | 8.73 | 56.5 | 2615.5M / 1083.8M | 10.0J / 6.5J·s |
+| Linux x86_64 | Regime A (Cold) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 2259 / 38 | 3114.1 [30.1] | [3094.0, 3144.0] | 17.12 | 40.2 | 2674.4M / 4799.1M | 252.6J / 784.4J·s |
+| Linux x86_64 | Regime B (Warm) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 2259 / 38 | 2992.4 [56.8] | [2981.9, 3027.2] | 1416.32 | 87.4 | 4669.0M / 6471.4M | 196.5J / 588.2J·s |
+| Windows 11 NVIDIA | Regime A (Cold) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 2094.0 [101.2] | [2063.0, 2125.5] | 149.70 | N/A§ | N/A* / N/A§ | 92.4J / 192.7J·s |
+| Windows 11 NVIDIA | Regime B (Warm) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 1203.0 [70.2] | [1187.7, 1219.0] | 23.55 | N/A§ | N/A* / N/A§ | 43.7J / 52.2J·s |
+| Windows Intel iGPU | Regime A (Cold) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 31058.6 [732.9] | [30739.3, 31170.8] | 116.11 | N/A§ | N/A* / N/A§ | N/A** |
+| Windows Intel iGPU | Regime B (Warm) | `python_native`¶ [Excluded: Schema-Failure / Confounded] | 1287 / 26 | 3733.7 [54.7] | [3721.0, 3758.7] | 71.98 | N/A§ | N/A* / N/A§ | N/A** |
 
 ### Schema & Prototype Judge Audit (Segregated `python_native` W5 Only — Non-Comparative Diagnostic)
 

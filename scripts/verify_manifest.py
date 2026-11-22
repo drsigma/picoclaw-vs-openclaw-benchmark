@@ -40,6 +40,7 @@ def update_manifest() -> int:
 
     # Also track additional core files if present
     additional = [
+        "paper/manuscript.tex",
         "paper/RESPONSE_TO_REVIEWERS.md",
         "benchmark/protocol_invariants.py",
         "benchmark/bun_jsc_agent.mjs",
@@ -118,9 +119,15 @@ def update_manifest() -> int:
         "audit_export/REVIEW_PACKAGE_README.md",
         "audit_export/pytest_output.txt",
         "audit_export/tost_block_sensitivity.csv",
+        "audit_export/tost_block_sensitivity_expanded.csv",
         "audit_export/quad_platform_consolidated_summary.csv",
         "audit_export/anomaly_and_cache_diagnostics.csv",
         "audit_export/w5_token_and_schema_audit.csv",
+        "audit_export/mbb_coverage_and_tost_power.csv",
+        "audit_export/linux_throttling_stratification.csv",
+        "audit_export/inter_session_drift_test.csv",
+        "benchmark/linux_x86_64_telemetry_adapter.py",
+        "benchmark/windows_x86_64_telemetry_adapter.py",
     ]
     # Dynamically include all raw quad-platform session JSONL datasets and consolidated tables
     import glob as _glob
@@ -229,4 +236,6 @@ def verify_manifest() -> int:
 
 
 if __name__ == "__main__":
+    if "--update" in sys.argv:
+        sys.exit(update_manifest())
     sys.exit(verify_manifest())

@@ -1,6 +1,6 @@
 # Guia Completo de Reprodução Passo a Passo (Reprodutibilidade 100%)
 ## Como Clonar, Executar os Testes e Recriar Todos os Gráficos Localmente
-**Público-Alvo:** Revisores de Periódicos Acadêmicos (*SoftwareX* / *IEEE*), Membros de Bancas e Pesquisadores  
+**Público-Alvo:** Revisores de Periódicos Acadêmicos (*BenchmarkSuite* / *IEEE*), Membros de Bancas e Pesquisadores  
 **Requisitos de Sistema:**
 * **Reprodução Completa com Telemetria Física:** macOS 14.0+ em Apple Silicon (M1/M2/M3/M4) com pelo menos 16 GB de Memória Unificada (UMA).
 * **Reprodução Simulado-Portátil (Qualquer Máquina):** Qualquer distribuição Linux (Ubuntu, Debian, Fedora, Arch), Windows (via WSL2) ou macOS Intel/Apple Silicon, sem exigir sudo, GPU ou modelo neural local.

@@ -1,0 +1,22 @@
+#==============================================================================
+# ARTIFACT: 36_mbb_coverage_and_tost_power_csv.txt
+# ORIGINAL_PATH: audit_export/mbb_coverage_and_tost_power.csv
+# PART: 1 / 1
+# ORIGINAL_SHA256: a16ecfc5a501ea11ca3a9a08c92a0346c422ade334eb727ffc76e2afef7569ac
+# CHUNK_SHA256: a16ecfc5a501ea11ca3a9a08c92a0346c422ade334eb727ffc76e2afef7569ac
+# DESCRIPTION: Monte Carlo AR(1) MBB Coverage and TOST Empirical Power Simulation
+#==============================================================================
+
+r1,n,n_sim,block_size,mbb_90ci_coverage_pct,tost_power_pct
+-0.7,30,500,3,96.8,48.8
+-0.7,30,500,5,92.4,55.8
+-0.7,30,500,8,86.0,64.4
+0.0,30,500,3,91.6,11.8
+0.0,30,500,5,89.6,16.0
+0.0,30,500,8,79.6,19.4
+0.4,30,500,3,85.8,3.4
+0.4,30,500,5,85.0,4.8
+0.4,30,500,8,77.8,9.8
+0.7,30,500,3,69.8,2.0
+0.7,30,500,5,72.4,1.2
+0.7,30,500,8,67.0,3.2

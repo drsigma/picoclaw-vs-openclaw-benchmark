@@ -1,0 +1,312 @@
+#==============================================================================
+# ARTIFACT: 41_reproduce_quad_platform_analysis_py_part03.txt
+# ORIGINAL_PATH: scripts/reproduce_quad_platform_analysis.py
+# PART: 3 / 3
+# ORIGINAL_SHA256: 2ab97b007f704519aa53974f15b92931ea29a368ff9047e3766c52883c73de70
+# CHUNK_SHA256: 9b1905745cffec8e8305d165ac3af6c1bfb4612168d544591e5affe51314ea52
+# DESCRIPTION: Master Statistical & Reproduction Analysis Pipeline
+#==============================================================================
+
+        "- **Workload W5 — Token Audit, `python_native` Segregation (M1) & Schema/Judge Sub-Table (C5 / E3):** All 4 platforms are reported in Table 8 with full token/finish-reason audit in `audit_export/w5_token_and_schema_audit.csv`. Because `python_native` (LangChain Core) experienced schema-validation failure and truncated prompts (`1,287/26` tokens vs. `2,007--6,921/33--38` for comparable arms; TTFT `50.0 ms` vs. `4,939.5 ms` on macOS Regime A; `1,416.3 ms` Warm initialization anomaly on Linux), it is **excluded from Tables 2 and 7** and **segregated into Part B of Table 8** (`¶`). Per C5, the `Quality Score (1-5)` column was removed from comparative Table 8; prototype diagnostics from `W5_langchain_real_world/evaluator.py` (local `Meta-Llama-3.2-3B-Instruct Q4_K_M`, `temperature=0.0`, `max_tokens=150`, 5-point 3-issue rubric with keyword fallback, $N=30$ outputs/regime, subject to same-family bias per Zheng et al. 2023) are isolated in Table 8's separate **Schema & Prototype Judge Audit** sub-table (`1.0/5.0` `\"Empty output\"` on macOS from schema validation failure; `3.0/5.0` partial 1-issue match on Intel iGPU). **No comparative output-quality evaluation was conducted across runtimes.**",
+        "",
+        "---",
+        "",
+        "## 5. `N/A` SYMBOL TAXONOMY",
+        "",
+        "No `N/A` cell was replaced by `0`. All symbols are defined consistently across Tables 1 and 8 and Figure 2(b):",
+        "",
+        "| Symbol | Scope | Hardware / Methodological Rationale |",
+        "| :--- | :--- | :--- |",
+        f"| `N/A*` | Windows (NVIDIA & Intel iGPU) — Hardware Instructions | Windows NT user-mode restricts hardware PMU retired instruction counters (`CR4.PCE`) without a privileged driver. Empirical Win32 CPU cycles are reported via `QueryProcessCycleTime` ({wn_cyc['ratio']:.2f}x NVIDIA; {wi_cyc['ratio']:.2f}x Intel iGPU). |",
+        "| `N/A‡` | All Platforms — `neural_baseline` (RSS, Instr/Cycles) | Direct HTTP pass-through to `llama-server` without a client orchestrator process ($T_{\\text{orch}} \\equiv 0$). |",
+        "| `N/A§` | Tables 1, 8 & Figure 2(b) — Windows `python_native` (RSS & Cycles) | Windows `py.exe` launcher wrapper (PEP 397) exposes the ephemeral parent stub PID (~4.9 MB) rather than the child `python.exe` worker heap/cycles; stub metrics are excluded uniformly. |",
+        "| `N/A||` | macOS ARM64 — Bun JSC Engine | Secondary JS-engine ablation introduced after the Apple M4 primary Cold/Warm campaign froze; evaluated in Cold & Warm on x86_64 nodes, with supplementary macOS Warm Session 2 trials archived in `inter_session_trials.jsonl`. |",
+        "| `N/A**` | Windows Intel iGPU — Package Energy & EDP | Intel HD Graphics 4600 executes on shared DDR3 system memory (UMA) without discrete NVML sensors or ring-0 RAPL MSR access in unprivileged user-mode ($P_{\\text{idle}} = 28.50\\text{ W}$). |",
+        "| `¶` | Table 8 Part B — Segregated W5 `python_native` | Schema-validation failure / truncated prompt (`1,287/26` tokens vs. `2,007--6,921/33--38`; TTFT `50 ms` on macOS); excluded from Tables 2 and 7 per M1. |",
+        "",
+        "---",
+        "",
+        "## 6. BIBLIOGRAPHIC INVENTORY (`references.bib`)",
+        "",
+        f"All **{bib_count} primary bibliographic entries** in `references.bib` carry checked DOIs, ISBNs, or arXiv identifiers:",
+        "- **Corrected Entry:** `maricq2018taming` (author names checked against OSDI '18 proceedings: *Aleksander Maricq* and *Ryan Stutsman*).",
+        "- **Replaced Entry:** Prior `goldsman1997methods` entry carried an unrelated TOMACS DOI and was replaced by the Moving Block Bootstrap reference (`kuensch1989jackknife`, DOI: `10.1214/aos/1176347265`).",
+        "- **Rank-Test, Serial-Dependence & Offload References (C6 / Etapa 4):** `bayley1946effective` (DOI: `10.2307/2983560`), `zimmerman1993rank` (DOI: `10.1037/h0078850`), `yue2004mann` (DOI: `10.1023/B:WARM.0000043140.61082.60`), `fagerland2009wilcoxon` (DOI: `10.1002/sim.3561`), and `sheng2023flexgen` (ICML 2023 / PMLR 202, DOI: `10.48550/arXiv.2303.06865`).",
+        "- **Core Systems, Statistical & Evaluation References:** `kalibera2013rigorous`, `hoefler2015scientific`, `schuirmann1987comparison`, `lakens2017equivalence`, `mann1947test`, `kruskal1952use`, `holm1979simple`, `cliff1993dominance`, `vargha2000critique`, `weaver2013nondeterminism`, `kwon2023vllm`, `yao2023react`, `zheng2023judging`, `reddi2020mlperf`, `you2023zeus`, `barroso2007case`, `fahad2019comparative`, `williams2009roofline`, and `smith2016software`.",
+        "- **Technical Specifications Separated:** Vendor documentation and PEPs (Microsoft Learn `QueryProcessCycleTime` / Win32 PSAPI, Intel 64 and IA-32 SDM Vol. 3B Ch. 20, Python PEP 397) are referenced explicitly as technical documentation in table notes.",
+        "",
+        "---",
+        "",
+        "## 7. REGENERATED FIGURES (300 DPI, ENGLISH) AND SHA-256 DIGESTS",
+        "",
+        "| File | Description | SHA-256 |",
+        "| :--- | :--- | :--- |"
+    ])
+
+    for rel_f, desc in fig_entries:
+        abs_f = os.path.join(REPO_DIR, rel_f)
+        h_f = sha256_file(abs_f) if os.path.exists(abs_f) else "MISSING"
+        lines.append(f"| `{rel_f}` | {desc} | `{h_f}` |")
+
+    lines.extend([
+        "",
+        "---",
+        "",
+        "## 8. METHODOLOGICAL LIMITATIONS, EXTERNAL VALIDITY & LICENSING",
+        "",
+        "1. **Offload & Memory Topology Asymmetry (UMA vs. Hybrid PCIe vs. Shared DDR3):** Apple M4 executes full on-die GPU offload (`-ngl 99`, 120 GB/s). Dell G15 nodes (Linux and Windows 11) execute under hybrid offload (`-ngl 16`) bounded by 4 GB GDDR6 VRAM with continuous PCIe streaming (~5.2 GB/s). Intel HD Graphics 4600 executes over shared DDR3-1600 RAM. Absolute Regime B latency and package energy comparisons are restricted to within-node contrasts.",
+        "2. **Windows User-Mode Telemetry Boundaries:** Absence of ring-0 privileges blocks direct PMU `INST_RETIRED.ANY` (`CR4.PCE`) and Intel iGPU RAPL MSR access; empirical Win32 `QueryProcessCycleTime` cycles are reported without synthetic IPC extrapolation.",
+        f"3. **Unequal Workload Scope on Windows Intel iGPU — W2, W5 & Tool-RAG Only (E8):** On shared DDR3-1600 memory, Regime A trial durations spanned **{igpu_w2_pico_s:.1f} s/trial** (`picoclaw`/`openclaw_minimal` W2) to **{igpu_w2_full_s:.1f} s/trial** (54-tool `openclaw_full` W2), with comparable W5 arms at **{igpu_w5_min_s:.1f}--{igpu_w5_max_s:.1f} s/trial**. Expanding to W1--W4 (including 10-turn W4 dialogues), KV-Thrashing, and MCP across two 30-rep sessions would require multi-day continuous execution and expose results to thermal/OS drift.",
+        "4. **Unequal Runtime Scope for Bun JSC — x86_64 Only in Consolidated Matrix (E8):** Bun (`bun_minimal`, JavaScriptCore) was added as a secondary JS-engine ablation after the Apple M4 primary Cold/Warm campaign froze; it is evaluated across Cold and Warm on all three x86_64 nodes (`N/A||` in macOS consolidated tables; supplementary macOS Warm Session 2 Bun trials are archived in `inter_session_trials.jsonl`).",
+        "5. **Segregation of W5 `python_native` (M1) & De-Scoped Prototype Judge (E3 / C5):** Schema-validation failure and truncated prompts (`1,287/26` tokens) make `python_native` W5 non-comparable (excluded from Tables 2 and 7; segregated in Part B of Table 8). Prototype judge outputs (`Llama-3.2-3B-Instruct`, $N=30$/regime, same-family bias risk) were moved out of comparative columns into Table 8's separate Schema & Prototype Judge Audit sub-table; no cross-runtime quality claims are made.",
+        "6. **Linux Mobile CPU Thermal/PL Throttling (M8):** Positive intra-trial deltas in `cpu_pkg_throttle_events` elevated lag-1 autocorrelation ($r_1$) on Linux x86_64 under `-ngl 16` offload, addressed via $n_{\\text{eff}}$-adjusted Mann-Whitney $U$ variance (Table 2) and Moving Block Bootstrap ($b=3$, Table 7).",
+        "7. **External Validity Boundaries & Licensing (C9):** Measurements are scoped to a single 3B quantized model (`Meta-Llama-3.2-3B-Instruct Q4_K_M`, Meta Llama 3.2 Community License), a single inference server (`llama-server` / `llama.cpp`, MIT License), synthetic deterministic workloads (W1--W5), and heterogeneous platform sensors. All evaluated `PicoClaw` and `OpenClaw` workers are clean-room academic implementations isolated for systems benchmarking (code: MIT License; data: CC BY 4.0).",
+        "",
+        "---",
+        "",
+        "## 9. ARTIFACT INVENTORY SUMMARY",
+        "",
+        "All derived artifacts — manuscript source (`paper/manuscript.tex`), `references.bib`, analysis scripts, Tables 1--8 (`.md`/`.tex`), Figures 1--6 (300 DPI), saved `pytest -q` transcript, 35-`.jsonl` access guide (`audit_export/REVIEW_PACKAGE_README.md`), lightweight text chunks (`audit_txt_chunks/`), `data/manifest_sha256.json`, and `audit_export_quad_platform.zip` — were regenerated directly from the raw datasets on disk.",
+    ])
+
+    content = "\n".join(lines) + "\n"
+    with open(root_report, "w", encoding="utf-8") as f:
+        f.write(content)
+    with open(export_report, "w", encoding="utf-8") as f:
+        f.write(content)
+    print(f"Exported Final Audit Report: {root_report} and {export_report}")
+
+
+# ==============================================================================
+# 12. Review Package Guide (E1 / C2 / C7) & Packaging Audit Zip
+# ==============================================================================
+
+def generate_review_package_readme(inventory: list[dict[str, Any]]):
+    """Generates audit_export/REVIEW_PACKAGE_README.md with archive contents and 35-JSONL access instructions (E1 / C2 / C7)."""
+    readme_path = os.path.join(AUDIT_EXPORT_DIR, "REVIEW_PACKAGE_README.md")
+    tot_meas = sum(inv["measured_trials"] for inv in inventory)
+    tot_lines = sum(inv["total_records"] for inv in inventory)
+
+    # Dynamic counts per directory prefix from live inventory
+    n_pub_mac = sum(1 for inv in inventory if inv["relative_path"].startswith("results/publication_campaign/"))
+    n_data_mac = sum(1 for inv in inventory if inv["relative_path"].startswith("data/") and inv["relative_path"].count("/") == 1)
+    n_linux = sum(1 for inv in inventory if inv["relative_path"].startswith("data/linux_x86_64_session"))
+    n_win_nv = sum(1 for inv in inventory if inv["relative_path"].startswith("data/windows_x86_64_session"))
+    n_win_igpu = sum(1 for inv in inventory if inv["relative_path"].startswith("data/windows_intel_graphics_session"))
+
+    bib_path = os.path.join(REPO_DIR, "references.bib")
+    bib_count = 25
+    if os.path.exists(bib_path):
+        try:
+            import re as _re_bib
+            bib_count = len(_re_bib.findall(r"^@\w+\{", open(bib_path, "r", encoding="utf-8").read(), flags=_re_bib.M))
+        except Exception:
+            pass
+
+    lines = [
+        "# Review & Reproduction Package Guide (`audit_export_quad_platform.zip`)",
+        "",
+        "This archive consolidates the manuscript source, bibliography, reproduction scripts, saved test transcript, publication figures (300 DPI), Markdown/LaTeX tables (Tables 1--8), statistical summaries, and 35-dataset cryptographic manifest for the **Quad-Platform PicoClaw vs. OpenClaw Benchmark**.",
+        "",
+        "## 1. Contents Included Directly in This Archive",
+        "",
+        "- **Manuscript, Documentation, Licenses & CI Workflow:**",
+        "  - `paper/manuscript.tex` — LaTeX manuscript source",
+        f"  - `references.bib` — {bib_count} primary bibliographic entries with checked DOIs/ISBNs/arXiv identifiers",
+        "  - `README.md` — Installation guide, exact reproduction commands, metadata, and external validity boundaries",
+        "  - `LICENSE` (MIT code license) and `DATA_LICENSE` (CC BY 4.0 data license)",
+        "  - `.github/workflows/reproducibility.yml` — Executable Ubuntu GitHub Actions reproducibility workflow",
+        "- **Repository Reproducibility Logs & Reports (not part of the manuscript):**",
+        "  - `audit_export/AUDIT_REPORT_FINAL.md` — Technical reproducibility log in neutral English (executed commands, observed outputs, file inventory)",
+        "  - `audit_export/Systems_Replication_Report.md` — Quad-platform systems replication report (English)",
+        "- **Reproduction Scripts, Cryptographic Manifest & Raw Datasets:**",
+        "  - `scripts/reproduce_quad_platform_analysis.py` — Master analysis, statistical test, table, and figure generator",
+        "  - `scripts/verify_manifest.py` — Cryptographic SHA-256 verification script",
+        "  - `data/manifest_sha256.json` — SHA-256 manifest covering all 35 raw `.jsonl` datasets and tracked artifacts",
+        f"  - All **{len(inventory)} raw `.jsonl` datasets** included directly at their canonical paths (`results/publication_campaign/*.jsonl`, `data/*.jsonl`, `data/*_session{{1,2}}/raw/*.jsonl`)",
+        "- **Saved Automated Test Transcript:**",
+        "  - `audit_export/pytest_output.txt` — Saved output from `pytest -q`",
+        "- **High-Resolution Figures (300 DPI):**",
+        "  - `audit_export/figures/fig1_architecture_topology.png` through `fig6_pmc_hardware_counters.png`",
+        "- **Consolidated Tables (Tables 1--8, Markdown & LaTeX):**",
+        "  - `audit_export/tables/table1_master_summary.{md,tex}`",
+        "  - `audit_export/tables/table2_statistical_tests.md`",
+        "  - `audit_export/tables/table3_warm_cache_summary.md`",
+        "  - `audit_export/tables/table4_kv_thrashing.md`",
+        "  - `audit_export/tables/table5_tool_rag_mitigation.md`",
+        "  - `audit_export/tables/table6_mcp_transport_ablation.{md,tex}`",
+        "  - `audit_export/tables/table7_session_replication_comparison.{md,tex}`",
+        "  - `audit_export/tables/table8_w5_enterprise_workload.{md,tex}`",
+        "- **Structured Tabular & Diagnostic Exports:**",
+        "  - `audit_export/quad_platform_consolidated_summary.csv`",
+        "  - `audit_export/anomaly_and_cache_diagnostics.csv`",
+        "  - `audit_export/w5_token_and_schema_audit.csv`",
+        "  - `audit_export/tost_block_sensitivity.csv` (block-size sensitivity $b \\in \\{2, 3, 5\\}$)",
+        "  - `audit_export/audit_summary_metrics.json`",
+        "",
+        f"## 2. Accessing All {len(inventory)} Raw `.jsonl` Datasets ({tot_lines:,} lines / {tot_meas:,} measured trials)",
+        "",
+        "All raw empirical trial logs are version-controlled directly in the public Git repository (branch `main`) without external paywalls or binary blobs:",
+        "",
+        "- **Repository URL:** `https://github.com/drsigma/picoclaw-vs-openclaw-benchmark` (branch `main`)",
+        "- **Clone Command:**",
+        "  ```bash",
+        "  git clone https://github.com/drsigma/picoclaw-vs-openclaw-benchmark.git",
+        "  cd picoclaw-vs-openclaw-benchmark",
+        "  git checkout main",
+        "  ```",
+        f"- **Directory Layout of the {len(inventory)} Raw `.jsonl` Files:**",
+        f"  - `results/publication_campaign/*.jsonl` — macOS ARM64 (Apple Silicon M4) primary campaigns & ablations ({n_pub_mac} files)",
+        f"  - `data/*.jsonl` — macOS ARM64 supplementary MCP transport & LangChain external trials ({n_data_mac} files)",
+        f"  - `data/linux_x86_64_session{{1,2}}/raw/*.jsonl` — Linux x86_64 (Dell G15 RTX 3050) Session 1 & Session 2 ({n_linux} files)",
+        f"  - `data/windows_x86_64_session{{1,2}}/raw/*.jsonl` — Windows 11 NVIDIA (Dell G15 RTX 3050) Session 1 & Session 2 ({n_win_nv} files)",
+        f"  - `data/windows_intel_graphics_session{{1,2}}/raw/*.jsonl` — Windows Intel HD 4600 iGPU Session 1 & Session 2 ({n_win_igpu} files)",
+        "",
+        f"### Complete Path & SHA-256 Index of All {len(inventory)} Raw `.jsonl` Datasets",
+        "",
+    ]
+    lines.extend(_build_inventory_table_lines(inventory))
+    lines.extend([
+        "",
+        "## 3. Step-by-Step Independent Reproduction Commands",
+        "",
+        "From the root of the cloned repository (no GPU or local LLM weights required to reproduce all statistical analyses, tables, and figures from the 35 `.jsonl` datasets):",
+        "",
+        "```bash",
+        "python3 -m venv .venv_repro",
+        "source .venv_repro/bin/activate",
+        "pip install -r requirements.txt",
+        "",
+        "# 1. Verify SHA-256 digests of all tracked raw JSONL files and artifacts",
+        "python3 scripts/verify_manifest.py",
+        "",
+        "# 2. Recompute all statistics, hypothesis tests, tables (1-8), figures (1-6), and reports",
+        "python3 scripts/reproduce_quad_platform_analysis.py",
+        "",
+        "# 3. Execute automated verification suite",
+        "pytest -q",
+        "```",
+    ])
+    with open(readme_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"Exported Review Package Guide: {readme_path}")
+
+
+def package_audit_zip(inventory: list[dict[str, Any]] | None = None):
+    audit_md_root = os.path.join(REPO_DIR, "AUDIT_REPORT_FINAL.md")
+    if os.path.exists(audit_md_root):
+        shutil.copy2(audit_md_root, os.path.join(AUDIT_EXPORT_DIR, "AUDIT_REPORT_FINAL.md"))
+
+    if inventory is None:
+        inventory = audit_raw_datasets()
+
+    zip_path_quad = os.path.join(REPO_DIR, "audit_export_quad_platform.zip")
+    print(f"Packaging {AUDIT_EXPORT_DIR}, core review artifacts, and {len(inventory)} raw JSONL datasets into {zip_path_quad}...")
+
+    extra_review_files = [
+        "LICENSE",
+        "DATA_LICENSE",
+        "README.md",
+        ".github/workflows/reproducibility.yml",
+        "paper/manuscript.tex",
+        "references.bib",
+        "scripts/reproduce_quad_platform_analysis.py",
+        "scripts/verify_manifest.py",
+        "data/manifest_sha256.json",
+    ] + [inv["relative_path"] for inv in inventory]
+
+    with zipfile.ZipFile(zip_path_quad, "w", zipfile.ZIP_DEFLATED) as zf:
+        added = set()
+        for root, dirs, files in os.walk(AUDIT_EXPORT_DIR):
+            for file in sorted(files):
+                abs_path = os.path.join(root, file)
+                rel_path = os.path.relpath(abs_path, REPO_DIR).replace("\\", "/")
+                if rel_path not in added:
+                    zf.write(abs_path, rel_path)
+                    added.add(rel_path)
+        for rel_extra in extra_review_files:
+            abs_extra = os.path.join(REPO_DIR, rel_extra)
+            if os.path.exists(abs_extra) and rel_extra not in added:
+                zf.write(abs_extra, rel_extra)
+                added.add(rel_extra)
+
+    size_bytes = os.path.getsize(zip_path_quad)
+    print(f"Audit package created: {zip_path_quad} ({size_bytes:,} bytes, {len(added)} entries)")
+
+
+# ==============================================================================
+# Main Entry Point
+# ==============================================================================
+
+def main():
+    global QUICK_MODE
+    parser = argparse.ArgumentParser(description="Master Quad-Platform Conformance Audit & Statistical Pipeline")
+    parser.add_argument("--quick", action="store_true", help="Run quick verification with reduced bootstrap iterations")
+    args = parser.parse_args()
+    if args.quick:
+        QUICK_MODE = True
+        print("⚡ QUICK MODE ACTIVATED: bootstrap iterations reduced for fast verification.")
+
+    print("=" * 80)
+    print("🚀 MASTER QUAD-PLATFORM AUDIT & STATISTICAL PIPELINE")
+    print("=" * 80)
+
+    try:
+        # 1. Audit Git Commits
+        print("\n▶ [Phase 1] Auditing Git Commits...")
+        commits = audit_git_commits()
+        print(f"Found {len(commits)} commits in history.")
+
+        # 2. Audit Datasets & Checksums
+        print("\n▶ [Phase 1/2] Auditing Raw Datasets & Cryptographic SHA-256...")
+        inventory = audit_raw_datasets()
+        print(f"Validated {len(inventory)} raw empirical trial datasets.")
+
+        # 3. Cache & Anomaly Diagnostics
+        print("\n▶ [Phase 2] Computing Cache, Warmup, Stationarity & Thermal Diagnostics...")
+        diagnostics = audit_cache_and_anomalies()
+        print(f"Computed diagnostics across {len(diagnostics)} experimental cells.")
+
+        # 4. Statistical Consolidation
+        print("\n▶ [Phase 3] Consolidating Side-by-Side Quad-Platform Statistics...")
+        consolidated = run_statistical_consolidation()
+
+        # 5. Hypothesis Testing
+        print("\n▶ [Phase 3] Computing Non-Parametric Hypothesis Tests & Omnibus Tests...")
+        test_results, kruskal_tests = compute_hypothesis_tests(consolidated)
+
+        # 6. Export Structured Summaries
+        print("\n▶ [Phase 4] Exporting Structured JSON & CSV Summaries...")
+        export_structured_summaries(consolidated, diagnostics, test_results)
+
+        # 7. Generate Tables
+        print("\n▶ [Phase 3/4] Generating Publication Tables in Markdown, LaTeX, and CSV...")
+        table_metrics = generate_comparative_tables(consolidated, test_results, kruskal_tests)
+        generate_clean_readme(consolidated, table_metrics)
+
+        # 8. Generate Figures
+        print("\n▶ [Phase 3] Regenerating All 6 Publication Figures (300 DPI)...")
+        generate_quad_platform_figures(consolidated, num_datasets=len(inventory))
+
+        # 9. Generate Master Replication Report, Final Audit Report & Review Package Guide
+        print("\n▶ [Phase 4] Generating Systems_Replication_Report.md, AUDIT_REPORT_FINAL.md, and REVIEW_PACKAGE_README.md...")
+        generate_master_audit_report(inventory, commits, diagnostics, consolidated, test_results, kruskal_tests, table_metrics)
+        generate_final_audit_report(inventory, diagnostics, consolidated, table_metrics)
+        generate_review_package_readme(inventory)
+
+        # 10. Package Audit Zip
+        print("\n▶ [Phase 4] Packaging audit_export_quad_platform.zip...")
+        package_audit_zip(inventory)
+
+        print("\n" + "=" * 80)
+        print("✅ MASTER QUAD-PLATFORM AUDIT & CONSOLIDATION COMPLETED SUCCESSFULLY.")
+        print("=" * 80)
+    except Exception as e:
+        print(f"\n❌ FATAL PIPELINE ERROR: {e}", file=sys.stderr)
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()

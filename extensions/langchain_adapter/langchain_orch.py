@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 extensions/langchain_adapter/langchain_orch.py - External Market Framework Orchestrator (LangChain)
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gate C1)
+Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gate C1)
 
 Implements the standard benchmark agent contract using langchain-core:
   - Pydantic v2 argument schemas

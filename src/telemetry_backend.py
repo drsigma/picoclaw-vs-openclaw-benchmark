@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 src/telemetry_backend.py - Cross-Platform Hardware Telemetry Abstraction
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gates B2 / E3)
+Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gates B2 / E3)
 
 Provides unified, zero-overhead hardware telemetry across heterogeneous platforms:
   1. macOS (Darwin / arm64 - Apple Silicon M1-M4):

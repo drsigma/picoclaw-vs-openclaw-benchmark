@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 scripts/run_external_framework_langchain_benchmark.py - External Market Framework Evaluation (LangChain Core)
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gate C1)
+Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gate C1)
 
 Executes standardized evaluation of LangChain Core across:
   - Workloads: W1, W2, W3, W4

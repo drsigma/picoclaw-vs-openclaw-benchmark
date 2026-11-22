@@ -1,0 +1,52 @@
+#==============================================================================
+# ARTIFACT: 33_w5_token_and_schema_audit_csv.txt
+# ORIGINAL_PATH: audit_export/w5_token_and_schema_audit.csv
+# PART: 1 / 1
+# ORIGINAL_SHA256: 48b1675ebff376de2b7648783d8033d15d0db41834b7c179ac5b8b2908138490
+# CHUNK_SHA256: 48b1675ebff376de2b7648783d8033d15d0db41834b7c179ac5b8b2908138490
+# DESCRIPTION: W5 Token Counts, Finish Reason & Schema Conformance Audit
+#==============================================================================
+
+platform,regime,agent_key,n_raw,median_latency_ms,median_orch_ms,median_prompt_tokens,median_completion_tokens,median_tool_calls,finish_reasons,w5_excluded_confounded
+macOS (M4),Regime A (Cold Prefill),neural_baseline,30,5504.59,0.0,2252,33,0.0,tool_calls,False
+macOS (M4),Regime A (Cold Prefill),openclaw_full,30,18092.6,23.779,6921,35,2.0,tool_calls,False
+macOS (M4),Regime A (Cold Prefill),openclaw_minimal,30,4989.14,19.887,2007,35,2.0,tool_calls,False
+macOS (M4),Regime A (Cold Prefill),picoclaw,30,5644.35,4.654,2259,38,2.0,tool_calls,False
+macOS (M4),Regime A (Cold Prefill),python_native,30,670.61,33.41,1287,26,2.0,tool_calls,True
+macOS (M4),Regime B (Warm Cache),neural_baseline,30,851.86,0.0,2252,33,0.0,tool_calls,False
+macOS (M4),Regime B (Warm Cache),openclaw_full,30,1131.82,22.604,6921,35,2.0,tool_calls,False
+macOS (M4),Regime B (Warm Cache),openclaw_minimal,30,914.72,18.625,2007,35,2.0,tool_calls,False
+macOS (M4),Regime B (Warm Cache),picoclaw,30,984.93,3.238,2259,38,2.0,tool_calls,False
+macOS (M4),Regime B (Warm Cache),python_native,30,650.73,8.734,1287,26,2.0,tool_calls,True
+Linux x86_64,Regime A (Cold Prefill),bun_minimal,30,3092.7,4.953,2259,38,2.0,tool_calls,False
+Linux x86_64,Regime A (Cold Prefill),neural_baseline,30,2896.59,0.0,2252,33,0.0,tool_calls,False
+Linux x86_64,Regime A (Cold Prefill),openclaw_full,30,8258.52,34.073,6921,35,2.0,tool_calls,False
+Linux x86_64,Regime A (Cold Prefill),openclaw_minimal,30,2711.1,28.919,2007,35,2.0,tool_calls,False
+Linux x86_64,Regime A (Cold Prefill),picoclaw,30,3100.7,4.343,2259,38,2.0,tool_calls,False
+Linux x86_64,Regime A (Cold Prefill),python_native,30,3114.07,17.124,2259,38,2.0,tool_calls,True
+Linux x86_64,Regime B (Warm Cache),bun_minimal,30,1571.37,5.394,2259,38,2.0,tool_calls,False
+Linux x86_64,Regime B (Warm Cache),neural_baseline,30,1387.05,0.0,2252,33,0.0,tool_calls,False
+Linux x86_64,Regime B (Warm Cache),openclaw_full,30,3117.56,33.276,6921,35,2.0,tool_calls,False
+Linux x86_64,Regime B (Warm Cache),openclaw_minimal,30,1419.59,27.779,2007,35,2.0,tool_calls,False
+Linux x86_64,Regime B (Warm Cache),picoclaw,30,1580.9,4.918,2259,38,2.0,tool_calls,False
+Linux x86_64,Regime B (Warm Cache),python_native,30,2992.38,1416.321,2259,38,2.0,tool_calls,True
+Windows 11,Regime A (Cold Prefill),bun_minimal,30,3279.0,13.414,2254,37,2.0,tool_calls,False
+Windows 11,Regime A (Cold Prefill),neural_baseline,30,2958.49,0.0,2252,33,0.0,tool_calls,False
+Windows 11,Regime A (Cold Prefill),openclaw_full,30,8333.4,44.663,6921,35,2.0,tool_calls,False
+Windows 11,Regime A (Cold Prefill),openclaw_minimal,30,2921.14,37.202,2007,35,2.0,tool_calls,False
+Windows 11,Regime A (Cold Prefill),picoclaw,30,3296.42,10.004,2254,37,2.0,tool_calls,False
+Windows 11,Regime A (Cold Prefill),python_native,30,2094.0,149.703,1287,26,2.0,tool_calls,True
+Windows 11,Regime B (Warm Cache),bun_minimal,30,1963.17,12.529,2254,37,2.0,tool_calls,False
+Windows 11,Regime B (Warm Cache),neural_baseline,30,1690.74,0.0,2252,33,0.0,tool_calls,False
+Windows 11,Regime B (Warm Cache),openclaw_full,30,4122.9,44.184,6921,35,2.0,tool_calls,False
+Windows 11,Regime B (Warm Cache),openclaw_minimal,30,1844.9,36.62,2007,35,2.0,tool_calls,False
+Windows 11,Regime B (Warm Cache),picoclaw,30,1969.2,9.518,2254,37,2.0,tool_calls,False
+Windows 11,Regime B (Warm Cache),python_native,30,1203.0,23.555,1287,26,2.0,tool_calls,True
+Windows Intel iGPU,Regime A (Cold Prefill),neural_baseline,30,54282.97,0.0,2252,33,0.0,tool_calls,False
+Windows Intel iGPU,Regime A (Cold Prefill),openclaw_minimal,30,50064.3,51.303,2007,35,2.0,tool_calls,False
+Windows Intel iGPU,Regime A (Cold Prefill),picoclaw,30,56885.1,11.324,2254,37,2.0,tool_calls,False
+Windows Intel iGPU,Regime A (Cold Prefill),python_native,30,31058.58,116.108,1287,26,2.0,stop,True
+Windows Intel iGPU,Regime B (Warm Cache),neural_baseline,30,5271.65,0.0,2252,33,0.0,tool_calls,False
+Windows Intel iGPU,Regime B (Warm Cache),openclaw_minimal,30,5671.66,50.817,2007,35,2.0,tool_calls,False
+Windows Intel iGPU,Regime B (Warm Cache),picoclaw,30,6280.33,10.914,2254,37,2.0,tool_calls,False
+Windows Intel iGPU,Regime B (Warm Cache),python_native,30,3733.72,71.984,1287,26,2.0,stop,True

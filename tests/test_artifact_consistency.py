@@ -589,7 +589,7 @@ def test_all_checklist_gates_0_to_8_verified():
     assert indep_data["status"] == "ALL_TOLERANCES_PASSED"
 
     # Gate 8: Disclaimers and absence of forbidden hype phrases
-    manuscript_path = os.path.join(REPO_DIR, "paper", "softwarex_manuscript.tex")
+    manuscript_path = os.path.join(REPO_DIR, "paper", "manuscript.tex")
     readme_path = os.path.join(REPO_DIR, "README.md")
     forbidden_phrases = [
         "proves superiority",
@@ -806,7 +806,7 @@ def test_reviewer2_e1_review_package_zip_contents():
         "DATA_LICENSE",
         "README.md",
         ".github/workflows/reproducibility.yml",
-        "paper/softwarex_manuscript.tex",
+        "paper/manuscript.tex",
         "references.bib",
         "scripts/reproduce_quad_platform_analysis.py",
         "scripts/verify_manifest.py",
@@ -844,7 +844,7 @@ def test_reviewer3_c1_c3_c5_c6_c8_c9_compliance():
     t8_md = open(os.path.join(REPO_DIR, "audit_export", "tables", "table8_w5_enterprise_workload.md"), encoding="utf-8").read()
     t8_tex = open(os.path.join(REPO_DIR, "audit_export", "tables", "table8_w5_enterprise_workload.tex"), encoding="utf-8").read()
     bib_txt = open(os.path.join(REPO_DIR, "references.bib"), encoding="utf-8").read()
-    ms_txt = open(os.path.join(REPO_DIR, "paper", "softwarex_manuscript.tex"), encoding="utf-8").read()
+    ms_txt = open(os.path.join(REPO_DIR, "paper", "manuscript.tex"), encoding="utf-8").read()
     readme_txt = open(os.path.join(REPO_DIR, "README.md"), encoding="utf-8").read()
 
     # C1: AUDIT_REPORT_FINAL.md is neutral technical English + scope notice (not part of manuscript)
@@ -882,6 +882,31 @@ def test_reviewer3_c1_c3_c5_c6_c8_c9_compliance():
         assert "llama-server" in doc
     for sec in (r"\section{Software Description}", r"\section{Illustrative Examples and Empirical Results}", r"\section{Impact}", "Code metadata"):
         assert sec in ms_txt, f"Missing required section/table '{sec}' in manuscript"
+
+
+def test_quad_platform_macros_consistency():
+    """Item 4: Verifies macros_quad_platform.tex consistency across results/ and audit_export/ and inputs in manuscript."""
+    pub_macros = os.path.join(REPO_DIR, "results", "quad_platform_tables", "macros_quad_platform.tex")
+    audit_macros = os.path.join(REPO_DIR, "audit_export", "tables", "macros_quad_platform.tex")
+    assert os.path.exists(pub_macros), f"Missing {pub_macros}"
+    assert os.path.exists(audit_macros), f"Missing {audit_macros}"
+
+    pub_txt = open(pub_macros, encoding="utf-8").read()
+    audit_txt = open(audit_macros, encoding="utf-8").read()
+    assert pub_txt == audit_txt, "Publication and audit macros_quad_platform.tex differ!"
+
+    assert r"\newcommand{\TotalRawDatasets}{35}" in pub_txt
+    assert r"\newcommand{\TotalJsonlLines}{19{,}141}" in pub_txt
+    assert r"\newcommand{\TotalMeasuredTrials}{17{,}460}" in pub_txt
+    assert r"\newcommand{\PhiOrchFifteenMin}" in pub_txt
+    assert r"\newcommand{\PhiOrchFifteenMax}" in pub_txt
+
+    ms_txt = open(os.path.join(REPO_DIR, "paper", "manuscript.tex"), encoding="utf-8").read()
+    assert "macros_quad_platform.tex" in ms_txt, "macros_quad_platform.tex not input in manuscript.tex"
+    assert r"\TotalRawDatasets" in ms_txt
+    assert r"\TotalJsonlLines" in ms_txt
+    assert r"\TotalMeasuredTrials" in ms_txt
+
 
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 benchmark/mcp_server.py - Live Model Context Protocol (MCP) Server
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gate R10 - MCP Live Transport Ablation)
+Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gate R10 - MCP Live Transport Ablation)
 
 Implements a real JSON-RPC 2.0 Model Context Protocol (MCP) server supporting:
   1. Stdio transport (stdin -> stdout)

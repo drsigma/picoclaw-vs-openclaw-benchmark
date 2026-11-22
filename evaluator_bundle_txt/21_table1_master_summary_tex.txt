@@ -1,0 +1,56 @@
+#==============================================================================
+# ARTIFACT: 21_table1_master_summary_tex.txt
+# ORIGINAL_PATH: audit_export/tables/table1_master_summary.tex
+# PART: 1 / 1
+# ORIGINAL_SHA256: b4d9de66851a1b8f2c29454d4f4e0835a559af924eba0b0cd9ed6b223209ea30
+# CHUNK_SHA256: b4d9de66851a1b8f2c29454d4f4e0835a559af924eba0b0cd9ed6b223209ea30
+# DESCRIPTION: Table 1: Master Systems & Microarchitectural Conformance (LaTeX)
+#==============================================================================
+
+\begin{table*}[t]
+\centering
+\caption{Quad-Platform Systems and Microarchitectural Conformance on Workload W2 (15 tools, 2,177 prompt tokens; $n=30$ raw measured trials per cell, with linearly detrended effective sample size $n_{\text{eff}} \le n$ reported per cell in \texttt{anomaly\_and\_cache\_diagnostics.csv}). Numbers represent empirical medians with 95\% Bootstrap / Moving Block Bootstrap ($b=3$) CIs.}
+\label{tab:quad_platform_master}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llrrrrrrr}
+\hline
+\textbf{Runtime Engine} & \textbf{Platform} & \textbf{$T_{\text{task}}$ (ms)} & \textbf{$T_{\text{orch}}$ (ms) [95\% CI]} & \textbf{$\Phi_{\text{orch}}$ (\%)} & \textbf{RSS (MB)} & \textbf{Energy (J)} & \textbf{EDP ($J \cdot s$)} & \textbf{Inst. (M)} \\
+\hline
+PicoClaw (Native Go) & macOS ARM64 (M4) & 5272.7 & 5.53 [5.2, 6.5] & 0.10\% & 5.1 & 88.3 & 464.6 & 62.27M \\
+PicoClaw (Native Go) & Linux x86\_64 & 2684.6 & 6.68 [6.5, 7.5] & 0.25\% & 9.7 & 206.8 & 563.1 & 32.35M \\
+PicoClaw (Native Go) & Windows 11 NVIDIA & 2928.3 & 13.11 [11.5, 13.9] & 0.45\% & 10.2 & 137.0 & 402.6 & N/A\textsuperscript{*} \\
+PicoClaw (Native Go) & Windows Intel iGPU & 53505.8 & 14.03 [13.8, 14.7] & 0.03\% & 8.2 & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
+OpenClaw (Node.js Minimal 15) & macOS ARM64 (M4) & 5284.8 & 20.60 [20.4, 21.0] & 0.39\% & 37.5 & 89.3 & 474.2 & 789.72M \\
+OpenClaw (Node.js Minimal 15) & Linux x86\_64 & 2721.1 & 31.36 [30.6, 31.7] & 1.15\% & 86.4 & 210.0 & 573.3 & 765.58M \\
+OpenClaw (Node.js Minimal 15) & Windows 11 NVIDIA & 2906.8 & 40.68 [40.5, 41.0] & 1.40\% & 72.9 & 136.7 & 400.3 & N/A\textsuperscript{*} \\
+OpenClaw (Node.js Minimal 15) & Windows Intel iGPU & 53505.9 & 57.86 [56.9, 58.4] & 0.11\% & 54.7 & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
+OpenClaw (Node.js Full 54) & macOS ARM64 (M4) & 18406.9 & 24.55 [24.4, 24.8] & 0.13\% & 37.7 & 305.8 & 5628.9 & 791.65M \\
+OpenClaw (Node.js Full 54) & Linux x86\_64 & 7829.0 & 35.53 [35.3, 35.9] & 0.46\% & 86.6 & 567.2 & 4447.1 & 772.13M \\
+OpenClaw (Node.js Full 54) & Windows 11 NVIDIA & 7896.4 & 48.55 [48.2, 48.8] & 0.61\% & 72.9 & 467.4 & 3694.0 & N/A\textsuperscript{*} \\
+OpenClaw (Node.js Full 54) & Windows Intel iGPU & 226696.9 & 68.89 [68.0, 69.5] & 0.03\% & 54.8 & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
+PythonNative (CPython VM) & macOS ARM64 (M4) & 5286.3 & 11.63 [11.3, 11.8] & 0.22\% & 24.1 & 88.9 & 468.1 & 649.57M \\
+PythonNative (CPython VM) & Linux x86\_64 & 2713.5 & 17.10 [16.3, 19.0] & 0.63\% & 40.2 & 216.1 & 587.6 & 2654.20M \\
+PythonNative (CPython VM) & Windows 11 NVIDIA & 2859.5 & 26.99 [26.0, 29.5] & 0.94\% & N/A\textsuperscript{\S} & 137.8 & 394.0 & N/A\textsuperscript{*} \\
+PythonNative (CPython VM) & Windows Intel iGPU & 53578.0 & 45.63 [41.4, 49.7] & 0.09\% & N/A\textsuperscript{\S} & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
+Bun JSC Minimal 15 & Linux x86\_64 & 2695.6 & 6.12 [6.0, 6.7] & 0.23\% & 24.2 & 207.2 & 560.5 & 55.04M \\
+Bun JSC Minimal 15 & Windows 11 NVIDIA & 2856.4 & 16.48 [16.3, 17.7] & 0.58\% & 24.6 & 136.2 & 387.5 & N/A\textsuperscript{*} \\
+Bun JSC Minimal 15 & Windows Intel iGPU & 53564.7 & 23.70 [23.4, 24.0] & 0.04\% & 23.6 & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{*} \\
+Neural Baseline (Direct Server) & macOS ARM64 (M4) & 5279.5 & 0.00 [0.0, 0.0] & 0.00\% & N/A\textsuperscript{\ddagger} & 88.2 & 463.2 & N/A\textsuperscript{\ddagger} \\
+Neural Baseline (Direct Server) & Linux x86\_64 & 2702.8 & 0.00 [0.0, 0.0] & 0.00\% & N/A\textsuperscript{\ddagger} & 210.0 & 569.4 & N/A\textsuperscript{\ddagger} \\
+Neural Baseline (Direct Server) & Windows 11 NVIDIA & 2773.5 & 0.00 [0.0, 0.0] & 0.00\% & N/A\textsuperscript{\ddagger} & 131.1 & 363.5 & N/A\textsuperscript{\ddagger} \\
+Neural Baseline (Direct Server) & Windows Intel iGPU & 51817.8 & 0.00 [0.0, 0.0] & 0.00\% & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{**} & N/A\textsuperscript{**} & N/A\textsuperscript{\ddagger} \\
+\hline
+\multicolumn{9}{l}{\textsuperscript{*}\footnotesize PMU instruction counters restricted in Windows user-mode; empirical CPU cycles tracked via QueryProcessCycleTime (45.8M in PicoClaw vs. 528.1M in OpenClaw Full, 11.54x ratio).} \\
+\multicolumn{9}{l}{\footnotesize \quad Refs \& Technical Docs: Weaver et al. (IEEE ISPASS 2013); Microsoft Learn (QueryProcessCycleTime); Intel SDM Vol. 3B Ch. 20.} \\
+\multicolumn{9}{l}{\textsuperscript{\S}\footnotesize \texttt{python\_native} on Windows captured \texttt{py.exe} launcher stub PID (PEP 397) instead of worker child (Win32 PSAPI); unified as N/A\textsuperscript{\S} across Fig.~2(b), Table~1, and Table~8.} \\
+\multicolumn{9}{l}{\footnotesize \quad Technical Docs: Python PEP 397; Microsoft Learn (GetProcessMemoryInfo / PROCESS\_MEMORY\_COUNTERS).} \\
+\multicolumn{9}{l}{\textsuperscript{\ddagger}\footnotesize Neural baseline issues direct HTTP requests to resident llama-server without client agent runtime ($T_{\text{orch}} \equiv 0$).} \\
+\multicolumn{9}{l}{\textsuperscript{||}\footnotesize Bun JSC was evaluated as a secondary JavaScript engine ablation on x86\_64 nodes (Linux and Windows) following the Darwin ARM64 reference campaign.} \\
+\multicolumn{9}{l}{\textsuperscript{**}\footnotesize Host energy \& EDP on Intel Graphics UMA uninstrumented in Windows user-mode (requires ring-0 MSR driver).} \\
+\multicolumn{9}{l}{\textsuperscript{\dagger}\footnotesize Cells with lag-1 serial autocorrelation $r_1 > 0.4$ subject to positive serial dependence.} \\
+\multicolumn{9}{l}{\footnotesize \textbf{Note --- Cross-ISA Hardware Counter Segregation:} Hardware instruction counts (ARM64 vs. x86\_64) are segregated due to microarchitectural density differences; evaluate via within-ISA relative ratios.} \\
+\multicolumn{9}{l}{\footnotesize \textbf{Note --- Clean Physical Executions:} All empirical datasets originate from clean from-scratch runs without partial data reuse.} \\
+\hline
+\end{tabular}
+}
+\end{table*}

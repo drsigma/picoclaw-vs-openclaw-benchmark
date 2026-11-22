@@ -1,5 +1,5 @@
 {
-  "protocol_version": "SoftwareX-Gate5-Gate6-v1.0",
+  "protocol_version": "Replication-Gate5-Gate6-v1.0",
   "status": "ALL_TOLERANCES_PASSED",
   "environment": {
     "timestamp_iso": "2026-11-13T15:33:32Z",

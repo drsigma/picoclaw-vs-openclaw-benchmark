@@ -1,0 +1,5863 @@
+#==============================================================================
+# ARTIFACT: 51_audit_summary_metrics_json_part05.txt
+# ORIGINAL_PATH: audit_export/audit_summary_metrics.json
+# PART: 5 / 9
+# ORIGINAL_SHA256: d9f4fb9e2e78928c321a49819243c4cfb82ec8a79931afc306c0a7a256c1c4a3
+# CHUNK_SHA256: 9f5d2e71fa3a0cb92aa8a0b8d5cf4e706fe88e77f3f2ef78c3dc76ffbb5b48f9
+# DESCRIPTION: Consolidated Numerical Metrics, Medians, and Confidence Intervals (JSON)
+#==============================================================================
+
+              64.803,
+              64.936
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 110.944,
+            "std": 16.457,
+            "median": 105.985,
+            "iqr": 9.032,
+            "ci_95": [
+              103.703,
+              109.427
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 151.323,
+            "std": 16.452,
+            "median": 146.373,
+            "iqr": 9.105,
+            "ci_95": [
+              144.417,
+              149.826
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 53.025,
+            "std": 7.934,
+            "median": 50.632,
+            "iqr": 3.526,
+            "ci_95": [
+              49.448,
+              52.354
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 163.27,
+            "std": 23.994,
+            "median": 156.063,
+            "iqr": 10.946,
+            "ci_95": [
+              154.531,
+              159.642
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 4007303371.0,
+            "std": 260087467.9,
+            "median": 3896980925.0,
+            "iqr": 126876696.25,
+            "ci_95": [
+              3866609729.688,
+              3918651918.213
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 7356783568.4,
+            "std": 522827553.44,
+            "median": 7127920129.0,
+            "iqr": 249900751.0,
+            "ci_95": [
+              7077918355.587,
+              7189212763.762
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 0.65,
+            "std": 0.8,
+            "median": 0.25,
+            "iqr": 1.0,
+            "ci_95": [
+              0.0,
+              1.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 7.367,
+            "std": 6.791,
+            "median": 10.75,
+            "iqr": 13.5,
+            "ci_95": [
+              0.5,
+              14.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": -0.434
+        },
+        "W4": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 13085.425,
+            "std": 77.88,
+            "median": 13073.879,
+            "iqr": 81.447,
+            "ci_95": [
+              13049.546,
+              13112.146
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 72.531,
+            "std": 3.913,
+            "median": 72.066,
+            "iqr": 4.499,
+            "ci_95": [
+              70.547,
+              73.063
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 13012.894,
+            "std": 77.657,
+            "median": 12995.507,
+            "iqr": 77.682,
+            "ci_95": [
+              12979.385,
+              13040.385
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.554,
+            "std": 0.03,
+            "median": 0.549,
+            "iqr": 0.032,
+            "ci_95": [
+              0.541,
+              0.559
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 395.625,
+            "std": 16.007,
+            "median": 399.896,
+            "iqr": 14.528,
+            "ci_95": [
+              392.625,
+              403.946
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 29.449,
+            "std": 0.185,
+            "median": 29.429,
+            "iqr": 0.206,
+            "ci_95": [
+              29.393,
+              29.529
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 22980.0,
+            "std": 0.0,
+            "median": 22980.0,
+            "iqr": 0.0,
+            "ci_95": [
+              22980.0,
+              22980.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 282.0,
+            "std": 0.0,
+            "median": 282.0,
+            "iqr": 0.0,
+            "ci_95": [
+              282.0,
+              282.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 10.0,
+            "std": 0.0,
+            "median": 10.0,
+            "iqr": 0.0,
+            "ci_95": [
+              10.0,
+              10.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 40.299,
+            "std": 0.067,
+            "median": 40.293,
+            "iqr": 0.056,
+            "ci_95": [
+              40.281,
+              40.312
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 931.59,
+            "std": 24.463,
+            "median": 923.673,
+            "iqr": 38.999,
+            "ci_95": [
+              915.463,
+              945.04
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 1197.956,
+            "std": 28.869,
+            "median": 1191.724,
+            "iqr": 43.584,
+            "ci_95": [
+              1187.684,
+              1209.587
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 67.564,
+            "std": 2.671,
+            "median": 67.573,
+            "iqr": 4.144,
+            "ci_95": [
+              66.376,
+              69.151
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 12190.597,
+            "std": 342.178,
+            "median": 12113.587,
+            "iqr": 507.589,
+            "ci_95": [
+              11974.291,
+              12388.719
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 2909687501.533,
+            "std": 62329689.224,
+            "median": 2923789336.5,
+            "iqr": 58767366.0,
+            "ci_95": [
+              2893284734.775,
+              2941809294.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 5021238124.1,
+            "std": 136099841.404,
+            "median": 5055434434.0,
+            "iqr": 115031184.75,
+            "ci_95": [
+              5002031031.062,
+              5086548136.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 281.594,
+            "std": 269.129,
+            "median": 203.75,
+            "iqr": 491.325,
+            "ci_95": [
+              60.091,
+              490.5
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 39.714,
+            "std": 26.743,
+            "median": 44.765,
+            "iqr": 40.242,
+            "ci_95": [
+              18.23,
+              52.82
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": -0.267
+        },
+        "W1": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 1739.295,
+            "std": 23.639,
+            "median": 1740.743,
+            "iqr": 29.179,
+            "ci_95": [
+              1728.711,
+              1752.22
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 15.552,
+            "std": 2.65,
+            "median": 15.848,
+            "iqr": 3.713,
+            "ci_95": [
+              13.877,
+              17.045
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 1723.743,
+            "std": 23.728,
+            "median": 1727.213,
+            "iqr": 27.448,
+            "ci_95": [
+              1712.743,
+              1734.696
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.894,
+            "std": 0.153,
+            "median": 0.914,
+            "iqr": 0.232,
+            "ci_95": [
+              0.801,
+              0.981
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 413.393,
+            "std": 14.687,
+            "median": 414.963,
+            "iqr": 15.625,
+            "ci_95": [
+              409.846,
+              418.681
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 32.759,
+            "std": 0.439,
+            "median": 32.828,
+            "iqr": 0.527,
+            "ci_95": [
+              32.575,
+              32.961
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 2153.0,
+            "std": 0.0,
+            "median": 2153.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2153.0,
+              2153.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 41.0,
+            "std": 0.0,
+            "median": 41.0,
+            "iqr": 0.0,
+            "ci_95": [
+              41.0,
+              41.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 0.0,
+            "std": 0.0,
+            "median": 0.0,
+            "iqr": 0.0,
+            "ci_95": [
+              0.0,
+              0.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 40.268,
+            "std": 0.063,
+            "median": 40.266,
+            "iqr": 0.077,
+            "ci_95": [
+              40.227,
+              40.299
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 141.295,
+            "std": 25.232,
+            "median": 135.794,
+            "iqr": 45.413,
+            "ci_95": [
+              120.233,
+              161.221
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 181.716,
+            "std": 25.295,
+            "median": 176.27,
+            "iqr": 45.463,
+            "ci_95": [
+              160.446,
+              201.965
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 67.443,
+            "std": 11.971,
+            "median": 64.718,
+            "iqr": 22.292,
+            "ci_95": [
+              57.624,
+              76.357
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 245.724,
+            "std": 43.851,
+            "median": 235.705,
+            "iqr": 83.688,
+            "ci_95": [
+              208.048,
+              280.42
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 2732012311.367,
+            "std": 31951318.914,
+            "median": 2736111912.5,
+            "iqr": 34225493.75,
+            "ci_95": [
+              2721449049.062,
+              2744968581.8
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 4910711518.867,
+            "std": 64496901.685,
+            "median": 4901616187.5,
+            "iqr": 71682579.75,
+            "ci_95": [
+              4890303964.925,
+              4940757435.512
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 1.133,
+            "std": 0.89,
+            "median": 1.5,
+            "iqr": 2.0,
+            "ci_95": [
+              0.5,
+              2.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 7.667,
+            "std": 6.783,
+            "median": 13.5,
+            "iqr": 14.0,
+            "ci_95": [
+              0.25,
+              13.5
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": -0.094
+        },
+        "W5": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 3014.615,
+            "std": 59.274,
+            "median": 2992.376,
+            "iqr": 56.841,
+            "ci_95": [
+              2981.862,
+              3027.203
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 1419.583,
+            "std": 27.685,
+            "median": 1416.321,
+            "iqr": 34.422,
+            "ci_95": [
+              1405.164,
+              1428.765
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 1595.032,
+            "std": 44.041,
+            "median": 1585.548,
+            "iqr": 23.985,
+            "ci_95": [
+              1577.106,
+              1594.365
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 47.095,
+            "std": 0.683,
+            "median": 47.13,
+            "iqr": 0.659,
+            "ci_95": [
+              46.904,
+              47.389
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 523.448,
+            "std": 13.224,
+            "median": 520.813,
+            "iqr": 9.414,
+            "ci_95": [
+              517.416,
+              524.788
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 28.962,
+            "std": 0.982,
+            "median": 28.714,
+            "iqr": 0.649,
+            "ci_95": [
+              28.544,
+              28.985
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 2259.0,
+            "std": 0.0,
+            "median": 2259.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2259.0,
+              2259.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 38.0,
+            "std": 0.0,
+            "median": 38.0,
+            "iqr": 0.0,
+            "ci_95": [
+              38.0,
+              38.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 2.0,
+            "std": 0.0,
+            "median": 2.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2.0,
+              2.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 87.355,
+            "std": 0.081,
+            "median": 87.352,
+            "iqr": 0.087,
+            "ci_95": [
+              87.324,
+              87.375
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 200.71,
+            "std": 18.024,
+            "median": 196.498,
+            "iqr": 22.026,
+            "ci_95": [
+              191.442,
+              198.372
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 280.246,
+            "std": 18.043,
+            "median": 276.068,
+            "iqr": 22.311,
+            "ci_95": [
+              270.84,
+              277.96
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 48.697,
+            "std": 4.365,
+            "median": 47.55,
+            "iqr": 5.176,
+            "ci_95": [
+              46.528,
+              48.101
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 605.343,
+            "std": 59.107,
+            "median": 588.162,
+            "iqr": 64.51,
+            "ci_95": [
+              570.602,
+              620.855
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 4652909186.1,
+            "std": 44198313.689,
+            "median": 4668967423.0,
+            "iqr": 62361619.75,
+            "ci_95": [
+              4650189906.0,
+              4676137268.363
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 6435013788.567,
+            "std": 87197836.978,
+            "median": 6471443886.0,
+            "iqr": 102948225.25,
+            "ci_95": [
+              6424922658.5,
+              6485775071.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 1.45,
+            "std": 1.179,
+            "median": 1.0,
+            "iqr": 0.75,
+            "ci_95": [
+              1.0,
+              1.691
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 7.933,
+            "std": 6.118,
+            "median": 7.0,
+            "iqr": 11.625,
+            "ci_95": [
+              7.0,
+              10.441
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": -0.171
+        }
+      },
+      "openclaw_full": {
+        "W4": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 27755.252,
+            "std": 76.765,
+            "median": 27753.211,
+            "iqr": 98.111,
+            "ci_95": [
+              27710.633,
+              27786.247
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 142.917,
+            "std": 4.73,
+            "median": 142.132,
+            "iqr": 3.85,
+            "ci_95": [
+              140.93,
+              143.539
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 27612.334,
+            "std": 76.658,
+            "median": 27612.988,
+            "iqr": 95.615,
+            "ci_95": [
+              27567.527,
+              27646.386
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.515,
+            "std": 0.017,
+            "median": 0.512,
+            "iqr": 0.013,
+            "ci_95": [
+              0.509,
+              0.517
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 827.523,
+            "std": 12.19,
+            "median": 828.209,
+            "iqr": 14.355,
+            "ci_95": [
+              822.569,
+              832.505
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 63.711,
+            "std": 0.187,
+            "median": 63.677,
+            "iqr": 0.219,
+            "ci_95": [
+              63.63,
+              63.757
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 72120.0,
+            "std": 0.0,
+            "median": 72120.0,
+            "iqr": 0.0,
+            "ci_95": [
+              72120.0,
+              72120.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 292.0,
+            "std": 0.0,
+            "median": 292.0,
+            "iqr": 0.0,
+            "ci_95": [
+              292.0,
+              292.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 10.0,
+            "std": 0.0,
+            "median": 10.0,
+            "iqr": 0.0,
+            "ci_95": [
+              10.0,
+              10.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 86.381,
+            "std": 0.07,
+            "median": 86.383,
+            "iqr": 0.09,
+            "ci_95": [
+              86.356,
+              86.402
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 1621.675,
+            "std": 21.82,
+            "median": 1626.698,
+            "iqr": 30.731,
+            "ci_95": [
+              1617.954,
+              1633.457
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 2170.133,
+            "std": 21.863,
+            "median": 2174.914,
+            "iqr": 31.807,
+            "ci_95": [
+              2167.064,
+              2181.451
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 57.057,
+            "std": 0.767,
+            "median": 57.289,
+            "iqr": 1.002,
+            "ci_95": [
+              56.871,
+              57.519
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 45009.899,
+            "std": 610.493,
+            "median": 45201.65,
+            "iqr": 919.978,
+            "ci_95": [
+              44942.667,
+              45354.046
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 1098390586.2,
+            "std": 3069132.914,
+            "median": 1096918975.5,
+            "iqr": 5504517.5,
+            "ci_95": [
+              1096240919.5,
+              1100394075.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 916421886.633,
+            "std": 13639477.938,
+            "median": 913528741.5,
+            "iqr": 19273774.75,
+            "ci_95": [
+              906896684.7,
+              923516078.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 144.581,
+            "std": 120.484,
+            "median": 233.43,
+            "iqr": 248.33,
+            "ci_95": [
+              2.64,
+              247.16
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 19.912,
+            "std": 10.364,
+            "median": 25.18,
+            "iqr": 19.17,
+            "ci_95": [
+              14.921,
+              26.556
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": -0.156
+        },
+        "W2": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 2633.748,
+            "std": 17.987,
+            "median": 2633.737,
+            "iqr": 28.371,
+            "ci_95": [
+              2624.581,
+              2644.172
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 34.738,
+            "std": 0.753,
+            "median": 34.547,
+            "iqr": 0.966,
+            "ci_95": [
+              34.293,
+              34.948
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 2599.01,
+            "std": 18.118,
+            "median": 2599.523,
+            "iqr": 28.918,
+            "ci_95": [
+              2590.565,
+              2607.785
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 1.319,
+            "std": 0.031,
+            "median": 1.31,
+            "iqr": 0.043,
+            "ci_95": [
+              1.304,
+              1.328
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 840.703,
+            "std": 7.924,
+            "median": 840.44,
+            "iqr": 8.646,
+            "ci_95": [
+              837.492,
+              841.735
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 62.797,
+            "std": 0.509,
+            "median": 62.754,
+            "iqr": 0.688,
+            "ci_95": [
+              62.563,
+              63.06
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 7091.0,
+            "std": 0.0,
+            "median": 7091.0,
+            "iqr": 0.0,
+            "ci_95": [
+              7091.0,
+              7091.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 29.0,
+            "std": 0.0,
+            "median": 29.0,
+            "iqr": 0.0,
+            "ci_95": [
+              29.0,
+              29.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 3.0,
+            "std": 0.0,
+            "median": 3.0,
+            "iqr": 0.0,
+            "ci_95": [
+              3.0,
+              3.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 86.646,
+            "std": 0.067,
+            "median": 86.637,
+            "iqr": 0.092,
+            "ci_95": [
+              86.611,
+              86.69
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 157.771,
+            "std": 14.927,
+            "median": 153.149,
+            "iqr": 15.699,
+            "ci_95": [
+              149.464,
+              158.696
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 217.856,
+            "std": 14.986,
+            "median": 213.221,
+            "iqr": 15.843,
+            "ci_95": [
+              209.72,
+              219.218
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 50.666,
+            "std": 4.747,
+            "median": 49.322,
+            "iqr": 5.232,
+            "ci_95": [
+              47.971,
+              50.556
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 415.611,
+            "std": 40.362,
+            "median": 403.773,
+            "iqr": 43.119,
+            "ci_95": [
+              392.767,
+              417.313
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 770930059.167,
+            "std": 2344792.684,
+            "median": 771554165.5,
+            "iqr": 2481324.25,
+            "ci_95": [
+              770982941.987,
+              772035048.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 519013088.567,
+            "std": 10728835.644,
+            "median": 518161065.5,
+            "iqr": 10821138.25,
+            "ci_95": [
+              514314178.562,
+              522482444.162
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 0.812,
+            "std": 0.757,
+            "median": 0.67,
+            "iqr": 1.67,
+            "ci_95": [
+              0.0,
+              1.67
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 3.077,
+            "std": 4.404,
+            "median": 0.0,
+            "iqr": 9.0,
+            "ci_95": [
+              0.0,
+              6.941
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": -0.162
+        },
+        "W3": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 3124.926,
+            "std": 20.826,
+            "median": 3123.941,
+            "iqr": 22.149,
+            "ci_95": [
+              3119.009,
+              3127.095
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 60.378,
+            "std": 1.519,
+            "median": 60.337,
+            "iqr": 1.397,
+            "ci_95": [
+              59.826,
+              60.746
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 3064.547,
+            "std": 20.545,
+            "median": 3062.76,
+            "iqr": 20.773,
+            "ci_95": [
+              3058.65,
+              3066.728
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 1.932,
+            "std": 0.047,
+            "median": 1.93,
+            "iqr": 0.029,
+            "ci_95": [
+              1.924,
+              1.945
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 870.864,
+            "std": 8.523,
+            "median": 870.462,
+            "iqr": 8.435,
+            "ci_95": [
+              866.997,
+              873.984
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 68.553,
+            "std": 0.532,
+            "median": 68.516,
+            "iqr": 0.69,
+            "ci_95": [
+              68.451,
+              68.799
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 7337.0,
+            "std": 0.0,
+            "median": 7337.0,
+            "iqr": 0.0,
+            "ci_95": [
+              7337.0,
+              7337.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 33.0,
+            "std": 0.0,
+            "median": 33.0,
+            "iqr": 0.0,
+            "ci_95": [
+              33.0,
+              33.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 1.0,
+            "std": 0.0,
+            "median": 1.0,
+            "iqr": 0.0,
+            "ci_95": [
+              1.0,
+              1.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 94.418,
+            "std": 0.17,
+            "median": 94.373,
+            "iqr": 0.136,
+            "ci_95": [
+              94.324,
+              94.43
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 177.661,
+            "std": 7.899,
+            "median": 176.36,
+            "iqr": 5.856,
+            "ci_95": [
+              174.864,
+              177.949
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 257.366,
+            "std": 7.914,
+            "median": 256.068,
+            "iqr": 6.54,
+            "ci_95": [
+              254.64,
+              257.711
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 43.013,
+            "std": 1.917,
+            "median": 42.635,
+            "iqr": 1.216,
+            "ci_95": [
+              42.355,
+              43.206
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 555.142,
+            "std": 24.053,
+            "median": 552.31,
+            "iqr": 17.467,
+            "ci_95": [
+              547.434,
+              557.324
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 1055528423.733,
+            "std": 6420200.591,
+            "median": 1058933188.5,
+            "iqr": 12373001.5,
+            "ci_95": [
+              1049237760.0,
+              1060683430.087
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 636952645.867,
+            "std": 11349108.42,
+            "median": 635921318.0,
+            "iqr": 11627220.0,
+            "ci_95": [
+              633516032.0,
+              638196901.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 0.992,
+            "std": 0.476,
+            "median": 1.125,
+            "iqr": 0.75,
+            "ci_95": [
+              0.75,
+              1.25
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 6.525,
+            "std": 4.716,
+            "median": 7.0,
+            "iqr": 5.125,
+            "ci_95": [
+              7.0,
+              7.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.015
+        },
+        "W1": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 3786.764,
+            "std": 24.94,
+            "median": 3788.041,
+            "iqr": 34.896,
+            "ci_95": [
+              3778.483,
+              3795.396
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 33.737,
+            "std": 1.735,
+            "median": 33.202,
+            "iqr": 1.139,
+            "ci_95": [
+              32.858,
+              33.579
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 3753.027,
+            "std": 25.256,
+            "median": 3755.212,
+            "iqr": 34.506,
+            "ci_95": [
+              3741.728,
+              3761.635
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.891,
+            "std": 0.047,
+            "median": 0.88,
+            "iqr": 0.029,
+            "ci_95": [
+              0.866,
+              0.884
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 838.929,
+            "std": 7.032,
+            "median": 838.453,
+            "iqr": 8.251,
+            "ci_95": [
+              835.473,
+              840.3
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 71.076,
+            "std": 0.562,
+            "median": 71.102,
+            "iqr": 0.77,
+            "ci_95": [
+              70.858,
+              71.343
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 7067.0,
+            "std": 0.0,
+            "median": 7067.0,
+            "iqr": 0.0,
+            "ci_95": [
+              7067.0,
+              7067.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 42.0,
+            "std": 0.0,
+            "median": 42.0,
+            "iqr": 0.0,
+            "ci_95": [
+              42.0,
+              42.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 0.0,
+            "std": 0.0,
+            "median": 0.0,
+            "iqr": 0.0,
+            "ci_95": [
+              0.0,
+              0.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 85.572,
+            "std": 0.113,
+            "median": 85.609,
+            "iqr": 0.105,
+            "ci_95": [
+              85.592,
+              85.621
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 226.01,
+            "std": 20.737,
+            "median": 219.097,
+            "iqr": 29.768,
+            "ci_95": [
+              214.031,
+              234.85
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 305.63,
+            "std": 20.755,
+            "median": 298.515,
+            "iqr": 29.443,
+            "ci_95": [
+              293.512,
+              313.887
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 54.777,
+            "std": 5.017,
+            "median": 53.236,
+            "iqr": 7.202,
+            "ci_95": [
+              51.963,
+              57.094
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 855.665,
+            "std": 76.529,
+            "median": 833.236,
+            "iqr": 112.17,
+            "ci_95": [
+              813.115,
+              888.848
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 748339292.867,
+            "std": 2443388.653,
+            "median": 749681594.0,
+            "iqr": 4648269.0,
+            "ci_95": [
+              745931204.0,
+              750040108.737
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 518745927.5,
+            "std": 11924876.711,
+            "median": 515912813.0,
+            "iqr": 7922248.75,
+            "ci_95": [
+              513995919.262,
+              518144031.087
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 1.033,
+            "std": 0.715,
+            "median": 1.25,
+            "iqr": 0.688,
+            "ci_95": [
+              0.809,
+              1.25
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 4.65,
+            "std": 3.803,
+            "median": 6.875,
+            "iqr": 7.0,
+            "ci_95": [
+              1.603,
+              7.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.031
+        },
+        "W5": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 3116.335,
+            "std": 30.201,
+            "median": 3117.556,
+            "iqr": 29.71,
+            "ci_95": [
+              3111.673,
+              3126.564
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 33.666,
+            "std": 1.767,
+            "median": 33.276,
+            "iqr": 0.949,
+            "ci_95": [
+              32.891,
+              33.434
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 3082.669,
+            "std": 30.028,
+            "median": 3085.105,
+            "iqr": 29.576,
+            "ci_95": [
+              3074.845,
+              3093.299
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 1.08,
+            "std": 0.056,
+            "median": 1.071,
+            "iqr": 0.035,
+            "ci_95": [
+              1.06,
+              1.079
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 828.513,
+            "std": 10.394,
+            "median": 828.166,
+            "iqr": 11.633,
+            "ci_95": [
+              824.364,
+              831.459
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 66.299,
+            "std": 0.735,
+            "median": 66.422,
+            "iqr": 0.71,
+            "ci_95": [
+              66.094,
+              66.573
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 6921.0,
+            "std": 0.0,
+            "median": 6921.0,
+            "iqr": 0.0,
+            "ci_95": [
+              6921.0,
+              6921.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 35.0,
+            "std": 0.0,
+            "median": 35.0,
+            "iqr": 0.0,
+            "ci_95": [
+              35.0,
+              35.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 2.0,
+            "std": 0.0,
+            "median": 2.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2.0,
+              2.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 85.601,
+            "std": 0.044,
+            "median": 85.594,
+            "iqr": 0.068,
+            "ci_95": [
+              85.575,
+              85.627
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 180.086,
+            "std": 10.596,
+            "median": 177.865,
+            "iqr": 9.899,
+            "ci_95": [
+              174.819,
+              180.302
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 259.684,
+            "std": 10.581,
+            "median": 257.174,
+            "iqr": 10.282,
+            "ci_95": [
+              254.488,
+              259.892
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 43.66,
+            "std": 2.589,
+            "median": 43.144,
+            "iqr": 2.387,
+            "ci_95": [
+              42.47,
+              43.797
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 561.23,
+            "std": 33.786,
+            "median": 554.945,
+            "iqr": 34.229,
+            "ci_95": [
+              546.631,
+              562.126
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 745706035.533,
+            "std": 2732956.898,
+            "median": 747130218.5,
+            "iqr": 5520920.5,
+            "ci_95": [
+              743747519.025,
+              747743581.8
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 509111181.133,
+            "std": 9419876.455,
+            "median": 510393378.5,
+            "iqr": 9374579.0,
+            "ci_95": [
+              506344616.5,
+              512636450.637
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 0.35,
+            "std": 0.625,
+            "median": 0.0,
+            "iqr": 0.438,
+            "ci_95": [
+              0.0,
+              0.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 1.025,
+            "std": 2.995,
+            "median": 0.0,
+            "iqr": 0.25,
+            "ci_95": [
+              0.0,
+              0.25
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.193
+        }
+      },
+      "bun_minimal": {
+        "W3": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 1412.216,
+            "std": 22.318,
+            "median": 1407.053,
+            "iqr": 33.315,
+            "ci_95": [
+              1401.235,
+              1421.134
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 28.975,
+            "std": 2.544,
+            "median": 28.881,
+            "iqr": 4.949,
+            "ci_95": [
+              26.752,
+              30.559
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 1383.241,
+            "std": 22.522,
+            "median": 1379.345,
+            "iqr": 33.342,
+            "ci_95": [
+              1369.431,
+              1392.82
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 2.052,
+            "std": 0.183,
+            "median": 2.063,
+            "iqr": 0.305,
+            "ci_95": [
+              1.916,
+              2.155
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 436.913,
+            "std": 8.485,
+            "median": 435.839,
+            "iqr": 5.622,
+            "ci_95": [
+              434.702,
+              438.256
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 30.527,
+            "std": 0.551,
+            "median": 30.478,
+            "iqr": 0.87,
+            "ci_95": [
+              30.14,
+              30.782
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 2423.0,
+            "std": 0.0,
+            "median": 2423.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2423.0,
+              2423.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 32.0,
+            "std": 0.0,
+            "median": 32.0,
+            "iqr": 0.0,
+            "ci_95": [
+              32.0,
+              32.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 1.0,
+            "std": 0.0,
+            "median": 1.0,
+            "iqr": 0.0,
+            "ci_95": [
+              1.0,
+              1.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 58.328,
+            "std": 0.149,
+            "median": 58.359,
+            "iqr": 0.214,
+            "ci_95": [
+              58.287,
+              58.395
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 100.556,
+            "std": 10.762,
+            "median": 98.688,
+            "iqr": 7.656,
+            "ci_95": [
+              97.052,
+              101.032
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 141.175,
+            "std": 10.645,
+            "median": 139.317,
+            "iqr": 7.453,
+            "ci_95": [
+              137.819,
+              141.92
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 47.79,
+            "std": 5.337,
+            "median": 46.805,
+            "iqr": 3.194,
+            "ci_95": [
+              45.972,
+              47.887
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 142.05,
+            "std": 15.87,
+            "median": 139.101,
+            "iqr": 9.532,
+            "ci_95": [
+              137.439,
+              144.046
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 343451217.767,
+            "std": 11360131.537,
+            "median": 338024946.0,
+            "iqr": 16779718.5,
+            "ci_95": [
+              335209781.238,
+              349732896.287
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 197335478.633,
+            "std": 7152730.315,
+            "median": 197317160.5,
+            "iqr": 10234564.25,
+            "ci_95": [
+              193916994.5,
+              201964895.5
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 0.933,
+            "std": 0.898,
+            "median": 0.75,
+            "iqr": 2.0,
+            "ci_95": [
+              0.119,
+              1.25
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 5.667,
+            "std": 6.855,
+            "median": 0.5,
+            "iqr": 14.0,
+            "ci_95": [
+              0.0,
+              13.631
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.157
+        },
+        "W5": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 1574.832,
+            "std": 24.128,
+            "median": 1571.365,
+            "iqr": 32.099,
+            "ci_95": [
+              1566.696,
+              1586.908
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 5.479,
+            "std": 0.719,
+            "median": 5.394,
+            "iqr": 1.294,
+            "ci_95": [
+              4.897,
+              5.995
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 1569.353,
+            "std": 24.013,
+            "median": 1566.006,
+            "iqr": 31.639,
+            "ci_95": [
+              1561.171,
+              1581.344
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.348,
+            "std": 0.045,
+            "median": 0.339,
+            "iqr": 0.078,
+            "ci_95": [
+              0.315,
+              0.383
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 415.805,
+            "std": 7.65,
+            "median": 415.453,
+            "iqr": 10.924,
+            "ci_95": [
+              411.938,
+              420.207
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 31.177,
+            "std": 0.512,
+            "median": 31.124,
+            "iqr": 0.685,
+            "ci_95": [
+              30.963,
+              31.387
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 2259.0,
+            "std": 0.0,
+            "median": 2259.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2259.0,
+              2259.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 38.0,
+            "std": 0.0,
+            "median": 38.0,
+            "iqr": 0.0,
+            "ci_95": [
+              38.0,
+              38.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 2.0,
+            "std": 0.0,
+            "median": 2.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2.0,
+              2.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 22.865,
+            "std": 0.146,
+            "median": 22.838,
+            "iqr": 0.27,
+            "ci_95": [
+              22.777,
+              22.92
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 113.941,
+            "std": 16.778,
+            "median": 109.065,
+            "iqr": 6.61,
+            "ci_95": [
+              107.555,
+              110.767
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 154.429,
+            "std": 16.822,
+            "median": 149.268,
+            "iqr": 6.394,
+            "ci_95": [
+              147.923,
+              151.437
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 54.299,
+            "std": 7.919,
+            "median": 52.336,
+            "iqr": 3.545,
+            "ci_95": [
+              51.032,
+              52.723
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 179.405,
+            "std": 26.2,
+            "median": 170.99,
+            "iqr": 10.95,
+            "ci_95": [
+              168.14,
+              174.658
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 48271879.567,
+            "std": 589362.862,
+            "median": 48103400.0,
+            "iqr": 744612.5,
+            "ci_95": [
+              47920255.8,
+              48405474.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 59274303.667,
+            "std": 2245433.183,
+            "median": 59375901.5,
+            "iqr": 2450506.75,
+            "ci_95": [
+              58699912.4,
+              59927991.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 1.117,
+            "std": 0.858,
+            "median": 1.0,
+            "iqr": 2.0,
+            "ci_95": [
+              0.5,
+              2.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 12.783,
+            "std": 8.313,
+            "median": 14.0,
+            "iqr": 0.875,
+            "ci_95": [
+              14.0,
+              14.131
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": -0.086
+        },
+        "W2": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 1251.411,
+            "std": 21.091,
+            "median": 1244.774,
+            "iqr": 32.568,
+            "ci_95": [
+              1236.812,
+              1260.88
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 6.719,
+            "std": 0.794,
+            "median": 6.966,
+            "iqr": 1.16,
+            "ci_95": [
+              6.18,
+              7.045
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 1244.691,
+            "std": 21.17,
+            "median": 1237.525,
+            "iqr": 33.083,
+            "ci_95": [
+              1230.117,
+              1253.72
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.537,
+            "std": 0.065,
+            "median": 0.552,
+            "iqr": 0.091,
+            "ci_95": [
+              0.494,
+              0.559
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 378.369,
+            "std": 6.1,
+            "median": 378.005,
+            "iqr": 9.344,
+            "ci_95": [
+              374.605,
+              381.021
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 29.873,
+            "std": 0.586,
+            "median": 29.683,
+            "iqr": 0.988,
+            "ci_95": [
+              29.478,
+              30.06
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 2177.0,
+            "std": 0.0,
+            "median": 2177.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2177.0,
+              2177.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 30.0,
+            "std": 0.0,
+            "median": 30.0,
+            "iqr": 0.0,
+            "ci_95": [
+              30.0,
+              30.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 3.0,
+            "std": 0.0,
+            "median": 3.0,
+            "iqr": 0.0,
+            "ci_95": [
+              3.0,
+              3.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 24.03,
+            "std": 0.135,
+            "median": 24.02,
+            "iqr": 0.206,
+            "ci_95": [
+              23.951,
+              24.043
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 89.936,
+            "std": 6.814,
+            "median": 91.622,
+            "iqr": 8.542,
+            "ci_95": [
+              87.908,
+              92.783
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 130.58,
+            "std": 6.788,
+            "median": 132.315,
+            "iqr": 8.44,
+            "ci_95": [
+              128.504,
+              133.493
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 42.705,
+            "std": 3.298,
+            "median": 43.201,
+            "iqr": 3.97,
+            "ci_95": [
+              41.839,
+              43.932
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 112.556,
+            "std": 8.854,
+            "median": 113.621,
+            "iqr": 10.145,
+            "ci_95": [
+              110.163,
+              116.83
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 53014382.267,
+            "std": 584129.961,
+            "median": 52898384.5,
+            "iqr": 628143.75,
+            "ci_95": [
+              52668551.0,
+              53156264.15
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 58845058.333,
+            "std": 2348018.712,
+            "median": 58682685.5,
+            "iqr": 3545882.5,
+            "ci_95": [
+              57267838.0,
+              60077669.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 1.433,
+            "std": 0.716,
+            "median": 1.5,
+            "iqr": 0.875,
+            "ci_95": [
+              1.5,
+              2.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 11.383,
+            "std": 9.672,
+            "median": 14.0,
+            "iqr": 13.375,
+            "ci_95": [
+              1.0,
+              14.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.227
+        },
+        "W4": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 13050.911,
+            "std": 55.315,
+            "median": 13062.836,
+            "iqr": 76.351,
+            "ci_95": [
+              13015.605,
+              13075.853
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 53.407,
+            "std": 2.023,
+            "median": 53.25,
+            "iqr": 2.451,
+            "ci_95": [
+              52.483,
+              54.137
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 12997.504,
+            "std": 55.888,
+            "median": 13009.852,
+            "iqr": 76.639,
+            "ci_95": [
+              12962.102,
+              13022.765
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.409,
+            "std": 0.016,
+            "median": 0.407,
+            "iqr": 0.02,
+            "ci_95": [
+              0.401,
+              0.416
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 358.559,
+            "std": 6.274,
+            "median": 356.899,
+            "iqr": 6.862,
+            "ci_95": [
+              355.689,
+              360.552
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 29.506,
+            "std": 0.165,
+            "median": 29.53,
+            "iqr": 0.235,
+            "ci_95": [
+              29.459,
+              29.594
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 22980.0,
+            "std": 0.0,
+            "median": 22980.0,
+            "iqr": 0.0,
+            "ci_95": [
+              22980.0,
+              22980.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 282.0,
+            "std": 0.0,
+            "median": 282.0,
+            "iqr": 0.0,
+            "ci_95": [
+              282.0,
+              282.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 10.0,
+            "std": 0.0,
+            "median": 10.0,
+            "iqr": 0.0,
+            "ci_95": [
+              10.0,
+              10.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 29.012,
+            "std": 0.083,
+            "median": 29.031,
+            "iqr": 0.133,
+            "ci_95": [
+              29.003,
+              29.061
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 917.668,
+            "std": 21.159,
+            "median": 916.669,
+            "iqr": 34.758,
+            "ci_95": [
+              907.153,
+              929.569
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 1173.065,
+            "std": 21.288,
+            "median": 1171.835,
+            "iqr": 34.813,
+            "ci_95": [
+              1163.271,
+              1185.502
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 69.336,
+            "std": 1.572,
+            "median": 69.373,
+            "iqr": 2.644,
+            "ci_95": [
+              68.396,
+              70.089
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 11976.492,
+            "std": 284.449,
+            "median": 11974.962,
+            "iqr": 481.097,
+            "ci_95": [
+              11817.138,
+              12140.626
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 132761005.6,
+            "std": 2574329.848,
+            "median": 132195018.0,
+            "iqr": 2634390.25,
+            "ci_95": [
+              131829238.075,
+              133585327.975
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 208914747.333,
+            "std": 4725668.877,
+            "median": 209151098.5,
+            "iqr": 6620919.5,
+            "ci_95": [
+              206660678.863,
+              210437828.05
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 867.699,
+            "std": 281.842,
+            "median": 1058.27,
+            "iqr": 528.502,
+            "ci_95": [
+              804.46,
+              1064.155
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 99.128,
+            "std": 10.914,
+            "median": 102.81,
+            "iqr": 9.212,
+            "ci_95": [
+              100.23,
+              104.853
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.11
+        },
+        "W1": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 1703.47,
+            "std": 19.47,
+            "median": 1704.973,
+            "iqr": 25.828,
+            "ci_95": [
+              1695.344,
+              1711.591
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 4.929,
+            "std": 0.669,
+            "median": 4.572,
+            "iqr": 1.051,
+            "ci_95": [
+              4.479,
+              4.801
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 1698.541,
+            "std": 19.603,
+            "median": 1699.47,
+            "iqr": 26.327,
+            "ci_95": [
+              1690.343,
+              1707.158
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.289,
+            "std": 0.04,
+            "median": 0.267,
+            "iqr": 0.063,
+            "ci_95": [
+              0.265,
+              0.283
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 377.174,
+            "std": 5.789,
+            "median": 376.469,
+            "iqr": 8.833,
+            "ci_95": [
+              373.588,
+              380.369
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 33.034,
+            "std": 0.443,
+            "median": 33.111,
+            "iqr": 0.627,
+            "ci_95": [
+              32.767,
+              33.284
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 2153.0,
+            "std": 0.0,
+            "median": 2153.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2153.0,
+              2153.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 41.0,
+            "std": 0.0,
+            "median": 41.0,
+            "iqr": 0.0,
+            "ci_95": [
+              41.0,
+              41.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 0.0,
+            "std": 0.0,
+            "median": 0.0,
+            "iqr": 0.0,
+            "ci_95": [
+              0.0,
+              0.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 22.734,
+            "std": 0.043,
+            "median": 22.721,
+            "iqr": 0.058,
+            "ci_95": [
+              22.711,
+              22.749
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 132.457,
+            "std": 19.498,
+            "median": 123.626,
+            "iqr": 28.854,
+            "ci_95": [
+              119.955,
+              138.865
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 172.881,
+            "std": 19.473,
+            "median": 163.717,
+            "iqr": 28.943,
+            "ci_95": [
+              160.344,
+              179.524
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 63.24,
+            "std": 9.367,
+            "median": 59.454,
+            "iqr": 14.42,
+            "ci_95": [
+              57.466,
+              65.901
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 225.616,
+            "std": 33.17,
+            "median": 209.103,
+            "iqr": 55.212,
+            "ci_95": [
+              204.456,
+              238.292
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 48814393.2,
+            "std": 472567.528,
+            "median": 48749404.5,
+            "iqr": 495889.25,
+            "ci_95": [
+              48627910.812,
+              49037939.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 60561327.333,
+            "std": 2122317.716,
+            "median": 60505004.5,
+            "iqr": 3342848.75,
+            "ci_95": [
+              59617748.038,
+              61800669.137
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 1.183,
+            "std": 0.793,
+            "median": 1.25,
+            "iqr": 1.375,
+            "ci_95": [
+              1.0,
+              1.881
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 9.067,
+            "std": 8.401,
+            "median": 13.75,
+            "iqr": 13.5,
+            "ci_95": [
+              0.5,
+              14.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.311
+        }
+      },
+      "picoclaw": {
+        "W5": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 1578.537,
+            "std": 20.996,
+            "median": 1580.903,
+            "iqr": 32.613,
+            "ci_95": [
+              1566.442,
+              1584.98
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 4.95,
+            "std": 0.794,
+            "median": 4.918,
+            "iqr": 1.552,
+            "ci_95": [
+              4.258,
+              5.573
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 1573.588,
+            "std": 21.063,
+            "median": 1575.965,
+            "iqr": 33.212,
+            "ci_95": [
+              1562.004,
+              1580.213
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.314,
+            "std": 0.051,
+            "median": 0.31,
+            "iqr": 0.098,
+            "ci_95": [
+              0.27,
+              0.352
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 417.51,
+            "std": 8.398,
+            "median": 415.704,
+            "iqr": 10.256,
+            "ci_95": [
+              413.093,
+              420.352
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 31.245,
+            "std": 0.486,
+            "median": 31.245,
+            "iqr": 0.722,
+            "ci_95": [
+              30.919,
+              31.437
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 2259.0,
+            "std": 0.0,
+            "median": 2259.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2259.0,
+              2259.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 38.0,
+            "std": 0.0,
+            "median": 38.0,
+            "iqr": 0.0,
+            "ci_95": [
+              38.0,
+              38.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 2.0,
+            "std": 0.0,
+            "median": 2.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2.0,
+              2.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 8.838,
+            "std": 0.087,
+            "median": 8.795,
+            "iqr": 0.149,
+            "ci_95": [
+              8.765,
+              8.894
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 120.19,
+            "std": 19.753,
+            "median": 111.156,
+            "iqr": 29.726,
+            "ci_95": [
+              108.388,
+              123.197
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 160.599,
+            "std": 19.864,
+            "median": 151.899,
+            "iqr": 29.926,
+            "ci_95": [
+              148.55,
+              163.871
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 57.375,
+            "std": 9.271,
+            "median": 53.058,
+            "iqr": 13.772,
+            "ci_95": [
+              51.945,
+              58.457
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 189.725,
+            "std": 31.298,
+            "median": 175.828,
+            "iqr": 48.762,
+            "ci_95": [
+              168.353,
+              193.916
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 11280559.333,
+            "std": 179507.842,
+            "median": 11240099.0,
+            "iqr": 178508.75,
+            "ci_95": [
+              11185782.512,
+              11288588.188
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 19219019.5,
+            "std": 726292.579,
+            "median": 19193981.0,
+            "iqr": 971729.75,
+            "ci_95": [
+              18964599.3,
+              19600561.038
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 1.1,
+            "std": 0.845,
+            "median": 1.0,
+            "iqr": 2.0,
+            "ci_95": [
+              0.738,
+              1.75
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 15.533,
+            "std": 8.987,
+            "median": 14.0,
+            "iqr": 10.25,
+            "ci_95": [
+              14.0,
+              14.5
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.021
+        },
+        "W2": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 1247.411,
+            "std": 18.13,
+            "median": 1246.485,
+            "iqr": 16.283,
+            "ci_95": [
+              1235.607,
+              1263.671
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 7.017,
+            "std": 0.858,
+            "median": 6.912,
+            "iqr": 1.351,
+            "ci_95": [
+              6.611,
+              7.789
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 1240.393,
+            "std": 18.313,
+            "median": 1240.05,
+            "iqr": 16.133,
+            "ci_95": [
+              1235.129,
+              1242.448
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.563,
+            "std": 0.071,
+            "median": 0.554,
+            "iqr": 0.098,
+            "ci_95": [
+              0.531,
+              0.617
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 377.9,
+            "std": 8.79,
+            "median": 376.071,
+            "iqr": 15.966,
+            "ci_95": [
+              371.567,
+              382.292
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 29.741,
+            "std": 0.471,
+            "median": 29.699,
+            "iqr": 0.443,
+            "ci_95": [
+              29.584,
+              29.885
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 2177.0,
+            "std": 0.0,
+            "median": 2177.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2177.0,
+              2177.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 30.0,
+            "std": 0.0,
+            "median": 30.0,
+            "iqr": 0.0,
+            "ci_95": [
+              30.0,
+              30.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 3.0,
+            "std": 0.0,
+            "median": 3.0,
+            "iqr": 0.0,
+            "ci_95": [
+              3.0,
+              3.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 9.704,
+            "std": 0.063,
+            "median": 9.684,
+            "iqr": 0.045,
+            "ci_95": [
+              9.676,
+              9.705
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 90.882,
+            "std": 5.65,
+            "median": 90.576,
+            "iqr": 5.456,
+            "ci_95": [
+              89.424,
+              92.303
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 131.41,
+            "std": 5.64,
+            "median": 131.046,
+            "iqr": 5.489,
+            "ci_95": [
+              129.6,
+              132.724
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 43.278,
+            "std": 2.726,
+            "median": 43.11,
+            "iqr": 2.675,
+            "ci_95": [
+              42.64,
+              44.084
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 113.361,
+            "std": 7.108,
+            "median": 113.276,
+            "iqr": 7.675,
+            "ci_95": [
+              111.504,
+              115.42
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 32696319.167,
+            "std": 179536.931,
+            "median": 32709115.0,
+            "iqr": 274512.25,
+            "ci_95": [
+              32647873.288,
+              32732877.5
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 24789241.8,
+            "std": 1150180.684,
+            "median": 24918420.0,
+            "iqr": 1536240.0,
+            "ci_95": [
+              24315036.312,
+              25290810.25
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 1.117,
+            "std": 0.887,
+            "median": 1.5,
+            "iqr": 2.0,
+            "ci_95": [
+              0.119,
+              2.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 21.417,
+            "std": 7.839,
+            "median": 27.5,
+            "iqr": 14.0,
+            "ci_95": [
+              14.119,
+              28.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.464
+        },
+        "W1": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 1706.549,
+            "std": 21.192,
+            "median": 1714.146,
+            "iqr": 35.464,
+            "ci_95": [
+              1701.436,
+              1721.931
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 4.876,
+            "std": 0.716,
+            "median": 5.265,
+            "iqr": 1.484,
+            "ci_95": [
+              4.451,
+              5.417
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 1701.673,
+            "std": 21.187,
+            "median": 1708.919,
+            "iqr": 35.388,
+            "ci_95": [
+              1697.536,
+              1716.605
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.286,
+            "std": 0.042,
+            "median": 0.308,
+            "iqr": 0.086,
+            "ci_95": [
+              0.26,
+              0.316
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 377.532,
+            "std": 6.857,
+            "median": 376.872,
+            "iqr": 10.432,
+            "ci_95": [
+              373.147,
+              381.091
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 33.104,
+            "std": 0.439,
+            "median": 33.152,
+            "iqr": 0.601,
+            "ci_95": [
+              32.956,
+              33.278
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 2153.0,
+            "std": 0.0,
+            "median": 2153.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2153.0,
+              2153.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 41.0,
+            "std": 0.0,
+            "median": 41.0,
+            "iqr": 0.0,
+            "ci_95": [
+              41.0,
+              41.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 0.0,
+            "std": 0.0,
+            "median": 0.0,
+            "iqr": 0.0,
+            "ci_95": [
+              0.0,
+              0.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 8.882,
+            "std": 0.078,
+            "median": 8.854,
+            "iqr": 0.119,
+            "ci_95": [
+              8.834,
+              8.922
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 124.402,
+            "std": 19.82,
+            "median": 117.477,
+            "iqr": 25.353,
+            "ci_95": [
+              112.748,
+              126.62
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 164.955,
+            "std": 19.834,
+            "median": 158.103,
+            "iqr": 24.902,
+            "ci_95": [
+              153.46,
+              167.353
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 59.196,
+            "std": 9.409,
+            "median": 55.8,
+            "iqr": 12.727,
+            "ci_95": [
+              53.535,
+              59.985
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 212.332,
+            "std": 34.116,
+            "median": 199.103,
+            "iqr": 47.206,
+            "ci_95": [
+              193.087,
+              218.496
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 11674154.633,
+            "std": 156838.964,
+            "median": 11665873.5,
+            "iqr": 162485.5,
+            "ci_95": [
+              11610849.0,
+              11698356.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 20584103.3,
+            "std": 945426.853,
+            "median": 20524293.5,
+            "iqr": 1103836.5,
+            "ci_95": [
+              20103494.337,
+              20933304.113
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 0.8,
+            "std": 0.887,
+            "median": 0.5,
+            "iqr": 2.0,
+            "ci_95": [
+              0.0,
+              1.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 14.717,
+            "std": 9.172,
+            "median": 14.5,
+            "iqr": 0.5,
+            "ci_95": [
+              14.0,
+              14.5
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.134
+        },
+        "W3": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 1426.085,
+            "std": 18.068,
+            "median": 1422.715,
+            "iqr": 23.939,
+            "ci_95": [
+              1418.603,
+              1433.48
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 44.719,
+            "std": 2.196,
+            "median": 44.78,
+            "iqr": 2.557,
+            "ci_95": [
+              43.782,
+              45.263
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 1381.366,
+            "std": 17.695,
+            "median": 1380.532,
+            "iqr": 23.239,
+            "ci_95": [
+              1373.337,
+              1388.707
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 3.136,
+            "std": 0.15,
+            "median": 3.143,
+            "iqr": 0.182,
+            "ci_95": [
+              3.072,
+              3.179
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 436.153,
+            "std": 7.825,
+            "median": 435.281,
+            "iqr": 10.464,
+            "ci_95": [
+              431.631,
+              438.769
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 30.491,
+            "std": 0.412,
+            "median": 30.341,
+            "iqr": 0.554,
+            "ci_95": [
+              30.258,
+              30.667
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 2423.0,
+            "std": 0.0,
+            "median": 2423.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2423.0,
+              2423.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 32.0,
+            "std": 0.0,
+            "median": 32.0,
+            "iqr": 0.0,
+            "ci_95": [
+              32.0,
+              32.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 1.0,
+            "std": 0.0,
+            "median": 1.0,
+            "iqr": 0.0,
+            "ci_95": [
+              1.0,
+              1.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 49.543,
+            "std": 3.466,
+            "median": 51.723,
+            "iqr": 6.77,
+            "ci_95": [
+              51.696,
+              51.741
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 98.003,
+            "std": 5.268,
+            "median": 97.727,
+            "iqr": 4.346,
+            "ci_95": [
+              96.639,
+              98.697
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 138.486,
+            "std": 5.267,
+            "median": 138.401,
+            "iqr": 4.212,
+            "ci_95": [
+              137.07,
+              139.197
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 46.717,
+            "std": 2.535,
+            "median": 46.49,
+            "iqr": 2.099,
+            "ci_95": [
+              46.079,
+              47.218
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 139.746,
+            "std": 7.448,
+            "median": 139.141,
+            "iqr": 6.765,
+            "ci_95": [
+              137.04,
+              142.073
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 584979868.667,
+            "std": 3418712.222,
+            "median": 583358776.0,
+            "iqr": 5199923.25,
+            "ci_95": [
+              582857521.188,
+              583704546.5
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 191501850.967,
+            "std": 4575511.907,
+            "median": 190655891.0,
+            "iqr": 3552609.0,
+            "ci_95": [
+              188949861.262,
+              191142792.625
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 0.95,
+            "std": 0.855,
+            "median": 1.0,
+            "iqr": 2.0,
+            "ci_95": [
+              0.25,
+              1.75
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 5.633,
+            "std": 6.747,
+            "median": 0.5,
+            "iqr": 13.5,
+            "ci_95": [
+              0.25,
+              13.5
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.046
+        },
+        "W4": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 12924.096,
+            "std": 64.597,
+            "median": 12920.787,
+            "iqr": 58.687,
+            "ci_95": [
+              12909.85,
+              12951.86
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 70.585,
+            "std": 3.759,
+            "median": 70.487,
+            "iqr": 5.118,
+            "ci_95": [
+              68.457,
+              71.797
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 12853.511,
+            "std": 64.283,
+            "median": 12851.597,
+            "iqr": 62.052,
+            "ci_95": [
+              12842.433,
+              12875.068
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.546,
+            "std": 0.029,
+            "median": 0.548,
+            "iqr": 0.039,
+            "ci_95": [
+              0.527,
+              0.554
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 361.266,
+            "std": 7.458,
+            "median": 359.92,
+            "iqr": 10.728,
+            "ci_95": [
+              356.858,
+              363.191
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 29.292,
+            "std": 0.182,
+            "median": 29.271,
+            "iqr": 0.178,
+            "ci_95": [
+              29.252,
+              29.324
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 22980.0,
+            "std": 0.0,
+            "median": 22980.0,
+            "iqr": 0.0,
+            "ci_95": [
+              22980.0,
+              22980.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 279.0,
+            "std": 0.0,
+            "median": 279.0,
+            "iqr": 0.0,
+            "ci_95": [
+              279.0,
+              279.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 10.0,
+            "std": 0.0,
+            "median": 10.0,
+            "iqr": 0.0,
+            "ci_95": [
+              10.0,
+              10.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 13.919,
+            "std": 0.246,
+            "median": 13.902,
+            "iqr": 0.275,
+            "ci_95": [
+              13.808,
+              14.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 908.943,
+            "std": 24.485,
+            "median": 910.96,
+            "iqr": 47.065,
+            "ci_95": [
+              893.565,
+              919.724
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 1164.451,
+            "std": 24.524,
+            "median": 1166.663,
+            "iqr": 47.014,
+            "ci_95": [
+              1149.208,
+              1174.748
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 68.647,
+            "std": 1.843,
+            "median": 68.747,
+            "iqr": 3.556,
+            "ci_95": [
+              67.45,
+              69.593
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 11747.118,
+            "std": 316.317,
+            "median": 11806.74,
+            "iqr": 576.886,
+            "ci_95": [
+              11556.898,
+              11901.938
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 30,
+            "mean": 264554290.167,
+            "std": 685142.413,
+            "median": 264519054.0,
+            "iqr": 932526.75,
+            "ci_95": [
+              264188603.0,
+              264929834.55
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 166450900.167,
+            "std": 2451539.7,
+            "median": 166347662.5,
+            "iqr": 3615682.25,
+            "ci_95": [
+              165715727.537,
+              167323932.387
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 633.802,
+            "std": 312.0,
+            "median": 535.925,
+            "iqr": 439.677,
+            "ci_95": [
+              530.92,
+              621.171
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 55.118,
+            "std": 32.196,
+            "median": 59.54,
+            "iqr": 39.678,
+            "ci_95": [
+              32.175,
+              63.114
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": -0.175
+        }
+      }
+    },
+    "kv_thrashing": {
+      "openclaw_minimal": {
+        "T1": {
+          "n": 30,
+          "mean": 3116.2,
+          "std": 18.21,
+          "median": 3114.54,
+          "iqr": 23.12,
+          "ci_95": [
+            3109.1,
+            3126.59
+          ]
+        },
+        "T2": {
+          "n": 30,
+          "mean": 3127.65,
+          "std": 15.88,
+          "median": 3125.07,
+          "iqr": 21.13,
+          "ci_95": [
+            3122.94,
+            3136.61
+          ]
+        },
+        "T3": {
+          "n": 30,
+          "mean": 2112.13,
+          "std": 16.2,
+          "median": 2113.19,
+          "iqr": 27.72,
+          "ci_95": [
+            2105.4,
+            2122.81
+          ]
+        }
+      },
+      "openclaw_full": {
+        "T1": {
+          "n": 30,
+          "mean": 8201.74,
+          "std": 19.75,
+          "median": 8200.99,
+          "iqr": 24.39,
+          "ci_95": [
+            8190.54,
+            8209.39
+          ]
+        },
+        "T2": {
+          "n": 30,
+          "mean": 8192.13,
+          "std": 19.94,
+          "median": 8189.45,
+          "iqr": 20.42,
+          "ci_95": [
+            8185.8,
+            8201.29
+          ]
+        },
+        "T3": {
+          "n": 30,
+          "mean": 3116.8,
+          "std": 11.84,
+          "median": 3116.97,
+          "iqr": 12.12,
+          "ci_95": [
+            3113.01,
+            3119.95
+          ]
+        }
+      }
+    },
+    "rag_mitigation": {
+      "cold": {
+        "openclaw_tool_rag": {
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 17213.5,
+            "median_latency_ms": 17215.87,
+            "iqr_latency_ms": 171.83,
+            "mean_prompt_tokens": 9197.0,
+            "median_t_prune_ms": 8.1346,
+            "ci_95": [
+              17147.8,
+              17269.43
+            ]
+          },
+          "W5": {
+            "n": 30,
+            "mean_latency_ms": 1494.39,
+            "median_latency_ms": 1492.91,
+            "iqr_latency_ms": 46.07,
+            "mean_prompt_tokens": 747.0,
+            "median_t_prune_ms": 2.521,
+            "ci_95": [
+              1482.13,
+              1511.86
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 1522.89,
+            "median_latency_ms": 1516.48,
+            "iqr_latency_ms": 37.87,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 2.518,
+            "ci_95": [
+              1506.34,
+              1535.3
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1806.88,
+            "median_latency_ms": 1803.21,
+            "iqr_latency_ms": 51.27,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 2.5333,
+            "ci_95": [
+              1794.98,
+              1818.87
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1765.01,
+            "median_latency_ms": 1762.57,
+            "iqr_latency_ms": 43.31,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 2.5257,
+            "ci_95": [
+              1752.02,
+              1770.75
+            ]
+          }
+        },
+        "picoclaw_tool_rag": {
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1743.52,
+            "median_latency_ms": 1740.85,
+            "iqr_latency_ms": 41.96,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 0.0207,
+            "ci_95": [
+              1730.71,
+              1756.14
+            ]
+          },
+          "W5": {
+            "n": 30,
+            "mean_latency_ms": 1777.66,
+            "median_latency_ms": 1774.3,
+            "iqr_latency_ms": 49.49,
+            "mean_prompt_tokens": 999.0,
+            "median_t_prune_ms": 0.0352,
+            "ci_95": [
+              1763.16,
+              1784.65
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 1485.08,
+            "median_latency_ms": 1483.55,
+            "iqr_latency_ms": 33.86,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 0.0358,
+            "ci_95": [
+              1470.47,
+              1495.57
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 16057.42,
+            "median_latency_ms": 16041.81,
+            "iqr_latency_ms": 144.65,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 0.2958,
+            "ci_95": [
+              16005.85,
+              16109.04
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1765.8,
+            "median_latency_ms": 1759.64,
+            "iqr_latency_ms": 37.72,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 0.0351,
+            "ci_95": [
+              1743.17,
+              1771.89
+            ]
+          }
+        }
+      },
+      "warm": {
+        "openclaw_tool_rag": {
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1275.77,
+            "median_latency_ms": 1272.81,
+            "iqr_latency_ms": 40.88,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 2.5102,
+            "ci_95": [
+              1263.3,
+              1285.4
+            ]
+          },
+          "W5": {
+            "n": 30,
+            "mean_latency_ms": 1029.59,
+            "median_latency_ms": 1018.81,
+            "iqr_latency_ms": 41.66,
+            "mean_prompt_tokens": 747.0,
+            "median_t_prune_ms": 2.5211,
+            "ci_95": [
+              1012.08,
+              1040.65
+            ]
+          },
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 11734.65,
+            "median_latency_ms": 11738.45,
+            "iqr_latency_ms": 66.5,
+            "mean_prompt_tokens": 9197.0,
+            "median_t_prune_ms": 8.1682,
+            "ci_95": [
+              11710.34,
+              11748.88
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 967.1,
+            "median_latency_ms": 972.08,
+            "iqr_latency_ms": 41.31,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 2.5256,
+            "ci_95": [
+              956.3,
+              984.56
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 1008.27,
+            "median_latency_ms": 1008.08,
+            "iqr_latency_ms": 31.48,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 2.5246,
+            "ci_95": [
+              1000.06,
+              1022.04
+            ]
+          }
+        },
+        "picoclaw_tool_rag": {
+          "W4": {
+            "n": 30,
+            "mean_latency_ms": 10564.96,
+            "median_latency_ms": 10552.78,
+            "iqr_latency_ms": 118.74,
+            "mean_prompt_tokens": 10380.0,
+            "median_t_prune_ms": 0.3048,
+            "ci_95": [
+              10516.17,
+              10583.73
+            ]
+          },
+          "W2": {
+            "n": 30,
+            "mean_latency_ms": 920.42,
+            "median_latency_ms": 911.69,
+            "iqr_latency_ms": 31.83,
+            "mean_prompt_tokens": 917.0,
+            "median_t_prune_ms": 0.0358,
+            "ci_95": [
+              907.31,
+              931.06
+            ]
+          },
+          "W1": {
+            "n": 30,
+            "mean_latency_ms": 1227.36,
+            "median_latency_ms": 1224.61,
+            "iqr_latency_ms": 34.03,
+            "mean_prompt_tokens": 893.0,
+            "median_t_prune_ms": 0.0371,
+            "ci_95": [
+              1214.96,
+              1235.21
+            ]
+          },
+          "W5": {
+            "n": 30,
+            "mean_latency_ms": 1196.4,
+            "median_latency_ms": 1195.69,
+            "iqr_latency_ms": 30.23,
+            "mean_prompt_tokens": 999.0,
+            "median_t_prune_ms": 0.0362,
+            "ci_95": [
+              1180.59,
+              1203.36
+            ]
+          },
+          "W3": {
+            "n": 30,
+            "mean_latency_ms": 981.45,
+            "median_latency_ms": 976.75,
+            "iqr_latency_ms": 47.65,
+            "mean_prompt_tokens": 1163.0,
+            "median_t_prune_ms": 0.0355,
+            "ci_95": [
+              965.72,
+              994.46
+            ]
+          }
+        }
+      }
+    },
+    "mcp_transport": {
+      "in_process": {
+        "n": 90,
+        "median_ms": 1.071,
+        "iqr_ms": 0.038,
+        "ci_95": [
+          1.067,
+          1.079
+        ]
+      },
+      "stdio": {
+        "n": 90,
+        "median_ms": 1.103,
+        "iqr_ms": 0.32,
+        "ci_95": [
+          1.097,
+          1.111
+        ]
+      },
+      "http": {
+        "n": 90,
+        "median_ms": 1.965,
+        "iqr_ms": 0.095,
+        "ci_95": [
+          1.944,
+          1.976
+        ]
+      }
+    }
+  },
+  "windows_x86_64": {
+    "name": "Microsoft Windows 11 (x86_64 build 26200)",
+    "short": "Windows 11",
+    "os_family": "windows",
+    "p_idle_w": 24.13,
+    "regime_a": {
+      "openclaw_full": {
+        "W3": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 9185.842,
+            "std": 90.895,
+            "median": 9165.827,
+            "iqr": 108.499,
+            "ci_95": [
+              9132.378,
+              9217.578
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 91.524,
+            "std": 41.17,
+            "median": 81.034,
+            "iqr": 4.155,
+            "ci_95": [
+              80.035,
+              81.864
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 9094.318,
+            "std": 87.734,
+            "median": 9080.137,
+            "iqr": 105.123,
+            "ci_95": [
+              9045.557,
+              9123.446
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.995,
+            "std": 0.44,
+            "median": 0.885,
+            "iqr": 0.041,
+            "ci_95": [
+              0.867,
+              0.895
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 6183.967,
+            "std": 72.472,
+            "median": 6160.099,
+            "iqr": 97.294,
+            "ci_95": [
+              6145.797,
+              6190.271
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 80.843,
+            "std": 1.511,
+            "median": 80.959,
+            "iqr": 1.742,
+            "ci_95": [
+              80.4,
+              81.635
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 7337.0,
+            "std": 0.0,
+            "median": 7337.0,
+            "iqr": 0.0,
+            "ci_95": [
+              7337.0,
+              7337.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 37.0,
+            "std": 0.0,
+            "median": 37.0,
+            "iqr": 0.0,
+            "ci_95": [
+              37.0,
+              37.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 1.0,
+            "std": 0.0,
+            "median": 1.0,
+            "iqr": 0.0,
+            "ci_95": [
+              1.0,
+              1.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 84.419,
+            "std": 1.062,
+            "median": 83.875,
+            "iqr": 1.814,
+            "ci_95": [
+              83.754,
+              83.969
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 511.026,
+            "std": 2.931,
+            "median": 510.928,
+            "iqr": 3.88,
+            "ci_95": [
+              510.093,
+              512.026
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 713.582,
+            "std": 4.425,
+            "median": 713.719,
+            "iqr": 5.344,
+            "ci_95": [
+              711.026,
+              714.833
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 54.774,
+            "std": 0.443,
+            "median": 54.757,
+            "iqr": 0.477,
+            "ci_95": [
+              54.622,
+              54.925
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 4694.359,
+            "std": 66.569,
+            "median": 4681.573,
+            "iqr": 83.176,
+            "ci_95": [
+              4661.861,
+              4715.384
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 0,
+            "mean": null,
+            "std": null,
+            "median": null,
+            "iqr": null,
+            "ci_95": [
+              null,
+              null
+            ],
+            "status": "N/A",
+            "na_reason": "PMU instruction counter restricted in Windows user-mode"
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 774064953.167,
+            "std": 22172612.726,
+            "median": 770829205.5,
+            "iqr": 31463870.0,
+            "ci_95": [
+              763572953.5,
+              782152560.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 2388.996,
+            "std": 853.633,
+            "median": 2214.775,
+            "iqr": 821.032,
+            "ci_95": [
+              1957.89,
+              2555.53
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 1015.548,
+            "std": 149.581,
+            "median": 999.775,
+            "iqr": 239.75,
+            "ci_95": [
+              932.335,
+              1074.082
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.019
+        },
+        "W2": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 7891.1,
+            "std": 84.354,
+            "median": 7896.411,
+            "iqr": 124.951,
+            "ci_95": [
+              7842.849,
+              7922.593
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 52.546,
+            "std": 24.21,
+            "median": 48.554,
+            "iqr": 1.115,
+            "ci_95": [
+              48.174,
+              48.76
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 7838.554,
+            "std": 87.988,
+            "median": 7848.022,
+            "iqr": 137.073,
+            "ci_95": [
+              7790.941,
+              7874.37
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.666,
+            "std": 0.307,
+            "median": 0.613,
+            "iqr": 0.013,
+            "ci_95": [
+              0.611,
+              0.619
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 5889.684,
+            "std": 70.617,
+            "median": 5880.353,
+            "iqr": 110.166,
+            "ci_95": [
+              5849.198,
+              5927.844
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 69.602,
+            "std": 1.761,
+            "median": 70.059,
+            "iqr": 2.566,
+            "ci_95": [
+              68.955,
+              70.515
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 7091.0,
+            "std": 0.0,
+            "median": 7091.0,
+            "iqr": 0.0,
+            "ci_95": [
+              7091.0,
+              7091.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 29.0,
+            "std": 0.0,
+            "median": 29.0,
+            "iqr": 0.0,
+            "ci_95": [
+              29.0,
+              29.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 3.0,
+            "std": 0.0,
+            "median": 3.0,
+            "iqr": 0.0,
+            "ci_95": [
+              3.0,
+              3.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 72.919,
+            "std": 0.102,
+            "median": 72.928,
+            "iqr": 0.091,
+            "ci_95": [
+              72.894,
+              72.973
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 467.192,
+            "std": 2.56,
+            "median": 467.432,
+            "iqr": 2.716,
+            "ci_95": [
+              466.265,
+              468.525
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 641.634,
+            "std": 3.991,
+            "median": 642.498,
+            "iqr": 4.213,
+            "ci_95": [
+              640.131,
+              643.114
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 58.147,
+            "std": 0.479,
+            "median": 58.19,
+            "iqr": 0.603,
+            "ci_95": [
+              57.945,
+              58.349
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 3686.792,
+            "std": 54.435,
+            "median": 3694.006,
+            "iqr": 71.385,
+            "ci_95": [
+              3665.961,
+              3706.854
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 0,
+            "mean": null,
+            "std": null,
+            "median": null,
+            "iqr": null,
+            "ci_95": [
+              null,
+              null
+            ],
+            "status": "N/A",
+            "na_reason": "PMU instruction counter restricted in Windows user-mode"
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 528311436.6,
+            "std": 8642416.895,
+            "median": 528099770.0,
+            "iqr": 9728391.0,
+            "ci_95": [
+              525970197.5,
+              531887555.625
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 1736.309,
+            "std": 784.703,
+            "median": 1809.815,
+            "iqr": 1040.16,
+            "ci_95": [
+              1379.084,
+              1937.765
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 937.293,
+            "std": 154.282,
+            "median": 919.125,
+            "iqr": 255.122,
+            "ci_95": [
+              868.046,
+              1011.221
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": -0.023
+        },
+        "W5": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 8355.277,
+            "std": 102.053,
+            "median": 8333.403,
+            "iqr": 114.583,
+            "ci_95": [
+              8308.92,
+              8377.349
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 44.647,
+            "std": 1.034,
+            "median": 44.663,
+            "iqr": 0.796,
+            "ci_95": [
+              44.447,
+              44.926
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 8310.629,
+            "std": 102.285,
+            "median": 8288.803,
+            "iqr": 112.857,
+            "ci_95": [
+              8263.616,
+              8332.807
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.534,
+            "std": 0.015,
+            "median": 0.535,
+            "iqr": 0.008,
+            "ci_95": [
+              0.533,
+              0.537
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 5787.253,
+            "std": 67.645,
+            "median": 5767.644,
+            "iqr": 93.062,
+            "ci_95": [
+              5757.789,
+              5796.989
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 74.217,
+            "std": 1.471,
+            "median": 74.162,
+            "iqr": 1.207,
+            "ci_95": [
+              73.76,
+              74.462
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 6921.0,
+            "std": 0.0,
+            "median": 6921.0,
+            "iqr": 0.0,
+            "ci_95": [
+              6921.0,
+              6921.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 35.0,
+            "std": 0.0,
+            "median": 35.0,
+            "iqr": 0.0,
+            "ci_95": [
+              35.0,
+              35.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 2.0,
+            "std": 0.0,
+            "median": 2.0,
+            "iqr": 0.0,
+            "ci_95": [
+              2.0,
+              2.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 71.722,
+            "std": 0.107,
+            "median": 71.74,
+            "iqr": 0.134,
+            "ci_95": [
+              71.703,
+              71.781
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 473.003,
+            "std": 2.855,
+            "median": 472.641,
+            "iqr": 4.643,
+            "ci_95": [
+              471.685,
+              474.792
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 657.552,
+            "std": 4.59,
+            "median": 656.807,
+            "iqr": 5.891,
+            "ci_95": [
+              655.541,
+              659.789
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 55.647,
+            "std": 0.546,
+            "median": 55.705,
+            "iqr": 0.618,
+            "ci_95": [
+              55.505,
+              55.852
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 3952.244,
+            "std": 65.79,
+            "median": 3940.278,
+            "iqr": 76.127,
+            "ci_95": [
+              3919.27,
+              3963.576
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "proc_instructions": {
+            "n": 0,
+            "mean": null,
+            "std": null,
+            "median": null,
+            "iqr": null,
+            "ci_95": [
+              null,
+              null
+            ],
+            "status": "N/A",
+            "na_reason": "PMU instruction counter restricted in Windows user-mode"
+          },
+          "proc_cycles": {
+            "n": 30,
+            "mean": 560061478.433,
+            "std": 10748487.598,
+            "median": 559993908.5,
+            "iqr": 11967280.0,
+            "ci_95": [
+              558790871.087,
+              564883295.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_rx_mb_s": {
+            "n": 30,
+            "mean": 1780.056,
+            "std": 596.499,
+            "median": 1802.25,
+            "iqr": 469.688,
+            "ci_95": [
+              1696.842,
+              1892.25
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "pcie_tx_mb_s": {
+            "n": 30,
+            "mean": 978.721,
+            "std": 120.852,
+            "median": 980.685,
+            "iqr": 129.377,
+            "ci_95": [
+              946.875,
+              1038.223
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "quality_score": {
+            "values": [],
+            "mean": null,
+            "median": null,
+            "status": "N/A",
+            "na_reason": "LLM-as-a-judge score only evaluated for structured agent workflows"
+          },
+          "autocorr_r1": 0.045
+        },
+        "W4": {
+          "t_task_ms": {
+            "n": 30,
+            "mean": 83015.743,
+            "std": 408.1,
+            "median": 82896.219,
+            "iqr": 492.857,
+            "ci_95": [
+              82811.604,
+              83108.055
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_orch_ms": {
+            "n": 30,
+            "mean": 262.049,
+            "std": 4.755,
+            "median": 262.097,
+            "iqr": 6.297,
+            "ci_95": [
+              260.463,
+              263.865
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "t_neural_ms": {
+            "n": 30,
+            "mean": 82753.694,
+            "std": 406.038,
+            "median": 82635.942,
+            "iqr": 496.824,
+            "ci_95": [
+              82548.806,
+              82836.095
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "phi_orch_pct": {
+            "n": 30,
+            "mean": 0.316,
+            "std": 0.005,
+            "median": 0.316,
+            "iqr": 0.007,
+            "ci_95": [
+              0.314,
+              0.318
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "ttft_ms": {
+            "n": 30,
+            "mean": 5810.367,
+            "std": 70.482,
+            "median": 5802.388,
+            "iqr": 122.083,
+            "ci_95": [
+              5767.574,
+              5830.742
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "itl_ms": {
+            "n": 30,
+            "mean": 75.71,
+            "std": 0.829,
+            "median": 75.676,
+            "iqr": 0.911,
+            "ci_95": [
+              75.333,
+              75.997
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "prompt_tokens": {
+            "n": 30,
+            "mean": 72120.0,
+            "std": 0.0,
+            "median": 72120.0,
+            "iqr": 0.0,
+            "ci_95": [
+              72120.0,
+              72120.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "completion_tokens": {
+            "n": 30,
+            "mean": 295.0,
+            "std": 0.0,
+            "median": 295.0,
+            "iqr": 0.0,
+            "ci_95": [
+              295.0,
+              295.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "tool_calls": {
+            "n": 30,
+            "mean": 10.0,
+            "std": 0.0,
+            "median": 10.0,
+            "iqr": 0.0,
+            "ci_95": [
+              10.0,
+              10.0
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "finish_reasons": [
+            "tool_calls"
+          ],
+          "rss_mb": {
+            "n": 30,
+            "mean": 72.922,
+            "std": 0.096,
+            "median": 72.918,
+            "iqr": 0.132,
+            "ci_95": [
+              72.884,
+              72.971
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_net_j": {
+            "n": 30,
+            "mean": 4908.494,
+            "std": 9.52,
+            "median": 4908.623,
+            "iqr": 13.303,
+            "ci_95": [
+              4902.547,
+              4910.783
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "energy_gross_j": {
+            "n": 30,
+            "mean": 6713.874,
+            "std": 16.093,
+            "median": 6712.955,
+            "iqr": 21.696,
+            "ci_95": [
+              6710.201,
+              6715.969
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "power_net_w": {
+            "n": 30,
+            "mean": 59.025,
+            "std": 0.247,
+            "median": 59.042,
+            "iqr": 0.317,
+            "ci_95": [
+              58.966,
+              59.151
+            ],
+            "status": "OK",
+            "na_reason": null
+          },
+          "edp_js": {
+            "n": 30,
+            "mean": 407484.301,
+            "std": 2517.905,

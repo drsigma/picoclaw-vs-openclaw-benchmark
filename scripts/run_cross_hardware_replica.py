@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 scripts/run_cross_hardware_replica.py - Single-Command Cross-Hardware Replication Runner
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gates B2 / E3)
+Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gates B2 / E3)
 
 Executes cross-hardware replication on Linux (x86_64, NVIDIA GPU, Intel/AMD RAPL)
 or secondary macOS hosts, generating:

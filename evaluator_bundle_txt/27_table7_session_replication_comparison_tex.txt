@@ -1,0 +1,45 @@
+#==============================================================================
+# ARTIFACT: 27_table7_session_replication_comparison_tex.txt
+# ORIGINAL_PATH: audit_export/tables/table7_session_replication_comparison.tex
+# PART: 1 / 1
+# ORIGINAL_SHA256: 99349977e3e13ee1504e7c929cd20bb12ae2cb81fef1b6e3f966baa8fcaef3ce
+# CHUNK_SHA256: 99349977e3e13ee1504e7c929cd20bb12ae2cb81fef1b6e3f966baa8fcaef3ce
+# DESCRIPTION: Table 7: Dual-Session TOST Equivalence Tests (LaTeX)
+#==============================================================================
+
+\begin{table*}[t]
+\small
+\centering
+\caption{Multi-Platform Dual-Session Empirical Contrast Replication and Moving Block Bootstrap ($b=3$, $B=10{,}000$) TOST Equivalence Matrix across Independent Campaigns ($n=30$ trials per session; confounded W5 \texttt{python\_native} excluded per M1). Contrasts evaluate median difference $\hat{\theta} = \text{median}(c_2) - \text{median}(c_1)$ over per-trial paired deviations $c_i = T_{\text{orch},i}(\text{Runtime}) - T_{\text{orch},i}(\text{PicoClaw})$ against a fixed pre-specified SESOI of $\pm 5.0$~ms with 90\% MBB CIs and Holm--Bonferroni family-wise adjustment ($p_{\text{TOST, adj}}$) under the 3-state rule (\texttt{Equivalent}, \texttt{Different}, \texttt{Inconclusive}; Schuirmann 1987; Lakens 2017). Sensitivity across $b \in \{2,3,5\}$ yields identical Holm-adjusted decisions (71 Equivalent, 24 Inconclusive), altering to 72 at $b=8$ and 74 at $b=12$ (3 decisions change between $b=3$ and $b=12$). Cells with $r_1 > 0.4$ marked with $^{\dagger}$ denote low empirical TOST power (~3.4\% at $r_1=+0.4$, ~2.0\% at $r_1=+0.7$) under positive serial autocorrelation; pairing is formed by chronological index (\texttt{rep}).}
+\label{tab:session_replication_tost}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lllccccccc}
+\toprule
+\textbf{Platform OS} & \textbf{Regime} & \textbf{Contrast} & \textbf{Session 1 $\Delta$ (ms)} & \textbf{Session 2 $\Delta$ (ms)} & \textbf{Diff (ms)} & \textbf{90\% MBB CI ($b=3$)} & \textbf{$p_{\text{TOST}}$} & \textbf{$p_{\text{TOST, adj}}$} & \textbf{Status (Lakens 2017)} \\
+\midrule
+macOS ARM64 (M4) & Regime B & W2 Node Minimal vs PicoClaw & 14.80 [0.82] & 14.89 [0.70] & +0.09 & [-0.26, +0.39] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+macOS ARM64 (M4) & Regime B & W2 PythonNative vs PicoClaw & 6.42 [0.64] & 6.33 [0.76] & -0.09 & [-0.36, +0.19] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+macOS ARM64 (M4) & Regime B & W5 Node Minimal vs PicoClaw & 15.29 [0.68] & 15.10 [0.86] & -0.19 & [-0.46, +0.01] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Linux x86\_64 & Regime B & W2 Node Minimal vs PicoClaw & 22.88 [1.60] & 23.12 [1.80] & +0.24 & [-0.38, +0.84] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Linux x86\_64 & Regime B & W2 Node Full vs PicoClaw & 27.40 [1.29] & 27.97 [1.73] & +0.56 & [-0.04, +0.94] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Linux x86\_64 & Regime B & W2 PythonNative vs PicoClaw & 10.74 [3.01] & 11.45 [3.50] & +0.71 & [-0.59, +1.52] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Linux x86\_64 & Regime B & W2 Bun Minimal vs PicoClaw & -0.39 [1.44] & 0.11 [1.42] & +0.50 & [-0.48, +1.17] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Linux x86\_64 & Regime B & W5 Node Minimal vs PicoClaw & 23.10 [1.48] & 23.34 [1.91] & +0.23 & [-0.29, +0.73] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Linux x86\_64 & Regime B & W5 Node Full vs PicoClaw & 28.25 [1.73] & 28.54 [2.11] & +0.29 & [-0.04, +0.72] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Linux x86\_64 & Regime B & W5 Bun Minimal vs PicoClaw & 0.56 [0.96] & 0.68 [1.92] & +0.12 & [-0.29, +0.62] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Windows 11 NVIDIA & Regime B & W2 Node Minimal vs PicoClaw & 29.94 [1.31] & 30.00 [1.61] & +0.06 & [-0.57, +0.32] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Windows 11 NVIDIA & Regime B & W2 Node Full vs PicoClaw & 36.51 [2.34] & 36.53 [2.32] & +0.02 & [-0.92, +0.64] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Windows 11 NVIDIA & Regime B & W2 PythonNative vs PicoClaw & 19.54 [13.05] & 18.41 [13.74] & -1.13 & [-6.84, +2.78] & 0.1100 & 1.0000 & Inconclusive \\
+Windows 11 NVIDIA & Regime B & W2 Bun Minimal vs PicoClaw & 4.84 [2.53] & 4.89 [1.89] & +0.04 & [-0.53, +0.48] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Windows 11 NVIDIA & Regime B & W5 Node Minimal vs PicoClaw & 27.28 [2.08] & 27.40 [2.16] & +0.12 & [-0.86, +0.93] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Windows 11 NVIDIA & Regime B & W5 Node Full vs PicoClaw & 34.56 [1.37] & 34.14 [1.76] & -0.41 & [-1.15, +0.04] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Windows 11 NVIDIA & Regime B & W5 Bun Minimal vs PicoClaw & 3.14 [1.92] & 3.60 [2.30] & +0.45 & [-1.03, +1.26] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Windows Intel iGPU & Regime B & W2 Node Minimal vs PicoClaw & 42.60 [2.34] & 43.45 [2.80] & +0.85 & [-0.71, +1.53] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Windows Intel iGPU & Regime B & W2 Node Full vs PicoClaw & 54.74 [3.17] & 54.98 [2.40] & +0.24 & [-0.95, +1.28] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Windows Intel iGPU & Regime B & W2 PythonNative vs PicoClaw & 29.02 [8.26] & 32.56 [8.79] & +3.54 & [+0.48, +7.59] & 0.3300 & 1.0000 & Inconclusive \\
+Windows Intel iGPU & Regime B & W2 Bun Minimal vs PicoClaw & 8.99 [2.21] & 9.46 [1.35] & +0.47 & [+0.00, +1.19] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+Windows Intel iGPU & Regime B & W5 Node Minimal vs PicoClaw & 39.77 [2.06] & 40.60 [2.04] & +0.83 & [-0.43, +1.50] & $< 0.0001$ & $< 0.0001$ & Equivalent \\
+\bottomrule
+\end{tabular}
+}
+\end{table*}

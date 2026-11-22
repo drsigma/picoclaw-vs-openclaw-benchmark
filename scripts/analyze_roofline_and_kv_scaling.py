@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 scripts/analyze_roofline_and_kv_scaling.py - Physical Roofline Memory Bandwidth & Affine KV-Cache Scaling Analysis
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
+Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark
 
 Decomposes GGUF tensor memory layout to resolve the naive S_file/ITL artifact (>100% bus utilization):
   1. Inspects GGUF tensor breakdown:

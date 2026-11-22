@@ -1,6 +1,6 @@
 # Complete Step-by-Step Reproduction Guide (100% Reproducibility)
 ## How to Clone, Run Tests, and Recreate All Charts Locally
-**Target Audience:** Academic Journal Reviewers (*SoftwareX* / *IEEE*), Committee Members, and Researchers  
+**Target Audience:** Academic Journal Reviewers (*BenchmarkSuite* / *IEEE*), Committee Members, and Researchers  
 **System Requirements:**
 * **Full Physical Reproduction with Hardware Telemetry:** macOS 14.0+ on Apple Silicon (M1/M2/M3/M4) with at least 16 GB Unified Memory Architecture (UMA).
 * **Portable Simulation Reproduction (Any Machine):** Any Linux distribution (Ubuntu, Debian, Fedora, Arch), Windows (via WSL2), or Intel/Apple Silicon macOS, requiring zero sudo privileges, no GPU, and no local weights.

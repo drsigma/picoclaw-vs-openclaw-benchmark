@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # scripts/run_cross_hardware_replica.sh - Single-Command Cross-Hardware Runner
-# Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gates B2 / E3)
+# Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gates B2 / E3)
 #
 # Usage:
 #   bash scripts/run_cross_hardware_replica.sh

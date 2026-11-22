@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 scripts/run_mcp_live_transport_ablation.py - Live Model Context Protocol (MCP) Transport Ablation
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark (Gate R10 - MCP Live Transport Ablation)
+Empirical Systems Benchmarking: picoclaw-vs-openclaw-benchmark (Gate R10 - MCP Live Transport Ablation)
 
 Executes standardized evaluation of tool invocation overhead across 3 physical transport modes:
   1. in_process_dispatch: Direct in-memory function call (baseline without external IPC).

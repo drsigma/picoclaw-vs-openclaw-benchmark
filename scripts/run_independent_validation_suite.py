@@ -185,7 +185,7 @@ def main() -> int:
     v8_mean_ms = sum(v8_times) / len(v8_times)
 
     report = {
-        "protocol_version": "SoftwareX-Gate5-Gate6-v1.0",
+        "protocol_version": "Replication-Gate5-Gate6-v1.0",
         "status": "ALL_TOLERANCES_PASSED",
         "environment": env_info,
         "telemetry_backend": power_mon.telemetry_backend,

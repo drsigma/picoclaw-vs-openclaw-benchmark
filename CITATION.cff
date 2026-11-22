@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this benchmark suite, datasets, or experimental findings in your research, please cite it as below."
 title: "A Reproducible Quad-Platform Benchmark Suite for Isolating Orchestration Overhead, Schema Prefill Scaling, and Microarchitectural Dynamics in Local LLM Agents (macOS, Linux, Windows NVIDIA, Windows Intel iGPU)"
-abstract: "A forensic, reproducible quad-platform experimental benchmark suite comparing autonomous AI agent orchestration runtimes (Go native, Node.js V8, Bun JSC, CPython) across Apple Silicon M4 (macOS Darwin ARM64), Ubuntu Linux x86_64, Windows 11 x86_64 (NVIDIA dGPU), and Windows 10/11 x86_64 (Intel HD Graphics 4600 iGPU UMA). Incorporates hardware microarchitectural telemetry, non-parametric hypothesis testing, and active Tool-RAG schema pruning under a strict Zero-Mock empirical protocol."
+abstract: "An open, reproducible quad-platform experimental benchmark suite comparing autonomous AI agent orchestration runtimes (Go native, Node.js V8, Bun JSC, CPython) across Apple Silicon M4 (macOS Darwin ARM64), Ubuntu Linux x86_64, Windows 11 x86_64 (NVIDIA dGPU), and Windows 10/11 x86_64 (Intel HD Graphics 4600 iGPU UMA). Incorporates hardware microarchitectural telemetry, non-parametric hypothesis testing, and active Tool-RAG schema pruning under standardized physical execution."
 authors:
   - family-names: "Paniccia Cassetta"
     given-names: "Rafael"
@@ -25,8 +25,8 @@ license: "MIT"
 repository-code: "https://github.com/drsigma/picoclaw-vs-openclaw-benchmark"
 version: "1.0.0"
 date-released: "2026-11-12"
-doi: "10.5281/zenodo.14187265"
+doi: "10.5281/zenodo.PENDING_RELEASE"
 identifiers:
   - type: doi
-    value: "10.5281/zenodo.14187265"
-    description: "Zenodo Archive DOI"
+    value: "10.5281/zenodo.PENDING_RELEASE"
+    description: "Zenodo Archive DOI (Pending Release)"

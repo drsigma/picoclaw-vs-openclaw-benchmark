@@ -37,16 +37,6 @@ import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
-try:
-    from statsmodels.stats.weightstats import ttost_ind
-except ImportError:
-    def ttost_ind(c1, c2, low, upp):
-        c1 = np.asarray(c1, dtype=float)
-        c2 = np.asarray(c2, dtype=float)
-        res1 = stats.ttest_ind(c1 - low, c2, alternative="greater")
-        res2 = stats.ttest_ind(c1 - upp, c2, alternative="less")
-        p_tost = max(float(res1.pvalue), float(res2.pvalue))
-        return p_tost, (float(res1.statistic), float(res1.pvalue), None), (float(res2.statistic), float(res2.pvalue), None)
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 AUDIT_EXPORT_DIR = os.path.join(REPO_DIR, "audit_export")
@@ -911,13 +901,9 @@ def summarize_trials(trials: list[dict[str, Any]], platform_name: str, regime_na
             if isinstance(e, (int, float)) and not isinstance(e, bool) and e > 0 and lat_s > 0:
                 edps.append(float(e) * lat_s)
 
-        # Compute lag-1 autocorrelation for adaptive MBB bootstrapping
+        # Compute linearly detrended lag-1 autocorrelation for adaptive MBB bootstrapping
         t_arr = np.asarray(t_tasks, dtype=float)
-        if len(t_arr) > 2 and np.std(t_arr) > 1e-9:
-            norm_t = t_arr - np.mean(t_arr)
-            r1_val = float(np.sum(norm_t[:-1] * norm_t[1:]) / np.sum(norm_t**2))
-        else:
-            r1_val = 0.0
+        r1_val = lag1_autocorr(t_arr, detrend=True)
 
         def get_stat_dict(arr_list, is_na=False, na_reason=None, r1=0.0):
             if is_na or not arr_list:
@@ -1629,7 +1615,9 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
             else:
                 base_full_cell = consolidated[p_key][base_ak].get("openclaw_full", {}).get("W2", {})
                 base_full_lat = base_full_cell.get("t_task_ms", {}).get("median", 1.0)
-                base_full_tokens = base_full_cell.get("prompt_tokens", {}).get("median") or 7091.0
+                if not base_full_cell or "prompt_tokens" not in base_full_cell or base_full_cell["prompt_tokens"].get("median") is None:
+                    raise KeyError(f"Missing prompt_tokens in reference cell openclaw_full W2 for platform {p_key}")
+                base_full_tokens = float(base_full_cell["prompt_tokens"]["median"])
                 baseline_source = "primary_campaign"
 
             if "openclaw_minimal" in reg_dict and "W2" in reg_dict["openclaw_minimal"]:
@@ -2277,11 +2265,11 @@ def generate_quad_platform_figures(consolidated: dict[str, Any], num_datasets: i
     ], bg="#FAF5FF", border="#7C3AED", title_color="#6D28D9")
 
     add_box(2.0, 18.0, 46.5, 22.5, "CLIENT AGENT RUNTIME ENGINES", [
-        "1. PicoClaw: Native Go 1.24 static binary (zero VM, zero JIT overhead)",
-        "2. OpenClaw Minimal: Node.js v26.12.1 (Google V8 JIT, 15 equalized tools)",
-        "3. OpenClaw Full: Node.js v26.12.1 (Google V8 JIT, 54 enterprise tools)",
-        "4. PythonNative: CPython 3.12 (standard reference runtime)",
-        "5. Bun Minimal: Bun v1.3.9 (JavaScriptCore JIT engine)"
+        "1. PicoClaw: Native Go static binary (1.23.2 M4; 1.23.3 Win11; 1.26.8 Linux)",
+        "2. OpenClaw Minimal: Node.js V8 (v26.12.1 M4; v18.20-v22.23 x86_64; 15 tools)",
+        "3. OpenClaw Full: Node.js V8 (v26.12.1 M4; v18.20-v22.23 x86_64; 54 tools)",
+        "4. PythonNative: CPython (3.9.6 M4; 3.12.10/16 Win; 3.14.4 Linux)",
+        "5. Bun Minimal: Bun JavaScriptCore (v1.4.4 M4/Linux/Win11; v1.4.5 Win10 iGPU)"
     ], bg="#FFFFFF", border="#64748B")
 
     add_box(50.5, 18.0, 46.5, 22.5, "NEURAL INFERENCE SERVER (COMMON BASELINE)", [
@@ -3011,7 +2999,7 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "> **Methodological Note on Offload Regimes and Regime B Commensurability (Dell G15 Linux/Windows & Intel iGPU):**  ",
         "> Neural inference on the Dell G15 nodes (Linux and Windows 11) operated under a hybrid offload regime (`-ngl 16`, allocating approximately 3.0 GiB within the 4 GB GDDR6 VRAM ceiling and retaining remaining layers in host DDR5 memory), inducing continuous PCIe 4.0 host-to-GPU streaming (~5.2 GB/s). On the Intel HD Graphics 4600 node, inference executed over a shared DDR3 host memory aperture (UMA). Consequently, absolute warm-cache (Regime B) latency gains on the x86_64 nodes are constrained by PCIe/RAM bandwidth saturation and are not directly commensurable with the Apple M4 unified memory architecture.",
         "",
-        "> **Authorship and Execution Node Declaration:** Git author `drsgima` (author of the Windows testbed commits) operated the dedicated Windows physical testbed nodes.",
+        "> **Authorship and Execution Node Declaration:** Rafael Paniccia Cassetta operated the dedicated Windows physical testbed nodes under the configured local Git author identities (`drsgima` [git author `drsgima`] on Windows 11 NVIDIA commits; `drsigma` on Windows 10 Intel iGPU commits).",
         "",
         "### Key Empirical Findings (Workload W2 -- Standard 15-Tool Chain):",
         "- **Client Middleware Dispatch Latency ($T_{\\text{orch}}$):**",
@@ -3333,7 +3321,7 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
         "",
         "**Repository:** `picoclaw-vs-openclaw-benchmark`  ",
         "**Principal Author:** Rafael Paniccia Cassetta (UFABC)  ",
-        "**Windows Testbed Operator:** `drsgima`  ",
+        "**Windows Testbed Operator:** `drsgima` (git author `drsgima` on Windows 11 NVIDIA commits; `drsigma` on Windows 10 Intel iGPU commits)  ",
         "**Consolidation Date:** 2026-11-22  ",
         "**Branch:** `main`  ",
         f"**Dataset Scope:** Quad-Platform (4 physical hardware/OS profiles, {len(inventory)} raw `.jsonl` files on disk, {total_cells} experimental cells).  ",
@@ -3448,7 +3436,7 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
         "",
         "## 9. ARTIFACT INVENTORY SUMMARY",
         "",
-        "All derived artifacts — manuscript source (`paper/softwarex_manuscript.tex`), `references.bib`, analysis scripts, Tables 1--8 (`.md`/`.tex`), Figures 1--6 (300 DPI), saved `pytest -q` transcript, 35-`.jsonl` access guide (`audit_export/REVIEW_PACKAGE_README.md`), lightweight text chunks (`audit_txt_chunks/`), `data/manifest_sha256.json`, and `audit_export_quad_platform.zip` — were regenerated directly from the raw datasets on disk.",
+        "All derived artifacts — manuscript source (`paper/manuscript.tex`), `references.bib`, analysis scripts, Tables 1--8 (`.md`/`.tex`), Figures 1--6 (300 DPI), saved `pytest -q` transcript, 35-`.jsonl` access guide (`audit_export/REVIEW_PACKAGE_README.md`), lightweight text chunks (`audit_txt_chunks/`), `data/manifest_sha256.json`, and `audit_export_quad_platform.zip` — were regenerated directly from the raw datasets on disk.",
     ])
 
     content = "\n".join(lines) + "\n"
@@ -3493,7 +3481,7 @@ def generate_review_package_readme(inventory: list[dict[str, Any]]):
         "## 1. Contents Included Directly in This Archive",
         "",
         "- **Manuscript, Documentation, Licenses & CI Workflow:**",
-        "  - `paper/softwarex_manuscript.tex` — LaTeX manuscript source",
+        "  - `paper/manuscript.tex` — LaTeX manuscript source",
         f"  - `references.bib` — {bib_count} primary bibliographic entries with checked DOIs/ISBNs/arXiv identifiers",
         "  - `README.md` — Installation guide, exact reproduction commands, metadata, and external validity boundaries",
         "  - `LICENSE` (MIT code license) and `DATA_LICENSE` (CC BY 4.0 data license)",
@@ -3590,7 +3578,7 @@ def package_audit_zip(inventory: list[dict[str, Any]] | None = None):
         "DATA_LICENSE",
         "README.md",
         ".github/workflows/reproducibility.yml",
-        "paper/softwarex_manuscript.tex",
+        "paper/manuscript.tex",
         "references.bib",
         "scripts/reproduce_quad_platform_analysis.py",
         "scripts/verify_manifest.py",

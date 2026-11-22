@@ -1,0 +1,7 @@
+block_size_b,n_boot,n_pairs,sesoi_ms,unadj_equivalent,unadj_different,unadj_inconclusive,holm_equivalent,holm_different,holm_inconclusive
+2,10000,95,5.0,76,0,19,71,0,24
+3,10000,95,5.0,76,0,19,72,0,23
+5,10000,95,5.0,78,0,17,73,0,22
+8,10000,95,5.0,78,0,17,73,0,22
+12,10000,95,5.0,83,1,11,75,1,19
+adaptive,10000,95,5.0,77,0,18,72,0,23

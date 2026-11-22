@@ -6,12 +6,12 @@ a todo o acervo empírico e analítico do benchmark PicoClaw vs. OpenClaw (Quad-
 
 ARQUIVOS DE TEXTO FATIADOS (.TXT):
 --------------------------------------------------------------------------------
-1. audit_pt1_report_and_checklist.txt  (66.0 KB)
+1. audit_pt1_report_and_checklist.txt  (70.3 KB)
    - Contém: AUDIT_REPORT_FINAL.md + audit_export/Systems_Replication_Report.md
    - Foco: Inventário real de 35 datasets JSONL em disco, verificação de integridade,
            taxonomia completa de N/A, auditoria bibliográfica e replicação de sistemas.
 
-2. audit_pt2_tables.txt  (69.9 KB)
+2. audit_pt2_tables.txt  (73.1 KB)
    - Contém: Tabelas 1 a 8 consolidadas em formato Markdown
      * Table 1: Master Systems & Microarchitectural Conformance (W2)
      * Table 2: Non-Parametric Hypothesis Tests (Mann-Whitney, Cliff's delta, Holm-Bonferroni)
@@ -45,17 +45,17 @@ LOCALIZAÇÃO DAS TABELAS COMPLETAS (MARKDOWN E LATEX):
 LOCALIZAÇÃO DAS FIGURAS DE ALTA RESOLUÇÃO (300 DPI):
 --------------------------------------------------------------------------------
 - Diretório de figuras: figures/ e audit_export/figures/
-- fig1_architecture_topology.png (767,525 bytes | SHA-256: 718b440e48e385215ef6769e8f35cc4bc5fd6a174b99b0c79b5e1b3014d41768)
+- fig1_architecture_topology.png (777,722 bytes | SHA-256: e05883699a68bd5d4a4bf3e656a3fa9f18aaef3e4ba792473c15da95f13084da)
   Figure 1: Quad-Platform Experimental Testbed & Microarchitectural Telemetry
-- fig2_exp1_cold_start_rss.png (349,620 bytes | SHA-256: 47a036c7ddcc1068da100170c050a4fef3730fada580acbe3001dee4bda7ea8b)
+- fig2_exp1_cold_start_rss.png (354,914 bytes | SHA-256: 90c0ca6275b5e9139398f53adb68130300580b16be6ce245187b8179fcb6e7e5)
   Figure 2: Cold Task Latency (W1) & Peak Resident Memory Footprint (W2 across 4 Platforms)
-- fig3_exp2_latency_overhead.png (392,886 bytes | SHA-256: 15082798b8d7601f3a9a358a99cf355bc55ed9577c9597fb3f56a1941c0522f1)
+- fig3_exp2_latency_overhead.png (415,456 bytes | SHA-256: c7c27045097b1ac351bb10ec7e19501bf02ba152afdc7b7bc04ab16f8f2f0647)
   Figure 3: Client Orchestration Latency T_orch (4 Platforms) & Middleware Ratio Phi_orch with W3 Inversion
-- fig4_exp3_energy_edp.png (403,353 bytes | SHA-256: 7a7eb616b580dff400f54942d57bbb51ba21c2fe1a4cea12ccf9c28970fae2b6)
+- fig4_exp3_energy_edp.png (403,302 bytes | SHA-256: 5acbd2e2fd656aee1037c9da0412056fede9204668e6acea65fad0fe145578d8)
   Figure 4: Net Dynamic Energy Dissipation & Energy-Delay Product (W2, Within-Node Sensor Domains)
-- fig5_exp4_tools_and_bloat.png (297,304 bytes | SHA-256: ba50975df745351ad8c4b8e29b8b2c28505a1e1cece809058ff73a2848316748)
+- fig5_exp4_tools_and_bloat.png (305,576 bytes | SHA-256: 95a3103a8515747d6c5b71803424d0a8a2b8af47944898ac9514f0079b1654e2)
   Figure 5: Tool Context Bloat Overhead (Linux) & Quad-Platform Tool-RAG Speedups
-- fig6_pmc_hardware_counters.png (531,565 bytes | SHA-256: 993d02190119dced683fd666955b47f47bed7f2cddc9760fbd594a91740e79e7)
+- fig6_pmc_hardware_counters.png (560,870 bytes | SHA-256: 7c08c8baaf613a9311e08b270d5bfa4b3d26f5b6f65d1a34406ded59e050564e)
   Figure 6: Quad-Platform PMC Retired Instructions (ARM64/Linux), Windows CPU Cycles & Relative Bloat Ratios
 
 ================================================================================
