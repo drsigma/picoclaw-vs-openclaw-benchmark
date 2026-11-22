@@ -4,16 +4,20 @@ This archive consolidates the manuscript source, bibliography, reproduction scri
 
 ## 1. Contents Included Directly in This Archive
 
-- **Manuscript & Bibliography:**
+- **Manuscript, Documentation, Licenses & CI Workflow:**
   - `paper/softwarex_manuscript.tex` — LaTeX manuscript source
-  - `references.bib` — 25 primary bibliographic entries with checked DOIs/ISBNs/arXiv identifiers
+  - `references.bib` — 26 primary bibliographic entries with checked DOIs/ISBNs/arXiv identifiers
+  - `README.md` — Installation guide, exact reproduction commands, metadata, and external validity boundaries
+  - `LICENSE` (MIT code license) and `DATA_LICENSE` (CC BY 4.0 data license)
+  - `.github/workflows/reproducibility.yml` — Executable Ubuntu GitHub Actions reproducibility workflow
 - **Repository Reproducibility Logs & Reports (not part of the manuscript):**
   - `audit_export/AUDIT_REPORT_FINAL.md` — Technical reproducibility log in neutral English (executed commands, observed outputs, file inventory)
   - `audit_export/Systems_Replication_Report.md` — Quad-platform systems replication report (English)
-- **Reproduction Scripts & Cryptographic Manifest:**
+- **Reproduction Scripts, Cryptographic Manifest & Raw Datasets:**
   - `scripts/reproduce_quad_platform_analysis.py` — Master analysis, statistical test, table, and figure generator
   - `scripts/verify_manifest.py` — Cryptographic SHA-256 verification script
   - `data/manifest_sha256.json` — SHA-256 manifest covering all 35 raw `.jsonl` datasets and tracked artifacts
+  - All **35 raw `.jsonl` datasets** included directly at their canonical paths (`results/publication_campaign/*.jsonl`, `data/*.jsonl`, `data/*_session{1,2}/raw/*.jsonl`)
 - **Saved Automated Test Transcript:**
   - `audit_export/pytest_output.txt` — Saved output from `pytest -q`
 - **High-Resolution Figures (300 DPI):**
@@ -31,6 +35,7 @@ This archive consolidates the manuscript source, bibliography, reproduction scri
   - `audit_export/quad_platform_consolidated_summary.csv`
   - `audit_export/anomaly_and_cache_diagnostics.csv`
   - `audit_export/w5_token_and_schema_audit.csv`
+  - `audit_export/tost_block_sensitivity.csv` (block-size sensitivity $b \in \{2, 3, 5\}$)
   - `audit_export/audit_summary_metrics.json`
 
 ## 2. Accessing All 35 Raw `.jsonl` Datasets (18,616 lines / 16,995 measured trials)

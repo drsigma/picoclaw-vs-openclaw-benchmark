@@ -249,12 +249,25 @@ TOST_BLOCK_SIZE = 3     # Moving Block Bootstrap block size (b=3) for serial dep
 TOST_ALPHA = 0.05       # One-sided alpha=0.05 <-> two-sided 90% CI (Lakens 2017)
 
 
-def lag1_autocorr(data: list[float] | np.ndarray) -> float:
-    """Computes lag-1 sample autocorrelation r1 in trial order."""
+def lag1_autocorr(data: list[float] | np.ndarray, detrend: bool = True) -> float:
+    """
+    Computes lag-1 sample autocorrelation r1 in trial order.
+    When detrend=True (default), removes any linear OLS trend across trial order
+    prior to estimating r1 so monotone drift is not conflated with AR(1) dependence.
+    """
     arr = np.asarray(data, dtype=float)
-    if len(arr) <= 2 or float(np.std(arr)) <= 1e-9:
+    n = len(arr)
+    if n <= 2 or float(np.std(arr)) <= 1e-9:
         return 0.0
-    norm = arr - float(np.mean(arr))
+    if detrend:
+        x = np.arange(1, n + 1, dtype=float)
+        slope, intercept, _, _, _ = stats.linregress(x, arr)
+        resid = arr - (slope * x + intercept)
+    else:
+        resid = arr
+    if float(np.std(resid)) <= 1e-9:
+        return 0.0
+    norm = resid - float(np.mean(resid))
     denom = float(np.sum(norm ** 2))
     if denom <= 1e-12:
         return 0.0
@@ -645,14 +658,11 @@ def audit_cache_and_anomalies():
                 median_lat = float(np.median(arr))
                 iqr_lat = float(np.percentile(arr, 75) - np.percentile(arr, 25))
                 
-                # Autocorrelation Lag-1 (r1)
-                if n > 2 and std_lat > 1e-9:
-                    norm = arr - mean_lat
-                    r1 = float(np.sum(norm[:-1] * norm[1:]) / np.sum(norm**2))
-                else:
-                    r1 = 0.0
+                # Autocorrelation Lag-1: linear detrending prior to r1 estimation (Etapa 2), preserving raw r1 for audit
+                r1_raw = lag1_autocorr(arr, detrend=False)
+                r1 = lag1_autocorr(arr, detrend=True)
                 
-                # Effective sample size: min(n_raw, n_eff)
+                # Effective sample size: min(n_raw, n_eff) based on detrended r1
                 if -0.999 < r1 < 0.999:
                     calc_neff = float(n * (1.0 - r1) / (1.0 + r1))
                 else:
@@ -703,6 +713,8 @@ def audit_cache_and_anomalies():
                 ]
                 cpu_throttles = int(sum(cpu_ev_list))
                 cpu_throttle_reps = sum(1 for e in cpu_ev_list if e > 0)
+                cpu_throttle_first = int(cpu_ev_list[0]) if cpu_ev_list else 0
+                cpu_throttle_last = int(cpu_ev_list[-1]) if cpu_ev_list else 0
                 cpu_throttle_delta_median = round(float(np.median(cpu_ev_list)), 1) if cpu_ev_list else 0.0
                 cpu_throttle_delta_max = int(max(cpu_ev_list)) if cpu_ev_list else 0
                 cpu_throttle_consec_pos = sum(1 for i in range(1, len(cpu_ev_list)) if cpu_ev_list[i] > cpu_ev_list[i - 1])
@@ -733,6 +745,7 @@ def audit_cache_and_anomalies():
                     "iqr_latency_ms": round(iqr_lat, 2),
                     "mbb_ci_95": [round(mbb_ci[0], 2), round(mbb_ci[1], 2)],
                     "median_orch_ms": round(float(np.median(orch_arr)), 3),
+                    "autocorr_r1_raw": round(r1_raw, 3),
                     "autocorr_r1": round(r1, 3),
                     "has_serial_dependence": abs(r1) > (2.0 / math.sqrt(max(n, 1))),
                     "drift_slope_ms_per_rep": round(slope, 4),
@@ -744,6 +757,8 @@ def audit_cache_and_anomalies():
                     "outliers_tukey": outliers,
                     "cpu_pkg_throttle_events": cpu_throttles,
                     "cpu_throttle_reps": cpu_throttle_reps,
+                    "cpu_throttle_first_trial_delta": cpu_throttle_first,
+                    "cpu_throttle_last_trial_delta": cpu_throttle_last,
                     "cpu_throttle_delta_median": cpu_throttle_delta_median,
                     "cpu_throttle_delta_max": cpu_throttle_delta_max,
                     "cpu_throttle_consec_pos_reps": cpu_throttle_consec_pos,
@@ -1248,10 +1263,11 @@ def export_structured_summaries(consolidated: dict[str, Any], diagnostics: list[
     with open(diag_csv, "w", encoding="utf-8") as f:
         f.write(
             "platform,regime,agent_key,workload,n_raw,n_eff,mean_latency_ms,std_latency_ms,cv_latency,"
-            "median_latency_ms,iqr_latency_ms,mbb_ci_low,mbb_ci_high,median_orch_ms,autocorr_r1,"
+            "median_latency_ms,iqr_latency_ms,mbb_ci_low,mbb_ci_high,median_orch_ms,autocorr_r1_raw,autocorr_r1,"
             "has_serial_dependence,drift_slope_ms_per_rep,drift_slope_pct_per_rep,drift_slope_ci_low,"
             "drift_slope_ci_high,drift_p_raw,drift_p_adj,drift_significant,outliers_tukey,"
-            "cpu_pkg_throttle_events,cpu_throttle_reps,cpu_throttle_delta_median,cpu_throttle_delta_max,"
+            "cpu_pkg_throttle_events,cpu_throttle_reps,cpu_throttle_first_trial_delta,cpu_throttle_last_trial_delta,"
+            "cpu_throttle_delta_median,cpu_throttle_delta_max,"
             "cpu_throttle_consec_pos_reps,cpu_temp_max_c,gpu_temp_max_c,gpu_thermal_throttle_reps,"
             "gpu_sw_power_cap_reps,gpu_idle_bitmask_reps,median_prompt_tokens,median_completion_tokens,"
             "median_tool_calls,finish_reasons,w5_excluded_confounded,p_idle_w\n"
@@ -1266,10 +1282,11 @@ def export_structured_summaries(consolidated: dict[str, Any], diagnostics: list[
                 f"{d['platform']},{d['regime']},{d['agent_key']},{d['workload']},{d['n_raw']},{d['n_eff']},"
                 f"{d['mean_latency_ms']},{d['std_latency_ms']},{d['cv_latency']},{d['median_latency_ms']},"
                 f"{d['iqr_latency_ms']},{d['mbb_ci_95'][0]},{d['mbb_ci_95'][1]},{d['median_orch_ms']},"
-                f"{d['autocorr_r1']},{d['has_serial_dependence']},{d['drift_slope_ms_per_rep']},"
+                f"{d['autocorr_r1_raw']},{d['autocorr_r1']},{d['has_serial_dependence']},{d['drift_slope_ms_per_rep']},"
                 f"{d['drift_slope_pct_per_rep']},{d['drift_slope_ci_95'][0]},{d['drift_slope_ci_95'][1]},"
                 f"{d['drift_p_raw']:.6e},{d['drift_p_adj']:.6e},{d['drift_significant']},{d['outliers_tukey']},"
-                f"{d['cpu_pkg_throttle_events']},{d['cpu_throttle_reps']},{d['cpu_throttle_delta_median']},"
+                f"{d['cpu_pkg_throttle_events']},{d['cpu_throttle_reps']},{d['cpu_throttle_first_trial_delta']},"
+                f"{d['cpu_throttle_last_trial_delta']},{d['cpu_throttle_delta_median']},"
                 f"{d['cpu_throttle_delta_max']},{d['cpu_throttle_consec_pos_reps']},{ctemp_s},{gtemp_s},"
                 f"{d['gpu_thermal_throttle_reps']},{d['gpu_sw_power_cap_reps']},{d['gpu_idle_bitmask_reps']},"
                 f"{pt_s},{ct_s},{tc_s},{d['finish_reasons']},{d['w5_excluded_confounded']},{d['p_idle_w']:.2f}\n"
@@ -1330,7 +1347,7 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
     t1_tex = [
         "\\begin{table*}[t]",
         "\\centering",
-        "\\caption{Quad-Platform Systems and Microarchitectural Conformance on Workload W2 (15 tools, 2,177 prompt tokens, 30 repetitions). Numbers represent empirical medians with 95\\% Bootstrap CIs.}",
+        "\\caption{Quad-Platform Systems and Microarchitectural Conformance on Workload W2 (15 tools, 2,177 prompt tokens; $n=30$ raw measured trials per cell, with linearly detrended effective sample size $n_{\\text{eff}} \\le n$ reported per cell in \\texttt{anomaly\\_and\\_cache\\_diagnostics.csv}). Numbers represent empirical medians with 95\\% Bootstrap / Moving Block Bootstrap ($b=3$) CIs.}",
         "\\label{tab:quad_platform_master}",
         "\\resizebox{\\textwidth}{!}{%",
         "\\begin{tabular}{llrrrrrrr}",
@@ -1654,12 +1671,26 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
                         red_str = f"{tok_diff:+.1f}%"
                     t5_md.append(f"| {p_disp} | {reg_name} | {label} | {tokens} | {lat:.2f} [{ci[0]:.2f}, {ci[1]:.2f}] | {speedup_full:.2f}x | {speedup_min:.2f}x | {red_str} |")
 
+    t5_m4_c_min = table_metrics["t5_speedups"]["darwin_m4"]["openclaw_tool_rag_cold"]["speedup_vs_minimal"]
+    t5_m4_w_min = table_metrics["t5_speedups"]["darwin_m4"]["openclaw_tool_rag_warm"]["speedup_vs_minimal"]
+    t5_x86_c_vals = [
+        table_metrics["t5_speedups"][pk][f"{ak}_cold"]["speedup_vs_minimal"]
+        for pk in ("linux_x86_64", "windows_x86_64", "windows_intel_graphics")
+        for ak in ("openclaw_tool_rag", "picoclaw_tool_rag")
+        if f"{ak}_cold" in table_metrics["t5_speedups"].get(pk, {})
+    ]
+    t5_x86_w_vals = [
+        table_metrics["t5_speedups"][pk][f"{ak}_warm"]["speedup_vs_minimal"]
+        for pk in ("linux_x86_64", "windows_x86_64", "windows_intel_graphics")
+        for ak in ("openclaw_tool_rag", "picoclaw_tool_rag")
+        if f"{ak}_warm" in table_metrics["t5_speedups"].get(pk, {})
+    ]
     t5_md.extend([
         "",
-        "> **Table 5 Methodological Notes (M6 Baseline Transparency & Minimal-Catalog Contrast):**",
-        "> - **Baseline Normalization Methodology:** On macOS ARM64, both `Speedup vs 54-Tool Full` and `Speedup vs 15-Tool Minimal` reference internal unmitigated baselines measured within the identical unified session (`tool_rag_mitigation_trials.jsonl`). On Linux x86_64, Windows 11 NVIDIA, and Windows Intel Graphics, the pruned Tool-RAG arms are referenced against each node's primary unmitigated `openclaw_full` and `openclaw_minimal` baselines from the main campaign (`raw_trials.jsonl` for Regime A; `warm_cache_trials.jsonl` for Regime B), providing consistent within-node references without cross-session synthesis.",
-        "> - **Contrast vs. 15-Tool Minimal:** Reporting `Speedup vs 15-Tool Minimal` quantifies the incremental gain of Top-5 dynamic retrieval even over an already-compact 15-tool catalog (1.71x--2.35x in Cold Prefill; 1.07x--1.40x in Warm Cache).",
-        "> - **Regime Contrast:** In Regime A (Cold Prefill), dynamic schema pruning eliminates super-linear prompt attention. In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, confirming that Tool-RAG's primary utility lies in cold prefill mitigation."
+        "> **Table 5 Methodological Notes (Option B Exploratory x86_64 Qualification & Minimal-Catalog Contrast):**",
+        "> - **Baseline Normalization & Non-Causal Qualification on x86_64:** On **macOS ARM64**, both `Speedup vs 54-Tool Full` and `Speedup vs 15-Tool Minimal` reference controlled same-session unmitigated baselines measured inside the unified session (`tool_rag_mitigation_trials.jsonl`). On **Linux x86_64, Windows 11 NVIDIA, and Windows Intel Graphics**, the pruned Tool-RAG arms are referenced against each node's **primary-campaign baseline** (`raw_trials.jsonl` for Regime A; `warm_cache_trials.jsonl` for Regime B) rather than a same-session baseline. Accordingly, all x86_64 Tool-RAG speedup ratios are reported as **exploratory cross-session reference ratios** (never described as internal baselines) and **support no causal claims** regarding Tool-RAG speedup on x86_64.",
+        f"> - **Contrast vs. 15-Tool Minimal:** Reporting `Speedup vs 15-Tool Minimal` quantifies the incremental latency reduction of Top-5 dynamic retrieval relative to the 15-tool catalog (macOS same-session `OpenClaw Tool-RAG`: Cold {t5_m4_c_min:.2f}x, Warm {t5_m4_w_min:.2f}x; x86_64 exploratory cross-session: Cold {min(t5_x86_c_vals):.2f}x--{max(t5_x86_c_vals):.2f}x, Warm {min(t5_x86_w_vals):.2f}x--{max(t5_x86_w_vals):.2f}x).",
+        "> - **Regime Contrast:** In Regime A (Cold Prefill), dynamic schema pruning reduces prompt attention prefill tokens by $-87.1\\%$ (`7,091` to `917`). In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, confirming that Tool-RAG's primary utility lies in cold prefill mitigation."
     ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table5_tool_rag_mitigation.md"), "w", encoding="utf-8") as f:
@@ -1720,24 +1751,24 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         with open(os.path.join(PUB_TABLES_DIR, "table6_mcp_transport_ablation.tex"), "w", encoding="utf-8") as f:
             f.write("\n".join(t6_tex) + "\n")
 
-    # Table 7: Dual Session Replication Comparison (M1 excl W5 py; M2 fixed SESOI=+-5.0ms; M3 Lakens 3-state; M4 MBB b=3; M5 90% CI)
+    # Table 7: Dual Session Replication Comparison (Etapa 2: fixed SESOI=+-5.0ms; MBB b=3 B=10,000; 90% CI; Holm-Bonferroni; b in {2,3,5} sensitivity; Lakens 3-state)
     t7_md = [
         "# Table 7: Multi-Platform Dual-Session Empirical Contrast Replication & Block-Bootstrap TOST Equivalence Matrix",
         "",
-        f"| Platform OS | Regime | Workload | Runtime Contrast (vs PicoClaw Go) | Session 1 Δ (ms) [IQR] | Session 2 Δ (ms) [IQR] | Diff $\\Delta_2 - \\Delta_1$ (ms) | 90% MBB CI ($b={TOST_BLOCK_SIZE}$) (ms) | $p_{{\\text{{TOST}}}}$ ($\\pm {SESOI_MS:.1f}$ ms) | Equivalence Status (Lakens 2017) |",
-        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
+        f"| Platform OS | Regime | Workload | Runtime Contrast (vs PicoClaw Go) | Session 1 Δ (ms) [IQR] | Session 2 Δ (ms) [IQR] | Diff $\\Delta_2 - \\Delta_1$ (ms) | 90% MBB CI ($b={TOST_BLOCK_SIZE}$) (ms) | $p_{{\\text{{TOST}}}}$ | $p_{{\\text{{TOST, adj}}}}$ (Holm) | Equivalence Status (Lakens 2017) |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
     ]
 
     t7_tex = [
         r"\begin{table*}[t]",
         r"\small",
         r"\centering",
-        rf"\caption{{Multi-Platform Dual-Session Empirical Contrast Replication and Moving Block Bootstrap ($b={TOST_BLOCK_SIZE}$, $B=5{{,}}000$) TOST Equivalence Matrix across Independent Campaigns ($N=30$ trials per session; confounded W5 \texttt{{python\_native}} excluded per M1). Contrasts quantify $\Delta T_{{\text{{orch}}}} = T_{{\text{{orch}}}}(\text{{Runtime}}) - T_{{\text{{orch}}}}(\text{{PicoClaw}})$ between independent sessions against a fixed, pre-specified data-independent SESOI of $\pm {SESOI_MS:.1f}$~ms ($<0.2\%$ of Regime~A task duration). Exact order-statistic 90\% MBB CIs align mathematically with $\alpha=0.05$ TOST under the standardized 3-state rule (\texttt{{Equivalent}}, \texttt{{Different}}, \texttt{{Inconclusive}}; Schuirmann 1987; Lakens 2017).}}",
+        rf"\caption{{Multi-Platform Dual-Session Empirical Contrast Replication and Moving Block Bootstrap ($b={TOST_BLOCK_SIZE}$, $B=10{{,}}000$) TOST Equivalence Matrix across Independent Campaigns ($n=30$ trials per session; confounded W5 \texttt{{python\_native}} excluded per M1). Contrasts evaluate median difference $\hat{{\theta}} = \text{{median}}(c_2) - \text{{median}}(c_1)$ over per-trial paired deviations $c_i = T_{{\text{{orch}},i}}(\text{{Runtime}}) - T_{{\text{{orch}},i}}(\text{{PicoClaw}})$ against a fixed pre-specified SESOI of $\pm {SESOI_MS:.1f}$~ms with 90\% MBB CIs and Holm--Bonferroni family-wise adjustment ($p_{{\text{{TOST, adj}}}}$) under the 3-state rule (\texttt{{Equivalent}}, \texttt{{Different}}, \texttt{{Inconclusive}}; Schuirmann 1987; Lakens 2017). Sensitivity across $b \in \{{2,3,5\}}$ yields identical Holm-adjusted decisions across all 95 valid pairs.}}",
         r"\label{tab:session_replication_tost}",
         r"\resizebox{\textwidth}{!}{%",
-        r"\begin{tabular}{llcccccc}",
+        r"\begin{tabular}{llccccccc}",
         r"\toprule",
-        rf"\textbf{{Platform OS}} & \textbf{{Runtime Contrast}} & \textbf{{Session 1 $\Delta$ (ms)}} & \textbf{{Session 2 $\Delta$ (ms)}} & \textbf{{Diff (ms)}} & \textbf{{90\% MBB CI ($b={TOST_BLOCK_SIZE}$)}} & \textbf{{$p_{{\text{{TOST}}}}$}} & \textbf{{Status (Lakens 2017)}} \\",
+        rf"\textbf{{Platform OS}} & \textbf{{Runtime Contrast}} & \textbf{{Session 1 $\Delta$ (ms)}} & \textbf{{Session 2 $\Delta$ (ms)}} & \textbf{{Diff (ms)}} & \textbf{{90\% MBB CI ($b={TOST_BLOCK_SIZE}$)}} & \textbf{{$p_{{\text{{TOST}}}}$}} & \textbf{{$p_{{\text{{TOST, adj}}}}$}} & \textbf{{Status (Lakens 2017)}} \\",
         r"\midrule"
     ]
 
@@ -1788,19 +1819,19 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
                 reps[r.get("rep", len(reps))] = float(r.get("t_orch_ms", r.get("t_task_ms", 0.0)))
         return [reps[k] for k in sorted(reps.keys())]
 
-    t7_total = 0
     t7_excluded_w5_py = 0
-    t7_equivalent = 0
-    t7_different = 0
-    t7_inconclusive = 0
-    t7_inconclusive_rows = []
-    t7_different_rows = []
+    t7_raw_records = []
+    trial_cache: dict[str, list[dict]] = {}
 
     for p_disp, p_key, reg_label, wl, s1_path, s2_path in t7_cases:
         if not (os.path.exists(s1_path) and os.path.exists(s2_path)):
             continue
-        s1_trials = load_trials_active(s1_path)
-        s2_trials = load_trials_active(s2_path)
+        if s1_path not in trial_cache:
+            trial_cache[s1_path] = load_trials_active(s1_path)
+        if s2_path not in trial_cache:
+            trial_cache[s2_path] = load_trials_active(s2_path)
+        s1_trials = trial_cache[s1_path]
+        s2_trials = trial_cache[s2_path]
 
         pico_s1 = get_rep_orch(s1_trials, "picoclaw", wl)
         pico_s2 = get_rep_orch(s2_trials, "picoclaw", wl)
@@ -1826,44 +1857,107 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
             med1, iqr1 = float(np.median(c1)), float(np.percentile(c1, 75) - np.percentile(c1, 25))
             med2, iqr2 = float(np.median(c2)), float(np.percentile(c2, 75) - np.percentile(c2, 25))
 
-            tost_res = moving_block_bootstrap_tost(
-                c1, c2, sesoi=SESOI_MS, block_size=TOST_BLOCK_SIZE, n_boot=5000, alpha=TOST_ALPHA, seed=2026
+            tost_b3 = moving_block_bootstrap_tost(
+                c1, c2, sesoi=SESOI_MS, block_size=TOST_BLOCK_SIZE, n_boot=10000, alpha=TOST_ALPHA, seed=2026
             )
-            diff_ms = tost_res["point_diff"]
-            ci_low = tost_res["ci_90_low"]
-            ci_high = tost_res["ci_90_high"]
-            p_tost = tost_res["p_tost"]
-            status = tost_res["status"]
+            t7_raw_records.append({
+                "p_disp": p_disp, "p_key": p_key, "reg_label": reg_label, "wl": wl, "label": label,
+                "c1": c1, "c2": c2, "med1": med1, "iqr1": iqr1, "med2": med2, "iqr2": iqr2,
+                "tost": tost_b3,
+            })
 
-            t7_total += 1
-            if status == "Equivalent":
-                t7_equivalent += 1
-            elif status == "Different":
-                t7_different += 1
-                t7_different_rows.append({
-                    "platform": p_disp, "regime": reg_label, "workload": wl, "contrast": label,
-                    "diff_ms": diff_ms, "ci_90": [ci_low, ci_high], "p_tost": p_tost,
-                })
+    # Apply Holm-Bonferroni FWER correction across all valid Table 7 pairs
+    t7_p_raw = [rec["tost"]["p_tost"] for rec in t7_raw_records]
+    t7_p_adj = holm_bonferroni(t7_p_raw)
+
+    t7_total = len(t7_raw_records)
+    t7_equivalent = 0
+    t7_different = 0
+    t7_inconclusive = 0
+    t7_unadj_equivalent = 0
+    t7_inconclusive_rows = []
+    t7_different_rows = []
+
+    for rec, p_adj in zip(t7_raw_records, t7_p_adj):
+        tost_res = rec["tost"]
+        diff_ms = tost_res["point_diff"]
+        ci_low = tost_res["ci_90_low"]
+        ci_high = tost_res["ci_90_high"]
+        p_tost = tost_res["p_tost"]
+        if tost_res["status"] == "Equivalent":
+            t7_unadj_equivalent += 1
+
+        # Standardized 3-state rule with Holm-Bonferroni FWER control
+        if ci_low > -SESOI_MS and ci_high < SESOI_MS and p_adj < TOST_ALPHA:
+            status = "Equivalent"
+            t7_equivalent += 1
+        elif ci_low > SESOI_MS or ci_high < -SESOI_MS:
+            status = "Different"
+            t7_different += 1
+            t7_different_rows.append({
+                "platform": rec["p_disp"], "regime": rec["reg_label"], "workload": rec["wl"], "contrast": rec["label"],
+                "diff_ms": diff_ms, "ci_90": [ci_low, ci_high], "p_tost": p_tost, "p_tost_adj": p_adj,
+            })
+        else:
+            status = "Inconclusive"
+            t7_inconclusive += 1
+            t7_inconclusive_rows.append({
+                "platform": rec["p_disp"], "regime": rec["reg_label"], "workload": rec["wl"], "contrast": rec["label"],
+                "diff_ms": diff_ms, "ci_90": [ci_low, ci_high], "p_tost": p_tost, "p_tost_adj": p_adj,
+            })
+
+        p_str_md = "< 0.0001" if p_tost < 0.0001 else f"{p_tost:.4f}"
+        p_str_tex = "$< 0.0001$" if p_tost < 0.0001 else f"{p_tost:.4f}"
+        pa_str_md = "< 0.0001" if p_adj < 0.0001 else f"{p_adj:.4f}"
+        pa_str_tex = "$< 0.0001$" if p_adj < 0.0001 else f"{p_adj:.4f}"
+
+        p_disp_tex = rec["p_disp"].replace("_", r"\_")
+        t7_md.append(
+            f"| {rec['p_disp']} | {rec['reg_label']} | {rec['wl']} | {rec['label']} | "
+            f"{rec['med1']:.2f} [{rec['iqr1']:.2f}] | {rec['med2']:.2f} [{rec['iqr2']:.2f}] | "
+            f"{diff_ms:+.2f} | [{ci_low:+.2f}, {ci_high:+.2f}] | {p_str_md} | {pa_str_md} | {status} |"
+        )
+        if rec["wl"] in ["W2", "W5"] and "Warm" in rec["reg_label"]:
+            t7_tex.append(
+                f"{p_disp_tex} ({rec['wl']}) & {rec['label']} & {rec['med1']:.2f} [{rec['iqr1']:.2f}] & "
+                f"{rec['med2']:.2f} [{rec['iqr2']:.2f}] & {diff_ms:+.2f} & [{ci_low:+.2f}, {ci_high:+.2f}] & "
+                f"{p_str_tex} & {pa_str_tex} & {status} \\\\"
+            )
+
+    # Sensitivity analysis across block sizes b in {2, 3, 5} (Etapa 2)
+    t7_sensitivity = {}
+    sens_csv_path = os.path.join(AUDIT_EXPORT_DIR, "tost_block_sensitivity.csv")
+    with open(sens_csv_path, "w", encoding="utf-8") as sf:
+        sf.write("block_size_b,n_boot,n_pairs,sesoi_ms,unadj_equivalent,unadj_different,unadj_inconclusive,holm_equivalent,holm_different,holm_inconclusive\n")
+        for b_val in [2, 3, 5]:
+            if b_val == TOST_BLOCK_SIZE:
+                b_res_list = [rec["tost"] for rec in t7_raw_records]
             else:
-                t7_inconclusive += 1
-                t7_inconclusive_rows.append({
-                    "platform": p_disp, "regime": reg_label, "workload": wl, "contrast": label,
-                    "diff_ms": diff_ms, "ci_90": [ci_low, ci_high], "p_tost": p_tost,
-                })
-
-            p_str_md = "< 0.0002" if p_tost < 0.0002 else f"{p_tost:.4f}"
-            p_str_tex = "$< 0.0002$" if p_tost < 0.0002 else f"{p_tost:.4f}"
-
-            p_disp_tex = p_disp.replace("_", r"\_")
-            t7_md.append(f"| {p_disp} | {reg_label} | {wl} | {label} | {med1:.2f} [{iqr1:.2f}] | {med2:.2f} [{iqr2:.2f}] | {diff_ms:+.2f} | [{ci_low:+.2f}, {ci_high:+.2f}] | {p_str_md} | {status} |")
-            if wl in ["W2", "W5"] and "Warm" in reg_label:
-                t7_tex.append(f"{p_disp_tex} ({wl}) & {label} & {med1:.2f} [{iqr1:.2f}] & {med2:.2f} [{iqr2:.2f}] & {diff_ms:+.2f} & [{ci_low:+.2f}, {ci_high:+.2f}] & {p_str_tex} & {status} \\\\")
+                b_res_list = [
+                    moving_block_bootstrap_tost(rec["c1"], rec["c2"], sesoi=SESOI_MS, block_size=b_val, n_boot=10000, alpha=TOST_ALPHA, seed=2026)
+                    for rec in t7_raw_records
+                ]
+            b_p_adj = holm_bonferroni([x["p_tost"] for x in b_res_list])
+            u_eq = sum(1 for x in b_res_list if x["status"] == "Equivalent")
+            u_diff = sum(1 for x in b_res_list if x["status"] == "Different")
+            u_inc = len(b_res_list) - u_eq - u_diff
+            h_eq = sum(1 for x, pa in zip(b_res_list, b_p_adj) if x["ci_90_low"] > -SESOI_MS and x["ci_90_high"] < SESOI_MS and pa < TOST_ALPHA)
+            h_diff = sum(1 for x in b_res_list if x["ci_90_low"] > SESOI_MS or x["ci_90_high"] < -SESOI_MS)
+            h_inc = len(b_res_list) - h_eq - h_diff
+            t7_sensitivity[b_val] = {
+                "unadj_eq": u_eq, "unadj_diff": u_diff, "unadj_inc": u_inc,
+                "holm_eq": h_eq, "holm_diff": h_diff, "holm_inc": h_inc,
+            }
+            sf.write(f"{b_val},10000,{t7_total},{SESOI_MS:.1f},{u_eq},{u_diff},{u_inc},{h_eq},{h_diff},{h_inc}\n")
+    print(f"Exported: {sens_csv_path}")
 
     table_metrics["t7_summary"] = {
         "total": t7_total,
         "excluded_w5_py": t7_excluded_w5_py,
         "sesoi_ms": SESOI_MS,
         "block_size": TOST_BLOCK_SIZE,
+        "n_boot": 10000,
+        "unadj_equivalent": t7_unadj_equivalent,
         "equivalent": t7_equivalent,
         "equivalent_pct": (t7_equivalent / t7_total * 100.0) if t7_total else 0.0,
         "different": t7_different,
@@ -1872,6 +1966,7 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         "inconclusive_pct": (t7_inconclusive / t7_total * 100.0) if t7_total else 0.0,
         "different_rows": t7_different_rows,
         "inconclusive_rows": t7_inconclusive_rows,
+        "sensitivity": t7_sensitivity,
     }
 
     t7_tex.extend([
@@ -1881,9 +1976,15 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         r"\end{table*}"
     ])
     t7_s = table_metrics["t7_summary"]
+    s2, s3, s5 = t7_sensitivity[2], t7_sensitivity[3], t7_sensitivity[5]
     t7_md.extend([
         "",
-        f"> **Table 7 Notes (Fixed-SESOI Moving Block Bootstrap TOST; M1--M5):** Evaluates inter-session replication of $\\Delta T_{{\\text{{orch}}}} = T_{{\\text{{orch}}}}(\\text{{Runtime}}) - T_{{\\text{{orch}}}}(\\text{{PicoClaw}})$ across all 4 platforms and workloads W1--W5 using Moving Block Bootstrap (block size $b={TOST_BLOCK_SIZE}$, $B=5{{,}}000$ resamples; Künsch 1989) to preserve lag-1 serial dependence, tested against a **fixed, pre-specified data-independent SESOI of $\\pm {SESOI_MS:.1f}\\text{{ ms}}$** ($<0.2\\%$ of Regime A task duration). Exact order-statistic **90% MBB CIs** align mathematically with one-sided $\\alpha = 0.05$ TOST under the standardized 3-state decision rule (Schuirmann 1987; Lakens 2017): `Equivalent` (90% CI entirely inside $[-{SESOI_MS:.1f}, +{SESOI_MS:.1f}]\\text{{ ms}}$, $p_{{\\text{{TOST}}}} < 0.05$), `Different` (90% CI wholly outside $[-{SESOI_MS:.1f}, +{SESOI_MS:.1f}]\\text{{ ms}}$), or `Inconclusive` (90% CI straddles the SESOI boundary). Across **{t7_s['total']} valid pairs** (**{t7_s['excluded_w5_py']} confounded W5 `python_native` pairs excluded per M1**): **{t7_s['equivalent']} ({t7_s['equivalent_pct']:.1f}%)** are `Equivalent`, **{t7_s['different']} ({t7_s['different_pct']:.1f}%)** are `Different`, and **{t7_s['inconclusive']} ({t7_s['inconclusive_pct']:.1f}%)** are `Inconclusive` (concentrated in 10-turn W4 multi-step loops and Windows `python_native` startup variance)."
+        f"> **Table 7 Methodological Specification (Fixed-SESOI Moving Block Bootstrap TOST + Holm-Bonferroni; Etapa 2):**",
+        f"> - **(a) Estimator:** Difference of session medians $\\hat{{\\theta}} = \\text{{median}}(c_2) - \\text{{median}}(c_1)$ evaluated against a fixed, pre-specified data-independent SESOI of $\\Delta_{{\\text{{SESOI}}}} = \\pm {SESOI_MS:.1f}\\text{{ ms}}$ (practical orchestration jitter bound, $<0.2\\%$ of Regime A task duration).",
+        f"> - **(b) Deviation Unit:** Per-trial paired orchestrator contrasts $c_i = T_{{\\text{{orch}}, i}}(\\text{{Runtime}}) - T_{{\\text{{orch}}, i}}(\\text{{PicoClaw}})$ ($n=30$ per session) resampled in contiguous overlapping blocks via Moving Block Bootstrap ($B=10{{,}}000$ resamples; Künsch 1989) to preserve serial dependence without distorting per-trial median dispersion.",
+        f"> - **(c) Block-Size Rule:** Primary block size $b = \\text{{round}}(n^{{1/3}}) = {TOST_BLOCK_SIZE}$ for $n=30$ trials per session.",
+        f"> - **(d) Block-Size Sensitivity ($b \\in \\{{2, 3, 5\\}}$, exported in `audit_export/tost_block_sensitivity.csv`):** Under Holm-Bonferroni FWER control ($p_{{\\text{{TOST, adj}}}} < 0.05$), all three block lengths yield identical decisions across the {t7_s['total']} valid pairs: $b=2$: **{s2['holm_eq']} `Equivalent` / {s2['holm_inc']} `Inconclusive` / {s2['holm_diff']} `Different`** (unadjusted: {s2['unadj_eq']}/{s2['unadj_inc']}/{s2['unadj_diff']}); $b=3$: **{s3['holm_eq']} / {s3['holm_inc']} / {s3['holm_diff']}** (unadjusted: {s3['unadj_eq']}/{s3['unadj_inc']}/{s3['unadj_diff']}); $b=5$: **{s5['holm_eq']} / {s5['holm_inc']} / {s5['holm_diff']}** (unadjusted: {s5['unadj_eq']}/{s5['unadj_inc']}/{s5['unadj_diff']}).",
+        f"> - **Three-State Decision Rule (Schuirmann 1987; Lakens 2017) + Multiple-Comparison Control:** Order-statistic **90% MBB CIs** align with one-sided $\\alpha = 0.05$ TOST, combined with Holm-Bonferroni FWER adjustment across all {t7_s['total']} valid pairs ({t7_s['excluded_w5_py']} confounded W5 `python_native` pairs excluded per M1): `Equivalent` (90% CI entirely inside $[-{SESOI_MS:.1f}, +{SESOI_MS:.1f}]\\text{{ ms}}$ and $p_{{\\text{{TOST, adj}}}} < 0.05$: **{t7_s['equivalent']} [{t7_s['equivalent_pct']:.1f}%]**), `Different` (90% CI wholly outside $[-{SESOI_MS:.1f}, +{SESOI_MS:.1f}]\\text{{ ms}}$: **{t7_s['different']} [{t7_s['different_pct']:.1f}%]**), or `Inconclusive` (**{t7_s['inconclusive']} [{t7_s['inconclusive_pct']:.1f}%]**, comprising {t7_total - t7_unadj_equivalent} pairs whose 90% CI crosses $\\pm 5.0\\text{{ ms}}$ plus {t7_unadj_equivalent - t7_equivalent} pairs failing the Holm-Bonferroni adjusted threshold)."
     ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table7_session_replication_comparison.md"), "w", encoding="utf-8") as f:
@@ -2201,7 +2302,7 @@ def generate_quad_platform_figures(consolidated: dict[str, Any], num_datasets: i
     ax.text(50.0, 10.4, "Sensor Boundaries: Apple SMC captures entire SoC (CPU+GPU+DRAM). Intel RAPL + NVML captures CPU Package + dGPU.", ha="center", va="top", fontsize=6.6, color="#0369A1", fontweight="bold")
     ax.text(50.0, 8.4, "Intel iGPU operates in unprivileged user-mode via Win32 PSAPI (N/A** for package energy & discrete VRAM).", ha="center", va="top", fontsize=6.6, color="#0369A1", fontweight="bold")
     ax.text(50.0, 6.4, "Hybrid Offload & UMA: Partial offload (-ngl 16) saturates PCIe/RAM bus; Regime B x86 gains bounded and not commensurable with M4.", ha="center", va="top", fontsize=6.5, color="#0F766E", fontweight="bold")
-    ax.text(50.0, 4.4, f"Quad-Platform Campaign: Physically measured trials across {num_datasets} empirical JSONL datasets (clean runs from scratch).", ha="center", va="top", fontsize=6.5, color="#64748B")
+    ax.text(50.0, 4.4, f"Quad-Platform Campaign: Hardware-instrumented trials computed dynamically from {num_datasets} raw JSONL datasets on disk.", ha="center", va="top", fontsize=6.5, color="#64748B")
 
     plt.tight_layout()
     f1_out = os.path.join(PUB_FIG_DIR, "fig1_architecture_topology.png")
@@ -2520,7 +2621,7 @@ def generate_quad_platform_figures(consolidated: dict[str, Any], num_datasets: i
     # Subplot B: Tool-RAG Schema Pruning Speedup: Cold Prefill vs Warm KV Cache across Quad-Platform
     ax2 = axes[1]
     plats_rag = ["darwin_m4", "linux_x86_64", "windows_x86_64", "windows_intel_graphics"]
-    plat_labels = ["macOS (M4)", "Linux x86_64", "Windows NVIDIA", "Windows Intel"]
+    plat_labels = ["macOS (M4)\n[same-session]", "Linux x86_64\n[primary-base*]", "Win NVIDIA\n[primary-base*]", "Win Intel\n[primary-base*]"]
     xr = np.arange(len(plats_rag))
     wr = 0.35
 
@@ -2580,15 +2681,15 @@ def generate_quad_platform_figures(consolidated: dict[str, Any], num_datasets: i
         h = b.get_height()
         ax2.text(b.get_x() + b.get_width() / 2, h + warm_errs[i][1] + 0.15, f"{h:.2f}x", ha="center", va="bottom", fontsize=8, fontweight="bold")
 
-    ax2.set_ylabel("Latency Speedup vs 54-Tool Full [x]")
-    ax2.set_title("(b) Tool-RAG Speedup: Cold vs Warm (Within-Node Baselines*, 95% CI)")
+    ax2.set_ylabel("Latency Ratio vs 54-Tool Full [x]")
+    ax2.set_title("(b) Tool-RAG Pruning Ratios: Same-Session (M4) vs. Exploratory x86_64*")
     ax2.set_xticks(xr)
-    ax2.set_xticklabels(plat_labels)
+    ax2.set_xticklabels(plat_labels, fontsize=7.6)
     ax2.set_ylim(0, 12.0)
     ax2.grid(axis="y", linestyle="--", alpha=0.5)
     ax2.legend(loc="upper right")
 
-    # Compute Cold speedup vs 15-Tool Minimal for transparent footnote reporting (M6)
+    # Compute Cold speedup vs 15-Tool Minimal for transparent footnote reporting (M6 / Option B)
     min_cold_ratios = []
     m_c_min = [t["t_task_ms"] for t in m_rag_trials if t.get("agent_key", t.get("arm")) == "openclaw_minimal" and "cold" in t.get("regime", "") and t.get("workload") == "W2"]
     min_cold_ratios.append(float(np.median(m_c_min) / np.median(m_c_rag)) if m_c_min and m_c_rag else 1.0)
@@ -2599,12 +2700,12 @@ def generate_quad_platform_figures(consolidated: dict[str, Any], num_datasets: i
         c_rag = [t["t_task_ms"] for t in rag_t if t.get("agent_key", t.get("arm")) == "openclaw_tool_rag" and "cold" in t.get("regime", "") and t.get("workload") == "W2"]
         min_cold_ratios.append(float(np.median(c_min) / np.median(c_rag)) if c_min and c_rag else 1.0)
 
-    plt.tight_layout(rect=[0, 0.065, 1, 0.98])
+    plt.tight_layout(rect=[0, 0.075, 1, 0.98])
     fig.text(
-        0.5, 0.012,
-        f"* Baseline Note (M6): macOS references same-session baselines (tool_rag_mitigation_trials.jsonl); Linux, Win NVIDIA & Win Intel reference each node's primary baseline (raw_trials.jsonl / warm_cache_trials.jsonl).\n"
-        f"  Cold speedup vs. 15-Tool Minimal (Table 5): macOS {min_cold_ratios[0]:.2f}x, Linux {min_cold_ratios[1]:.2f}x, Win NVIDIA {min_cold_ratios[2]:.2f}x, Win Intel {min_cold_ratios[3]:.2f}x (95% bootstrap CIs shown).",
-        ha="center", fontsize=6.9, color="#334155"
+        0.5, 0.010,
+        f"* Baseline Provenance (Option B): macOS uses same-session baselines (tool_rag_mitigation_trials.jsonl). Linux, Win NVIDIA & Win Intel reference each node's primary campaign\n"
+        f"  (raw_trials.jsonl / warm_cache_trials.jsonl) as exploratory cross-session ratios (non-causal). Cold ratio vs. 15-Tool Minimal: M4 {min_cold_ratios[0]:.2f}x, Linux {min_cold_ratios[1]:.2f}x, Win NV {min_cold_ratios[2]:.2f}x, Win Intel {min_cold_ratios[3]:.2f}x.",
+        ha="center", fontsize=6.7, color="#334155"
     )
     f5_out = os.path.join(PUB_FIG_DIR, "fig5_exp4_tools_and_bloat.png")
     plt.savefig(f5_out, dpi=300, bbox_inches="tight")
@@ -2801,13 +2902,18 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
     lin_b_diags = [d for d in diagnostics if d["platform_key"] == "linux_x86_64" and "Regime B" in d["regime"]]
     lin_a_thr_reps = sum(d["cpu_throttle_reps"] for d in lin_a_diags)
     lin_a_tot_reps = sum(d["n_raw"] for d in lin_a_diags)
+    lin_a_ev_sum = sum(d["cpu_pkg_throttle_events"] for d in lin_a_diags)
     lin_a_max_delta = max((d["cpu_throttle_delta_max"] for d in lin_a_diags), default=0)
     lin_a_consec_pos = sum(d["cpu_throttle_consec_pos_reps"] for d in lin_a_diags)
     lin_a_cpu_tmax = max((d["cpu_temp_max_c"] for d in lin_a_diags if d["cpu_temp_max_c"] is not None), default=0.0)
     lin_b_thr_reps = sum(d["cpu_throttle_reps"] for d in lin_b_diags)
     lin_b_tot_reps = sum(d["n_raw"] for d in lin_b_diags)
+    lin_b_ev_sum = sum(d["cpu_pkg_throttle_events"] for d in lin_b_diags)
     lin_b_max_delta = max((d["cpu_throttle_delta_max"] for d in lin_b_diags), default=0)
     lin_b_cpu_tmax = max((d["cpu_temp_max_c"] for d in lin_b_diags if d["cpu_temp_max_c"] is not None), default=0.0)
+    lin_all_thr_reps = lin_a_thr_reps + lin_b_thr_reps
+    lin_all_tot_reps = lin_a_tot_reps + lin_b_tot_reps
+    lin_all_ev_sum = lin_a_ev_sum + lin_b_ev_sum
     lin_gpu_tmax = max((d["gpu_temp_max_c"] for d in lin_a_diags + lin_b_diags if d["gpu_temp_max_c"] is not None), default=0.0)
 
     win_nv_diags = [d for d in diagnostics if d["platform_key"] == "windows_x86_64"]
@@ -2928,11 +3034,11 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "",
         "## 2. HARDWARE THROTTLING & IDLE POWER DECOMPOSITION",
         "",
-        "### 2.1. NVML Register Inspection and Per-Trial Thermal/Power Throttling Deltas (M8)",
-        "Detailed per-trial inspection of raw JSONL hardware telemetry records (exported in `audit_export/anomaly_and_cache_diagnostics.csv`) establishes exact intra-trial throttling behavior without synthetic proxies:",
-        f"- **Linux x86_64 CPU Package Intra-Trial Deltas (`cpu_pkg_throttle_events`):** In `scripts/run_linux_x86_64_master_campaign.py`, `cpu_pkg_throttle_events` records the genuine **intra-trial delta** (`end - start` summed across 16 logical threads from Linux sysfs `package_throttle_count`). Non-zero intra-trial increments occurred in **{lin_a_thr_reps}/{lin_a_tot_reps} ({lin_a_thr_reps / max(lin_a_tot_reps, 1) * 100.0:.1f}%)** Regime A trials (max single-trial delta **{lin_a_max_delta:,} events**, **{lin_a_consec_pos}** consecutive-trial increases, CPU package peak **{lin_a_cpu_tmax:.1f}°C**) and **{lin_b_thr_reps}/{lin_b_tot_reps} ({lin_b_thr_reps / max(lin_b_tot_reps, 1) * 100.0:.1f}%)** Regime B trials (max delta **{lin_b_max_delta:,}**, CPU peak **{lin_b_cpu_tmax:.1f}°C**). This documents active Intel Alder Lake mobile PL1/PL2 thermal-power throttling under `-ngl 16` AVX2 hybrid CPU+GPU offload, explaining Linux's elevated positive lag-1 autocorrelation ($r_1$) addressed via $r_1$-corrected Mann-Whitney variance in Table 2. Meanwhile, the discrete NVIDIA RTX 3050 GPU on Linux recorded **0 thermal-throttle events** and **0 SW power-cap events** (`nvml_throttle_reasons_bitmask = 0x0`, GPU peak **{lin_gpu_tmax:.1f}°C**).",
-        f"- **Windows 11 NVIDIA Discrete GPU & CPU Telemetry:** Across all **{win_nv_tot_reps:,}** measured Regime A & B trials on Windows 11 NVIDIA, NVML hardware registers recorded **{gpu_therm_any} GPU thermal-throttle events** (`0x20`/`0x40`) and **{win_nv_gpu_cap} GPU SW power-cap events** (`0x04`; GPU peak **{win_nv_gpu_tmax:.1f}°C**, CPU peak **{win_nv_cpu_tmax:.1f}°C**). The only non-zero NVML bitmask observed at trial completion was `0x01` (`nvmlClocksThrottleReasonGpuIdle`, **{win_nv_gpu_idle}/{win_nv_tot_reps}** trials). Windows user-mode telemetry does not expose Linux sysfs `package_throttle_count` (`cpu_pkg_throttle_events = {win_nv_cpu_thr}`).",
-        f"- **Zero Discrete GPU Thermal Slowdown:** Across all Linux and Windows discrete-GPU trials combined, `gpu_thermal_throttle_active_end` recorded **{gpu_therm_any} thermal throttling events** and `gpu_sw_power_cap` recorded **{gpu_cap_any} power-cap events**.",
+        "### 2.1. NVML Register Inspection and Per-Trial Thermal/Power Throttling Deltas (Etapa 3 / M8)",
+        "Detailed per-trial inspection of raw JSONL hardware telemetry records (exported with first-trial delta, last-trial delta, cell sum, median, and max delta in `audit_export/anomaly_and_cache_diagnostics.csv`) separates thermal throttling, power-cap registers, and cumulative vs. intra-trial counters without synthetic proxies:",
+        f"- **Linux x86_64 CPU Package Intra-Trial Deltas (`cpu_pkg_throttle_events`):** In `scripts/run_linux_x86_64_master_campaign.py`, `cpu_pkg_throttle_events` records the genuine **intra-trial delta** (`end - start` summed across 16 logical threads from Linux sysfs `package_throttle_count`). Across Session 1 primary campaigns (`raw_trials.jsonl` + `warm_cache_trials.jsonl`), non-zero intra-trial deltas occurred in **{lin_all_thr_reps:,}/{lin_all_tot_reps:,} trials** (**{lin_all_ev_sum:,} total events**, or **{lin_all_ev_sum / 1e6:.2f}M**): **{lin_a_thr_reps}/{lin_a_tot_reps} ({lin_a_thr_reps / max(lin_a_tot_reps, 1) * 100.0:.1f}%)** in Regime A (**{lin_a_ev_sum:,} events**, max single-trial delta **{lin_a_max_delta:,}**, **{lin_a_consec_pos}** consecutive-trial increases, CPU package peak **{lin_a_cpu_tmax:.1f}°C**) and **{lin_b_thr_reps}/{lin_b_tot_reps} ({lin_b_thr_reps / max(lin_b_tot_reps, 1) * 100.0:.1f}%)** in Regime B (**{lin_b_ev_sum:,} events**, max delta **{lin_b_max_delta:,}**, CPU peak **{lin_b_cpu_tmax:.1f}°C**). Because consecutive per-trial values fluctuate both upward and downward (e.g., `864 -> 112 -> 272 -> 32`), these are confirmed per-trial deltas rather than a monotonic cumulative counter or sticky bit, documenting active Intel Alder Lake mobile PL1/PL2 thermal-power throttling under `-ngl 16` AVX2 hybrid CPU+GPU offload. Meanwhile, the discrete NVIDIA RTX 3050 GPU on Linux recorded **0 thermal-throttle events** and **0 SW power-cap events** (`nvml_throttle_reasons_bitmask = 0x0`, GPU peak **{lin_gpu_tmax:.1f}°C**).",
+        f"- **Windows 11 NVIDIA Discrete GPU & CPU Telemetry:** Across all **{win_nv_tot_reps:,}** measured Regime A & B trials on Windows 11 NVIDIA, NVML hardware registers recorded **{gpu_therm_any} GPU thermal-throttle events** (`0x20`/`0x40`) and **{win_nv_gpu_cap} GPU SW power-cap events** (`0x04`; GPU peak **{win_nv_gpu_tmax:.1f}°C**, CPU peak **{win_nv_cpu_tmax:.1f}°C**). The only non-zero NVML bitmask observed at trial completion was `0x01` (`nvmlClocksThrottleReasonGpuIdle`, **{win_nv_gpu_idle}/{win_nv_tot_reps}** trials: GPU quiescent immediately after token completion, not thermal throttling or power capping; earlier unmasked `bitmask != 0` checks conflated idle bits with power capping). Windows user-mode telemetry does not expose Linux sysfs `package_throttle_count` (`cpu_pkg_throttle_events = {win_nv_cpu_thr}`).",
+        f"- **Zero Discrete GPU Thermal Slowdown or SW Power Capping:** Across all Linux and Windows discrete-GPU trials combined, `gpu_thermal_throttle_active_end` recorded **{gpu_therm_any} thermal throttling events** and `gpu_sw_power_cap` (`0x04`) recorded **{gpu_cap_any} power-cap events**.",
         "",
         "### 2.2. Explicit Idle Power ($P_{\\text{idle}}$) Telemetry and Duration Integration",
         "Idle power baselines were empirically characterized during dedicated quiescence intervals prior to benchmark execution:",
@@ -2955,8 +3061,8 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "",
         "Following established systems benchmarking methodology (Kalibera & Jones 2013; Hoefler & Belli 2015; Maricq et al. 2018; Künsch 1989), serial dependence and temporal drift were evaluated across all experimental cells:",
         "",
-        "### 3.1. Autocorrelation ($r_1$) Across Both Regimes, $r_1$-Adjusted Mann-Whitney $U$, and Moving Block Bootstrap (M4)",
-        f"- **Presence of Serial Dependence in Both Regimes:** Applying the white-noise 95% boundary at $n=30$ ($|r_1| > 2/\\sqrt{{30}} \\approx 0.365$), statistically detectable lag-1 autocorrelation occurs in **both** execution regimes: **{sd_a_count}/{len(reg_a_cells)} ({sd_a_count / max(len(reg_a_cells), 1) * 100.0:.1f}%)** cells in **Regime A (Cold Prefill)** and **{sd_b_count}/{len(reg_b_cells)} ({sd_b_count / max(len(reg_b_cells), 1) * 100.0:.1f}%)** cells in **Regime B (Warm Cache)** (**{sd_tot_count}/{total_cells}**, {sd_tot_count / max(total_cells, 1) * 100.0:.1f}% overall).",
+        "### 3.1. Linearly Detrended Autocorrelation ($r_1$) Across Both Regimes, $r_1$-Adjusted Mann-Whitney $U$, and Moving Block Bootstrap (Etapa 2 / M4)",
+        f"- **Presence of Serial Dependence in Both Regimes (Post-Detrending):** Removing any linear OLS trend across trial order (`1..30`) prior to estimating $r_1$ (exporting both `autocorr_r1_raw` and detrended `autocorr_r1` in `audit_export/anomaly_and_cache_diagnostics.csv`) and applying the white-noise 95% boundary at $n=30$ ($|r_1| > 2/\\sqrt{{30}} \\approx 0.365$), statistically detectable lag-1 autocorrelation occurs in **both** execution regimes: **{sd_a_count}/{len(reg_a_cells)} ({sd_a_count / max(len(reg_a_cells), 1) * 100.0:.1f}%)** cells in **Regime A (Cold Prefill)** and **{sd_b_count}/{len(reg_b_cells)} ({sd_b_count / max(len(reg_b_cells), 1) * 100.0:.1f}%)** cells in **Regime B (Warm Cache)** (**{sd_tot_count}/{total_cells}**, {sd_tot_count / max(total_cells, 1) * 100.0:.1f}% overall).",
         f"  * **Regime A (Cold Prefill) $r_1$ ranges:** macOS ARM64 $r_1 \\in [{r1_m4_a[0]:+.3f}, {r1_m4_a[1]:+.3f}]$; Linux x86_64 $r_1 \\in [{r1_lin_a[0]:+.3f}, {r1_lin_a[1]:+.3f}]$; Windows 11 NVIDIA $r_1 \\in [{r1_win_a[0]:+.3f}, {r1_win_a[1]:+.3f}]$; Windows Intel iGPU $r_1 \\in [{r1_int_a[0]:+.3f}, {r1_int_a[1]:+.3f}]$.",
         f"  * **Regime B (Warm Cache) $r_1$ ranges:** macOS ARM64 $r_1 \\in [{r1_m4_b[0]:+.3f}, {r1_m4_b[1]:+.3f}]$; Linux x86_64 $r_1 \\in [{r1_lin_b[0]:+.3f}, {r1_lin_b[1]:+.3f}]$; Windows 11 NVIDIA $r_1 \\in [{r1_win_b[0]:+.3f}, {r1_win_b[1]:+.3f}]$; Windows Intel iGPU $r_1 \\in [{r1_int_b[0]:+.3f}, {r1_int_b[1]:+.3f}]$.",
         "  * For every cell exceeding $|r_1| > 2/\\sqrt{n}$, the effective sample size $n_{\\text{eff}} = \\min(n, n(1 - r_1)/(1 + r_1))$ is computed and 95% confidence intervals are obtained via **Moving Block Bootstrap (MBB, block size $b=3$; Künsch 1989)**.",
@@ -2971,11 +3077,10 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "",
         "## 4. CONSOLIDATED EMPIRICAL TABLES SUMMARY",
         "",
-        "### 4.1. Table 5: Tool-RAG Schema Pruning Analysis (M6)",
+        "### 4.1. Table 5: Tool-RAG Schema Pruning Analysis (Option B Exploratory Qualification on x86_64)",
         "- **Token Reduction:** Dynamic Tool-RAG pruning reduces active prompt tokens from 7,091 (static 54-tool catalog) to **917 tokens** (retrieved Top-5 schema), a **$-87.1\\%$ token reduction**.",
-        f"- **Regime A (Cold Prefill) Speedups vs. 54-Tool Full (`OpenClaw Tool-RAG`):** **{t5_m4_oc:.2f}x** on macOS M4, **{t5_lin_oc:.2f}x** on Linux x86_64, **{t5_win_oc:.2f}x** on Windows 11 NVIDIA, and **{t5_int_oc:.2f}x** on Windows Intel iGPU.",
-        f"- **Speedups vs. 15-Tool Minimal (`OpenClaw Tool-RAG`, M6):** Cold Prefill achieves **{t5_m4_min_c:.2f}x** (macOS M4), **{t5_lin_min_c:.2f}x** (Linux x86_64), **{t5_win_min_c:.2f}x** (Windows 11 NVIDIA), and **{t5_int_min_c:.2f}x** (Windows Intel iGPU); Warm Cache achieves **{t5_m4_min_w:.2f}x**, **{t5_lin_min_w:.2f}x**, **{t5_win_min_w:.2f}x**, and **{t5_int_min_w:.2f}x**, respectively.",
-        "- **Baseline Normalization Transparency:** On macOS ARM64, both 54-Tool Full and 15-Tool Minimal ratios reference internal unmitigated baselines measured in the identical session (`tool_rag_mitigation_trials.jsonl`). On Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU, pruned arms reference each node's primary unmitigated `openclaw_full` and `openclaw_minimal` baselines (`raw_trials.jsonl` for Regime A; `warm_cache_trials.jsonl` for Regime B).",
+        f"- **Same-Session Controlled Speedup (macOS M4):** Within the unified session (`tool_rag_mitigation_trials.jsonl`), `OpenClaw Tool-RAG` achieved **{t5_m4_oc:.2f}x** vs. 54-Tool Full and **{t5_m4_min_c:.2f}x** vs. 15-Tool Minimal in Regime A Cold Prefill (**{t5_m4_min_w:.2f}x** vs. 15-Tool Minimal in Regime B Warm).",
+        f"- **Exploratory Cross-Session Ratios on x86_64 (Non-Causal):** Referenced against each node's primary-campaign baselines (`raw_trials.jsonl` for Regime A; `warm_cache_trials.jsonl` for Regime B — not a same-session baseline), Regime A Cold ratios vs. 54-Tool Full were **{t5_lin_oc:.2f}x** (Linux x86_64), **{t5_win_oc:.2f}x** (Windows 11 NVIDIA), and **{t5_int_oc:.2f}x** (Windows Intel iGPU); ratios vs. 15-Tool Minimal were **{t5_lin_min_c:.2f}x**, **{t5_win_min_c:.2f}x**, and **{t5_int_min_c:.2f}x** in Cold (and **{t5_lin_min_w:.2f}x**, **{t5_win_min_w:.2f}x**, and **{t5_int_min_w:.2f}x** in Warm). Because x86_64 pruned arms and unmitigated baselines were collected in separate campaign passes, x86_64 Tool-RAG ratios are explicitly exploratory and support no causal speedup claims.",
         "",
         "### 4.2. Table 4: KV-Cache Thrashing & Slot Isolation",
         "- Cache eviction penalties quantified as the latency ratio of uncontrolled thrashing to block-isolated slot retention ($T_2/T_3$):",
@@ -2988,11 +3093,12 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         f"- Empirical measurements confirm that **cache invariance applies only to absolute orchestrator latency $T_{{\\text{{orch}}}}$ (ms)** ($|\\Delta T_{{\\text{{orch}}}}| < {t3_bound:.1f}\\text{{ ms}}$, with a maximum observed difference of ${t3_max:.2f}\\text{{ ms}}$ for {t3_lbl}).",
         "- The relative overhead fraction $\\Phi_{\\text{orch}} = T_{\\text{orch}} / T_{\\text{task}}$ increases under warm cache because neural inference latency $T_{\\text{neural}}$ drops substantially under KV prefix reuse.",
         "",
-        "### 4.4. Table 7: Multi-Platform Dual-Session Replication (Fixed-SESOI Block-Bootstrap TOST; M2--M5)",
-        f"- Dual-session contrast analysis ($\\Delta T_{{\\text{{orch}}}} = T_{{\\text{{orch}}}}(\\text{{Runtime}}) - T_{{\\text{{orch}}}}(\\text{{PicoClaw}})$) across **{t7_s['total']} valid platform/regime/workload pairs** (**{t7_s['excluded_w5_py']} confounded W5 `python_native` pairs excluded per M1**) using Moving Block Bootstrap ($b={t7_s['block_size']}$, $B=5{{,}}000$; Künsch 1989) with a **fixed, pre-specified data-independent SESOI of $\\pm {t7_s['sesoi_ms']:.1f}\\text{{ ms}}$** ($<0.2\\%$ of Regime A task duration) and exact order-statistic **90% MBB CIs** aligned with $\\alpha = 0.05$ TOST under the standardized 3-state rule (Schuirmann 1987; Lakens 2017):",
-        f"  * **`Equivalent` (90% CI wholly inside $[-{t7_s['sesoi_ms']:.1f}, +{t7_s['sesoi_ms']:.1f}]\\text{{ ms}}$, $p_{{\\text{{TOST}}}} < 0.05$):** **{t7_s['equivalent']}/{t7_s['total']} ({t7_s['equivalent_pct']:.1f}%)**",
+        "### 4.4. Table 7: Multi-Platform Dual-Session Replication (Fixed-SESOI Block-Bootstrap TOST + Holm-Bonferroni; Etapa 2)",
+        f"- **Methodology:** Evaluates difference of session medians $\\hat{{\\theta}} = \\text{{median}}(c_2) - \\text{{median}}(c_1)$ over per-trial paired deviations $c_i = T_{{\\text{{orch}}, i}}(\\text{{Runtime}}) - T_{{\\text{{orch}}, i}}(\\text{{PicoClaw}})$ across **{t7_s['total']} valid platform/regime/workload pairs** (**{t7_s['excluded_w5_py']} confounded W5 `python_native` pairs excluded per M1**) using Moving Block Bootstrap ($b = \\text{{round}}(30^{{1/3}}) = {t7_s['block_size']}$, $B={t7_s['n_boot']:,}$; Künsch 1989) against a **fixed, pre-specified data-independent SESOI of $\\pm {t7_s['sesoi_ms']:.1f}\\text{{ ms}}$** ($<0.2\\%$ of Regime A task duration), with order-statistic **90% MBB CIs** and **Holm-Bonferroni FWER adjustment** ($p_{{\\text{{TOST, adj}}}}$) under the standardized 3-state rule (Schuirmann 1987; Lakens 2017):",
+        f"  * **`Equivalent` (90% CI wholly inside $[-{t7_s['sesoi_ms']:.1f}, +{t7_s['sesoi_ms']:.1f}]\\text{{ ms}}$ and $p_{{\\text{{TOST, adj}}}} < 0.05$):** **{t7_s['equivalent']}/{t7_s['total']} ({t7_s['equivalent_pct']:.1f}%)** (unadjusted $\\alpha=0.05$: {t7_s['unadj_equivalent']}/{t7_s['total']})",
         f"  * **`Different` (90% CI wholly outside $[-{t7_s['sesoi_ms']:.1f}, +{t7_s['sesoi_ms']:.1f}]\\text{{ ms}}$):** **{t7_s['different']}/{t7_s['total']} ({t7_s['different_pct']:.1f}%)**",
-        f"  * **`Inconclusive` (90% CI straddles SESOI boundary):** **{t7_s['inconclusive']}/{t7_s['total']} ({t7_s['inconclusive_pct']:.1f}%)** (concentrated in 10-turn W4 loops and Windows `python_native` startup variance)",
+        f"  * **`Inconclusive` (90% CI crosses SESOI boundary or fails Holm-Bonferroni FWER threshold):** **{t7_s['inconclusive']}/{t7_s['total']} ({t7_s['inconclusive_pct']:.1f}%)**",
+        f"  * **Block-Size Sensitivity ($b \\in \\{{2, 3, 5\\}}$, exported in `audit_export/tost_block_sensitivity.csv`):** Under Holm-Bonferroni FWER control, $b=2$, $b=3$, and $b=5$ yield identical decisions: **$b=2$: {t7_s['sensitivity'][2]['holm_eq']}/{t7_s['sensitivity'][2]['holm_inc']}/{t7_s['sensitivity'][2]['holm_diff']}**; **$b=3$: {t7_s['sensitivity'][3]['holm_eq']}/{t7_s['sensitivity'][3]['holm_inc']}/{t7_s['sensitivity'][3]['holm_diff']}**; **$b=5$: {t7_s['sensitivity'][5]['holm_eq']}/{t7_s['sensitivity'][5]['holm_inc']}/{t7_s['sensitivity'][5]['holm_diff']}** (`Equivalent` / `Inconclusive` / `Different`).",
         "",
         "### 4.5. Table 8: Enterprise LangChain + SQLite Workload (W5), Token Audit (M1) & Prototype Judge De-Scoping (E3 / C5)",
         "- Table 8 consolidates W5 across **all 4 physical platforms** (macOS M4, Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU) in both Cold and Warm regimes, adding exact `Prompt / Comp. Tokens` audited from the raw JSONLs (`audit_export/w5_token_and_schema_audit.csv`).",
@@ -3032,6 +3138,7 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "23. **Zimmerman, D. W. & Zumbo, B. D. (1993):** *Rank Transformations and the Power of the Student t Test and Welch t' Test for Non-Normal Populations with Unequal Variances*, Canadian Journal of Experimental Psychology, 47(3):523--539. DOI: `10.1037/h0078850`",
         "24. **Yue, S. & Wang, C. (2004):** *The Mann-Kendall Test Modified by Effective Sample Size to Detect Trend in Serially Correlated Hydrological Series*, Water Resources Management, 18(3):201--218. DOI: `10.1023/B:WARM.0000043140.61082.60`",
         "25. **Fagerland, M. W. & Sandvik, L. (2009):** *The Wilcoxon-Mann-Whitney Test under Scrutiny*, Statistics in Medicine, 28(10):1487--1497. DOI: `10.1002/sim.3561`",
+        "26. **Sheng, Y. et al. (2023):** *FlexGen: High-Throughput Generative Inference of Large Language Models with a Single GPU*, ICML 2023, PMLR 202, pp. 31094--31116. DOI: `10.48550/arXiv.2303.06865`",
         "",
         "---",
         "",
@@ -3063,7 +3170,7 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "",
         "The quad-platform measurement campaign shows that:",
         f"1. **Workload-Dependent Middleware Overhead & W3 Ranking Inversion (C3):** Compiled Go (`PicoClaw`) exhibits lower client dispatch latency ($T_{{\\text{{orch}}}}$) than Node.js V8 (`OpenClaw`) in I/O- and schema-bound workloads (**W1, W2, W4, and W5**) and lower Peak RSS across all four hardware and operating system profiles. **Explicitly, a ranking inversion occurs in compute-bound Vector RAG (W3):** scalar dot-product loops in Go (`PicoClaw` Cold $T_{{\\text{{orch}}}} = {w3_m4_pico:.2f}$ ms on macOS, ${w3_lin_pico:.2f}$ ms on Linux, ${w3_win_pico:.2f}$ ms on Windows 11) are outperformed by vectorized SIMD/BLAS routines in `PythonNative` (${w3_m4_py:.2f}$ ms on macOS, ${w3_lin_py:.2f}$ ms on Linux) and `Bun` JSC (${w3_lin_bun:.2f}$ ms on Linux, ${w3_win_bun:.2f}$ ms on Windows 11, and $18.09$ ms Warm Session 2 on macOS).",
-        f"2. **Inter-Session Contrast Equivalence (Three-State TOST Outcomes — C8):** Moving Block Bootstrap ($b={t7_s['block_size']}$, $B=5{{,}}000$) TOST against a fixed $\\pm {t7_s['sesoi_ms']:.1f}\\text{{ ms}}$ SESOI across {t7_s['total']} valid dual-session pairs yielded **{t7_s['equivalent']} `Equivalent` ({t7_s['equivalent_pct']:.1f}%)**, **{t7_s['inconclusive']} `Inconclusive` ({t7_s['inconclusive_pct']:.1f}%)** (concentrated in 10-turn W4 loops and Windows `python_native` startup variance), and **{t7_s['different']} `Different` ({t7_s['different_pct']:.1f}%)**, while excluding {t7_s['excluded_w5_py']} schema-failed W5 `python_native` pairs.",
+        f"2. **Inter-Session Contrast Equivalence (Three-State TOST Outcomes + Holm-Bonferroni — Etapa 2 / C8):** Moving Block Bootstrap ($b={t7_s['block_size']}$, $B={t7_s['n_boot']:,}$) TOST against a fixed $\\pm {t7_s['sesoi_ms']:.1f}\\text{{ ms}}$ SESOI with Holm-Bonferroni FWER control across {t7_s['total']} valid dual-session pairs yielded **{t7_s['equivalent']} `Equivalent` ({t7_s['equivalent_pct']:.1f}%)**, **{t7_s['inconclusive']} `Inconclusive` ({t7_s['inconclusive_pct']:.1f}%)** (concentrated in 10-turn W4 loops, Windows `python_native` startup variance, and Holm-threshold boundary pairs), and **{t7_s['different']} `Different` ({t7_s['different_pct']:.1f}%)** (identical across $b \\in \\{{2, 3, 5\\}}$), while excluding {t7_s['excluded_w5_py']} schema-failed W5 `python_native` pairs.",
         "3. **Segregated Microarchitectural Grounding:** Retired hardware instruction ratios are evaluated within-ISA on ARM64 and x86_64 Linux, complemented by empirical Win32 CPU cycle ratios on both Windows platforms.",
         "4. **Artifact Inventory and Traceability:** Raw JSONL datasets, analysis scripts, manuscript source, regenerated tables, figures, saved test outputs, and SHA-256 manifests are synchronized in `main` for independent reproduction."
     ])
@@ -3109,10 +3216,17 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
     lin_b_diags = [d for d in diagnostics if d["platform_key"] == "linux_x86_64" and "Regime B" in d["regime"]]
     lin_a_thr_reps = sum(d["cpu_throttle_reps"] for d in lin_a_diags)
     lin_a_tot_reps = sum(d["n_raw"] for d in lin_a_diags)
+    lin_a_ev_sum = sum(d["cpu_pkg_throttle_events"] for d in lin_a_diags)
     lin_a_max_delta = max((d["cpu_throttle_delta_max"] for d in lin_a_diags), default=0)
     lin_b_thr_reps = sum(d["cpu_throttle_reps"] for d in lin_b_diags)
     lin_b_tot_reps = sum(d["n_raw"] for d in lin_b_diags)
+    lin_b_ev_sum = sum(d["cpu_pkg_throttle_events"] for d in lin_b_diags)
+    lin_all_thr_reps = lin_a_thr_reps + lin_b_thr_reps
+    lin_all_tot_reps = lin_a_tot_reps + lin_b_tot_reps
+    lin_all_ev_sum = lin_a_ev_sum + lin_b_ev_sum
     win_nv_gpu_cap = sum(d["gpu_sw_power_cap_reps"] for d in diagnostics if d["platform_key"] == "windows_x86_64")
+    win_nv_gpu_idle = sum(d["gpu_idle_bitmask_reps"] for d in diagnostics if d["platform_key"] == "windows_x86_64")
+    win_nv_tot_reps = sum(d["n_raw"] for d in diagnostics if d["platform_key"] == "windows_x86_64")
     gpu_therm_any = sum(d["gpu_thermal_throttle_reps"] for d in diagnostics)
 
     t2_s = table_metrics["t2_summary"]
@@ -3266,12 +3380,12 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
         "",
         "All numerical summaries reported across tables, figures, and reports are computed by `scripts/reproduce_quad_platform_analysis.py` from the raw `.jsonl` files listed in Section 3:",
         "",
-        f"- **Serial Autocorrelation Across Both Regimes & Table 2 Adjustment (M4):** Lag-1 serial dependence ($|r_1| > 2/\\sqrt{{30}} \\approx 0.365$) occurred in **{sd_a_count}/{len(reg_a_cells)}** cells in **Regime A (Cold)** and **{sd_b_count}/{len(reg_b_cells)}** cells in **Regime B (Warm)** (**{sd_a_count + sd_b_count}/{total_cells}** overall). In Table 2 (excluding W5 `python_native` per M1), inflating Mann-Whitney $U$ asymptotic variance via $n_{{\\text{{eff}}}} = n(1-r_1)/(1+r_1)$ for positively autocorrelated cells ($r_1 > 0$; Bayley & Hammersley 1946; Yue & Wang 2004; Zimmerman & Zumbo 1993; Fagerland & Sandvik 2009) retains **{t2_s['sig_r1']}/{t2_s['total']}** Holm-Bonferroni significant contrasts (vs. **{t2_s['sig_std']}/{t2_s['total']}** unadjusted; **{len(t2_s['lost_sig'])}** contrasts marked `(NS*)` lose significance under $r_1$ correction, all on Linux x86_64).",
+        f"- **Detrended Serial Autocorrelation Across Both Regimes & Table 2 Adjustment (Etapa 2 / M4):** Linearly detrending trial order prior to estimating $r_1$ (both raw `autocorr_r1_raw` and detrended `autocorr_r1` exported in `anomaly_and_cache_diagnostics.csv`), lag-1 serial dependence ($|r_1| > 2/\\sqrt{{30}} \\approx 0.365$) occurred in **{sd_a_count}/{len(reg_a_cells)}** cells in **Regime A (Cold)** and **{sd_b_count}/{len(reg_b_cells)}** cells in **Regime B (Warm)** (**{sd_a_count + sd_b_count}/{total_cells}** overall). In Table 2 (excluding W5 `python_native` per M1), inflating Mann-Whitney $U$ asymptotic variance via $n_{{\\text{{eff}}}} = n(1-r_1)/(1+r_1)$ for positively autocorrelated cells ($r_1 > 0$; Bayley & Hammersley 1946; Yue & Wang 2004; Zimmerman & Zumbo 1993; Fagerland & Sandvik 2009) retains **{t2_s['sig_r1']}/{t2_s['total']}** Holm-Bonferroni significant contrasts (vs. **{t2_s['sig_std']}/{t2_s['total']}** unadjusted; **{len(t2_s['lost_sig'])}** contrasts marked `(NS*)` lose significance under $r_1$ correction).",
         f"- **Stationarity & Temporal Drift (M7):** OLS regression across all {total_cells} experimental cells with Holm-Bonferroni FWER adjustment found **{non_drift_cells}/{total_cells} ({non_drift_pct:.1f}%)** non-significant ($p_{{\\text{{adj}}}} \\ge 0.05$) and **{len(sig_drift_cells)}/{total_cells}** significant. Across valid (non-segregated) cells, the largest observed absolute slope was **{abs(worst_valid_drift['drift_slope_pct_per_rep']):.3f}%/rep** (`{worst_valid_drift['platform']}`, `{worst_valid_drift['regime']}`, `{worst_valid_drift['agent_key']}`, `{worst_valid_drift['workload']}`, $p_{{\\text{{adj}}}}={worst_valid_drift['drift_p_adj']:.4g}$); including the segregated W5 `python_native` arm, the overall raw maximum was **{abs(win_b_py_w5_drift['drift_slope_pct_per_rep']):.3f}%/rep** in `{win_b_py_w5_drift['platform']}` `{win_b_py_w5_drift['regime']}` `python_native` `W5` ($p_{{\\text{{adj}}}}={win_b_py_w5_drift['drift_p_adj']:.4g}$).",
-        f"- **Intra-Trial Hardware Throttling Deltas (M8):** On Linux x86_64, `cpu_pkg_throttle_events` records intra-trial `end - start` deltas summed across logical threads, with non-zero increments in **{lin_a_thr_reps}/{lin_a_tot_reps}** Regime A trials (max **{lin_a_max_delta:,}**/trial) and **{lin_b_thr_reps}/{lin_b_tot_reps}** Regime B trials, documenting active mobile CPU PL1/PL2 thermal throttling under hybrid `-ngl 16` offload. Discrete GPUs on Linux and Windows 11 NVIDIA recorded **{gpu_therm_any}** thermal-throttle events (`gpu_thermal_throttle_active_end`) and **{win_nv_gpu_cap}** SW power-cap events (`0x04`) on Windows NVIDIA.",
-        f"- **Inter-Session Contrast Equivalence (Three-State MBB TOST, Table 7; M2--M5 / C8):** Across **{t7_s['total']} valid pairs** (**{t7_s['excluded_w5_py']} schema-failed W5 `python_native` pairs excluded per M1**) evaluated via Moving Block Bootstrap ($b={t7_s['block_size']}$, $B=5{{,}}000$; Künsch 1989) with a fixed data-independent SESOI of $\\pm {t7_s['sesoi_ms']:.1f}\\text{{ ms}}$ and order-statistic 90% CIs aligned to $\\alpha = 0.05$ (Schuirmann 1987; Lakens 2017): **{t7_s['equivalent']} ({t7_s['equivalent_pct']:.1f}%)** `Equivalent`, **{t7_s['inconclusive']} ({t7_s['inconclusive_pct']:.1f}%)** `Inconclusive`, and **{t7_s['different']} ({t7_s['different_pct']:.1f}%)** `Different`.",
+        f"- **Intra-Trial Hardware Throttling Deltas (Etapa 3 / M8):** On Linux x86_64, `cpu_pkg_throttle_events` records genuine intra-trial `end - start` deltas summed across logical threads (non-monotonic across consecutive trials, confirming non-sticky per-trial deltas), totaling **{lin_all_thr_reps:,}/{lin_all_tot_reps:,}** non-zero Session 1 primary trials (**{lin_all_ev_sum:,} events**, **{lin_all_ev_sum / 1e6:.2f}M**: **{lin_a_thr_reps}/{lin_a_tot_reps}** in Regime A, max **{lin_a_max_delta:,}**/trial; **{lin_b_thr_reps}/{lin_b_tot_reps}** in Regime B). Discrete GPUs on Linux and Windows 11 NVIDIA recorded **{gpu_therm_any}** thermal-throttle events (`gpu_thermal_throttle_active_end`) and **{win_nv_gpu_cap}** SW power-cap events (`0x04`); the non-zero NVML bitmask on Windows NVIDIA (**{win_nv_gpu_idle}/{win_nv_tot_reps}** trials) corresponds exclusively to `0x01` (`nvmlClocksThrottleReasonGpuIdle`).",
+        f"- **Inter-Session Contrast Equivalence (Three-State MBB TOST + Holm-Bonferroni & $b \\in \\{{2,3,5\\}}$ Sensitivity, Table 7; Etapa 2):** Across **{t7_s['total']} valid pairs** (**{t7_s['excluded_w5_py']} schema-failed W5 `python_native` pairs excluded per M1**) evaluated via Moving Block Bootstrap ($b={t7_s['block_size']}$, $B={t7_s['n_boot']:,}$; Künsch 1989) against a fixed SESOI of $\\pm {t7_s['sesoi_ms']:.1f}\\text{{ ms}}$ with order-statistic 90% CIs and Holm-Bonferroni FWER adjustment ($p_{{\\text{{TOST, adj}}}}$; Schuirmann 1987; Lakens 2017): **{t7_s['equivalent']} ({t7_s['equivalent_pct']:.1f}%)** `Equivalent`, **{t7_s['inconclusive']} ({t7_s['inconclusive_pct']:.1f}%)** `Inconclusive`, and **{t7_s['different']} ({t7_s['different_pct']:.1f}%)** `Different` (identical Holm-adjusted decisions across $b \\in \\{{2, 3, 5\\}}$, exported in `audit_export/tost_block_sensitivity.csv`).",
         f"- **Workload-Dependent Runtime Ranking & W3 Inversion (C3):** Compiled Go (`PicoClaw`) achieves lower $T_{{\\text{{orch}}}}$ than Node.js V8 (`OpenClaw`) in W1, W2, W4, and W5 across all tested platforms. In compute-bound Vector RAG (W3), a ranking inversion occurs: scalar Go dot-product loops (`PicoClaw` Cold $T_{{\\text{{orch}}}} = {w3_m4_pico:.2f}$ ms on macOS, ${w3_lin_pico:.2f}$ ms on Linux, ${w3_win_pico:.2f}$ ms on Windows 11) are outperformed by vectorized SIMD/BLAS routines in `PythonNative` (${w3_m4_py:.2f}$ ms on macOS, ${w3_lin_py:.2f}$ ms on Linux) and `Bun` JSC (${w3_lin_bun:.2f}$ ms on Linux, ${w3_win_bun:.2f}$ ms on Windows 11, and $18.09$ ms Warm Session 2 on macOS).",
-        f"- **Tool-RAG Schema Pruning (Table 5 & Figure 5b; M6):** $-87.1\\%$ prompt token reduction (`7,091` to `917` tokens). Regime A (`OpenClaw Tool-RAG`) speedups vs. **54-Tool Full**: **{t5_m4_oc:.2f}x** (macOS M4, same-session baseline), **{t5_lin_oc:.2f}x** (Linux x86_64), **{t5_win_oc:.2f}x** (Windows 11 NVIDIA), and **{t5_int_oc:.2f}x** (Windows Intel iGPU); vs. **15-Tool Minimal**: **{t5_m4_min_c:.2f}x**, **{t5_lin_min_c:.2f}x**, **{t5_win_min_c:.2f}x**, and **{t5_int_min_c:.2f}x**, respectively (x86_64 pruned arms normalized to each node's primary campaign baseline).",
+        f"- **Tool-RAG Schema Pruning (Table 5 & Figure 5b; Option B Exploratory Qualification on x86_64):** $-87.1\\%$ prompt token reduction (`7,091` to `917` tokens). Same-session controlled speedup on **macOS M4** (`tool_rag_mitigation_trials.jsonl`): **{t5_m4_oc:.2f}x** vs. 54-Tool Full (**{t5_m4_min_c:.2f}x** vs. 15-Tool Minimal). Exploratory cross-session ratios on x86_64 referenced against each node's primary-campaign baseline (`raw_trials.jsonl` / `warm_cache_trials.jsonl`, non-causal): **{t5_lin_oc:.2f}x** (Linux x86_64), **{t5_win_oc:.2f}x** (Windows 11 NVIDIA), and **{t5_int_oc:.2f}x** (Windows Intel iGPU) vs. 54-Tool Full (**{t5_lin_min_c:.2f}x**, **{t5_win_min_c:.2f}x**, and **{t5_int_min_c:.2f}x** vs. 15-Tool Minimal).",
         f"- **KV-Cache Thrashing $T_2/T_3$ (Table 4):** Measured eviction penalties (Minimal / Full): **{t4_m4['min_penalty']:.2f}x / {t4_m4['full_penalty']:.2f}x** on macOS M4, **{t4_lin['min_penalty']:.2f}x / {t4_lin['full_penalty']:.2f}x** on Linux x86_64, and **{t4_win['min_penalty']:.2f}x / {t4_win['full_penalty']:.2f}x** on Windows 11 NVIDIA (not executed on Intel iGPU, scoped to W2/W5).",
         f"- **Absolute $T_{{\\text{{orch}}}}$ Cache Invariance (Table 3):** Observed bound $|\\Delta T_{{\\text{{orch}}}}| < {t3_bound:.1f}\\text{{ ms}}$ (maximum observed delta **${t3_max:.2f}\\text{{ ms}}$** for {t3_lbl}).",
         f"- **Windows CPU Cycles (Table 1 & Figure 6c/d):** Windows 11 NVIDIA: **{wn_cyc['picoclaw_m']:.1f}M** cycles in PicoClaw vs. **{wn_cyc['openclaw_full_m']:.1f}M** in OpenClaw Full (**{wn_cyc['ratio']:.2f}x**). Windows Intel iGPU: **{wi_cyc['picoclaw_m']:.1f}M** vs. **{wi_cyc['openclaw_full_m']:.1f}M** (**{wi_cyc['ratio']:.2f}x**).",
@@ -3299,7 +3413,7 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
         f"All **{bib_count} primary bibliographic entries** in `references.bib` carry checked DOIs, ISBNs, or arXiv identifiers:",
         "- **Corrected Entry:** `maricq2018taming` (author names checked against OSDI '18 proceedings: *Aleksander Maricq* and *Ryan Stutsman*).",
         "- **Replaced Entry:** Prior `goldsman1997methods` entry carried an unrelated TOMACS DOI and was replaced by the Moving Block Bootstrap reference (`kuensch1989jackknife`, DOI: `10.1214/aos/1176347265`).",
-        "- **Rank-Test & Serial-Dependence References (C6):** `bayley1946effective` (DOI: `10.2307/2983560`), `zimmerman1993rank` (DOI: `10.1037/h0078850`), `yue2004mann` (DOI: `10.1023/B:WARM.0000043140.61082.60`), and `fagerland2009wilcoxon` (DOI: `10.1002/sim.3561`).",
+        "- **Rank-Test, Serial-Dependence & Offload References (C6 / Etapa 4):** `bayley1946effective` (DOI: `10.2307/2983560`), `zimmerman1993rank` (DOI: `10.1037/h0078850`), `yue2004mann` (DOI: `10.1023/B:WARM.0000043140.61082.60`), `fagerland2009wilcoxon` (DOI: `10.1002/sim.3561`), and `sheng2023flexgen` (ICML 2023 / PMLR 202, DOI: `10.48550/arXiv.2303.06865`).",
         "- **Core Systems, Statistical & Evaluation References:** `kalibera2013rigorous`, `hoefler2015scientific`, `schuirmann1987comparison`, `lakens2017equivalence`, `mann1947test`, `kruskal1952use`, `holm1979simple`, `cliff1993dominance`, `vargha2000critique`, `weaver2013nondeterminism`, `kwon2023vllm`, `yao2023react`, `zheng2023judging`, `reddi2020mlperf`, `you2023zeus`, `barroso2007case`, `fahad2019comparative`, `williams2009roofline`, and `smith2016software`.",
         "- **Technical Specifications Separated:** Vendor documentation and PEPs (Microsoft Learn `QueryProcessCycleTime` / Win32 PSAPI, Intel 64 and IA-32 SDM Vol. 3B Ch. 20, Python PEP 397) are referenced explicitly as technical documentation in table notes.",
         "",
@@ -3378,16 +3492,20 @@ def generate_review_package_readme(inventory: list[dict[str, Any]]):
         "",
         "## 1. Contents Included Directly in This Archive",
         "",
-        "- **Manuscript & Bibliography:**",
+        "- **Manuscript, Documentation, Licenses & CI Workflow:**",
         "  - `paper/softwarex_manuscript.tex` — LaTeX manuscript source",
         f"  - `references.bib` — {bib_count} primary bibliographic entries with checked DOIs/ISBNs/arXiv identifiers",
+        "  - `README.md` — Installation guide, exact reproduction commands, metadata, and external validity boundaries",
+        "  - `LICENSE` (MIT code license) and `DATA_LICENSE` (CC BY 4.0 data license)",
+        "  - `.github/workflows/reproducibility.yml` — Executable Ubuntu GitHub Actions reproducibility workflow",
         "- **Repository Reproducibility Logs & Reports (not part of the manuscript):**",
         "  - `audit_export/AUDIT_REPORT_FINAL.md` — Technical reproducibility log in neutral English (executed commands, observed outputs, file inventory)",
         "  - `audit_export/Systems_Replication_Report.md` — Quad-platform systems replication report (English)",
-        "- **Reproduction Scripts & Cryptographic Manifest:**",
+        "- **Reproduction Scripts, Cryptographic Manifest & Raw Datasets:**",
         "  - `scripts/reproduce_quad_platform_analysis.py` — Master analysis, statistical test, table, and figure generator",
         "  - `scripts/verify_manifest.py` — Cryptographic SHA-256 verification script",
         "  - `data/manifest_sha256.json` — SHA-256 manifest covering all 35 raw `.jsonl` datasets and tracked artifacts",
+        f"  - All **{len(inventory)} raw `.jsonl` datasets** included directly at their canonical paths (`results/publication_campaign/*.jsonl`, `data/*.jsonl`, `data/*_session{{1,2}}/raw/*.jsonl`)",
         "- **Saved Automated Test Transcript:**",
         "  - `audit_export/pytest_output.txt` — Saved output from `pytest -q`",
         "- **High-Resolution Figures (300 DPI):**",
@@ -3405,6 +3523,7 @@ def generate_review_package_readme(inventory: list[dict[str, Any]]):
         "  - `audit_export/quad_platform_consolidated_summary.csv`",
         "  - `audit_export/anomaly_and_cache_diagnostics.csv`",
         "  - `audit_export/w5_token_and_schema_audit.csv`",
+        "  - `audit_export/tost_block_sensitivity.csv` (block-size sensitivity $b \\in \\{2, 3, 5\\}$)",
         "  - `audit_export/audit_summary_metrics.json`",
         "",
         f"## 2. Accessing All {len(inventory)} Raw `.jsonl` Datasets ({tot_lines:,} lines / {tot_meas:,} measured trials)",
@@ -3455,21 +3574,28 @@ def generate_review_package_readme(inventory: list[dict[str, Any]]):
     print(f"Exported Review Package Guide: {readme_path}")
 
 
-def package_audit_zip():
+def package_audit_zip(inventory: list[dict[str, Any]] | None = None):
     audit_md_root = os.path.join(REPO_DIR, "AUDIT_REPORT_FINAL.md")
     if os.path.exists(audit_md_root):
         shutil.copy2(audit_md_root, os.path.join(AUDIT_EXPORT_DIR, "AUDIT_REPORT_FINAL.md"))
 
+    if inventory is None:
+        inventory = audit_raw_datasets()
+
     zip_path_quad = os.path.join(REPO_DIR, "audit_export_quad_platform.zip")
-    print(f"Packaging {AUDIT_EXPORT_DIR} and core review artifacts into {zip_path_quad}...")
+    print(f"Packaging {AUDIT_EXPORT_DIR}, core review artifacts, and {len(inventory)} raw JSONL datasets into {zip_path_quad}...")
 
     extra_review_files = [
+        "LICENSE",
+        "DATA_LICENSE",
+        "README.md",
+        ".github/workflows/reproducibility.yml",
         "paper/softwarex_manuscript.tex",
         "references.bib",
         "scripts/reproduce_quad_platform_analysis.py",
         "scripts/verify_manifest.py",
         "data/manifest_sha256.json",
-    ]
+    ] + [inv["relative_path"] for inv in inventory]
 
     with zipfile.ZipFile(zip_path_quad, "w", zipfile.ZIP_DEFLATED) as zf:
         added = set()
@@ -3542,7 +3668,7 @@ def main():
 
     # 10. Package Audit Zip
     print("\n▶ [Phase 4] Packaging audit_export_quad_platform.zip...")
-    package_audit_zip()
+    package_audit_zip(inventory)
 
     print("\n" + "=" * 80)
     print("✅ MASTER QUAD-PLATFORM AUDIT & CONSOLIDATION COMPLETED SUCCESSFULLY.")

@@ -66,7 +66,7 @@ All orchestrators interface via local loopback (`127.0.0.1:8080`) with a unified
 | **Code License** | MIT License ([`LICENSE`](LICENSE)) |
 | **Data License** | Creative Commons Attribution 4.0 ([`DATA_LICENSE`](DATA_LICENSE)) |
 | **External Model License** | Meta Llama 3.2 Community License (`Meta-Llama-3.2-3B-Instruct`, downloaded separately) |
-| **CI & Automated Tests** | GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)): `ruff check`, `pytest -q`, `make dry-run`, `scripts/verify_manifest.py` |
+| **CI & Automated Tests** | GitHub Actions ([`ci.yml`](.github/workflows/ci.yml) & [`reproducibility.yml`](.github/workflows/reproducibility.yml)): `ruff check`, `pytest -q`, `make dry-run`, `scripts/verify_manifest.py`, `scripts/reproduce_quad_platform_analysis.py` |
 | **Archival DOI / Zenodo** | `CITATION.cff` / Zenodo release reservation (`10.5281/zenodo.PENDING_RELEASE`) |
 
 > [!WARNING]
@@ -273,7 +273,7 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── CITATION.cff                               <- Metadados acadêmicos para citação e Zenodo DOI
 ├── LICENSE                                    <- Licença MIT para código-fonte
 ├── DATA_LICENSE                               <- Licença Creative Commons CC-BY 4.0 para dados e figuras
-├── references.bib                             <- Base bibliográfica formal BibTeX (25 referências primárias com DOIs/ISBNs/arXiv conferidos)
+├── references.bib                             <- Base bibliográfica formal BibTeX (26 referências primárias com DOIs/ISBNs/arXiv conferidos)
 ├── reproduce_linux_gold.sh                    <- Script de reprodução física automatizada em Linux x86_64
 ├── windows_gold.ps1                           <- Script PowerShell de reprodução no Windows 11
 ├── launch_sentinel_intel_win.ps1              <- Script PowerShell de reprodução no Windows Intel HD Graphics 4600

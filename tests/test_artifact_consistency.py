@@ -802,12 +802,17 @@ def test_reviewer2_e1_review_package_zip_contents():
         names = set(zf.namelist())
 
     required = [
+        "LICENSE",
+        "DATA_LICENSE",
+        "README.md",
+        ".github/workflows/reproducibility.yml",
         "paper/softwarex_manuscript.tex",
         "references.bib",
         "scripts/reproduce_quad_platform_analysis.py",
         "scripts/verify_manifest.py",
         "data/manifest_sha256.json",
         "audit_export/pytest_output.txt",
+        "audit_export/tost_block_sensitivity.csv",
         "audit_export/REVIEW_PACKAGE_README.md",
         "audit_export/AUDIT_REPORT_FINAL.md",
         "audit_export/Systems_Replication_Report.md",
@@ -828,6 +833,8 @@ def test_reviewer2_e1_review_package_zip_contents():
     ]
     missing = [r for r in required if r not in names]
     assert not missing, f"Missing entries in audit_export_quad_platform.zip: {missing}"
+    jsonl_in_zip = [n for n in names if n.endswith(".jsonl")]
+    assert len(jsonl_in_zip) == 35, f"Expected all 35 raw .jsonl datasets in zip, found {len(jsonl_in_zip)}"
 
 
 def test_reviewer3_c1_c3_c5_c6_c8_c9_compliance():
@@ -861,11 +868,12 @@ def test_reviewer3_c1_c3_c5_c6_c8_c9_compliance():
     assert "Artifact Inventory and Traceability" in rep_txt
     assert "Equivalent" in rep_txt and "Inconclusive" in rep_txt and "Different" in rep_txt
 
-    # C6: Verified rank-test / serial-dependence references in references.bib & Related Work in manuscript
-    for key in ("bayley1946effective", "zimmerman1993rank", "yue2004mann", "fagerland2009wilcoxon"):
+    # C6: Verified rank-test / serial-dependence / offload references in references.bib & Related Work in manuscript
+    for key in ("bayley1946effective", "zimmerman1993rank", "yue2004mann", "fagerland2009wilcoxon", "sheng2023flexgen"):
         assert f"{{{key}," in bib_txt, f"Missing BibTeX entry {key}"
         assert key in ms_txt, f"Missing citation to {key} in manuscript"
     assert r"\subsection{Related Work and Positioning}" in ms_txt
+    assert os.path.exists(os.path.join(REPO_DIR, ".github", "workflows", "reproducibility.yml"))
 
     # C9: Required sections + Llama 3.2 Community License + clean-room PicoClaw/OpenClaw + external validity bounds
     for doc in (ms_txt, readme_txt):

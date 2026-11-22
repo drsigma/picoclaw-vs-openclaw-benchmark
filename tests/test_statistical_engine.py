@@ -178,11 +178,16 @@ def test_mann_whitney_r1_variance_adjustment_conservative():
     if scripts_dir not in sys.path:
         sys.path.insert(0, scripts_dir)
 
-    from reproduce_quad_platform_analysis import mann_whitney_r1_adjusted
+    from reproduce_quad_platform_analysis import lag1_autocorr, mann_whitney_r1_adjusted
 
-    # Strongly positively autocorrelated AR(1)-like series
-    x_pos = [10.0 + 0.1 * i for i in range(30)]
-    y_pos = [11.5 + 0.1 * i for i in range(30)]
+    # Pure linear ramp has ~0 detrended r1 (linear detrending removes monotone drift)
+    ramp = [10.0 + 0.5 * i for i in range(30)]
+    assert abs(lag1_autocorr(ramp, detrend=True)) < 1e-6
+
+    # Stationary positively autocorrelated series (smooth low-frequency wave + small offset, zero linear trend)
+    import math
+    x_pos = [10.0 + 2.0 * math.sin(2.0 * math.pi * i / 10.0) for i in range(30)]
+    y_pos = [11.5 + 2.0 * math.sin(2.0 * math.pi * i / 10.0 + 0.4) for i in range(30)]
     res_pos = mann_whitney_r1_adjusted(x_pos, y_pos)
     assert res_pos["r1_x"] > 0.5 and res_pos["r1_y"] > 0.5
     assert res_pos["n_eff1"] < 30.0 and res_pos["n_eff2"] < 30.0
@@ -199,7 +204,8 @@ def test_mann_whitney_r1_variance_adjustment_conservative():
 
 
 def test_w5_python_native_segregation_and_t7_90ci_alignment_on_generated_tables():
-    """M1/M2/M3/M5: Verify generated Tables 2, 7, 8 enforce W5 python_native segregation and exact 90% CI <-> TOST alignment."""
+    """Etapa 1/2: Verify generated Tables 2, 7, 8 enforce W5 python_native segregation, Holm-Bonferroni TOST 3-state alignment, and b in {2,3,5} sensitivity."""
+    import csv
     import os
     import re
     repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -207,6 +213,7 @@ def test_w5_python_native_segregation_and_t7_90ci_alignment_on_generated_tables(
     t7_path = os.path.join(repo_dir, "audit_export", "tables", "table7_session_replication_comparison.md")
     t8_md_path = os.path.join(repo_dir, "audit_export", "tables", "table8_w5_enterprise_workload.md")
     t8_tex_path = os.path.join(repo_dir, "audit_export", "tables", "table8_w5_enterprise_workload.tex")
+    sens_path = os.path.join(repo_dir, "audit_export", "tost_block_sensitivity.csv")
 
     t2 = open(t2_path, encoding="utf-8").read()
     for line in t2.splitlines():
@@ -219,24 +226,32 @@ def test_w5_python_native_segregation_and_t7_90ci_alignment_on_generated_tables(
         if not line.startswith("| ") or line.startswith("| Platform") or line.startswith("| :---"):
             continue
         parts = [p.strip() for p in line.strip("|").split("|")]
-        if len(parts) < 10:
+        if len(parts) < 11:
             continue
         row_count += 1
-        wl, contrast, ci_str, p_str, status = parts[2], parts[3], parts[7], parts[8], parts[9]
+        wl, contrast, ci_str, p_str, pa_str, status = parts[2], parts[3], parts[7], parts[8], parts[9], parts[10]
         if wl == "W5":
             assert "PythonNative" not in contrast, f"Confounded W5 PythonNative leaked into Table 7: {line}"
         assert status in {"Equivalent", "Different", "Inconclusive"}, f"Unexpected Table 7 status: {status}"
         m = re.match(r"\[([+-]?\d+\.\d+),\s*([+-]?\d+\.\d+)\]", ci_str)
         assert m, f"Could not parse 90% CI in Table 7: {ci_str}"
         lo, hi = float(m.group(1)), float(m.group(2))
-        p_val = 0.0 if p_str.startswith("<") else float(p_str)
+        p_adj = 0.0 if pa_str.startswith("<") else float(pa_str)
         if status == "Equivalent":
-            assert lo > -5.0 and hi < 5.0 and p_val < 0.05, f"90% CI vs TOST mismatch in Table 7: {line}"
+            assert lo > -5.0 and hi < 5.0 and p_adj < 0.05, f"90% CI / Holm TOST mismatch in Table 7: {line}"
         elif status == "Different":
-            assert (lo > 5.0 or hi < -5.0) and p_val >= 0.05, f"Different status mismatch in Table 7: {line}"
+            assert (lo > 5.0 or hi < -5.0) and p_adj >= 0.05, f"Different status mismatch in Table 7: {line}"
         else:
-            assert not (lo > -5.0 and hi < 5.0) and not (lo > 5.0 or hi < -5.0) and p_val >= 0.05, f"Inconclusive mismatch: {line}"
+            assert not (lo > -5.0 and hi < 5.0 and p_adj < 0.05) and not (lo > 5.0 or hi < -5.0), f"Inconclusive mismatch: {line}"
     assert row_count == 95, f"Expected 95 valid Table 7 pairs (102 minus 7 W5 python_native), got {row_count}"
+
+    assert os.path.exists(sens_path), f"Missing block-size sensitivity CSV: {sens_path}"
+    with open(sens_path, encoding="utf-8") as sf:
+        s_rows = list(csv.DictReader(sf))
+    assert [int(r["block_size_b"]) for r in s_rows] == [2, 3, 5]
+    for sr in s_rows:
+        assert int(sr["n_pairs"]) == 95
+        assert int(sr["holm_equivalent"]) + int(sr["holm_different"]) + int(sr["holm_inconclusive"]) == 95
 
     t8_md = open(t8_md_path, encoding="utf-8").read()
     assert "Part A: Comparable W5 Orchestrators" in t8_md
