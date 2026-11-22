@@ -37,10 +37,10 @@ pt1_header = """================================================================
 AUDIT CHUNK PART 1: FINAL AUDIT REPORT & SYSTEMS REPLICATION REPORT
 ================================================================================
 Arquivos Originais Incluídos / Source Files Included:
-  1. AUDIT_REPORT_FINAL.md (Relatório Final de Auditoria, Testes e Inventário Real)
+  1. AUDIT_REPORT_FINAL.md (Technical Repository Reproducibility Log, English; not part of manuscript)
   2. audit_export/Systems_Replication_Report.md (Quad-Platform Systems Replication Report)
 Escopo: Quad-Platform Empirical Systems Benchmark (4 Physical Profiles)
-Data de Exportação: 2026-11-21
+Data de Exportação: 2026-11-22
 Tamanho Máximo do Chunk: <= 150 KB
 ================================================================================
 

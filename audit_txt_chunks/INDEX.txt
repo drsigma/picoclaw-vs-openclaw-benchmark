@@ -6,12 +6,12 @@ a todo o acervo empírico e analítico do benchmark PicoClaw vs. OpenClaw (Quad-
 
 ARQUIVOS DE TEXTO FATIADOS (.TXT):
 --------------------------------------------------------------------------------
-1. audit_pt1_report_and_checklist.txt  (61.2 KB)
+1. audit_pt1_report_and_checklist.txt  (63.6 KB)
    - Contém: AUDIT_REPORT_FINAL.md + audit_export/Systems_Replication_Report.md
    - Foco: Inventário real de 35 datasets JSONL em disco, verificação de integridade,
            taxonomia completa de N/A, auditoria bibliográfica e replicação de sistemas.
 
-2. audit_pt2_tables.txt  (66.9 KB)
+2. audit_pt2_tables.txt  (67.9 KB)
    - Contém: Tabelas 1 a 8 consolidadas em formato Markdown
      * Table 1: Master Systems & Microarchitectural Conformance (W2)
      * Table 2: Non-Parametric Hypothesis Tests (Mann-Whitney, Cliff's delta, Holm-Bonferroni)

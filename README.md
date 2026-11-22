@@ -49,12 +49,28 @@ All orchestrators interface via local loopback (`127.0.0.1:8080`) with a unified
 
 ---
 
-### ⚖️ Aviso de Escopo e Marcas Registradas / Trademark & Scope Disclaimer
-* **🇧🇷 PT-BR:** Este benchmark avalia implementações de referência isomórficas *clean-room* em Go (`picoclaw_orch.go`), Node.js/TypeScript (`openclaw_orch.mjs`) e Python (`python_orch.py`), projetadas para mensurar o impacto microarquitetural e de runtime (compilado nativo vs. JIT/interpretado) sob esquemas e prompts idênticos. PicoClaw e OpenClaw são marcas de seus respectivos criadores; este projeto é um benchmark acadêmico independente não afiliado ou endossado pelos mantenedores originais.
-* **🇺🇸 EN-US:** This benchmark evaluates clean-room, isomorphic reference implementations in Go (`picoclaw_orch.go`), Node.js/TypeScript (`openclaw_orch.mjs`), and Python (`python_orch.py`) designed to isolate systems runtime overhead (native compiled vs. JIT/interpreted) under strictly identical prompts and tool schemas. PicoClaw and OpenClaw are trademarks of their respective owners; this software is an independent academic performance benchmark not affiliated with or endorsed by upstream project maintainers.
+### ⚖️ Aviso de Escopo, Licenças e Marcas Registradas / Scope, Licensing & Trademark Disclaimer
+* **🇧🇷 PT-BR:**
+  * **Implementações *Clean-Room*:** Este benchmark avalia implementações de referência isomórficas *clean-room* em Go (`picoclaw_orch.go`), Node.js/TypeScript (`openclaw_orch.mjs`), Bun JavaScriptCore (`bun_jsc_agent.mjs`) e Python (`python_orch.py`), projetadas para isolar o overhead de runtime sob esquemas e prompts idênticos. **PicoClaw** e **OpenClaw** são marcas de seus respectivos criadores; este projeto é um benchmark acadêmico independente não afiliado ou endossado pelos mantenedores originais.
+  * **Licenciamento (Código, Dados e Modelo):** Código-fonte sob **MIT License** (`LICENSE`); datasets empíricos e figuras sob **CC BY 4.0** (`DATA_LICENSE`); pesos do modelo externo **Meta Llama-3.2-3B-Instruct** (não redistribuídos neste repositório) regidos pela **Meta Llama 3.2 Community License**.
+* **🇺🇸 EN-US:**
+  * **Clean-Room Implementations:** This benchmark evaluates clean-room, isomorphic reference implementations in Go (`picoclaw_orch.go`), Node.js/TypeScript (`openclaw_orch.mjs`), Bun JavaScriptCore (`bun_jsc_agent.mjs`), and Python (`python_orch.py`) designed to isolate runtime overhead under identical prompts and tool schemas. **PicoClaw** and **OpenClaw** are trademarks of their respective owners; this software is an independent academic benchmark not affiliated with or endorsed by upstream project maintainers.
+  * **Licensing (Code, Data, and Model):** Source code is licensed under the **MIT License** (`LICENSE`); empirical datasets and figures under **CC BY 4.0** (`DATA_LICENSE`); external **Meta Llama-3.2-3B-Instruct** model weights (not redistributed here) are governed by the **Meta Llama 3.2 Community License**.
+
+### 📋 Metadados do Software / Code Metadata Summary
+
+| Field | Value |
+| :--- | :--- |
+| **Version** | `v1.0.0` |
+| **Repository** | `https://github.com/drsigma/picoclaw-vs-openclaw-benchmark` |
+| **Code License** | MIT License ([`LICENSE`](LICENSE)) |
+| **Data License** | Creative Commons Attribution 4.0 ([`DATA_LICENSE`](DATA_LICENSE)) |
+| **External Model License** | Meta Llama 3.2 Community License (`Meta-Llama-3.2-3B-Instruct`, downloaded separately) |
+| **CI & Automated Tests** | GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)): `ruff check`, `pytest -q`, `make dry-run`, `scripts/verify_manifest.py` |
+| **Archival DOI / Zenodo** | `CITATION.cff` / Zenodo release reservation (`10.5281/zenodo.PENDING_RELEASE`) |
 
 > [!WARNING]
-> **Provenance Notice / Aviso de Proveniência:** All consolidated findings, statistical tables, and 300 DPI figures derive strictly from physical, hardware-instrumented trials across 35 validated raw `.jsonl` datasets spanning all 4 platforms (`results/publication_campaign/`, `data/linux_x86_64_session{1,2}/raw/`, `data/windows_x86_64_session{1,2}/raw/`, `data/windows_intel_graphics_session{1,2}/raw/`). Legacy exploratory files in `results/exploratory_campaigns/` (including early calibration runs, synthetic checks in `poisson_results.json`, and exploratory figures `fig7`/`fig8`) represent historical engineering milestones prior to protocol standardization and are excluded from consolidated tables and canonical manifests.
+> **Provenance Notice / Aviso de Proveniência:** All consolidated findings, statistical tables, and 300 DPI figures derive from physical, hardware-instrumented trials across 35 raw `.jsonl` datasets spanning all 4 platforms (`results/publication_campaign/`, `data/linux_x86_64_session{1,2}/raw/`, `data/windows_x86_64_session{1,2}/raw/`, `data/windows_intel_graphics_session{1,2}/raw/`). Legacy exploratory files in `results/exploratory_campaigns/` (including early calibration runs, synthetic checks in `poisson_results.json`, and exploratory figures `fig7`/`fig8`) represent historical engineering milestones prior to protocol standardization and are excluded from consolidated tables and canonical manifests.
 
 ---
 
@@ -218,9 +234,11 @@ Em conformidade com a literatura de engenharia de software experimental e avalia
 * **Estocasticidade do Modelo Neural:** Variações probabilísticas na geração de texto poderiam alterar a quantidade de tokens gerados e mascarar o desempenho do runtime. **Mitigação:** Fixou-se decodificação gulosa determinística (`temperature = 0.0`, `seed = 42`) no `llama.cpp`, garantindo respostas idênticas token a token.
 * **Ruído do Sistema Operacional e Throttling:** Tarefas em segundo plano do macOS (Spotlight, Time Machine, repouso de tela) poderiam contaminar as medições de I/O e latência. **Mitigação:** Aplicou-se suspensão de indexação (`sudo mdutil -a -i off`), isolamento em loopback de rede local e bloqueio persistente de repouso via `/usr/bin/caffeinate -dims`.
 
-### 2. Validade Externa (*External Validity*)
-* **Generalização do Modelo Neural:** Os experimentos foram conduzidos com o Meta Llama-3.2-3B-Instruct quantizado em 4 bits (GGUF Q4_K_M). Embora este modelo represente a fronteira de eficiência para agentes em dispositivos locais (*edge computing*), modelos de 8B ou 70B imporiam maior tempo de prefill, tornando o percentual relativo de overhead do orquestrador ($T_{\text{orch}}$) menor em relação ao tempo neural total.
-* **Diversidade de Hardware:** Os resultados refletem a microarquitetura Apple Silicon M4 com memória unificada (UMA). Em servidores x86 convencionais com GPU dedicada acoplada via barramento PCIe, a transferência de tensores adiciona latência de socket que não ocorre no Apple Silicon.
+### 2. Validade Externa (*External Validity Boundaries*)
+* **Modelo Único de 3B (*Single Model Scale*):** Todas as campanhas avaliam um único modelo quantizado em 4 bits (**Meta Llama-3.2-3B-Instruct Q4_K_M**, regido pela *Meta Llama 3.2 Community License*). Modelos maiores (8B–70B) aumentam $T_{\text{neural}}$ e comprimem a fração relativa $\Phi_{\text{orch}}$.
+* **Servidor Único (*Single Inference Server*):** Todas as execuções utilizam `llama-server` (`llama.cpp`, licença MIT) em slot único (`-np 1`); motores com *continuous batching* ou *RadixAttention* (ex.: vLLM) exibem dinâmicas distintas de KV-cache.
+* **Workloads Sintéticos Determinísticos (*Synthetic Workloads*):** W1–W5 empregam cadeias controladas de ferramentas, busca vetorial 384-D e consultas SQLite determinísticas em vez de tráfego aberto de produção.
+* **Sensores Heterogêneos entre Plataformas (*Heterogeneous Hardware Sensors*):** A telemetria varia estruturalmente entre Apple SMC (SoC integral no macOS M4), Intel RAPL + NVIDIA NVML (pacote CPU + dGPU no Linux/Windows 11) e Win32 PSAPI / `QueryProcessCycleTime` em modo usuário no Windows Intel iGPU (`N/A**` para energia); comparações absolutas de energia/potência limitam-se a contrastes intra-nó. Além disso, em **W3 (Vector RAG)** ocorre uma **inversão de ranking**, na qual `PythonNative` (NumPy SIMD/BLAS) e `Bun` (JSC) superam os loops escalares em Go do `PicoClaw`.
 
 ### 3. Validade de Construto (*Construct Validity*)
 * **🇧🇷 PT-BR:**
@@ -255,14 +273,16 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── CITATION.cff                               <- Metadados acadêmicos para citação e Zenodo DOI
 ├── LICENSE                                    <- Licença MIT para código-fonte
 ├── DATA_LICENSE                               <- Licença Creative Commons CC-BY 4.0 para dados e figuras
-├── references.bib                             <- Base bibliográfica formal BibTeX (21 referências primárias verificadas)
+├── references.bib                             <- Base bibliográfica formal BibTeX (25 referências primárias com DOIs/ISBNs/arXiv conferidos)
 ├── reproduce_linux_gold.sh                    <- Script de reprodução física automatizada em Linux x86_64
 ├── windows_gold.ps1                           <- Script PowerShell de reprodução no Windows 11
 ├── launch_sentinel_intel_win.ps1              <- Script PowerShell de reprodução no Windows Intel HD Graphics 4600
-├── AUDIT_REPORT_FINAL.md                      <- Relatório final dinâmico de auditoria (inventário real dos 35 .jsonl)
+├── AUDIT_REPORT_FINAL.md                      <- Log técnico de reprodutibilidade em inglês (inventário dos 35 .jsonl; não integrante do manuscrito)
 ├── audit_export/                              <- Artefatos consolidados da auditoria quad-plataforma
-│   ├── AUDIT_REPORT_FINAL.md                  <- Espelho do relatório final de auditoria
-│   ├── Systems_Replication_Report.md          <- Relatório consolidado de replicação de sistemas (100% inglês)
+│   ├── AUDIT_REPORT_FINAL.md                  <- Espelho do log técnico de reprodutibilidade
+│   ├── REVIEW_PACKAGE_README.md               <- Guia do pacote de revisão e acesso aos 35 .jsonl
+│   ├── pytest_output.txt                      <- Saída salva da execução de pytest -q
+│   ├── Systems_Replication_Report.md          <- Relatório consolidado de replicação de sistemas (em inglês)
 │   ├── audit_summary_metrics.json             <- Métricas consolidadas em formato JSON estruturado
 │   ├── quad_platform_consolidated_summary.csv <- Sumário estatístico comparativo quad-plataforma
 │   ├── anomaly_and_cache_diagnostics.csv      <- Diagnóstico de dependência serial, drift e telemetria térmica
@@ -304,14 +324,14 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 │   ├── verify_manifest.py                     <- Validador criptográfico SHA-256 (todos os arquivos rastreados + 35 .jsonl)
 │   ├── check_quiescence.sh                    <- Auditoria de quiescência operacional
 │   └── legacy/                                <- Scripts exploratórios arquivados
-├── tests/                                     <- Suíte de testes automatizados (51 testes em pytest)
+├── tests/                                     <- Suíte de testes automatizados (`pytest -q`)
 │   ├── test_adapters_and_failfast.py          <- Validação dos adaptadores e fail-fast
 │   ├── test_artifact_consistency.py           <- Consistência numérica cruzada JSON/CSV/LaTeX
 │   ├── test_dataset_generator.py              <- Validação de integridade dos datasets determinísticos
 │   ├── test_statistical_engine.py             <- Validação matemática de Cliff's d, A12, Bootstrap e Holm
 │   ├── test_telemetry_parser.py               <- Validação de parsing SMC, RAPL e libproc
 │   └── test_windows_intel_graphics_adapter.py <- Validação de isolamento e esquema do adaptador Intel iGPU
-├── figures/                                   <- 6 figuras científicas quad-plataforma em 300 DPI (100% inglês)
+├── figures/                                   <- 6 figuras científicas quad-plataforma em 300 DPI (em inglês)
 ├── results/                                   <- Resultados experimentais estruturados
 │   ├── publication_campaign/                  <- Dados brutos macOS Apple Silicon M4 (7 arquivos .jsonl)
 │   │   ├── raw_trials.jsonl                   <- Regime A Cold Prefill (825 linhas: 750 medições + 75 warmups, W1–W5)
@@ -410,7 +430,7 @@ python scripts/reproduce_quad_platform_analysis.py
 # 2. Exporta os chunks textuais leves (<= 150 KB) em audit_txt_chunks/
 python scripts/generate_audit_txt_chunks.py
 
-# 3. Executa os 51 testes automatizados e valida o manifesto criptográfico SHA-256
+# 3. Executa a suíte automatizada de testes e valida o manifesto criptográfico SHA-256
 pytest -q
 python scripts/verify_manifest.py
 ```

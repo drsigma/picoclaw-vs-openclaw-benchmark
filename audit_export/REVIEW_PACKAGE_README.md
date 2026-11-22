@@ -1,17 +1,19 @@
 # Review & Reproduction Package Guide (`audit_export_quad_platform.zip`)
 
-This archive consolidates the analytical artifacts, statistical summaries, publication figures, Markdown/LaTeX tables, primary bibliography, reproduction scripts, and saved test output for the **Quad-Platform PicoClaw vs. OpenClaw Benchmark**.
+This archive consolidates the manuscript source, bibliography, reproduction scripts, saved test transcript, publication figures (300 DPI), Markdown/LaTeX tables (Tables 1--8), statistical summaries, and 35-dataset cryptographic manifest for the **Quad-Platform PicoClaw vs. OpenClaw Benchmark**.
 
 ## 1. Contents Included Directly in This Archive
 
-- **Reports:**
-  - `audit_export/AUDIT_REPORT_FINAL.md` — Final reproducibility audit report (Portuguese/bilingual technical notes)
+- **Manuscript & Bibliography:**
+  - `paper/softwarex_manuscript.tex` — LaTeX manuscript source
+  - `references.bib` — 25 primary bibliographic entries with checked DOIs/ISBNs/arXiv identifiers
+- **Repository Reproducibility Logs & Reports (not part of the manuscript):**
+  - `audit_export/AUDIT_REPORT_FINAL.md` — Technical reproducibility log in neutral English (executed commands, observed outputs, file inventory)
   - `audit_export/Systems_Replication_Report.md` — Quad-platform systems replication report (English)
-- **Bibliography & Reproduction Scripts:**
-  - `references.bib` — 21 primary bibliographic entries with DOIs/ISBNs/arXiv identifiers
+- **Reproduction Scripts & Cryptographic Manifest:**
   - `scripts/reproduce_quad_platform_analysis.py` — Master analysis, statistical test, table, and figure generator
   - `scripts/verify_manifest.py` — Cryptographic SHA-256 verification script
-  - `data/manifest_sha256.json` — SHA-256 cryptographic manifest for all tracked repository artifacts
+  - `data/manifest_sha256.json` — SHA-256 manifest covering all 35 raw `.jsonl` datasets and tracked artifacts
 - **Saved Automated Test Transcript:**
   - `audit_export/pytest_output.txt` — Saved output from `pytest -q`
 - **High-Resolution Figures (300 DPI):**

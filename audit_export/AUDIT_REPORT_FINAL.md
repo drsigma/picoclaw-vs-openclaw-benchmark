@@ -1,40 +1,44 @@
 # AUDIT_REPORT_FINAL.md
-# Relatório de Auditoria Final de Reprodutibilidade e Sistemas (Quad-Platform)
-## Consolidação Multi-Plataforma, Verificação Criptográfica e Consistência Empírica
+## Quad-Platform Repository Reproducibility Log & Artifact Inventory
 
-**Projeto:** `picoclaw-vs-openclaw-benchmark`  
-**Autor Principal:** Rafael Paniccia Cassetta (UFABC)  
-**Operador do Testbed Windows:** `drsgima`  
-**Data da Consolidação:** 2026-11-22  
-**Branch Auditada:** `main`  
-**Escopo Empírico:** Quad-Platform (4 ambientes físicos distintos, 35 arquivos `.jsonl` em disco, 190 células experimentais).  
+> **Scope Notice:** This document is a technical reproducibility log for the repository artifacts (generated dynamically by `scripts/reproduce_quad_platform_analysis.py`) and is **not part of the manuscript**.
 
----
-
-## 1. VERIFICAÇÃO AUTOMATIZADA DE TESTES E INTEGRIDADE
-
-- **Suíte de Testes (`pytest -q`):** `57/57 tests passed` (saída completa salva em `audit_export/pytest_output.txt`) (testes unitários, invariância de protocolo, alinhamento IC 90% <-> TOST e segregação de W5).
-- **Manifesto Criptográfico (`scripts/verify_manifest.py`):** Todos os `277/277` arquivos rastreados em `data/manifest_sha256.json` conferem com suas assinaturas SHA-256 em disco (0 arquivos ausentes, 0 divergências de hash).
-- **Pacote de Revisão e Exportação Modular (`audit_export_quad_platform.zip`):** Contém `references.bib`, `scripts/reproduce_quad_platform_analysis.py`, `scripts/verify_manifest.py`, `data/manifest_sha256.json`, `audit_export/pytest_output.txt`, `audit_export/REVIEW_PACKAGE_README.md` (instruções de acesso aos 35 `.jsonl`), todas as 6 figuras (300 DPI), todas as 8 tabelas (`.md`/`.tex`) e sumários CSV/JSON, acompanhados dos chunks textuais leves em `audit_txt_chunks/` (<= 150 KB por arquivo).
+**Repository:** `picoclaw-vs-openclaw-benchmark`  
+**Principal Author:** Rafael Paniccia Cassetta (UFABC)  
+**Windows Testbed Operator:** `drsgima`  
+**Consolidation Date:** 2026-11-22  
+**Branch:** `main`  
+**Dataset Scope:** Quad-Platform (4 physical hardware/OS profiles, 35 raw `.jsonl` files on disk, 190 experimental cells).  
 
 ---
 
-## 2. COBERTURA QUAD-PLATAFORMA (4 AMBIENTES FÍSICOS)
+## 1. EXECUTED COMMANDS AND OBSERVED OUTPUTS
 
-| ID | Plataforma / Perfil | Arquitetura | CPU & Threads | Memória & Barramento | Acelerador Neural (GPU) | Telemetria Nativa | $P_{\text{idle}}$ |
+The following commands were executed in the repository virtual environment (`.venv_repro`) on branch `main`:
+
+| Command | Observed Output |
+| :--- | :--- |
+| `python3 scripts/reproduce_quad_platform_analysis.py` | Scanned `35` `.jsonl` files (`18,616` lines, `16,995` measured trials, `1,621` warmups), computed `190` diagnostic cells, generated Tables 1--8 (`.md`/`.tex`), rendered Figures 1--6 (300 DPI), generated reports and `audit_export/REVIEW_PACKAGE_README.md`, and built `audit_export_quad_platform.zip` (exit code 0). |
+| `python3 scripts/generate_audit_txt_chunks.py` | Exported 4 lightweight text chunks (`INDEX.txt`, `audit_pt1_report_and_checklist.txt`, `audit_pt2_tables.txt`, `audit_pt3_summary_and_diagnostics.txt`) in `audit_txt_chunks/`, each `<= 150 KB` (exit code 0). |
+| `pytest -q` | `58/58 tests passed` (exit code 0; full transcript saved in `audit_export/pytest_output.txt`). |
+| `python3 scripts/verify_manifest.py` | `277/277` tracked files matched their recorded SHA-256 digests in `data/manifest_sha256.json` (`0` missing, `0` hash mismatches, exit code 0). |
+
+---
+
+## 2. QUAD-PLATFORM HARDWARE COVERAGE (4 PHYSICAL ENVIRONMENTS)
+
+| ID | Platform / Profile | Architecture | CPU & Threads | Memory & Bus | Neural Accelerator (GPU) | Native Telemetry | $P_{\text{idle}}$ |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **P1** | **macOS ARM64** | Apple Silicon M4 | 10 cores (4P+6E) | 24 GB LPDDR5X (120 GB/s UMA) | Metal 3 (`-ngl 99`, offload integral) | Apple SMC `powermetrics` + XNU `libproc` | 1.20 W |
-| **P2** | **Linux x86_64** | Ubuntu 26.04 LTS (Kernel 7.0) | Intel Core i5-12500H (16T) | 30.5 GiB DDR5-4800 | NVIDIA RTX 3050 Laptop (4 GB, híbrido `-ngl 16`) | Intel RAPL MSR + NVML + `perf_event_open` | 19.71 W / 20.08 W |
-| **P3** | **Windows 11 NVIDIA** | Win11 Pro (Build 26200) | Intel Core i5-12500H (16T) | 31.7 GiB DDR5-4800 | NVIDIA RTX 3050 Laptop (4 GB, híbrido `-ngl 16`) | Intel MSR RAPL + NVML DLL + Win32 PSAPI / Cycles | 24.13 W / 21.96 W |
+| **P1** | **macOS ARM64** | Apple Silicon M4 | 10 cores (4P+6E) | 24 GB LPDDR5X (120 GB/s UMA) | Metal 3 (`-ngl 99`, full offload) | Apple SMC `powermetrics` + XNU `libproc` | 1.20 W |
+| **P2** | **Linux x86_64** | Ubuntu 26.04 LTS (Kernel 7.0) | Intel Core i5-12500H (16T) | 30.5 GiB DDR5-4800 | NVIDIA RTX 3050 Laptop (4 GB, hybrid `-ngl 16`) | Intel RAPL MSR + NVML + `perf_event_open` | 19.71 W / 20.08 W |
+| **P3** | **Windows 11 NVIDIA** | Win11 Pro (Build 26200) | Intel Core i5-12500H (16T) | 31.7 GiB DDR5-4800 | NVIDIA RTX 3050 Laptop (4 GB, hybrid `-ngl 16`) | Intel MSR RAPL + NVML DLL + Win32 PSAPI / Cycles | 24.13 W / 21.96 W |
 | **P4** | **Windows Intel iGPU** | Win10 Pro (Build 19045) | Intel Core i7-4790K (4C/8T) | 15.88 GiB DDR3-1600 (Shared RAM) | Intel HD Graphics 4600 (UMA Shared Aperture) | Win32 PSAPI + `QueryProcessCycleTime` (user-mode) | 28.50 W |
 
-> **Verificação Terminológica:** Confirmada a presença de **4/4 plataformas** nos dados brutos, tabelas, figuras e documentação principal, com nomenclatura atualizada para **quad-platform**.
-
 ---
 
-## 3. INVENTÁRIO DE ARQUIVOS E HASHES SHA-256 (35 ARQUIVOS `.jsonl`)
+## 3. FILE INVENTORY AND SHA-256 DIGESTS (35 RAW `.jsonl` FILES)
 
-Tabela gerada dinamicamente por varredura direta dos arquivos `.jsonl` em disco, idêntica à Seção 6 de `audit_export/Systems_Replication_Report.md`:
+Inventory table computed dynamically from the `.jsonl` files on disk (identical to Section 6 of `audit_export/Systems_Replication_Report.md`):
 
 | Relative Path | Platform | Session Identifier | Role | Workloads | Total Lines | Measured Trials | Warmup Trials | SHA-256 Checksum |
 | :--- | :--- | :--- | :--- | :--- | ---: | ---: | ---: | :--- |
@@ -77,51 +81,52 @@ Tabela gerada dinamicamente por varredura direta dos arquivos `.jsonl` em disco,
 
 ---
 
-## 4. GERAÇÃO DINÂMICA A PARTIR DOS JSONL BRUTOS
+## 4. DYNAMIC GENERATION FROM RAW JSONL DATASETS
 
-Todos os números reportados nos documentos, tabelas e gráficos derivam de `scripts/reproduce_quad_platform_analysis.py` sobre os `.jsonl` listados na Seção 3:
+All numerical summaries reported across tables, figures, and reports are computed by `scripts/reproduce_quad_platform_analysis.py` from the raw `.jsonl` files listed in Section 3:
 
-- **Autocorrelação Serial em Ambos os Regimes e Ajuste na Tabela 2 (M4):** Dependência serial ($|r_1| > 2/\sqrt{30} \approx 0.365$) ocorreu em **20/95** células no **Regime A (Cold)** e em **27/95** células no **Regime B (Warm)** (total **47/190**). Na Tabela 2 (excluindo `python_native` W5 por M1), o ajuste de variância de Mann-Whitney por $n_{\text{eff}}$ para células com $r_1 > 0$ mantém **91/146** contrastes significativos após Holm-Bonferroni (vs. **99/146** no teste padrão; **8** contrastes marcados `(NS*)` perdem significância sob correção de $r_1$, todos no Linux x86_64).
-- **Estacionariedade e Drift Temporal (M7):** Em 190 células analisadas via regressão linear com correção Holm-Bonferroni, **188/190 (98.9%)** não apresentaram drift significativo ($p_{\text{adj}} \ge 0.05$) e **2/190** foram significativas. O pior caso de inclinação entre células válidas (excluindo `python_native` W5) foi **0.599%/rep** (`Windows Intel iGPU`, `Regime B (Warm Cache)`, `neural_baseline`, `W5`, $p_{\text{adj}}=1$); incluindo o braço segregado W5, o máximo bruto foi **1.376%/rep** em `Windows 11` `Regime B (Warm Cache)` `python_native` `W5` ($p_{\text{adj}}=1$).
-- **Throttling por Delta Intra-Trial (M8):** No Linux x86_64, `cpu_pkg_throttle_events` mede o delta intra-trial (`end - start` entre threads lógicos), com incrementos positivos em **884/900** trials do Regime A (máx. **120,948**/trial) e **768/900** do Regime B, documentando throttling real de CPU móvel sob offload híbrido `-ngl 16`; nas GPUs discretas (Linux e Windows 11 NVIDIA), `gpu_thermal_throttle_active_end` registrou **0** eventos e `gpu_sw_power_cap` (`0x04`) registrou **0** eventos no Windows NVIDIA.
-- **Replicação Inter-Sessão e TOST em Blocos com SESOI Fixo (Tabela 7; M2--M5):** Nos **95 pares válidos** (**7 pares confundidos de `python_native` W5 excluídos por M1**) avaliados via Moving Block Bootstrap ($b=3$, $B=5{,}000$; Künsch 1989) com **SESOI fixo pré-especificado $\Delta_{\text{SESOI}} = \pm 5.0\text{ ms}$** e **IC 90%** alinhado a $\alpha = 0.05$ (Schuirmann 1987; Lakens 2017): **76 (80.0%)** `Equivalent`, **0 (0.0%)** `Different`, e **19 (20.0%)** `Inconclusive`.
-- **Tool-RAG Schema Pruning (Tabela 5 e Figura 5b; M6):** Redução de $-87.1\%$ em tokens de prompt (7.091 para 917 tokens). Acelerações em Regime A (`OpenClaw Tool-RAG`) vs. **54-Tool Full**: **7.28x** (macOS M4, baseline interno), **5.16x** (Linux x86_64), **4.64x** (Windows 11 NVIDIA) e **9.96x** (Windows Intel iGPU); e vs. **15-Tool Minimal**: **2.10x**, **1.79x**, **1.71x** e **2.35x**, respectivamente (nos 3 nós x86_64 os braços podados referenciam os baselines da campanha principal do mesmo nó).
-- **KV-Cache Thrashing $T_2/T_3$ (Tabela 4):** Penalidades medidas (Minimal / Full): **6.85x / 19.46x** no macOS M4, **1.48x / 2.63x** no Linux x86_64, e **2.01x / 2.30x** no Windows 11 NVIDIA. (Sub-experimento não executado no Intel iGPU, dedicado a W2/W5.)
-- **Invariância de $T_{\text{orch}}$ (Tabela 3):** Limite empírico observado de $|\Delta T_{\text{orch}}| < 2.0\text{ ms}$ (máximo de **$1.95\text{ ms}$** em PicoClaw (Go) on Windows 11 NVIDIA).
-- **Ciclos de CPU no Windows (Tabela 1 e Figura 6c/d):** No Windows 11 NVIDIA: **45.8M** ciclos no PicoClaw vs. **528.1M** no OpenClaw Full (**11.54x**). No Windows Intel iGPU: **87.8M** ciclos no PicoClaw vs. **1446.1M** no OpenClaw Full (**16.47x**).
-- **Workload W5 — Auditoria de Tokens, Segregação de `python_native` (M1) e Desescopo do Protótipo LLM-as-a-Judge (E3):** Todos os 4 ambientes incluídos com auditoria de `prompt_tokens`, `completion_tokens`, `tool_calls` e `finish_reason` em `audit_export/w5_token_and_schema_audit.csv`. Como `python_native` (LangChain Core) apresentou falha de validação de schema / prompt truncado (`1,287/26` tokens vs. `2,007–6,921/33–38` nos orquestradores comparáveis; TTFT `50.0 ms` vs. `4,939.5 ms` no macOS Regime A; anomalia de `1,416.3 ms` de $T_{\text{orch}}$ no Linux Warm), foi **excluído das Tabelas 2 e 7** e **segregado na Parte B da Tabela 8** (`¶`). **Não houve avaliação comparativa de qualidade de saída entre runtimes:** o protótipo `W5_langchain_real_world/evaluator.py` (usando o mesmo `Meta-Llama-3.2-3B-Instruct Q4_K_M` local em `temperature=0.0`, `max_tokens=150`, rubrica de 1--5 pontos para 3 problemas de orçamento/SLA/compliance com fallback heurístico — sujeito a *same-family / self-evaluation bias*, Zheng et al. 2023) rodou apenas em `python_native` W5 ($N=30$ saídas/regime no macOS e Intel iGPU), onde `1.0/5.0` no macOS (`30/30`, `evaluation_reasoning = "Empty output"`) reflete falha de validação de schema com saída vazia e `3.0/5.0` no Intel iGPU (`30/30`) reflete detecção parcial de 1 problema sem cruzamento documento-banco.
+- **Serial Autocorrelation Across Both Regimes & Table 2 Adjustment (M4):** Lag-1 serial dependence ($|r_1| > 2/\sqrt{30} \approx 0.365$) occurred in **20/95** cells in **Regime A (Cold)** and **27/95** cells in **Regime B (Warm)** (**47/190** overall). In Table 2 (excluding W5 `python_native` per M1), inflating Mann-Whitney $U$ asymptotic variance via $n_{\text{eff}} = n(1-r_1)/(1+r_1)$ for positively autocorrelated cells ($r_1 > 0$; Bayley & Hammersley 1946; Yue & Wang 2004; Zimmerman & Zumbo 1993; Fagerland & Sandvik 2009) retains **91/146** Holm-Bonferroni significant contrasts (vs. **99/146** unadjusted; **8** contrasts marked `(NS*)` lose significance under $r_1$ correction, all on Linux x86_64).
+- **Stationarity & Temporal Drift (M7):** OLS regression across all 190 experimental cells with Holm-Bonferroni FWER adjustment found **188/190 (98.9%)** non-significant ($p_{\text{adj}} \ge 0.05$) and **2/190** significant. Across valid (non-segregated) cells, the largest observed absolute slope was **0.599%/rep** (`Windows Intel iGPU`, `Regime B (Warm Cache)`, `neural_baseline`, `W5`, $p_{\text{adj}}=1$); including the segregated W5 `python_native` arm, the overall raw maximum was **1.376%/rep** in `Windows 11` `Regime B (Warm Cache)` `python_native` `W5` ($p_{\text{adj}}=1$).
+- **Intra-Trial Hardware Throttling Deltas (M8):** On Linux x86_64, `cpu_pkg_throttle_events` records intra-trial `end - start` deltas summed across logical threads, with non-zero increments in **884/900** Regime A trials (max **120,948**/trial) and **768/900** Regime B trials, documenting active mobile CPU PL1/PL2 thermal throttling under hybrid `-ngl 16` offload. Discrete GPUs on Linux and Windows 11 NVIDIA recorded **0** thermal-throttle events (`gpu_thermal_throttle_active_end`) and **0** SW power-cap events (`0x04`) on Windows NVIDIA.
+- **Inter-Session Contrast Equivalence (Three-State MBB TOST, Table 7; M2--M5 / C8):** Across **95 valid pairs** (**7 schema-failed W5 `python_native` pairs excluded per M1**) evaluated via Moving Block Bootstrap ($b=3$, $B=5{,}000$; Künsch 1989) with a fixed data-independent SESOI of $\pm 5.0\text{ ms}$ and order-statistic 90% CIs aligned to $\alpha = 0.05$ (Schuirmann 1987; Lakens 2017): **76 (80.0%)** `Equivalent`, **19 (20.0%)** `Inconclusive`, and **0 (0.0%)** `Different`.
+- **Workload-Dependent Runtime Ranking & W3 Inversion (C3):** Compiled Go (`PicoClaw`) achieves lower $T_{\text{orch}}$ than Node.js V8 (`OpenClaw`) in W1, W2, W4, and W5 across all tested platforms. In compute-bound Vector RAG (W3), a ranking inversion occurs: scalar Go dot-product loops (`PicoClaw` Cold $T_{\text{orch}} = 36.83$ ms on macOS, $45.09$ ms on Linux, $49.68$ ms on Windows 11) are outperformed by vectorized SIMD/BLAS routines in `PythonNative` ($21.52$ ms on macOS, $35.20$ ms on Linux) and `Bun` JSC ($28.32$ ms on Linux, $39.99$ ms on Windows 11, and $18.09$ ms Warm Session 2 on macOS).
+- **Tool-RAG Schema Pruning (Table 5 & Figure 5b; M6):** $-87.1\%$ prompt token reduction (`7,091` to `917` tokens). Regime A (`OpenClaw Tool-RAG`) speedups vs. **54-Tool Full**: **7.28x** (macOS M4, same-session baseline), **5.16x** (Linux x86_64), **4.64x** (Windows 11 NVIDIA), and **9.96x** (Windows Intel iGPU); vs. **15-Tool Minimal**: **2.10x**, **1.79x**, **1.71x**, and **2.35x**, respectively (x86_64 pruned arms normalized to each node's primary campaign baseline).
+- **KV-Cache Thrashing $T_2/T_3$ (Table 4):** Measured eviction penalties (Minimal / Full): **6.85x / 19.46x** on macOS M4, **1.48x / 2.63x** on Linux x86_64, and **2.01x / 2.30x** on Windows 11 NVIDIA (not executed on Intel iGPU, scoped to W2/W5).
+- **Absolute $T_{\text{orch}}$ Cache Invariance (Table 3):** Observed bound $|\Delta T_{\text{orch}}| < 2.0\text{ ms}$ (maximum observed delta **$1.95\text{ ms}$** for PicoClaw (Go) on Windows 11 NVIDIA).
+- **Windows CPU Cycles (Table 1 & Figure 6c/d):** Windows 11 NVIDIA: **45.8M** cycles in PicoClaw vs. **528.1M** in OpenClaw Full (**11.54x**). Windows Intel iGPU: **87.8M** vs. **1446.1M** (**16.47x**).
+- **Workload W5 — Token Audit, `python_native` Segregation (M1) & Schema/Judge Sub-Table (C5 / E3):** All 4 platforms are reported in Table 8 with full token/finish-reason audit in `audit_export/w5_token_and_schema_audit.csv`. Because `python_native` (LangChain Core) experienced schema-validation failure and truncated prompts (`1,287/26` tokens vs. `2,007--6,921/33--38` for comparable arms; TTFT `50.0 ms` vs. `4,939.5 ms` on macOS Regime A; `1,416.3 ms` Warm initialization anomaly on Linux), it is **excluded from Tables 2 and 7** and **segregated into Part B of Table 8** (`¶`). Per C5, the `Quality Score (1-5)` column was removed from comparative Table 8; prototype diagnostics from `W5_langchain_real_world/evaluator.py` (local `Meta-Llama-3.2-3B-Instruct Q4_K_M`, `temperature=0.0`, `max_tokens=150`, 5-point 3-issue rubric with keyword fallback, $N=30$ outputs/regime, subject to same-family bias per Zheng et al. 2023) are isolated in Table 8's separate **Schema & Prototype Judge Audit** sub-table (`1.0/5.0` `"Empty output"` on macOS from schema validation failure; `3.0/5.0` partial 1-issue match on Intel iGPU). **No comparative output-quality evaluation was conducted across runtimes.**
 
 ---
 
-## 5. TAXONOMIA DE VALORES `N/A`
+## 5. `N/A` SYMBOL TAXONOMY
 
-Nenhum valor `N/A` foi substituído por `0`. Todos os símbolos estão definidos nas notas das Tabelas 1 e 8:
+No `N/A` cell was replaced by `0`. All symbols are defined consistently across Tables 1 and 8 and Figure 2(b):
 
-| Símbolo | Escopo | Justificativa Físico-Arquitetural |
+| Symbol | Scope | Hardware / Methodological Rationale |
 | :--- | :--- | :--- |
-| `N/A*` | Windows (NVIDIA e Intel iGPU) — Hardware Instructions | O kernel do Windows NT bloqueia leitura de contadores PMU (`CR4.PCE`) em user-mode sem driver privilegiado. Ciclos de CPU são medidos diretamente via Win32 `QueryProcessCycleTime` (11.54x no NVIDIA; 16.47x no Intel iGPU). |
-| `N/A†` | Tabela 8 — `quality_score` (Protótipo Desescopado — E3) | Não houve avaliação comparativa de qualidade entre runtimes. O protótipo `evaluator.py` (`Llama-3.2-3B-Instruct`, rubrica 1--5 pontos, $N=30$/regime, risco explícito de *same-family bias*) rodou apenas em `python_native` W5 (`1.0/5.0` = `Empty output` por falha de schema no macOS; `3.0/5.0` no Intel iGPU) e não foi instrumentado nos runtimes comparáveis (`N/A†`). |
-| `N/A‡` | Todas as Plataformas — `neural_baseline` (RSS, Instr/Cycles) | A linha de base neural envia chamadas HTTP diretamente ao `llama-server` sem processo orquestrador cliente ($T_{\text{orch}} \equiv 0$). |
-| `N/A§` | Tabelas 1, 8 e Figura 2(b) — `python_native` no Windows (RSS e Cycles) | A invocação via wrapper `py.exe` (PEP 397) captura o PID pai efêmero (~4.9 MB) em vez do processo filho `python.exe`; os dados do stub são excluídos uniformemente em todo o pacote. |
-| `N/A||` | macOS ARM64 — Bun JSC Engine | Motor secundário adicionado após o congelamento da campanha primária Cold/Warm no Apple M4; avaliado nas plataformas x86_64 (Linux e Windows), com medições suplementares Warm Session 2 no macOS preservadas em `inter_session_trials.jsonl`. |
-| `N/A**` | Windows Intel iGPU — Energia de Pacote e EDP | Intel HD Graphics 4600 opera sobre memória DDR3 compartilhada (UMA) sem sensores NVML dedicados ou driver MSR RAPL em anel zero no modo de usuário ($P_{\text{idle}} = 28.50\text{ W}$). |
-| `¶` | Tabela 8 Parte B — `python_native` em W5 (Segregado) | Falha de validação de schema / prompt truncado (`1,287/26` tokens vs. `2,007–6,921/33–38`; TTFT `50 ms` no macOS); excluído de comparações de desempenho/energia/TOST (Tabelas 2 e 7) por M1. |
+| `N/A*` | Windows (NVIDIA & Intel iGPU) — Hardware Instructions | Windows NT user-mode restricts hardware PMU retired instruction counters (`CR4.PCE`) without a privileged driver. Empirical Win32 CPU cycles are reported via `QueryProcessCycleTime` (11.54x NVIDIA; 16.47x Intel iGPU). |
+| `N/A‡` | All Platforms — `neural_baseline` (RSS, Instr/Cycles) | Direct HTTP pass-through to `llama-server` without a client orchestrator process ($T_{\text{orch}} \equiv 0$). |
+| `N/A§` | Tables 1, 8 & Figure 2(b) — Windows `python_native` (RSS & Cycles) | Windows `py.exe` launcher wrapper (PEP 397) exposes the ephemeral parent stub PID (~4.9 MB) rather than the child `python.exe` worker heap/cycles; stub metrics are excluded uniformly. |
+| `N/A||` | macOS ARM64 — Bun JSC Engine | Secondary JS-engine ablation introduced after the Apple M4 primary Cold/Warm campaign froze; evaluated in Cold & Warm on x86_64 nodes, with supplementary macOS Warm Session 2 trials archived in `inter_session_trials.jsonl`. |
+| `N/A**` | Windows Intel iGPU — Package Energy & EDP | Intel HD Graphics 4600 executes on shared DDR3 system memory (UMA) without discrete NVML sensors or ring-0 RAPL MSR access in unprivileged user-mode ($P_{\text{idle}} = 28.50\text{ W}$). |
+| `¶` | Table 8 Part B — Segregated W5 `python_native` | Schema-validation failure / truncated prompt (`1,287/26` tokens vs. `2,007--6,921/33--38`; TTFT `50 ms` on macOS); excluded from Tables 2 and 7 per M1. |
 
 ---
 
-## 6. AUDITORIA BIBLIOGRÁFICA (`references.bib`)
+## 6. BIBLIOGRAPHIC INVENTORY (`references.bib`)
 
-Todas as entradas em `references.bib` foram conferidas contra publicações primárias (21 referências primárias ativas com DOIs/ISBNs/arXiv IDs conferidos):
-- **Corrigida:** `maricq2018taming` (nomes reais dos autores conferidos no OSDI '18: *Aleksander Maricq* e *Ryan Stutsman*).
-- **Removida/Substituída:** entrada anterior `goldsman1997methods` continha DOI incorreto (`10.1145/259207.259235`, pertencente a outro artigo do TOMACS); substituída pela referência seminal do Moving Block Bootstrap (`kuensch1989jackknife`, DOI: `10.1214/aos/1176347265`).
-- **Referências metodológicas adicionadas:** `hoefler2015scientific`, `schuirmann1987comparison`, `lakens2017equivalence` (DOI: `10.1177/1948550617697177`), `mann1947test`, `kruskal1952use`, `holm1979simple`, `cliff1993dominance`, `vargha2000critique`, `weaver2013nondeterminism`, `yao2023react`, `zheng2023judging`, `reddi2020mlperf`, `you2023zeus`, `barroso2007case`, `fahad2019comparative`, `williams2009roofline`, `smith2016software` (além das existentes `kalibera2013rigorous` e `kwon2023vllm`).
-- **Especificações Técnicas Separadas:** Documentação de fabricantes e PEPs (Microsoft Learn `QueryProcessCycleTime` / Win32 PSAPI, Intel 64 and IA-32 SDM Vol. 3B Ch. 20, Python PEP 397) são rotuladas explicitamente como documentação técnica nas notas das tabelas.
+All **25 primary bibliographic entries** in `references.bib` carry checked DOIs, ISBNs, or arXiv identifiers:
+- **Corrected Entry:** `maricq2018taming` (author names checked against OSDI '18 proceedings: *Aleksander Maricq* and *Ryan Stutsman*).
+- **Replaced Entry:** Prior `goldsman1997methods` entry carried an unrelated TOMACS DOI and was replaced by the Moving Block Bootstrap reference (`kuensch1989jackknife`, DOI: `10.1214/aos/1176347265`).
+- **Rank-Test & Serial-Dependence References (C6):** `bayley1946effective` (DOI: `10.2307/2983560`), `zimmerman1993rank` (DOI: `10.1037/h0078850`), `yue2004mann` (DOI: `10.1023/B:WARM.0000043140.61082.60`), and `fagerland2009wilcoxon` (DOI: `10.1002/sim.3561`).
+- **Core Systems, Statistical & Evaluation References:** `kalibera2013rigorous`, `hoefler2015scientific`, `schuirmann1987comparison`, `lakens2017equivalence`, `mann1947test`, `kruskal1952use`, `holm1979simple`, `cliff1993dominance`, `vargha2000critique`, `weaver2013nondeterminism`, `kwon2023vllm`, `yao2023react`, `zheng2023judging`, `reddi2020mlperf`, `you2023zeus`, `barroso2007case`, `fahad2019comparative`, `williams2009roofline`, and `smith2016software`.
+- **Technical Specifications Separated:** Vendor documentation and PEPs (Microsoft Learn `QueryProcessCycleTime` / Win32 PSAPI, Intel 64 and IA-32 SDM Vol. 3B Ch. 20, Python PEP 397) are referenced explicitly as technical documentation in table notes.
 
 ---
 
-## 7. FIGURAS REGENERADAS (300 DPI, EM INGLÊS) E HASHES SHA-256
+## 7. REGENERATED FIGURES (300 DPI, ENGLISH) AND SHA-256 DIGESTS
 
-| Arquivo | Descrição | SHA-256 |
+| File | Description | SHA-256 |
 | :--- | :--- | :--- |
 | `figures/fig1_architecture_topology.png` | Quad-platform hardware topology diagram (4 physical nodes, English labels, dynamic dataset count, wrapped sensor boundary notes). | `f9a1bcb1a54ff2aeee6a99407effc742dca7bc31a692cae2f97d48a1fdc16dcb` |
 | `figures/fig2_exp1_cold_start_rss.png` | Panel (a) W1 cold latency with numerical labels and Intel iGPU/Bun scope note; Panel (b) W2 Peak RSS across 4 platforms with unified N/A§ (Win Stub) hatched block. | `47a036c7ddcc1068da100170c050a4fef3730fada580acbe3001dee4bda7ea8b` |
@@ -132,17 +137,18 @@ Todas as entradas em `references.bib` foram conferidas contra publicações prim
 
 ---
 
-## 8. LIMITAÇÕES E THREATS TO VALIDITY
+## 8. METHODOLOGICAL LIMITATIONS, EXTERNAL VALIDITY & LICENSING
 
-1. **Assimetria de Offload e Memória (UMA vs. Híbrido PCIe vs. DDR3):** Apple M4 executa offload integral em memória unificada (`-ngl 99`, 120 GB/s). Dell G15 (Linux e Windows 11) opera sob offload híbrido (`-ngl 16`) limitado pela VRAM de 4 GB GDDR6 com streaming PCIe (~5.2 GB/s). Intel HD Graphics 4600 opera sobre RAM DDR3 compartilhada. Contrastes absolutos de latência neural em Regime B são restritos a comparações intra-nó.
-2. **Restrições de Privilégio em Modo de Usuário no Windows:** Ausência de acesso ring-0 impede leitura direta de `INST_RETIRED.ANY` (`CR4.PCE`) e RAPL MSR no Intel iGPU; ciclos de processo Win32 (`QueryProcessCycleTime`) são utilizados sem extrapolações sintéticas de IPC.
-3. **Escopo Desigual no Windows Intel iGPU — Restrito a W2, W5 e Tool-RAG (E8):** Sobre memória DDR3-1600 compartilhada, os tempos medidos em Regime A (Cold Prefill) variaram de **53.5 s/trial** (`picoclaw` / `openclaw_minimal` W2) até **226.7 s/trial** (`openclaw_full` W2 com 54 ferramentas), com os braços comparáveis de W5 entre **50.1 s e 56.9 s/trial**. Executar toda a matriz W1--W4 (especialmente W4 com 10 turnos, excedendo 8--15 minutos/trial em prefill frio), KV-Thrashing (Tabela 4) e MCP Transport (Tabela 6) em duas sessões de 30 repetições demandaria execução contínua por múltiplos dias, introduzindo drift térmico e interferência do SO. Restringir o nó Intel iGPU a W2, W5 e Tool-RAG captura o overhead de middleware ($T_{\text{orch}}$, RSS, ciclos) e a poda de schema em memória compartilhada dentro de janelas estacionárias viáveis.
-4. **Escopo Desigual de Bun JSC — Avaliado Apenas em x86_64 na Matriz Consolidada (E8):** Bun (`bun_minimal`, JavaScriptCore) foi adicionado como ablação secundária de motor JS após o congelamento da campanha primária Cold/Warm no Apple M4 (`raw_trials.jsonl`, `warm_cache_trials.jsonl`). Por isso, Bun aparece nos regimes Cold e Warm dos 3 nós x86_64 (Linux, Windows 11 NVIDIA e Windows Intel iGPU) e como `N/A||` nas tabelas consolidadas do macOS (medições suplementares de Bun Warm Session 2 no macOS permanecem arquivadas em `results/publication_campaign/inter_session_trials.jsonl`, sem síntese artificial de Regime A).
-5. **Segregação de `python_native` em W5 (M1) e Desescopo do Protótipo LLM-as-a-Judge (E3):** Falha de validação de schema e truncamento de prompt (`1,287/26` tokens) no LangChain Core tornam `python_native` W5 não comparável aos demais orquestradores (excluído das Tabelas 2 e 7; segregado na Parte B da Tabela 8). O avaliador protótipo `evaluator.py` consultou o mesmo `Llama-3.2-3B-Instruct` local (risco de *same-family bias*) somente em `python_native` W5 ($N=30$/regime); nenhuma afirmação comparativa de qualidade de saída entre runtimes é sustentada.
-6. **Throttling Térmico/PL de CPU no Linux x86_64 (M8):** Sob offload híbrido `-ngl 16` (AVX2 + RTX 3050), o pacote Intel Core i5-12500H apresentou deltas intra-trial positivos de `cpu_pkg_throttle_events`, elevando a autocorrelação serial $r_1$ (compensada via ajuste de variância na Tabela 2 e Moving Block Bootstrap na Tabela 7).
+1. **Offload & Memory Topology Asymmetry (UMA vs. Hybrid PCIe vs. Shared DDR3):** Apple M4 executes full on-die GPU offload (`-ngl 99`, 120 GB/s). Dell G15 nodes (Linux and Windows 11) execute under hybrid offload (`-ngl 16`) bounded by 4 GB GDDR6 VRAM with continuous PCIe streaming (~5.2 GB/s). Intel HD Graphics 4600 executes over shared DDR3-1600 RAM. Absolute Regime B latency and package energy comparisons are restricted to within-node contrasts.
+2. **Windows User-Mode Telemetry Boundaries:** Absence of ring-0 privileges blocks direct PMU `INST_RETIRED.ANY` (`CR4.PCE`) and Intel iGPU RAPL MSR access; empirical Win32 `QueryProcessCycleTime` cycles are reported without synthetic IPC extrapolation.
+3. **Unequal Workload Scope on Windows Intel iGPU — W2, W5 & Tool-RAG Only (E8):** On shared DDR3-1600 memory, Regime A trial durations spanned **53.5 s/trial** (`picoclaw`/`openclaw_minimal` W2) to **226.7 s/trial** (54-tool `openclaw_full` W2), with comparable W5 arms at **50.1--56.9 s/trial**. Expanding to W1--W4 (including 10-turn W4 dialogues), KV-Thrashing, and MCP across two 30-rep sessions would require multi-day continuous execution and expose results to thermal/OS drift.
+4. **Unequal Runtime Scope for Bun JSC — x86_64 Only in Consolidated Matrix (E8):** Bun (`bun_minimal`, JavaScriptCore) was added as a secondary JS-engine ablation after the Apple M4 primary Cold/Warm campaign froze; it is evaluated across Cold and Warm on all three x86_64 nodes (`N/A||` in macOS consolidated tables; supplementary macOS Warm Session 2 Bun trials are archived in `inter_session_trials.jsonl`).
+5. **Segregation of W5 `python_native` (M1) & De-Scoped Prototype Judge (E3 / C5):** Schema-validation failure and truncated prompts (`1,287/26` tokens) make `python_native` W5 non-comparable (excluded from Tables 2 and 7; segregated in Part B of Table 8). Prototype judge outputs (`Llama-3.2-3B-Instruct`, $N=30$/regime, same-family bias risk) were moved out of comparative columns into Table 8's separate Schema & Prototype Judge Audit sub-table; no cross-runtime quality claims are made.
+6. **Linux Mobile CPU Thermal/PL Throttling (M8):** Positive intra-trial deltas in `cpu_pkg_throttle_events` elevated lag-1 autocorrelation ($r_1$) on Linux x86_64 under `-ngl 16` offload, addressed via $n_{\text{eff}}$-adjusted Mann-Whitney $U$ variance (Table 2) and Moving Block Bootstrap ($b=3$, Table 7).
+7. **External Validity Boundaries & Licensing (C9):** Measurements are scoped to a single 3B quantized model (`Meta-Llama-3.2-3B-Instruct Q4_K_M`, Meta Llama 3.2 Community License), a single inference server (`llama-server` / `llama.cpp`, MIT License), synthetic deterministic workloads (W1--W5), and heterogeneous platform sensors. All evaluated `PicoClaw` and `OpenClaw` workers are clean-room academic implementations isolated for systems benchmarking (code: MIT License; data: CC BY 4.0).
 
 ---
 
-## 9. RESUMO DO ESTADO DE CONSOLIDAÇÃO
+## 9. ARTIFACT INVENTORY SUMMARY
 
-Os artefatos empíricos, tabelas Markdown/LaTeX, figuras em 300 DPI, saída salva de `pytest -q`, instruções de acesso aos 35 `.jsonl`, chunks textuais de auditoria e manifesto SHA-256 foram regenerados dinamicamente a partir dos arquivos brutos em disco.
+All derived artifacts — manuscript source (`paper/softwarex_manuscript.tex`), `references.bib`, analysis scripts, Tables 1--8 (`.md`/`.tex`), Figures 1--6 (300 DPI), saved `pytest -q` transcript, 35-`.jsonl` access guide (`audit_export/REVIEW_PACKAGE_README.md`), lightweight text chunks (`audit_txt_chunks/`), `data/manifest_sha256.json`, and `audit_export_quad_platform.zip` — were regenerated directly from the raw datasets on disk.

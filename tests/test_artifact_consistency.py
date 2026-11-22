@@ -802,6 +802,7 @@ def test_reviewer2_e1_review_package_zip_contents():
         names = set(zf.namelist())
 
     required = [
+        "paper/softwarex_manuscript.tex",
         "references.bib",
         "scripts/reproduce_quad_platform_analysis.py",
         "scripts/verify_manifest.py",
@@ -827,6 +828,53 @@ def test_reviewer2_e1_review_package_zip_contents():
     ]
     missing = [r for r in required if r not in names]
     assert not missing, f"Missing entries in audit_export_quad_platform.zip: {missing}"
+
+
+def test_reviewer3_c1_c3_c5_c6_c8_c9_compliance():
+    """Reviewer 3 C1, C3, C5, C6, C8, C9: Enforces English AUDIT_REPORT_FINAL.md, W3 ranking-inversion qualification, Table 8 cleanup, 25 BibTeX refs, neutral TOST phrasing, and licensing/validity declarations."""
+    audit_txt = open(os.path.join(REPO_DIR, "AUDIT_REPORT_FINAL.md"), encoding="utf-8").read()
+    rep_txt = open(os.path.join(REPO_DIR, "audit_export", "Systems_Replication_Report.md"), encoding="utf-8").read()
+    t8_md = open(os.path.join(REPO_DIR, "audit_export", "tables", "table8_w5_enterprise_workload.md"), encoding="utf-8").read()
+    t8_tex = open(os.path.join(REPO_DIR, "audit_export", "tables", "table8_w5_enterprise_workload.tex"), encoding="utf-8").read()
+    bib_txt = open(os.path.join(REPO_DIR, "references.bib"), encoding="utf-8").read()
+    ms_txt = open(os.path.join(REPO_DIR, "paper", "softwarex_manuscript.tex"), encoding="utf-8").read()
+    readme_txt = open(os.path.join(REPO_DIR, "README.md"), encoding="utf-8").read()
+
+    # C1: AUDIT_REPORT_FINAL.md is neutral technical English + scope notice (not part of manuscript)
+    assert "not part of the manuscript" in audit_txt.lower()
+    assert "EXECUTED COMMANDS AND OBSERVED OUTPUTS" in audit_txt
+    for pt_marker in ("Relatório de Auditoria", "Escopo Empírico", "Manifesto Criptográfico", "LIMITAÇÕES"):
+        assert pt_marker not in audit_txt, f"Untranslated Portuguese marker '{pt_marker}' in AUDIT_REPORT_FINAL.md"
+
+    # C3: W3 ranking inversion explicitly qualified in Systems_Replication_Report.md and manuscript Conclusions
+    assert "ranking inversion" in rep_txt.lower() and "W3" in rep_txt
+    assert "ranking inversion" in ms_txt.lower() and "SIMD/BLAS" in ms_txt
+
+    # C5: Quality Score column removed from comparative Table 8 (.md/.tex) and moved to separate Schema & Prototype Judge Audit
+    assert "| Quality Score (1-5) |" not in t8_md
+    assert "### Schema & Prototype Judge Audit" in t8_md
+    assert r"\textbf{Score}" not in t8_tex
+    assert "Schema \\& Prototype Judge Audit" in t8_tex
+
+    # C8: Neutral TOST three-state summary & Artifact Inventory and Traceability
+    assert "Quantified Replicability" not in rep_txt
+    assert "Artifact Inventory and Traceability" in rep_txt
+    assert "Equivalent" in rep_txt and "Inconclusive" in rep_txt and "Different" in rep_txt
+
+    # C6: Verified rank-test / serial-dependence references in references.bib & Related Work in manuscript
+    for key in ("bayley1946effective", "zimmerman1993rank", "yue2004mann", "fagerland2009wilcoxon"):
+        assert f"{{{key}," in bib_txt, f"Missing BibTeX entry {key}"
+        assert key in ms_txt, f"Missing citation to {key} in manuscript"
+    assert r"\subsection{Related Work and Positioning}" in ms_txt
+
+    # C9: Required sections + Llama 3.2 Community License + clean-room PicoClaw/OpenClaw + external validity bounds
+    for doc in (ms_txt, readme_txt):
+        assert "Meta Llama 3.2 Community License" in doc
+        assert "clean-room" in doc.lower()
+        assert "llama-server" in doc
+    for sec in (r"\section{Software Description}", r"\section{Illustrative Examples and Empirical Results}", r"\section{Impact}", "Code metadata"):
+        assert sec in ms_txt, f"Missing required section/table '{sec}' in manuscript"
+
 
 
 
