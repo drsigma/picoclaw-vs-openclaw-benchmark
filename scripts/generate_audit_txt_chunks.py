@@ -178,16 +178,19 @@ for p_key, p_data in raw_metrics.items():
 concise_json_str = json.dumps(concise_digest, indent=2)
 
 num_diag_cells = max(0, len([l for l in anomaly_csv_content.splitlines() if l.strip()]) - 1)
+w5_audit_path = os.path.join(REPO_DIR, "audit_export", "w5_token_and_schema_audit.csv")
+w5_audit_content = open(w5_audit_path, "r", encoding="utf-8").read() if os.path.exists(w5_audit_path) else ""
 
 pt3_header = f"""================================================================================
-AUDIT CHUNK PART 3: CONSOLIDATED CSV SUMMARY, ANOMALY DIAGNOSTICS & METRICS
+AUDIT CHUNK PART 3: CONSOLIDATED CSV SUMMARY, ANOMALY DIAGNOSTICS & W5 TOKEN AUDIT
 ================================================================================
 Arquivos Originais Incluídos / Source Files Included:
   1. audit_export/quad_platform_consolidated_summary.csv (Todas as {num_diag_cells} células nas 4 plataformas)
-  2. audit_export/anomaly_and_cache_diagnostics.csv (Autocorrelação r1, n_eff, p-adj drift e teto térmico)
-  3. audit_export/audit_summary_metrics.json (Resumo condensado estruturado de medianas, CIs e diagnósticos)
+  2. audit_export/anomaly_and_cache_diagnostics.csv (Autocorrelação r1, n_eff, drift %/rep, deltas de throttling e tokens)
+  3. audit_export/w5_token_and_schema_audit.csv (Auditoria dedicada de tokens, finish_reason e segregação de W5)
+  4. audit_export/audit_summary_metrics.json (Resumo condensado estruturado de medianas, CIs e diagnósticos)
 Escopo: Quad-Platform Microarchitectural Telemetry & Diagnostics
-Data de Exportação: 2026-11-21
+Data de Exportação: 2026-11-22
 Tamanho Máximo do Chunk: <= 150 KB
 ================================================================================
 
@@ -203,7 +206,11 @@ with open(pt3_path, "w", encoding="utf-8") as f:
     f.write(anomaly_csv_content)
     f.write("\n\n>>> FIM DE: audit_export/anomaly_and_cache_diagnostics.csv <<<\n")
     f.write("\n" + "=" * 80 + "\n\n")
-    f.write(">>> SEÇÃO 3: CONDENSED STRUCTURED SUMMARY (from audit_summary_metrics.json) <<<\n\n")
+    f.write(">>> SEÇÃO 3: audit_export/w5_token_and_schema_audit.csv <<<\n\n")
+    f.write(w5_audit_content)
+    f.write("\n\n>>> FIM DE: audit_export/w5_token_and_schema_audit.csv <<<\n")
+    f.write("\n" + "=" * 80 + "\n\n")
+    f.write(">>> SEÇÃO 4: CONDENSED STRUCTURED SUMMARY (from audit_summary_metrics.json) <<<\n\n")
     f.write(concise_json_str)
     f.write("\n\n>>> FIM DE: CONDENSED STRUCTURED SUMMARY <<<\n")
 

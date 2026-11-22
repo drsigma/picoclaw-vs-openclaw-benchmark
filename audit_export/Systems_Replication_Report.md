@@ -42,11 +42,11 @@ This report documents the physical execution, microarchitectural instrumentation
 
 ## 2. HARDWARE THROTTLING & IDLE POWER DECOMPOSITION
 
-### 2.1. NVML Register Inspection and Thermal/Power Throttling Diagnostics (Linux and Windows)
-Detailed inspection of raw JSONL telemetry records across all trials on Linux and Windows characterizes thermal and power-limit behavior:
-- **Stationary Cumulative Counter on Linux (`cpu_pkg_throttle_events`):** Recorded values in `cpu_pkg_throttle_events` reflect monotonic sticky-bit accumulation from the Intel CPU package thermal status MSR (`IA32_PACKAGE_THERM_STATUS`) rather than progressive throughput degradation during benchmark trials.
-- **Mobile TDP Power Cap on Windows (`gpu_sw_power_cap`):** Bitmask `0x8` (`SW_POWER_CAP`) events on Windows 11 NVIDIA reflect transient mobile GPU TDP enforcement (75 W board ceiling) during matrix-multiplication bursts in prompt prefill, rather than thermal throttling.
-- **Absence of Hardware Thermal Throttling:** Across all discrete-GPU trials on Linux and Windows, the NVML thermal-throttle indicator (`gpu_thermal_throttle_active_end`) recorded **0 thermal throttling events**. GPU temperatures stayed within 50.0°C--74.0°C, below the 87.0°C threshold required to trigger `HW_THERMAL_SLOWDOWN` (`0x40`) or `SW_THERMAL_SLOWDOWN` (`0x20`).
+### 2.1. NVML Register Inspection and Per-Trial Thermal/Power Throttling Deltas (M8)
+Detailed per-trial inspection of raw JSONL hardware telemetry records (exported in `audit_export/anomaly_and_cache_diagnostics.csv`) establishes exact intra-trial throttling behavior without synthetic proxies:
+- **Linux x86_64 CPU Package Intra-Trial Deltas (`cpu_pkg_throttle_events`):** In `scripts/run_linux_x86_64_master_campaign.py`, `cpu_pkg_throttle_events` records the genuine **intra-trial delta** (`end - start` summed across 16 logical threads from Linux sysfs `package_throttle_count`). Non-zero intra-trial increments occurred in **884/900 (98.2%)** Regime A trials (max single-trial delta **120,948 events**, **445** consecutive-trial increases, CPU package peak **100.0°C**) and **768/900 (85.3%)** Regime B trials (max delta **14,576**, CPU peak **95.0°C**). This documents active Intel Alder Lake mobile PL1/PL2 thermal-power throttling under `-ngl 16` AVX2 hybrid CPU+GPU offload, explaining Linux's elevated positive lag-1 autocorrelation ($r_1$) addressed via $r_1$-corrected Mann-Whitney variance in Table 2. Meanwhile, the discrete NVIDIA RTX 3050 GPU on Linux recorded **0 thermal-throttle events** and **0 SW power-cap events** (`nvml_throttle_reasons_bitmask = 0x0`, GPU peak **71.0°C**).
+- **Windows 11 NVIDIA Discrete GPU & CPU Telemetry:** Across all **1,800** measured Regime A & B trials on Windows 11 NVIDIA, NVML hardware registers recorded **0 GPU thermal-throttle events** (`0x20`/`0x40`) and **0 GPU SW power-cap events** (`0x04`; GPU peak **74.0°C**, CPU peak **78.0°C**). The only non-zero NVML bitmask observed at trial completion was `0x01` (`nvmlClocksThrottleReasonGpuIdle`, **902/1800** trials). Windows user-mode telemetry does not expose Linux sysfs `package_throttle_count` (`cpu_pkg_throttle_events = 0`).
+- **Zero Discrete GPU Thermal Slowdown:** Across all Linux and Windows discrete-GPU trials combined, `gpu_thermal_throttle_active_end` recorded **0 thermal throttling events** and `gpu_sw_power_cap` recorded **0 power-cap events**.
 
 ### 2.2. Explicit Idle Power ($P_{\text{idle}}$) Telemetry and Duration Integration
 Idle power baselines were empirically characterized during dedicated quiescence intervals prior to benchmark execution:
@@ -69,27 +69,27 @@ Idle power baselines were empirically characterized during dedicated quiescence 
 
 Following established systems benchmarking methodology (Kalibera & Jones 2013; Hoefler & Belli 2015; Maricq et al. 2018; Künsch 1989), serial dependence and temporal drift were evaluated across all experimental cells:
 
-### 3.1. Autocorrelation ($r_1$), Effective Sample Size ($n_{\text{eff}}$), and Moving Block Bootstrap
-- **Regime A (Cold Prefill):** Lag-1 serial autocorrelation across platforms spanned: macOS ARM64 $r_1 \in [-0.310, +0.433]$; Linux x86_64 $r_1 \in [-0.340, +0.778]$; Windows 11 NVIDIA $r_1 \in [-0.313, +0.219]$; Windows Intel iGPU $r_1 \in [-0.463, +0.193]$. White-noise 95% boundary at $n=30$ is $|r_1| < 2/\sqrt{30} \approx 0.365$.
-- **Regime B (Warm Cache):** Serial autocorrelation emerged in a subset of warm-cache cells:
-  * On macOS ARM64, lag-1 autocorrelation spanned $r_1 \in [-0.895, +0.434]$, with negative alternation attributed to harness dispatch cadence, loopback TCP socket drainage, and server thread wake-up scheduling.
-  * On Windows 11 NVIDIA, lag-1 autocorrelation spanned $r_1 \in [-0.386, +0.450]$, reflecting memory page retention in the Windows Standby List.
-  * For every cell exceeding $|r_1| > 2/\sqrt{n}$, the effective sample size $n_{\text{eff}} = \min(n, n(1 - r_1)/(1 + r_1))$ was computed and 95% confidence intervals were obtained via **Moving Block Bootstrap (MBB, block size $b=3$; Künsch 1989)** to preserve short-range serial correlation.
-- **Interpretation of $n_{\text{eff}}$:** Mann-Whitney $U$, Cliff's $\delta$, and Vargha-Delaney $A_{12}$ statistics reflect $n=30$ measured trials per condition; $n_{\text{eff}}$ is reported exclusively as a diagnostic indicator of serial correlation health alongside MBB confidence intervals.
+### 3.1. Autocorrelation ($r_1$) Across Both Regimes, $r_1$-Adjusted Mann-Whitney $U$, and Moving Block Bootstrap (M4)
+- **Presence of Serial Dependence in Both Regimes:** Applying the white-noise 95% boundary at $n=30$ ($|r_1| > 2/\sqrt{30} \approx 0.365$), statistically detectable lag-1 autocorrelation occurs in **both** execution regimes: **20/95 (21.1%)** cells in **Regime A (Cold Prefill)** and **27/95 (28.4%)** cells in **Regime B (Warm Cache)** (**47/190**, 24.7% overall).
+  * **Regime A (Cold Prefill) $r_1$ ranges:** macOS ARM64 $r_1 \in [-0.310, +0.433]$; Linux x86_64 $r_1 \in [-0.340, +0.778]$; Windows 11 NVIDIA $r_1 \in [-0.313, +0.219]$; Windows Intel iGPU $r_1 \in [-0.463, +0.193]$.
+  * **Regime B (Warm Cache) $r_1$ ranges:** macOS ARM64 $r_1 \in [-0.895, +0.434]$; Linux x86_64 $r_1 \in [-0.430, +0.685]$; Windows 11 NVIDIA $r_1 \in [-0.386, +0.450]$; Windows Intel iGPU $r_1 \in [-0.284, +0.387]$.
+  * For every cell exceeding $|r_1| > 2/\sqrt{n}$, the effective sample size $n_{\text{eff}} = \min(n, n(1 - r_1)/(1 + r_1))$ is computed and 95% confidence intervals are obtained via **Moving Block Bootstrap (MBB, block size $b=3$; Künsch 1989)**.
+- **Table 2 $r_1$-Adjusted Mann-Whitney $U$ Variance Correction:** For pairwise comparisons in Table 2 (excluding confounded W5 `python_native` per M1), cells with positive autocorrelation ($r_1 > 0$) inflate the asymptotic variance of $U$ using $n_{\text{eff}} = n(1-r_1)/(1+r_1)$ (retaining $n_{\text{eff}} = n$ conservatively when $r_1 \le 0$). Across **146 pairwise contrasts**, **99** are significant under standard Holm-Bonferroni and **91** remain significant under $r_1$-corrected Holm-Bonferroni; **8 contrast(s)** lose statistical significance under $r_1$ correction (flagged `(NS*)` in Table 2, all on Linux x86_64 where active CPU thermal/PL throttling induced positive serial correlation).
 
-### 3.2. Linear Regression Drift Test with Holm-Bonferroni Family-Wise Error Control
+### 3.2. Linear Regression Drift Test with Holm-Bonferroni Family-Wise Error Control (M7)
 Ordinary least-squares regression of task latency against repetition index ($1 \dots 30$) was evaluated across all experimental cells with Holm-Bonferroni FWER adjustment (Holm 1979):
-- Across all **190 experimental cells**, **188/190 (98.9%) exhibited no statistically significant temporal drift** ($p_{\text{adj}} \ge 0.05$).
-- In the small fraction of cells with statistically detectable slope (e.g., long-context W4 prefill), per-repetition slope magnitudes remained below $0.1\%$ of task duration.
+- Across all **190 experimental cells**, **188/190 (98.9%)** exhibited no statistically significant temporal drift ($p_{\text{adj}} \ge 0.05$); **2/190** reached Holm-Bonferroni significance: Windows 11 Regime B (Warm Cache) `neural_baseline` W1 (+3.611 ms/rep, 0.174%/rep, $p_{\text{adj}}=0.04731$); macOS (M4) Regime A (Cold Prefill) `openclaw_full` W4 (+13.012 ms/rep, 0.007%/rep, $p_{\text{adj}}=4.4e-05$).
+- **Worst-Case Slope Magnitudes (%/rep):** Across all **valid (non-segregated)** cells, the largest observed absolute slope magnitude was **0.599%/rep** (`Windows Intel iGPU`, `Regime B (Warm Cache)`, `neural_baseline`, `W5`, $p_{\text{adj}} = 1$, non-significant). Including the segregated W5 `python_native` arm (excluded per M1), the overall maximum raw slope was **1.376%/rep** in `Windows 11` `Regime B (Warm Cache)` `python_native` `W5` ($p_{\text{adj}} = 1$).
 
 ---
 
 ## 4. CONSOLIDATED EMPIRICAL TABLES SUMMARY
 
-### 4.1. Table 5: Tool-RAG Schema Pruning Analysis
+### 4.1. Table 5: Tool-RAG Schema Pruning Analysis (M6)
 - **Token Reduction:** Dynamic Tool-RAG pruning reduces active prompt tokens from 7,091 (static 54-tool catalog) to **917 tokens** (retrieved Top-5 schema), a **$-87.1\%$ token reduction**.
-- **Regime A (Cold Prefill) Speedups (OpenClaw Tool-RAG vs. 54-Tool Full):** **7.28x** on macOS M4, **5.16x** on Linux x86_64, **4.64x** on Windows 11 NVIDIA, and **9.96x** on Windows Intel iGPU.
-- **Baseline Normalization Transparency:** On macOS ARM64, speedups reference the internal unmitigated 54-tool baseline measured in the identical session (`tool_rag_mitigation_trials.jsonl`). On Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU, pruned arms reference each node's primary unmitigated baseline (`raw_trials.jsonl` for Regime A; `warm_cache_trials.jsonl` for Regime B).
+- **Regime A (Cold Prefill) Speedups vs. 54-Tool Full (`OpenClaw Tool-RAG`):** **7.28x** on macOS M4, **5.16x** on Linux x86_64, **4.64x** on Windows 11 NVIDIA, and **9.96x** on Windows Intel iGPU.
+- **Speedups vs. 15-Tool Minimal (`OpenClaw Tool-RAG`, M6):** Cold Prefill achieves **2.10x** (macOS M4), **1.79x** (Linux x86_64), **1.71x** (Windows 11 NVIDIA), and **2.35x** (Windows Intel iGPU); Warm Cache achieves **1.07x**, **1.31x**, **1.26x**, and **1.22x**, respectively.
+- **Baseline Normalization Transparency:** On macOS ARM64, both 54-Tool Full and 15-Tool Minimal ratios reference internal unmitigated baselines measured in the identical session (`tool_rag_mitigation_trials.jsonl`). On Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU, pruned arms reference each node's primary unmitigated `openclaw_full` and `openclaw_minimal` baselines (`raw_trials.jsonl` for Regime A; `warm_cache_trials.jsonl` for Regime B).
 
 ### 4.2. Table 4: KV-Cache Thrashing & Slot Isolation
 - Cache eviction penalties quantified as the latency ratio of uncontrolled thrashing to block-isolated slot retention ($T_2/T_3$):
@@ -102,16 +102,16 @@ Ordinary least-squares regression of task latency against repetition index ($1 \
 - Empirical measurements confirm that **cache invariance applies strictly to absolute orchestrator latency $T_{\text{orch}}$ (ms)** ($|\Delta T_{\text{orch}}| < 2.0\text{ ms}$, with a maximum observed difference of $1.95\text{ ms}$ for PicoClaw (Go) on Windows 11 NVIDIA).
 - The relative overhead fraction $\Phi_{\text{orch}} = T_{\text{orch}} / T_{\text{task}}$ increases under warm cache because neural inference latency $T_{\text{neural}}$ drops substantially under KV prefix reuse.
 
-### 4.4. Table 7: Multi-Platform Dual-Session Replication (TOST)
-- Dual-session contrast analysis ($\Delta T_{\text{orch}} = T_{\text{orch}}(\text{Runtime}) - T_{\text{orch}}(\text{PicoClaw})$) across **102 platform/regime/workload pairs** using Two One-Sided Tests (`ttost_ind`, margin $\max(5.0\text{ ms}, 15\%\cdot|\bar{\Delta}_1|)$; Schuirmann 1987) yielded:
-  * **Equivalence Proven ($p < 0.05$):** **53/102 (52.0%)**
-  * **Replicated ($|\Delta| < 10\%$):** **29/102 (28.4%)**
-  * **Divergence Detected ($|\Delta| \ge 10\%$ and $p \ge 0.05$):** **20/102 (19.6%)**
-- Extreme W5 outliers (macOS ARM64 (M4) Regime B (Warm) W5 (PythonNative vs PicoClaw: +15360.46%); Linux x86_64 Regime A (Cold) W5 (PythonNative vs PicoClaw: +11936.37%)) occurred in `PythonNative` due to cross-session initialization variability during dynamic LangChain/CPython module resolution.
+### 4.4. Table 7: Multi-Platform Dual-Session Replication (Fixed-SESOI Block-Bootstrap TOST; M2--M5)
+- Dual-session contrast analysis ($\Delta T_{\text{orch}} = T_{\text{orch}}(\text{Runtime}) - T_{\text{orch}}(\text{PicoClaw})$) across **95 valid platform/regime/workload pairs** (**7 confounded W5 `python_native` pairs excluded per M1**) using Moving Block Bootstrap ($b=3$, $B=5{,}000$; Künsch 1989) with a **fixed, pre-specified data-independent SESOI of $\pm 5.0\text{ ms}$** ($<0.2\%$ of Regime A task duration) and exact order-statistic **90% MBB CIs** aligned with $\alpha = 0.05$ TOST under the standardized 3-state rule (Schuirmann 1987; Lakens 2017):
+  * **`Equivalent` (90% CI wholly inside $[-5.0, +5.0]\text{ ms}$, $p_{\text{TOST}} < 0.05$):** **76/95 (80.0%)**
+  * **`Different` (90% CI wholly outside $[-5.0, +5.0]\text{ ms}$):** **0/95 (0.0%)**
+  * **`Inconclusive` (90% CI straddles SESOI boundary):** **19/95 (20.0%)** (concentrated in 10-turn W4 loops and Windows `python_native` startup variance)
 
-### 4.5. Table 8: Enterprise LangChain + SQLite Workload (W5)
-- Table 8 consolidates W5 across **all 4 physical platforms** (macOS M4, Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU) in both Cold and Warm regimes.
-- **Quality Score Audit (`quality_score`):** LLM-as-a-Judge scoring (Zheng et al. 2023) was instrumented on `python_native` LangChain Core runs on macOS M4 (**1.0/5.0**, due to strict schema validation mismatch) and Windows Intel iGPU (**3.0/5.0**, partial query completion). Client agent runs (`picoclaw`, `openclaw_minimal`, `openclaw_full`, `bun_minimal`) and Linux/Windows NVIDIA W5 campaigns did not run the LLM-as-a-Judge wrapper and are explicitly marked `N/A†`.
+### 4.5. Table 8: Enterprise LangChain + SQLite Workload (W5) & Token/Schema Audit (M1)
+- Table 8 consolidates W5 across **all 4 physical platforms** (macOS M4, Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU) in both Cold and Warm regimes, adding exact `Prompt / Comp. Tokens` audited from the raw JSONLs (`audit_export/w5_token_and_schema_audit.csv`).
+- **Token Audit & Segregation of `python_native` (M1, Option A):** Comparable client orchestrators (`picoclaw`, `openclaw_minimal`, `openclaw_full`, `bun_minimal`, `neural_baseline`) processed `2,007--6,921` prompt tokens and `33--38` completion tokens with `finish_reason=tool_calls` across all four platforms. In contrast, `python_native` (LangChain Core) on macOS M4, Windows 11 NVIDIA, and Windows Intel iGPU executed a confounded/truncated prompt (`1,287` prompt / `26` completion tokens; TTFT `50.0 ms` vs. `4,939.5 ms` in macOS Regime A; `finish_reason=stop` on Intel iGPU; `quality_score = 1.0/5.0` on macOS M4 and `3.0/5.0` on Windows Intel iGPU), while Linux x86_64 Regime B exhibited a `1,416.3 ms` LangChain initialization anomaly. Accordingly, `python_native` in W5 is **excluded from all latency, energy, and TOST contrasts (Tables 2 and 7)** and explicitly **segregated into Part B of Table 8**; any lower latency or energy in Part B is strictly a schema-failure/truncation artifact rather than runtime efficiency.
+- **Quality Score Audit (`quality_score`):** LLM-as-a-Judge scoring (Zheng et al. 2023) was instrumented on `python_native` LangChain Core runs on macOS M4 (**1.0/5.0**) and Windows Intel iGPU (**3.0/5.0**); comparable client orchestrators and Linux/Windows NVIDIA W5 runs did not run the LLM-as-a-Judge wrapper and are marked `N/A†`.
 
 ---
 
@@ -122,21 +122,22 @@ Ordinary least-squares regression of task latency against repetition index ($1 \
 3. **Maricq, A., Duplyakin, D., Jimenez, I., Maltzahn, C., Stutsman, R., & Ricci, R. (2018):** *Taming Performance Variability*, USENIX OSDI '18, pp. 409--425. ISBN: `978-1-939133-08-3`
 4. **Künsch, H. R. (1989):** *The Jackknife and the Bootstrap for General Stationary Observations*, The Annals of Statistics, 17(3):1217--1241. DOI: `10.1214/aos/1176347265`
 5. **Schuirmann, D. J. (1987):** *A Comparison of the Two One-Sided Tests Procedure and the Power Approach for Assessing the Equivalence of Average Bioavailability*, Journal of Pharmacokinetics and Biopharmaceutics, 15(6):657--680. DOI: `10.1007/BF01068419`
-6. **Mann, H. B. & Whitney, D. R. (1947):** *On a Test of Whether One of Two Random Variables is Stochastically Larger than the Other*, The Annals of Mathematical Statistics, 18(1):50--60. DOI: `10.1214/aoms/1177730491`
-7. **Kruskal, W. H. & Wallis, W. A. (1952):** *Use of Ranks in One-Criterion Variance Analysis*, Journal of the American Statistical Association, 47(260):583--621. DOI: `10.1080/01621459.1952.10483441`
-8. **Holm, S. (1979):** *A Simple Sequentially Rejective Multiple Test Procedure*, Scandinavian Journal of Statistics, 6(2):65--70. DOI: `10.2307/4615733`
-9. **Cliff, N. (1993):** *Dominance Statistics: Ordinal Analyses to Answer Ordinal Questions*, Psychological Bulletin, 114(3):494--509. DOI: `10.1037/0033-2909.114.3.494`
-10. **Vargha, A. & Delaney, H. D. (2000):** *A Critique and Improvement of the "CL" Common Language Effect Size Statistics of McGraw and Wong*, Journal of Educational and Behavioral Statistics, 25(2):101--132. DOI: `10.3102/10769986025002101`
-11. **Weaver, V. M., Terpstra, D., & Moore, S. (2013):** *Non-Determinism and Overcount on Modern Hardware Performance Counter Implementations*, IEEE ISPASS 2013, pp. 215--224. DOI: `10.1109/ISPASS.2013.6557172`
-12. **Kwon, W. et al. (2023):** *Efficient Memory Management for Large Language Model Serving with PagedAttention*, ACM SOSP '23, pp. 611--626. DOI: `10.1145/3600006.3613165`
-13. **Yao, S. et al. (2023):** *ReAct: Synergizing Reasoning and Acting in Language Models*, ICLR 2023 (`arXiv:2210.03629`).
-14. **Zheng, L. et al. (2023):** *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena*, NeurIPS 2023 (`arXiv:2306.05685`).
-15. **Reddi, V. J. et al. (2020):** *MLPerf Inference Benchmark*, ACM/IEEE ISCA 2020, pp. 446--459. DOI: `10.1109/ISCA45697.2020.00045`
-16. **You, J., Chung, J.-W., & Chowdhury, M. (2023):** *Zeus: Understanding and Optimizing GPU Energy Consumption of DNN Training*, USENIX NSDI '23, pp. 119--139. ISBN: `978-1-939133-33-5`
-17. **Barroso, L. A. & Hölzle, U. (2007):** *The Case for Energy-Proportional Computing*, IEEE Computer, 40(12):33--37. DOI: `10.1109/MC.2007.443`
-18. **Fahad, M., Shahid, A., Manumachu, R. R., & Lastovetsky, A. (2019):** *A Comparative Study of Methods for Measurement of Energy of Computing*, Energies, 12(11):2204. DOI: `10.3390/en12112204`
-19. **Williams, S., Waterman, A., & Patterson, D. (2009):** *Roofline: An Insightful Visual Performance Model for Multicore Architectures*, Communications of the ACM, 52(4):65--76. DOI: `10.1145/1498765.1498785`
-20. **Smith, A. M., Katz, D. S., Niemeyer, K. E., & FORCE11 Software Citation Working Group (2016):** *Software Citation Principles*, PeerJ Computer Science, 2:e86. DOI: `10.7717/peerj-cs.86`
+6. **Lakens, D. (2017):** *Equivalence Tests: A Practical Primer for t Tests, Correlations, and Meta-Analyses*, Social Psychological and Personality Science, 8(4):355--362. DOI: `10.1177/1948550617697177`
+7. **Mann, H. B. & Whitney, D. R. (1947):** *On a Test of Whether One of Two Random Variables is Stochastically Larger than the Other*, The Annals of Mathematical Statistics, 18(1):50--60. DOI: `10.1214/aoms/1177730491`
+8. **Kruskal, W. H. & Wallis, W. A. (1952):** *Use of Ranks in One-Criterion Variance Analysis*, Journal of the American Statistical Association, 47(260):583--621. DOI: `10.1080/01621459.1952.10483441`
+9. **Holm, S. (1979):** *A Simple Sequentially Rejective Multiple Test Procedure*, Scandinavian Journal of Statistics, 6(2):65--70. DOI: `10.2307/4615733`
+10. **Cliff, N. (1993):** *Dominance Statistics: Ordinal Analyses to Answer Ordinal Questions*, Psychological Bulletin, 114(3):494--509. DOI: `10.1037/0033-2909.114.3.494`
+11. **Vargha, A. & Delaney, H. D. (2000):** *A Critique and Improvement of the "CL" Common Language Effect Size Statistics of McGraw and Wong*, Journal of Educational and Behavioral Statistics, 25(2):101--132. DOI: `10.3102/10769986025002101`
+12. **Weaver, V. M., Terpstra, D., & Moore, S. (2013):** *Non-Determinism and Overcount on Modern Hardware Performance Counter Implementations*, IEEE ISPASS 2013, pp. 215--224. DOI: `10.1109/ISPASS.2013.6557172`
+13. **Kwon, W. et al. (2023):** *Efficient Memory Management for Large Language Model Serving with PagedAttention*, ACM SOSP '23, pp. 611--626. DOI: `10.1145/3600006.3613165`
+14. **Yao, S. et al. (2023):** *ReAct: Synergizing Reasoning and Acting in Language Models*, ICLR 2023 (`arXiv:2210.03629`).
+15. **Zheng, L. et al. (2023):** *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena*, NeurIPS 2023 (`arXiv:2306.05685`).
+16. **Reddi, V. J. et al. (2020):** *MLPerf Inference Benchmark*, ACM/IEEE ISCA 2020, pp. 446--459. DOI: `10.1109/ISCA45697.2020.00045`
+17. **You, J., Chung, J.-W., & Chowdhury, M. (2023):** *Zeus: Understanding and Optimizing GPU Energy Consumption of DNN Training*, USENIX NSDI '23, pp. 119--139. ISBN: `978-1-939133-33-5`
+18. **Barroso, L. A. & Hölzle, U. (2007):** *The Case for Energy-Proportional Computing*, IEEE Computer, 40(12):33--37. DOI: `10.1109/MC.2007.443`
+19. **Fahad, M., Shahid, A., Manumachu, R. R., & Lastovetsky, A. (2019):** *A Comparative Study of Methods for Measurement of Energy of Computing*, Energies, 12(11):2204. DOI: `10.3390/en12112204`
+20. **Williams, S., Waterman, A., & Patterson, D. (2009):** *Roofline: An Insightful Visual Performance Model for Multicore Architectures*, Communications of the ACM, 52(4):65--76. DOI: `10.1145/1498765.1498785`
+21. **Smith, A. M., Katz, D. S., Niemeyer, K. E., & FORCE11 Software Citation Working Group (2016):** *Software Citation Principles*, PeerJ Computer Science, 2:e86. DOI: `10.7717/peerj-cs.86`
 
 ---
 

@@ -116,6 +116,7 @@ def update_manifest() -> int:
         "audit_export/Systems_Replication_Report.md",
         "audit_export/quad_platform_consolidated_summary.csv",
         "audit_export/anomaly_and_cache_diagnostics.csv",
+        "audit_export/w5_token_and_schema_audit.csv",
     ]
     # Dynamically include all raw quad-platform session JSONL datasets and consolidated tables
     import glob as _glob

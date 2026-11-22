@@ -121,3 +121,129 @@ def test_pca_variance_decomposition_orthogonality_and_sum():
             contribs = list(comp["contributions_pct"].values())
             assert np.isclose(sum(contribs), 100.0, atol=0.2)
 
+
+def test_fixed_sesoi_mbb_tost_90ci_duality_and_three_states():
+    """M2/M3/M4/M5: Verify fixed SESOI (+-5.0 ms), exact 90% CI <-> p_tost < 0.05 duality, and 3-state Lakens rule."""
+    import os
+    import sys
+    repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    scripts_dir = os.path.join(repo_dir, "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+
+    from reproduce_quad_platform_analysis import (
+        SESOI_MS,
+        TOST_ALPHA,
+        TOST_BLOCK_SIZE,
+        moving_block_bootstrap_tost,
+    )
+
+    assert SESOI_MS == 5.0
+    assert TOST_BLOCK_SIZE == 3
+    assert TOST_ALPHA == 0.05
+
+    rng = np.random.default_rng(123)
+    # 1. Equivalent case: identical distributions within +-5.0 ms
+    c1_eq = rng.normal(20.0, 0.5, size=30)
+    c2_eq = rng.normal(20.3, 0.5, size=30)
+    res_eq = moving_block_bootstrap_tost(c1_eq, c2_eq, sesoi=SESOI_MS, block_size=TOST_BLOCK_SIZE)
+    assert res_eq["status"] == "Equivalent"
+    assert res_eq["p_tost"] < TOST_ALPHA
+    assert res_eq["ci_90_low"] > -SESOI_MS and res_eq["ci_90_high"] < SESOI_MS
+
+    # 2. Different case: shifted well outside +-5.0 ms
+    c1_diff = rng.normal(20.0, 0.5, size=30)
+    c2_diff = rng.normal(35.0, 0.5, size=30)
+    res_diff = moving_block_bootstrap_tost(c1_diff, c2_diff, sesoi=SESOI_MS, block_size=TOST_BLOCK_SIZE)
+    assert res_diff["status"] == "Different"
+    assert res_diff["p_tost"] >= TOST_ALPHA
+    assert res_diff["ci_90_low"] > SESOI_MS or res_diff["ci_90_high"] < -SESOI_MS
+
+    # 3. Inconclusive case: centered at the +5.0 ms SESOI boundary so 90% CI straddles +5.0 ms
+    c1_inc = rng.normal(20.0, 6.0, size=30)
+    c2_inc = rng.normal(25.0, 6.0, size=30)
+    res_inc = moving_block_bootstrap_tost(c1_inc, c2_inc, sesoi=SESOI_MS, block_size=TOST_BLOCK_SIZE)
+    assert res_inc["status"] == "Inconclusive"
+    assert res_inc["p_tost"] >= TOST_ALPHA
+    assert not (res_inc["ci_90_low"] > -SESOI_MS and res_inc["ci_90_high"] < SESOI_MS)
+    assert not (res_inc["ci_90_low"] > SESOI_MS or res_inc["ci_90_high"] < -SESOI_MS)
+
+
+def test_mann_whitney_r1_variance_adjustment_conservative():
+    """M4: Verify positive r1 inflates MW variance (n_eff < n, p_r1 >= p_std) while negative r1 retains n_eff = n."""
+    import os
+    import sys
+    repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    scripts_dir = os.path.join(repo_dir, "scripts")
+    if scripts_dir not in sys.path:
+        sys.path.insert(0, scripts_dir)
+
+    from reproduce_quad_platform_analysis import mann_whitney_r1_adjusted
+
+    # Strongly positively autocorrelated AR(1)-like series
+    x_pos = [10.0 + 0.1 * i for i in range(30)]
+    y_pos = [11.5 + 0.1 * i for i in range(30)]
+    res_pos = mann_whitney_r1_adjusted(x_pos, y_pos)
+    assert res_pos["r1_x"] > 0.5 and res_pos["r1_y"] > 0.5
+    assert res_pos["n_eff1"] < 30.0 and res_pos["n_eff2"] < 30.0
+    assert res_pos["vif"] > 1.0
+    assert res_pos["p_r1"] >= res_pos["p_std"]
+
+    # Negatively autocorrelated alternating series -> conservative n_eff = n
+    x_neg = [10.0 + (2.0 if i % 2 == 0 else -2.0) for i in range(30)]
+    y_neg = [20.0 + (2.0 if i % 2 == 0 else -2.0) for i in range(30)]
+    res_neg = mann_whitney_r1_adjusted(x_neg, y_neg)
+    assert res_neg["r1_x"] < 0.0 and res_neg["r1_y"] < 0.0
+    assert res_neg["n_eff1"] == 30.0 and res_neg["n_eff2"] == 30.0
+    assert res_neg["vif"] == 1.0
+
+
+def test_w5_python_native_segregation_and_t7_90ci_alignment_on_generated_tables():
+    """M1/M2/M3/M5: Verify generated Tables 2, 7, 8 enforce W5 python_native segregation and exact 90% CI <-> TOST alignment."""
+    import os
+    import re
+    repo_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    t2_path = os.path.join(repo_dir, "audit_export", "tables", "table2_statistical_tests.md")
+    t7_path = os.path.join(repo_dir, "audit_export", "tables", "table7_session_replication_comparison.md")
+    t8_md_path = os.path.join(repo_dir, "audit_export", "tables", "table8_w5_enterprise_workload.md")
+    t8_tex_path = os.path.join(repo_dir, "audit_export", "tables", "table8_w5_enterprise_workload.tex")
+
+    t2 = open(t2_path, encoding="utf-8").read()
+    for line in t2.splitlines():
+        if line.startswith("| ") and "| W5 |" in line:
+            assert "PythonNative" not in line, f"Confounded W5 PythonNative leaked into Table 2: {line}"
+
+    t7 = open(t7_path, encoding="utf-8").read()
+    row_count = 0
+    for line in t7.splitlines():
+        if not line.startswith("| ") or line.startswith("| Platform") or line.startswith("| :---"):
+            continue
+        parts = [p.strip() for p in line.strip("|").split("|")]
+        if len(parts) < 10:
+            continue
+        row_count += 1
+        wl, contrast, ci_str, p_str, status = parts[2], parts[3], parts[7], parts[8], parts[9]
+        if wl == "W5":
+            assert "PythonNative" not in contrast, f"Confounded W5 PythonNative leaked into Table 7: {line}"
+        assert status in {"Equivalent", "Different", "Inconclusive"}, f"Unexpected Table 7 status: {status}"
+        m = re.match(r"\[([+-]?\d+\.\d+),\s*([+-]?\d+\.\d+)\]", ci_str)
+        assert m, f"Could not parse 90% CI in Table 7: {ci_str}"
+        lo, hi = float(m.group(1)), float(m.group(2))
+        p_val = 0.0 if p_str.startswith("<") else float(p_str)
+        if status == "Equivalent":
+            assert lo > -5.0 and hi < 5.0 and p_val < 0.05, f"90% CI vs TOST mismatch in Table 7: {line}"
+        elif status == "Different":
+            assert (lo > 5.0 or hi < -5.0) and p_val >= 0.05, f"Different status mismatch in Table 7: {line}"
+        else:
+            assert not (lo > -5.0 and hi < 5.0) and not (lo > 5.0 or hi < -5.0) and p_val >= 0.05, f"Inconclusive mismatch: {line}"
+    assert row_count == 95, f"Expected 95 valid Table 7 pairs (102 minus 7 W5 python_native), got {row_count}"
+
+    t8_md = open(t8_md_path, encoding="utf-8").read()
+    assert "Part A: Comparable W5 Orchestrators" in t8_md
+    assert "Part B: Segregated / Non-Comparable Arm" in t8_md
+    assert "Prompt / Comp. Tokens" in t8_md
+
+    t8_tex = open(t8_tex_path, encoding="utf-8").read()
+    assert "Part B: Segregated Non-Comparable Arm" in t8_tex
+    assert all(ord(c) <= 127 for c in t8_tex), "Non-ASCII character found in table8_w5_enterprise_workload.tex"
+

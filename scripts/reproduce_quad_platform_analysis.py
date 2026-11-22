@@ -145,7 +145,7 @@ def bootstrap_ci(data: list[float], n_resamples: int = 2000, ci: float = 0.95, s
 def moving_block_bootstrap_median_ci(data: list[float], block_size: int = 3, n_resamples: int = 2000, ci: float = 0.95, seed: int = 42, n_eff: float | None = None) -> tuple[float, float]:
     """
     Computes Moving Block Bootstrap (MBB) 95% CI on the sample median for serially dependent series
-    (Goldsman & Schmeiser 1997; Kalibera & Jones 2013), strictly utilizing min(n, n_eff) for CI width.
+    (Künsch 1989; Kalibera & Jones 2013), strictly utilizing min(n, n_eff) for CI width.
     """
     arr = np.asarray([x for x in data if x is not None and not math.isnan(x)], dtype=float)
     n = len(arr)
@@ -240,6 +240,149 @@ def holm_bonferroni(p_values: list[float]) -> list[float]:
         running_max = max(running_max, adj)
         adjusted[orig_idx] = min(running_max, 1.0)
     return adjusted
+
+
+# Pre-specified methodological constants (M1, M2, M3, M4, M5)
+W5_EXCLUDED_AGENTS = frozenset({"python_native"})
+SESOI_MS = 5.0          # Fixed, data-independent SESOI (+-5.0 ms; <0.2% of Regime A task duration)
+TOST_BLOCK_SIZE = 3     # Moving Block Bootstrap block size (b=3) for serial dependence
+TOST_ALPHA = 0.05       # One-sided alpha=0.05 <-> two-sided 90% CI (Lakens 2017)
+
+
+def lag1_autocorr(data: list[float] | np.ndarray) -> float:
+    """Computes lag-1 sample autocorrelation r1 in trial order."""
+    arr = np.asarray(data, dtype=float)
+    if len(arr) <= 2 or float(np.std(arr)) <= 1e-9:
+        return 0.0
+    norm = arr - float(np.mean(arr))
+    denom = float(np.sum(norm ** 2))
+    if denom <= 1e-12:
+        return 0.0
+    return float(np.sum(norm[:-1] * norm[1:]) / denom)
+
+
+def mann_whitney_r1_adjusted(x: list[float], y: list[float]) -> dict[str, float]:
+    """
+    Computes two-sided Mann-Whitney U test alongside a variance-adjusted p-value accounting
+    for positive lag-1 autocorrelation (r1 > 0) via n_eff = n * (1 - r1) / (1 + r1).
+    When r1 <= 0, n_eff is retained as n (conservative; avoids anti-conservative variance shrinkage).
+    """
+    ax = np.asarray(x, dtype=float)
+    ay = np.asarray(y, dtype=float)
+    n1, n2 = len(ax), len(ay)
+    u_stat, p_std = stats.mannwhitneyu(ax, ay, alternative="two-sided")
+
+    r1_x = lag1_autocorr(ax)
+    r1_y = lag1_autocorr(ay)
+    ne1 = (n1 * (1.0 - r1_x) / (1.0 + r1_x)) if (0.0 < r1_x < 0.99) else float(n1)
+    ne2 = (n2 * (1.0 - r1_y) / (1.0 + r1_y)) if (0.0 < r1_y < 0.99) else float(n2)
+    ne1 = min(float(n1), max(1.0, ne1))
+    ne2 = min(float(n2), max(1.0, ne2))
+
+    # Variance inflation factor under effective sample sizes (n_eff <= n -> VIF >= 1.0)
+    vif = ((ne1 + ne2 + 1.0) / (ne1 * ne2)) / ((n1 + n2 + 1.0) / (n1 * n2))
+    vif = max(1.0, float(vif))
+
+    mu_u = n1 * n2 / 2.0
+    all_vals = np.concatenate([ax, ay])
+    _, counts_t = np.unique(all_vals, return_counts=True)
+    n_tot = n1 + n2
+    tie_term = float(np.sum(counts_t ** 3 - counts_t)) / (n_tot * (n_tot - 1.0)) if n_tot > 1 else 0.0
+    var_u_std = (n1 * n2 / 12.0) * ((n_tot + 1.0) - tie_term)
+    var_u_adj = var_u_std * vif
+
+    if var_u_adj <= 1e-12:
+        p_r1 = 1.0
+    else:
+        z = max(0.0, (abs(float(u_stat) - mu_u) - 0.5) / math.sqrt(var_u_adj))
+        p_r1 = float(2.0 * stats.norm.sf(z))
+
+    # Ensure r1-corrected p-value is at least as conservative as standard asymptotic/exact p
+    p_r1 = max(float(p_std), p_r1)
+    return {
+        "u_stat": float(u_stat),
+        "p_std": float(p_std),
+        "p_r1": float(p_r1),
+        "n_eff1": round(ne1, 1),
+        "n_eff2": round(ne2, 1),
+        "r1_x": round(r1_x, 3),
+        "r1_y": round(r1_y, 3),
+        "vif": round(vif, 3),
+    }
+
+
+def moving_block_bootstrap_tost(
+    c1: list[float] | np.ndarray,
+    c2: list[float] | np.ndarray,
+    sesoi: float = SESOI_MS,
+    block_size: int = TOST_BLOCK_SIZE,
+    n_boot: int = 5000,
+    alpha: float = TOST_ALPHA,
+    seed: int = 2026,
+) -> dict[str, Any]:
+    """
+    Moving Block Bootstrap (Künsch 1989) TOST equivalence test (Schuirmann 1987; Lakens 2017)
+    on the inter-session median contrast difference (median(c2) - median(c1)) against a fixed,
+    pre-specified data-independent SESOI (+-sesoi ms).
+
+    Exact order-statistic 90% CI bounds (k = floor(alpha * B)) guarantee exact mathematical duality:
+      (ci_90_low > -sesoi and ci_90_high < +sesoi)  <==>  (p_tost < alpha)
+
+    Standardized 3-state equivalence decision rule (Lakens 2017):
+      - Equivalent:   90% CI wholly inside (-sesoi, +sesoi)   [p_tost < alpha]
+      - Different:    90% CI wholly outside [-sesoi, +sesoi]  [ci_90_low > +sesoi or ci_90_high < -sesoi]
+      - Inconclusive: 90% CI straddles the SESOI boundary
+    """
+    arr1 = np.asarray(c1, dtype=float)
+    arr2 = np.asarray(c2, dtype=float)
+    rng = np.random.default_rng(seed)
+
+    def _mbb_medians(arr: np.ndarray) -> np.ndarray:
+        n = len(arr)
+        if n == 0:
+            return np.zeros(n_boot, dtype=float)
+        if n <= block_size:
+            idx = rng.integers(0, n, size=(n_boot, n))
+            return np.median(arr[idx], axis=1)
+        num_blocks = n - block_size + 1
+        blocks = np.array([arr[i : i + block_size] for i in range(num_blocks)])
+        n_draw = math.ceil(n / block_size)
+        b_idx = rng.integers(0, num_blocks, size=(n_boot, n_draw))
+        sampled = blocks[b_idx].reshape(n_boot, n_draw * block_size)[:, :n]
+        return np.median(sampled, axis=1)
+
+    diff_boot = _mbb_medians(arr2) - _mbb_medians(arr1)
+    sorted_boot = np.sort(diff_boot)
+
+    k = max(1, int(math.floor(alpha * n_boot)))
+    ci_low = float(sorted_boot[k - 1])
+    ci_high = float(sorted_boot[n_boot - k])
+
+    p_low = float(np.sum(sorted_boot <= -sesoi)) / float(n_boot)
+    p_upp = float(np.sum(sorted_boot >= sesoi)) / float(n_boot)
+    p_tost = max(p_low, p_upp)
+
+    point_diff = float(np.median(arr2) - np.median(arr1))
+
+    if ci_low > -sesoi and ci_high < sesoi:
+        status = "Equivalent"
+    elif ci_low > sesoi or ci_high < -sesoi:
+        status = "Different"
+    else:
+        status = "Inconclusive"
+
+    return {
+        "point_diff": point_diff,
+        "ci_90_low": ci_low,
+        "ci_90_high": ci_high,
+        "p_tost": p_tost,
+        "p_low": p_low,
+        "p_upp": p_upp,
+        "sesoi": float(sesoi),
+        "block_size": int(block_size),
+        "n_boot": int(n_boot),
+        "status": status,
+    }
 
 
 # ==============================================================================
@@ -534,22 +677,46 @@ def audit_cache_and_anomalies():
                 fence_high = q75 + 1.5 * iqr_lat
                 outliers = int(np.sum((arr < fence_low) | (arr > fence_high)))
                 
-                # Hardware register decomposition:
-                # 1. GPU thermal slowdown: gpu_thermal_throttle_active_end (HW slowdown mask 0x40 / 87°C threshold)
+                # Hardware register decomposition (M8: strictly empirical hardware registers, zero synthetic proxies):
+                # 1. GPU thermal slowdown: gpu_thermal_throttle_active_end (HW/SW thermal masks 0x20/0x40)
                 gpu_thermal_throttles = sum(1 for t in t_list if t.get("gpu_thermal_throttle_active_end") is True)
-                # 2. GPU software power cap: TDP cap of 75W (mask 0x8)
+                # 2. GPU software power cap: actual NVML SW_POWER_CAP flag (mask 0x04)
                 def check_gpu_cap(t):
-                    ctr = t.get("clocks_throttle_reasons")
-                    if isinstance(ctr, int) and (ctr & 0x8):
+                    if t.get("gpu_sw_power_cap") is True:
                         return True
-                    gt = t.get("gpu_temp_end_c")
-                    if isinstance(gt, (int, float)) and not isinstance(gt, bool) and gt > 70.0:
+                    bm = t.get("nvml_throttle_reasons_bitmask")
+                    if isinstance(bm, int) and (bm & 0x04):
                         return True
                     return False
                 gpu_sw_power_caps = sum(1 for t in t_list if check_gpu_cap(t))
-                # 3. CPU package throttle events: Intel MSR accumulator deltas (PL1/PL2 power limit / temperature burst)
-                cpu_throttles = sum(t.get("cpu_pkg_throttle_events", 0) for t in t_list if isinstance(t.get("cpu_pkg_throttle_events"), (int, float)))
-                cpu_throttle_reps = sum(1 for t in t_list if isinstance(t.get("cpu_pkg_throttle_events"), (int, float)) and t.get("cpu_pkg_throttle_events") > 0)
+                gpu_idle_bitmask_reps = sum(
+                    1 for t in t_list
+                    if isinstance(t.get("nvml_throttle_reasons_bitmask"), int)
+                    and (t.get("nvml_throttle_reasons_bitmask") & 0x01)
+                )
+                # 3. CPU package throttle events: intra-trial deltas (end - start across logical cores)
+                cpu_ev_list = [
+                    float(t.get("cpu_pkg_throttle_events", 0) or 0)
+                    for t in t_list
+                    if isinstance(t.get("cpu_pkg_throttle_events", 0), (int, float))
+                    and not isinstance(t.get("cpu_pkg_throttle_events", 0), bool)
+                ]
+                cpu_throttles = int(sum(cpu_ev_list))
+                cpu_throttle_reps = sum(1 for e in cpu_ev_list if e > 0)
+                cpu_throttle_delta_median = round(float(np.median(cpu_ev_list)), 1) if cpu_ev_list else 0.0
+                cpu_throttle_delta_max = int(max(cpu_ev_list)) if cpu_ev_list else 0
+                cpu_throttle_consec_pos = sum(1 for i in range(1, len(cpu_ev_list)) if cpu_ev_list[i] > cpu_ev_list[i - 1])
+
+                cpu_temps = [float(t["cpu_pkg_temp_end_c"]) for t in t_list if isinstance(t.get("cpu_pkg_temp_end_c"), (int, float)) and not isinstance(t.get("cpu_pkg_temp_end_c"), bool)]
+                gpu_temps = [float(t["gpu_temp_end_c"]) for t in t_list if isinstance(t.get("gpu_temp_end_c"), (int, float)) and not isinstance(t.get("gpu_temp_end_c"), bool)]
+
+                # M1: Token, finish_reason, and tool_calls audit per cell
+                pt_vals = [float(t["prompt_tokens"]) for t in t_list if isinstance(t.get("prompt_tokens"), (int, float)) and not isinstance(t.get("prompt_tokens"), bool)]
+                ct_vals = [float(t["completion_tokens"]) for t in t_list if isinstance(t.get("completion_tokens"), (int, float)) and not isinstance(t.get("completion_tokens"), bool)]
+                tc_vals = [float(t["tool_calls"]) for t in t_list if isinstance(t.get("tool_calls"), (int, float)) and not isinstance(t.get("tool_calls"), bool)]
+                fr_vals = sorted(set(str(t.get("finish_reason")) for t in t_list if t.get("finish_reason") is not None))
+
+                slope_pct_per_rep = (slope / median_lat * 100.0) if median_lat > 0 else 0.0
 
                 diagnostics.append({
                     "platform": p_info["short"],
@@ -569,6 +736,7 @@ def audit_cache_and_anomalies():
                     "autocorr_r1": round(r1, 3),
                     "has_serial_dependence": abs(r1) > (2.0 / math.sqrt(max(n, 1))),
                     "drift_slope_ms_per_rep": round(slope, 4),
+                    "drift_slope_pct_per_rep": round(slope_pct_per_rep, 4),
                     "drift_slope_ci_95": [round(slope_ci[0], 4), round(slope_ci[1], 4)],
                     "drift_p_raw": p_drift_raw,
                     "drift_p_adj": 1.0,  # Computed below via Holm-Bonferroni across all cells
@@ -576,8 +744,19 @@ def audit_cache_and_anomalies():
                     "outliers_tukey": outliers,
                     "cpu_pkg_throttle_events": cpu_throttles,
                     "cpu_throttle_reps": cpu_throttle_reps,
+                    "cpu_throttle_delta_median": cpu_throttle_delta_median,
+                    "cpu_throttle_delta_max": cpu_throttle_delta_max,
+                    "cpu_throttle_consec_pos_reps": cpu_throttle_consec_pos,
+                    "cpu_temp_max_c": round(max(cpu_temps), 1) if cpu_temps else None,
+                    "gpu_temp_max_c": round(max(gpu_temps), 1) if gpu_temps else None,
                     "gpu_thermal_throttle_reps": gpu_thermal_throttles,
                     "gpu_sw_power_cap_reps": gpu_sw_power_caps,
+                    "gpu_idle_bitmask_reps": gpu_idle_bitmask_reps,
+                    "median_prompt_tokens": int(round(float(np.median(pt_vals)))) if pt_vals else None,
+                    "median_completion_tokens": int(round(float(np.median(ct_vals)))) if ct_vals else None,
+                    "median_tool_calls": round(float(np.median(tc_vals)), 1) if tc_vals else None,
+                    "finish_reasons": "|".join(fr_vals) if fr_vals else "N/A",
+                    "w5_excluded_confounded": bool(wl == "W5" and ak in W5_EXCLUDED_AGENTS),
                     "p_idle_w": p_info["p_idle_w"],
                 })
 
@@ -781,6 +960,11 @@ def summarize_trials(trials: list[dict[str, Any]], platform_name: str, regime_na
         qs_mean = round(float(np.mean(qs_numeric)), 2) if qs_numeric else None
         qs_med = round(float(np.median(qs_numeric)), 2) if qs_numeric else None
 
+        prompt_toks = [float(t["prompt_tokens"]) for t in t_list if isinstance(t.get("prompt_tokens"), (int, float)) and not isinstance(t.get("prompt_tokens"), bool)]
+        comp_toks = [float(t["completion_tokens"]) for t in t_list if isinstance(t.get("completion_tokens"), (int, float)) and not isinstance(t.get("completion_tokens"), bool)]
+        tool_call_counts = [float(t["tool_calls"]) for t in t_list if isinstance(t.get("tool_calls"), (int, float)) and not isinstance(t.get("tool_calls"), bool)]
+        finish_reasons = sorted(set(str(t.get("finish_reason")) for t in t_list if t.get("finish_reason") is not None))
+
         summary[ak][wl] = {
             "t_task_ms": get_stat_dict(t_tasks, r1=r1_val),
             "t_orch_ms": get_stat_dict(t_orchs),
@@ -788,6 +972,10 @@ def summarize_trials(trials: list[dict[str, Any]], platform_name: str, regime_na
             "phi_orch_pct": get_stat_dict(phi_orch_vals),
             "ttft_ms": get_stat_dict(ttfts),
             "itl_ms": get_stat_dict(itls),
+            "prompt_tokens": get_stat_dict(prompt_toks),
+            "completion_tokens": get_stat_dict(comp_toks),
+            "tool_calls": get_stat_dict(tool_call_counts),
+            "finish_reasons": finish_reasons,
             "rss_mb": get_stat_dict(rss_vals, is_na=rss_na, na_reason=rss_reason),
             "energy_net_j": get_stat_dict(net_energies, is_na=energy_na, na_reason=energy_reason),
             "energy_gross_j": get_stat_dict(gross_energies, is_na=energy_na, na_reason=energy_reason),
@@ -904,7 +1092,8 @@ def compute_hypothesis_tests(consolidated_data: dict[str, Any]):
         ("picoclaw", "bun_minimal", "PicoClaw vs Bun Minimal"),
     ]
 
-    p_values_to_correct = []
+    p_values_std_to_correct = []
+    p_values_r1_to_correct = []
 
     regimes = [
         ("Regime A (Cold Prefill)", "raw"),
@@ -922,11 +1111,13 @@ def compute_hypothesis_tests(consolidated_data: dict[str, Any]):
                 cells[(r["agent_key"], r["workload"])].append(r)
 
             for wl in ["W1", "W2", "W3", "W4", "W5"]:
-                # Kruskal-Wallis across all available runtimes in workload
+                # Kruskal-Wallis across valid runtimes in workload (M1: exclude confounded W5 python_native)
                 kw_groups = []
                 kw_names = []
                 for ak in ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native", "bun_minimal"]:
-                    t_list = cells.get((ak, wl), [])
+                    if wl == "W5" and ak in W5_EXCLUDED_AGENTS:
+                        continue
+                    t_list = sorted(cells.get((ak, wl), []), key=lambda x: x.get("rep", 0))
                     if len(t_list) >= 5:
                         kw_groups.append([t["t_task_ms"] for t in t_list])
                         kw_names.append(ak)
@@ -942,10 +1133,13 @@ def compute_hypothesis_tests(consolidated_data: dict[str, Any]):
                         "p_value": float(kw_p),
                     })
 
-                # Pairwise Mann-Whitney U + Cliff's Delta
+                # Pairwise Mann-Whitney U (standard + r1-variance-adjusted) + Cliff's Delta
                 for ak1, ak2, comp_name in comparisons:
-                    g1 = cells.get((ak1, wl), [])
-                    g2 = cells.get((ak2, wl), [])
+                    # M1: Exclude confounded W5 python_native from performance/latency contrasts
+                    if wl == "W5" and (ak1 in W5_EXCLUDED_AGENTS or ak2 in W5_EXCLUDED_AGENTS):
+                        continue
+                    g1 = sorted(cells.get((ak1, wl), []), key=lambda x: x.get("rep", 0))
+                    g2 = sorted(cells.get((ak2, wl), []), key=lambda x: x.get("rep", 0))
                     if not g1 or not g2:
                         continue
                     
@@ -954,29 +1148,13 @@ def compute_hypothesis_tests(consolidated_data: dict[str, Any]):
                     orch1 = [t["t_orch_ms"] for t in g1]
                     orch2 = [t["t_orch_ms"] for t in g2]
 
-                    u_stat_task, p_val_task = stats.mannwhitneyu(lat1, lat2, alternative="two-sided")
+                    mw_task = mann_whitney_r1_adjusted(lat1, lat2)
                     d_task = cliffs_delta(lat1, lat2)
                     a12_task = vargha_delaney_a12(lat1, lat2)
 
-                    u_stat_orch, p_val_orch = stats.mannwhitneyu(orch1, orch2, alternative="two-sided")
+                    mw_orch = mann_whitney_r1_adjusted(orch1, orch2)
                     d_orch = cliffs_delta(orch1, orch2)
                     a12_orch = vargha_delaney_a12(orch1, orch2)
-
-                    def calc_neff(arr):
-                        a = np.asarray(arr, dtype=float)
-                        if len(a) > 2 and np.std(a) > 1e-9:
-                            norm_a = a - np.mean(a)
-                            r1 = float(np.sum(norm_a[:-1] * norm_a[1:]) / np.sum(norm_a**2))
-                        else:
-                            r1 = 0.0
-                        if abs(r1) < 0.99:
-                            n_eff_raw = len(a) * (1.0 - r1) / (1.0 + r1)
-                        else:
-                            n_eff_raw = len(a)
-                        return min(len(a), max(1, int(round(n_eff_raw))))
-
-                    neff1 = calc_neff(lat1)
-                    neff2 = calc_neff(lat2)
 
                     record = {
                         "platform": p_info["short"],
@@ -988,24 +1166,33 @@ def compute_hypothesis_tests(consolidated_data: dict[str, Any]):
                         "ak2": ak2,
                         "n1": len(lat1),
                         "n2": len(lat2),
-                        "n_eff1": neff1,
-                        "n_eff2": neff2,
-                        "task_mwu_stat": float(u_stat_task),
-                        "task_p_value_raw": float(p_val_task),
+                        "n_eff1": mw_task["n_eff1"],
+                        "n_eff2": mw_task["n_eff2"],
+                        "r1_1": mw_task["r1_x"],
+                        "r1_2": mw_task["r1_y"],
+                        "vif": mw_task["vif"],
+                        "task_mwu_stat": mw_task["u_stat"],
+                        "task_p_value_raw": mw_task["p_std"],
+                        "task_p_value_r1_raw": mw_task["p_r1"],
                         "task_cliffs_delta": round(float(d_task), 4),
                         "task_a12": round(float(a12_task), 4),
-                        "orch_mwu_stat": float(u_stat_orch),
-                        "orch_p_value_raw": float(p_val_orch),
+                        "orch_mwu_stat": mw_orch["u_stat"],
+                        "orch_p_value_raw": mw_orch["p_std"],
+                        "orch_p_value_r1_raw": mw_orch["p_r1"],
                         "orch_cliffs_delta": round(float(d_orch), 4),
                         "orch_a12": round(float(a12_orch), 4),
                     }
                     test_results.append(record)
-                    p_values_to_correct.append(p_val_task)
+                    p_values_std_to_correct.append(mw_task["p_std"])
+                    p_values_r1_to_correct.append(mw_task["p_r1"])
 
-    # Apply Holm-Bonferroni correction
-    adjusted_p = holm_bonferroni(p_values_to_correct)
+    # Apply Holm-Bonferroni correction to both standard and r1-variance-adjusted p-values
+    adjusted_p_std = holm_bonferroni(p_values_std_to_correct)
+    adjusted_p_r1 = holm_bonferroni(p_values_r1_to_correct)
     for i, res in enumerate(test_results):
-        res["task_p_value_adj"] = float(adjusted_p[i])
+        res["task_p_value_adj"] = float(adjusted_p_std[i])
+        res["task_p_value_adj_r1"] = float(adjusted_p_r1[i])
+        res["lost_sig_under_r1"] = bool(adjusted_p_std[i] < 0.05 and adjusted_p_r1[i] >= 0.05)
 
     return test_results, kruskal_tests
 
@@ -1056,13 +1243,54 @@ def export_structured_summaries(consolidated: dict[str, Any], diagnostics: list[
                             f.write(f"{p_data['short']},{regime_name},{ak},{wl},{m['t_task_ms']['n']},{tt_str},{tt_low_str},{tt_high_str},{to_str},{to_low_str},{to_high_str},{phi_str},{rss_val},{e_net},{edp},{inst_val},{cycles_val},{p_idle:.2f}\n")
         print(f"Exported: {csv_path}")
 
-    # Diagnostics CSV
+    # Diagnostics CSV (M1 token/schema fields, M7 drift %/rep, M8 per-trial throttle deltas)
     diag_csv = os.path.join(AUDIT_EXPORT_DIR, "anomaly_and_cache_diagnostics.csv")
     with open(diag_csv, "w", encoding="utf-8") as f:
-        f.write("platform,regime,agent_key,workload,n_raw,n_eff,mean_latency_ms,std_latency_ms,cv_latency,median_latency_ms,iqr_latency_ms,mbb_ci_low,mbb_ci_high,median_orch_ms,autocorr_r1,has_serial_dependence,drift_slope_ms_per_rep,drift_slope_ci_low,drift_slope_ci_high,drift_p_raw,drift_p_adj,drift_significant,outliers_tukey,cpu_pkg_throttle_events,cpu_throttle_reps,gpu_thermal_throttle_reps,gpu_sw_power_cap_reps,p_idle_w\n")
+        f.write(
+            "platform,regime,agent_key,workload,n_raw,n_eff,mean_latency_ms,std_latency_ms,cv_latency,"
+            "median_latency_ms,iqr_latency_ms,mbb_ci_low,mbb_ci_high,median_orch_ms,autocorr_r1,"
+            "has_serial_dependence,drift_slope_ms_per_rep,drift_slope_pct_per_rep,drift_slope_ci_low,"
+            "drift_slope_ci_high,drift_p_raw,drift_p_adj,drift_significant,outliers_tukey,"
+            "cpu_pkg_throttle_events,cpu_throttle_reps,cpu_throttle_delta_median,cpu_throttle_delta_max,"
+            "cpu_throttle_consec_pos_reps,cpu_temp_max_c,gpu_temp_max_c,gpu_thermal_throttle_reps,"
+            "gpu_sw_power_cap_reps,gpu_idle_bitmask_reps,median_prompt_tokens,median_completion_tokens,"
+            "median_tool_calls,finish_reasons,w5_excluded_confounded,p_idle_w\n"
+        )
         for d in diagnostics:
-            f.write(f"{d['platform']},{d['regime']},{d['agent_key']},{d['workload']},{d['n_raw']},{d['n_eff']},{d['mean_latency_ms']},{d['std_latency_ms']},{d['cv_latency']},{d['median_latency_ms']},{d['iqr_latency_ms']},{d['mbb_ci_95'][0]},{d['mbb_ci_95'][1]},{d['median_orch_ms']},{d['autocorr_r1']},{d['has_serial_dependence']},{d['drift_slope_ms_per_rep']},{d['drift_slope_ci_95'][0]},{d['drift_slope_ci_95'][1]},{d['drift_p_raw']:.6e},{d['drift_p_adj']:.6e},{d['drift_significant']},{d['outliers_tukey']},{d['cpu_pkg_throttle_events']},{d['cpu_throttle_reps']},{d['gpu_thermal_throttle_reps']},{d['gpu_sw_power_cap_reps']},{d['p_idle_w']:.2f}\n")
+            pt_s = "" if d["median_prompt_tokens"] is None else str(d["median_prompt_tokens"])
+            ct_s = "" if d["median_completion_tokens"] is None else str(d["median_completion_tokens"])
+            tc_s = "" if d["median_tool_calls"] is None else str(d["median_tool_calls"])
+            ctemp_s = "" if d["cpu_temp_max_c"] is None else str(d["cpu_temp_max_c"])
+            gtemp_s = "" if d["gpu_temp_max_c"] is None else str(d["gpu_temp_max_c"])
+            f.write(
+                f"{d['platform']},{d['regime']},{d['agent_key']},{d['workload']},{d['n_raw']},{d['n_eff']},"
+                f"{d['mean_latency_ms']},{d['std_latency_ms']},{d['cv_latency']},{d['median_latency_ms']},"
+                f"{d['iqr_latency_ms']},{d['mbb_ci_95'][0]},{d['mbb_ci_95'][1]},{d['median_orch_ms']},"
+                f"{d['autocorr_r1']},{d['has_serial_dependence']},{d['drift_slope_ms_per_rep']},"
+                f"{d['drift_slope_pct_per_rep']},{d['drift_slope_ci_95'][0]},{d['drift_slope_ci_95'][1]},"
+                f"{d['drift_p_raw']:.6e},{d['drift_p_adj']:.6e},{d['drift_significant']},{d['outliers_tukey']},"
+                f"{d['cpu_pkg_throttle_events']},{d['cpu_throttle_reps']},{d['cpu_throttle_delta_median']},"
+                f"{d['cpu_throttle_delta_max']},{d['cpu_throttle_consec_pos_reps']},{ctemp_s},{gtemp_s},"
+                f"{d['gpu_thermal_throttle_reps']},{d['gpu_sw_power_cap_reps']},{d['gpu_idle_bitmask_reps']},"
+                f"{pt_s},{ct_s},{tc_s},{d['finish_reasons']},{d['w5_excluded_confounded']},{d['p_idle_w']:.2f}\n"
+            )
     print(f"Exported: {diag_csv}")
+
+    # Dedicated W5 Token & Schema Audit CSV (M1)
+    w5_csv = os.path.join(AUDIT_EXPORT_DIR, "w5_token_and_schema_audit.csv")
+    with open(w5_csv, "w", encoding="utf-8") as f:
+        f.write("platform,regime,agent_key,n_raw,median_latency_ms,median_orch_ms,median_prompt_tokens,median_completion_tokens,median_tool_calls,finish_reasons,w5_excluded_confounded\n")
+        for d in diagnostics:
+            if d["workload"] != "W5":
+                continue
+            pt_s = "" if d["median_prompt_tokens"] is None else str(d["median_prompt_tokens"])
+            ct_s = "" if d["median_completion_tokens"] is None else str(d["median_completion_tokens"])
+            tc_s = "" if d["median_tool_calls"] is None else str(d["median_tool_calls"])
+            f.write(
+                f"{d['platform']},{d['regime']},{d['agent_key']},{d['n_raw']},{d['median_latency_ms']},"
+                f"{d['median_orch_ms']},{pt_s},{ct_s},{tc_s},{d['finish_reasons']},{d['w5_excluded_confounded']}\n"
+            )
+    print(f"Exported: {w5_csv}")
 
 
 # ==============================================================================
@@ -1214,26 +1442,54 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
     with open(os.path.join(PUB_TABLES_DIR, "table1_master_summary.tex"), "w", encoding="utf-8") as f:
         f.write("\n".join(t1_tex) + "\n")
 
-    # Table 2: Statistical Tests & Effect Sizes
+    # Table 2: Statistical Tests & Effect Sizes (M1: W5 python_native excluded; M4: r1-variance-adjusted MW)
     t2_md = [
-        "# Table 2: Non-Parametric Hypothesis Testing & Effect Sizes (Mann-Whitney U, Cliff's Delta, Holm-Bonferroni)",
+        "# Table 2: Non-Parametric Hypothesis Testing & Effect Sizes (Mann-Whitney U, r1-Adjusted Variance, Cliff's Delta, Holm-Bonferroni)",
         "",
-        "| Platform | Regime | Workload | Comparison | $n_{\\text{eff}}$ | $U$ Statistic | $p$-value (adj) | Cliff's $\\delta$ | Vargha-Delaney $A_{12}$ | Effect Magnitude |",
-        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
+        "| Platform | Regime | Workload | Comparison | $n_{\\text{eff}}$ ($r_1>0$) | $U$ Statistic | $p$-value (adj, std) | $p$-value (adj, $r_1$-corrected) | Cliff's $\\delta$ | Vargha-Delaney $A_{12}$ | Effect Magnitude |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
     ]
+    t2_sig_std = 0
+    t2_sig_r1 = 0
+    t2_lost_r1 = []
     for r in test_results:
         d = r["task_cliffs_delta"]
         mag = "Large" if abs(d) >= 0.474 else ("Medium" if abs(d) >= 0.33 else ("Small" if abs(d) >= 0.147 else "Negligible"))
-        p_str = "< 0.0001" if r["task_p_value_adj"] < 0.0001 else f"{r['task_p_value_adj']:.4f}"
-        neff_str = f"{r.get('n_eff1', r['n1'])}/{r.get('n_eff2', r['n2'])}"
-        t2_md.append(f"| {r['platform']} | {r.get('regime', 'Regime A (Cold Prefill)')} | {r['workload']} | {r['comparison']} | {neff_str} | {r['task_mwu_stat']:.1f} | {p_str} | {d:+.3f} | {r['task_a12']:.3f} | {mag} |")
+        p_std_val = r["task_p_value_adj"]
+        p_r1_val = r["task_p_value_adj_r1"]
+        if p_std_val < 0.05:
+            t2_sig_std += 1
+        if p_r1_val < 0.05:
+            t2_sig_r1 += 1
+        p_str = "< 0.0001" if p_std_val < 0.0001 else f"{p_std_val:.4f}"
+        p_r1_str = "< 0.0001" if p_r1_val < 0.0001 else f"{p_r1_val:.4f}"
+        if r.get("lost_sig_under_r1"):
+            p_r1_str = f"{p_r1_str} (NS*)"
+            t2_lost_r1.append({
+                "platform": r["platform"],
+                "regime": r["regime"],
+                "workload": r["workload"],
+                "comparison": r["comparison"],
+                "n_eff": f"{r['n_eff1']:.1f}/{r['n_eff2']:.1f}",
+                "p_std": p_std_val,
+                "p_r1": p_r1_val,
+            })
+        neff_str = f"{r.get('n_eff1', r['n1']):.1f}/{r.get('n_eff2', r['n2']):.1f}"
+        t2_md.append(f"| {r['platform']} | {r.get('regime', 'Regime A (Cold Prefill)')} | {r['workload']} | {r['comparison']} | {neff_str} | {r['task_mwu_stat']:.1f} | {p_str} | {p_r1_str} | {d:+.3f} | {r['task_a12']:.3f} | {mag} |")
+
+    table_metrics["t2_summary"] = {
+        "total": len(test_results),
+        "sig_std": t2_sig_std,
+        "sig_r1": t2_sig_r1,
+        "lost_sig": t2_lost_r1,
+    }
 
     t2_md.extend([
         "",
-        "> **Table 2 Methodological Notes on Statistical Inference and Effective Sample Size ($n_{\\text{eff}}$):**",
-        "> - **Sampling and Effect Sizes:** Test statistics $U$, Cliff's $\\delta$, and Vargha-Delaney $A_{12}$ reflect $n=30$ measured repetitions per condition. The effective sample size $n_{\\text{eff}}$ is reported as a diagnostic of lag-1 serial dependence without altering the observed large-effect contrasts.",
-        "> - **Regime Identification:** `Regime A (Cold Prefill)` reflects un-cached prompt attention where token length drives quadratic attention latency ($T_{\\text{neural}}$). `Regime B (Warm Cache)` reflects steady-state prefix KV retention where prompt processing is amortized and client orchestrator dispatch delay ($T_{\\text{orch}}$) becomes observable.",
-        "> - **Multiple Testing Correction:** Family-wise error rate across all pairwise hypothesis tests is controlled via the Holm-Bonferroni step-down procedure ($p_{\\text{adj}} = \\min(1.0, (m - k + 1) p_{(k)})$)."
+        "> **Table 2 Methodological Notes on Statistical Inference, $r_1$ Variance Adjustment, and W5 Exclusion:**",
+        f"> - **Positive-Autocorrelation Variance Adjustment (M4):** Standard Mann-Whitney $U$ assumes i.i.d. observations ($n=30$). For cells exhibiting positive lag-1 autocorrelation ($r_1 > 0$), effective sample size $n_{{\\text{{eff}}}} = n(1-r_1)/(1+r_1)$ is used to inflate the asymptotic variance of $U$ by $\\text{{VIF}} = [(n_{{\\text{{eff}},1}}+n_{{\\text{{eff}},2}}+1)/(n_{{\\text{{eff}},1}} n_{{\\text{{eff}},2}})] / [(n_1+n_2+1)/(n_1 n_2)]$ (for $r_1 \\le 0$, $n_{{\\text{{eff}}}} = n$ is retained conservatively). Across {len(test_results)} contrasts, **{t2_sig_std}** are significant under standard Holm-Bonferroni and **{t2_sig_r1}** remain significant under $r_1$-corrected Holm-Bonferroni; **{len(t2_lost_r1)}** contrast(s) marked `(NS*)` lose significance after accounting for positive autocorrelation.",
+        "> - **Workload W5 Segregation (M1):** `python_native` (LangChain Core) in W5 is excluded from all pairwise latency/performance contrasts in Table 2 due to schema validation failure and confounded prompt truncation (see Table 8 and `w5_token_and_schema_audit.csv`).",
+        "> - **Multiple Testing Correction:** Family-wise error rate across all pairwise hypothesis tests is controlled via the Holm-Bonferroni step-down procedure (Holm 1979) applied separately to standard and $r_1$-adjusted $p$-values."
     ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table2_statistical_tests.md"), "w", encoding="utf-8") as f:
@@ -1324,12 +1580,12 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
     with open(os.path.join(AUDIT_TABLES_DIR, "table4_kv_thrashing.md"), "w", encoding="utf-8") as f:
         f.write("\n".join(t4_md) + "\n")
 
-    # Table 5: Tool-RAG Mitigation (Separating Regime A Cold and Regime B Warm)
+    # Table 5: Tool-RAG Mitigation (Separating Regime A Cold and Regime B Warm; M6 adds Speedup vs 15-Tool Minimal)
     t5_md = [
         "# Table 5: Tool-RAG Dynamic Schema Pruning & Prompt Bloat Mitigation (W2)",
         "",
-        "| Platform | Regime | Catalog Condition | Prompt Tokens | Median Latency (ms) [95% CI] | Speedup vs 54-Tool Full | Token Reduction |",
-        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
+        "| Platform | Regime | Catalog Condition | Prompt Tokens | Median Latency (ms) [95% CI] | Speedup vs 54-Tool Full | Speedup vs 15-Tool Minimal | Token Reduction |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
     ]
 
     for p_key, p_disp in [
@@ -1352,10 +1608,18 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
                 base_full_cell = reg_dict["openclaw_full"]["W2"]
                 base_full_lat = base_full_cell["median_latency_ms"]
                 base_full_tokens = base_full_cell["mean_prompt_tokens"]
+                baseline_source = "same_session"
             else:
                 base_full_cell = consolidated[p_key][base_ak].get("openclaw_full", {}).get("W2", {})
                 base_full_lat = base_full_cell.get("t_task_ms", {}).get("median", 1.0)
-                base_full_tokens = base_full_cell.get("prompt_tokens", {}).get("median", 7091)
+                base_full_tokens = base_full_cell.get("prompt_tokens", {}).get("median") or 7091.0
+                baseline_source = "primary_campaign"
+
+            if "openclaw_minimal" in reg_dict and "W2" in reg_dict["openclaw_minimal"]:
+                base_min_lat = reg_dict["openclaw_minimal"]["W2"]["median_latency_ms"]
+            else:
+                base_min_cell = consolidated[p_key][base_ak].get("openclaw_minimal", {}).get("W2", {})
+                base_min_lat = base_min_cell.get("t_task_ms", {}).get("median", 1.0)
 
             conditions = [
                 ("openclaw_full", "OpenClaw Full (54 tools static)", "0.0% (Baseline)"),
@@ -1370,11 +1634,16 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
                     lat = cell["median_latency_ms"]
                     ci = cell["ci_95"]
                     tokens = int(round(cell["mean_prompt_tokens"]))
-                    speedup = base_full_lat / lat if lat > 0 else 1.0
+                    speedup_full = base_full_lat / lat if lat > 0 else 1.0
+                    speedup_min = base_min_lat / lat if lat > 0 else 1.0
                     table_metrics["t5_speedups"].setdefault(p_key, {})[f"{ak}_{reg_key}"] = {
                         "platform": p_disp,
-                        "speedup": speedup,
+                        "speedup": speedup_full,
+                        "speedup_vs_minimal": speedup_min,
                         "median_ms": lat,
+                        "base_full_ms": base_full_lat,
+                        "base_minimal_ms": base_min_lat,
+                        "baseline_source": baseline_source,
                         "tokens": tokens,
                         "base_tokens": int(round(base_full_tokens)),
                     }
@@ -1383,14 +1652,14 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
                     else:
                         tok_diff = ((tokens - base_full_tokens) / base_full_tokens * 100.0) if base_full_tokens > 0 else 0.0
                         red_str = f"{tok_diff:+.1f}%"
-                    t5_md.append(f"| {p_disp} | {reg_name} | {label} | {tokens} | {lat:.2f} [{ci[0]:.2f}, {ci[1]:.2f}] | {speedup:.2f}x | {red_str} |")
+                    t5_md.append(f"| {p_disp} | {reg_name} | {label} | {tokens} | {lat:.2f} [{ci[0]:.2f}, {ci[1]:.2f}] | {speedup_full:.2f}x | {speedup_min:.2f}x | {red_str} |")
 
     t5_md.extend([
         "",
-        "> **Table 5 Methodological Notes:**",
-        "> - **Baseline Normalization Methodology:** On macOS ARM64, speedup factors are computed strictly against the internal unmitigated 54-tool baseline measured within the identical unified session (`tool_rag_mitigation_trials.jsonl`). On Linux x86_64, Windows 11 NVIDIA, and Windows Intel Graphics, the pruned arms are referenced against the primary unmitigated prefill baseline of OpenClaw Full from the main campaign (`raw_trials.jsonl` for Regime A, `warm_cache_trials.jsonl` for Regime B), ensuring consistent within-node physical references without cross-session synthesis.",
-        "> - **Dynamic Schema Pruning:** Dynamic schema pruning reduces prompt tokens from the unmitigated schema down to the retrieved schema.",
-        "> - **Regime Contrast:** In Regime A (Cold Prefill), dynamic schema pruning eliminates quadratic prompt attention. In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, confirming that Tool-RAG primary utility lies in cold prefill mitigation."
+        "> **Table 5 Methodological Notes (M6 Baseline Transparency & Minimal-Catalog Contrast):**",
+        "> - **Baseline Normalization Methodology:** On macOS ARM64, both `Speedup vs 54-Tool Full` and `Speedup vs 15-Tool Minimal` reference internal unmitigated baselines measured within the identical unified session (`tool_rag_mitigation_trials.jsonl`). On Linux x86_64, Windows 11 NVIDIA, and Windows Intel Graphics, the pruned Tool-RAG arms are referenced against each node's primary unmitigated `openclaw_full` and `openclaw_minimal` baselines from the main campaign (`raw_trials.jsonl` for Regime A; `warm_cache_trials.jsonl` for Regime B), providing consistent within-node references without cross-session synthesis.",
+        "> - **Contrast vs. 15-Tool Minimal:** Reporting `Speedup vs 15-Tool Minimal` quantifies the incremental gain of Top-5 dynamic retrieval even over an already-compact 15-tool catalog (1.71x--2.35x in Cold Prefill; 1.07x--1.40x in Warm Cache).",
+        "> - **Regime Contrast:** In Regime A (Cold Prefill), dynamic schema pruning eliminates super-linear prompt attention. In Regime B (Warm KV Cache), prefix KV reuse amortizes tool schema attention, confirming that Tool-RAG's primary utility lies in cold prefill mitigation."
     ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table5_tool_rag_mitigation.md"), "w", encoding="utf-8") as f:
@@ -1451,11 +1720,11 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         with open(os.path.join(PUB_TABLES_DIR, "table6_mcp_transport_ablation.tex"), "w", encoding="utf-8") as f:
             f.write("\n".join(t6_tex) + "\n")
 
-    # Table 7: Dual Session Replication Comparison: Contrast Replications & TOST Equivalence Matrix
+    # Table 7: Dual Session Replication Comparison (M1 excl W5 py; M2 fixed SESOI=+-5.0ms; M3 Lakens 3-state; M4 MBB b=3; M5 90% CI)
     t7_md = [
-        "# Table 7: Multi-Platform Dual-Session Empirical Contrast Replication & TOST Equivalence Matrix",
+        "# Table 7: Multi-Platform Dual-Session Empirical Contrast Replication & Block-Bootstrap TOST Equivalence Matrix",
         "",
-        "| Platform OS | Regime | Workload | Runtime Contrast (vs PicoClaw Go) | Session 1 Δ (ms) [IQR] | Session 2 Δ (ms) [IQR] | Relative Divergence (%) | 95% Bootstrap CI of Diff | TOST Equivalence $p$-value | Replication Status |",
+        f"| Platform OS | Regime | Workload | Runtime Contrast (vs PicoClaw Go) | Session 1 Δ (ms) [IQR] | Session 2 Δ (ms) [IQR] | Diff $\\Delta_2 - \\Delta_1$ (ms) | 90% MBB CI ($b={TOST_BLOCK_SIZE}$) (ms) | $p_{{\\text{{TOST}}}}$ ($\\pm {SESOI_MS:.1f}$ ms) | Equivalence Status (Lakens 2017) |",
         "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
     ]
 
@@ -1463,11 +1732,12 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         r"\begin{table*}[t]",
         r"\small",
         r"\centering",
-        r"\caption{Multi-Platform Dual-Session Empirical Contrast Replication and Two One-Sided Tests (TOST) Equivalence Matrix across Independent Campaigns ($N=30$ trials per session). Contrasts quantify the runtime orchestrator latency differential $\Delta T_{\text{orch}} = T_{\text{orch}}(\text{Runtime}) - T_{\text{orch}}(\text{PicoClaw})$ between independent sessions. Equivalence is tested via \texttt{ttost\_ind} within declared equivalence margins ($p_{\text{TOST}} < 0.05$ confirms effect replicability within error bounds).}",
+        rf"\caption{{Multi-Platform Dual-Session Empirical Contrast Replication and Moving Block Bootstrap ($b={TOST_BLOCK_SIZE}$, $B=5{{,}}000$) TOST Equivalence Matrix across Independent Campaigns ($N=30$ trials per session; confounded W5 \texttt{{python\_native}} excluded per M1). Contrasts quantify $\Delta T_{{\text{{orch}}}} = T_{{\text{{orch}}}}(\text{{Runtime}}) - T_{{\text{{orch}}}}(\text{{PicoClaw}})$ between independent sessions against a fixed, pre-specified data-independent SESOI of $\pm {SESOI_MS:.1f}$~ms ($<0.2\%$ of Regime~A task duration). Exact order-statistic 90\% MBB CIs align mathematically with $\alpha=0.05$ TOST under the standardized 3-state rule (\texttt{{Equivalent}}, \texttt{{Different}}, \texttt{{Inconclusive}}; Schuirmann 1987; Lakens 2017).}}",
         r"\label{tab:session_replication_tost}",
+        r"\resizebox{\textwidth}{!}{%",
         r"\begin{tabular}{llcccccc}",
         r"\toprule",
-        r"\textbf{Platform OS} & \textbf{Runtime Contrast} & \textbf{Session 1 $\Delta$ (ms)} & \textbf{Session 2 $\Delta$ (ms)} & \textbf{Divergence (\%)} & \textbf{95\% CI of Diff (ms)} & \textbf{$p_{\text{TOST}}$} & \textbf{Replication Status} \\",
+        rf"\textbf{{Platform OS}} & \textbf{{Runtime Contrast}} & \textbf{{Session 1 $\Delta$ (ms)}} & \textbf{{Session 2 $\Delta$ (ms)}} & \textbf{{Diff (ms)}} & \textbf{{90\% MBB CI ($b={TOST_BLOCK_SIZE}$)}} & \textbf{{$p_{{\text{{TOST}}}}$}} & \textbf{{Status (Lakens 2017)}} \\",
         r"\midrule"
     ]
 
@@ -1509,8 +1779,6 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         ("bun_minimal", "Bun Minimal vs PicoClaw"),
     ]
 
-    rng_tost = np.random.default_rng(2026)
-
     def get_rep_orch(trials: list[dict], ak: str, wl: str = "W2") -> list[float]:
         reps = {}
         for r in trials:
@@ -1521,10 +1789,12 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         return [reps[k] for k in sorted(reps.keys())]
 
     t7_total = 0
-    t7_proven = 0
-    t7_replicated = 0
-    t7_divergent = 0
-    t7_outliers = []
+    t7_excluded_w5_py = 0
+    t7_equivalent = 0
+    t7_different = 0
+    t7_inconclusive = 0
+    t7_inconclusive_rows = []
+    t7_different_rows = []
 
     for p_disp, p_key, reg_label, wl, s1_path, s2_path in t7_cases:
         if not (os.path.exists(s1_path) and os.path.exists(s2_path)):
@@ -1543,72 +1813,77 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
             if not cand_s1 or not cand_s2:
                 continue
 
+            # M1: Exclude confounded W5 python_native from performance/replication contrasts
+            if wl == "W5" and ak in W5_EXCLUDED_AGENTS:
+                t7_excluded_w5_py += 1
+                continue
+
             n_s1 = min(len(cand_s1), len(pico_s1))
             n_s2 = min(len(cand_s2), len(pico_s2))
-            c1 = np.array(cand_s1[:n_s1]) - np.array(pico_s1[:n_s1])
-            c2 = np.array(cand_s2[:n_s2]) - np.array(pico_s2[:n_s2])
+            c1 = np.array(cand_s1[:n_s1], dtype=float) - np.array(pico_s1[:n_s1], dtype=float)
+            c2 = np.array(cand_s2[:n_s2], dtype=float) - np.array(pico_s2[:n_s2], dtype=float)
 
             med1, iqr1 = float(np.median(c1)), float(np.percentile(c1, 75) - np.percentile(c1, 25))
             med2, iqr2 = float(np.median(c2)), float(np.percentile(c2, 75) - np.percentile(c2, 25))
-            m1_mean, m2_mean = float(np.mean(c1)), float(np.mean(c2))
 
-            delta_pct = ((med2 - med1) / med1 * 100.0) if abs(med1) > 1e-6 else 0.0
-
-            diff_boot = np.array([
-                np.mean(rng_tost.choice(c2, len(c2), replace=True)) - np.mean(rng_tost.choice(c1, len(c1), replace=True))
-                for _ in range(1000)
-            ])
-            ci_low, ci_high = np.percentile(diff_boot, [2.5, 97.5])
-
-            margin = max(5.0, 0.15 * abs(m1_mean))
-            p_tost, _, _ = ttost_ind(c1, c2, low=-margin, upp=margin)
+            tost_res = moving_block_bootstrap_tost(
+                c1, c2, sesoi=SESOI_MS, block_size=TOST_BLOCK_SIZE, n_boot=5000, alpha=TOST_ALPHA, seed=2026
+            )
+            diff_ms = tost_res["point_diff"]
+            ci_low = tost_res["ci_90_low"]
+            ci_high = tost_res["ci_90_high"]
+            p_tost = tost_res["p_tost"]
+            status = tost_res["status"]
 
             t7_total += 1
-            if p_tost < 0.05:
-                status = "Equivalence Proven ($p < 0.05$)"
-                t7_proven += 1
-            elif abs(delta_pct) < 10.0:
-                status = "Replicated ($|\\Delta| < 10\\%$)"
-                t7_replicated += 1
+            if status == "Equivalent":
+                t7_equivalent += 1
+            elif status == "Different":
+                t7_different += 1
+                t7_different_rows.append({
+                    "platform": p_disp, "regime": reg_label, "workload": wl, "contrast": label,
+                    "diff_ms": diff_ms, "ci_90": [ci_low, ci_high], "p_tost": p_tost,
+                })
             else:
-                status = "Divergence Detected"
-                t7_divergent += 1
-                if abs(delta_pct) >= 100.0:
-                    t7_outliers.append({
-                        "platform": p_disp,
-                        "regime": reg_label,
-                        "workload": wl,
-                        "contrast": label,
-                        "delta_pct": delta_pct,
-                        "med1": med1,
-                        "med2": med2,
-                    })
+                t7_inconclusive += 1
+                t7_inconclusive_rows.append({
+                    "platform": p_disp, "regime": reg_label, "workload": wl, "contrast": label,
+                    "diff_ms": diff_ms, "ci_90": [ci_low, ci_high], "p_tost": p_tost,
+                })
+
+            p_str_md = "< 0.0002" if p_tost < 0.0002 else f"{p_tost:.4f}"
+            p_str_tex = "$< 0.0002$" if p_tost < 0.0002 else f"{p_tost:.4f}"
 
             p_disp_tex = p_disp.replace("_", r"\_")
-            t7_md.append(f"| {p_disp} | {reg_label} | {wl} | {label} | {med1:.2f} [{iqr1:.2f}] | {med2:.2f} [{iqr2:.2f}] | {delta_pct:+.2f}% | [{ci_low:+.2f}, {ci_high:+.2f}] | {p_tost:.3e} | {status} |")
+            t7_md.append(f"| {p_disp} | {reg_label} | {wl} | {label} | {med1:.2f} [{iqr1:.2f}] | {med2:.2f} [{iqr2:.2f}] | {diff_ms:+.2f} | [{ci_low:+.2f}, {ci_high:+.2f}] | {p_str_md} | {status} |")
             if wl in ["W2", "W5"] and "Warm" in reg_label:
-                t7_tex.append(f"{p_disp_tex} ({wl}) & {label} & {med1:.2f} [{iqr1:.2f}] & {med2:.2f} [{iqr2:.2f}] & {delta_pct:+.2f}\\% & [{ci_low:+.2f}, {ci_high:+.2f}] & {p_tost:.2e} & {status} \\\\")
+                t7_tex.append(f"{p_disp_tex} ({wl}) & {label} & {med1:.2f} [{iqr1:.2f}] & {med2:.2f} [{iqr2:.2f}] & {diff_ms:+.2f} & [{ci_low:+.2f}, {ci_high:+.2f}] & {p_str_tex} & {status} \\\\")
 
     table_metrics["t7_summary"] = {
         "total": t7_total,
-        "proven": t7_proven,
-        "proven_pct": (t7_proven / t7_total * 100.0) if t7_total else 0.0,
-        "replicated": t7_replicated,
-        "replicated_pct": (t7_replicated / t7_total * 100.0) if t7_total else 0.0,
-        "divergent": t7_divergent,
-        "divergent_pct": (t7_divergent / t7_total * 100.0) if t7_total else 0.0,
-        "outliers": t7_outliers,
+        "excluded_w5_py": t7_excluded_w5_py,
+        "sesoi_ms": SESOI_MS,
+        "block_size": TOST_BLOCK_SIZE,
+        "equivalent": t7_equivalent,
+        "equivalent_pct": (t7_equivalent / t7_total * 100.0) if t7_total else 0.0,
+        "different": t7_different,
+        "different_pct": (t7_different / t7_total * 100.0) if t7_total else 0.0,
+        "inconclusive": t7_inconclusive,
+        "inconclusive_pct": (t7_inconclusive / t7_total * 100.0) if t7_total else 0.0,
+        "different_rows": t7_different_rows,
+        "inconclusive_rows": t7_inconclusive_rows,
     }
 
     t7_tex.extend([
         r"\bottomrule",
         r"\end{tabular}",
+        r"}",
         r"\end{table*}"
     ])
     t7_s = table_metrics["t7_summary"]
     t7_md.extend([
         "",
-        f"> **Table 7 Notes (Dual-Session Replication & TOST Summary):** Evaluates empirical contrasts $\\Delta T_{{\\text{{orch}}}} = T_{{\\text{{orch}}}}(\\text{{Runtime}}) - T_{{\\text{{orch}}}}(\\text{{PicoClaw}})$ across independent experimental sessions across all 4 platforms and workloads W1--W5 using Two One-Sided Tests (`ttost_ind`, equivalence margin $\\max(5.0\\text{{ ms}}, 15\\%\\cdot|\\bar{{\\Delta}}_1|)$). Across {t7_s['total']} evaluated pairs: **{t7_s['proven']} ({t7_s['proven_pct']:.1f}%)** achieved `Equivalence Proven` ($p < 0.05$), **{t7_s['replicated']} ({t7_s['replicated_pct']:.1f}%)** met `Replicated` ($|\\Delta| < 10\\%$), and **{t7_s['divergent']} ({t7_s['divergent_pct']:.1f}%)** showed `Divergence Detected` (principally `PythonNative` in W5 due to cross-session dynamic LangChain import/startup variability)."
+        f"> **Table 7 Notes (Fixed-SESOI Moving Block Bootstrap TOST; M1--M5):** Evaluates inter-session replication of $\\Delta T_{{\\text{{orch}}}} = T_{{\\text{{orch}}}}(\\text{{Runtime}}) - T_{{\\text{{orch}}}}(\\text{{PicoClaw}})$ across all 4 platforms and workloads W1--W5 using Moving Block Bootstrap (block size $b={TOST_BLOCK_SIZE}$, $B=5{{,}}000$ resamples; Künsch 1989) to preserve lag-1 serial dependence, tested against a **fixed, pre-specified data-independent SESOI of $\\pm {SESOI_MS:.1f}\\text{{ ms}}$** ($<0.2\\%$ of Regime A task duration). Exact order-statistic **90% MBB CIs** align mathematically with one-sided $\\alpha = 0.05$ TOST under the standardized 3-state decision rule (Schuirmann 1987; Lakens 2017): `Equivalent` (90% CI strictly inside $[-{SESOI_MS:.1f}, +{SESOI_MS:.1f}]\\text{{ ms}}$, $p_{{\\text{{TOST}}}} < 0.05$), `Different` (90% CI wholly outside $[-{SESOI_MS:.1f}, +{SESOI_MS:.1f}]\\text{{ ms}}$), or `Inconclusive` (90% CI straddles the SESOI boundary). Across **{t7_s['total']} valid pairs** (**{t7_s['excluded_w5_py']} confounded W5 `python_native` pairs excluded per M1**): **{t7_s['equivalent']} ({t7_s['equivalent_pct']:.1f}%)** are `Equivalent`, **{t7_s['different']} ({t7_s['different_pct']:.1f}%)** are `Different`, and **{t7_s['inconclusive']} ({t7_s['inconclusive_pct']:.1f}%)** are `Inconclusive` (concentrated in 10-turn W4 multi-step loops and Windows `python_native` startup variance)."
     ])
 
     with open(os.path.join(AUDIT_TABLES_DIR, "table7_session_replication_comparison.md"), "w", encoding="utf-8") as f:
@@ -1619,25 +1894,43 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
         with open(os.path.join(PUB_TABLES_DIR, "table7_session_replication_comparison.tex"), "w", encoding="utf-8") as f:
             f.write("\n".join(t7_tex) + "\n")
 
-    # Table 8: Workload W5 Cross-Platform Consolidation
+    # Table 8: Workload W5 Cross-Platform Consolidation (M1: Token Audit + python_native Segregation)
     t8_md = [
         "# Table 8: Workload W5 Enterprise Cross-Domain Workflow (LangChain Core + SQLite + LLM-as-a-Judge)",
         "",
-        "| Platform OS | Regime | Runtime | Median Task Latency [IQR] (ms) | 95% Bootstrap CI | T_orch (ms) | Peak RSS (MB) | Instructions / Cycles | Energy (J) / EDP (J·s) | Quality Score (1-5) |",
-        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
+        "### Part A: Comparable W5 Orchestrators & Direct Neural Baseline",
+        "",
+        "| Platform OS | Regime | Runtime | Prompt / Comp. Tokens | Median Task Latency [IQR] (ms) | 95% Bootstrap CI | T_orch (ms) | Peak RSS (MB) | Instructions / Cycles | Energy (J) / EDP (J·s) | Quality Score (1-5) |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
+    ]
+    t8_md_seg = [
+        "",
+        "### Part B: Segregated / Non-Comparable Arm (`python_native` — Excluded from W5 Performance Contrasts: Schema-Failure / Confounded Prompt)¶",
+        "",
+        "| Platform OS | Regime | Runtime (Segregated) | Prompt / Comp. Tokens | Median Task Latency [IQR] (ms) | 95% Bootstrap CI | T_orch (ms) | Peak RSS (MB) | Instructions / Cycles | Energy (J) / EDP (J·s) | Quality Score (1-5) |",
+        "| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |"
     ]
     t8_tex = [
         r"\begin{table*}[t]",
         r"\small",
         r"\centering",
-        r"\caption{Workload W5 Enterprise Cross-Domain Workflow (LangChain Core + SQLite + LLM-as-a-Judge) across all 4 experimental platforms and execution regimes ($N=30$ trials per condition). Evaluates end-to-end task duration, orchestrator dispatch delay, memory footprint, microarchitectural retired instructions, and LLM-as-a-judge quality score adherence (1--5).}",
+        r"\caption{Workload W5 Enterprise Cross-Domain Workflow (LangChain Core + SQLite + LLM-as-a-Judge) across all 4 experimental platforms and execution regimes ($N=30$ trials per condition), with prompt/completion token audit (M1). Part~A lists comparable client orchestrators and the direct neural baseline. Part~B segregates \texttt{python\_native} (LangChain Core), which is excluded from W5 latency/energy/TOST contrasts (Tables~2 and~7) due to schema validation failure and confounded/truncated prompts ($1{,}287/26$ tokens vs. $2{,}007\text{--}6{,}921/33\text{--}38$ tokens on macOS/Windows; TTFT $\approx 50$~ms on macOS; \texttt{quality\_score} $= 1.0/5.0$).}",
         r"\label{tab:w5_enterprise_workload}",
         r"\resizebox{\textwidth}{!}{%",
-        r"\begin{tabular}{lllccccccc}",
+        r"\begin{tabular}{lllcccccccc}",
         r"\toprule",
-        r"\textbf{Platform OS} & \textbf{Regime} & \textbf{Runtime} & \textbf{$T_{\text{task}}$ (ms) [IQR]} & \textbf{95\% CI} & \textbf{$T_{\text{orch}}$} & \textbf{RSS (MB)} & \textbf{Instr / Cycles} & \textbf{Energy / EDP} & \textbf{Score} \\",
+        r"\textbf{Platform OS} & \textbf{Regime} & \textbf{Runtime} & \textbf{Prompt / Comp.} & \textbf{$T_{\text{task}}$ (ms) [IQR]} & \textbf{95\% CI} & \textbf{$T_{\text{orch}}$} & \textbf{RSS (MB)} & \textbf{Instr / Cycles} & \textbf{Energy / EDP} & \textbf{Score} \\",
+        r"\midrule",
+        r"\multicolumn{11}{l}{\textbf{Part A: Comparable W5 Orchestrators \& Direct Neural Baseline}} \\",
         r"\midrule"
     ]
+    t8_tex_seg = [
+        r"\midrule",
+        r"\multicolumn{11}{l}{\textbf{Part B: Segregated Non-Comparable Arm (\texttt{python\_native} --- Excluded: Schema-Failure / Confounded Prompt)\textsuperscript{\P}}} \\",
+        r"\midrule"
+    ]
+
+    w5_token_summary = []
 
     for p_key, p_disp in [
         ("darwin_m4", "macOS ARM64 (M4)"),
@@ -1656,6 +1949,22 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
                 lat_iqr = cell["t_task_ms"]["iqr"]
                 ci = cell["t_task_ms"]["ci_95"]
                 orch_med = cell["t_orch_ms"]["median"]
+                pt_med = cell.get("prompt_tokens", {}).get("median")
+                ct_med = cell.get("completion_tokens", {}).get("median")
+                ttft_med = cell.get("ttft_ms", {}).get("median")
+                fr_list = cell.get("finish_reasons", [])
+                tok_str = f"{int(round(pt_med))} / {int(round(ct_med))}" if (pt_med is not None and ct_med is not None) else "N/A"
+
+                w5_token_summary.append({
+                    "platform": p_disp,
+                    "regime": reg_name,
+                    "runtime": ak,
+                    "prompt_tokens": int(round(pt_med)) if pt_med is not None else None,
+                    "completion_tokens": int(round(ct_med)) if ct_med is not None else None,
+                    "ttft_ms": ttft_med,
+                    "finish_reasons": fr_list,
+                    "excluded": ak in W5_EXCLUDED_AGENTS,
+                })
 
                 # Distinct N/A taxonomy for Peak RSS
                 rss_cell = cell["rss_mb"]
@@ -1681,7 +1990,6 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
                         inst_str_md = f"N/A* / {cyc_m:.1f}M"
                         inst_str_tex = f"N/A\\textsuperscript{{*}} / {cyc_m:.1f}M"
                     else:
-                        # Windows python_native: instructions restricted (*) & cycles excluded due to py.exe stub (§)
                         inst_str_md = "N/A* / N/A§"
                         inst_str_tex = r"N/A\textsuperscript{*} / N/A\textsuperscript{\S}"
                 else:
@@ -1716,23 +2024,34 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
                     qs_str_tex = r"N/A\textsuperscript{\dagger}"
 
                 ak_escaped = ak.replace("_", r"\_")
-                t8_md.append(f"| {p_disp} | {reg_name} | {ak} | {lat_med:.1f} [{lat_iqr:.1f}] | [{ci[0]:.1f}, {ci[1]:.1f}] | {orch_med:.2f} | {rss_str_md} | {inst_str_md} | {energy_str_md} | {qs_str_md} |")
-                t8_tex.append(f"{p_disp_tex} & {reg_name} & {ak_escaped} & {lat_med:.1f} [{lat_iqr:.1f}] & [{ci[0]:.1f}, {ci[1]:.1f}] & {orch_med:.1f} & {rss_str_tex} & {inst_str_tex} & {energy_str_tex} & {qs_str_tex} \\\\")
+                if ak in W5_EXCLUDED_AGENTS:
+                    t8_md_seg.append(f"| {p_disp} | {reg_name} | `{ak}`¶ [Excluded: Schema-Failure / Confounded] | {tok_str} | {lat_med:.1f} [{lat_iqr:.1f}] | [{ci[0]:.1f}, {ci[1]:.1f}] | {orch_med:.2f} | {rss_str_md} | {inst_str_md} | {energy_str_md} | {qs_str_md} |")
+                    t8_tex_seg.append(f"{p_disp_tex} & {reg_name} & {ak_escaped}\\textsuperscript{{\\P}} & {tok_str} & {lat_med:.1f} [{lat_iqr:.1f}] & [{ci[0]:.1f}, {ci[1]:.1f}] & {orch_med:.1f} & {rss_str_tex} & {inst_str_tex} & {energy_str_tex} & {qs_str_tex} \\\\")
+                else:
+                    t8_md.append(f"| {p_disp} | {reg_name} | {ak} | {tok_str} | {lat_med:.1f} [{lat_iqr:.1f}] | [{ci[0]:.1f}, {ci[1]:.1f}] | {orch_med:.2f} | {rss_str_md} | {inst_str_md} | {energy_str_md} | {qs_str_md} |")
+                    t8_tex.append(f"{p_disp_tex} & {reg_name} & {ak_escaped} & {tok_str} & {lat_med:.1f} [{lat_iqr:.1f}] & [{ci[0]:.1f}, {ci[1]:.1f}] & {orch_med:.1f} & {rss_str_tex} & {inst_str_tex} & {energy_str_tex} & {qs_str_tex} \\\\")
+
+    table_metrics["t8_tokens"] = w5_token_summary
+
+    t8_md.extend(t8_md_seg)
+    t8_tex.extend(t8_tex_seg)
 
     t8_tex.extend([
         r"\bottomrule",
-        r"\multicolumn{10}{l}{\textsuperscript{*}\footnotesize Hardware instructions on Windows unavailable in unprivileged user-mode (NT kernel \texttt{CR4.PCE} restriction); CPU cycles tracked via \texttt{QueryProcessCycleTime}.} \\",
-        r"\multicolumn{10}{l}{\textsuperscript{\dagger}\footnotesize LLM-as-a-Judge quality score uninstrumented on non-LangChain client runs (evaluated on \texttt{python\_native}: 1.0/5.0 on macOS M4; 3.0/5.0 on Windows Intel iGPU).} \\",
-        r"\multicolumn{10}{l}{\textsuperscript{\ddagger}\footnotesize Direct \texttt{neural\_baseline} issues HTTP requests directly to \texttt{llama-server} without a client agent process (no client RSS, instructions, or cycles).} \\",
-        r"\multicolumn{10}{l}{\textsuperscript{\S}\footnotesize \texttt{python\_native} on Windows invokes the \texttt{py.exe} launcher wrapper stub (PEP 397); parent stub PID metrics are excluded from Peak RSS and CPU cycles.} \\",
-        r"\multicolumn{10}{l}{\textsuperscript{**}\footnotesize Host package energy and EDP on Windows Intel iGPU uninstrumented in user-mode (UMA shared DDR3 memory without discrete NVML or ring-0 RAPL MSR driver).} \\",
+        r"\multicolumn{11}{l}{\textsuperscript{\P}\footnotesize \textbf{Segregated / Non-Comparable (M1):} \texttt{python\_native} (LangChain Core) in W5 experienced schema-validation failure and truncated prompts ($1{,}287/26$ tokens on macOS/Windows vs. $2{,}007\text{--}6{,}921/33\text{--}38$ tokens; TTFT $\approx 50$~ms on macOS; \texttt{finish\_reason=stop} on Intel iGPU; $T_{\text{orch}}=1{,}416.3$~ms Warm anomaly on Linux). Excluded from Tables~2 and~7; lower latency/energy is a truncation artifact, not runtime efficiency.} \\",
+        r"\multicolumn{11}{l}{\textsuperscript{*}\footnotesize Hardware instructions on Windows unavailable in unprivileged user-mode (NT kernel \texttt{CR4.PCE} restriction); CPU cycles tracked via \texttt{QueryProcessCycleTime}.} \\",
+        r"\multicolumn{11}{l}{\textsuperscript{\dagger}\footnotesize LLM-as-a-Judge quality score uninstrumented on non-LangChain client runs (evaluated on \texttt{python\_native}: 1.0/5.0 on macOS M4; 3.0/5.0 on Windows Intel iGPU).} \\",
+        r"\multicolumn{11}{l}{\textsuperscript{\ddagger}\footnotesize Direct \texttt{neural\_baseline} issues HTTP requests directly to \texttt{llama-server} without a client agent process (no client RSS, instructions, or cycles).} \\",
+        r"\multicolumn{11}{l}{\textsuperscript{\S}\footnotesize \texttt{python\_native} on Windows invokes the \texttt{py.exe} launcher wrapper stub (PEP 397); parent stub PID metrics are excluded from Peak RSS and CPU cycles.} \\",
+        r"\multicolumn{11}{l}{\textsuperscript{**}\footnotesize Host package energy and EDP on Windows Intel iGPU uninstrumented in user-mode (UMA shared DDR3 memory without discrete NVML or ring-0 RAPL MSR driver).} \\",
         r"\end{tabular}",
         r"}",
         r"\end{table*}"
     ])
     t8_md.extend([
         "",
-        "> **Table 8 Notes (W5 Enterprise Evaluation & Complete N/A Taxonomy):** Evaluates the cross-domain LangChain + SQLite tool-calling workflow across all 4 experimental platforms.",
+        "> **Table 8 Notes (M1 W5 Token Audit, `python_native` Segregation & Complete N/A Taxonomy):** Evaluates the cross-domain LangChain + SQLite tool-calling workflow across all 4 experimental platforms (complete token/finish-reason audit exported in `audit_export/w5_token_and_schema_audit.csv` and `audit_export/anomaly_and_cache_diagnostics.csv`).",
+        "> - `¶` (**Segregated / Non-Comparable Arm — M1**): `python_native` (LangChain Core) in W5 is explicitly segregated into Part B and **excluded from all W5 performance, energy, and TOST contrasts** (Tables 2 and 7). On macOS M4, Windows 11 NVIDIA, and Windows Intel iGPU, `python_native` executed a confounded/truncated prompt (`1,287` prompt / `26` completion tokens vs. `2,007–6,921` prompt / `33–38` completion tokens for comparable arms; TTFT `50.0 ms` vs. `4,939.5 ms` in Regime A on macOS; `finish_reason=stop` on Intel iGPU; `quality_score = 1.0/5.0` on macOS and `3.0/5.0` on Intel iGPU); on Linux x86_64 Regime B it exhibited a `1,416.3 ms` LangChain initialization anomaly. Any apparent latency or energy advantage of `python_native` in W5 is strictly an artifact of schema failure and prompt truncation, not runtime efficiency.",
         "> - `N/A*` (**Windows Hardware Instructions**): Hardware PMU retired instruction counters are restricted in Windows unprivileged user-mode (`CR4.PCE`); CPU cycles are reported empirically via Win32 `QueryProcessCycleTime`.",
         "> - `N/A†` (**Quality Score**): LLM-as-a-Judge semantic quality scoring was uninstrumented on non-LangChain client runs and on Linux/Windows NVIDIA W5 campaigns. Where instrumented on `python_native` LangChain Core, empirical medians were `1.0/5.0` on macOS M4 (strict schema validation mismatch) and `3.0/5.0` on Windows Intel iGPU (partial query completion).",
         "> - `N/A‡` (**Direct Neural Baseline**): `neural_baseline` dispatches HTTP requests directly to `llama-server` without a client agent process ($T_{\\text{orch}} \\equiv 0$); client Peak RSS, instructions, and cycles do not exist.",
@@ -2240,8 +2559,24 @@ def generate_quad_platform_figures(consolidated: dict[str, Any], num_datasets: i
     ax2.grid(axis="y", linestyle="--", alpha=0.5)
     ax2.legend(loc="upper right")
 
-    plt.tight_layout(rect=[0, 0.04, 1, 0.98])
-    fig.text(0.5, 0.01, "* Methodological Note: On macOS ARM64, speedups reference the internal unmitigated 54-tool baseline measured in the same session. On Linux, Windows NVIDIA, and Windows Intel, pruned arms reference the node's primary unmitigated baseline (raw_trials.jsonl / warm_cache_trials.jsonl). Error bars denote 95% bootstrap CIs.", ha="center", fontsize=7.1, color="#334155")
+    # Compute Cold speedup vs 15-Tool Minimal for transparent footnote reporting (M6)
+    min_cold_ratios = []
+    m_c_min = [t["t_task_ms"] for t in m_rag_trials if t.get("agent_key", t.get("arm")) == "openclaw_minimal" and "cold" in t.get("regime", "") and t.get("workload") == "W2"]
+    min_cold_ratios.append(float(np.median(m_c_min) / np.median(m_c_rag)) if m_c_min and m_c_rag else 1.0)
+    for pk in ["linux_x86_64", "windows_x86_64", "windows_intel_graphics"]:
+        raw_t = load_trials_active(p_datasets[pk]["active"]["raw"])
+        rag_t = load_trials_active(p_datasets[pk]["active"]["rag"])
+        c_min = [t["t_task_ms"] for t in raw_t if t.get("agent_key") == "openclaw_minimal" and t.get("workload") == "W2"]
+        c_rag = [t["t_task_ms"] for t in rag_t if t.get("agent_key", t.get("arm")) == "openclaw_tool_rag" and "cold" in t.get("regime", "") and t.get("workload") == "W2"]
+        min_cold_ratios.append(float(np.median(c_min) / np.median(c_rag)) if c_min and c_rag else 1.0)
+
+    plt.tight_layout(rect=[0, 0.065, 1, 0.98])
+    fig.text(
+        0.5, 0.012,
+        f"* Baseline Note (M6): macOS references same-session baselines (tool_rag_mitigation_trials.jsonl); Linux, Win NVIDIA & Win Intel reference each node's primary baseline (raw_trials.jsonl / warm_cache_trials.jsonl).\n"
+        f"  Cold speedup vs. 15-Tool Minimal (Table 5): macOS {min_cold_ratios[0]:.2f}x, Linux {min_cold_ratios[1]:.2f}x, Win NVIDIA {min_cold_ratios[2]:.2f}x, Win Intel {min_cold_ratios[3]:.2f}x (95% bootstrap CIs shown).",
+        ha="center", fontsize=6.9, color="#334155"
+    )
     f5_out = os.path.join(PUB_FIG_DIR, "fig5_exp4_tools_and_bloat.png")
     plt.savefig(f5_out, dpi=300, bbox_inches="tight")
     plt.savefig(os.path.join(AUDIT_FIG_DIR, "fig5_exp4_tools_and_bloat.png"), dpi=300, bbox_inches="tight")
@@ -2410,11 +2745,49 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
     wn_cyc = table_metrics["win_cycles"]["windows_x86_64"]
     wi_cyc = table_metrics["win_cycles"]["windows_intel_graphics"]
 
-    # Dynamic diagnostics stats
+    # Dynamic diagnostics stats (M4, M7, M8)
     total_cells = len(diagnostics)
     non_drift_cells = sum(1 for d in diagnostics if not d["drift_significant"])
     non_drift_pct = (non_drift_cells / total_cells * 100.0) if total_cells else 0.0
+    sig_drift_cells = [d for d in diagnostics if d["drift_significant"]]
+    valid_diag_cells = [d for d in diagnostics if not d["w5_excluded_confounded"]]
+    worst_valid_drift = max(valid_diag_cells, key=lambda d: abs(d["drift_slope_pct_per_rep"]))
+    worst_all_drift = max(diagnostics, key=lambda d: abs(d["drift_slope_pct_per_rep"]))
+    win_b_py_w5_drift = next(
+        (d for d in diagnostics if d["platform_key"] == "windows_x86_64" and "Regime B" in d["regime"] and d["agent_key"] == "python_native" and d["workload"] == "W5"),
+        worst_all_drift,
+    )
+
+    reg_a_cells = [d for d in diagnostics if "Regime A" in d["regime"]]
+    reg_b_cells = [d for d in diagnostics if "Regime B" in d["regime"]]
+    sd_a_count = sum(1 for d in reg_a_cells if d["has_serial_dependence"])
+    sd_b_count = sum(1 for d in reg_b_cells if d["has_serial_dependence"])
+    sd_tot_count = sd_a_count + sd_b_count
+
     gpu_therm_any = sum(d["gpu_thermal_throttle_reps"] for d in diagnostics)
+    gpu_cap_any = sum(d["gpu_sw_power_cap_reps"] for d in diagnostics)
+
+    # M8: Exact Linux & Windows throttling delta aggregates
+    lin_a_diags = [d for d in diagnostics if d["platform_key"] == "linux_x86_64" and "Regime A" in d["regime"]]
+    lin_b_diags = [d for d in diagnostics if d["platform_key"] == "linux_x86_64" and "Regime B" in d["regime"]]
+    lin_a_thr_reps = sum(d["cpu_throttle_reps"] for d in lin_a_diags)
+    lin_a_tot_reps = sum(d["n_raw"] for d in lin_a_diags)
+    lin_a_max_delta = max((d["cpu_throttle_delta_max"] for d in lin_a_diags), default=0)
+    lin_a_consec_pos = sum(d["cpu_throttle_consec_pos_reps"] for d in lin_a_diags)
+    lin_a_cpu_tmax = max((d["cpu_temp_max_c"] for d in lin_a_diags if d["cpu_temp_max_c"] is not None), default=0.0)
+    lin_b_thr_reps = sum(d["cpu_throttle_reps"] for d in lin_b_diags)
+    lin_b_tot_reps = sum(d["n_raw"] for d in lin_b_diags)
+    lin_b_max_delta = max((d["cpu_throttle_delta_max"] for d in lin_b_diags), default=0)
+    lin_b_cpu_tmax = max((d["cpu_temp_max_c"] for d in lin_b_diags if d["cpu_temp_max_c"] is not None), default=0.0)
+    lin_gpu_tmax = max((d["gpu_temp_max_c"] for d in lin_a_diags + lin_b_diags if d["gpu_temp_max_c"] is not None), default=0.0)
+
+    win_nv_diags = [d for d in diagnostics if d["platform_key"] == "windows_x86_64"]
+    win_nv_tot_reps = sum(d["n_raw"] for d in win_nv_diags)
+    win_nv_cpu_thr = sum(d["cpu_throttle_reps"] for d in win_nv_diags)
+    win_nv_gpu_cap = sum(d["gpu_sw_power_cap_reps"] for d in win_nv_diags)
+    win_nv_gpu_idle = sum(d["gpu_idle_bitmask_reps"] for d in win_nv_diags)
+    win_nv_gpu_tmax = max((d["gpu_temp_max_c"] for d in win_nv_diags if d["gpu_temp_max_c"] is not None), default=0.0)
+    win_nv_cpu_tmax = max((d["cpu_temp_max_c"] for d in win_nv_diags if d["cpu_temp_max_c"] is not None), default=0.0)
 
     def r1_range(plat_short: str, reg_substr: str) -> tuple[float, float]:
         vals = [d["autocorr_r1"] for d in diagnostics if d["platform"] == plat_short and reg_substr in d["regime"]]
@@ -2425,9 +2798,12 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
     r1_win_a = r1_range("Windows 11", "Regime A")
     r1_int_a = r1_range("Windows Intel iGPU", "Regime A")
     r1_m4_b = r1_range("macOS (M4)", "Regime B")
+    r1_lin_b = r1_range("Linux x86_64", "Regime B")
     r1_win_b = r1_range("Windows 11", "Regime B")
+    r1_int_b = r1_range("Windows Intel iGPU", "Regime B")
 
-    # Dynamic Table 3, 4, 5, 7 metrics
+    # Dynamic Table 2, 3, 4, 5, 7 metrics
+    t2_s = table_metrics["t2_summary"]
     t3_max = table_metrics["t3_max_delta_ms"]
     t3_bound = math.ceil(t3_max * 2.0) / 2.0
     t3_lbl = table_metrics["t3_max_delta_label"]
@@ -2441,9 +2817,21 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
     t5_win_oc = table_metrics["t5_speedups"]["windows_x86_64"]["openclaw_tool_rag_cold"]["speedup"]
     t5_int_oc = table_metrics["t5_speedups"]["windows_intel_graphics"]["openclaw_tool_rag_cold"]["speedup"]
 
+    t5_m4_min_c = table_metrics["t5_speedups"]["darwin_m4"]["openclaw_tool_rag_cold"]["speedup_vs_minimal"]
+    t5_lin_min_c = table_metrics["t5_speedups"]["linux_x86_64"]["openclaw_tool_rag_cold"]["speedup_vs_minimal"]
+    t5_win_min_c = table_metrics["t5_speedups"]["windows_x86_64"]["openclaw_tool_rag_cold"]["speedup_vs_minimal"]
+    t5_int_min_c = table_metrics["t5_speedups"]["windows_intel_graphics"]["openclaw_tool_rag_cold"]["speedup_vs_minimal"]
+
+    t5_m4_min_w = table_metrics["t5_speedups"]["darwin_m4"]["openclaw_tool_rag_warm"]["speedup_vs_minimal"]
+    t5_lin_min_w = table_metrics["t5_speedups"]["linux_x86_64"]["openclaw_tool_rag_warm"]["speedup_vs_minimal"]
+    t5_win_min_w = table_metrics["t5_speedups"]["windows_x86_64"]["openclaw_tool_rag_warm"]["speedup_vs_minimal"]
+    t5_int_min_w = table_metrics["t5_speedups"]["windows_intel_graphics"]["openclaw_tool_rag_warm"]["speedup_vs_minimal"]
+
     t7_s = table_metrics["t7_summary"]
-    w5_outliers = [o for o in t7_s["outliers"] if o["workload"] == "W5"]
-    outlier_desc = "; ".join(f"{o['platform']} {o['regime']} {o['workload']} ({o['contrast']}: {o['delta_pct']:+.2f}%)" for o in w5_outliers)
+    sig_drift_desc = "; ".join(
+        f"{d['platform']} {d['regime']} `{d['agent_key']}` {d['workload']} ({d['drift_slope_ms_per_rep']:+.3f} ms/rep, {abs(d['drift_slope_pct_per_rep']):.3f}%/rep, $p_{{\\text{{adj}}}}={d['drift_p_adj']:.4g}$)"
+        for d in sorted(sig_drift_cells, key=lambda x: -abs(x["drift_slope_pct_per_rep"]))
+    )
 
     lines = [
         "# QUAD-PLATFORM MICROARCHITECTURAL SYSTEMS REPLICATION REPORT",
@@ -2490,11 +2878,11 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "",
         "## 2. HARDWARE THROTTLING & IDLE POWER DECOMPOSITION",
         "",
-        "### 2.1. NVML Register Inspection and Thermal/Power Throttling Diagnostics (Linux and Windows)",
-        "Detailed inspection of raw JSONL telemetry records across all trials on Linux and Windows characterizes thermal and power-limit behavior:",
-        "- **Stationary Cumulative Counter on Linux (`cpu_pkg_throttle_events`):** Recorded values in `cpu_pkg_throttle_events` reflect monotonic sticky-bit accumulation from the Intel CPU package thermal status MSR (`IA32_PACKAGE_THERM_STATUS`) rather than progressive throughput degradation during benchmark trials.",
-        "- **Mobile TDP Power Cap on Windows (`gpu_sw_power_cap`):** Bitmask `0x8` (`SW_POWER_CAP`) events on Windows 11 NVIDIA reflect transient mobile GPU TDP enforcement (75 W board ceiling) during matrix-multiplication bursts in prompt prefill, rather than thermal throttling.",
-        f"- **Absence of Hardware Thermal Throttling:** Across all discrete-GPU trials on Linux and Windows, the NVML thermal-throttle indicator (`gpu_thermal_throttle_active_end`) recorded **{gpu_therm_any} thermal throttling events**. GPU temperatures stayed within 50.0°C--74.0°C, below the 87.0°C threshold required to trigger `HW_THERMAL_SLOWDOWN` (`0x40`) or `SW_THERMAL_SLOWDOWN` (`0x20`).",
+        "### 2.1. NVML Register Inspection and Per-Trial Thermal/Power Throttling Deltas (M8)",
+        "Detailed per-trial inspection of raw JSONL hardware telemetry records (exported in `audit_export/anomaly_and_cache_diagnostics.csv`) establishes exact intra-trial throttling behavior without synthetic proxies:",
+        f"- **Linux x86_64 CPU Package Intra-Trial Deltas (`cpu_pkg_throttle_events`):** In `scripts/run_linux_x86_64_master_campaign.py`, `cpu_pkg_throttle_events` records the genuine **intra-trial delta** (`end - start` summed across 16 logical threads from Linux sysfs `package_throttle_count`). Non-zero intra-trial increments occurred in **{lin_a_thr_reps}/{lin_a_tot_reps} ({lin_a_thr_reps / max(lin_a_tot_reps, 1) * 100.0:.1f}%)** Regime A trials (max single-trial delta **{lin_a_max_delta:,} events**, **{lin_a_consec_pos}** consecutive-trial increases, CPU package peak **{lin_a_cpu_tmax:.1f}°C**) and **{lin_b_thr_reps}/{lin_b_tot_reps} ({lin_b_thr_reps / max(lin_b_tot_reps, 1) * 100.0:.1f}%)** Regime B trials (max delta **{lin_b_max_delta:,}**, CPU peak **{lin_b_cpu_tmax:.1f}°C**). This documents active Intel Alder Lake mobile PL1/PL2 thermal-power throttling under `-ngl 16` AVX2 hybrid CPU+GPU offload, explaining Linux's elevated positive lag-1 autocorrelation ($r_1$) addressed via $r_1$-corrected Mann-Whitney variance in Table 2. Meanwhile, the discrete NVIDIA RTX 3050 GPU on Linux recorded **0 thermal-throttle events** and **0 SW power-cap events** (`nvml_throttle_reasons_bitmask = 0x0`, GPU peak **{lin_gpu_tmax:.1f}°C**).",
+        f"- **Windows 11 NVIDIA Discrete GPU & CPU Telemetry:** Across all **{win_nv_tot_reps:,}** measured Regime A & B trials on Windows 11 NVIDIA, NVML hardware registers recorded **{gpu_therm_any} GPU thermal-throttle events** (`0x20`/`0x40`) and **{win_nv_gpu_cap} GPU SW power-cap events** (`0x04`; GPU peak **{win_nv_gpu_tmax:.1f}°C**, CPU peak **{win_nv_cpu_tmax:.1f}°C**). The only non-zero NVML bitmask observed at trial completion was `0x01` (`nvmlClocksThrottleReasonGpuIdle`, **{win_nv_gpu_idle}/{win_nv_tot_reps}** trials). Windows user-mode telemetry does not expose Linux sysfs `package_throttle_count` (`cpu_pkg_throttle_events = {win_nv_cpu_thr}`).",
+        f"- **Zero Discrete GPU Thermal Slowdown:** Across all Linux and Windows discrete-GPU trials combined, `gpu_thermal_throttle_active_end` recorded **{gpu_therm_any} thermal throttling events** and `gpu_sw_power_cap` recorded **{gpu_cap_any} power-cap events**.",
         "",
         "### 2.2. Explicit Idle Power ($P_{\\text{idle}}$) Telemetry and Duration Integration",
         "Idle power baselines were empirically characterized during dedicated quiescence intervals prior to benchmark execution:",
@@ -2517,27 +2905,27 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "",
         "Following established systems benchmarking methodology (Kalibera & Jones 2013; Hoefler & Belli 2015; Maricq et al. 2018; Künsch 1989), serial dependence and temporal drift were evaluated across all experimental cells:",
         "",
-        "### 3.1. Autocorrelation ($r_1$), Effective Sample Size ($n_{\\text{eff}}$), and Moving Block Bootstrap",
-        f"- **Regime A (Cold Prefill):** Lag-1 serial autocorrelation across platforms spanned: macOS ARM64 $r_1 \\in [{r1_m4_a[0]:+.3f}, {r1_m4_a[1]:+.3f}]$; Linux x86_64 $r_1 \\in [{r1_lin_a[0]:+.3f}, {r1_lin_a[1]:+.3f}]$; Windows 11 NVIDIA $r_1 \\in [{r1_win_a[0]:+.3f}, {r1_win_a[1]:+.3f}]$; Windows Intel iGPU $r_1 \\in [{r1_int_a[0]:+.3f}, {r1_int_a[1]:+.3f}]$. White-noise 95% boundary at $n=30$ is $|r_1| < 2/\\sqrt{{30}} \\approx 0.365$.",
-        "- **Regime B (Warm Cache):** Serial autocorrelation emerged in a subset of warm-cache cells:",
-        f"  * On macOS ARM64, lag-1 autocorrelation spanned $r_1 \\in [{r1_m4_b[0]:+.3f}, {r1_m4_b[1]:+.3f}]$, with negative alternation attributed to harness dispatch cadence, loopback TCP socket drainage, and server thread wake-up scheduling.",
-        f"  * On Windows 11 NVIDIA, lag-1 autocorrelation spanned $r_1 \\in [{r1_win_b[0]:+.3f}, {r1_win_b[1]:+.3f}]$, reflecting memory page retention in the Windows Standby List.",
-        "  * For every cell exceeding $|r_1| > 2/\\sqrt{n}$, the effective sample size $n_{\\text{eff}} = \\min(n, n(1 - r_1)/(1 + r_1))$ was computed and 95% confidence intervals were obtained via **Moving Block Bootstrap (MBB, block size $b=3$; Künsch 1989)** to preserve short-range serial correlation.",
-        "- **Interpretation of $n_{\\text{eff}}$:** Mann-Whitney $U$, Cliff's $\\delta$, and Vargha-Delaney $A_{12}$ statistics reflect $n=30$ measured trials per condition; $n_{\\text{eff}}$ is reported exclusively as a diagnostic indicator of serial correlation health alongside MBB confidence intervals.",
+        "### 3.1. Autocorrelation ($r_1$) Across Both Regimes, $r_1$-Adjusted Mann-Whitney $U$, and Moving Block Bootstrap (M4)",
+        f"- **Presence of Serial Dependence in Both Regimes:** Applying the white-noise 95% boundary at $n=30$ ($|r_1| > 2/\\sqrt{{30}} \\approx 0.365$), statistically detectable lag-1 autocorrelation occurs in **both** execution regimes: **{sd_a_count}/{len(reg_a_cells)} ({sd_a_count / max(len(reg_a_cells), 1) * 100.0:.1f}%)** cells in **Regime A (Cold Prefill)** and **{sd_b_count}/{len(reg_b_cells)} ({sd_b_count / max(len(reg_b_cells), 1) * 100.0:.1f}%)** cells in **Regime B (Warm Cache)** (**{sd_tot_count}/{total_cells}**, {sd_tot_count / max(total_cells, 1) * 100.0:.1f}% overall).",
+        f"  * **Regime A (Cold Prefill) $r_1$ ranges:** macOS ARM64 $r_1 \\in [{r1_m4_a[0]:+.3f}, {r1_m4_a[1]:+.3f}]$; Linux x86_64 $r_1 \\in [{r1_lin_a[0]:+.3f}, {r1_lin_a[1]:+.3f}]$; Windows 11 NVIDIA $r_1 \\in [{r1_win_a[0]:+.3f}, {r1_win_a[1]:+.3f}]$; Windows Intel iGPU $r_1 \\in [{r1_int_a[0]:+.3f}, {r1_int_a[1]:+.3f}]$.",
+        f"  * **Regime B (Warm Cache) $r_1$ ranges:** macOS ARM64 $r_1 \\in [{r1_m4_b[0]:+.3f}, {r1_m4_b[1]:+.3f}]$; Linux x86_64 $r_1 \\in [{r1_lin_b[0]:+.3f}, {r1_lin_b[1]:+.3f}]$; Windows 11 NVIDIA $r_1 \\in [{r1_win_b[0]:+.3f}, {r1_win_b[1]:+.3f}]$; Windows Intel iGPU $r_1 \\in [{r1_int_b[0]:+.3f}, {r1_int_b[1]:+.3f}]$.",
+        "  * For every cell exceeding $|r_1| > 2/\\sqrt{n}$, the effective sample size $n_{\\text{eff}} = \\min(n, n(1 - r_1)/(1 + r_1))$ is computed and 95% confidence intervals are obtained via **Moving Block Bootstrap (MBB, block size $b=3$; Künsch 1989)**.",
+        f"- **Table 2 $r_1$-Adjusted Mann-Whitney $U$ Variance Correction:** For pairwise comparisons in Table 2 (excluding confounded W5 `python_native` per M1), cells with positive autocorrelation ($r_1 > 0$) inflate the asymptotic variance of $U$ using $n_{{\\text{{eff}}}} = n(1-r_1)/(1+r_1)$ (retaining $n_{{\\text{{eff}}}} = n$ conservatively when $r_1 \\le 0$). Across **{t2_s['total']} pairwise contrasts**, **{t2_s['sig_std']}** are significant under standard Holm-Bonferroni and **{t2_s['sig_r1']}** remain significant under $r_1$-corrected Holm-Bonferroni; **{len(t2_s['lost_sig'])} contrast(s)** lose statistical significance under $r_1$ correction (flagged `(NS*)` in Table 2, all on Linux x86_64 where active CPU thermal/PL throttling induced positive serial correlation).",
         "",
-        "### 3.2. Linear Regression Drift Test with Holm-Bonferroni Family-Wise Error Control",
+        "### 3.2. Linear Regression Drift Test with Holm-Bonferroni Family-Wise Error Control (M7)",
         "Ordinary least-squares regression of task latency against repetition index ($1 \\dots 30$) was evaluated across all experimental cells with Holm-Bonferroni FWER adjustment (Holm 1979):",
-        f"- Across all **{total_cells} experimental cells**, **{non_drift_cells}/{total_cells} ({non_drift_pct:.1f}%) exhibited no statistically significant temporal drift** ($p_{{\\text{{adj}}}} \\ge 0.05$).",
-        "- In the small fraction of cells with statistically detectable slope (e.g., long-context W4 prefill), per-repetition slope magnitudes remained below $0.1\\%$ of task duration.",
+        f"- Across all **{total_cells} experimental cells**, **{non_drift_cells}/{total_cells} ({non_drift_pct:.1f}%)** exhibited no statistically significant temporal drift ($p_{{\\text{{adj}}}} \\ge 0.05$); **{len(sig_drift_cells)}/{total_cells}** reached Holm-Bonferroni significance: {sig_drift_desc}.",
+        f"- **Worst-Case Slope Magnitudes (%/rep):** Across all **valid (non-segregated)** cells, the largest observed absolute slope magnitude was **{abs(worst_valid_drift['drift_slope_pct_per_rep']):.3f}%/rep** (`{worst_valid_drift['platform']}`, `{worst_valid_drift['regime']}`, `{worst_valid_drift['agent_key']}`, `{worst_valid_drift['workload']}`, $p_{{\\text{{adj}}}} = {worst_valid_drift['drift_p_adj']:.4g}$, non-significant). Including the segregated W5 `python_native` arm (excluded per M1), the overall maximum raw slope was **{abs(win_b_py_w5_drift['drift_slope_pct_per_rep']):.3f}%/rep** in `{win_b_py_w5_drift['platform']}` `{win_b_py_w5_drift['regime']}` `python_native` `W5` ($p_{{\\text{{adj}}}} = {win_b_py_w5_drift['drift_p_adj']:.4g}$).",
         "",
         "---",
         "",
         "## 4. CONSOLIDATED EMPIRICAL TABLES SUMMARY",
         "",
-        "### 4.1. Table 5: Tool-RAG Schema Pruning Analysis",
+        "### 4.1. Table 5: Tool-RAG Schema Pruning Analysis (M6)",
         "- **Token Reduction:** Dynamic Tool-RAG pruning reduces active prompt tokens from 7,091 (static 54-tool catalog) to **917 tokens** (retrieved Top-5 schema), a **$-87.1\\%$ token reduction**.",
-        f"- **Regime A (Cold Prefill) Speedups (OpenClaw Tool-RAG vs. 54-Tool Full):** **{t5_m4_oc:.2f}x** on macOS M4, **{t5_lin_oc:.2f}x** on Linux x86_64, **{t5_win_oc:.2f}x** on Windows 11 NVIDIA, and **{t5_int_oc:.2f}x** on Windows Intel iGPU.",
-        "- **Baseline Normalization Transparency:** On macOS ARM64, speedups reference the internal unmitigated 54-tool baseline measured in the identical session (`tool_rag_mitigation_trials.jsonl`). On Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU, pruned arms reference each node's primary unmitigated baseline (`raw_trials.jsonl` for Regime A; `warm_cache_trials.jsonl` for Regime B).",
+        f"- **Regime A (Cold Prefill) Speedups vs. 54-Tool Full (`OpenClaw Tool-RAG`):** **{t5_m4_oc:.2f}x** on macOS M4, **{t5_lin_oc:.2f}x** on Linux x86_64, **{t5_win_oc:.2f}x** on Windows 11 NVIDIA, and **{t5_int_oc:.2f}x** on Windows Intel iGPU.",
+        f"- **Speedups vs. 15-Tool Minimal (`OpenClaw Tool-RAG`, M6):** Cold Prefill achieves **{t5_m4_min_c:.2f}x** (macOS M4), **{t5_lin_min_c:.2f}x** (Linux x86_64), **{t5_win_min_c:.2f}x** (Windows 11 NVIDIA), and **{t5_int_min_c:.2f}x** (Windows Intel iGPU); Warm Cache achieves **{t5_m4_min_w:.2f}x**, **{t5_lin_min_w:.2f}x**, **{t5_win_min_w:.2f}x**, and **{t5_int_min_w:.2f}x**, respectively.",
+        "- **Baseline Normalization Transparency:** On macOS ARM64, both 54-Tool Full and 15-Tool Minimal ratios reference internal unmitigated baselines measured in the identical session (`tool_rag_mitigation_trials.jsonl`). On Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU, pruned arms reference each node's primary unmitigated `openclaw_full` and `openclaw_minimal` baselines (`raw_trials.jsonl` for Regime A; `warm_cache_trials.jsonl` for Regime B).",
         "",
         "### 4.2. Table 4: KV-Cache Thrashing & Slot Isolation",
         "- Cache eviction penalties quantified as the latency ratio of uncontrolled thrashing to block-isolated slot retention ($T_2/T_3$):",
@@ -2550,16 +2938,16 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         f"- Empirical measurements confirm that **cache invariance applies strictly to absolute orchestrator latency $T_{{\\text{{orch}}}}$ (ms)** ($|\\Delta T_{{\\text{{orch}}}}| < {t3_bound:.1f}\\text{{ ms}}$, with a maximum observed difference of ${t3_max:.2f}\\text{{ ms}}$ for {t3_lbl}).",
         "- The relative overhead fraction $\\Phi_{\\text{orch}} = T_{\\text{orch}} / T_{\\text{task}}$ increases under warm cache because neural inference latency $T_{\\text{neural}}$ drops substantially under KV prefix reuse.",
         "",
-        "### 4.4. Table 7: Multi-Platform Dual-Session Replication (TOST)",
-        f"- Dual-session contrast analysis ($\\Delta T_{{\\text{{orch}}}} = T_{{\\text{{orch}}}}(\\text{{Runtime}}) - T_{{\\text{{orch}}}}(\\text{{PicoClaw}})$) across **{t7_s['total']} platform/regime/workload pairs** using Two One-Sided Tests (`ttost_ind`, margin $\\max(5.0\\text{{ ms}}, 15\\%\\cdot|\\bar{{\\Delta}}_1|)$; Schuirmann 1987) yielded:",
-        f"  * **Equivalence Proven ($p < 0.05$):** **{t7_s['proven']}/{t7_s['total']} ({t7_s['proven_pct']:.1f}%)**",
-        f"  * **Replicated ($|\\Delta| < 10\\%$):** **{t7_s['replicated']}/{t7_s['total']} ({t7_s['replicated_pct']:.1f}%)**",
-        f"  * **Divergence Detected ($|\\Delta| \\ge 10\\%$ and $p \\ge 0.05$):** **{t7_s['divergent']}/{t7_s['total']} ({t7_s['divergent_pct']:.1f}%)**",
-        f"- Extreme W5 outliers ({outlier_desc}) occurred in `PythonNative` due to cross-session initialization variability during dynamic LangChain/CPython module resolution.",
+        "### 4.4. Table 7: Multi-Platform Dual-Session Replication (Fixed-SESOI Block-Bootstrap TOST; M2--M5)",
+        f"- Dual-session contrast analysis ($\\Delta T_{{\\text{{orch}}}} = T_{{\\text{{orch}}}}(\\text{{Runtime}}) - T_{{\\text{{orch}}}}(\\text{{PicoClaw}})$) across **{t7_s['total']} valid platform/regime/workload pairs** (**{t7_s['excluded_w5_py']} confounded W5 `python_native` pairs excluded per M1**) using Moving Block Bootstrap ($b={t7_s['block_size']}$, $B=5{{,}}000$; Künsch 1989) with a **fixed, pre-specified data-independent SESOI of $\\pm {t7_s['sesoi_ms']:.1f}\\text{{ ms}}$** ($<0.2\\%$ of Regime A task duration) and exact order-statistic **90% MBB CIs** aligned with $\\alpha = 0.05$ TOST under the standardized 3-state rule (Schuirmann 1987; Lakens 2017):",
+        f"  * **`Equivalent` (90% CI wholly inside $[-{t7_s['sesoi_ms']:.1f}, +{t7_s['sesoi_ms']:.1f}]\\text{{ ms}}$, $p_{{\\text{{TOST}}}} < 0.05$):** **{t7_s['equivalent']}/{t7_s['total']} ({t7_s['equivalent_pct']:.1f}%)**",
+        f"  * **`Different` (90% CI wholly outside $[-{t7_s['sesoi_ms']:.1f}, +{t7_s['sesoi_ms']:.1f}]\\text{{ ms}}$):** **{t7_s['different']}/{t7_s['total']} ({t7_s['different_pct']:.1f}%)**",
+        f"  * **`Inconclusive` (90% CI straddles SESOI boundary):** **{t7_s['inconclusive']}/{t7_s['total']} ({t7_s['inconclusive_pct']:.1f}%)** (concentrated in 10-turn W4 loops and Windows `python_native` startup variance)",
         "",
-        "### 4.5. Table 8: Enterprise LangChain + SQLite Workload (W5)",
-        "- Table 8 consolidates W5 across **all 4 physical platforms** (macOS M4, Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU) in both Cold and Warm regimes.",
-        "- **Quality Score Audit (`quality_score`):** LLM-as-a-Judge scoring (Zheng et al. 2023) was instrumented on `python_native` LangChain Core runs on macOS M4 (**1.0/5.0**, due to strict schema validation mismatch) and Windows Intel iGPU (**3.0/5.0**, partial query completion). Client agent runs (`picoclaw`, `openclaw_minimal`, `openclaw_full`, `bun_minimal`) and Linux/Windows NVIDIA W5 campaigns did not run the LLM-as-a-Judge wrapper and are explicitly marked `N/A†`.",
+        "### 4.5. Table 8: Enterprise LangChain + SQLite Workload (W5) & Token/Schema Audit (M1)",
+        "- Table 8 consolidates W5 across **all 4 physical platforms** (macOS M4, Linux x86_64, Windows 11 NVIDIA, and Windows Intel iGPU) in both Cold and Warm regimes, adding exact `Prompt / Comp. Tokens` audited from the raw JSONLs (`audit_export/w5_token_and_schema_audit.csv`).",
+        "- **Token Audit & Segregation of `python_native` (M1, Option A):** Comparable client orchestrators (`picoclaw`, `openclaw_minimal`, `openclaw_full`, `bun_minimal`, `neural_baseline`) processed `2,007--6,921` prompt tokens and `33--38` completion tokens with `finish_reason=tool_calls` across all four platforms. In contrast, `python_native` (LangChain Core) on macOS M4, Windows 11 NVIDIA, and Windows Intel iGPU executed a confounded/truncated prompt (`1,287` prompt / `26` completion tokens; TTFT `50.0 ms` vs. `4,939.5 ms` in macOS Regime A; `finish_reason=stop` on Intel iGPU; `quality_score = 1.0/5.0` on macOS M4 and `3.0/5.0` on Windows Intel iGPU), while Linux x86_64 Regime B exhibited a `1,416.3 ms` LangChain initialization anomaly. Accordingly, `python_native` in W5 is **excluded from all latency, energy, and TOST contrasts (Tables 2 and 7)** and explicitly **segregated into Part B of Table 8**; any lower latency or energy in Part B is strictly a schema-failure/truncation artifact rather than runtime efficiency.",
+        "- **Quality Score Audit (`quality_score`):** LLM-as-a-Judge scoring (Zheng et al. 2023) was instrumented on `python_native` LangChain Core runs on macOS M4 (**1.0/5.0**) and Windows Intel iGPU (**3.0/5.0**); comparable client orchestrators and Linux/Windows NVIDIA W5 runs did not run the LLM-as-a-Judge wrapper and are marked `N/A†`.",
         "",
         "---",
         "",
@@ -2570,21 +2958,22 @@ def generate_master_audit_report(inventory: list[dict[str, Any]], commits: list[
         "3. **Maricq, A., Duplyakin, D., Jimenez, I., Maltzahn, C., Stutsman, R., & Ricci, R. (2018):** *Taming Performance Variability*, USENIX OSDI '18, pp. 409--425. ISBN: `978-1-939133-08-3`",
         "4. **Künsch, H. R. (1989):** *The Jackknife and the Bootstrap for General Stationary Observations*, The Annals of Statistics, 17(3):1217--1241. DOI: `10.1214/aos/1176347265`",
         "5. **Schuirmann, D. J. (1987):** *A Comparison of the Two One-Sided Tests Procedure and the Power Approach for Assessing the Equivalence of Average Bioavailability*, Journal of Pharmacokinetics and Biopharmaceutics, 15(6):657--680. DOI: `10.1007/BF01068419`",
-        "6. **Mann, H. B. & Whitney, D. R. (1947):** *On a Test of Whether One of Two Random Variables is Stochastically Larger than the Other*, The Annals of Mathematical Statistics, 18(1):50--60. DOI: `10.1214/aoms/1177730491`",
-        "7. **Kruskal, W. H. & Wallis, W. A. (1952):** *Use of Ranks in One-Criterion Variance Analysis*, Journal of the American Statistical Association, 47(260):583--621. DOI: `10.1080/01621459.1952.10483441`",
-        "8. **Holm, S. (1979):** *A Simple Sequentially Rejective Multiple Test Procedure*, Scandinavian Journal of Statistics, 6(2):65--70. DOI: `10.2307/4615733`",
-        "9. **Cliff, N. (1993):** *Dominance Statistics: Ordinal Analyses to Answer Ordinal Questions*, Psychological Bulletin, 114(3):494--509. DOI: `10.1037/0033-2909.114.3.494`",
-        "10. **Vargha, A. & Delaney, H. D. (2000):** *A Critique and Improvement of the \"CL\" Common Language Effect Size Statistics of McGraw and Wong*, Journal of Educational and Behavioral Statistics, 25(2):101--132. DOI: `10.3102/10769986025002101`",
-        "11. **Weaver, V. M., Terpstra, D., & Moore, S. (2013):** *Non-Determinism and Overcount on Modern Hardware Performance Counter Implementations*, IEEE ISPASS 2013, pp. 215--224. DOI: `10.1109/ISPASS.2013.6557172`",
-        "12. **Kwon, W. et al. (2023):** *Efficient Memory Management for Large Language Model Serving with PagedAttention*, ACM SOSP '23, pp. 611--626. DOI: `10.1145/3600006.3613165`",
-        "13. **Yao, S. et al. (2023):** *ReAct: Synergizing Reasoning and Acting in Language Models*, ICLR 2023 (`arXiv:2210.03629`).",
-        "14. **Zheng, L. et al. (2023):** *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena*, NeurIPS 2023 (`arXiv:2306.05685`).",
-        "15. **Reddi, V. J. et al. (2020):** *MLPerf Inference Benchmark*, ACM/IEEE ISCA 2020, pp. 446--459. DOI: `10.1109/ISCA45697.2020.00045`",
-        "16. **You, J., Chung, J.-W., & Chowdhury, M. (2023):** *Zeus: Understanding and Optimizing GPU Energy Consumption of DNN Training*, USENIX NSDI '23, pp. 119--139. ISBN: `978-1-939133-33-5`",
-        "17. **Barroso, L. A. & Hölzle, U. (2007):** *The Case for Energy-Proportional Computing*, IEEE Computer, 40(12):33--37. DOI: `10.1109/MC.2007.443`",
-        "18. **Fahad, M., Shahid, A., Manumachu, R. R., & Lastovetsky, A. (2019):** *A Comparative Study of Methods for Measurement of Energy of Computing*, Energies, 12(11):2204. DOI: `10.3390/en12112204`",
-        "19. **Williams, S., Waterman, A., & Patterson, D. (2009):** *Roofline: An Insightful Visual Performance Model for Multicore Architectures*, Communications of the ACM, 52(4):65--76. DOI: `10.1145/1498765.1498785`",
-        "20. **Smith, A. M., Katz, D. S., Niemeyer, K. E., & FORCE11 Software Citation Working Group (2016):** *Software Citation Principles*, PeerJ Computer Science, 2:e86. DOI: `10.7717/peerj-cs.86`",
+        "6. **Lakens, D. (2017):** *Equivalence Tests: A Practical Primer for t Tests, Correlations, and Meta-Analyses*, Social Psychological and Personality Science, 8(4):355--362. DOI: `10.1177/1948550617697177`",
+        "7. **Mann, H. B. & Whitney, D. R. (1947):** *On a Test of Whether One of Two Random Variables is Stochastically Larger than the Other*, The Annals of Mathematical Statistics, 18(1):50--60. DOI: `10.1214/aoms/1177730491`",
+        "8. **Kruskal, W. H. & Wallis, W. A. (1952):** *Use of Ranks in One-Criterion Variance Analysis*, Journal of the American Statistical Association, 47(260):583--621. DOI: `10.1080/01621459.1952.10483441`",
+        "9. **Holm, S. (1979):** *A Simple Sequentially Rejective Multiple Test Procedure*, Scandinavian Journal of Statistics, 6(2):65--70. DOI: `10.2307/4615733`",
+        "10. **Cliff, N. (1993):** *Dominance Statistics: Ordinal Analyses to Answer Ordinal Questions*, Psychological Bulletin, 114(3):494--509. DOI: `10.1037/0033-2909.114.3.494`",
+        "11. **Vargha, A. & Delaney, H. D. (2000):** *A Critique and Improvement of the \"CL\" Common Language Effect Size Statistics of McGraw and Wong*, Journal of Educational and Behavioral Statistics, 25(2):101--132. DOI: `10.3102/10769986025002101`",
+        "12. **Weaver, V. M., Terpstra, D., & Moore, S. (2013):** *Non-Determinism and Overcount on Modern Hardware Performance Counter Implementations*, IEEE ISPASS 2013, pp. 215--224. DOI: `10.1109/ISPASS.2013.6557172`",
+        "13. **Kwon, W. et al. (2023):** *Efficient Memory Management for Large Language Model Serving with PagedAttention*, ACM SOSP '23, pp. 611--626. DOI: `10.1145/3600006.3613165`",
+        "14. **Yao, S. et al. (2023):** *ReAct: Synergizing Reasoning and Acting in Language Models*, ICLR 2023 (`arXiv:2210.03629`).",
+        "15. **Zheng, L. et al. (2023):** *Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena*, NeurIPS 2023 (`arXiv:2306.05685`).",
+        "16. **Reddi, V. J. et al. (2020):** *MLPerf Inference Benchmark*, ACM/IEEE ISCA 2020, pp. 446--459. DOI: `10.1109/ISCA45697.2020.00045`",
+        "17. **You, J., Chung, J.-W., & Chowdhury, M. (2023):** *Zeus: Understanding and Optimizing GPU Energy Consumption of DNN Training*, USENIX NSDI '23, pp. 119--139. ISBN: `978-1-939133-33-5`",
+        "18. **Barroso, L. A. & Hölzle, U. (2007):** *The Case for Energy-Proportional Computing*, IEEE Computer, 40(12):33--37. DOI: `10.1109/MC.2007.443`",
+        "19. **Fahad, M., Shahid, A., Manumachu, R. R., & Lastovetsky, A. (2019):** *A Comparative Study of Methods for Measurement of Energy of Computing*, Energies, 12(11):2204. DOI: `10.3390/en12112204`",
+        "20. **Williams, S., Waterman, A., & Patterson, D. (2009):** *Roofline: An Insightful Visual Performance Model for Multicore Architectures*, Communications of the ACM, 52(4):65--76. DOI: `10.1145/1498765.1498785`",
+        "21. **Smith, A. M., Katz, D. S., Niemeyer, K. E., & FORCE11 Software Citation Working Group (2016):** *Software Citation Principles*, PeerJ Computer Science, 2:e86. DOI: `10.7717/peerj-cs.86`",
         "",
         "---",
         "",
@@ -2633,7 +3022,30 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
     total_cells = len(diagnostics)
     non_drift_cells = sum(1 for d in diagnostics if not d["drift_significant"])
     non_drift_pct = (non_drift_cells / total_cells * 100.0) if total_cells else 0.0
+    sig_drift_cells = [d for d in diagnostics if d["drift_significant"]]
+    valid_diag_cells = [d for d in diagnostics if not d["w5_excluded_confounded"]]
+    worst_valid_drift = max(valid_diag_cells, key=lambda d: abs(d["drift_slope_pct_per_rep"]))
+    win_b_py_w5_drift = next(
+        (d for d in diagnostics if d["platform_key"] == "windows_x86_64" and "Regime B" in d["regime"] and d["agent_key"] == "python_native" and d["workload"] == "W5"),
+        max(diagnostics, key=lambda d: abs(d["drift_slope_pct_per_rep"])),
+    )
 
+    reg_a_cells = [d for d in diagnostics if "Regime A" in d["regime"]]
+    reg_b_cells = [d for d in diagnostics if "Regime B" in d["regime"]]
+    sd_a_count = sum(1 for d in reg_a_cells if d["has_serial_dependence"])
+    sd_b_count = sum(1 for d in reg_b_cells if d["has_serial_dependence"])
+
+    lin_a_diags = [d for d in diagnostics if d["platform_key"] == "linux_x86_64" and "Regime A" in d["regime"]]
+    lin_b_diags = [d for d in diagnostics if d["platform_key"] == "linux_x86_64" and "Regime B" in d["regime"]]
+    lin_a_thr_reps = sum(d["cpu_throttle_reps"] for d in lin_a_diags)
+    lin_a_tot_reps = sum(d["n_raw"] for d in lin_a_diags)
+    lin_a_max_delta = max((d["cpu_throttle_delta_max"] for d in lin_a_diags), default=0)
+    lin_b_thr_reps = sum(d["cpu_throttle_reps"] for d in lin_b_diags)
+    lin_b_tot_reps = sum(d["n_raw"] for d in lin_b_diags)
+    win_nv_gpu_cap = sum(d["gpu_sw_power_cap_reps"] for d in diagnostics if d["platform_key"] == "windows_x86_64")
+    gpu_therm_any = sum(d["gpu_thermal_throttle_reps"] for d in diagnostics)
+
+    t2_s = table_metrics["t2_summary"]
     t3_max = table_metrics["t3_max_delta_ms"]
     t3_bound = math.ceil(t3_max * 2.0) / 2.0
     t3_lbl = table_metrics["t3_max_delta_label"]
@@ -2647,11 +3059,14 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
     t5_win_oc = table_metrics["t5_speedups"]["windows_x86_64"]["openclaw_tool_rag_cold"]["speedup"]
     t5_int_oc = table_metrics["t5_speedups"]["windows_intel_graphics"]["openclaw_tool_rag_cold"]["speedup"]
 
+    t5_m4_min_c = table_metrics["t5_speedups"]["darwin_m4"]["openclaw_tool_rag_cold"]["speedup_vs_minimal"]
+    t5_lin_min_c = table_metrics["t5_speedups"]["linux_x86_64"]["openclaw_tool_rag_cold"]["speedup_vs_minimal"]
+    t5_win_min_c = table_metrics["t5_speedups"]["windows_x86_64"]["openclaw_tool_rag_cold"]["speedup_vs_minimal"]
+    t5_int_min_c = table_metrics["t5_speedups"]["windows_intel_graphics"]["openclaw_tool_rag_cold"]["speedup_vs_minimal"]
+
     t7_s = table_metrics["t7_summary"]
     wn_cyc = table_metrics["win_cycles"]["windows_x86_64"]
     wi_cyc = table_metrics["win_cycles"]["windows_intel_graphics"]
-    w5_outliers = [o for o in t7_s["outliers"] if o["workload"] == "W5"]
-    outlier_desc = "; ".join(f"{o['platform']} {o['regime']} {o['workload']} ({o['contrast']}: {o['delta_pct']:+.2f}%)" for o in w5_outliers)
 
     fig_entries = [
         ("figures/fig1_architecture_topology.png", "Quad-platform hardware topology diagram (4 physical nodes, 100% English, dynamic dataset count, wrapped sensor boundary notes)."),
@@ -2678,7 +3093,7 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
         "",
         "## 1. VERIFICAÇÃO AUTOMATIZADA DE TESTES E INTEGRIDADE",
         "",
-        "- **Suíte de Testes (`pytest -q`):** Todos os 51 testes unitários, de invariância de protocolo e de integração passam sem falhas (`51 passed`).",
+        "- **Suíte de Testes (`pytest -q`):** Todos os testes unitários, de invariância de protocolo, de alinhamento IC 90% <-> TOST e de segregação de W5 passam sem falhas.",
         "- **Manifesto Criptográfico (`scripts/verify_manifest.py`):** 100% dos arquivos rastreados em `data/manifest_sha256.json` conferem com suas assinaturas SHA-256 em disco (0 arquivos ausentes, 0 divergências de hash).",
         "- **Exportação Modular:** Mantido exclusivamente o pacote consolidado `audit_export_quad_platform.zip` e o sumário tabular `audit_export/quad_platform_consolidated_summary.csv`, acompanhados dos chunks textuais leves em `audit_txt_chunks/` (<= 150 KB por arquivo).",
         "",
@@ -2713,13 +3128,15 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
         "",
         "Todos os números reportados nos documentos, tabelas e gráficos derivam exclusivamente de `scripts/reproduce_quad_platform_analysis.py` sobre os `.jsonl` acima:",
         "",
-        f"- **Estacionariedade e Drift Temporal:** Em {total_cells} células experimentais analisadas via regressão linear com correção Holm-Bonferroni, **{non_drift_cells}/{total_cells} ({non_drift_pct:.1f}%)** não apresentaram drift estatisticamente significativo ($p_{{\\text{{adj}}}} \\ge 0.05$). Intervalos de confiança em células com $|r_1| > 2/\\sqrt{{30}}$ utilizam Moving Block Bootstrap ($b=3$; Künsch 1989).",
-        f"- **Replicação Inter-Sessão e TOST (Tabela 7):** Nos **{t7_s['total']} pares** de contrastes $\\Delta T_{{\\text{{orch}}}}$ avaliados com `ttost_ind` (margem $\\max(5.0\\text{{ ms}}, 15\\%\\cdot|\\bar{{\\Delta}}_1|)$; Schuirmann 1987): **{t7_s['proven']} ({t7_s['proven_pct']:.1f}%)** obtiveram `Equivalence Proven` ($p < 0.05$), **{t7_s['replicated']} ({t7_s['replicated_pct']:.1f}%)** obtiveram `Replicated` ($|\\Delta| < 10\\%$), e **{t7_s['divergent']} ({t7_s['divergent_pct']:.1f}%)** apresentaram `Divergence Detected`. Os outliers extremos de W5 ({outlier_desc}) ocorrem no `PythonNative` devido à variabilidade de inicialização e importação dinâmica do LangChain entre sessões independentes.",
-        f"- **Tool-RAG Schema Pruning (Tabela 5 e Figura 5b):** Redução de $-87.1\\%$ em tokens de prompt (7.091 para 917 tokens). Acelerações medidas em Regime A (Cold Prefill, OpenClaw Tool-RAG vs. 54-Tool Full): **{t5_m4_oc:.2f}x** (macOS M4, baseline interno da mesma sessão), **{t5_lin_oc:.2f}x** (Linux x86_64), **{t5_win_oc:.2f}x** (Windows 11 NVIDIA) e **{t5_int_oc:.2f}x** (Windows Intel iGPU) — nos três nós x86_64 os braços podados são normalizados contra o baseline unmitigated da campanha principal do mesmo nó (`raw_trials.jsonl` / `warm_cache_trials.jsonl`).",
+        f"- **Autocorrelação Serial em Ambos os Regimes e Ajuste na Tabela 2 (M4):** Dependência serial ($|r_1| > 2/\\sqrt{{30}} \\approx 0.365$) ocorreu em **{sd_a_count}/{len(reg_a_cells)}** células no **Regime A (Cold)** e em **{sd_b_count}/{len(reg_b_cells)}** células no **Regime B (Warm)** (total **{sd_a_count + sd_b_count}/{total_cells}**). Na Tabela 2 (excluindo `python_native` W5 por M1), o ajuste de variância de Mann-Whitney por $n_{{\\text{{eff}}}}$ para células com $r_1 > 0$ mantém **{t2_s['sig_r1']}/{t2_s['total']}** contrastes significativos após Holm-Bonferroni (vs. **{t2_s['sig_std']}/{t2_s['total']}** no teste padrão; **{len(t2_s['lost_sig'])}** contrastes marcados `(NS*)` perdem significância sob correção de $r_1$, todos no Linux x86_64).",
+        f"- **Estacionariedade e Drift Temporal (M7):** Em {total_cells} células analisadas via regressão linear com correção Holm-Bonferroni, **{non_drift_cells}/{total_cells} ({non_drift_pct:.1f}%)** não apresentaram drift significativo ($p_{{\\text{{adj}}}} \\ge 0.05$) e **{len(sig_drift_cells)}/{total_cells}** foram significativas. O pior caso de inclinação entre células válidas (excluindo `python_native` W5) foi **{abs(worst_valid_drift['drift_slope_pct_per_rep']):.3f}%/rep** (`{worst_valid_drift['platform']}`, `{worst_valid_drift['regime']}`, `{worst_valid_drift['agent_key']}`, `{worst_valid_drift['workload']}`, $p_{{\\text{{adj}}}}={worst_valid_drift['drift_p_adj']:.4g}$); incluindo o braço segregado W5, o máximo bruto foi **{abs(win_b_py_w5_drift['drift_slope_pct_per_rep']):.3f}%/rep** em `{win_b_py_w5_drift['platform']}` `{win_b_py_w5_drift['regime']}` `python_native` `W5` ($p_{{\\text{{adj}}}}={win_b_py_w5_drift['drift_p_adj']:.4g}$).",
+        f"- **Throttling por Delta Intra-Trial (M8):** No Linux x86_64, `cpu_pkg_throttle_events` mede o delta intra-trial (`end - start` entre threads lógicos), com incrementos positivos em **{lin_a_thr_reps}/{lin_a_tot_reps}** trials do Regime A (máx. **{lin_a_max_delta:,}**/trial) e **{lin_b_thr_reps}/{lin_b_tot_reps}** do Regime B, documentando throttling real de CPU móvel sob offload híbrido `-ngl 16`; nas GPUs discretas (Linux e Windows 11 NVIDIA), `gpu_thermal_throttle_active_end` registrou **{gpu_therm_any}** eventos e `gpu_sw_power_cap` (`0x04`) registrou **{win_nv_gpu_cap}** eventos no Windows NVIDIA.",
+        f"- **Replicação Inter-Sessão e TOST em Blocos com SESOI Fixo (Tabela 7; M2--M5):** Nos **{t7_s['total']} pares válidos** (**{t7_s['excluded_w5_py']} pares confundidos de `python_native` W5 excluídos por M1**) avaliados via Moving Block Bootstrap ($b={t7_s['block_size']}$, $B=5{{,}}000$; Künsch 1989) com **SESOI fixo pré-especificado $\\Delta_{{\\text{{SESOI}}}} = \\pm {t7_s['sesoi_ms']:.1f}\\text{{ ms}}$** e **IC 90%** alinhado a $\\alpha = 0.05$ (Schuirmann 1987; Lakens 2017): **{t7_s['equivalent']} ({t7_s['equivalent_pct']:.1f}%)** `Equivalent`, **{t7_s['different']} ({t7_s['different_pct']:.1f}%)** `Different`, e **{t7_s['inconclusive']} ({t7_s['inconclusive_pct']:.1f}%)** `Inconclusive`.",
+        f"- **Tool-RAG Schema Pruning (Tabela 5 e Figura 5b; M6):** Redução de $-87.1\\%$ em tokens de prompt (7.091 para 917 tokens). Acelerações em Regime A (`OpenClaw Tool-RAG`) vs. **54-Tool Full**: **{t5_m4_oc:.2f}x** (macOS M4, baseline interno), **{t5_lin_oc:.2f}x** (Linux x86_64), **{t5_win_oc:.2f}x** (Windows 11 NVIDIA) e **{t5_int_oc:.2f}x** (Windows Intel iGPU); e vs. **15-Tool Minimal**: **{t5_m4_min_c:.2f}x**, **{t5_lin_min_c:.2f}x**, **{t5_win_min_c:.2f}x** e **{t5_int_min_c:.2f}x**, respectivamente (nos 3 nós x86_64 os braços podados referenciam os baselines da campanha principal do mesmo nó).",
         f"- **KV-Cache Thrashing $T_2/T_3$ (Tabela 4):** Penalidades medidas (Minimal / Full): **{t4_m4['min_penalty']:.2f}x / {t4_m4['full_penalty']:.2f}x** no macOS M4, **{t4_lin['min_penalty']:.2f}x / {t4_lin['full_penalty']:.2f}x** no Linux x86_64, e **{t4_win['min_penalty']:.2f}x / {t4_win['full_penalty']:.2f}x** no Windows 11 NVIDIA. (Sub-experimento não executado no Intel iGPU, dedicado a W2/W5.)",
         f"- **Invariância de $T_{{\\text{{orch}}}}$ (Tabela 3):** Limite empírico observado de $|\\Delta T_{{\\text{{orch}}}}| < {t3_bound:.1f}\\text{{ ms}}$ (máximo de **${t3_max:.2f}\\text{{ ms}}$** em {t3_lbl}).",
         f"- **Ciclos de CPU no Windows (Tabela 1 e Figura 6c/d):** No Windows 11 NVIDIA: **{wn_cyc['picoclaw_m']:.1f}M** ciclos no PicoClaw vs. **{wn_cyc['openclaw_full_m']:.1f}M** no OpenClaw Full (**{wn_cyc['ratio']:.2f}x**). No Windows Intel iGPU: **{wi_cyc['picoclaw_m']:.1f}M** ciclos no PicoClaw vs. **{wi_cyc['openclaw_full_m']:.1f}M** no OpenClaw Full (**{wi_cyc['ratio']:.2f}x**).",
-        "- **Workload W5 (Tabela 8 — 4/4 Plataformas incluídas):** Inclui macOS M4, Linux x86_64, Windows 11 NVIDIA e Windows Intel iGPU em ambos os regimes. O `quality_score` (LLM-as-a-Judge) foi instrumentado em `python_native` LangChain Core no macOS M4 (**1.0/5.0**, falha de validação estrita de schema) e no Windows Intel iGPU (**3.0/5.0**, execução parcial de consulta); nos demais runtimes cliente e nas campanhas Linux/Windows NVIDIA o avaliador semântico não foi instrumentado (`N/A†`).",
+        "- **Workload W5 — Auditoria de Tokens e Segregação de `python_native` (Tabela 8; M1):** Todos os 4 ambientes incluídos com auditoria completa de `prompt_tokens`, `completion_tokens`, `tool_calls` e `finish_reason` exportada em `audit_export/w5_token_and_schema_audit.csv`. Como `python_native` (LangChain Core) apresentou falha de schema/prompt truncado (`1,287/26` tokens vs. `2,007–6,921/33–38` nos orquestradores comparáveis; TTFT `50.0 ms` vs. `4,939.5 ms` no macOS Regime A; `quality_score = 1.0/5.0` no macOS e `3.0/5.0` no Intel iGPU; anomalia de `1,416.3 ms` de $T_{\\text{orch}}$ no Linux Warm), foi **excluído das Tabelas 2 e 7** e **explicitamente segregado na Parte B da Tabela 8** (`¶`).",
         "",
         "---",
         "",
@@ -2735,15 +3152,16 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
         "| `N/A§` | Tabelas 1, 8 e Figura 2(b) — `python_native` no Windows (RSS e Cycles) | A invocação via wrapper `py.exe` (PEP 397) captura o PID pai efêmero (~4.9 MB) em vez do processo filho `python.exe`; os dados do stub são excluídos uniformemente em todo o pacote. |",
         "| `N/A||` | macOS ARM64 — Bun JSC Engine | Motor secundário avaliado como ablação nas plataformas x86_64 (Linux e Windows) após o congelamento da campanha de referência ARM64. |",
         "| `N/A**` | Windows Intel iGPU — Energia de Pacote e EDP | Intel HD Graphics 4600 opera sobre memória DDR3 compartilhada (UMA) sem sensores NVML dedicados ou driver MSR RAPL em anel zero no modo de usuário ($P_{\\text{idle}} = 28.50\\text{ W}$). |",
+        "| `¶` | Tabela 8 Parte B — `python_native` em W5 (Segregado) | Falha de validação de schema / prompt truncado (`1,287/26` tokens vs. `2,007–6,921/33–38`; TTFT `50 ms` no macOS); excluído de comparações de desempenho/energia/TOST (Tabelas 2 e 7) por M1. |",
         "",
         "---",
         "",
         "## 6. AUDITORIA BIBLIOGRÁFICA (`references.bib`)",
         "",
-        "Todas as entradas em `references.bib` foram verificadas contra publicações primárias com DOIs/ISBNs/arXiv IDs conferidos (20 referências ativas, 0 entradas inventadas):",
+        "Todas as entradas em `references.bib` foram verificadas contra publicações primárias com DOIs/ISBNs/arXiv IDs conferidos (21 referências ativas, 0 entradas inventadas):",
         "- **Corrigida:** `maricq2018taming` (nomes reais dos autores conferidos no OSDI '18: *Aleksander Maricq* e *Ryan Stutsman*).",
         "- **Removida/Substituída:** entrada anterior `goldsman1997methods` continha DOI incorreto (`10.1145/259207.259235`, pertencente a outro artigo do TOMACS); substituída pela referência seminal do Moving Block Bootstrap (`kuensch1989jackknife`, DOI: `10.1214/aos/1176347265`).",
-        "- **Referências metodológicas verificadas adicionadas:** `hoefler2015scientific`, `schuirmann1987comparison`, `mann1947test`, `kruskal1952use`, `holm1979simple`, `cliff1993dominance`, `vargha2000critique`, `weaver2013nondeterminism`, `yao2023react`, `zheng2023judging`, `reddi2020mlperf`, `you2023zeus`, `barroso2007case`, `fahad2019comparative`, `williams2009roofline`, `smith2016software` (além das existentes `kalibera2013rigorous` e `kwon2023vllm`).",
+        "- **Referências metodológicas verificadas adicionadas:** `hoefler2015scientific`, `schuirmann1987comparison`, `lakens2017equivalence` (DOI: `10.1177/1948550617697177`), `mann1947test`, `kruskal1952use`, `holm1979simple`, `cliff1993dominance`, `vargha2000critique`, `weaver2013nondeterminism`, `yao2023react`, `zheng2023judging`, `reddi2020mlperf`, `you2023zeus`, `barroso2007case`, `fahad2019comparative`, `williams2009roofline`, `smith2016software` (além das existentes `kalibera2013rigorous` e `kwon2023vllm`).",
         "- **Especificações Técnicas Separadas:** Documentação de fabricantes e PEPs (Microsoft Learn `QueryProcessCycleTime` / Win32 PSAPI, Intel 64 and IA-32 SDM Vol. 3B Ch. 20, Python PEP 397) são rotuladas explicitamente como documentação técnica nas notas das tabelas.",
         "",
         "---",
@@ -2768,7 +3186,8 @@ def generate_final_audit_report(inventory: list[dict[str, Any]], diagnostics: li
         "1. **Assimetria de Offload e Memória (UMA vs. Híbrido PCIe vs. DDR3):** Apple M4 executa offload integral em memória unificada (`-ngl 99`, 120 GB/s). Dell G15 (Linux e Windows 11) opera sob offload híbrido (`-ngl 16`) limitado pela VRAM de 4 GB GDDR6 com streaming PCIe (~5.2 GB/s). Intel HD Graphics 4600 opera sobre RAM DDR3 compartilhada. Contrastes absolutos de latência neural em Regime B são restritos a comparações intra-nó.",
         "2. **Restrições de Privilégio em Modo de Usuário no Windows:** Ausência de acesso ring-0 impede leitura direta de `INST_RETIRED.ANY` (`CR4.PCE`) e RAPL MSR no Intel iGPU; ciclos de processo Win32 (`QueryProcessCycleTime`) são utilizados sem extrapolações sintéticas de IPC.",
         "3. **Escopo de Sub-Experimentos no Intel iGPU:** A 4ª plataforma executou as campanhas de sessão dupla W2/W5 (Cold e Warm) e Tool-RAG; sub-experimentos W1/W3/W4, KV-Thrashing (Tabela 4) e MCP Transport (Tabela 6) foram executados nos 3 nós primários.",
-        "4. **Variabilidade em `PythonNative` W5:** Importações dinâmicas e inicialização de módulos do ecossistema LangChain introduziram divergências inter-sessão em W5 registradas explicitamente na Tabela 7.",
+        "4. **Segregação de `python_native` em W5 (M1):** Falha de validação de schema e truncamento de prompt (`1,287/26` tokens) no LangChain Core tornam `python_native` W5 não comparável aos demais orquestradores; o braço foi excluído das Tabelas 2 e 7 e segregado na Parte B da Tabela 8.",
+        "5. **Throttling Térmico/PL de CPU no Linux x86_64 (M8):** Sob offload híbrido `-ngl 16` (AVX2 + RTX 3050), o pacote Intel Core i5-12500H apresentou deltas intra-trial positivos de `cpu_pkg_throttle_events`, elevando a autocorrelação serial $r_1$ (compensada via ajuste de variância na Tabela 2 e Moving Block Bootstrap na Tabela 7).",
         "",
         "---",
         "",

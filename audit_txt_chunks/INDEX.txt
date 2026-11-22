@@ -6,12 +6,12 @@ a todo o acervo empírico e analítico do benchmark PicoClaw vs. OpenClaw (Quad-
 
 ARQUIVOS DE TEXTO FATIADOS (.TXT):
 --------------------------------------------------------------------------------
-1. audit_pt1_report_and_checklist.txt  (47.0 KB)
+1. audit_pt1_report_and_checklist.txt  (52.5 KB)
    - Contém: AUDIT_REPORT_FINAL.md + audit_export/Systems_Replication_Report.md
    - Foco: Inventário real de 35 datasets JSONL em disco, verificação de integridade,
            taxonomia completa de N/A, auditoria bibliográfica e replicação de sistemas.
 
-2. audit_pt2_tables.txt  (64.2 KB)
+2. audit_pt2_tables.txt  (65.7 KB)
    - Contém: Tabelas 1 a 8 consolidadas em formato Markdown
      * Table 1: Master Systems & Microarchitectural Conformance (W2)
      * Table 2: Non-Parametric Hypothesis Tests (Mann-Whitney, Cliff's delta, Holm-Bonferroni)
@@ -22,7 +22,7 @@ ARQUIVOS DE TEXTO FATIADOS (.TXT):
      * Table 7: Dual-Session TOST Equivalence Tests
      * Table 8: Enterprise Workload W5 across all 4 Platforms (LangChain + SQLite)
 
-3. audit_pt3_summary_and_diagnostics.txt  (117.9 KB)
+3. audit_pt3_summary_and_diagnostics.txt  (133.0 KB)
    - Contém:
      * quad_platform_consolidated_summary.csv (Todas as 190 células em CSV plano)
      * anomaly_and_cache_diagnostics.csv (Autocorrelação r1, n_eff, drift e thermal masks)
@@ -53,7 +53,7 @@ LOCALIZAÇÃO DAS FIGURAS DE ALTA RESOLUÇÃO (300 DPI):
   Figure 3: Client Orchestration Latency T_orch (4 Platforms) & Middleware Ratio Phi_orch with W3 Inversion
 - fig4_exp3_energy_edp.png (404,056 bytes | SHA-256: 10ce315ede6898d6ce9579d3b3093f59e22880b1db1f66000c3864e0e4e4b475)
   Figure 4: Net Dynamic Energy Dissipation & Energy-Delay Product (W2, Within-Node Sensor Domains)
-- fig5_exp4_tools_and_bloat.png (300,238 bytes | SHA-256: da6431994273aab04df3260ffd2f366c4a1da07cb14ebabccf0dc146f21ea4e5)
+- fig5_exp4_tools_and_bloat.png (297,202 bytes | SHA-256: 9eabf3b4d538c0930c8674cd2b2aad66efdbff0da77d845c8d0088ea0787791f)
   Figure 5: Tool Context Bloat Overhead (Linux) & Quad-Platform Tool-RAG Speedups
 - fig6_pmc_hardware_counters.png (531,565 bytes | SHA-256: 993d02190119dced683fd666955b47f47bed7f2cddc9760fbd594a91740e79e7)
   Figure 6: Quad-Platform PMC Retired Instructions (ARM64/Linux), Windows CPU Cycles & Relative Bloat Ratios

@@ -1,61 +1,67 @@
 \begin{table*}[t]
 \small
 \centering
-\caption{Workload W5 Enterprise Cross-Domain Workflow (LangChain Core + SQLite + LLM-as-a-Judge) across all 4 experimental platforms and execution regimes ($N=30$ trials per condition). Evaluates end-to-end task duration, orchestrator dispatch delay, memory footprint, microarchitectural retired instructions, and LLM-as-a-judge quality score adherence (1--5).}
+\caption{Workload W5 Enterprise Cross-Domain Workflow (LangChain Core + SQLite + LLM-as-a-Judge) across all 4 experimental platforms and execution regimes ($N=30$ trials per condition), with prompt/completion token audit (M1). Part~A lists comparable client orchestrators and the direct neural baseline. Part~B segregates \texttt{python\_native} (LangChain Core), which is excluded from W5 latency/energy/TOST contrasts (Tables~2 and~7) due to schema validation failure and confounded/truncated prompts ($1{,}287/26$ tokens vs. $2{,}007\text{--}6{,}921/33\text{--}38$ tokens on macOS/Windows; TTFT $\approx 50$~ms on macOS; \texttt{quality\_score} $= 1.0/5.0$).}
 \label{tab:w5_enterprise_workload}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{lllccccccc}
+\begin{tabular}{lllcccccccc}
 \toprule
-\textbf{Platform OS} & \textbf{Regime} & \textbf{Runtime} & \textbf{$T_{\text{task}}$ (ms) [IQR]} & \textbf{95\% CI} & \textbf{$T_{\text{orch}}$} & \textbf{RSS (MB)} & \textbf{Instr / Cycles} & \textbf{Energy / EDP} & \textbf{Score} \\
+\textbf{Platform OS} & \textbf{Regime} & \textbf{Runtime} & \textbf{Prompt / Comp.} & \textbf{$T_{\text{task}}$ (ms) [IQR]} & \textbf{95\% CI} & \textbf{$T_{\text{orch}}$} & \textbf{RSS (MB)} & \textbf{Instr / Cycles} & \textbf{Energy / EDP} & \textbf{Score} \\
 \midrule
-macOS ARM64 (M4) & Regime A (Cold) & picoclaw & 5644.4 [55.5] & [5637.6, 5669.9] & 4.7 & 4.2 & 41.1M / 25.0M & 93.9J / 531.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-macOS ARM64 (M4) & Regime A (Cold) & openclaw\_minimal & 4989.1 [27.2] & [4982.4, 5002.9] & 19.9 & 37.2 & 777.7M / 295.1M & 83.7J / 418.0J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-macOS ARM64 (M4) & Regime A (Cold) & openclaw\_full & 18092.6 [46.7] & [18082.5, 18104.0] & 23.8 & 37.3 & 779.8M / 300.0M & 300.8J / 5436.0J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-macOS ARM64 (M4) & Regime A (Cold) & python\_native & 670.6 [30.6] & [658.4, 679.1] & 33.4 & 56.5 & 2731.9M / 1177.3M & 9.9J / 6.6J\,$\cdot$\,s & 1.0/5.0 \\
-macOS ARM64 (M4) & Regime A (Cold) & neural\_baseline & 5504.6 [45.9] & [5489.5, 5518.7] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 92.2J / 506.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-macOS ARM64 (M4) & Regime B (Warm) & picoclaw & 984.9 [31.4] & [980.1, 992.3] & 3.2 & 4.3 & 40.8M / 24.2M & 12.6J / 12.4J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-macOS ARM64 (M4) & Regime B (Warm) & openclaw\_minimal & 914.7 [26.4] & [907.8, 920.9] & 18.6 & 37.3 & 776.7M / 293.6M & 12.3J / 11.4J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-macOS ARM64 (M4) & Regime B (Warm) & openclaw\_full & 1131.8 [24.3] & [1126.1, 1135.8] & 22.6 & 37.3 & 777.2M / 294.7M & 14.7J / 16.7J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-macOS ARM64 (M4) & Regime B (Warm) & python\_native & 650.7 [16.6] & [647.0, 655.3] & 8.7 & 56.5 & 2615.5M / 1083.8M & 10.0J / 6.5J\,$\cdot$\,s & 1.0/5.0 \\
-macOS ARM64 (M4) & Regime B (Warm) & neural\_baseline & 851.9 [20.2] & [846.2, 858.3] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 11.0J / 9.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime A (Cold) & picoclaw & 3100.7 [28.0] & [3084.6, 3119.2] & 4.3 & 8.8 & 11.0M / 18.7M & 245.6J / 762.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime A (Cold) & openclaw\_minimal & 2711.1 [28.4] & [2702.3, 2721.5] & 28.9 & 85.0 & 745.5M / 480.9M & 213.9J / 581.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime A (Cold) & openclaw\_full & 8258.5 [39.7] & [8142.4, 8294.0] & 34.1 & 85.6 & 802.1M / 523.8M & 594.4J / 4909.0J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime A (Cold) & python\_native & 3114.1 [30.1] & [3097.6, 3809.2] & 17.1 & 40.2 & 2674.4M / 4799.1M & 252.6J / 784.4J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime A (Cold) & bun\_minimal & 3092.7 [38.3] & [3078.3, 3104.8] & 5.0 & 23.0 & 51.2M / 64.7M & 246.2J / 761.6J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime A (Cold) & neural\_baseline & 2896.6 [33.1] & [2861.7, 2912.2] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 220.5J / 634.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime B (Warm) & picoclaw & 1580.9 [32.6] & [1564.2, 1585.0] & 4.9 & 8.8 & 11.2M / 19.2M & 111.2J / 175.8J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime B (Warm) & openclaw\_minimal & 1419.6 [31.0] & [1408.4, 1425.6] & 27.8 & 85.1 & 744.6M / 502.8M & 100.8J / 143.5J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime B (Warm) & openclaw\_full & 3117.6 [29.7] & [3111.0, 3127.8] & 33.3 & 85.6 & 747.1M / 510.4M & 177.9J / 554.9J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime B (Warm) & python\_native & 2992.4 [56.8] & [2980.0, 3027.3] & 1416.3 & 87.4 & 4669.0M / 6471.4M & 196.5J / 588.2J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime B (Warm) & bun\_minimal & 1571.4 [32.1] & [1565.2, 1576.7] & 5.4 & 22.8 & 48.1M / 59.4M & 109.1J / 171.0J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Linux x86\_64 & Regime B (Warm) & neural\_baseline & 1387.0 [23.9] & [1377.3, 1394.2] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 95.7J / 133.9J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime A (Cold) & picoclaw & 3296.4 [115.2] & [3263.3, 3351.8] & 10.0 & 9.3 & N/A\textsuperscript{*} / 41.7M & 154.1J / 510.1J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime A (Cold) & openclaw\_minimal & 2921.1 [101.4] & [2908.5, 2960.2] & 37.2 & 71.7 & N/A\textsuperscript{*} / 511.3M & 135.7J / 397.4J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime A (Cold) & openclaw\_full & 8333.4 [114.6] & [8303.3, 8379.0] & 44.7 & 71.7 & N/A\textsuperscript{*} / 560.0M & 472.6J / 3940.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime A (Cold) & python\_native & 2094.0 [101.2] & [2070.5, 2125.5] & 149.7 & N/A\textsuperscript{\S} & N/A\textsuperscript{*} / N/A\textsuperscript{\S} & 92.4J / 192.7J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime A (Cold) & bun\_minimal & 3279.0 [93.0] & [3240.5, 3307.9] & 13.4 & 24.3 & N/A\textsuperscript{*} / 126.5M & 155.8J / 510.6J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime A (Cold) & neural\_baseline & 2958.5 [93.8] & [2930.9, 2990.3] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 141.6J / 422.2J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime B (Warm) & picoclaw & 1969.2 [36.8] & [1960.0, 1985.4] & 9.5 & 9.3 & N/A\textsuperscript{*} / 41.1M & 47.1J / 92.7J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime B (Warm) & openclaw\_minimal & 1844.9 [54.5] & [1821.2, 1855.3] & 36.6 & 71.7 & N/A\textsuperscript{*} / 563.4M & 46.3J / 85.4J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime B (Warm) & openclaw\_full & 4122.9 [69.3] & [4103.7, 4152.7] & 44.2 & 71.8 & N/A\textsuperscript{*} / 587.1M & 88.5J / 365.0J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime B (Warm) & python\_native & 1203.0 [70.2] & [1188.0, 1219.0] & 23.6 & N/A\textsuperscript{\S} & N/A\textsuperscript{*} / N/A\textsuperscript{\S} & 43.7J / 52.2J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime B (Warm) & bun\_minimal & 1963.2 [50.8] & [1934.4, 1990.9] & 12.5 & 24.3 & N/A\textsuperscript{*} / 113.0M & 49.2J / 96.6J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows 11 NVIDIA & Regime B (Warm) & neural\_baseline & 1690.7 [45.6] & [1679.2, 1706.1] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 40.6J / 68.6J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
-Windows Intel iGPU & Regime A (Cold) & picoclaw & 56885.1 [1330.3] & [56641.5, 57213.9] & 11.3 & 7.3 & N/A\textsuperscript{*} / 77.2M & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
-Windows Intel iGPU & Regime A (Cold) & openclaw\_minimal & 50064.3 [903.7] & [49850.6, 50503.8] & 51.3 & 52.2 & N/A\textsuperscript{*} / 1319.9M & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
-Windows Intel iGPU & Regime A (Cold) & python\_native & 31058.6 [732.9] & [30745.6, 31210.2] & 116.1 & N/A\textsuperscript{\S} & N/A\textsuperscript{*} / N/A\textsuperscript{\S} & N/A\textsuperscript{**} & 3.0/5.0 \\
-Windows Intel iGPU & Regime A (Cold) & neural\_baseline & 54283.0 [1217.2] & [54065.1, 54624.6] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
-Windows Intel iGPU & Regime B (Warm) & picoclaw & 6280.3 [113.4] & [6236.5, 6323.3] & 10.9 & 7.4 & N/A\textsuperscript{*} / 76.7M & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
-Windows Intel iGPU & Regime B (Warm) & openclaw\_minimal & 5671.7 [154.3] & [5630.5, 5745.8] & 50.8 & 53.5 & N/A\textsuperscript{*} / 1157.6M & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
-Windows Intel iGPU & Regime B (Warm) & python\_native & 3733.7 [54.7] & [3721.7, 3754.0] & 72.0 & N/A\textsuperscript{\S} & N/A\textsuperscript{*} / N/A\textsuperscript{\S} & N/A\textsuperscript{**} & 3.0/5.0 \\
-Windows Intel iGPU & Regime B (Warm) & neural\_baseline & 5271.6 [93.4] & [5223.1, 5284.9] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
+\multicolumn{11}{l}{\textbf{Part A: Comparable W5 Orchestrators \& Direct Neural Baseline}} \\
+\midrule
+macOS ARM64 (M4) & Regime A (Cold) & picoclaw & 2259 / 38 & 5644.4 [55.5] & [5637.6, 5669.9] & 4.7 & 4.2 & 41.1M / 25.0M & 93.9J / 531.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+macOS ARM64 (M4) & Regime A (Cold) & openclaw\_minimal & 2007 / 35 & 4989.1 [27.2] & [4982.4, 5002.9] & 19.9 & 37.2 & 777.7M / 295.1M & 83.7J / 418.0J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+macOS ARM64 (M4) & Regime A (Cold) & openclaw\_full & 6921 / 35 & 18092.6 [46.7] & [18082.5, 18104.0] & 23.8 & 37.3 & 779.8M / 300.0M & 300.8J / 5436.0J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+macOS ARM64 (M4) & Regime A (Cold) & neural\_baseline & 2252 / 33 & 5504.6 [45.9] & [5489.5, 5518.7] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 92.2J / 506.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+macOS ARM64 (M4) & Regime B (Warm) & picoclaw & 2259 / 38 & 984.9 [31.4] & [980.1, 992.3] & 3.2 & 4.3 & 40.8M / 24.2M & 12.6J / 12.4J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+macOS ARM64 (M4) & Regime B (Warm) & openclaw\_minimal & 2007 / 35 & 914.7 [26.4] & [907.8, 920.9] & 18.6 & 37.3 & 776.7M / 293.6M & 12.3J / 11.4J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+macOS ARM64 (M4) & Regime B (Warm) & openclaw\_full & 6921 / 35 & 1131.8 [24.3] & [1126.1, 1135.8] & 22.6 & 37.3 & 777.2M / 294.7M & 14.7J / 16.7J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+macOS ARM64 (M4) & Regime B (Warm) & neural\_baseline & 2252 / 33 & 851.9 [20.2] & [846.2, 858.3] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 11.0J / 9.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime A (Cold) & picoclaw & 2259 / 38 & 3100.7 [28.0] & [3084.6, 3119.2] & 4.3 & 8.8 & 11.0M / 18.7M & 245.6J / 762.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime A (Cold) & openclaw\_minimal & 2007 / 35 & 2711.1 [28.4] & [2702.3, 2721.5] & 28.9 & 85.0 & 745.5M / 480.9M & 213.9J / 581.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime A (Cold) & openclaw\_full & 6921 / 35 & 8258.5 [39.7] & [8142.4, 8294.0] & 34.1 & 85.6 & 802.1M / 523.8M & 594.4J / 4909.0J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime A (Cold) & bun\_minimal & 2259 / 38 & 3092.7 [38.3] & [3078.3, 3104.8] & 5.0 & 23.0 & 51.2M / 64.7M & 246.2J / 761.6J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime A (Cold) & neural\_baseline & 2252 / 33 & 2896.6 [33.1] & [2861.7, 2912.2] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 220.5J / 634.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime B (Warm) & picoclaw & 2259 / 38 & 1580.9 [32.6] & [1564.2, 1585.0] & 4.9 & 8.8 & 11.2M / 19.2M & 111.2J / 175.8J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime B (Warm) & openclaw\_minimal & 2007 / 35 & 1419.6 [31.0] & [1408.4, 1425.6] & 27.8 & 85.1 & 744.6M / 502.8M & 100.8J / 143.5J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime B (Warm) & openclaw\_full & 6921 / 35 & 3117.6 [29.7] & [3111.0, 3127.8] & 33.3 & 85.6 & 747.1M / 510.4M & 177.9J / 554.9J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime B (Warm) & bun\_minimal & 2259 / 38 & 1571.4 [32.1] & [1565.2, 1576.7] & 5.4 & 22.8 & 48.1M / 59.4M & 109.1J / 171.0J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime B (Warm) & neural\_baseline & 2252 / 33 & 1387.0 [23.9] & [1377.3, 1394.2] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 95.7J / 133.9J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime A (Cold) & picoclaw & 2254 / 37 & 3296.4 [115.2] & [3263.3, 3351.8] & 10.0 & 9.3 & N/A\textsuperscript{*} / 41.7M & 154.1J / 510.1J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime A (Cold) & openclaw\_minimal & 2007 / 35 & 2921.1 [101.4] & [2908.5, 2960.2] & 37.2 & 71.7 & N/A\textsuperscript{*} / 511.3M & 135.7J / 397.4J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime A (Cold) & openclaw\_full & 6921 / 35 & 8333.4 [114.6] & [8303.3, 8379.0] & 44.7 & 71.7 & N/A\textsuperscript{*} / 560.0M & 472.6J / 3940.3J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime A (Cold) & bun\_minimal & 2254 / 37 & 3279.0 [93.0] & [3240.5, 3307.9] & 13.4 & 24.3 & N/A\textsuperscript{*} / 126.5M & 155.8J / 510.6J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime A (Cold) & neural\_baseline & 2252 / 33 & 2958.5 [93.8] & [2930.9, 2990.3] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 141.6J / 422.2J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime B (Warm) & picoclaw & 2254 / 37 & 1969.2 [36.8] & [1960.0, 1985.4] & 9.5 & 9.3 & N/A\textsuperscript{*} / 41.1M & 47.1J / 92.7J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime B (Warm) & openclaw\_minimal & 2007 / 35 & 1844.9 [54.5] & [1821.2, 1855.3] & 36.6 & 71.7 & N/A\textsuperscript{*} / 563.4M & 46.3J / 85.4J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime B (Warm) & openclaw\_full & 6921 / 35 & 4122.9 [69.3] & [4103.7, 4152.7] & 44.2 & 71.8 & N/A\textsuperscript{*} / 587.1M & 88.5J / 365.0J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime B (Warm) & bun\_minimal & 2254 / 37 & 1963.2 [50.8] & [1934.4, 1990.9] & 12.5 & 24.3 & N/A\textsuperscript{*} / 113.0M & 49.2J / 96.6J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime B (Warm) & neural\_baseline & 2252 / 33 & 1690.7 [45.6] & [1679.2, 1706.1] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & 40.6J / 68.6J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows Intel iGPU & Regime A (Cold) & picoclaw & 2254 / 37 & 56885.1 [1330.3] & [56641.5, 57213.9] & 11.3 & 7.3 & N/A\textsuperscript{*} / 77.2M & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
+Windows Intel iGPU & Regime A (Cold) & openclaw\_minimal & 2007 / 35 & 50064.3 [903.7] & [49850.6, 50503.8] & 51.3 & 52.2 & N/A\textsuperscript{*} / 1319.9M & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
+Windows Intel iGPU & Regime A (Cold) & neural\_baseline & 2252 / 33 & 54283.0 [1217.2] & [54065.1, 54624.6] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
+Windows Intel iGPU & Regime B (Warm) & picoclaw & 2254 / 37 & 6280.3 [113.4] & [6236.5, 6323.3] & 10.9 & 7.4 & N/A\textsuperscript{*} / 76.7M & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
+Windows Intel iGPU & Regime B (Warm) & openclaw\_minimal & 2007 / 35 & 5671.7 [154.3] & [5630.5, 5745.8] & 50.8 & 53.5 & N/A\textsuperscript{*} / 1157.6M & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
+Windows Intel iGPU & Regime B (Warm) & neural\_baseline & 2252 / 33 & 5271.6 [93.4] & [5223.1, 5284.9] & 0.0 & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{\ddagger} & N/A\textsuperscript{**} & N/A\textsuperscript{\dagger} \\
+\midrule
+\multicolumn{11}{l}{\textbf{Part B: Segregated Non-Comparable Arm (\texttt{python\_native} --- Excluded: Schema-Failure / Confounded Prompt)\textsuperscript{\P}}} \\
+\midrule
+macOS ARM64 (M4) & Regime A (Cold) & python\_native\textsuperscript{\P} & 1287 / 26 & 670.6 [30.6] & [658.4, 679.1] & 33.4 & 56.5 & 2731.9M / 1177.3M & 9.9J / 6.6J\,$\cdot$\,s & 1.0/5.0 \\
+macOS ARM64 (M4) & Regime B (Warm) & python\_native\textsuperscript{\P} & 1287 / 26 & 650.7 [16.6] & [647.0, 655.3] & 8.7 & 56.5 & 2615.5M / 1083.8M & 10.0J / 6.5J\,$\cdot$\,s & 1.0/5.0 \\
+Linux x86\_64 & Regime A (Cold) & python\_native\textsuperscript{\P} & 2259 / 38 & 3114.1 [30.1] & [3097.6, 3809.2] & 17.1 & 40.2 & 2674.4M / 4799.1M & 252.6J / 784.4J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Linux x86\_64 & Regime B (Warm) & python\_native\textsuperscript{\P} & 2259 / 38 & 2992.4 [56.8] & [2980.0, 3027.3] & 1416.3 & 87.4 & 4669.0M / 6471.4M & 196.5J / 588.2J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime A (Cold) & python\_native\textsuperscript{\P} & 1287 / 26 & 2094.0 [101.2] & [2070.5, 2125.5] & 149.7 & N/A\textsuperscript{\S} & N/A\textsuperscript{*} / N/A\textsuperscript{\S} & 92.4J / 192.7J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows 11 NVIDIA & Regime B (Warm) & python\_native\textsuperscript{\P} & 1287 / 26 & 1203.0 [70.2] & [1188.0, 1219.0] & 23.6 & N/A\textsuperscript{\S} & N/A\textsuperscript{*} / N/A\textsuperscript{\S} & 43.7J / 52.2J\,$\cdot$\,s & N/A\textsuperscript{\dagger} \\
+Windows Intel iGPU & Regime A (Cold) & python\_native\textsuperscript{\P} & 1287 / 26 & 31058.6 [732.9] & [30745.6, 31210.2] & 116.1 & N/A\textsuperscript{\S} & N/A\textsuperscript{*} / N/A\textsuperscript{\S} & N/A\textsuperscript{**} & 3.0/5.0 \\
+Windows Intel iGPU & Regime B (Warm) & python\_native\textsuperscript{\P} & 1287 / 26 & 3733.7 [54.7] & [3721.7, 3754.0] & 72.0 & N/A\textsuperscript{\S} & N/A\textsuperscript{*} / N/A\textsuperscript{\S} & N/A\textsuperscript{**} & 3.0/5.0 \\
 \bottomrule
-\multicolumn{10}{l}{\textsuperscript{*}\footnotesize Hardware instructions on Windows unavailable in unprivileged user-mode (NT kernel \texttt{CR4.PCE} restriction); CPU cycles tracked via \texttt{QueryProcessCycleTime}.} \\
-\multicolumn{10}{l}{\textsuperscript{\dagger}\footnotesize LLM-as-a-Judge quality score uninstrumented on non-LangChain client runs (evaluated on \texttt{python\_native}: 1.0/5.0 on macOS M4; 3.0/5.0 on Windows Intel iGPU).} \\
-\multicolumn{10}{l}{\textsuperscript{\ddagger}\footnotesize Direct \texttt{neural\_baseline} issues HTTP requests directly to \texttt{llama-server} without a client agent process (no client RSS, instructions, or cycles).} \\
-\multicolumn{10}{l}{\textsuperscript{\S}\footnotesize \texttt{python\_native} on Windows invokes the \texttt{py.exe} launcher wrapper stub (PEP 397); parent stub PID metrics are excluded from Peak RSS and CPU cycles.} \\
-\multicolumn{10}{l}{\textsuperscript{**}\footnotesize Host package energy and EDP on Windows Intel iGPU uninstrumented in user-mode (UMA shared DDR3 memory without discrete NVML or ring-0 RAPL MSR driver).} \\
+\multicolumn{11}{l}{\textsuperscript{\P}\footnotesize \textbf{Segregated / Non-Comparable (M1):} \texttt{python\_native} (LangChain Core) in W5 experienced schema-validation failure and truncated prompts ($1{,}287/26$ tokens on macOS/Windows vs. $2{,}007\text{--}6{,}921/33\text{--}38$ tokens; TTFT $\approx 50$~ms on macOS; \texttt{finish\_reason=stop} on Intel iGPU; $T_{\text{orch}}=1{,}416.3$~ms Warm anomaly on Linux). Excluded from Tables~2 and~7; lower latency/energy is a truncation artifact, not runtime efficiency.} \\
+\multicolumn{11}{l}{\textsuperscript{*}\footnotesize Hardware instructions on Windows unavailable in unprivileged user-mode (NT kernel \texttt{CR4.PCE} restriction); CPU cycles tracked via \texttt{QueryProcessCycleTime}.} \\
+\multicolumn{11}{l}{\textsuperscript{\dagger}\footnotesize LLM-as-a-Judge quality score uninstrumented on non-LangChain client runs (evaluated on \texttt{python\_native}: 1.0/5.0 on macOS M4; 3.0/5.0 on Windows Intel iGPU).} \\
+\multicolumn{11}{l}{\textsuperscript{\ddagger}\footnotesize Direct \texttt{neural\_baseline} issues HTTP requests directly to \texttt{llama-server} without a client agent process (no client RSS, instructions, or cycles).} \\
+\multicolumn{11}{l}{\textsuperscript{\S}\footnotesize \texttt{python\_native} on Windows invokes the \texttt{py.exe} launcher wrapper stub (PEP 397); parent stub PID metrics are excluded from Peak RSS and CPU cycles.} \\
+\multicolumn{11}{l}{\textsuperscript{**}\footnotesize Host package energy and EDP on Windows Intel iGPU uninstrumented in user-mode (UMA shared DDR3 memory without discrete NVML or ring-0 RAPL MSR driver).} \\
 \end{tabular}
 }
 \end{table*}

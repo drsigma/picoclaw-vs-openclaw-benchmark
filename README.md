@@ -255,7 +255,7 @@ Seguindo o **Princípio do Menor Privilégio (*Principle of Least Privilege*)**:
 ├── CITATION.cff                               <- Metadados acadêmicos para citação e Zenodo DOI
 ├── LICENSE                                    <- Licença MIT para código-fonte
 ├── DATA_LICENSE                               <- Licença Creative Commons CC-BY 4.0 para dados e figuras
-├── references.bib                             <- Base bibliográfica formal BibTeX (20 referências primárias verificadas)
+├── references.bib                             <- Base bibliográfica formal BibTeX (21 referências primárias verificadas)
 ├── reproduce_linux_gold.sh                    <- Script de reprodução física automatizada em Linux x86_64
 ├── windows_gold.ps1                           <- Script PowerShell de reprodução no Windows 11
 ├── launch_sentinel_intel_win.ps1              <- Script PowerShell de reprodução no Windows Intel HD Graphics 4600
@@ -433,7 +433,7 @@ The pipeline executes `ruff check`, `pytest -q tests/`, the fast reviewer dry-ru
 ### Por que cada decisão metodológica foi adotada / Why Each Methodological Choice Matters
 1. **Isolamento de Slots KV-Cache (`T1`, `T2`, `T3`):** Separa evicção descontrolada (*thrashing*, `T2`) da alocação isolada por bloco (`T3`), isolando o custo de recomputação quadrática de prefill do custo intrínseco do runtime orquestrador (Kwon et al., 2023).
 2. **Moving Block Bootstrap ($b=3$) e Tamanho Amostral Efetivo ($n_{\text{eff}}$):** Execuções em cache quente (Regime B) podem exibir autocorrelação serial lag-1 ($|r_1| > 2/\sqrt{n}$) devido à retenção de páginas de memória pelo SO e drenagem de sockets loopback. O Moving Block Bootstrap (Künsch, 1989) preserva a dependência temporal de curto alcance nos intervalos de confiança de 95% sem assumir independência i.i.d. estrita.
-3. **TOST de Contrastes Inter-Sessão ($\Delta T_{\text{orch}}$):** Testes de hipótese nula tradicionais não provam equivalência. O procedimento *Two One-Sided Tests* (Schuirmann, 1987; `ttost_ind`) testa formalmente se os contrastes $\Delta T_{\text{orch}} = T_{\text{orch}}(\text{Runtime}) - T_{\text{orch}}(\text{PicoClaw})$ replicam entre sessões independentes dentro da margem $\max(5{,}0\text{ ms}, 15\%\cdot|\bar{\Delta}_1|)$.
+3. **TOST de Contrastes Inter-Sessão ($\Delta T_{\text{orch}}$) em Blocos com SESOI Fixo:** Testes de hipótese nula tradicionais não provam equivalência. O procedimento *Two One-Sided Tests* via Moving Block Bootstrap ($b=3$, $B=5{,}000$; Künsch, 1989; Schuirmann, 1987; Lakens, 2017) avalia se os contrastes $\Delta T_{\text{orch}} = T_{\text{orch}}(\text{Runtime}) - T_{\text{orch}}(\text{PicoClaw})$ replicam entre sessões independentes dentro de uma margem pré-especificada e independente dos dados ($\Delta_{\text{SESOI}} = \pm 5{,}0\text{ ms}$), com IC 90% matematicamente alinhado a $\alpha = 0{,}05$ e decisão padronizada em 3 estados (`Equivalent`, `Different`, `Inconclusive`).
 4. **Segregação Cross-ISA de Contadores PMU:** Contagens brutas de instruções retiradas diferem estruturalmente entre ARM64 (RISC) e x86_64 (CISC) por densidade de ISA e expansão de micro-ops (Weaver et al., 2013). As contagens são segregadas por ISA e interpretadas por razões intra-nó; no Windows (onde `CR4.PCE` restringe contadores PMU em user-mode), utilizam-se ciclos de CPU diretos via Win32 `QueryProcessCycleTime` sem extrapolações sintéticas de IPC.
 
 ### Arquitetura dos Scripts Principais / Core Script Architecture
