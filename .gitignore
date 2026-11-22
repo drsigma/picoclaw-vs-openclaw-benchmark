@@ -30,4 +30,6 @@ models
 models/
 
 audit_export_chunks/
+audit_export_quad_platform/
+audit_export_quad_platform (*)/
 .venv_win/
