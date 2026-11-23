@@ -8,6 +8,7 @@ Fails fast with RuntimeError if neural endpoint is offline in real benchmark mod
 from __future__ import annotations
 
 import argparse
+import datetime
 import http.server
 import json
 import os
@@ -534,18 +535,40 @@ def main():
 
     if args.dry_run:
         print("⚡ [DRY-RUN] Execution matrix validation mode activated.")
+        print("⚡ [DRY-RUN] Plan: Master macOS ARM64 Unified Campaign")
         print(f"⚡ [DRY-RUN] Mode: reps={reps}, cooldown={cooldown}s, invert_blocks={args.invert_blocks}")
         out_dir = args.output_dir or os.path.join(REPO_DIR, "data", "campaign_v2", "darwin_m4_dry_run")
         from benchmark.environment_manifest import record_environment_manifest
-        record_environment_manifest(out_dir, "darwin_m4_dry_run")
+        is_emulated = (platform.system() != "Darwin")
+        extra_meta = {
+            "cross_platform_emulation": is_emulated,
+            "target_platform": "darwin_arm64",
+            "host_platform": f"{platform.system()}_{platform.machine()}",
+        }
+        if is_emulated:
+            print(f"⚡ [DRY-RUN] Cross-platform emulation note: running on {platform.system()} {platform.machine()} for darwin_arm64 target.")
+        record_environment_manifest(out_dir, "darwin_m4_dry_run", extra_metadata=extra_meta)
         print(f"⚡ [DRY-RUN] Recorded environment manifest in {out_dir}")
         print("⚡ [DRY-RUN] All preconditions, protocol freeze, and matrix checks passed.")
-        return
+        sys.exit(0)
+
+    # Native platform guard for real execution
+    if platform.system() != "Darwin":
+        print(
+            f"FATAL: Native platform mismatch! macOS unified runner requires macOS (Darwin) ARM64. "
+            f"Detected: {platform.system()} {platform.machine()}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    effective_output_dir = args.output_dir or os.path.join(
+        REPO_DIR, "data", "campaign_v2", f"darwin_m4_{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+    )
 
     run_campaign(
         reps_per_condition=reps,
         dry_run=args.dry_run,
-        output_dir=args.output_dir,
+        output_dir=effective_output_dir,
         cooldown_sec=cooldown,
         invert_blocks=args.invert_blocks,
         resume=args.resume,

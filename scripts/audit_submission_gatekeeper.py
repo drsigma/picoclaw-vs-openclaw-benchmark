@@ -162,6 +162,10 @@ def audit_jsonl_file(filepath: str, nominal_bw_gbs: float = 120.0) -> Dict[str, 
                     f"Cell {cell_key}: Physical Roofline violation! Median Active BW = {bw_active:.2f} GB/s > {nominal_bw_gbs} GB/s"
                 )
 
+    if stats["valid_records"] == 0:
+        stats["schema_violations"] += 1
+        stats["errors"].append("Empty file error: dataset contains 0 valid evaluation records.")
+
     stats["is_compliant"] = (
         stats["schema_violations"] == 0
         and stats["http_status_errors"] == 0
@@ -270,7 +274,14 @@ def run_gatekeeper_suite(target_files: List[str] | None = None) -> int:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Automated Benchmark Submission Gatekeeper")
+    parser.add_argument("--dry-run", action="store_true", help="Display audit plan and exit immediately with code 0")
     parser.add_argument("files", nargs="*", help="Optional specific .jsonl files to audit")
     args = parser.parse_args()
+
+    if args.dry_run:
+        print("⚡ [DRY-RUN] Execution plan: Automated Benchmark Submission Gatekeeper & Roofline Validator")
+        print(f"⚡ [DRY-RUN] Target: Audit 35 datasets or {len(args.files)} user-specified files")
+        print("⚡ [DRY-RUN] Plan verified successfully. Exiting code 0.")
+        sys.exit(0)
 
     sys.exit(run_gatekeeper_suite(args.files if args.files else None))

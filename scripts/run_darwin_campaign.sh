@@ -24,6 +24,12 @@ cd "${REPO_DIR}"
 MODE="${1:---full}"
 EXTRA_ARGS="${*:2}"
 
+# Platform mismatch guard for real runs
+if [[ "${MODE}" != "--dry-run" && "$(uname -s)" != "Darwin" ]]; then
+    echo "ERROR: Native platform mismatch! scripts/run_darwin_campaign.sh requires macOS (Darwin). Detected: $(uname -s)." >&2
+    exit 1
+fi
+
 echo "========================================================================"
 echo " MACOS ARM64 (APPLE SILICON M4) BENCHMARK CAMPAIGN"
 echo " Repository Root: ${REPO_DIR}"
@@ -69,8 +75,9 @@ if command -v purge >/dev/null 2>&1; then
     purge || true
 fi
 
-OUT_DIR_S1="${REPO_DIR}/data/campaign_v2/darwin_m4_session1"
-OUT_DIR_S2="${REPO_DIR}/data/campaign_v2/darwin_m4_session2"
+SESSION_TIMESTAMP="$(date -u +%Y%m%d_%H%M%S)"
+OUT_DIR_S1="${REPO_DIR}/data/campaign_v2/darwin_m4_${SESSION_TIMESTAMP}_session1"
+OUT_DIR_S2="${REPO_DIR}/data/campaign_v2/darwin_m4_${SESSION_TIMESTAMP}_session2"
 mkdir -p "${OUT_DIR_S1}" "${OUT_DIR_S2}"
 
 echo "▶ Starting Session 1 (Canonical Order)..."

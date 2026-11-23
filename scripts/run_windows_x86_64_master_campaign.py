@@ -39,8 +39,13 @@ sys.path.insert(0, os.path.join(REPO_DIR, "scripts"))
 # ------------------------------------------------------------------------------
 # Namespaces and write guard
 # ------------------------------------------------------------------------------
-if platform.system() != "Windows" and "--dry-run" not in sys.argv and "--help" not in sys.argv and "-h" not in sys.argv:
-    print("FATAL: this runner is Windows-only (darwin data is read-only).", file=sys.stderr)
+is_dry_or_help = any(arg in sys.argv for arg in ["--dry-run", "-h", "--help"])
+if platform.system() != "Windows" and not is_dry_or_help:
+    print(
+        f"FATAL: Native platform mismatch! Windows runner requires Windows x86_64. "
+        f"Detected: {platform.system()} {platform.machine()}",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 ARCH_TAG = "windows_x86_64"
@@ -58,7 +63,8 @@ class Paths:
             "data/darwin-aarch64", "data/darwin_aarch64", "data/darwin_arm64",
             "results/publication_campaign", "results/publication_campaign_darwin_aarch64",
             "results/publication_campaign_darwin_arm64", "data/raw", "data/manifest_sha256.json",
-            "data/workload_data", "data/llama_server_stdout.log"))
+            "data/workload_data", "data/llama_server_stdout.log"
+        ))
 
 
 PATHS = Paths()
@@ -68,6 +74,10 @@ def guard(path: str) -> str:
     rp = os.path.realpath(path)
     in_allowed = any(rp == a or rp.startswith(a + os.sep) for a in PATHS.allowed)
     in_forbidden = any(rp == f or rp.startswith(f + os.sep) for f in PATHS.forbidden) or "darwin" in rp.lower() or "linux" in rp.lower()
+    # Explicitly protect historical .jsonl datasets from being modified or overwritten
+    if rp.endswith(".jsonl") and os.path.exists(rp) and ("session1" in rp or "session2" in rp) and "_v2" not in rp:
+        print(f"FATAL (historical protection guard): refusing to overwrite historical dataset: {rp}", file=sys.stderr)
+        sys.exit(1)
     if not in_allowed or in_forbidden:
         print(f"FATAL (isolation guard): refusing to write outside the {ARCH_TAG} namespace: {rp}", file=sys.stderr)
         sys.exit(1)
@@ -839,6 +849,8 @@ def main() -> None:
     elif args.full:
         args.reps = 30
         args.warmups = 3
+        if not args.suffix:
+            args.suffix = f"_v2_{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
     args.ctx_expected = 32768
     PATHS = Paths(args.suffix)
@@ -848,7 +860,13 @@ def main() -> None:
     # Capture environment manifest at start of campaign
     from benchmark.environment_manifest import record_environment_manifest
     session_tag = "S2_INVERTED" if args.invert_blocks else "S1_CANONICAL"
-    env_path = record_environment_manifest(PATHS.raw, f"{session_tag}_{ARCH_TAG}")
+    is_emulated = (platform.system() != "Windows")
+    extra_meta = {
+        "cross_platform_emulation": is_emulated,
+        "target_platform": "windows_x86_64",
+        "host_platform": f"{platform.system()}_{platform.machine()}",
+    }
+    env_path = record_environment_manifest(PATHS.raw, f"{session_tag}_{ARCH_TAG}", extra_metadata=extra_meta)
     print(f"Recorded environment manifest: {env_path}", flush=True)
 
     if args.dry_run:

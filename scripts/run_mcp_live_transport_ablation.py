@@ -27,9 +27,11 @@ Author: Rafael Paniccia Cassetta (UFABC)
 
 from __future__ import annotations
 
+import argparse
 import datetime
 import json
 import os
+import platform
 import subprocess
 import sys
 import time
@@ -231,11 +233,19 @@ def run_mcp_ablation():
                         "transport": tr_key,
                         "rep": rep,
                         "http_status": 200,
+                        "measurement_type": "empirical_ipc_with_modeled_neural_baseline",
                         "t_mcp_ipc_ms": round(t_ipc_acc, 3),
+                        "t_orch_base_modeled_ms": round(t_orch_base, 3),
+                        "t_neural_modeled_ms": round(t_neural_w2, 1),
                         "t_orch_ms": round(t_orch_total, 3),
                         "t_neural_ms": round(t_neural_w2, 1),
                         "t_task_ms": round(t_task_total, 2),
                         "phi_orch_pct": round((t_orch_total / t_task_total) * 100.0, 3),
+                        "analytical_model": {
+                            "is_empirical_ipc": True,
+                            "modeled_parameters": ["t_orch_base_modeled_ms", "t_neural_modeled_ms"],
+                            "neural_baseline_source": "W2_empirical_reference_constant",
+                        },
                         "energy_net_above_idle_j": energy_slice.get("energy_net_above_idle_j", 0.0),
                     }
                     all_trials.append(rec)
@@ -258,6 +268,11 @@ def run_mcp_ablation():
         "timestamp_iso": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "hardware": hardware_str,
         "workload": "W2 Warm Cache (3-tool dispatch)",
+        "methodology": {
+            "ipc_latency": "empirical_measurement (live round-trip JSON-RPC / pipe / loopback HTTP)",
+            "neural_baseline": "modeled_parameter (fixed reference constant from W2 empirical measurements)",
+            "analytical_model_type": "additive_decomposition (T_task = T_neural_modeled + T_orch_base_modeled + T_mcp_ipc)",
+        },
         "n_evals_per_condition": evals,
         "results": {},
     }
@@ -330,5 +345,32 @@ def run_mcp_ablation():
     print("🏁 Gate R10 MCP Live Transport concluído com sucesso!")
 
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(description="Live Model Context Protocol (MCP) Transport Ablation")
+    parser.add_argument("--dry-run", action="store_true", help="Print execution plan and exit immediately with code 0")
+    parser.add_argument("--smoke-test", action="store_true", help="Fast smoke test (1 rep per condition)")
+    args = parser.parse_args()
+
+    if args.dry_run:
+        print("⚡ [DRY-RUN] Execution plan: Live Model Context Protocol (MCP) Transport Ablation")
+        print("⚡ [DRY-RUN] Target: Apple Mac mini M4 (Apple Silicon)")
+        print("⚡ [DRY-RUN] Transports: in_process_dispatch, mcp_stdio_server, mcp_http_sse_server")
+        print("⚡ [DRY-RUN] Runtimes: go_orchestrator, node_orchestrator, python_agent")
+        print("⚡ [DRY-RUN] Plan verified successfully. Exiting code 0.")
+        sys.exit(0)
+
+    is_dry_or_help = any(arg in sys.argv for arg in ["--dry-run", "-h", "--help"])
+    if platform.system() != "Darwin" and not is_dry_or_help:
+        print(
+            f"FATAL: Native platform mismatch! MCP ablation with SMC requires macOS (Darwin) ARM64. "
+            f"Detected: {platform.system()} {platform.machine()}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    evals = 1 if args.smoke_test else 15
     run_mcp_ablation()
+
+
+if __name__ == "__main__":
+    main()

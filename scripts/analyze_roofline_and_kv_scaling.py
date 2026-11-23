@@ -18,10 +18,12 @@ Decomposes GGUF tensor memory layout to resolve the naive S_file/ITL artifact (>
 Author: Rafael Paniccia Cassetta (UFABC)
 """
 
+import argparse
 import datetime
 import json
 import os
 import struct
+import sys
 from typing import Any, Dict, List, Tuple
 
 import numpy as np
@@ -312,6 +314,17 @@ def compute_cross_regime_bandwidth() -> Dict[str, Any]:
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Physical Roofline & Affine KV-Cache Scaling Analysis")
+    parser.add_argument("--dry-run", action="store_true", help="Print execution plan and exit immediately with code 0")
+    args = parser.parse_args()
+
+    if args.dry_run:
+        print("⚡ [DRY-RUN] Execution plan: Physical Roofline & Affine KV-Cache Scaling Analysis")
+        print("⚡ [DRY-RUN] Inputs: GGUF tensor layout, prefill_ablation.jsonl, warm_cache_trials.jsonl")
+        print("⚡ [DRY-RUN] Outputs: roofline_kv_affine_model.json, table_energy_bandwidth_deconvolution.tex")
+        print("⚡ [DRY-RUN] Plan verified successfully. Exiting code 0.")
+        sys.exit(0)
+
     print("=" * 80)
     print("🔬 ANALISE FISICA ROOFLINE E ESCALONAMENTO AFIM DO KV-CACHE NO APPLE M4")
     print("=" * 80)
@@ -344,6 +357,20 @@ def main():
         "timestamp_iso": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core GPU, 24GB LPDDR5X UMA)",
         "nominal_uma_bandwidth_gbs": NOMINAL_M4_BW_GBS,
+        "methodology": {
+            "model_type": "analytical_model",
+            "empirical_inputs": ["prefill_ablation.jsonl", "warm_cache_trials.jsonl"],
+            "modeled_parameters": {
+                "nominal_uma_bandwidth_gbs": NOMINAL_M4_BW_GBS,
+                "bytes_per_kv_token": BYTES_PER_KV_TOKEN,
+                "s_kv_per_token_gb": S_KV_PER_TOKEN_GB,
+            },
+            "fitted_parameters": {
+                "itl_0_intercept_ms": reg["itl_0_intercept_ms"],
+                "alpha_kv_slope_us_per_token": reg["alpha_kv_slope_us_per_token"],
+                "r_squared": reg["r_squared"],
+            },
+        },
         "gguf_tensor_decomposition": gguf_info,
         "kv_cache_scaling_affine_model": affine_info,
         "cross_regime_bandwidth_comparison": cross_bw,

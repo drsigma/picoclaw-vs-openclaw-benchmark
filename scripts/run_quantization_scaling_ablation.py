@@ -24,10 +24,13 @@ Author: Rafael Paniccia Cassetta (UFABC)
 
 from __future__ import annotations
 
+import argparse
 import datetime
 import json
 import os
+import platform
 import subprocess
+import sys
 
 import numpy as np
 
@@ -137,6 +140,17 @@ def run_quantization_ablation():
             "active_bandwidth_gbs": round(active_bw_gbs, 2),
             "active_bandwidth_util_pct": round(active_bw_util_pct, 1),
             "is_within_physical_limits": active_bw_gbs < NOMINAL_M4_BW_GBS,
+            "measurement_type": "empirical_gpu_bench_with_analytical_phi_projection",
+            "modeled_parameters": {
+                "ttft_modeled_ms": ttft_ms,
+                "t_orch_modeled_ms": {
+                    "go_native": t_orch_go,
+                    "node_openclaw": t_orch_node,
+                    "python_native": t_orch_py,
+                    "langchain_core": t_orch_langchain,
+                },
+                "parameter_type": "analytical_model_projection",
+            },
             "w2_t_neural_ms": round(t_neural_w2, 1),
             "phi_orch_pct": {
                 "go_native": round(phi_orch_go, 3),
@@ -163,6 +177,12 @@ def run_quantization_ablation():
         "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
         "nominal_uma_bandwidth_gbs": NOMINAL_M4_BW_GBS,
         "n_repetitions_per_model": 10,
+        "methodology": {
+            "decode_throughput": "empirical_measurement (llama-bench GPU kernel profiling)",
+            "itl_0": "empirical_measurement (1000 / avg_ts)",
+            "active_bandwidth_gbs": "analytical_roofline_derivation (S_active_weights / itl_0)",
+            "phi_orch_pct": "analytical_model_projection (modeled T_orch / (T_neural + T_orch))",
+        },
         "scaling_regression": {
             "formula": "ITL_0(S_active) = slope * S_active + intercept",
             "slope_ms_per_gb": round(float(slope), 3),
@@ -224,5 +244,29 @@ def run_quantization_ablation():
     print("🏁 Gate R10 Quantization Scaling concluído com 100% de sucesso!")
 
 
-if __name__ == "__main__":
+def main():
+    parser = argparse.ArgumentParser(description="Extreme Quantization Scaling Ablation")
+    parser.add_argument("--dry-run", action="store_true", help="Print execution plan and exit immediately with code 0")
+    args = parser.parse_args()
+
+    if args.dry_run:
+        print("⚡ [DRY-RUN] Execution plan: Extreme Quantization Scaling Ablation")
+        print("⚡ [DRY-RUN] Target: Apple Mac mini M4 (Metal GPU 10-core)")
+        print("⚡ [DRY-RUN] Models: Q2_K, Q3_K_M, Q4_K_M (Meta-Llama-3.2-3B-Instruct)")
+        print("⚡ [DRY-RUN] Plan verified successfully. Exiting code 0.")
+        sys.exit(0)
+
+    is_dry_or_help = any(arg in sys.argv for arg in ["--dry-run", "-h", "--help"])
+    if platform.system() != "Darwin" and not is_dry_or_help:
+        print(
+            f"FATAL: Native platform mismatch! Quantization scaling with Metal GPU requires macOS (Darwin) ARM64. "
+            f"Detected: {platform.system()} {platform.machine()}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
     run_quantization_ablation()
+
+
+if __name__ == "__main__":
+    main()

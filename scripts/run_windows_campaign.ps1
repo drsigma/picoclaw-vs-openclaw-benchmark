@@ -31,6 +31,12 @@ Write-Host "====================================================================
 Write-Host " WINDOWS BENCHMARK CAMPAIGN RUNNER (Mode: $Mode, Target: $Target)" -ForegroundColor Cyan
 Write-Host "========================================================================" -ForegroundColor Cyan
 
+$isRealWindows = ($PSVersionTable.PSVersion.Major -ge 6 -and $IsWindows) -or ($env:OS -like "*Windows*")
+if ($Mode -ne "dry-run" -and -not $isRealWindows) {
+    Write-Error "ERROR: Native platform mismatch! scripts/run_windows_campaign.ps1 requires Windows. Detected non-Windows environment."
+    exit 1
+}
+
 $PythonExe = "$RepoDir\.venv_win\Scripts\python.exe"
 if (-not (Test-Path $PythonExe)) {
     $PythonExe = "python.exe"
@@ -59,16 +65,20 @@ if ($Mode -eq "dry-run") {
 }
 
 # Session 1: Canonical
-Write-Host "▶ Starting Session 1 (Canonical Order)..." -ForegroundColor Yellow
-& $PythonExe $RunnerScript $Flag
+$SessionTimestamp = (Get-Date).ToUniversalTime().ToString("yyyyMMdd_HHmmss")
+$SuffixS1 = "_v2_${SessionTimestamp}_session1"
+$SuffixS2 = "_v2_${SessionTimestamp}_session2"
+
+Write-Host "▶ Starting Session 1 (Canonical Order, isolated under $SuffixS1)..." -ForegroundColor Yellow
+& $PythonExe $RunnerScript $Flag --suffix $SuffixS1
 
 # Cooldown
 Write-Host "▶ Inter-session stabilization cooldown (30s)..." -ForegroundColor Yellow
 Start-Sleep -Seconds 30
 
 # Session 2: Inverted Blocks
-Write-Host "▶ Starting Session 2 (Inverted Block Order)..." -ForegroundColor Yellow
-& $PythonExe $RunnerScript $Flag --invert-blocks
+Write-Host "▶ Starting Session 2 (Inverted Block Order, isolated under $SuffixS2)..." -ForegroundColor Yellow
+& $PythonExe $RunnerScript $Flag --invert-blocks --suffix $SuffixS2
 
 Write-Host "========================================================================" -ForegroundColor Green
 Write-Host " WINDOWS BENCHMARK CAMPAIGN COMPLETED SUCCESSFULLY." -ForegroundColor Green

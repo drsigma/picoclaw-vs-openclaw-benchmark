@@ -86,18 +86,81 @@ def get_cpu_governor() -> str:
 def get_runtime_versions() -> Dict[str, str]:
     versions = {
         "python": sys.version.split()[0],
-        "go": "not_installed",
-        "node": "not_installed",
-        "bun": "not_installed",
+        "go": "unavailable_in_environment (binary not in PATH)",
+        "node": "unavailable_in_environment (binary not in PATH)",
+        "bun": "unavailable_in_environment (binary not in PATH)",
+        "llama_server": "unavailable_in_environment (binary not in PATH)",
+        "powershell": "unavailable_in_environment (binary not in PATH)",
     }
-    for tool, cmd in [("go", ["go", "version"]), ("node", ["node", "--version"]), ("bun", ["bun", "--version"])]:
-        if shutil.which(tool):
+    tool_commands = [
+        ("go", "go", ["go", "version"]),
+        ("node", "node", ["node", "--version"]),
+        ("bun", "bun", ["bun", "--version"]),
+        ("llama_server", "llama-server", ["llama-server", "--version"]),
+        ("powershell", "pwsh", ["pwsh", "--version"]),
+        ("powershell", "powershell", ["powershell", "-Version"]),
+    ]
+    for key, binary, cmd in tool_commands:
+        resolved = shutil.which(binary)
+        if resolved and (versions[key].startswith("unavailable") or key == "powershell"):
             try:
-                out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL, text=True).strip()
-                versions[tool] = out
+                out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL, text=True).strip().splitlines()[0]
+                versions[key] = out
             except Exception:
-                versions[tool] = "installed_probe_failed"
+                versions[key] = f"installed_at_{resolved}_probe_failed"
     return versions
+
+
+def get_pmu_and_security_status() -> Dict[str, Any]:
+    status: Dict[str, Any] = {
+        "perf_event_paranoid": None,
+        "pmu_status": "unavailable_in_environment",
+        "rapl_status": "unavailable_in_environment",
+        "restriction_reason": None,
+    }
+    if sys.platform == "linux":
+        paranoid_file = "/proc/sys/kernel/perf_event_paranoid"
+        if os.path.exists(paranoid_file):
+            try:
+                with open(paranoid_file, "r", encoding="utf-8") as f:
+                    val = int(f.read().strip())
+                status["perf_event_paranoid"] = val
+                if val <= 0:
+                    status["pmu_status"] = "available_unrestricted"
+                elif val == 1:
+                    status["pmu_status"] = "restricted_system_wide"
+                    status["restriction_reason"] = "kernel.perf_event_paranoid=1 (kernel-level profiling restricted to root)"
+                else:
+                    status["pmu_status"] = "restricted_high_paranoid"
+                    status["restriction_reason"] = f"kernel.perf_event_paranoid={val} >= 2 restricts unprivileged user PMU access"
+            except PermissionError:
+                status["pmu_status"] = "permission_denied"
+                status["restriction_reason"] = "Permission denied reading /proc/sys/kernel/perf_event_paranoid"
+            except Exception as e:
+                status["restriction_reason"] = str(e)
+        else:
+            status["restriction_reason"] = "File /proc/sys/kernel/perf_event_paranoid not found"
+
+        rapl_dir = "/sys/class/powercap/intel-rapl"
+        if os.path.exists(rapl_dir):
+            try:
+                energy_file = os.path.join(rapl_dir, "intel-rapl:0", "energy_uj")
+                if os.path.exists(energy_file) and os.access(energy_file, os.R_OK):
+                    status["rapl_status"] = "available_readable"
+                else:
+                    status["rapl_status"] = "restricted_permission_denied"
+                    status["restriction_reason"] = "RAPL sysfs exists but energy_uj is not readable without root/sudo"
+            except Exception as e:
+                status["rapl_status"] = f"error: {e}"
+        else:
+            status["rapl_status"] = "unavailable_in_environment (no intel-rapl sysfs)"
+    elif sys.platform == "darwin":
+        status["pmu_status"] = "apple_smc_powermetrics_supported"
+        status["rapl_status"] = "not_applicable (Apple Silicon UMA)"
+    elif sys.platform == "win32":
+        status["pmu_status"] = "win32_psapi_cycles_supported"
+        status["rapl_status"] = "not_applicable (Windows RAPL via driver/fallback)"
+    return status
 
 
 def record_environment_manifest(
@@ -124,6 +187,7 @@ def record_environment_manifest(
         "ram": get_ram_info(),
         "power_source": get_power_source(),
         "cpu_governor": get_cpu_governor(),
+        "pmu_and_security": get_pmu_and_security_status(),
         "runtimes": get_runtime_versions(),
         "extra_metadata": extra_metadata or {},
     }

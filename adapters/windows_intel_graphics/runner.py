@@ -573,7 +573,7 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
 def main() -> None:
     is_dry_or_help = any(arg in sys.argv for arg in ["--dry-run", "-h", "--help"])
     if platform.system() != "Windows" and not is_dry_or_help:
-        print("FATAL: Windows Intel Graphics runner must execute on Windows.", file=sys.stderr)
+        print(f"FATAL: Native platform mismatch! Windows Intel Graphics runner requires Windows. Detected: {platform.system()} {platform.machine()}", file=sys.stderr)
         sys.exit(1)
 
     ap = argparse.ArgumentParser(description="Windows Intel Graphics Dedicated Benchmark Campaign Runner")

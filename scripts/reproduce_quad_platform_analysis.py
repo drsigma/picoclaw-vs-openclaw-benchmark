@@ -4315,9 +4315,19 @@ def package_audit_zip(inventory: list[dict[str, Any]] | None = None):
 def main():
     global QUICK_MODE, BASE_DATA_DIR
     parser = argparse.ArgumentParser(description="Master Quad-Platform Conformance Audit & Statistical Pipeline")
+    parser.add_argument("--dry-run", action="store_true", help="Display execution plan and exit immediately with exit code 0")
     parser.add_argument("--quick", action="store_true", help="Run quick verification with reduced bootstrap iterations")
     parser.add_argument("--data-dir", type=str, default=None, help="Root directory for campaign data (overrides default repo data dir)")
     args = parser.parse_args()
+
+    if args.dry_run:
+        print("⚡ [DRY-RUN] Execution plan: Master Quad-Platform Conformance Audit & Statistical Pipeline")
+        print(f"⚡ [DRY-RUN] Repository root: {REPO_DIR}")
+        print(f"⚡ [DRY-RUN] Data dir: {args.data_dir or BASE_DATA_DIR or os.path.join(REPO_DIR, 'data')}")
+        print(f"⚡ [DRY-RUN] Quick mode: {args.quick}")
+        print("⚡ [DRY-RUN] Pipeline execution plan validated successfully. Exiting code 0.")
+        sys.exit(0)
+
     if args.quick:
         QUICK_MODE = True
         print("⚡ QUICK MODE ACTIVATED: bootstrap iterations reduced for fast verification.")

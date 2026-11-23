@@ -39,8 +39,13 @@ sys.path.insert(0, os.path.join(REPO_DIR, "scripts"))
 # ------------------------------------------------------------------------------
 # Namespaces and write guard
 # ------------------------------------------------------------------------------
-if platform.system() != "Linux":
-    print("FATAL: this runner is Linux-only (darwin data is read-only).", file=sys.stderr)
+is_dry_or_help = any(arg in sys.argv for arg in ["--dry-run", "-h", "--help"])
+if platform.system() != "Linux" and not is_dry_or_help:
+    print(
+        f"FATAL: Native platform mismatch! Linux runner requires Linux x86_64. "
+        f"Detected: {platform.system()} {platform.machine()}",
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 ARCH_TAG = f"{platform.system().lower()}_{platform.machine()}"
@@ -58,7 +63,8 @@ class Paths:
             "data/darwin-aarch64", "data/darwin_aarch64", "data/darwin_arm64",
             "results/publication_campaign", "results/publication_campaign_darwin_aarch64",
             "results/publication_campaign_darwin_arm64", "data/raw", "data/manifest_sha256.json",
-            "data/workload_data", "data/llama_server_stdout.log"))
+            "data/workload_data", "data/llama_server_stdout.log"
+        ))
 
 
 PATHS = Paths()
@@ -68,6 +74,10 @@ def guard(path: str) -> str:
     rp = os.path.realpath(path)
     in_allowed = any(rp == a or rp.startswith(a + os.sep) for a in PATHS.allowed)
     in_forbidden = any(rp == f or rp.startswith(f + os.sep) for f in PATHS.forbidden) or "darwin" in rp.lower()
+    # Explicitly protect historical .jsonl datasets from being modified or overwritten
+    if rp.endswith(".jsonl") and os.path.exists(rp) and ("session1" in rp or "session2" in rp) and "_v2" not in rp:
+        print(f"FATAL (historical protection guard): refusing to overwrite historical dataset: {rp}", file=sys.stderr)
+        sys.exit(1)
     if not in_allowed or in_forbidden:
         print(f"FATAL (isolation guard): refusing to write outside the {ARCH_TAG} namespace: {rp}", file=sys.stderr)
         sys.exit(1)
@@ -262,11 +272,16 @@ class Ctx:
 
 def dynamic_runtime_labels(adapters: dict[str, Any]) -> dict[str, str]:
     def v(cmd: list[str]) -> str:
-        return subprocess.check_output(cmd, text=True, stderr=subprocess.STDOUT, timeout=15).strip().splitlines()[0]
-    node = shutil.which("node") or die("node not found")
-    bun = shutil.which("bun") or die("bun not found")
-    go = shutil.which("go") or die("go not found")
-    node_v, bun_v, go_v = v([node, "--version"]), v([bun, "--version"]), v([go, "version"])
+        try:
+            return subprocess.check_output(cmd, text=True, stderr=subprocess.STDOUT, timeout=15).strip().splitlines()[0]
+        except Exception:
+            return "unavailable_in_environment (probe failed)"
+    node = shutil.which("node")
+    bun = shutil.which("bun")
+    go = shutil.which("go")
+    node_v = v([node, "--version"]) if node else "unavailable_in_environment (node not in PATH)"
+    bun_v = v([bun, "--version"]) if bun else "unavailable_in_environment (bun not in PATH)"
+    go_v = v([go, "version"]) if go else "unavailable_in_environment (go not in PATH)"
     py_v = platform.python_version()
     return {
         "picoclaw": f"{go_v} (native {platform.system()} ELF {platform.machine()})",
@@ -701,6 +716,19 @@ def prepare(ctx: Ctx) -> None:
          "power.limit,persistence_mode", "--format=csv,noheader"], text=True).strip()
     lscpu = json.loads(subprocess.check_output(["lscpu", "-J"], text=True))
     govs = sorted({open(p).read().strip() for p in __import__("glob").glob("/sys/devices/system/cpu/cpu*/cpufreq/scaling_governor")})
+    def _safe_read(p: str, default: Any = None) -> Any:
+        try:
+            if os.path.exists(p):
+                with open(p, "r", encoding="utf-8") as f:
+                    return f.read().strip()
+        except Exception:
+            pass
+        return default
+
+    paranoid_raw = _safe_read("/proc/sys/kernel/perf_event_paranoid")
+    kptr_raw = _safe_read("/proc/sys/kernel/kptr_restrict")
+    profile_raw = _safe_read("/sys/firmware/acpi/platform_profile", "unavailable_in_environment")
+
     meta = {
         "session_id": ctx.session_id, "created_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "arch_tag": ARCH_TAG, "provenance": ctx.prov, "git_dirty_files": ctx.git_dirty,
@@ -711,14 +739,15 @@ def prepare(ctx: Ctx) -> None:
         "memory_metric_note": "On Linux the primary physical memory metric proc_peak_phys_mb is VmHWM / Peak RSS "
                               "(wait4 ru_maxrss of the workload process tree, KiB->MiB). Darwin uses ri_lifetime_max_phys_footprint.",
         "pmu": {"method": "perf_event_open(2) on workload PID, enable_on_exec, inherit; core PMUs summed",
-                "perf_event_paranoid": int(open("/proc/sys/kernel/perf_event_paranoid").read()),
-                "kptr_restrict": int(open("/proc/sys/kernel/kptr_restrict").read())},
+                "perf_event_paranoid": int(paranoid_raw) if paranoid_raw and paranoid_raw.lstrip("-").isdigit() else None,
+                "kptr_restrict": int(kptr_raw) if kptr_raw and kptr_raw.isdigit() else None,
+                "status": "available" if paranoid_raw and int(paranoid_raw) <= 0 else "restricted_or_unavailable"},
         "energy": {"backend": ctx.pmon.telemetry_backend, "rapl_zones": sorted(ctx.pmon.zones),
                    "total_definition": "RAPL package-0 + NVML GPU (excludes platform/psys, display, SSD, fans)"},
         "idle_baseline": ib, "thermal_plateau": plateau,
         "thermal_gate": {"cpu_max_c": args.cool_cpu_c, "gpu_max_c": args.cool_gpu_c, "timeout_s": args.cool_timeout_s},
         "fans": {"rpm": ctx.tc.fan_rpm(), "max_rpm": ctx.tc.fan_max_rpm()},
-        "cpu_governors": govs, "platform_profile": open("/sys/firmware/acpi/platform_profile").read().strip(),
+        "cpu_governors": govs, "platform_profile": profile_raw,
         "nvidia_smi": smi, "lscpu": lscpu,
         "toolchain": ctx.runtime_labels,
         "adapters_cfg": {"reps": args.reps, "warmups": args.warmups},
@@ -772,6 +801,8 @@ def main() -> None:
     elif args.full:
         args.reps = 30
         args.warmups = 3
+        if not args.suffix:
+            args.suffix = f"_v2_{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
     args.ctx_expected = 32768
     PATHS = Paths(args.suffix)
@@ -781,7 +812,13 @@ def main() -> None:
     # Capture environment manifest at start of campaign
     from benchmark.environment_manifest import record_environment_manifest
     session_tag = "S2_INVERTED" if args.invert_blocks else "S1_CANONICAL"
-    env_path = record_environment_manifest(PATHS.raw, f"{session_tag}_{ARCH_TAG}")
+    is_emulated = (platform.system() != "Linux")
+    extra_meta = {
+        "cross_platform_emulation": is_emulated,
+        "target_platform": "linux_x86_64",
+        "host_platform": f"{platform.system()}_{platform.machine()}",
+    }
+    env_path = record_environment_manifest(PATHS.raw, f"{session_tag}_{ARCH_TAG}", extra_metadata=extra_meta)
     print(f"Recorded environment manifest: {env_path}", flush=True)
 
     if args.dry_run:

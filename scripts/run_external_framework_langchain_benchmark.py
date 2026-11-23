@@ -17,9 +17,11 @@ Outputs:
 Author: Rafael Paniccia Cassetta (UFABC)
 """
 
+import argparse
 import datetime
 import json
 import os
+import platform
 import subprocess
 import sys
 import time
@@ -51,7 +53,7 @@ def get_git_commit() -> str:
         return "unknown"
 
 
-def run_langchain_battery():
+def run_langchain_battery(eval_count: int = 15, warmup_count: int = 3, out_jsonl: str = OUT_JSONL, out_summary: str = OUT_SUMMARY):
     print("=" * 80)
     print("🚀 EXECUTANDO BATERIA DO FRAMEWORK EXTERNO LANGCHAIN CORE (GATE C1)")
     print("   Apple Mac mini M4 | llama-server 127.0.0.1:8080")
@@ -69,16 +71,11 @@ def run_langchain_battery():
         ("Regime B (Warm Cache)", "Warm", True),
         ("Regime A (Cold Prefill)", "Cold", False),
     ]
-    warmup_count = 3
-    eval_count = 15
 
     monitor = SMCPowerMonitor(sample_interval_ms=50)
     monitor.start_campaign()
 
     all_trials: List[Dict[str, Any]] = []
-    os.makedirs(os.path.dirname(OUT_JSONL), exist_ok=True)
-    with open(OUT_JSONL, "w", encoding="utf-8") as f:
-        pass  # Initialize empty file
 
     try:
         for reg_title, warmth_arg, is_warm in regimes:
@@ -101,6 +98,10 @@ def run_langchain_battery():
                     except Exception:
                         parsed = {"t_task_ms": (t1_ns - t0_ns) / 1e6}
 
+                    http_status = parsed.get("http_status")
+                    if http_status is None:
+                        http_status = 200 if ret_code == 0 else 500
+
                     rec = {
                         "session_id": session_id,
                         "timestamp_iso": datetime.datetime.now(datetime.timezone.utc).isoformat(),
@@ -117,7 +118,7 @@ def run_langchain_battery():
                         "warmth": warmth_arg,
                         "rep": w_idx,
                         "is_warmup": True,
-                        "http_status": 200,
+                        "http_status": http_status,
                         **parsed,
                         **hw_stats,
                         "energy_total_j": energy_slice.get("energy_total_j", 0.0),
@@ -127,8 +128,6 @@ def run_langchain_battery():
                         "edp_js": round((energy_slice.get("energy_net_above_idle_j", 0.0) or 0.0) * (parsed.get("t_task_ms", 1000.0) / 1000.0), 3),
                     }
                     all_trials.append(rec)
-                    with open(OUT_JSONL, "a", encoding="utf-8") as f:
-                        f.write(json.dumps(rec) + "\n")
 
                 # 2. Evaluations
                 for rep in range(1, eval_count + 1):
@@ -142,6 +141,10 @@ def run_langchain_battery():
                         parsed = json.loads(sub_out)[0]
                     except Exception:
                         parsed = {"t_task_ms": (t1_ns - t0_ns) / 1e6}
+
+                    http_status = parsed.get("http_status")
+                    if http_status is None:
+                        http_status = 200 if ret_code == 0 else 500
 
                     rec = {
                         "session_id": session_id,
@@ -159,7 +162,7 @@ def run_langchain_battery():
                         "warmth": warmth_arg,
                         "rep": rep,
                         "is_warmup": False,
-                        "http_status": 200,
+                        "http_status": http_status,
                         **parsed,
                         **hw_stats,
                         "energy_total_j": energy_slice.get("energy_total_j", 0.0),
@@ -169,8 +172,6 @@ def run_langchain_battery():
                         "edp_js": round((energy_slice.get("energy_net_above_idle_j", 0.0) or 0.0) * (parsed.get("t_task_ms", 1000.0) / 1000.0), 3),
                     }
                     all_trials.append(rec)
-                    with open(OUT_JSONL, "a", encoding="utf-8") as f:
-                        f.write(json.dumps(rec) + "\n")
 
                     if rep % 5 == 0 or rep == eval_count:
                         print(f"     [Trial {rep:02d}/{eval_count:02d}] Task: {rec['t_task_ms']:6.1f} ms | "
@@ -180,7 +181,15 @@ def run_langchain_battery():
     finally:
         monitor.stop_campaign()
 
-    print(f"\n💾 Salvos {len(all_trials)} ensaios em {OUT_JSONL}")
+    if not all_trials:
+        raise RuntimeError("Zero valid trials collected; refusing to write or accept empty JSONL dataset.")
+
+    os.makedirs(os.path.dirname(out_jsonl), exist_ok=True)
+    with open(out_jsonl, "w", encoding="utf-8") as f:
+        for r in all_trials:
+            f.write(json.dumps(r) + "\n")
+
+    print(f"\n💾 Salvos {len(all_trials)} ensaios em {out_jsonl}")
 
     # Generate Summary
     eval_only = [r for r in all_trials if not r.get("is_warmup", False)]
@@ -225,16 +234,48 @@ def run_langchain_battery():
                 "completion_tokens_mean": round(float(np.mean(cts)), 1),
             }
 
-    with open(OUT_SUMMARY, "w", encoding="utf-8") as f:
+    with open(out_summary, "w", encoding="utf-8") as f:
         json.dump(summary, f, indent=2)
-    with open(PUB_SUMMARY, "w", encoding="utf-8") as f:
-        json.dump(summary, f, indent=2)
-    if os.path.exists(OUT_JSONL):
-        import shutil
-        shutil.copy2(OUT_JSONL, PUB_JSONL)
-    print(f"✅ Salvo sumário executivo em: {OUT_SUMMARY} e {PUB_SUMMARY}")
+    if out_jsonl == OUT_JSONL:
+        with open(PUB_SUMMARY, "w", encoding="utf-8") as f:
+            json.dump(summary, f, indent=2)
+        if os.path.exists(OUT_JSONL):
+            import shutil
+            shutil.copy2(OUT_JSONL, PUB_JSONL)
+    print(f"✅ Salvo sumário executivo em: {out_summary}")
     print("\n🏁 Bateria do Framework Externo LangChain concluída com 100% de sucesso!")
 
 
+def main():
+    parser = argparse.ArgumentParser(description="External Framework LangChain Core Evaluation")
+    parser.add_argument("--dry-run", action="store_true", help="Print execution plan and exit immediately with code 0")
+    parser.add_argument("--smoke-test", action="store_true", help="Run 1 warmup + 1 evaluation per condition")
+    parser.add_argument("--reps", type=int, default=15, help="Number of measured evaluations per condition (default: 15)")
+    parser.add_argument("--output-jsonl", type=str, default=OUT_JSONL, help="Custom output JSONL path")
+    parser.add_argument("--output-summary", type=str, default=OUT_SUMMARY, help="Custom output summary path")
+    args = parser.parse_args()
+
+    if args.dry_run:
+        print("⚡ [DRY-RUN] Execution plan: External Framework LangChain Core Evaluation")
+        print(f"⚡ [DRY-RUN] Target: Apple Mac mini M4 | llama-server 127.0.0.1:8080")
+        print(f"⚡ [DRY-RUN] Workloads: W1, W2, W3, W4 | Regimes: Warm, Cold | Reps: {args.reps}")
+        print(f"⚡ [DRY-RUN] Output JSONL: {args.output_jsonl}")
+        print("⚡ [DRY-RUN] Plan verified successfully. Exiting code 0.")
+        sys.exit(0)
+
+    is_dry_or_help = any(arg in sys.argv for arg in ["--dry-run", "-h", "--help"])
+    if platform.system() != "Darwin" and not is_dry_or_help:
+        print(
+            f"FATAL: Native platform mismatch! LangChain SMC benchmark requires macOS (Darwin) ARM64. "
+            f"Detected: {platform.system()} {platform.machine()}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+    eval_count = 1 if args.smoke_test else args.reps
+    warmup_count = 1 if args.smoke_test else 3
+    run_langchain_battery(eval_count=eval_count, warmup_count=warmup_count, out_jsonl=args.output_jsonl, out_summary=args.output_summary)
+
+
 if __name__ == "__main__":
-    run_langchain_battery()
+    main()
