@@ -41,7 +41,7 @@
 - **Files Modified / Generated:** `scripts/build_review_submission_package.py`, `review_submission_package.zip`.
 - **Command:** `python3 scripts/build_review_submission_package.py`
 - **Result:** Package built at 52.50 MB (55,045,820 bytes), well within the 100 MB limit.
-- **Verification:** Automatically extracted to `/tmp/audit_zip_check/review_submission_package`, executed `verify_manifest.py` (302/302 valid) and `pytest -q` (69 passed), and verified zero forbidden terms (`softwarex`, `elsevier`, `elsarticle`, `rafalince`, `pix_qr_code`, `chave pix`).
+- **Verification:** Automatically extracted to `/tmp/audit_zip_check/review_submission_package`, executed `verify_manifest.py` (302/302 valid) and `pytest -q` (69 passed), and verified zero forbidden terms (publisher identifiers, personal home paths, donation keys).
 
 #### Item 2: Permanent Version with DOI
 - **Files Modified:** `CITATION.cff`, `paper/manuscript.tex`.
