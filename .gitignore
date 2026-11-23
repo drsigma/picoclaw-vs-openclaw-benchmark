@@ -36,3 +36,10 @@ peer_review_bundle/
 .venv_win/
 review_submission_package/
 review_submission_package.zip
+
+# Dry run and temporary execution directories
+data/campaign_v2/*
+!data/campaign_v2/.gitkeep
+data/linux_x86_64/raw/environment_manifest.json
+data/windows_x86_64/
+
