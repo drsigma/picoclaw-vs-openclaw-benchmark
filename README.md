@@ -17,6 +17,43 @@ Evaluated runtimes contrast Go and Bun (JavaScriptCore) against Node.js (V8) and
 
 All reference agents evaluated under the `PicoClaw` and `OpenClaw` names are clean-room academic implementations isolated for systems benchmarking. Models are subject to the Meta Llama 3.2 Community License.
 
+## Pre-Run Packaging vs. Post-Run Experimental Artifacts
+
+This repository rigorously distinguishes between **Pre-Run static deliverables** and **Post-Run runtime artifacts**:
+
+### 1. Pre-Run Deliverables (Static Source Package)
+The pre-campaign package contains all executable scripts, platform telemetry adapters, frozen workload contracts (W1–W5), deterministic test suites, documentation, and static input data (`data/workload_data/`).
+- **Safe Pre-Flight Verification Commands (Zero Workloads Executed)**:
+  ```bash
+  # Pre-flight static manifest verification
+  python3 scripts/verify_manifest.py --pre-run
+
+  # Pre-flight gatekeeper verification (validates schemas, contracts, and directory readiness)
+  python3 scripts/audit_submission_gatekeeper.py --pre-run
+
+  # Safe dry-runs across unified and platform runners
+  python3 benchmark/run_unified_benchmark.py --dry-run
+  python3 scripts/run_linux_x86_64_master_campaign.py --dry-run
+
+  # Unit & contract test execution
+  pytest -v
+  ```
+
+### 2. Post-Run Runtime Artifacts (Generated Post-Campaign)
+Execution trials (`*.jsonl`), power traces, and derived statistical tables/figures are **runtime outputs generated during and after campaign execution**.
+- Historical campaign datasets (35 `.jsonl` files comprising 18,616 records across 4 platforms) document prior baseline runs. In a fresh pre-run package, trial datasets are produced when physical campaigns are executed on native testbeds (`--full`).
+- **Post-Run Validation & Audit Pipeline**:
+  ```bash
+  # Post-run campaign reproduction & statistical deconvolution
+  python3 scripts/reproduce_quad_platform_analysis.py
+
+  # Post-run automated submission gatekeeper (audits .jsonl datasets & emits certificate)
+  python3 scripts/audit_submission_gatekeeper.py --post-run
+
+  # Post-run complete cryptographic manifest verification
+  python3 scripts/verify_manifest.py --post-run
+  ```
+
 ## Illustrative Example
 
 To execute an individual benchmark trial evaluating a specific agent adapter and workload tier against a local `llama-server` instance:

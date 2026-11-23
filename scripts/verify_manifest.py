@@ -18,6 +18,7 @@ import sys
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MANIFEST_PATH = os.path.join(REPO_DIR, "data", "manifest_sha256.json")
+MANIFEST_STATIC_PATH = os.path.join(REPO_DIR, "data", "manifest_static_sha256.json")
 
 
 def compute_sha256(filepath: str) -> str:
@@ -186,23 +187,102 @@ def update_manifest() -> int:
         f.write("\n")
 
     print(f"✅ [SUCCESS] Updated {len(updated)} tracked file signatures in {MANIFEST_PATH}")
+    update_static_manifest()
     return 0
 
 
-def verify_manifest() -> int:
+def update_static_manifest() -> int:
+    """Computes SHA-256 exclusively for static pre-run files, omitting runtime trial .jsonl and campaign logs."""
+    static_entries = [
+        ".github/workflows/reproducibility.yml",
+        ".gitignore",
+        "CITATION.cff",
+        "CONTRIBUTING.md",
+        "DATA_LICENSE",
+        "LICENSE",
+        "Makefile",
+        "README.md",
+        "pyproject.toml",
+        "requirements.txt",
+        "protocol/protocol_v2.0.json",
+        "src/telemetry_backend.py",
+        "data/README.md",
+        "results/README.md",
+    ]
+
+    for d in ["benchmark", "adapters", "scripts", "tests", "docs", "paper"]:
+        abs_d = os.path.join(REPO_DIR, d)
+        if not os.path.exists(abs_d):
+            continue
+        for root, _, files in os.walk(abs_d):
+            if "__pycache__" in root or ".pytest_cache" in root:
+                continue
+            for f in sorted(files):
+                if f.endswith(".pyc") or f.endswith(".pyo") or f == ".DS_Store" or f.endswith(".log"):
+                    continue
+                # Exclude runtime trial jsonl files from static manifest
+                if f.endswith(".jsonl") and "workload_data" not in root:
+                    continue
+                rel = os.path.relpath(os.path.join(root, f), REPO_DIR).replace("\\", "/")
+                static_entries.append(rel)
+
+    # Include mock data inside data/workload_data (needed by workloads W1-W5)
+    wl_data = os.path.join(REPO_DIR, "data", "workload_data")
+    if os.path.exists(wl_data):
+        for root, _, files in os.walk(wl_data):
+            for f in sorted(files):
+                rel = os.path.relpath(os.path.join(root, f), REPO_DIR).replace("\\", "/")
+                static_entries.append(rel)
+
+    static_entries = sorted(set(static_entries))
+    updated_static = {}
+    for rel_path in static_entries:
+        abs_path = os.path.join(REPO_DIR, rel_path)
+        if os.path.exists(abs_path):
+            updated_static[rel_path] = compute_sha256(abs_path)
+
+    os.makedirs(os.path.dirname(MANIFEST_STATIC_PATH), exist_ok=True)
+    with open(MANIFEST_STATIC_PATH, "w", encoding="utf-8") as f:
+        json.dump(updated_static, f, indent=2)
+        f.write("\n")
+
+    print(f"✅ [SUCCESS] Updated {len(updated_static)} static file signatures in {MANIFEST_STATIC_PATH}")
+    return 0
+
+
+def verify_manifest(manifest_file: str | None = None) -> int:
     if "--update" in sys.argv:
         return update_manifest()
 
-    if not os.path.exists(MANIFEST_PATH):
-        print(f"❌ [ERROR] Manifest file not found: {MANIFEST_PATH}")
-        return 1
+    # Determine manifest mode
+    is_pre_run = "--pre-run" in sys.argv
+    is_post_run = "--post-run" in sys.argv
 
-    with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
+    if manifest_file:
+        target_path = manifest_file
+    elif is_pre_run:
+        target_path = MANIFEST_STATIC_PATH
+    elif is_post_run:
+        target_path = MANIFEST_PATH
+    else:
+        # Default fallback: check static manifest if full manifest does not exist or if .jsonl are absent
+        target_path = MANIFEST_PATH if os.path.exists(MANIFEST_PATH) else MANIFEST_STATIC_PATH
+
+    if not os.path.exists(target_path):
+        # Fall back to static if post-run not available
+        if target_path == MANIFEST_PATH and os.path.exists(MANIFEST_STATIC_PATH):
+            target_path = MANIFEST_STATIC_PATH
+        else:
+            print(f"❌ [ERROR] Manifest file not found: {target_path}")
+            return 1
+
+    with open(target_path, "r", encoding="utf-8") as f:
         manifest = json.load(f)
 
+    manifest_label = "Pre-Run Static" if "static" in os.path.basename(target_path) else "Post-Run Complete"
     total_files = len(manifest)
     print("========================================================================")
-    print(" 🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)")
+    print(f" 🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256) [{manifest_label}]")
     print(f"    [EN-US] Cryptographic Artifact Integrity Verification ({total_files} files)")
     print("========================================================================")
 
@@ -250,26 +330,28 @@ def verify_manifest() -> int:
         return 1
 
 
-def pre_flight_check() -> int:
+def pre_flight_check(is_pre_run: bool = False) -> int:
     """
     Executes comprehensive pre-flight verification:
     1. Verifies all files in manifest exist and hashes match.
     2. Validates execution permissions of scripts and binaries.
     3. Checks protocol freeze and core configuration invariants.
+    4. Confirms output directories (data/ and results/) exist or are created.
     Returns 0 on complete compliance, 1 on any failure.
     """
+    manifest_label = "Pre-Run Static Mode" if is_pre_run else "Standard Verification"
     print("========================================================================")
-    print(" 🚀 [PRE-FLIGHT VERIFIER] Comprehensive Pre-Flight & Permission Check")
+    print(f" 🚀 [PRE-FLIGHT VERIFIER] Comprehensive Pre-Flight Check ({manifest_label})")
     print("========================================================================")
 
-    res = verify_manifest()
+    target_manifest = MANIFEST_STATIC_PATH if is_pre_run else (MANIFEST_PATH if os.path.exists(MANIFEST_PATH) else MANIFEST_STATIC_PATH)
+    res = verify_manifest(target_manifest)
     if res != 0:
         print("❌ [PRE-FLIGHT FAILED] Manifest integrity check failed.", file=sys.stderr)
         return 1
 
     permission_errors = []
     if os.name != "nt":
-        # Check execution permissions on critical binaries and scripts
         exec_targets = [
             "benchmark/picoclaw_orch",
             "benchmark/picoclaw_orch_linux",
@@ -290,12 +372,18 @@ def pre_flight_check() -> int:
             print(f"   - {err}", file=sys.stderr)
         return 1
 
-    # Check protocol file
     proto_path = os.path.join(REPO_DIR, "protocol", "protocol_v2.0.json")
     if not os.path.exists(proto_path):
         print("❌ [PRE-FLIGHT FAILED] Missing protocol/protocol_v2.0.json", file=sys.stderr)
         return 1
 
+    # Ensure output staging directories exist
+    os.makedirs(os.path.join(REPO_DIR, "data"), exist_ok=True)
+    os.makedirs(os.path.join(REPO_DIR, "results"), exist_ok=True)
+
+    if is_pre_run:
+        print("ℹ️  [PRE-RUN NOTICE] Static pre-run verification passed.")
+        print("   Runtime trial .jsonl files will be generated during physical campaign execution.")
     print("✅ [PRE-FLIGHT PASSED] All files verified, permissions confirmed, protocol present.")
     print("========================================================================\n")
     return 0
@@ -303,13 +391,15 @@ def pre_flight_check() -> int:
 
 if __name__ == "__main__":
     if "-h" in sys.argv or "--help" in sys.argv:
-        print("Usage: scripts/verify_manifest.py [--pre-flight | --update | --dry-run | -h]")
+        print("Usage: scripts/verify_manifest.py [--pre-run | --post-run | --pre-flight | --update | --dry-run | -h]")
         sys.exit(0)
     if "--dry-run" in sys.argv:
         print("⚡ [DRY-RUN] Manifest verification execution plan verified. Exiting code 0.")
         sys.exit(0)
     if "--update" in sys.argv:
         sys.exit(update_manifest())
+    if "--pre-run" in sys.argv or ("--pre-flight" in sys.argv and "--post-run" not in sys.argv and not os.path.exists(MANIFEST_PATH)):
+        sys.exit(pre_flight_check(is_pre_run=True))
     if "--pre-flight" in sys.argv:
-        sys.exit(pre_flight_check())
+        sys.exit(pre_flight_check(is_pre_run=("--pre-run" in sys.argv)))
     sys.exit(verify_manifest())
