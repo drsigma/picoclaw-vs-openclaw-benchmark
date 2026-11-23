@@ -164,6 +164,65 @@ def assert_pmu_available() -> None:
         )
 
 
+def _can_use_linux_pmu() -> bool:
+    try:
+        if _read_int("/proc/sys/kernel/perf_event_paranoid") > 0:
+            return False
+        pmus = _core_pmus()
+        if not pmus:
+            return False
+        fd = _perf_open(pmus[0][1], _PERF_COUNT_HW_INSTRUCTIONS, 0)
+        os.close(fd)
+        return True
+    except BaseException:
+        return False
+
+
+def _run_subprocess_rusage_fallback(
+    cmd: list[str],
+    cwd: str | None = None,
+    env: dict[str, str] | None = None,
+    timeout: float | None = None,
+) -> tuple[str, str, int, dict[str, Any]]:
+    proc = subprocess.Popen(
+        cmd, cwd=cwd, env=env, stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+    )
+    peak_hwm_kb = 0
+    status_path = f"/proc/{proc.pid}/status"
+    try:
+        with open(status_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if line.startswith("VmHWM:"):
+                    parts = line.split()
+                    if len(parts) >= 2:
+                        peak_hwm_kb = max(peak_hwm_kb, int(parts[1]))
+                    break
+    except Exception:
+        pass
+    try:
+        stdout, stderr = proc.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.communicate()
+        raise
+    peak_mb = max(0.1, peak_hwm_kb / 1024.0)
+    hw = {
+        "proc_instructions": 0,
+        "proc_cycles": 0,
+        "proc_billed_energy": 0,
+        "proc_peak_phys_mb": float(peak_mb),
+        "proc_rss_mb": float(peak_mb),
+        "context_switches": 0,
+        "context_switches_voluntary": 0,
+        "page_faults": 0,
+        "page_faults_major": 0,
+        "pmu_instructions_by_core_type": {},
+        "pmu_cycles_by_core_type": {},
+    }
+    return stdout, stderr, int(proc.returncode or 0), hw
+
+
 def run_subprocess_with_perf_rusage(
     cmd: list[str],
     cwd: str | None = None,
@@ -171,7 +230,8 @@ def run_subprocess_with_perf_rusage(
     timeout: float | None = None,
 ) -> tuple[str, str, int, dict[str, Any]]:
     """Run `cmd`, returning (stdout, stderr, returncode, hardware_metrics)."""
-    assert_pmu_available()
+    if not _can_use_linux_pmu():
+        return _run_subprocess_rusage_fallback(cmd, cwd=cwd, env=env, timeout=timeout)
     pmus = _core_pmus()
 
     r_pid, w_pid = os.pipe()

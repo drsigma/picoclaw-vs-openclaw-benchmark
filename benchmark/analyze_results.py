@@ -11,13 +11,24 @@ import os
 import sys
 from typing import Any
 
-import numpy as np
-from scipy import stats
+for _env_var in (
+    "OPENBLAS_NUM_THREADS",
+    "OMP_NUM_THREADS",
+    "MKL_NUM_THREADS",
+    "NUMEXPR_NUM_THREADS",
+    "VECLIB_MAXIMUM_THREADS",
+    "GOTO_NUM_THREADS",
+    "BLIS_NUM_THREADS",
+):
+    os.environ.setdefault(_env_var, "1")
+
+import numpy as np  # noqa: E402
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if REPO_DIR not in sys.path:
     sys.path.insert(0, REPO_DIR)
 
+from benchmark import stats_core as stats  # noqa: E402
 from benchmark.protocol_invariants import validate_campaign_invariants  # noqa: E402
 
 
@@ -1305,7 +1316,8 @@ def compute_sensitivity_and_outlier_analysis(
 
             pt_mean = float(np.mean([float(x["prompt_tokens"]) for x in c_recs]))
             ct_mean = float(np.mean([float(x.get("completion_tokens", x.get("output_tokens", 1))) for x in c_recs]))
-            en_mean = float(np.mean([float(x["energy_net_above_idle_j"]) for x in c_recs if x.get("energy_net_above_idle_j") is not None]))
+            en_vals = [float(x["energy_net_above_idle_j"]) for x in c_recs if x.get("energy_net_above_idle_j") is not None]
+            en_mean = float(np.mean(en_vals)) if en_vals else None
 
             cells[f"{ak}_{w}"] = {
                 "agent_key": ak,
@@ -1323,10 +1335,10 @@ def compute_sensitivity_and_outlier_analysis(
                     float(np.median(p_ms_list)) / max(0.01, float(np.median(p_ms_list)) + float(np.median(pred_ms_list))) * 100.0,
                     2,
                 ),
-                "active_power_net_mean_w": round(float(np.mean(p_watts)), 2) if p_watts else 0.0,
-                "active_power_net_sd_w": round(float(np.std(p_watts, ddof=1)), 2) if len(p_watts) > 1 else 0.0,
-                "energy_per_prompt_token_mj": round((en_mean * 1000.0) / max(1.0, pt_mean), 3),
-                "energy_per_completion_token_mj": round((en_mean * 1000.0) / max(1.0, ct_mean), 2),
+                "active_power_net_mean_w": round(float(np.mean(p_watts)), 2) if p_watts else None,
+                "active_power_net_sd_w": round(float(np.std(p_watts, ddof=1)), 2) if len(p_watts) > 1 else None,
+                "energy_per_prompt_token_mj": round((en_mean * 1000.0) / max(1.0, pt_mean), 3) if en_mean is not None else None,
+                "energy_per_completion_token_mj": round((en_mean * 1000.0) / max(1.0, ct_mean), 2) if en_mean is not None else None,
             }
 
         return {

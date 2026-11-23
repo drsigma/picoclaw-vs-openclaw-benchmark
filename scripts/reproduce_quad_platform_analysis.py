@@ -40,14 +40,25 @@ builtins.print = functools.partial(builtins.print, flush=True)
 
 QUICK_MODE = False
 
-import matplotlib
-matplotlib.use("Agg")
-import matplotlib.patches as patches
-import matplotlib.pyplot as plt
-import numpy as np
-from scipy import stats
+for _env_var in (
+    "OPENBLAS_NUM_THREADS",
+    "OMP_NUM_THREADS",
+    "MKL_NUM_THREADS",
+    "NUMEXPR_NUM_THREADS",
+    "VECLIB_MAXIMUM_THREADS",
+    "GOTO_NUM_THREADS",
+    "BLIS_NUM_THREADS",
+):
+    os.environ.setdefault(_env_var, "1")
+os.environ.setdefault("MPLBACKEND", "Agg")
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if REPO_DIR not in sys.path:
+    sys.path.insert(0, REPO_DIR)
+
+import numpy as np  # noqa: E402
+from benchmark import stats_core as stats  # noqa: E402
+
 AUDIT_EXPORT_DIR = os.path.join(REPO_DIR, "audit_export")
 AUDIT_FIG_DIR = os.path.join(AUDIT_EXPORT_DIR, "figures")
 AUDIT_TABLES_DIR = os.path.join(AUDIT_EXPORT_DIR, "tables")
@@ -60,22 +71,7 @@ def ensure_output_directories():
     os.makedirs(AUDIT_FIG_DIR, exist_ok=True)
     os.makedirs(AUDIT_TABLES_DIR, exist_ok=True)
     os.makedirs(PUB_FIG_DIR, exist_ok=True)
-os.makedirs(PUB_TABLES_DIR, exist_ok=True)
-
-# Publication styling
-plt.rcParams.update({
-    "font.family": "sans-serif",
-    "font.sans-serif": ["Helvetica", "Arial", "DejaVu Sans"],
-    "font.size": 10,
-    "axes.titlesize": 11,
-    "axes.titleweight": "bold",
-    "axes.labelsize": 10,
-    "axes.labelweight": "bold",
-    "xtick.labelsize": 9,
-    "ytick.labelsize": 9,
-    "legend.fontsize": 8.5,
-    "figure.dpi": 300,
-})
+    os.makedirs(PUB_TABLES_DIR, exist_ok=True)
 
 COLOR_PICO = "#0D9488"      # Teal (PicoClaw Go)
 COLOR_OPEN_MIN = "#E11D48"  # Rose / Crimson (OpenClaw Minimal)
@@ -2861,6 +2857,24 @@ def generate_comparative_tables(consolidated: dict[str, Any], test_results: list
 
 def generate_quad_platform_figures(consolidated: dict[str, Any], num_datasets: int = 35):
     print("Generating Quad-Platform High-Resolution Figures (300 DPI)...")
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.patches as patches
+    import matplotlib.pyplot as plt
+
+    plt.rcParams.update({
+        "font.family": "sans-serif",
+        "font.sans-serif": ["Helvetica", "Arial", "DejaVu Sans"],
+        "font.size": 10,
+        "axes.titlesize": 11,
+        "axes.titleweight": "bold",
+        "axes.labelsize": 10,
+        "axes.labelweight": "bold",
+        "xtick.labelsize": 9,
+        "ytick.labelsize": 9,
+        "legend.fontsize": 8.5,
+        "figure.dpi": 300,
+    })
 
     # --------------------------------------------------------------------------
     # Figure 1: Architecture Topology Diagram

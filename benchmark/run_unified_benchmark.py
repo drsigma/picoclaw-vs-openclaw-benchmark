@@ -27,8 +27,6 @@ REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_DIR)
 
 from benchmark.adapters import get_adapter  # noqa: E402
-from benchmark.analyze_results import analyze_publication_campaign  # noqa: E402
-from benchmark.generate_charts import generate_all_charts  # noqa: E402
 from benchmark.telemetry import (  # noqa: E402
     LinuxRAPLMonitor,
     SMCPowerMonitor,
@@ -621,10 +619,12 @@ def run_campaign(
 
     # Generate analytical tables and statistical tests
     print("\n📈 Executing non-parametric statistical analysis...")
+    from benchmark.analyze_results import analyze_publication_campaign
     analyze_publication_campaign(raw_trials_path, output_dir)
 
     # Generate publication charts
     print("\n🎨 Generating publication charts...")
+    from benchmark.generate_charts import generate_all_charts
     generate_all_charts(output_dir)
 
 

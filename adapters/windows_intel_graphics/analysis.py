@@ -16,11 +16,27 @@ import json
 import math
 import os
 import shutil
+import sys
 from typing import Any, Callable
 
-import numpy as np
-from scipy import stats
-from statsmodels.stats.weightstats import ttost_ind
+for _env_var in (
+    "OPENBLAS_NUM_THREADS",
+    "OMP_NUM_THREADS",
+    "MKL_NUM_THREADS",
+    "NUMEXPR_NUM_THREADS",
+    "VECLIB_MAXIMUM_THREADS",
+    "GOTO_NUM_THREADS",
+    "BLIS_NUM_THREADS",
+):
+    os.environ.setdefault(_env_var, "1")
+
+_REPO_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if _REPO_DIR not in sys.path:
+    sys.path.insert(0, _REPO_DIR)
+
+import numpy as np  # noqa: E402
+from benchmark import stats_core as stats  # noqa: E402
+from benchmark.stats_core import ttost_ind  # noqa: E402
 
 NA = "N/A"
 

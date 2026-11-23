@@ -6,10 +6,23 @@ Author / Autor: Rafael Paniccia Cassetta (UFABC)
 Language / Idioma: Bilingual (PT-BR & EN-US comments, English code)
 """
 
-import numpy as np
-from scipy import stats
+import os
 
-from benchmark.analyze_results import (
+for _env_var in (
+    "OPENBLAS_NUM_THREADS",
+    "OMP_NUM_THREADS",
+    "MKL_NUM_THREADS",
+    "NUMEXPR_NUM_THREADS",
+    "VECLIB_MAXIMUM_THREADS",
+    "GOTO_NUM_THREADS",
+    "BLIS_NUM_THREADS",
+):
+    os.environ.setdefault(_env_var, "1")
+
+import numpy as np  # noqa: E402
+from benchmark import stats_core as stats  # noqa: E402
+
+from benchmark.analyze_results import (  # noqa: E402
     bootstrap_ci,
     cliffs_delta,
     holm_bonferroni_adjust,

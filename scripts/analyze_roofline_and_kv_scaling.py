@@ -26,10 +26,23 @@ import struct
 import sys
 from typing import Any, Dict, List, Tuple
 
-import numpy as np
-from scipy import stats
+for _env_var in (
+    "OPENBLAS_NUM_THREADS",
+    "OMP_NUM_THREADS",
+    "MKL_NUM_THREADS",
+    "NUMEXPR_NUM_THREADS",
+    "VECLIB_MAXIMUM_THREADS",
+    "GOTO_NUM_THREADS",
+    "BLIS_NUM_THREADS",
+):
+    os.environ.setdefault(_env_var, "1")
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if REPO_DIR not in sys.path:
+    sys.path.insert(0, REPO_DIR)
+
+import numpy as np  # noqa: E402
+from benchmark import stats_core as stats  # noqa: E402
 ABLATION_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "prefill_ablation.jsonl")
 RAW_TRIALS_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
 WARM_TRIALS_PATH = os.path.join(REPO_DIR, "results", "publication_campaign", "warm_cache_trials.jsonl")
