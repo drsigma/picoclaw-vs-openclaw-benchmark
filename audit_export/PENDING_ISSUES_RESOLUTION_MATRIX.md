@@ -3,7 +3,7 @@
 **Repository:** `picoclaw-vs-openclaw-benchmark` (branch `main`)  
 **Commit Baseline:** Post-reconciliation V2 readiness  
 **Date:** 2026-11-23  
-**Audit Protocol:** Quad-Platform Systems Benchmarking Guidelines (Zero-Mock, Strictly Empirical, Venue-Neutral)
+**Audit Protocol:** Quad-Platform Systems Benchmarking Guidelines (Zero-Mock, Empirically Grounded, Venue-Neutral)
 
 ---
 
