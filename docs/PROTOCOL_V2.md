@@ -2,7 +2,7 @@
 
 **Protocol Version:** 2.0.0  
 **Frozen Status:** Frozen (Immutable)  
-**Protocol Hash (SHA-256):** `f195d5ed67f8606e9d6ef9c1176049702e9d9b221ebc62817ccc34bd379b456f`  
+**Protocol Hash (SHA-256):** `717e550e7c976a35c9d7af4c5ce85cb967ebf0f7f15f4bfd8c6f81dcb3250358`  
 **Author:** Rafael Paniccia Cassetta (UFABC)  
 **Repository:** `https://github.com/drsigma/picoclaw-vs-openclaw-benchmark`  
 

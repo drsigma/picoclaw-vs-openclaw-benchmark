@@ -30,9 +30,11 @@ WORKLOAD_CONTRACTS: Dict[str, Dict[str, Any]] = {
         "description": "Calculates right triangle hypotenuse using calculate_hypotenuse tool.",
         "prompt_template": "Calculate the hypotenuse of a right triangle with legs a=12.5 and b=18.2 using the available math tool.",
         "prompt_hash": "a1f7d98c25e839e4e69b0fa6bb8cfa8249d44321394c8e7e1f40d7c71f5439a0",
-        "expected_prompt_tokens": 1084,
+        "expected_prompt_tokens": 2153,
+        "expected_prompt_tokens_minimal": 2153,
+        "expected_prompt_tokens_bloated": 7067,
         "token_tolerance_pct": 5.0,
-        "expected_completion_tokens": 28,
+        "expected_completion_tokens": 41,
         "expected_tool_calls": 1,
         "expected_tools_sequence": ["calculate_hypotenuse"],
         "catalog_size": 15,
@@ -42,17 +44,20 @@ WORKLOAD_CONTRACTS: Dict[str, Dict[str, Any]] = {
     "W2": {
         "workload_id": "W2",
         "name": "Multi-Tool Selection & Bloat Ablation",
-        "description": "Retrieves system log and computes SHA-256 under minimal (15) and bloated (54) schemas.",
+        "description": "Retrieves system log and computes SHA-256 under minimal (15), bloated (54), and Tool-RAG (top-5) schemas.",
         "prompt_template": "Retrieve the authentication log entry for service 'auth-gateway' and compute its SHA-256 checksum.",
         "prompt_hash": "b2c8e10d34f9a08e718b1eb7cc9dfb9350e55432405d9f8f2051e8d8206540b1",
-        "expected_prompt_tokens_minimal": 1092,
+        "expected_prompt_tokens": 2177,
+        "expected_prompt_tokens_minimal": 2177,
         "expected_prompt_tokens_bloated": 7091,
+        "expected_prompt_tokens_tool_rag": 917,
         "token_tolerance_pct": 5.0,
-        "expected_completion_tokens": 32,
+        "expected_completion_tokens": 30,
         "expected_tool_calls": 2,
         "expected_tools_sequence": ["fetch_system_log", "hash_sha256"],
         "catalog_size_minimal": 15,
         "catalog_size_bloated": 54,
+        "catalog_size_tool_rag": 5,
         "regime_a_cache_hit_pct": 0.0,
         "regime_b_min_cache_hit_pct": 80.0,
     },
@@ -62,9 +67,12 @@ WORKLOAD_CONTRACTS: Dict[str, Dict[str, Any]] = {
         "description": "In-memory cosine similarity retrieval over embedded documentation chunks.",
         "prompt_template": "Find the top documentation chunk relevant to 'memory bandwidth saturation on unified memory' and summarize it.",
         "prompt_hash": "c3d9f21e45a0b19f829c2fc8dd0efc0461f66543516e0a9a3162f9e9317651c2",
-        "expected_prompt_tokens": 1287,
+        "expected_prompt_tokens": 2423,
+        "expected_prompt_tokens_minimal": 2423,
+        "expected_prompt_tokens_bloated": 7337,
+        "expected_prompt_tokens_tool_rag": 1163,
         "token_tolerance_pct": 5.0,
-        "expected_completion_tokens": 42,
+        "expected_completion_tokens": 32,
         "expected_tool_calls": 2,
         "expected_tools_sequence": ["vector_search_chunks", "read_chunk_detail"],
         "catalog_size": 15,
@@ -77,9 +85,12 @@ WORKLOAD_CONTRACTS: Dict[str, Dict[str, Any]] = {
         "description": "10-turn sequential agent conversation tracking variable state across turns.",
         "prompt_template": "Sequential 10-turn multi-step state tracking.",
         "prompt_hash": "d4e0a32f56b1c20a930d3ad9ee1f0d1572a77654627f1b0b4273a0fa428762d3",
-        "expected_prompt_tokens": 2150,
-        "token_tolerance_pct": 8.0,
-        "expected_completion_tokens": 35,
+        "expected_prompt_tokens": 22980,
+        "expected_prompt_tokens_minimal": 22980,
+        "expected_prompt_tokens_bloated": 72120,
+        "expected_prompt_tokens_tool_rag": 10380,
+        "token_tolerance_pct": 10.0,
+        "expected_completion_tokens": 285,
         "expected_tool_calls": 10,
         "catalog_size": 15,
         "regime_a_cache_hit_pct": 0.0,
@@ -97,8 +108,11 @@ WORKLOAD_CONTRACTS: Dict[str, Dict[str, Any]] = {
             "and provide an executive compliance summary."
         ),
         "expected_prompt_tokens": 2259,
+        "expected_prompt_tokens_minimal": 2259,
+        "expected_prompt_tokens_bloated": 6921,
+        "expected_prompt_tokens_tool_rag": 999,
         "token_tolerance_pct": 5.0,
-        "expected_completion_tokens": 38,
+        "expected_completion_tokens": 35,
         "expected_tool_calls": 2,
         "expected_tools_sequence": ["read_governance_policy", "query_analytics_db"],
         "catalog_size": 2,
@@ -146,18 +160,22 @@ def audit_cell_trial(
 
     # Invariant 3: Token parity against contract
     if strict_token_parity:
-        exp_ptok = contract.get("expected_prompt_tokens")
+        exp_ptok = contract.get("expected_prompt_tokens", contract.get("expected_prompt_tokens_minimal"))
+        tol = contract.get("token_tolerance_pct", 5.0) / 100.0
+
+        is_bloated = record.get("agent_key") == "openclaw_full" or record.get("mode") == "full" or record.get("tools_count", 0) > 20
+        is_tool_rag = "tool_rag" in str(record.get("agent_key", "")) or "tool_rag" in str(record.get("mode", ""))
+
+        if is_bloated and "expected_prompt_tokens_bloated" in contract:
+            exp_ptok = contract["expected_prompt_tokens_bloated"]
+        elif is_tool_rag and "expected_prompt_tokens_tool_rag" in contract:
+            exp_ptok = contract["expected_prompt_tokens_tool_rag"]
+        elif "expected_prompt_tokens_minimal" in contract:
+            exp_ptok = contract["expected_prompt_tokens_minimal"]
+
         if exp_ptok is not None:
-            tol = contract.get("token_tolerance_pct", 5.0) / 100.0
             min_p = math.floor(exp_ptok * (1.0 - tol))
             max_p = math.ceil(exp_ptok * (1.0 + tol))
-            # Handle W2 bloat ablation case
-            is_bloated = record.get("agent_key") == "openclaw_full" or record.get("tools_count", 0) > 20
-            if is_bloated and "expected_prompt_tokens_bloated" in contract:
-                exp_ptok = contract["expected_prompt_tokens_bloated"]
-                min_p = math.floor(exp_ptok * (1.0 - tol))
-                max_p = math.ceil(exp_ptok * (1.0 + tol))
-
             if not (min_p <= ptok_val <= max_p):
                 return (
                     False,

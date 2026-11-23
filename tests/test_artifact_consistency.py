@@ -737,8 +737,8 @@ def test_gatekeeper_audit_certificate_verified():
         cert = json.load(f)
 
     assert cert["gatekeeper_verdict"] == "CERTIFIED_VALID"
-    assert cert["total_records_verified"] >= 3700
-    assert cert["total_datasets_audited"] >= 7
+    assert cert["total_records_verified"] == 18616
+    assert cert["total_datasets_audited"] == 35
 
 
 def test_reviewer2_e9_no_residual_promotional_labels():
@@ -896,8 +896,8 @@ def test_quad_platform_macros_consistency():
     assert pub_txt == audit_txt, "Publication and audit macros_quad_platform.tex differ!"
 
     assert r"\newcommand{\TotalRawDatasets}{35}" in pub_txt
-    assert r"\newcommand{\TotalJsonlLines}{19{,}141}" in pub_txt
-    assert r"\newcommand{\TotalMeasuredTrials}{17{,}460}" in pub_txt
+    assert r"\newcommand{\TotalJsonlLines}{18{,}616}" in pub_txt
+    assert r"\newcommand{\TotalMeasuredTrials}{16{,}995}" in pub_txt
     assert r"\newcommand{\PhiOrchFifteenMin}" in pub_txt
     assert r"\newcommand{\PhiOrchFifteenMax}" in pub_txt
 

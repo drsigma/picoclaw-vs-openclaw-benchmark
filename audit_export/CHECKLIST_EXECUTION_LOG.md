@@ -12,7 +12,7 @@
 | 1 | Phase 1 | Complete repository in ZIP (`review_submission_package.zip`) | [x] | `review_submission_package.zip` (52.50 MB <= 100 MB). Tested in `/tmp/audit_zip_check` with 53 passed tests and 100% manifest match. |
 | 2 | Phase 1 | Permanent version with DOI (Zenodo) | [ ] PENDENTE AÇÃO EXTERNA | Centralized as `PENDING_RELEASE` in CITATION.cff and manuscript. Zero fabricated DOIs. |
 | 3 | Phase 1 | Include all referenced artifacts | [x] | 302 tracked files in `manifest_sha256.json`, including binaries (`picoclaw_orch_linux`, `picoclaw_orch`), LaTeX macros, tables, figures, CSVs, and chunks. |
-| 4 | Phase 2 | Single source of truth for all numbers (`macros_quad_platform.tex`) | [x] | Generated `macros_quad_platform.tex` with 35 datasets, 19,141 lines, 17,460 trials, integrated into `paper/manuscript.tex`. Test `test_quad_platform_macros_consistency` passed. |
+| 4 | Phase 2 | Single source of truth for all numbers (`macros_quad_platform.tex`) | [x] | Generated `macros_quad_platform.tex` with 35 datasets, 18,616 lines, 16,995 measured trials, integrated into `paper/manuscript.tex`. Test `test_quad_platform_macros_consistency` passed. |
 | 5 | Phase 2 | Correct/remove thermal throttling claims | [x] | Stratification analysis generated `linux_throttling_stratification.csv`: median Delta T is 0.0 C, median elongation is -0.17%. Manuscript text updated to eliminate thermal throttling as cause of positive autocorrelation. |
 | 6 | Phase 2 | Correct memory bandwidth gatekeeper claim | [x] | Manuscript Section 4.2 updated to active-weights analytical Roofline (102.4 GB/s median, 85.3% of 120 GB/s peak), qualifying that naive model-size estimation exceeds physical bandwidth in 11/150 trials. |
 | 7 | Phase 2 | Correct machine instruction interpretation | [x] | Section 4.2 and Table 1 qualified retired instructions as total runtime activity including VM overhead (CPython 78x Go instructions with lower T_orch than Node.js). |
@@ -57,8 +57,9 @@
 - **Files Generated:** `results/quad_platform_tables/macros_quad_platform.tex`, `audit_export/tables/macros_quad_platform.tex`.
 - **Values:**
   - `\TotalRawDatasets`: 35
-  - `\TotalJsonlLines`: 19,141
-  - `\TotalMeasuredTrials`: 17,460
+  - `\TotalJsonlLines`: 18,616
+  - `\TotalMeasuredTrials`: 16,995
+  - `\TotalWarmupTrials`: 1,621
   - `\PhiOrchFifteenMin`: 0.28%
   - `\PhiOrchFifteenMax`: 4.20%
   - `\DeviationNeuralMin`: -2.89%

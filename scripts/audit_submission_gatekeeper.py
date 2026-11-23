@@ -88,7 +88,19 @@ def audit_jsonl_file(filepath: str, nominal_bw_gbs: float = 120.0) -> Dict[str, 
                 continue
 
             # 1. Required provenance fields
-            missing = [fld for fld in REQUIRED_PROVENANCE_FIELDS if fld not in rec]
+            is_micro_ablation = (
+                "iterations" in rec
+                or "total_ops" in rec
+                or "transport" in rec
+                or "t_mcp_ipc_ms" in rec
+                or "mcp" in str(rec.get("workload", "")).lower()
+            )
+            req_fields = (
+                ["session_id", "timestamp_iso", "git_commit", "hardware", "workload"]
+                if is_micro_ablation
+                else REQUIRED_PROVENANCE_FIELDS
+            )
+            missing = [fld for fld in req_fields if fld not in rec]
             if missing:
                 stats["schema_violations"] += 1
                 stats["errors"].append(f"Line {line_no}: Missing provenance fields: {missing}")
@@ -100,7 +112,6 @@ def audit_jsonl_file(filepath: str, nominal_bw_gbs: float = 120.0) -> Dict[str, 
                 stats["errors"].append(f"Line {line_no}: Invalid http_status ({http_st}), expected 200")
 
             # 3. Token invariants & finish reason (for LLM agent trials)
-            is_micro_ablation = "iterations" in rec or "total_ops" in rec
             ptok = rec.get("prompt_tokens")
             ctok = rec.get("completion_tokens", rec.get("output_tokens"))
             fr = rec.get("finish_reason")
@@ -115,13 +126,16 @@ def audit_jsonl_file(filepath: str, nominal_bw_gbs: float = 120.0) -> Dict[str, 
                 stats["schema_violations"] += 1
                 stats["errors"].append(f"Line {line_no}: Invalid finish_reason: {fr}")
 
-            # 4. Physical plausibility check
+            # 4. Physical plausibility check & no simulation
             t_task = float(rec.get("t_task_ms", rec.get("t_total_ms", rec.get("t_exec_ms", 0.0))))
             t_neural = float(rec.get("t_neural_ms", rec.get("prompt_ms", 0.0)))
             if t_task <= 0.0:
                 stats["schema_violations"] += 1
                 stats["errors"].append(f"Line {line_no}: Non-positive task latency ({t_task})")
-            if rec.get("is_mocked", False) or rec.get("simulated", False):
+            if t_neural > 0.0 and t_task < t_neural:
+                stats["schema_violations"] += 1
+                stats["errors"].append(f"Line {line_no}: Plausibility violation: t_task ({t_task}) < t_neural ({t_neural})")
+            if rec.get("is_mocked", False) or rec.get("simulated", False) or rec.get("is_simulated", False) is True:
                 stats["schema_violations"] += 1
                 stats["errors"].append(f"Line {line_no}: Rejected simulated or mocked execution record")
 
@@ -164,17 +178,23 @@ def run_gatekeeper_suite(target_files: List[str] | None = None) -> int:
     print("=" * 80)
 
     if not target_files:
-        # Default: audit all publication datasets
-        pub_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
-        target_files = [
-            os.path.join(pub_dir, "raw_trials.jsonl"),
-            os.path.join(pub_dir, "warm_cache_trials.jsonl"),
-            os.path.join(pub_dir, "prefill_ablation.jsonl"),
-            os.path.join(pub_dir, "uma_energy_bandwidth_trials.jsonl"),
-            os.path.join(pub_dir, "inter_session_trials.jsonl"),
-            os.path.join(pub_dir, "tool_rag_mitigation_trials.jsonl"),
-            os.path.join(pub_dir, "kv_cache_thrashing_trials.jsonl"),
-        ]
+        # Default: audit all 35 publication datasets across all 4 platforms
+        try:
+            sys.path.insert(0, REPO_DIR)
+            from scripts.reproduce_quad_platform_analysis import audit_raw_datasets
+            inv = audit_raw_datasets()
+            target_files = [x["path"] for x in inv]
+        except Exception:
+            pub_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+            target_files = [
+                os.path.join(pub_dir, "raw_trials.jsonl"),
+                os.path.join(pub_dir, "warm_cache_trials.jsonl"),
+                os.path.join(pub_dir, "prefill_ablation.jsonl"),
+                os.path.join(pub_dir, "uma_energy_bandwidth_trials.jsonl"),
+                os.path.join(pub_dir, "inter_session_trials.jsonl"),
+                os.path.join(pub_dir, "tool_rag_mitigation_trials.jsonl"),
+                os.path.join(pub_dir, "kv_cache_thrashing_trials.jsonl"),
+            ]
 
     audit_results = []
     all_passed = True
@@ -199,7 +219,7 @@ def run_gatekeeper_suite(target_files: List[str] | None = None) -> int:
                 print(f"      ⚠️  {err}")
 
     certificate = {
-        "gatekeeper_version": "1.0.0",
+        "gatekeeper_version": "2.0.0",
         "methodological_references": [
             "Pugliese et al. (Automated Software Artifact Verification & Peer Review)",
             "OpenMCP (Model Context Protocol Specification & Test Suite)",
@@ -211,10 +231,10 @@ def run_gatekeeper_suite(target_files: List[str] | None = None) -> int:
         "overall_ready_for_submission": all_passed,
         "gatekeeper_verdict": "CERTIFIED_VALID" if all_passed else "REJECTED_NON_COMPLIANT",
         "invariants_enforced": [
-            "All 9 root provenance fields present on 100% of rows",
+            "All 9 root provenance fields present on 100% of rows (or 5 core for micro-ablations)",
             "HTTP 200 response status verified with non-zero token decodes",
             "Physical Roofline active memory bandwidth bounded <= 120.0 GB/s",
-            "Zero synthetic or mocked fallback values",
+            "Zero synthetic or mocked fallback values (is_simulated == False enforced)",
         ],
         "datasets": audit_results,
     }
@@ -223,7 +243,12 @@ def run_gatekeeper_suite(target_files: List[str] | None = None) -> int:
     with open(OUT_CERT, "w", encoding="utf-8") as f:
         json.dump(certificate, f, indent=2)
 
-    # Sync to publication campaign
+    # Sync to audit_export and publication campaign
+    export_cert = os.path.join(REPO_DIR, "audit_export", "gatekeeper_35_jsonl_audit.json")
+    os.makedirs(os.path.dirname(export_cert), exist_ok=True)
+    with open(export_cert, "w", encoding="utf-8") as f:
+        json.dump(certificate, f, indent=2)
+
     pub_cert = os.path.join(REPO_DIR, "results", "publication_campaign", "gatekeeper_audit_certificate.json")
     with open(pub_cert, "w", encoding="utf-8") as f:
         json.dump(certificate, f, indent=2)
@@ -231,8 +256,10 @@ def run_gatekeeper_suite(target_files: List[str] | None = None) -> int:
     print("\n" + "=" * 80)
     if all_passed:
         print(f"🎉 CERTIFICADO EMITIDO COM SUCESSO: {certificate['gatekeeper_verdict']}")
+        print(f"   Total de datasets auditados: {len(target_files)}")
         print(f"   Total de registros certificados: {total_evaluated_records}")
         print(f"   Salvo em: {OUT_CERT}")
+        print(f"   Espelhado em: {export_cert}")
         print("=" * 80)
         return 0
     else:

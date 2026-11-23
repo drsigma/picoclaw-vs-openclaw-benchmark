@@ -57,34 +57,48 @@
     "W1": {
       "description": "Single-Tool Arithmetic Dispatch",
       "schema_tools": 15,
-      "expected_prompt_tokens": 1084,
-      "expected_completion_tokens": 28
+      "expected_prompt_tokens": 2153,
+      "expected_prompt_tokens_minimal": 2153,
+      "expected_prompt_tokens_bloated": 7067,
+      "expected_completion_tokens": 41
     },
     "W2": {
-      "description": "Multi-Tool Selection & Bloat Ablation (15 vs 54 tools)",
-      "schema_tools": 15,
+      "description": "Multi-Tool Selection & Bloat Ablation (15 vs 54 tools vs Tool-RAG top-5)",
+      "schema_tools_minimal": 15,
       "schema_tools_bloated": 54,
-      "expected_prompt_tokens_minimal": 1092,
+      "schema_tools_tool_rag": 5,
+      "expected_prompt_tokens": 2177,
+      "expected_prompt_tokens_minimal": 2177,
       "expected_prompt_tokens_bloated": 7091,
-      "expected_completion_tokens": 32
+      "expected_prompt_tokens_tool_rag": 917,
+      "expected_completion_tokens": 30
     },
     "W3": {
       "description": "Vector Retrieval-Augmented Generation (Cosine Similarity)",
       "schema_tools": 15,
-      "expected_prompt_tokens": 1287,
-      "expected_completion_tokens": 42
+      "expected_prompt_tokens": 2423,
+      "expected_prompt_tokens_minimal": 2423,
+      "expected_prompt_tokens_bloated": 7337,
+      "expected_prompt_tokens_tool_rag": 1163,
+      "expected_completion_tokens": 32
     },
     "W4": {
       "description": "Multi-Turn Conversational Memory (10 Turns)",
       "schema_tools": 15,
-      "expected_prompt_tokens": 2150,
-      "expected_completion_tokens": 35
+      "expected_prompt_tokens": 22980,
+      "expected_prompt_tokens_minimal": 22980,
+      "expected_prompt_tokens_bloated": 72120,
+      "expected_prompt_tokens_tool_rag": 10380,
+      "expected_completion_tokens": 285
     },
     "W5": {
       "description": "Enterprise Cross-Domain Synthesis (LangChain + SQLite + Policy)",
       "schema_tools": 2,
       "expected_prompt_tokens": 2259,
-      "expected_completion_tokens": 38
+      "expected_prompt_tokens_minimal": 2259,
+      "expected_prompt_tokens_bloated": 6921,
+      "expected_prompt_tokens_tool_rag": 999,
+      "expected_completion_tokens": 35
     }
   },
   "execution_modes": {

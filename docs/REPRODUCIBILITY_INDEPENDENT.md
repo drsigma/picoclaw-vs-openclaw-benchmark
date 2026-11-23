@@ -71,7 +71,7 @@ Verify execution matrices, parameter validation, and environment manifest record
 
 ## 3. Full Statistical Re-Execution from Raw Data
 
-Independent reviewers can reproduce 100% of the statistical analyses, tables, figures, hypothesis tests, and LaTeX macros directly from the 35 raw empirical `.jsonl` files (19,141 recorded lines, 17,460 measured trials, 0 synthetic records):
+Independent reviewers can reproduce 100% of the statistical analyses, tables, figures, hypothesis tests, and LaTeX macros directly from the 35 raw empirical `.jsonl` files (18,616 recorded lines, 16,995 measured trials, 1,621 warmup trials, 0 synthetic records):
 
 ### 3.1 Fast Verification Mode (Reduced Bootstrap Resamples)
 ```bash
@@ -133,3 +133,14 @@ Select your target platform script:
   ```
 
 All raw outputs will be stored in isolated directories under `data/campaign_v2/` without overwriting historical benchmarks.
+
+---
+
+## 5. Distinction of Reproducibility Levels & Current Evaluation Status
+
+Following ACM / IEEE standard definitions for artifact review and badging:
+1. **Repeatability (Same team, same experimental setup):** Evaluated and confirmed across macOS ARM64 M4, Linux x86_64, Windows 11 NVIDIA RTX 3050, and Windows 10 Intel HD Graphics 4600.
+2. **Replicability (Different team, same experimental setup):** Protocol V2, workload contracts, and automated gatekeeper are frozen and fully documented to allow an external team to replicate using the specified hardware/software configuration.
+3. **Independent Reproducibility (Different team, different experimental setup):**
+   - **Status:** `[ ] PENDENTE EXECUÇÃO POR TERCEIRO INDEPENDENTE` (Awaiting execution by external third party without author intervention).
+   - Independent researchers and evaluators are invited to execute the protocol on their own testbeds and log all successes and discrepancies without author assistance.

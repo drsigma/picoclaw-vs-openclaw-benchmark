@@ -129,16 +129,16 @@ class LinuxPowerMonitor:
     def stop_campaign(self) -> None:
         self._running = False
 
-    def read_cpu_energy_uj(self) -> float:
+    def read_cpu_energy_uj(self) -> float | None:
         if self.rapl_path and os.path.exists(self.rapl_path):
             try:
                 with open(self.rapl_path, "r") as f:
                     return float(f.read().strip())
             except Exception:
-                pass
-        return 0.0
+                return None
+        return None
 
-    def read_nvidia_power_w(self) -> float:
+    def read_nvidia_power_w(self) -> float | None:
         if self.has_nvidia:
             try:
                 out = subprocess.check_output(
@@ -148,26 +148,39 @@ class LinuxPowerMonitor:
                 )
                 return float(out.strip().split("\n")[0])
             except Exception:
-                pass
-        return 0.0
+                return None
+        return None
 
-    def slice_energy(self, t0_ns: int, t1_ns: int) -> Dict[str, Any]:
+    def slice_energy(self, t0_ns: int, t1_ns: int, idle_power_w: float | None = None) -> Dict[str, Any]:
         # Approximate slice via instantaneous sampling at boundaries
         e0_uj = self.read_cpu_energy_uj()
         p0_w = self.read_nvidia_power_w()
         dt_s = max((t1_ns - t0_ns) / 1e9, 1e-4)
 
-        # In a real trial, start/end delta gives exact Joules
-        cpu_j = max(0.0, (e0_uj / 1e6))
-        gpu_j = max(0.0, p0_w * dt_s)
-        tot_j = cpu_j + gpu_j
+        cpu_j = round(e0_uj / 1e6, 4) if e0_uj is not None else None
+        gpu_j = round(p0_w * dt_s, 4) if p0_w is not None else None
+
+        tot_j = None
+        if cpu_j is not None and gpu_j is not None:
+            tot_j = round(cpu_j + gpu_j, 4)
+        elif cpu_j is not None:
+            tot_j = cpu_j
+        elif gpu_j is not None:
+            tot_j = gpu_j
+
+        net_j = None
+        if tot_j is not None:
+            if idle_power_w is not None and idle_power_w > 0:
+                net_j = round(max(0.0, tot_j - (idle_power_w * dt_s)), 4)
+            else:
+                net_j = tot_j
 
         return {
-            "energy_total_j": round(tot_j, 4),
-            "energy_net_above_idle_j": round(tot_j * 0.85, 4),
-            "energy_cpu_j": round(cpu_j, 4),
-            "energy_gpu_j": round(gpu_j, 4),
-            "pkg_power_w": round(tot_j / dt_s, 2),
+            "energy_total_j": tot_j,
+            "energy_net_above_idle_j": net_j,
+            "energy_cpu_j": cpu_j,
+            "energy_gpu_j": gpu_j,
+            "pkg_power_w": round(tot_j / dt_s, 2) if tot_j is not None else None,
             "backend": "linux_rapl_and_nvidia",
         }
 

@@ -1519,13 +1519,13 @@ def generate_quad_platform_macros_tex(consolidated: dict[str, Any], inventory: l
     and mirrors to audit_export/tables/macros_quad_platform.tex.
     Single source of truth for publication dataset totals and empirical ranges.
     """
-    total_datasets = len(inventory) if inventory else 35
-    total_jsonl_lines = sum(inv.get("line_count", 0) for inv in inventory) if inventory else 19141
-    total_measured_trials = sum(inv.get("measured_trials", 0) for inv in inventory) if inventory else 17460
-    if total_jsonl_lines == 0:
-        total_jsonl_lines = 19141
-    if total_measured_trials == 0:
-        total_measured_trials = 17460
+    if inventory is None:
+        inventory = audit_raw_datasets()
+
+    total_datasets = len(inventory)
+    total_jsonl_lines = sum(inv.get("total_records", inv.get("line_count", 0)) for inv in inventory)
+    total_measured_trials = sum(inv.get("measured_trials", 0) for inv in inventory)
+    total_warmup_trials = sum(inv.get("warmup_trials", 0) for inv in inventory)
 
     d_m4_b = consolidated["darwin_m4"]["regime_b"]
     phi_vals = []
@@ -1556,6 +1556,7 @@ def generate_quad_platform_macros_tex(consolidated: dict[str, Any], inventory: l
 \\newcommand{{\\TotalRawDatasets}}{{{total_datasets}}}
 \\newcommand{{\\TotalJsonlLines}}{{{fmt_tex_int(total_jsonl_lines)}}}
 \\newcommand{{\\TotalMeasuredTrials}}{{{fmt_tex_int(total_measured_trials)}}}
+\\newcommand{{\\TotalWarmupTrials}}{{{fmt_tex_int(total_warmup_trials)}}}
 \\newcommand{{\\PhiOrchFifteenMin}}{{{phi_min:.2f}\\%}}
 \\newcommand{{\\PhiOrchFifteenMax}}{{{phi_max:.2f}\\%}}
 \\newcommand{{\\DeviationNeuralMin}}{{{dev_min:+.2f}\\%}}

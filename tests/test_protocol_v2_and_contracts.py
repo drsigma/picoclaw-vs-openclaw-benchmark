@@ -48,8 +48,8 @@ def test_audit_cell_trial_catches_invalid_timing_and_status():
         "is_simulated": False,
         "finish_reason": "stop",
         "http_status": 200,
-        "prompt_tokens": 1084,
-        "completion_tokens": 24,
+        "prompt_tokens": 2153,
+        "completion_tokens": 41,
         "t_task_ms": 120.0,
         "t_neural_ms": 100.0,
         "t_orch_ms": 20.0,
@@ -57,7 +57,39 @@ def test_audit_cell_trial_catches_invalid_timing_and_status():
     }
     # Valid trial should pass
     ok, err = audit_cell_trial(valid_record, "W1", "Regime A")
-    assert ok is True
+    assert ok is True, f"Failed on valid W1 record: {err}"
+
+    # W2 exact token variant tests (minimal=2177, bloated=7091, tool_rag=917)
+    rec_w2_min = {
+        "workload": "W2",
+        "agent_key": "picoclaw",
+        "mode": "minimal",
+        "regime": "Regime A",
+        "is_simulated": False,
+        "finish_reason": "tool_calls",
+        "http_status": 200,
+        "prompt_tokens": 2177,
+        "completion_tokens": 30,
+        "t_task_ms": 500.0,
+        "t_neural_ms": 480.0,
+        "t_orch_ms": 20.0,
+        "cache_hit_pct": 0.0,
+    }
+    ok_min, err_min = audit_cell_trial(rec_w2_min, "W2", "Regime A")
+    assert ok_min is True, f"W2 minimal failed: {err_min}"
+
+    rec_w2_bloated = dict(rec_w2_min, agent_key="openclaw_full", mode="full", prompt_tokens=7091)
+    ok_bloat, err_bloat = audit_cell_trial(rec_w2_bloated, "W2", "Regime A")
+    assert ok_bloat is True, f"W2 bloated failed: {err_bloat}"
+
+    rec_w2_tool_rag = dict(rec_w2_min, agent_key="picoclaw_tool_rag", mode="tool_rag", prompt_tokens=917)
+    ok_rag, err_rag = audit_cell_trial(rec_w2_tool_rag, "W2", "Regime A")
+    assert ok_rag is True, f"W2 tool_rag failed: {err_rag}"
+
+    rec_w2_bad = dict(rec_w2_min, prompt_tokens=9999)
+    ok_bad, err_bad = audit_cell_trial(rec_w2_bad, "W2", "Regime A")
+    assert ok_bad is False
+    assert "Token parity breach" in err_bad
     assert err is None
 
     # Inverted timing (t_task < t_neural) must fail

@@ -30,8 +30,8 @@ python3 -m venv .venv_repro
 source .venv_repro/bin/activate
 pip install -r requirements.txt
 
-# 2. Execute automated test suite (58 tests)
-pytest -q
+# 2. Execute automated test suite
+pytest -v
 
 # 3. Execute portable simulation dry-run
 make dry-run
@@ -148,3 +148,15 @@ To update the cryptographic manifest following physical runs:
 ```bash
 python scripts/verify_manifest.py --update
 ```
+
+---
+
+## 7. Artifact Badging & Independent Reproducibility Status
+
+In alignment with standard ACM / IEEE artifact guidelines:
+- **Repeatability (Same Team, Same Experimental Setup):** Verified internally across all 4 nodes (M4, Linux x86_64, Windows 11 NVIDIA, Windows 10 Intel iGPU).
+- **Replicability (Different Team, Same Experimental Setup):** Protocol V2, contracts, and gatekeeper are frozen to support full replicability.
+- **Independent Reproducibility (Different Team, Different Experimental Setup):**
+  - **Current Status:** `[ ] PENDENTE EXECUÇÃO POR TERCEIRO INDEPENDENTE` (Awaiting execution by external third party without author intervention).
+  - External evaluators are encouraged to run the protocol on their own testbed and log results independently.
+
