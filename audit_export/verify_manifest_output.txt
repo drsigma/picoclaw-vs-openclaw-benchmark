@@ -1,13 +1,14 @@
 ========================================================================
+ 🚀 [PRE-FLIGHT VERIFIER] Comprehensive Pre-Flight & Permission Check
+========================================================================
+========================================================================
  🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (287 files)
+    [EN-US] Cryptographic Artifact Integrity Verification (302 files)
+========================================================================
+✅ [SUCCESS] All 302/302 tracked files match their cryptographic SHA-256 signature!
+   [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 
-❌ [ERROR] Hash mismatches (1):
-   - audit_export/pytest_output.txt
-     Expected: 19a2856e357d5fc40312866f3b903b97abc17fa197f0933cb21ec7a70cd40329
-     Actual:   193c009b15627b6d099a65f24adc1efc3ef78a442c9a892469703163ef03917a
-
-⚠️  [FAILURE] Verification failed: 286/287 valid, 1 altered, 0 missing.
+✅ [PRE-FLIGHT PASSED] All files verified, permissions confirmed, protocol present.
 ========================================================================
 

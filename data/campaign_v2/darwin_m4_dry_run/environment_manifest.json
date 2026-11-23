@@ -1,0 +1,29 @@
+{
+  "manifest_version": "2.0.0",
+  "session_id": "darwin_m4_dry_run",
+  "recorded_at_utc": "2026-11-23T03:44:25.628403+00:00",
+  "platform_system": "Linux",
+  "platform_release": "7.0.0-43-generic",
+  "platform_version": "#43-Ubuntu SMP PREEMPT_DYNAMIC Fri Oct 23 13:25:25 UTC 2026",
+  "platform_machine": "x86_64",
+  "cpu": {
+    "architecture": "x86_64",
+    "processor": "desconhecido",
+    "cpu_count_logical": 16,
+    "model_name": "12th Gen Intel(R) Core(TM) i5-12500H"
+  },
+  "ram": {
+    "total_gb": 30.53,
+    "available_gb": 21.21,
+    "percent_used": 30.5
+  },
+  "power_source": "AC_MAINS",
+  "cpu_governor": "powersave",
+  "runtimes": {
+    "python": "3.14.4",
+    "go": "go version go1.26.8 linux/amd64",
+    "node": "v18.20.8",
+    "bun": "1.4.4"
+  },
+  "extra_metadata": {}
+}

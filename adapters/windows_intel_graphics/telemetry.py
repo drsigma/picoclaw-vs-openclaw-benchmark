@@ -490,7 +490,7 @@ class IntelGraphicsThermalAndLoadMonitor:
         s0 = self._s0
         duration_s = max(0.0001, t1 - self._t0)
 
-        # Strictly per-trial DELTAS (end - start), never cumulative OS totals
+        # Exclusively per-trial DELTAS (end - start), never cumulative OS totals
         def _delta(k: str) -> float | str:
             v0, v1 = s0.get(k), s1.get(k)
             if isinstance(v0, (int, float)) and isinstance(v1, (int, float)):

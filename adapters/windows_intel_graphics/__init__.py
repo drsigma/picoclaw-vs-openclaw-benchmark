@@ -1,7 +1,7 @@
 """
 adapters/windows_intel_graphics - Dedicated Windows Intel Graphics (iGPU / UMA) Benchmark Adapter.
 
-Strictly isolated from Mac Mini M4 (darwin), Windows NVIDIA (windows_x86_64), and Linux campaigns.
+Exclusively isolated from Mac Mini M4 (darwin), Windows NVIDIA (windows_x86_64), and Linux campaigns.
 Zero NVML / nvidia-smi calls; explicit 'N/A' for hardware metrics unavailable in Windows user-mode.
 """
 

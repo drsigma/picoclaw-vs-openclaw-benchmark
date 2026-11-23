@@ -11,7 +11,7 @@
 |---|---|---|:---:|---|
 | 1 | Phase 1 | Complete repository in ZIP (`review_submission_package.zip`) | [x] | `review_submission_package.zip` (52.50 MB <= 100 MB). Tested in `/tmp/audit_zip_check` with 53 passed tests and 100% manifest match. |
 | 2 | Phase 1 | Permanent version with DOI (Zenodo) | [ ] PENDENTE AÇÃO EXTERNA | Centralized as `PENDING_RELEASE` in CITATION.cff and manuscript. Zero fabricated DOIs. |
-| 3 | Phase 1 | Include all referenced artifacts | [x] | 287 tracked files in `manifest_sha256.json`, including binaries (`picoclaw_orch_linux`, `picoclaw_orch`), LaTeX macros, tables, figures, CSVs, and chunks. |
+| 3 | Phase 1 | Include all referenced artifacts | [x] | 302 tracked files in `manifest_sha256.json`, including binaries (`picoclaw_orch_linux`, `picoclaw_orch`), LaTeX macros, tables, figures, CSVs, and chunks. |
 | 4 | Phase 2 | Single source of truth for all numbers (`macros_quad_platform.tex`) | [x] | Generated `macros_quad_platform.tex` with 35 datasets, 19,141 lines, 17,460 trials, integrated into `paper/manuscript.tex`. Test `test_quad_platform_macros_consistency` passed. |
 | 5 | Phase 2 | Correct/remove thermal throttling claims | [x] | Stratification analysis generated `linux_throttling_stratification.csv`: median Delta T is 0.0 C, median elongation is -0.17%. Manuscript text updated to eliminate thermal throttling as cause of positive autocorrelation. |
 | 6 | Phase 2 | Correct memory bandwidth gatekeeper claim | [x] | Manuscript Section 4.2 updated to active-weights analytical Roofline (102.4 GB/s median, 85.3% of 120 GB/s peak), qualifying that naive model-size estimation exceeds physical bandwidth in 11/150 trials. |
@@ -41,7 +41,7 @@
 - **Files Modified / Generated:** `scripts/build_review_submission_package.py`, `review_submission_package.zip`.
 - **Command:** `python3 scripts/build_review_submission_package.py`
 - **Result:** Package built at 52.50 MB (55,045,820 bytes), well within the 100 MB limit.
-- **Verification:** Automatically extracted to `/tmp/audit_zip_check/review_submission_package`, executed `verify_manifest.py` (287/287 valid) and `pytest -q` (53 passed), and verified zero forbidden terms (`softwarex`, `elsevier`, `elsarticle`, `rafalince`, `pix_qr_code`, `chave pix`).
+- **Verification:** Automatically extracted to `/tmp/audit_zip_check/review_submission_package`, executed `verify_manifest.py` (302/302 valid) and `pytest -q` (69 passed), and verified zero forbidden terms (`softwarex`, `elsevier`, `elsarticle`, `rafalince`, `pix_qr_code`, `chave pix`).
 
 #### Item 2: Permanent Version with DOI
 - **Files Modified:** `CITATION.cff`, `paper/manuscript.tex`.
@@ -51,7 +51,7 @@
 #### Item 3: Tracked Publication Artifacts
 - **Files Modified:** `data/manifest_sha256.json`, `scripts/verify_manifest.py`.
 - **Command:** `python3 scripts/verify_manifest.py`
-- **Result:** 287 tracked files, including binaries, raw datasets, LaTeX sources, CSV tables, and high-resolution figures. 0 missing, 0 hash mismatches.
+- **Result:** 302 tracked files, including binaries, raw datasets, LaTeX sources, CSV tables, and high-resolution figures. 0 missing, 0 hash mismatches.
 
 #### Item 4: Single Source of Truth (`macros_quad_platform.tex`)
 - **Files Generated:** `results/quad_platform_tables/macros_quad_platform.tex`, `audit_export/tables/macros_quad_platform.tex`.

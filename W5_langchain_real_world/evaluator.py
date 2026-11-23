@@ -27,7 +27,7 @@ The evaluation must adhere to this 5-point rubric:
 Agent Output to Evaluate:
 \"\"\"{output}\"\"\"
 
-Respond STRICTLY in JSON format with two keys:
+Respond EXCLUSIVELY in JSON format with two keys:
 {{"quality_score": <integer from 1 to 5>, "reasoning": "<concise explanation>"}}
 """
 

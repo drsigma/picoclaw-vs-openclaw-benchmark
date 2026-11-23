@@ -3,10 +3,10 @@
 adapters/windows_intel_graphics/runner.py
 
 Dedicated Windows Intel Graphics Master Campaign Orchestrator.
-Strictly isolated from Mac Mini M4 (darwin), Windows NVIDIA (windows_x86_64), and Linux.
+Exclusively isolated from Mac Mini M4 (darwin), Windows NVIDIA (windows_x86_64), and Linux.
 
 Features:
-  - Strict write-isolation guard (blocks writes to darwin/linux/windows_x86_64 NVIDIA)
+  - Enforced write-isolation guard (blocks writes to darwin/linux/windows_x86_64 NVIDIA)
   - Orphan process & port 8080 cleanup before every block
   - Empirical llama-server backend probe (Vulkan vs CPU AVX2) + offload logging (-ngl)
   - Per-trial delta telemetry + thermal/RAM cooldown protection

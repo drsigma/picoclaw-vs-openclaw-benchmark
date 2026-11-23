@@ -83,4 +83,4 @@ tests/test_windows_intel_graphics_adapter.py::test_tost_equivalence_contrasts_an
     if asyncio.iscoroutinefunction(func):
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
-======================= 69 passed, 17 warnings in 5.79s ========================
+======================= 69 passed, 17 warnings in 5.85s ========================

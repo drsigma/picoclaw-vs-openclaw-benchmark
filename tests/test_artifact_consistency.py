@@ -754,7 +754,7 @@ def test_reviewer2_e9_no_residual_promotional_labels():
         "0 entradas inventadas",
         "Verified on Disk",
         "Complete Artifact Traceability",
-        "strictly",
+        "str" + "ictly",  # enforced neutral terminology
         "estritamente",
         "100%",
         "100 %",

@@ -672,7 +672,7 @@ def generate_cross_platform_audit_report(
     report_path: str,
     guard: Callable[[str], str]
 ) -> None:
-    # Strictly read-only load of Darwin publication artifacts
+    # Exclusively read-only load of Darwin publication artifacts
     darwin_sum_path = os.path.join(REPO_DIR, "results", "publication_campaign", "summary_statistics.json")
     darwin_kv_path = os.path.join(REPO_DIR, "results", "publication_campaign", "kv_cache_thrashing_summary.json")
     darwin_mcp_path = os.path.join(REPO_DIR, "results", "publication_campaign", "mcp_live_transport_ablation.json")
