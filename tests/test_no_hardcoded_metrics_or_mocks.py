@@ -113,12 +113,28 @@ def test_reconciled_35_datasets_counts():
     """Priority 1: Enforces that dynamic inventory exactly matches the 35 datasets and 18,616 records."""
     import sys
     sys.path.insert(0, REPO_DIR)
-    from scripts.reproduce_quad_platform_analysis import audit_raw_datasets
+    from scripts.reproduce_quad_platform_analysis import get_platform_datasets, audit_raw_datasets
+
+    # Verify declared datasets specification in quad-platform matrix
+    datasets = get_platform_datasets()
+    declared = []
+    for p_key, p_info in datasets.items():
+        for sess in p_info["sessions"]:
+            for f_key in ["raw", "warm", "kv", "mcp", "rag", "prefill", "uma", "langchain"]:
+                if f_key in sess:
+                    declared.append(sess[f_key])
+
+    assert len(declared) == 35, f"Expected 35 declared datasets in quad-platform matrix, got {len(declared)}"
+
+    existing = [p for p in declared if os.path.exists(p)]
+    if len(existing) < 35:
+        import pytest
+        pytest.skip(
+            f"Pre-run mode: {len(existing)}/35 runtime trial .jsonl datasets present. "
+            "Trials are generated during campaign execution."
+        )
 
     inv = audit_raw_datasets()
-    if not inv:
-        import pytest
-        pytest.skip("Pre-run mode: runtime trial .jsonl datasets are produced after the campaign run.")
     assert len(inv) == 35, f"Expected 35 datasets, got {len(inv)}"
     tot_records = sum(x["total_records"] for x in inv)
     tot_measured = sum(x["measured_trials"] for x in inv)

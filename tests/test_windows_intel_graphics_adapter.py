@@ -14,7 +14,6 @@ from adapters.windows_intel_graphics.analysis import (
     compute_autocorrelation_and_trend,
     run_tost_equivalence,
 )
-from adapters.windows_intel_graphics.runner import IntelPaths
 from adapters.windows_intel_graphics.telemetry import NA, IntelGraphicsThermalAndLoadMonitor
 from adapters.windows_intel_graphics.validator import (
     compute_deterministic_cache_hit,
@@ -83,6 +82,8 @@ def _valid_record(
 
 
 def test_isolation_guard_allows_only_intel_graphics_namespace():
+    from adapters.windows_intel_graphics.runner import IntelPaths
+
     paths = IntelPaths(REPO_DIR, suffix="_session1")
     ok_path = os.path.join(paths.raw, "raw_trials.jsonl")
     assert paths.guard(ok_path) == ok_path

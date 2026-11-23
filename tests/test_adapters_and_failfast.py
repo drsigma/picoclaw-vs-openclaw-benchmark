@@ -12,11 +12,6 @@ import pytest
 
 from benchmark.adapters import ADAPTER_REGISTRY, get_adapter
 from benchmark.adapters.base import AgentOrchestratorAdapter
-from benchmark.run_unified_benchmark import (
-    check_server_health,
-    run_campaign,
-    start_mock_server_if_needed,
-)
 
 REPO_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -43,6 +38,8 @@ def test_adapter_registry_contains_all_registered_agents():
 
 def test_bun_minimal_adapter_metadata_and_execution(monkeypatch):
     """Verify BunJSCOrchestratorAdapter executes dedicated benchmark/bun_jsc_agent.mjs and conforms to interface."""
+    from benchmark.run_unified_benchmark import start_mock_server_if_needed
+
     mock_port = 8088
     start_mock_server_if_needed(mock_port)
     monkeypatch.setenv("LLAMA_API_URL", f"http://127.0.0.1:{mock_port}/v1/chat/completions")
@@ -79,6 +76,8 @@ def test_adapter_instances_subclass_base_adapter():
 
 def test_adapter_run_workload_across_targets(monkeypatch):
     """Verify each adapter runs workload W1 deterministically in standard test environment."""
+    from benchmark.run_unified_benchmark import start_mock_server_if_needed
+
     mock_port = 8088
     start_mock_server_if_needed(mock_port)
     monkeypatch.setenv("LLAMA_API_URL", f"http://127.0.0.1:{mock_port}/v1/chat/completions")
@@ -95,6 +94,8 @@ def test_fail_fast_on_unreachable_server(monkeypatch):
     Verify fail-fast policy: when dry_run=False and the neural server port is offline,
     the pipeline immediately raises RuntimeError instead of generating synthetic data.
     """
+    from benchmark.run_unified_benchmark import check_server_health, run_campaign
+
     # Test health check against an offline loopback port (59999)
     offline_url = "http://127.0.0.1:59999/health"
     is_healthy = check_server_health(url=offline_url, timeout=0.2)

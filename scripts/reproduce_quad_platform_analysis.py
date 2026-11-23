@@ -54,10 +54,12 @@ AUDIT_TABLES_DIR = os.path.join(AUDIT_EXPORT_DIR, "tables")
 PUB_FIG_DIR = os.path.join(REPO_DIR, "figures")
 PUB_TABLES_DIR = os.path.join(REPO_DIR, "results", "quad_platform_tables")
 
-os.makedirs(AUDIT_EXPORT_DIR, exist_ok=True)
-os.makedirs(AUDIT_FIG_DIR, exist_ok=True)
-os.makedirs(AUDIT_TABLES_DIR, exist_ok=True)
-os.makedirs(PUB_FIG_DIR, exist_ok=True)
+
+def ensure_output_directories():
+    os.makedirs(AUDIT_EXPORT_DIR, exist_ok=True)
+    os.makedirs(AUDIT_FIG_DIR, exist_ok=True)
+    os.makedirs(AUDIT_TABLES_DIR, exist_ok=True)
+    os.makedirs(PUB_FIG_DIR, exist_ok=True)
 os.makedirs(PUB_TABLES_DIR, exist_ok=True)
 
 # Publication styling
@@ -4327,6 +4329,8 @@ def main():
         print(f"⚡ [DRY-RUN] Quick mode: {args.quick}")
         print("⚡ [DRY-RUN] Pipeline execution plan validated successfully. Exiting code 0.")
         sys.exit(0)
+
+    ensure_output_directories()
 
     if args.quick:
         QUICK_MODE = True

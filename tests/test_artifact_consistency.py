@@ -204,6 +204,58 @@ def test_analyze_publication_campaign_handles_none_energy(tmp_path):
     assert r"\newcommand{\WTwoOpenMinEnergy}{\textbf{N/A}}" in content
     assert r"\newcommand{\WFourEDPReductionPct}{\textbf{N/A}}" in content
 
+    # 2. Test analyze_publication_campaign end-to-end on controlled trial records with None energy
+    from benchmark.analyze_results import analyze_publication_campaign
+    test_trials_path = os.path.join(str(tmp_path), "test_raw_trials.jsonl")
+    sample_records = []
+    for ak in ["picoclaw", "openclaw_minimal", "openclaw_full", "neural_baseline"]:
+        for w in ["W1", "W2", "W3", "W4"]:
+            for rep in range(1, 4):
+                sample_records.append({
+                    "session_id": "sess_unit_test",
+                    "timestamp_iso": "2026-11-23T12:00:00Z",
+                    "git_commit": "0" * 40,
+                    "hardware": "test_hw",
+                    "os": "test_os",
+                    "model_version": "Llama-3.2-3B",
+                    "quantization": "Q4_K_M",
+                    "server_flags": "-c 32768",
+                    "agent_key": ak,
+                    "workload": w,
+                    "rep": rep,
+                    "http_status": 200,
+                    "finish_reason": "stop",
+                    "prompt_tokens": 150,
+                    "completion_tokens": 20,
+                    "t_task_ms": 50.0 + rep,
+                    "t_orch_ms": 2.0,
+                    "t_neural_ms": 48.0,
+                    "t_dispatch_ms": 1.0,
+                    "t_http_ms": 1.0,
+                    "rss_peak_mb": 12.0,
+                    "proc_peak_phys_mb": 8.0,
+                    "proc_instructions": 1000000,
+                    "proc_cycles": 500000,
+                    "proc_billed_energy": 0,
+                    "energy_total_j": None,
+                    "energy_net_above_idle_j": None,
+                    "energy_net_j": None,
+                    "edp_js": None,
+                    "is_warmup": False,
+                })
+    with open(test_trials_path, "w", encoding="utf-8") as f:
+        for r in sample_records:
+            f.write(json.dumps(r) + "\n")
+
+    # Run analyze_publication_campaign on the isolated test directory without accessing hardware
+    analyze_publication_campaign(input_path=test_trials_path, output_dir=str(tmp_path))
+    summary_path = os.path.join(str(tmp_path), "summary_statistics.json")
+    assert os.path.exists(summary_path)
+    with open(summary_path, "r", encoding="utf-8") as f:
+        analyzed_stats = json.load(f)
+    assert analyzed_stats["picoclaw"]["W1"]["energy_total_mean_j"] is None
+    assert analyzed_stats["picoclaw"]["W1"]["edp_mean_js"] is None
+
 
 def test_smc_power_monitor_slice_energy_synthetic():
     """Verify SMCPowerMonitor.slice_energy correctly calculates trapezoidal integration for synthetic samples."""

@@ -148,13 +148,14 @@ def analyze_publication_campaign(input_path: str | None = None, output_dir: str 
     eval_records = valid_records
 
     # Enforce strict protocol invariants via benchmark/protocol_invariants.py
-    has_energy = all(r.get("energy_net_above_idle_j") is not None for r in eval_records)
+    has_energy = any(r.get("energy_net_above_idle_j") is not None for r in eval_records)
     validate_campaign_invariants(
         eval_records,
         expected_eval_count=len(eval_records),
         require_equalized_tokens=False,
         require_energy=has_energy,
-        metadata={"session_id": "S1_REGIME_A_20261112", "git_commit": "7bf09b4"},
+        metadata={"session_id": eval_records[0].get("session_id", "S1_REGIME_A_20261112"), "git_commit": eval_records[0].get("git_commit", "7bf09b4")},
+        expected_reps_per_cell=30 if len(eval_records) >= 600 else None,
         require_gate_0_fields=True,
     )
 

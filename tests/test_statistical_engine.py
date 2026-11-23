@@ -12,7 +12,6 @@ from scipy import stats
 from benchmark.analyze_results import (
     bootstrap_ci,
     cliffs_delta,
-    compute_pca_variance_decomposition,
     holm_bonferroni_adjust,
     vargha_delaney_a12,
 )
@@ -108,6 +107,7 @@ def test_pca_variance_decomposition_orthogonality_and_sum():
     if not os.path.exists(raw_path):
         pytest.skip("Pre-run package: PCA variance decomposition requires post-campaign trial datasets")
 
+    from benchmark.analyze_results import compute_pca_variance_decomposition
     pca_res = compute_pca_variance_decomposition()
     assert "regime_a_cold_prefill" in pca_res
     assert "regime_b_warm_kv_cache" in pca_res

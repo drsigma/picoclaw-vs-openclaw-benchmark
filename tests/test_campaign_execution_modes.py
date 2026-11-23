@@ -39,20 +39,27 @@ def test_environment_manifest_generation():
 def test_linux_runner_dry_run_modes():
     """Validates that Linux master runner handles --dry-run and --dry-run --invert-blocks cleanly."""
     cmd1 = [sys.executable, os.path.join(REPO_DIR, "scripts", "run_linux_x86_64_master_campaign.py"), "--dry-run"]
-    res1 = subprocess.run(cmd1, capture_output=True, text=True)
+    res1 = subprocess.run(cmd1, capture_output=True, text=True, timeout=15.0)
     assert res1.returncode == 0
     assert "[DRY-RUN]" in res1.stdout
 
     cmd2 = [sys.executable, os.path.join(REPO_DIR, "scripts", "run_linux_x86_64_master_campaign.py"), "--dry-run", "--invert-blocks"]
-    res2 = subprocess.run(cmd2, capture_output=True, text=True)
+    res2 = subprocess.run(cmd2, capture_output=True, text=True, timeout=15.0)
     assert res2.returncode == 0
     assert "Invert Order: True" in res2.stdout
 
 
-def test_darwin_runner_dry_run():
+def test_darwin_runner_dry_run(tmp_path):
     """Validates that unified benchmark runner handles --dry-run and --dry-run --invert-blocks cleanly."""
-    cmd = [sys.executable, os.path.join(REPO_DIR, "benchmark", "run_unified_benchmark.py"), "--dry-run"]
-    res = subprocess.run(cmd, capture_output=True, text=True)
+    out_dir = str(tmp_path / "darwin_dry_run_test")
+    cmd = [
+        sys.executable,
+        os.path.join(REPO_DIR, "benchmark", "run_unified_benchmark.py"),
+        "--dry-run",
+        "--output-dir",
+        out_dir,
+    ]
+    res = subprocess.run(cmd, capture_output=True, text=True, timeout=15.0)
     assert res.returncode == 0
     assert "[DRY-RUN]" in res.stdout
 
@@ -60,7 +67,7 @@ def test_darwin_runner_dry_run():
 def test_windows_intel_runner_dry_run():
     """Validates that Windows Intel iGPU runner handles --dry-run on host cleanly."""
     cmd = [sys.executable, os.path.join(REPO_DIR, "adapters", "windows_intel_graphics", "runner.py"), "--dry-run"]
-    res = subprocess.run(cmd, capture_output=True, text=True)
+    res = subprocess.run(cmd, capture_output=True, text=True, timeout=15.0)
     assert res.returncode == 0
     assert "[DRY-RUN]" in res.stdout
 
