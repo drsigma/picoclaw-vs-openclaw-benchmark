@@ -28,10 +28,11 @@ $ErrorActionPreference = "Stop"
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 Set-Location $ScriptDir
 
-$env:PATH = "C:\Program Files\Git\cmd;C:\Users\rafal\AppData\Local\Programs\go\bin;C:\Users\rafal\AppData\Local\Programs\Python\Python312;C:\Users\rafal\AppData\Local\Programs\Python\Python312\Scripts;C:\Users\rafal\AppData\Local\Programs\node;C:\Users\rafal\AppData\Local\Programs\bun;C:\Users\rafal\AppData\Local\Programs\llama_server;" + $env:PATH
+$LocalPrograms = if ($env:LOCALAPPDATA) { "$env:LOCALAPPDATA\Programs" } else { "C:\Programs" }
+$env:PATH = "C:\Program Files\Git\cmd;$LocalPrograms\go\bin;$LocalPrograms\Python\Python312;$LocalPrograms\Python\Python312\Scripts;$LocalPrograms\node;$LocalPrograms\bun;$LocalPrograms\llama_server;" + $env:PATH
 
-if (-not (Test-Path $Model) -and (Test-Path "C:\benchmark_gold\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf")) {
-    $Model = "C:\benchmark_gold\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+if (-not (Test-Path $Model) -and (Test-Path "$ScriptDir\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf")) {
+    $Model = "$ScriptDir\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf"
 }
 
 
@@ -127,7 +128,10 @@ try {
     $VenvDir = Join-Path $ScriptDir ".venv_win"
     $PythonExe = Join-Path $VenvDir "Scripts\python.exe"
 
-    $SysPython = "C:\Users\rafal\AppData\Local\Programs\Python\Python312\python.exe"
+    $SysPython = (Get-Command python -ErrorAction SilentlyContinue).Source
+    if (-not $SysPython -and (Test-Path "$LocalPrograms\Python\Python312\python.exe")) {
+        $SysPython = "$LocalPrograms\Python\Python312\python.exe"
+    }
     if (-not (Test-Path $PythonExe)) {
         Write-Host "  - Criando ambiente virtual em $VenvDir..."
         & $SysPython -m venv $VenvDir

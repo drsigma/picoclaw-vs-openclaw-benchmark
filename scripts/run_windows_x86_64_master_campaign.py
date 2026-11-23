@@ -159,7 +159,9 @@ class LlamaServer:
         with socket.socket() as s:
             if s.connect_ex(("127.0.0.1", 8080)) == 0:
                 die("port 8080 is already in use; stop the existing llama-server first")
-        exe = shutil.which("llama-server") or r"C:\Users\rafal\AppData\Local\Programs\llama_server\llama-server.exe"
+        local_app_data = os.environ.get("LOCALAPPDATA", "")
+        fallback_llama = os.path.join(local_app_data, "Programs", "llama_server", "llama-server.exe") if local_app_data else ""
+        exe = shutil.which("llama-server") or (fallback_llama if os.path.exists(fallback_llama) else None)
         if not exe:
             die("llama-server not found in PATH")
         cmd = [exe, "-m", self.model, "--port", "8080"] + self.flag_tokens

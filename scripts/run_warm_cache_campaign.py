@@ -170,22 +170,67 @@ def generate_warm_cache_latex_table(
 
 
 def main():
+    import argparse
+    from benchmark.environment_manifest import record_environment_manifest
+
+    parser = argparse.ArgumentParser(description="Warm-Cache Benchmark Campaign (Apple Silicon M4)")
+    parser.add_argument("--dry-run", action="store_true", help="Validate matrix and configuration without executing trials")
+    parser.add_argument("--smoke-test", action="store_true", help="Fast smoke test (1 rep, 0 warmups)")
+    parser.add_argument("--quick", action="store_true", help="Quick test (5 reps, 1 warmup)")
+    parser.add_argument("--full", action="store_true", help="Full confirmatory campaign (30 reps, 3 warmups)")
+    parser.add_argument("--resume", action="store_true", help="Resume interrupted campaign without repeating completed trials")
+    parser.add_argument("--invert-blocks", action="store_true", help="Invert condition block execution order")
+    parser.add_argument("--output-dir", default=None, help="Output directory for trials and tables")
+    parser.add_argument("--analyze-only", action="store_true", help="Run analysis on existing trials file")
+    parser.add_argument("--reps", type=int, default=None, help="Override repetitions per condition")
+    args = parser.parse_args()
+
     print("========================================================================")
-    print(" 🚀 Full Warm-Cache Benchmark Campaign (Apple Silicon M4)")
+    print(" 🚀 Warm-Cache Benchmark Campaign (Apple Silicon M4)")
     print("    Regime B: Realistic KV-Cache Reuse (BENCH_CACHE_PROMPT=true)")
     print("========================================================================")
 
-    output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+    reps_per_condition = 30
+    warmups_per_condition = 3
+    if args.smoke_test:
+        reps_per_condition = 1
+        warmups_per_condition = 0
+    elif args.quick:
+        reps_per_condition = 5
+        warmups_per_condition = 1
+    elif args.full:
+        reps_per_condition = 30
+        warmups_per_condition = 3
+    if args.reps is not None:
+        reps_per_condition = args.reps
+
+    if args.output_dir:
+        output_dir = os.path.abspath(args.output_dir)
+    elif args.analyze_only:
+        output_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+    else:
+        output_dir = os.path.join(REPO_DIR, "data", "campaign_v2", "darwin_m4_warm_cache")
+
     os.makedirs(output_dir, exist_ok=True)
     os.makedirs(os.path.join(output_dir, "tables"), exist_ok=True)
     warm_cache_trials_path = os.path.join(output_dir, "warm_cache_trials.jsonl")
 
     agents = ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native", "neural_baseline"]
     workloads = ["W1", "W2", "W3", "W4", "W5"]
-    reps_per_condition = 30
     total_evals = len(agents) * len(workloads) * reps_per_condition
 
-    if "--analyze-only" in sys.argv:
+    if args.dry_run:
+        print("⚡ [DRY-RUN] Execution matrix validation mode activated.")
+        print(f"⚡ [DRY-RUN] Reps: {reps_per_condition}, Warmups: {warmups_per_condition}, Invert: {args.invert_blocks}")
+        print(f"⚡ [DRY-RUN] Destination: {output_dir}")
+        manifest_file = record_environment_manifest(output_dir, session_id="dry_run_warm_cache", extra_metadata={"platform_id": "darwin_arm64"})
+        print(f"⚡ [DRY-RUN] Recorded environment manifest at: {manifest_file}")
+        print("⚡ [DRY-RUN] Matrix validation completed successfully.")
+        return
+
+    record_environment_manifest(output_dir, session_id="warm_cache_campaign", extra_metadata={"platform_id": "darwin_arm64"})
+
+    if args.analyze_only:
         print("📊 [INFO] Running in --analyze-only mode on existing warm_cache_trials.jsonl...")
         if not os.path.exists(warm_cache_trials_path):
             print(f"❌ [FATAL] {warm_cache_trials_path} not found.")
@@ -234,19 +279,22 @@ def main():
         rng = random.Random(42)
 
         conditions = [(ak, w) for ak in agents for w in workloads]
-        rng.shuffle(conditions)
-        warmups_count = len(conditions) * 3
+        if args.invert_blocks:
+            conditions.reverse()
+        else:
+            rng.shuffle(conditions)
+        warmups_count = len(conditions) * warmups_per_condition
         trial_idx = 0
 
-        print(f"\n▶️  Dispatching 20 randomized blocks ({reps_per_condition} evaluations + 3 primings per block = {total_evals} evals, {warmups_count} primings)...")
+        print(f"\n▶️  Dispatching {len(conditions)} condition blocks ({reps_per_condition} evaluations + {warmups_per_condition} primings per block = {total_evals} evals, {warmups_count} primings)...")
 
         try:
             for block_idx, (ak, w) in enumerate(conditions, start=1):
                 ad = adapter_instances[ak]
-                print(f"\n📦 [Block {block_idx:02d}/20] Condition: {ak} on {w} (3 Priming Warmups + {reps_per_condition} Evaluations)")
+                print(f"\n📦 [Block {block_idx:02d}/{len(conditions)}] Condition: {ak} on {w} ({warmups_per_condition} Priming Warmups + {reps_per_condition} Evaluations)")
 
                 # Priming warmups for this block
-                for w_rep in range(1, 4):
+                for w_rep in range(1, warmups_per_condition + 1):
                     res = ad.run_workload(w, iterations=1)
                     cached_tokens = res.get("cached_tokens", 0)
                     uncached_prompt_tokens = res.get("uncached_prompt_tokens", 0)

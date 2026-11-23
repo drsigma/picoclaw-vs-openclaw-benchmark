@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-scripts/run_inter_session_replication.py - Rigorous Inter-Session Replication (n=30) & Real Bun JSC Benchmark
+scripts/run_inter_session_replication.py - Inter-Session Replication (n=30) & Real Bun JSC Benchmark
 Executes independent Session 2 replication (seed=99, n=30 evaluations + 3 primings per block)
 in Regime B (BENCH_CACHE_PROMPT=true) with randomized block order, a single continuous
 SMCPowerMonitor(sample_interval_ms=50), real subprocess rusage telemetry, and native Bun JSC (darwin-aarch64).
@@ -85,25 +85,75 @@ def _median(vals: list[float]) -> float:
 
 
 def run_replication() -> int:
-    if sys.platform != "darwin":
-        raise RuntimeError(f"FATAL: Physical hardware benchmark requires macOS Darwin, got {sys.platform}")
+    import argparse
+    from benchmark.environment_manifest import record_environment_manifest
+
+    parser = argparse.ArgumentParser(description="Inter-Session Replication (Apple Silicon M4)")
+    parser.add_argument("--dry-run", action="store_true", help="Validate matrix and configuration without executing trials")
+    parser.add_argument("--smoke-test", action="store_true", help="Fast smoke test (1 rep, 0 warmups)")
+    parser.add_argument("--quick", action="store_true", help="Quick test (5 reps, 1 warmup)")
+    parser.add_argument("--full", action="store_true", help="Full confirmatory campaign (30 reps, 3 warmups)")
+    parser.add_argument("--invert-blocks", action="store_true", help="Invert condition block execution order")
+    parser.add_argument("--output-dir", default=None, help="Output directory for trials and tables")
+    parser.add_argument("--analyze-only", action="store_true", help="Run analysis on existing trials file")
+    parser.add_argument("--resample-bun-only", action="store_true", help="Resample Bun JSC only")
+    parser.add_argument("--reps", type=int, default=None, help="Override repetitions per condition")
+    args = parser.parse_args()
 
     workloads = ["W1", "W2", "W3", "W4", "W5"]
     target_agents = ["picoclaw", "openclaw_minimal", "python_native", "neural_baseline", "bun_minimal"]
     n_evals = 30
     n_primings = 3
+    if args.smoke_test:
+        n_evals = 1
+        n_primings = 0
+    elif args.quick:
+        n_evals = 5
+        n_primings = 1
+    elif args.full:
+        n_evals = 30
+        n_primings = 3
+    if args.reps is not None:
+        n_evals = args.reps
+
+    if args.output_dir:
+        out_dir = os.path.abspath(args.output_dir)
+    elif args.analyze_only:
+        out_dir = os.path.join(REPO_DIR, "results", "publication_campaign")
+    else:
+        out_dir = os.path.join(REPO_DIR, "data", "campaign_v2", "darwin_m4_session2")
+
+    os.makedirs(out_dir, exist_ok=True)
+    out_trials_path = os.path.join(out_dir, "inter_session_trials.jsonl")
+    out_json_path = os.path.join(out_dir, "inter_session_replication.json")
+
+    if args.dry_run:
+        print("⚡ [DRY-RUN] Inter-session replication execution matrix validation mode activated.")
+        print(f"⚡ [DRY-RUN] Reps: {n_evals}, Primings: {n_primings}, Invert: {args.invert_blocks}")
+        print(f"⚡ [DRY-RUN] Target Agents: {target_agents}")
+        print(f"⚡ [DRY-RUN] Destination: {out_dir}")
+        manifest_file = record_environment_manifest(out_dir, session_id="dry_run_session2", extra_metadata={"platform_id": "darwin_arm64"})
+        print(f"⚡ [DRY-RUN] Recorded environment manifest at: {manifest_file}")
+        print("⚡ [DRY-RUN] Matrix validation completed successfully.")
+        return 0
+
+    if sys.platform != "darwin":
+        raise RuntimeError(f"FATAL: Physical hardware benchmark requires macOS Darwin, got {sys.platform}")
+
     git_commit = get_git_commit()
     session_id = "session_2_replication_m4"
+
+    record_environment_manifest(out_dir, session_id=session_id, extra_metadata={"platform_id": "darwin_arm64"})
 
     bun_adapter = get_adapter("bun_jsc_orchestrator", REPO_DIR)
     bun_meta = bun_adapter.metadata()
     if bun_meta.get("is_fallback_node", True) or bun_meta.get("runner_binary_used") != "bun":
         raise RuntimeError(f"FATAL: Real native 'bun' binary required, got metadata: {bun_meta}")
 
-    if "--analyze-only" in sys.argv and os.path.exists(OUT_TRIALS_JSONL):
-        print(f"📊 [INFO] Running in --analyze-only mode on {OUT_TRIALS_JSONL}...")
+    if (args.analyze_only or "--analyze-only" in sys.argv) and os.path.exists(out_trials_path):
+        print(f"📊 [INFO] Running in --analyze-only mode on {out_trials_path}...")
         all_s2_records = []
-        with open(OUT_TRIALS_JSONL, "r", encoding="utf-8") as f:
+        with open(out_trials_path, "r", encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     r = json.loads(line)
@@ -163,8 +213,11 @@ def run_replication() -> int:
                 for ak in target_agents:
                     blocks_to_execute.append((ak, w))
 
-            rng = random.Random(99)
-            rng.shuffle(blocks_to_execute)
+            if args.invert_blocks:
+                blocks_to_execute.reverse()
+            else:
+                rng = random.Random(99)
+                rng.shuffle(blocks_to_execute)
 
         print(f"🚀 Executing {len(blocks_to_execute)} physical blocks (n={n_evals} evals + {n_primings} primings per block)...")
         measured_records = []
@@ -369,10 +422,10 @@ def run_replication() -> int:
 
         all_s2_records = measured_records + reused_records
 
-    with open(OUT_TRIALS_JSONL, "w", encoding="utf-8") as f:
+    with open(out_trials_path, "w", encoding="utf-8") as f:
         for r in all_s2_records:
             f.write(json.dumps(r) + "\n")
-    print(f"\n💾 Wrote {len(all_s2_records)} Session 2 records to {OUT_TRIALS_JSONL}")
+    print(f"\n💾 Wrote {len(all_s2_records)} Session 2 records to {out_trials_path}")
 
     # Load Session 1 (primary unified warm_cache_trials.jsonl)
     s1_cells = load_records_by_cell(WARM_TRIALS_PATH)
@@ -483,12 +536,12 @@ def run_replication() -> int:
         }
 
     out_data = {
-        "description": "Rigorous Inter-Session Replication (Session 2, seed=99, n=30 per cell) and Native Bun JSC (benchmark/bun_jsc_agent.mjs) Benchmark",
+        "description": "Inter-Session Replication (Session 2, seed=99, n=30 per cell) and Native Bun JSC (benchmark/bun_jsc_agent.mjs) Benchmark",
         "session_id": session_id,
         "git_commit": git_commit,
         "caching_protocol": "Deterministic block-isolation (-np 1, 3 primings + 30 evaluations per block, BENCH_CACHE_PROMPT=true, randomized block order)",
         "hardware": "Apple Mac mini M4 (Mac16,10, 10-core Metal GPU)",
-        "raw_trials_file": "results/publication_campaign/inter_session_trials.jsonl",
+        "raw_trials_file": out_trials_path,
         "inter_session_comparisons": comparison,
         "paired_intra_session_contrasts_vs_neural_baseline": intra_session_contrasts,
         "overall_mean_inter_session_rel_diff_pct": round(overall_mean_rel_diff, 2),
@@ -510,10 +563,10 @@ def run_replication() -> int:
     )
     out_data["protocol_invariants_validation"] = inv_res
 
-    with open(OUT_JSON_PATH, "w", encoding="utf-8") as f:
+    with open(out_json_path, "w", encoding="utf-8") as f:
         json.dump(out_data, f, indent=2)
 
-    print(f"✅ Generated inter-session replication results: {OUT_JSON_PATH}")
+    print(f"✅ Generated inter-session replication results: {out_json_path}")
     print(f"   Overall Mean Inter-Session Relative Diff: {overall_mean_rel_diff:.2f}% | Pooled CV: {overall_mean_pooled_cv:.2f}%")
     return 0
 

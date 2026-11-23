@@ -26,7 +26,7 @@ case "${UNAME_S}" in
         exec ./run_linux_campaign.sh "$@"
         ;;
     Darwin*)
-        echo "▶ Disparando pipeline mestre macOS ARM64 (Darwin Gold)..."
+        echo "▶ Disparando pipeline mestre macOS ARM64 (Darwin)..."
         chmod +x ./reproduce_darwin_gold.sh
         exec ./reproduce_darwin_gold.sh "$@"
         ;;

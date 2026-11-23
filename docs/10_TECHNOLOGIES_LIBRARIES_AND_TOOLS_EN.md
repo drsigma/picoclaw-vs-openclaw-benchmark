@@ -19,7 +19,7 @@ The methodological and architectural rationales are definitive:
    * Python functions as a **neutral, external supervisor**, launching agent runtimes as isolated operating system child processes, monitoring PIDs, sampling RSS memory, and querying hardware sensors without sharing memory space or execution threads.
 
 2. **Scientific Maturity and Academic Statistical Rigor:**
-   * The Python scientific ecosystem features **SciPy** and **NumPy**, the gold-standard, peer-reviewed computational libraries in academic literature.
+   * The Python scientific ecosystem features **SciPy** and **NumPy**, the standard, peer-reviewed computational libraries in academic literature.
    * Computing exact Garwood (1936) Poisson fiducial limits, Cameron & Trivedi (1990) overdispersion regression tests, and One-Way ANOVA tests requires analytical quantiles of the Chi-Square ($\chi^2$) and $F$ distributions, implemented with 64-bit IEEE 754 floating-point stability in SciPy. Pure Bash or stock JavaScript lacks native support for these statistical operations without fragile third-party modules.
 
 3. **Multiprocess Orchestration and Daemon Management:**

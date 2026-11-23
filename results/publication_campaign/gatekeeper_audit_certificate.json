@@ -5,7 +5,7 @@
     "OpenMCP (Model Context Protocol Specification & Test Suite)",
     "DynamicMCPBench (Dynamic Multi-Tool Telemetry & Invariant Checking)"
   ],
-  "audit_timestamp_iso": "2026-11-23T02:53:47.762088+00:00",
+  "audit_timestamp_iso": "2026-11-23T03:15:01.490597+00:00",
   "total_datasets_audited": 7,
   "total_records_verified": 4269,
   "overall_ready_for_submission": true,

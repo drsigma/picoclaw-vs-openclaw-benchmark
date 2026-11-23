@@ -2,7 +2,7 @@
 
 **Protocol Version:** 2.0.0  
 **Frozen Status:** Frozen (Immutable)  
-**Protocol Hash (SHA-256):** `faae1495c811125a945ade49e6026b160b211ca67168a42d27a0b15a0350210f`  
+**Protocol Hash (SHA-256):** `2aef611c7be0e2e77e3cc0f30879962221e2484fbe8d3a1db103d86628f53c63`  
 **Author:** Rafael Paniccia Cassetta (UFABC)  
 **Repository:** `https://github.com/drsigma/picoclaw-vs-openclaw-benchmark`  
 
@@ -12,8 +12,8 @@
 
 This protocol establishes the immutable methodological specification for confirmatory and diagnostic execution of the quad-platform edge AI agent orchestrator benchmark across four heterogeneous operating systems and microarchitectures:
 1. **Apple Silicon M4 macOS ARM64** (Unified Memory Architecture, 120 GB/s bus, physical Apple SMC shunts at 50 ms);
-2. **Ubuntu 26.04 x86_64 Core i9-14900HX** (Linux RAPL energy_uj, POSIX rusage, Linux CFS scheduler);
-3. **Microsoft Windows 11 Pro x86_64 Core i9 + NVIDIA RTX 4090** (Dedicated GPU baseline, NVML board power telemetry);
+2. **Ubuntu 26.04 x86_64 Core i5-12500H + NVIDIA RTX 3050** (Linux RAPL energy_uj, POSIX rusage, Linux CFS scheduler, NVIDIA NVML);
+3. **Microsoft Windows 11 Pro x86_64 Core i5-12500H + NVIDIA RTX 3050** (Discrete laptop GPU, Win32 cycle accounting, NVML board power telemetry);
 4. **Microsoft Windows 10/11 x86_64 Intel HD Graphics 4600 UMA** (Constrained legacy desktop, Win32 PSAPI rusage).
 
 ---
@@ -36,7 +36,7 @@ In block-randomized designs, physical trial repetition index ($k \in \{1, \dots,
 
 ## 3. Confirmatory Hypotheses vs. Exploratory Analyses (Item 0.2)
 
-To avoid data-dredging and post-hoc hypothesis generation, this protocol strictly enforces the boundary between prior confirmatory hypotheses and exploratory diagnostics:
+To avoid data-dredging and post-hoc hypothesis generation, this protocol explicitly defines the boundary between prior confirmatory hypotheses and exploratory diagnostics:
 
 ### A. Confirmatory Hypotheses (Pre-registered)
 1. **$H_{\text{conf}, 1}$ (Orchestrator Overhead in Warm Cache):**

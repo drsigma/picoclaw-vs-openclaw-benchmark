@@ -10,7 +10,7 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${REPO_DIR}"
 
 echo "=================================================================="
-echo " 🍏 DARWIN GOLD STANDARD CAMPAIGN (APPLE SILICON M4 - METAL/UMA) 🍏 "
+echo " 🍏 DARWIN BENCHMARK CAMPAIGN (APPLE SILICON M4 - METAL/UMA) 🍏 "
 echo "=================================================================="
 
 # 0. Encerra aplicativos que possam interferir no sleep e na frequência

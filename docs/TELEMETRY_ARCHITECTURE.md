@@ -11,7 +11,7 @@ This document provides formal technical documentation for the hardware telemetry
 | **macOS ARM64 (Apple Silicon M4)** | Apple SMC via `powermetrics` / `task_info` | Unified Package Power (CPU clusters, Metal GPU, ANE, DRAM controller) | Per-thread hardware PMC counters in standard unprivileged space | Continuous root daemon sampling at 50 ms intervals with trapezoidal energy integration |
 | **Linux x86_64 (Ubuntu 26.04)** | Intel RAPL (`/sys/class/powercap`) + NVIDIA NVML (`pynvml`) | CPU package (`intel-rapl:0`), DRAM domain (`intel-rapl:0:0`), discrete RTX 3050 power shunts | Per-process fine-grained GPU thread energy decomposition | Microsecond MSR hardware energy counter deltas + NVML power polling at 10 ms |
 | **Windows 11 x86_64 (NVIDIA)** | NVIDIA NVML (`pynvml`) + Win32 `QueryProcessCycleTime` | Discrete RTX 3050 GPU power/temperature, process user/kernel cycles via PSAPI | Direct kernel MSR RAPL without ring-0 driver; DRAM domain unobservable | Delta measurement of process execution cycles and NVML board power integration |
-| **Windows 10/11 x86_64 (Intel HD Graphics 4600)** | Win32 PSAPI / `QueryProcessCycleTime` | Process CPU cycles, CPU package thermal register (WMI/ACPI), physical RSS | Direct GPU hardware counter without Intel GPA; DRAM energy unobservable | Process cycle attribution; energy fields set strictly to `null` / `N/A` |
+| **Windows 10/11 x86_64 (Intel HD Graphics 4600)** | Win32 PSAPI / `QueryProcessCycleTime` | Process CPU cycles, CPU package thermal register (WMI/ACPI), physical RSS | Direct GPU hardware counter without Intel GPA; DRAM energy unobservable | Process cycle attribution; energy fields set explicitly to `null` / `N/A` |
 
 ---
 
@@ -38,7 +38,7 @@ This document provides formal technical documentation for the hardware telemetry
 ### 2.4 Windows 10/11 x86_64 (Intel Core i7-4790K / HD Graphics 4600 iGPU)
 - **Sensors:** Win32 `QueryProcessCycleTime`, `K32GetProcessMemoryInfo`, and WMI/ACPI thermal probes.
 - **Telemetry Backend Label:** Labeled as `win32_cycles_psapi`.
-- **Explicit-Null Policy:** DRAM and package energy counters are physically unavailable through user-mode APIs on legacy Haswell iGPU architectures. All energy fields (`energy_total_j`, `energy_gpu_j`, `energy_net_above_idle_j`) are recorded strictly as `null` / `"N/A"`, with execution cost represented faithfully by elapsed latency and hardware process cycles.
+- **Explicit-Null Policy:** DRAM and package energy counters are physically unavailable through user-mode APIs on legacy Haswell iGPU architectures. All energy fields (`energy_total_j`, `energy_gpu_j`, `energy_net_above_idle_j`) are recorded explicitly as `null` / `"N/A"`, with execution cost represented faithfully by elapsed latency and hardware process cycles.
 
 ---
 
@@ -46,6 +46,6 @@ This document provides formal technical documentation for the hardware telemetry
 
 Every collected JSONL record must contain:
 1. `telemetry_backend`: Explicit non-empty string declaring the active sensor subsystem.
-2. `is_simulated`: Boolean strictly set to `false`.
+2. `is_simulated`: Boolean set to `false`.
 3. Sensor fields matching the declared backend (no synthetic numerical values in restricted domains).
 4. Physical plausibility checks: $T_{\text{task}} \ge T_{\text{neural}} \ge 0$, and when energy is measured, $E \ge 0$.

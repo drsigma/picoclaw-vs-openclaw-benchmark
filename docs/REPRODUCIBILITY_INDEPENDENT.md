@@ -8,7 +8,7 @@ This document provides a comprehensive, step-by-step protocol enabling an indepe
 
 ### 1.1 Cloning the Repository
 ```bash
-git clone https://github.com/rpcas/picoclaw-vs-openclaw-benchmark.git
+git clone https://github.com/drsigma/picoclaw-vs-openclaw-benchmark.git
 cd picoclaw-vs-openclaw-benchmark
 ```
 
@@ -22,7 +22,7 @@ pip install -r requirements.txt
 ```
 
 ### 1.3 Verifying Pre-Flight Manifest & Cryptographic Integrity
-Verify that all 287 repository source files, datasets, and scripts match their recorded SHA-256 digests and have correct execution permissions:
+Verify that all 302 repository source files, datasets, and scripts match their recorded SHA-256 digests and have correct execution permissions:
 ```bash
 python3 scripts/verify_manifest.py --pre-flight
 ```

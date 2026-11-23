@@ -8,10 +8,10 @@ This matrix maps all 42 methodological, software engineering, telemetry, and sta
 
 | ID | Phase & Requirement | Status | Implemented File / Function / Flag | Verification Evidence & Command |
 | :---: | :--- | :---: | :--- | :--- |
-| **0.1** | **Immutable Protocol Versioning:** Frozen specification v2.0.0 with SHA-256 validation. | `[x]` | `protocol/protocol_v2.0.json`, `benchmark/protocol_freeze.py` | `python3 benchmark/protocol_freeze.py --check-hash faae1495c8...` (Exit 0) |
+| **0.1** | **Immutable Protocol Versioning:** Frozen specification v2.0.0 with SHA-256 validation. | `[x]` | `protocol/protocol_v2.0.json`, `benchmark/protocol_freeze.py` | `python3 benchmark/protocol_freeze.py --check-hash 2aef611c7b...` (Exit 0) |
 | **0.2** | **Hypotheses Separation:** Formal separation of confirmatory ($H_1$–$H_4$) from exploratory analyses ($A_1$–$A_4$). | `[x]` | `protocol/protocol_v2.0.json`, `docs/PROTOCOL_V2.md` | `pytest tests/test_protocol_v2_and_contracts.py` (Exit 0) |
 | **0.3** | **Statistical Unit Definition:** Fixed cell `platform × workload × regime × runtime × session`, eliminating spurious pairing by random `rep`. | `[x]` | `docs/PROTOCOL_V2.md`, `scripts/reproduce_quad_platform_analysis.py` | `pytest tests/test_statistical_engine.py` (Exit 0) |
-| **1.1** | **Repository Completeness:** Integrity of `benchmark/`, `src/`, `tests/`, `scripts/`, `docs/`, `protocol/`. | `[x]` | Repository root tree | `python3 scripts/verify_manifest.py --pre-flight` (All 301 files valid) |
+| **1.1** | **Repository Completeness:** Integrity of `benchmark/`, `src/`, `tests/`, `scripts/`, `docs/`, `protocol/`. | `[x]` | Repository root tree | `python3 scripts/verify_manifest.py --pre-flight` (All 302 files valid) |
 | **1.2** | **Strict Manifest Failure:** Pre-flight validation returning non-zero exit code on missing file or hash divergence. | `[x]` | `scripts/verify_manifest.py --pre-flight` | Verified with exit code 1 on missing permissions; passes on clean repo |
 | **1.3** | **Automated Gatekeeper:** Validates JSONL schema, positive tokens, finish reasons, HTTP 200, timing plausibility ($T_{\text{task}} \ge T_{\text{neural}}$). | `[x]` | `scripts/audit_submission_gatekeeper.py` | `python3 scripts/audit_submission_gatekeeper.py` (4,269/4,269 records certified) |
 | **1.4** | **Execution Modes:** Standardized `--smoke-test`, `--quick`, `--full`, `--dry-run`, `--resume`, `--invert-blocks` across all runners. | `[x]` | `scripts/run_linux_x86_64_master_campaign.py`, `scripts/run_windows_x86_64_master_campaign.py`, `benchmark/run_unified_benchmark.py`, `adapters/windows_intel_graphics/runner.py` | `pytest tests/test_campaign_execution_modes.py` (All dry-runs pass exit 0) |
@@ -30,10 +30,10 @@ This matrix maps all 42 methodological, software engineering, telemetry, and sta
 | **4.2** | **Execution Wrappers (Non-Promotional):** Clean scripts (`run_linux_campaign.sh`, `run_windows_campaign.ps1`, `run_darwin_campaign.sh`). | `[x]` | `scripts/run_linux_campaign.sh`, `scripts/run_windows_campaign.ps1`, `scripts/run_darwin_campaign.sh` | Verified via `./scripts/run_linux_campaign.sh --dry-run` |
 | **4.3** | **Hardware Telemetry Documentation:** Explicit boundary documentation for SMC, RAPL, NVML, and Win32 PSAPI. | `[x]` | `docs/TELEMETRY_ARCHITECTURE.md` | Documented and verified in gatekeeper |
 | **4.4** | **Hardware Throttling Verification:** Tracking `cpu_pkg_throttle_events` and GPU throttle bitmasks without spurious causal $r_1$ inference. | `[x]` | `thermal_fields()`, `audit_export/linux_throttling_stratification.csv` | Verified in replication report |
-| **4.5** | **Explicit-Null Telemetry Integrity:** Restricted counters recorded strictly as `null` / `"N/A"` without synthetic fabrication. | `[x]` | Telemetry adapters across all platforms | `pytest tests/test_no_hardcoded_metrics_or_mocks.py` (Exit 0) |
-| **5.1** | **Additive Latency Model:** Strict enforcement: $T_{\text{task}} = T_{\text{neural}} + T_{\text{orch}}$ ($T_{\text{orch}} \ge 0$). | `[x]` | Workload contracts, gatekeeper, all adapters | `pytest tests/test_protocol_v2_and_contracts.py` (Exit 0) |
+| **4.5** | **Explicit-Null Telemetry Integrity:** Restricted counters recorded explicitly as `null` / `"N/A"` without synthetic fabrication. | `[x]` | Telemetry adapters across all platforms | `pytest tests/test_no_hardcoded_metrics_or_mocks.py` (Exit 0) |
+| **5.1** | **Additive Latency Model:** Enforcement: $T_{\text{task}} = T_{\text{neural}} + T_{\text{orch}}$ ($T_{\text{orch}} \ge 0$). | `[x]` | Workload contracts, gatekeeper, all adapters | `pytest tests/test_protocol_v2_and_contracts.py` (Exit 0) |
 | **5.2** | **Concrete Runtime Analysis:** Analysis focused on Go runtime, Bun JSC, and Node.js V8 rather than generic "compiled vs JIT". | `[x]` | `docs/PROTOCOL_V2.md`, `README.md`, manuscript | Verified in neutral documentation |
-| **5.3** | **Instruction Metrics Demarcation:** PMC / cycles treated strictly as secondary microarchitectural cost, not latency substitute. | `[x]` | Reports and manuscript | Verified across Table 1 and Table 2 |
+| **5.3** | **Instruction Metrics Demarcation:** PMC / cycles treated explicitly as secondary microarchitectural cost, not latency substitute. | `[x]` | Reports and manuscript | Verified across Table 1 and Table 2 |
 | **5.4** | **Analytical Roofline UMA Bandwidth:** Declared as active-weight analytical bound rather than physical LPDDR5X bus counter. | `[x]` | `audit_submission_gatekeeper.py`, `README.md` | Verified in gatekeeper certification |
 | **5.5** | **Pre-Registered Exclusion Criteria:** Explicit objective criteria: HTTP != 200, length truncation, schema divergence, severe throttle, warmups. | `[x]` | `protocol/protocol_v2.0.json`, `docs/PROTOCOL_V2.md` | Invariant checks in gatekeeper |
 | **6.1** | **Unique Trial Identifiers:** `trial_id`, `run_id`, `session_id`, `git_commit`, timestamp, block index, seed in all records. | `[x]` | Master runners across platforms | Schema verified in gatekeeper |
@@ -50,14 +50,14 @@ This matrix maps all 42 methodological, software engineering, telemetry, and sta
 | **8.2** | **Non-Selective Visualizations:** Explicit labeling of cold (Regime A) vs warm (Regime B) and session in all figures and Table 7. | `[x]` | Publication figures 1–6 and Tables 1–8 | Verified in generated figures |
 | **8.3** | **State of the Art Positioning:** Verifiable, accurate bibliographic citations with verified DOIs. | `[x]` | `paper/references.bib` | Clean bibliography without invented DOIs |
 | **8.4** | **Explicit Scope Limitations:** Sober discussion of model scale (3B vs larger), sensor scope, single-slot prefix caching. | `[x]` | `README.md`, `paper/manuscript.tex` | Verified neutral text |
-| **8.5** | **Unified Release Package:** Consolidated packaging with `PENDING_RELEASE` placeholder awaiting Zenodo minting. | `[x]` | `scripts/reproduce_quad_platform_analysis.py:package_audit_zip` | `audit_export_quad_platform.zip` created |
+| **8.5** | **Unified Release Package:** Consolidated packaging with `PENDING_RELEASE` placeholder awaiting Zenodo minting. | `[ ] PENDENTE AÇÃO EXTERNA (Aguardando cunhagem do DOI pelo autor)` | `scripts/reproduce_quad_platform_analysis.py:package_audit_zip` | `audit_export_quad_platform.zip` created |
 
 ---
 
 ## Final Readiness Verdict
 
 - **Automated Test Suite:** 69 / 69 tests passing (`pytest -v`, exit code 0).
-- **Manifest Pre-Flight Check:** 301 / 301 files verified with matching SHA-256 and executable permissions (`verify_manifest.py --pre-flight`, exit code 0).
+- **Manifest Pre-Flight Check:** 302 / 302 files verified with matching SHA-256 and executable permissions (`verify_manifest.py --pre-flight`, exit code 0).
 - **Quality Gatekeeper Certification:** 4,269 / 4,269 historical records certified valid with zero mock records and zero physical roofline violations (`audit_submission_gatekeeper.py`, exit code 0).
 - **Dry-Run Matrix Validation:** 100% passing across Linux x86_64, Windows 11 NVIDIA, Windows Intel HD Graphics iGPU, and macOS ARM64.
 - **Overnight Execution Status:** Repository is fully prepared and shielded for overnight confirmatory campaigns.

@@ -27,28 +27,28 @@
     {
       "platform_id": "darwin_arm64",
       "os": "macOS 15.x",
-      "hardware": "Apple Silicon M4 (10-Core CPU, 10-Core GPU, 24GB Unified Memory)",
+      "hardware": "Apple Silicon M4 (10-Core CPU, 10-Core GPU, 24GB Unified Memory UMA)",
       "telemetry_source": "Apple SMC powermetrics (50ms interval) + libproc rusage",
       "energy_unit": "Joules (Hardware Shunts)"
     },
     {
       "platform_id": "linux_x86_64",
-      "os": "Ubuntu 26.04 LTS (Kernel 6.x)",
-      "hardware": "Intel Core i9-14900HX (24C/32T, 64GB DDR5)",
-      "telemetry_source": "Linux RAPL (energy_uj) + POSIX getrusage + perf",
-      "energy_unit": "Joules (RAPL MSR Package)"
+      "os": "Ubuntu 26.04 LTS (Kernel 6.x / 7.x)",
+      "hardware": "Intel Core i5-12500H (12C/16T, 16GB DDR4) + NVIDIA GeForce RTX 3050 Laptop GPU (4GB VRAM)",
+      "telemetry_source": "Linux RAPL (energy_uj) + POSIX getrusage + perf + NVIDIA NVML",
+      "energy_unit": "Joules (RAPL MSR Package + NVML Board Power)"
     },
     {
       "platform_id": "windows_11_nvidia",
       "os": "Microsoft Windows 11 Pro x86_64",
-      "hardware": "Intel Core i9 + NVIDIA GeForce RTX 4090 24GB VRAM",
+      "hardware": "Intel Core i5-12500H (12C/16T, 16GB DDR4) + NVIDIA GeForce RTX 3050 Laptop GPU (4GB VRAM)",
       "telemetry_source": "NVIDIA NVML (Power) + Win32 QueryProcessCycleTime",
       "energy_unit": "Joules (NVML Board Power)"
     },
     {
       "platform_id": "windows_intel_graphics",
       "os": "Windows 10/11 x86_64",
-      "hardware": "Intel Core i5-4590 (Haswell, 4C/4T, Intel HD Graphics 4600 UMA)",
+      "hardware": "Intel Core i7-4790K (Haswell, 4C/8T, 16GB DDR3) + Intel HD Graphics 4600 iGPU UMA",
       "telemetry_source": "Win32 PSAPI Process Memory + CPU Cycle Time",
       "energy_unit": "N/A (Hardware MSR unprivileged, recorded as None)"
     }
