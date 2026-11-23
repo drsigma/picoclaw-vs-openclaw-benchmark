@@ -193,9 +193,6 @@ def run_langchain_battery(eval_count: int = 15, warmup_count: int = 3, out_jsonl
                         "energy_gpu_j": energy_slice.get("energy_gpu_j"),
                         "edp_js": round((energy_slice.get("energy_net_above_idle_j") or 0.0) * (parsed.get("t_task_ms", 1000.0) / 1000.0), 3) if energy_slice.get("energy_net_above_idle_j") is not None else None,
                     }
-                        "energy_gpu_j": energy_slice.get("energy_gpu_j", 0.0),
-                        "edp_js": round((energy_slice.get("energy_net_above_idle_j", 0.0) or 0.0) * (parsed.get("t_task_ms", 1000.0) / 1000.0), 3),
-                    }
                     all_trials.append(rec)
 
                     if rep % 5 == 0 or rep == eval_count:

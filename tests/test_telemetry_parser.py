@@ -65,9 +65,9 @@ def test_integrate_energy_trapezoidal():
 
 
 def test_integrate_energy_empty_or_single():
-    """Verify empty sample list yields 0.0 Joules."""
+    """Verify empty sample list yields None (no samples) for energy."""
     res_empty = integrate_energy_trapezoidal([])
-    assert res_empty["energy_total_j"] == 0.0
+    assert res_empty["energy_total_j"] is None
 
     res_single = integrate_energy_trapezoidal([{
         "timestamp_ns": 0,
