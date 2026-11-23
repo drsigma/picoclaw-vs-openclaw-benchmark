@@ -68,17 +68,22 @@ SESSION_TIMESTAMP="$(date -u +%Y%m%d_%H%M%S)"
 SUFFIX_S1="_v2_${SESSION_TIMESTAMP}_session1"
 SUFFIX_S2="_v2_${SESSION_TIMESTAMP}_session2"
 
-# Execute Session 1 (Canonical order)
-echo "▶ Starting Session 1 (Canonical Order, isolated under ${SUFFIX_S1})..."
-"${PYTHON_BIN}" scripts/run_linux_x86_64_master_campaign.py ${RUN_FLAG} --suffix "${SUFFIX_S1}" ${EXTRA_ARGS}
+if [[ " $* " =~ " --invert-blocks " ]]; then
+    echo "▶ Starting Inverted Session (--invert-blocks, isolated under ${SUFFIX_S2})..."
+    "${PYTHON_BIN}" scripts/run_linux_x86_64_master_campaign.py ${RUN_FLAG} --invert-blocks --suffix "${SUFFIX_S2}" ${EXTRA_ARGS}
+else
+    # Execute Session 1 (Canonical order)
+    echo "▶ Starting Session 1 (Canonical Order, isolated under ${SUFFIX_S1})..."
+    "${PYTHON_BIN}" scripts/run_linux_x86_64_master_campaign.py ${RUN_FLAG} --suffix "${SUFFIX_S1}" ${EXTRA_ARGS}
 
-# Cooldown between sessions
-echo "▶ Inter-session stabilization cooldown (30s)..."
-sync && sleep 30
+    # Cooldown between sessions
+    echo "▶ Inter-session stabilization cooldown (30s)..."
+    sync && sleep 30
 
-# Execute Session 2 (Counterbalanced Inverted Order)
-echo "▶ Starting Session 2 (Inverted Block Order for Counterbalancing, isolated under ${SUFFIX_S2})..."
-"${PYTHON_BIN}" scripts/run_linux_x86_64_master_campaign.py ${RUN_FLAG} --invert-blocks --suffix "${SUFFIX_S2}" ${EXTRA_ARGS}
+    # Execute Session 2 (Counterbalanced Inverted Order)
+    echo "▶ Starting Session 2 (Inverted Block Order for Counterbalancing, isolated under ${SUFFIX_S2})..."
+    "${PYTHON_BIN}" scripts/run_linux_x86_64_master_campaign.py ${RUN_FLAG} --invert-blocks --suffix "${SUFFIX_S2}" ${EXTRA_ARGS}
+fi
 
 echo "========================================================================"
 echo " LINUX x86_64 SESSIONS COMPLETED SUCCESSFULLY."

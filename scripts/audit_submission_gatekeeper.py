@@ -49,11 +49,14 @@ REQUIRED_PROVENANCE_FIELDS = [
 
 
 def audit_jsonl_file(filepath: str, nominal_bw_gbs: float = 120.0) -> Dict[str, Any]:
-    """Audits a single JSONL benchmark dataset for schema invariants and physical roofline bounds."""
+    """Audits a single JSONL benchmark dataset for schema invariants, execution validity, and physical roofline bounds."""
     stats = {
         "filepath": os.path.relpath(filepath, REPO_DIR).replace("\\", "/"),
         "total_records": 0,
         "valid_records": 0,
+        "invalid_records": 0,
+        "incomplete_records": 0,
+        "unassailable_records": 0,
         "schema_violations": 0,
         "http_status_errors": 0,
         "roofline_violations": 0,
@@ -64,6 +67,8 @@ def audit_jsonl_file(filepath: str, nominal_bw_gbs: float = 120.0) -> Dict[str, 
 
     if not os.path.exists(filepath):
         stats["errors"].append(f"File not found: {filepath}")
+        stats["schema_violations"] += 1
+        stats["is_compliant"] = False
         return stats
 
     h = hashlib.sha256()
@@ -80,72 +85,92 @@ def audit_jsonl_file(filepath: str, nominal_bw_gbs: float = 120.0) -> Dict[str, 
             if not line.strip():
                 continue
             stats["total_records"] += 1
+            line_violations: List[str] = []
             try:
                 rec = json.loads(line)
             except Exception as e:
                 stats["schema_violations"] += 1
+                stats["unassailable_records"] += 1
                 stats["errors"].append(f"Line {line_no}: Invalid JSON: {e}")
                 continue
 
-            # 1. Required provenance fields
-            is_micro_ablation = (
-                "iterations" in rec
-                or "total_ops" in rec
-                or "transport" in rec
+            # Determine dataset schema type
+            is_mcp = (
+                "transport" in rec
                 or "t_mcp_ipc_ms" in rec
                 or "mcp" in str(rec.get("workload", "")).lower()
+                or "mcp" in filepath.lower()
             )
-            req_fields = (
-                ["session_id", "timestamp_iso", "git_commit", "hardware", "workload"]
-                if is_micro_ablation
-                else REQUIRED_PROVENANCE_FIELDS
+            is_langchain = (
+                "framework" in rec
+                or "langchain" in str(rec.get("agent_key", "")).lower()
+                or "langchain" in filepath.lower()
             )
-            missing = [fld for fld in req_fields if fld not in rec]
-            if missing:
-                stats["schema_violations"] += 1
-                stats["errors"].append(f"Line {line_no}: Missing provenance fields: {missing}")
+            is_micro_ablation = is_mcp or ("iterations" in rec and "total_ops" in rec)
 
-            # 2. HTTP Status == 200 (unless explicit fault injection ablation)
+            # 1. Provenance fields verification
+            if is_micro_ablation:
+                req_fields = ["session_id", "timestamp_iso", "git_commit", "hardware", "workload"]
+            else:
+                req_fields = REQUIRED_PROVENANCE_FIELDS
+
+            missing = [fld for fld in req_fields if fld not in rec or rec[fld] is None or (isinstance(rec[fld], str) and not rec[fld].strip())]
+            if missing:
+                line_violations.append(f"Line {line_no}: Missing required provenance fields: {missing}")
+
+            # 2. HTTP Status == 200
             http_st = rec.get("http_status")
             if http_st != 200 and not rec.get("is_fault_injection", False):
                 stats["http_status_errors"] += 1
-                stats["errors"].append(f"Line {line_no}: Invalid http_status ({http_st}), expected 200")
+                line_violations.append(f"Line {line_no}: Invalid http_status ({http_st}), expected 200")
 
-            # 3. Token invariants & finish reason (for LLM agent trials)
+            # 3. Subprocess exit code validation
+            sub_rc = rec.get("subprocess_exit_code", rec.get("returncode", 0))
+            if sub_rc != 0:
+                line_violations.append(f"Line {line_no}: Subprocess execution failed with returncode {sub_rc}")
+
+            # 4. Token invariants & finish reason (for LLM agent trials)
             ptok = rec.get("prompt_tokens")
             ctok = rec.get("completion_tokens", rec.get("output_tokens"))
             fr = rec.get("finish_reason")
             if not is_micro_ablation:
                 if ptok is None or int(ptok) <= 0:
-                    stats["schema_violations"] += 1
-                    stats["errors"].append(f"Line {line_no}: Missing or non-positive prompt_tokens: {ptok}")
+                    line_violations.append(f"Line {line_no}: Missing or non-positive prompt_tokens: {ptok}")
                 if ctok is None or int(ctok) <= 0:
-                    stats["schema_violations"] += 1
-                    stats["errors"].append(f"Line {line_no}: Missing or non-positive completion_tokens: {ctok}")
-            if fr and fr not in ("stop", "tool_calls", "length"):
-                stats["schema_violations"] += 1
-                stats["errors"].append(f"Line {line_no}: Invalid finish_reason: {fr}")
+                    line_violations.append(f"Line {line_no}: Missing or non-positive completion_tokens: {ctok}")
+                if fr and fr not in ("stop", "tool_calls", "length"):
+                    line_violations.append(f"Line {line_no}: Invalid finish_reason: {fr}")
 
-            # 4. Physical plausibility check & no simulation
+            # 5. Physical plausibility check & no simulation
             t_task = float(rec.get("t_task_ms", rec.get("t_total_ms", rec.get("t_exec_ms", 0.0))))
             t_neural = float(rec.get("t_neural_ms", rec.get("prompt_ms", 0.0)))
             if t_task <= 0.0:
-                stats["schema_violations"] += 1
-                stats["errors"].append(f"Line {line_no}: Non-positive task latency ({t_task})")
+                line_violations.append(f"Line {line_no}: Non-positive task latency ({t_task})")
             if t_neural > 0.0 and t_task < t_neural:
-                stats["schema_violations"] += 1
-                stats["errors"].append(f"Line {line_no}: Plausibility violation: t_task ({t_task}) < t_neural ({t_neural})")
+                line_violations.append(f"Line {line_no}: Plausibility violation: t_task ({t_task}) < t_neural ({t_neural})")
             if rec.get("is_mocked", False) or rec.get("simulated", False) or rec.get("is_simulated", False) is True:
-                stats["schema_violations"] += 1
-                stats["errors"].append(f"Line {line_no}: Rejected simulated or mocked execution record")
+                line_violations.append(f"Line {line_no}: Rejected simulated or mocked execution record")
 
-            # 5. Accumulate ITL per condition cell for Roofline check
+            # 6. Specific schema validation for MCP & LangChain
+            if is_mcp:
+                if "t_mcp_ipc_ms" not in rec or float(rec.get("t_mcp_ipc_ms", -1.0)) < 0.0:
+                    line_violations.append(f"Line {line_no}: Missing or negative t_mcp_ipc_ms in MCP ablation")
+            elif is_langchain:
+                if "framework" not in rec or not str(rec.get("framework")).strip():
+                    line_violations.append(f"Line {line_no}: Missing 'framework' designation in LangChain benchmark")
+
+            # Accumulate ITL per condition cell for Roofline check
             itl_ms = rec.get("itl_ms", 0.0)
-            if itl_ms > 0:
+            if itl_ms and itl_ms > 0:
                 cell_key = (rec.get("workload"), rec.get("agent_key") or rec.get("runtime"))
                 by_cell_itls[cell_key].append(itl_ms)
 
-            stats["valid_records"] += 1
+            if line_violations:
+                stats["schema_violations"] += len(line_violations)
+                stats["invalid_records"] += 1
+                stats["errors"].extend(line_violations)
+            else:
+                stats["valid_records"] += 1
 
     # Evaluate physical Roofline across condition medians
     for cell_key, itl_list in by_cell_itls.items():
@@ -175,12 +200,13 @@ def audit_jsonl_file(filepath: str, nominal_bw_gbs: float = 120.0) -> Dict[str, 
     return stats
 
 
-def run_gatekeeper_suite(target_files: List[str] | None = None) -> int:
+def run_gatekeeper_suite(target_files: List[str] | None = None, output_cert: str | None = None) -> int:
     print("=" * 80)
     print("🛡️  AUTOMATED BENCHMARK SUBMISSION GATEKEEPER & ROOFLINE VALIDATOR")
     print("   Methodology: Pugliese et al., OpenMCP, and DynamicMCPBench guidelines")
     print("=" * 80)
 
+    is_custom_files = bool(target_files)
     if not target_files:
         # Default: audit all 35 publication datasets across all 4 platforms
         try:
@@ -243,27 +269,41 @@ def run_gatekeeper_suite(target_files: List[str] | None = None) -> int:
         "datasets": audit_results,
     }
 
-    os.makedirs(os.path.dirname(OUT_CERT), exist_ok=True)
-    with open(OUT_CERT, "w", encoding="utf-8") as f:
-        json.dump(certificate, f, indent=2)
+    if output_cert:
+        dest_cert = output_cert
+        os.makedirs(os.path.dirname(dest_cert), exist_ok=True)
+        with open(dest_cert, "w", encoding="utf-8") as f:
+            json.dump(certificate, f, indent=2)
+        print(f"\n[INFO] Certificate emitted to custom destination: {dest_cert}")
+    elif is_custom_files:
+        # Write certificate in the directory of the target dataset to protect historical certificates
+        first_dir = os.path.dirname(target_files[0])
+        dest_cert = os.path.join(first_dir, "gatekeeper_audit_certificate.json")
+        os.makedirs(first_dir, exist_ok=True)
+        with open(dest_cert, "w", encoding="utf-8") as f:
+            json.dump(certificate, f, indent=2)
+        print(f"\n[INFO] Campaign-isolated certificate emitted to: {dest_cert}")
+    else:
+        # Default full-suite audit: update historical certificate points
+        os.makedirs(os.path.dirname(OUT_CERT), exist_ok=True)
+        with open(OUT_CERT, "w", encoding="utf-8") as f:
+            json.dump(certificate, f, indent=2)
 
-    # Sync to audit_export and publication campaign
-    export_cert = os.path.join(REPO_DIR, "audit_export", "gatekeeper_35_jsonl_audit.json")
-    os.makedirs(os.path.dirname(export_cert), exist_ok=True)
-    with open(export_cert, "w", encoding="utf-8") as f:
-        json.dump(certificate, f, indent=2)
+        export_cert = os.path.join(REPO_DIR, "audit_export", "gatekeeper_35_jsonl_audit.json")
+        os.makedirs(os.path.dirname(export_cert), exist_ok=True)
+        with open(export_cert, "w", encoding="utf-8") as f:
+            json.dump(certificate, f, indent=2)
 
-    pub_cert = os.path.join(REPO_DIR, "results", "publication_campaign", "gatekeeper_audit_certificate.json")
-    with open(pub_cert, "w", encoding="utf-8") as f:
-        json.dump(certificate, f, indent=2)
+        pub_cert = os.path.join(REPO_DIR, "results", "publication_campaign", "gatekeeper_audit_certificate.json")
+        os.makedirs(os.path.dirname(pub_cert), exist_ok=True)
+        with open(pub_cert, "w", encoding="utf-8") as f:
+            json.dump(certificate, f, indent=2)
 
     print("\n" + "=" * 80)
     if all_passed:
         print(f"🎉 CERTIFICADO EMITIDO COM SUCESSO: {certificate['gatekeeper_verdict']}")
         print(f"   Total de datasets auditados: {len(target_files)}")
         print(f"   Total de registros certificados: {total_evaluated_records}")
-        print(f"   Salvo em: {OUT_CERT}")
-        print(f"   Espelhado em: {export_cert}")
         print("=" * 80)
         return 0
     else:
@@ -275,6 +315,7 @@ def run_gatekeeper_suite(target_files: List[str] | None = None) -> int:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Automated Benchmark Submission Gatekeeper")
     parser.add_argument("--dry-run", action="store_true", help="Display audit plan and exit immediately with code 0")
+    parser.add_argument("--output-cert", default=None, help="Optional custom certificate output path")
     parser.add_argument("files", nargs="*", help="Optional specific .jsonl files to audit")
     args = parser.parse_args()
 
@@ -284,4 +325,4 @@ if __name__ == "__main__":
         print("⚡ [DRY-RUN] Plan verified successfully. Exiting code 0.")
         sys.exit(0)
 
-    sys.exit(run_gatekeeper_suite(args.files if args.files else None))
+    sys.exit(run_gatekeeper_suite(args.files if args.files else None, output_cert=args.output_cert))

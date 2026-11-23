@@ -80,17 +80,22 @@ OUT_DIR_S1="${REPO_DIR}/data/campaign_v2/darwin_m4_${SESSION_TIMESTAMP}_session1
 OUT_DIR_S2="${REPO_DIR}/data/campaign_v2/darwin_m4_${SESSION_TIMESTAMP}_session2"
 mkdir -p "${OUT_DIR_S1}" "${OUT_DIR_S2}"
 
-echo "▶ Starting Session 1 (Canonical Order)..."
-"${PYTHON_BIN}" benchmark/run_unified_benchmark.py ${RUN_FLAG} --output-dir "${OUT_DIR_S1}" ${EXTRA_ARGS}
+if [[ " $* " =~ " --invert-blocks " ]]; then
+    echo "▶ Starting Inverted Session (--invert-blocks, isolated under ${OUT_DIR_S2})..."
+    "${PYTHON_BIN}" benchmark/run_unified_benchmark.py ${RUN_FLAG} --invert-blocks --output-dir "${OUT_DIR_S2}" ${EXTRA_ARGS}
+else
+    echo "▶ Starting Session 1 (Canonical Order, isolated under ${OUT_DIR_S1})..."
+    "${PYTHON_BIN}" benchmark/run_unified_benchmark.py ${RUN_FLAG} --output-dir "${OUT_DIR_S1}" ${EXTRA_ARGS}
 
-echo "▶ Inter-session stabilization cooldown (30s)..."
-if command -v purge >/dev/null 2>&1; then
-    purge || true
+    echo "▶ Inter-session stabilization cooldown (30s)..."
+    if command -v purge >/dev/null 2>&1; then
+        purge || true
+    fi
+    sleep 30
+
+    echo "▶ Starting Session 2 (Counterbalanced Inverted Order, isolated under ${OUT_DIR_S2})..."
+    "${PYTHON_BIN}" benchmark/run_unified_benchmark.py ${RUN_FLAG} --invert-blocks --output-dir "${OUT_DIR_S2}" ${EXTRA_ARGS}
 fi
-sleep 30
-
-echo "▶ Starting Session 2 (Counterbalanced Inverted Order)..."
-"${PYTHON_BIN}" benchmark/run_unified_benchmark.py ${RUN_FLAG} --invert-blocks --output-dir "${OUT_DIR_S2}" ${EXTRA_ARGS}
 
 echo "========================================================================"
 echo " MACOS ARM64 SESSIONS COMPLETED SUCCESSFULLY."

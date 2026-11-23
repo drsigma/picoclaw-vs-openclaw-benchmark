@@ -91,16 +91,25 @@ def run_langchain_battery(eval_count: int = 15, warmup_count: int = 3, out_jsonl
                     t0_ns = time.monotonic_ns()
                     sub_out, sub_err, ret_code, hw_stats = run_subprocess_with_rusage(cmd, cwd=REPO_DIR)
                     t1_ns = time.monotonic_ns()
-                    energy_slice = monitor.slice_energy(t0_ns, t1_ns)
+                    energy_slice = monitor.slice_energy(t0_ns, t1_ns) or {}
+
+                    if ret_code != 0:
+                        raise RuntimeError(
+                            f"LangChain warmup failed with exit code {ret_code} in {wl} ({warmth_arg}). "
+                            f"stderr: {sub_err.strip()}"
+                        )
+                    if not sub_out or not sub_out.strip():
+                        raise RuntimeError(f"LangChain warmup produced empty output in {wl} ({warmth_arg}).")
 
                     try:
-                        parsed = json.loads(sub_out)[0]
-                    except Exception:
-                        parsed = {"t_task_ms": (t1_ns - t0_ns) / 1e6}
+                        parsed_raw = json.loads(sub_out)
+                        parsed = parsed_raw[0] if isinstance(parsed_raw, list) and parsed_raw else parsed_raw
+                    except Exception as e:
+                        raise RuntimeError(f"Failed to parse LangChain output in {wl}: {e}\nRaw: {sub_out}")
 
                     http_status = parsed.get("http_status")
-                    if http_status is None:
-                        http_status = 200 if ret_code == 0 else 500
+                    if http_status != 200:
+                        raise RuntimeError(f"Invalid HTTP status {http_status} in LangChain warmup {wl}")
 
                     rec = {
                         "session_id": session_id,
@@ -119,13 +128,15 @@ def run_langchain_battery(eval_count: int = 15, warmup_count: int = 3, out_jsonl
                         "rep": w_idx,
                         "is_warmup": True,
                         "http_status": http_status,
+                        "subprocess_returncode": ret_code,
+                        "subprocess_stderr": sub_err.strip()[:500] if sub_err else "",
                         **parsed,
                         **hw_stats,
-                        "energy_total_j": energy_slice.get("energy_total_j", 0.0),
-                        "energy_net_above_idle_j": energy_slice.get("energy_net_above_idle_j", 0.0),
-                        "energy_cpu_j": energy_slice.get("energy_cpu_j", 0.0),
-                        "energy_gpu_j": energy_slice.get("energy_gpu_j", 0.0),
-                        "edp_js": round((energy_slice.get("energy_net_above_idle_j", 0.0) or 0.0) * (parsed.get("t_task_ms", 1000.0) / 1000.0), 3),
+                        "energy_total_j": energy_slice.get("energy_total_j"),
+                        "energy_net_above_idle_j": energy_slice.get("energy_net_above_idle_j"),
+                        "energy_cpu_j": energy_slice.get("energy_cpu_j"),
+                        "energy_gpu_j": energy_slice.get("energy_gpu_j"),
+                        "edp_js": round((energy_slice.get("energy_net_above_idle_j") or 0.0) * (parsed.get("t_task_ms", 1000.0) / 1000.0), 3) if energy_slice.get("energy_net_above_idle_j") is not None else None,
                     }
                     all_trials.append(rec)
 
@@ -135,16 +146,25 @@ def run_langchain_battery(eval_count: int = 15, warmup_count: int = 3, out_jsonl
                     t0_ns = time.monotonic_ns()
                     sub_out, sub_err, ret_code, hw_stats = run_subprocess_with_rusage(cmd, cwd=REPO_DIR)
                     t1_ns = time.monotonic_ns()
-                    energy_slice = monitor.slice_energy(t0_ns, t1_ns)
+                    energy_slice = monitor.slice_energy(t0_ns, t1_ns) or {}
+
+                    if ret_code != 0:
+                        raise RuntimeError(
+                            f"LangChain evaluation failed with exit code {ret_code} in {wl} ({warmth_arg}) rep {rep}. "
+                            f"stderr: {sub_err.strip()}"
+                        )
+                    if not sub_out or not sub_out.strip():
+                        raise RuntimeError(f"LangChain evaluation produced empty output in {wl} ({warmth_arg}) rep {rep}.")
 
                     try:
-                        parsed = json.loads(sub_out)[0]
-                    except Exception:
-                        parsed = {"t_task_ms": (t1_ns - t0_ns) / 1e6}
+                        parsed_raw = json.loads(sub_out)
+                        parsed = parsed_raw[0] if isinstance(parsed_raw, list) and parsed_raw else parsed_raw
+                    except Exception as e:
+                        raise RuntimeError(f"Failed to parse LangChain output in {wl} rep {rep}: {e}\nRaw: {sub_out}")
 
                     http_status = parsed.get("http_status")
-                    if http_status is None:
-                        http_status = 200 if ret_code == 0 else 500
+                    if http_status != 200:
+                        raise RuntimeError(f"Invalid HTTP status {http_status} in LangChain evaluation {wl} rep {rep}")
 
                     rec = {
                         "session_id": session_id,
@@ -163,11 +183,16 @@ def run_langchain_battery(eval_count: int = 15, warmup_count: int = 3, out_jsonl
                         "rep": rep,
                         "is_warmup": False,
                         "http_status": http_status,
+                        "subprocess_returncode": ret_code,
+                        "subprocess_stderr": sub_err.strip()[:500] if sub_err else "",
                         **parsed,
                         **hw_stats,
-                        "energy_total_j": energy_slice.get("energy_total_j", 0.0),
-                        "energy_net_above_idle_j": energy_slice.get("energy_net_above_idle_j", 0.0),
-                        "energy_cpu_j": energy_slice.get("energy_cpu_j", 0.0),
+                        "energy_total_j": energy_slice.get("energy_total_j"),
+                        "energy_net_above_idle_j": energy_slice.get("energy_net_above_idle_j"),
+                        "energy_cpu_j": energy_slice.get("energy_cpu_j"),
+                        "energy_gpu_j": energy_slice.get("energy_gpu_j"),
+                        "edp_js": round((energy_slice.get("energy_net_above_idle_j") or 0.0) * (parsed.get("t_task_ms", 1000.0) / 1000.0), 3) if energy_slice.get("energy_net_above_idle_j") is not None else None,
+                    }
                         "energy_gpu_j": energy_slice.get("energy_gpu_j", 0.0),
                         "edp_js": round((energy_slice.get("energy_net_above_idle_j", 0.0) or 0.0) * (parsed.get("t_task_ms", 1000.0) / 1000.0), 3),
                     }

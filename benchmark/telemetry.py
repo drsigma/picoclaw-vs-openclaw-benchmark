@@ -291,13 +291,14 @@ def integrate_energy_trapezoidal(samples: list[dict[str, Any]], idle_package_mw:
     """
     if not samples:
         return {
-            "energy_cpu_j": 0.0,
-            "energy_gpu_j": 0.0,
-            "energy_ane_j": 0.0,
-            "energy_total_j": 0.0,
-            "energy_net_above_idle_j": 0.0,
+            "energy_cpu_j": None,
+            "energy_gpu_j": None,
+            "energy_ane_j": None,
+            "energy_total_j": None,
+            "energy_net_above_idle_j": None,
             "duration_s": 0.0,
-            "avg_power_w": 0.0,
+            "avg_power_w": None,
+            "telemetry_status": "no_samples_available",
         }
 
     if len(samples) == 1:
@@ -648,8 +649,8 @@ class LinuxRAPLMonitor:
             energy_j = diff_uj / 1_000_000.0
             return {
                 "energy_cpu_j": round(energy_j, 4),
-                "energy_gpu_j": 0.0,
-                "energy_ane_j": 0.0,
+                "energy_gpu_j": None,
+                "energy_ane_j": None,
                 "energy_total_j": round(energy_j, 4),
                 "energy_net_above_idle_j": round(energy_j, 4),
                 "duration_s": round(duration_s, 4),

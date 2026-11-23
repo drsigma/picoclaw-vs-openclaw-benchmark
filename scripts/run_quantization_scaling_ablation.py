@@ -81,6 +81,8 @@ def run_quantization_ablation():
     for m in models:
         print(f"\n▶ Avaliando Nível de Quantização: {m['quant']} ({m['s_file_gb']:.3f} GB file)...")
         assert os.path.exists(m["path"]), f"Modelo não encontrado: {m['path']}"
+        if not os.path.exists(LLAMA_BENCH_BIN):
+            raise FileNotFoundError(f"llama-bench binary not found at {LLAMA_BENCH_BIN}")
 
         # Run llama-bench with n_prompt=512, n_gen=64, repetitions=10, Metal GPU ngl 99
         cmd = [
@@ -93,11 +95,18 @@ def run_quantization_ablation():
             "-o", "json",
         ]
         res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        if res.returncode != 0:
+            raise RuntimeError(f"llama-bench failed with exit code {res.returncode}: {res.stderr}")
+
         bench_data = json.loads(res.stdout)
+        if not bench_data:
+            raise ValueError(f"Empty benchmark data returned by llama-bench for {m['quant']}")
 
         # bench_data has 2 entries: prompt processing (n_prompt=512, n_gen=0) and generation (n_prompt=0, n_gen=64)
-        pp_entry = next(e for e in bench_data if e["n_prompt"] == 512 and e["n_gen"] == 0)
-        tg_entry = next(e for e in bench_data if e["n_prompt"] == 0 and e["n_gen"] == 64)
+        pp_entry = next((e for e in bench_data if e.get("n_prompt") == 512 and e.get("n_gen") == 0), None)
+        tg_entry = next((e for e in bench_data if e.get("n_prompt") == 0 and e.get("n_gen") == 64), None)
+        if not pp_entry or not tg_entry:
+            raise ValueError(f"Missing expected prompt or generation entries in llama-bench output for {m['quant']}")
 
         pp_tok_s = pp_entry["avg_ts"]
         pp_std_tok_s = pp_entry["stddev_ts"]
@@ -141,6 +150,23 @@ def run_quantization_ablation():
             "active_bandwidth_util_pct": round(active_bw_util_pct, 1),
             "is_within_physical_limits": active_bw_gbs < NOMINAL_M4_BW_GBS,
             "measurement_type": "empirical_gpu_bench_with_analytical_phi_projection",
+            "field_classification": {
+                "prompt_throughput_tok_s": "measured",
+                "generation_throughput_tok_s": "measured",
+                "itl_0_median_ms": "measured",
+                "active_bandwidth_gbs": "derived_empirical",
+                "s_active_weights_gb": "estimated_weight_footprint",
+                "w2_t_neural_ms": "modeled_analytical",
+                "phi_orch_pct": "modeled_analytical",
+            },
+            "execution_config": {
+                "backend": "Metal GPU 10-core",
+                "repetitions": 10,
+                "context_eval_p": 512,
+                "generation_n": 64,
+                "ngl": 99,
+                "command": " ".join(cmd),
+            },
             "modeled_parameters": {
                 "ttft_modeled_ms": ttft_ms,
                 "t_orch_modeled_ms": {

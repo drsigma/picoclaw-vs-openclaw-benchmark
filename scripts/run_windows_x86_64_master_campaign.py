@@ -705,7 +705,8 @@ def stage_mcp(ctx: Ctx) -> None:
                         "is_simulated": False, "http_status": 200, "t_mcp_ipc_ms": ipc_sum,
                         "t_mcp_ipc_per_tool_ms": per_tool, "t_orch_ms": round(t_orch_total, 3),
                         "t_neural_ms": round(b_neural, 3), "t_task_ms": round(t_task_total, 3),
-                        "phi_orch_pct": round(phi, 3), "energy_net_above_idle_j": 0.0,
+                        "phi_orch_pct": round(phi, 3), "energy_net_above_idle_j": None,
+                        "telemetry_status": "uninstrumented_in_mcp_ablation",
                         "tools": [t[0] for t in tools_to_run], "client": "python harness (runtime independent)"
                     }
                     append_jsonl(out, rec)

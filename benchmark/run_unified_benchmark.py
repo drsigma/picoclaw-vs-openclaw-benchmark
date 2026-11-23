@@ -169,6 +169,39 @@ def collect_host_metadata() -> dict[str, Any]:
     return meta
 
 
+def get_git_commit_hash() -> str:
+    try:
+        res = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_DIR, capture_output=True, text=True, timeout=3.0)
+        if res.returncode == 0 and res.stdout.strip():
+            return res.stdout.strip()[:7]
+    except Exception:
+        pass
+    return "unknown"
+
+
+def detect_system_provenance() -> tuple[str, str]:
+    hw = platform.processor() or platform.machine()
+    if sys.platform == "darwin":
+        try:
+            brand = subprocess.check_output(["sysctl", "-n", "machdep.cpu.brand_string"], text=True).strip()
+            hw = f"Apple Silicon ({brand})"
+        except Exception:
+            hw = "Apple Silicon"
+    elif sys.platform == "linux":
+        try:
+            with open("/proc/cpuinfo") as f:
+                for line in f:
+                    if "model name" in line:
+                        hw = line.split(":", 1)[1].strip()
+                        break
+        except Exception:
+            pass
+    elif sys.platform == "win32":
+        hw = os.environ.get("PROCESSOR_IDENTIFIER", platform.processor() or "x86_64")
+    os_str = f"{platform.system()} {platform.release()} ({platform.machine()})"
+    return hw, os_str
+
+
 def run_campaign(
     reps_per_condition: int = 30,
     dry_run: bool = False,
@@ -244,11 +277,72 @@ def run_campaign(
             telemetry_backend = "unprivileged_no_smc" if sys.platform == "darwin" else "linux_psutil_unprivileged"
 
     host_meta = collect_host_metadata()
+    detected_hw, detected_os = detect_system_provenance()
+    current_git_commit = get_git_commit_hash()
+    
+    # Model and quantization metadata discovery
+    model_env = os.environ.get("LLAMA_MODEL", "")
+    if model_env:
+        model_basename = os.path.basename(model_env)
+        detected_model_ver = model_basename.replace(".gguf", "")
+        m_quant = re.search(r"-(Q\d\w*)\.gguf$", model_basename, re.IGNORECASE)
+        detected_quant = f"GGUF {m_quant.group(1)}" if m_quant else "GGUF Q4_K_M"
+    else:
+        detected_model_ver = "Meta-Llama-3.2-3B-Instruct"
+        detected_quant = "GGUF Q4_K_M (2.019 GB)"
+    
+    detected_server_flags = os.environ.get("LLAMA_SERVER_FLAGS", "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42")
+
     agents = ["picoclaw", "openclaw_minimal", "openclaw_full", "python_native", "neural_baseline"]
     workloads = ["W1", "W2", "W3", "W4", "W5"]
 
+    # Block order planning (counterbalanced inversion for Session 2)
+    if invert_blocks:
+        agents_order = list(reversed(agents))
+        workloads_order = list(reversed(workloads))
+        print("🔄 [ORDER] Counterbalancing active (--invert-blocks):")
+        print(f"         Agents:    {agents_order}")
+        print(f"         Workloads: {workloads_order}")
+    else:
+        agents_order = list(agents)
+        workloads_order = list(workloads)
+        print("▶️  [ORDER] Canonical block order:")
+        print(f"         Agents:    {agents_order}")
+        print(f"         Workloads: {workloads_order}")
+
     total_eval_trials = len(agents) * len(workloads) * reps_per_condition
     print(f"📊 Matrix: {len(agents)} agents x {len(workloads)} workloads x {reps_per_condition} reps = {total_eval_trials} evaluation trials.")
+
+    # Resume discovery and safety check
+    done_keys: set[tuple[str, str, int, bool]] = set()
+    existing_trials_count = 0
+    if os.path.exists(raw_trials_path):
+        if not resume and not dry_run:
+            with open(raw_trials_path, "r", encoding="utf-8") as _chk_f:
+                if _chk_f.readline().strip():
+                    raise RuntimeError(
+                        f"Output dataset already exists at {raw_trials_path}. "
+                        "Refusing to overwrite without --resume or an isolated --output-dir namespace."
+                    )
+        elif resume:
+            with open(raw_trials_path, "r", encoding="utf-8") as in_f:
+                for line_idx, line in enumerate(in_f, 1):
+                    line_str = line.strip()
+                    if not line_str:
+                        continue
+                    try:
+                        rec = json.loads(line_str)
+                        ak_exist = rec.get("agent_key")
+                        w_exist = rec.get("workload")
+                        r_exist = int(rec.get("rep", 0))
+                        warm_exist = bool(rec.get("is_warmup", False))
+                        if ak_exist and w_exist and r_exist > 0:
+                            done_keys.add((ak_exist, w_exist, r_exist, warm_exist))
+                            if not warm_exist:
+                                existing_trials_count += 1
+                    except Exception as err:
+                        print(f"⚠️  [WARN] Corrupted JSON record at line {line_idx} discarded during resume: {err}")
+            print(f"🔄 [RESUME] Discovered {len(done_keys)} completed trials ({existing_trials_count} evaluations). Resuming execution without repetition.")
 
     # Instantiate and setup adapters
     adapter_instances = {}
@@ -258,17 +352,20 @@ def run_campaign(
             raise RuntimeError(f"Failed to setup adapter '{ak}'. Check compiler and runtime paths.")
         adapter_instances[ak] = ad
 
-    trials_written = 0
+    trials_written = existing_trials_count
     rng = random.Random(42)
+    file_mode = "a" if resume else "w"
 
     try:
-        with open(raw_trials_path, "w", encoding="utf-8") as out_f:
+        with open(raw_trials_path, file_mode, encoding="utf-8") as out_f:
             # Phase A: Warmup rounds (3 per condition, discarded from statistics)
             if not dry_run:
                 print("\n🔥 Executing warmup rounds (3 per condition, marked with is_warmup=True)...")
-                for w in workloads:
-                    for ak in agents:
+                for w in workloads_order:
+                    for ak in agents_order:
                         for w_rep in range(3):
+                            if (ak, w, w_rep + 1, True) in done_keys:
+                                continue
                             ad = adapter_instances[ak]
                             res = ad.run_workload(w, iterations=1)
                             tn = float(res.get("t_neural_ms", 0.0))
@@ -334,25 +431,32 @@ def run_campaign(
                                 "energy_total_j": None,
                                 "energy_net_above_idle_j": None,
                                 "edp_js": None,
-                                "session_id": "session_1_primary_publication_m4",
-                                "git_commit": "c251847",
-                                "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
-                                "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
-                                "model_version": "Meta-Llama-3.2-3B-Instruct",
-                                "quantization": "GGUF Q4_K_M (2.019 GB)",
-                                "server_flags": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
+                                "session_id": session_id,
+                                "git_commit": current_git_commit,
+                                "hardware": detected_hw,
+                                "os": detected_os,
+                                "model_version": detected_model_ver,
+                                "quantization": detected_quant,
+                                "server_flags": detected_server_flags,
                             }
                             out_f.write(json.dumps(record) + "\n")
                             out_f.flush()
+                            os.fsync(out_f.fileno())
+                            done_keys.add((ak, w, w_rep + 1, True))
 
-            # Phase B: Main Evaluation Trials (Block-Interleaved Randomization)
-            print("\n▶️  Dispatching randomized evaluation blocks...")
+            # Phase B: Main Evaluation Trials (Block-Interleaved Counterbalancing)
+            print("\n▶️  Dispatching evaluation blocks...")
             for rep in range(1, reps_per_condition + 1):
-                # Create block of all (agent, workload) conditions and shuffle
-                block = [(ak, w) for ak in agents for w in workloads]
-                rng.shuffle(block)
+                # Create block of all (agent, workload) conditions
+                block = [(ak, w) for ak in agents_order for w in workloads_order]
+                if invert_blocks:
+                    block.reverse()
+                else:
+                    rng.shuffle(block)
 
                 for ak, w in block:
+                    if (ak, w, rep, False) in done_keys:
+                        continue
                     trials_written += 1
                     ad = adapter_instances[ak]
 
@@ -468,17 +572,27 @@ def run_campaign(
                         "edp_js": edp_js,
                         "joules_per_token": j_per_token,
                         "host_metadata": host_meta,
-                        "session_id": "session_1_primary_publication_m4",
-                        "git_commit": "c251847",
-                        "hardware": "Apple Mac mini M4 (Mac16,10, 10-core CPU, 10-core Metal GPU, 24GB LPDDR5X UMA)",
-                        "os": "macOS 26.6.2 (Build 25G83, darwin-arm64)",
-                        "model_version": "Meta-Llama-3.2-3B-Instruct",
-                        "quantization": "GGUF Q4_K_M (2.019 GB)",
-                        "server_flags": "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42",
+                        "session_id": session_id,
+                        "git_commit": current_git_commit,
+                        "hardware": detected_hw,
+                        "os": detected_os,
+                        "model_version": detected_model_ver,
+                        "quantization": detected_quant,
+                        "server_flags": detected_server_flags,
                     }
 
                     out_f.write(json.dumps(trial_record) + "\n")
                     out_f.flush()
+                    os.fsync(out_f.fileno())
+                    done_keys.add((ak, w, rep, False))
+
+                    # Invariant validation per cell execution
+                    if not dry_run:
+                        from benchmark.workload_contracts import audit_cell_trial
+                        regime_key = "B" if trial_record.get("cache_hit") else "A"
+                        is_ok, err_msg = audit_cell_trial(trial_record, w, regime_key, strict_token_parity=False)
+                        if not is_ok:
+                            raise RuntimeError(f"Cell contract invariant failure ({ak}, {w}, rep={rep}): {err_msg}")
 
                     edp_disp = f"{edp_js:.3f}J·s" if edp_js is not None else "N/A"
                     print(
@@ -491,6 +605,19 @@ def run_campaign(
     finally:
         if smc_monitor.active:
             smc_monitor.stop_campaign()
+
+    # Enforce protocol invariants before proceeding to analysis
+    if not dry_run and os.path.exists(raw_trials_path):
+        from benchmark.protocol_invariants import validate_campaign_invariants
+        eval_records = [json.loads(line) for line in open(raw_trials_path, "r", encoding="utf-8") if line.strip()]
+        validate_campaign_invariants(
+            eval_records,
+            expected_eval_count=total_eval_trials,
+            expected_reps_per_cell=reps_per_condition,
+            require_gate_0_fields=True,
+            require_energy=False,
+        )
+        print("🛡️  [INVARIANTS] Session protocol invariants verified successfully.")
 
     # Generate analytical tables and statistical tests
     print("\n📈 Executing non-parametric statistical analysis...")

@@ -222,10 +222,26 @@ def validate_campaign_invariants(
                     f"Protocol Invariant #2 violated in workload {w}: 15-tool arms diverged in prompt_tokens: {formatted}"
                 )
 
+    executed_invariants = [
+        "Invariant #1: positive prompt_tokens and completion_tokens",
+        "Invariant #3: valid finish_reason in {'stop', 'tool_calls', 'length'}",
+        "Invariant #4: http_status == 200",
+        "Invariant #5: exact sample count and balanced per-cell repetitions",
+        "Invariant #6: non-empty session_id and git_commit provenance",
+    ]
+    if require_gate_0_fields:
+        executed_invariants.append("Invariant #0: all 9 Gate 0 root provenance fields verified")
+    if require_energy:
+        executed_invariants.append("Invariant #7: positive physical net energy")
+    if require_equalized_tokens:
+        executed_invariants.append("Invariant #2: equalized prompt_tokens across 15-tool arms in W1-W4")
+
     return {
         "validated_records": len(eval_recs),
         "cells_validated": len(cell_counts),
         "require_equalized_tokens": require_equalized_tokens,
         "require_energy": require_energy,
+        "executed_invariants": executed_invariants,
+        "failed_invariants": [],
         "status": "PASSED",
     }

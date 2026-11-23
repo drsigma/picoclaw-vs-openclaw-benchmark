@@ -246,7 +246,17 @@ def run_mcp_ablation():
                             "modeled_parameters": ["t_orch_base_modeled_ms", "t_neural_modeled_ms"],
                             "neural_baseline_source": "W2_empirical_reference_constant",
                         },
-                        "energy_net_above_idle_j": energy_slice.get("energy_net_above_idle_j", 0.0),
+                        "field_provenance": {
+                            "t_mcp_ipc_ms": "empirical_measurement",
+                            "t_orch_base_modeled_ms": "analytical_model",
+                            "t_neural_modeled_ms": "analytical_model",
+                            "t_orch_ms": "derived_composite",
+                            "t_task_ms": "derived_composite",
+                            "phi_orch_pct": "derived_composite",
+                            "energy_net_above_idle_j": "empirical_measurement_or_null",
+                        },
+                        "energy_net_above_idle_j": energy_slice.get("energy_net_above_idle_j") if energy_slice else None,
+                        "telemetry_status": "instrumented" if (energy_slice and energy_slice.get("energy_net_above_idle_j") is not None) else "uninstrumented_or_unavailable",
                     }
                     all_trials.append(rec)
                     with open(OUT_JSONL, "a", encoding="utf-8") as f:

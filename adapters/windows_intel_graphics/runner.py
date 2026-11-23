@@ -501,13 +501,21 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
         return [a for a in base_arms if a in adapters]
 
     try:
+        invert = getattr(args, "invert_blocks", False)
+        planned_stages = [s for s in reversed(stages) if s != "ANALYZE"] + (["ANALYZE"] if "ANALYZE" in stages else []) if invert else stages
+        print(f"\n▶️  [PLAN] Session execution order (invert_blocks={invert}): stages={planned_stages}")
+
         # Stage B: Warm KV-cache (block-isolated per condition for deterministic cache_hit)
-        if "B" in stages:
+        if "B" in planned_stages:
             out_b = os.path.join(paths.raw, "warm_cache_trials.jsonl")
             done_b = _done_keys(out_b)
-            conds = [(ak, wl) for wl in workloads for ak in _arms_for_wl(wl, arms_requested)]
-            random.Random(2027).shuffle(conds)
-            print(f"\n=== STAGE B (Warm KV-Cache, cache_prompt=true): {len(conds)} blocks ===", flush=True)
+            wl_order = list(reversed(workloads)) if invert else list(workloads)
+            conds = [(ak, wl) for wl in wl_order for ak in (list(reversed(_arms_for_wl(wl, arms_requested))) if invert else _arms_for_wl(wl, arms_requested))]
+            if not invert:
+                random.Random(2027).shuffle(conds)
+            else:
+                conds.reverse()
+            print(f"\n=== STAGE B (Warm KV-Cache, cache_prompt=true, invert={invert}): {len(conds)} blocks ===", flush=True)
             for ak, wl in conds:
                 for w_rep in range(1, args.warmups + 1):
                     if (ak, wl, w_rep, True) not in done_b:
@@ -517,17 +525,22 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
                         _run_one(ak, wl, rep, False, "B_warm", True, out_b)
 
         # Stage TOOLRAG: Full vs Minimal vs Tool-RAG in the same session (W2)
-        if "TOOLRAG" in stages:
+        if "TOOLRAG" in planned_stages:
             out_tr = os.path.join(paths.raw, "tool_rag_mitigation_trials.jsonl")
             tr_wls = [w for w in workloads if w != "W5"] or ["W2"]
+            if invert:
+                tr_wls = list(reversed(tr_wls))
             tr_arms = [a for a in TOOL_RAG_ARMS if a in adapters]
-            for reg_name, cache_flag in (("regime_b_warm", True), ("regime_a_cold", False)):
+            if invert:
+                tr_arms = list(reversed(tr_arms))
+            regimes_seq = (("regime_a_cold", False), ("regime_b_warm", True)) if invert else (("regime_b_warm", True), ("regime_a_cold", False))
+            for reg_name, cache_flag in regimes_seq:
                 done_tr = {
                     (r["regime"], r["agent_key"], r["workload"], int(r["rep"]), bool(r["is_warmup"]))
                     for r in _load_jsonl(out_tr)
                     if r.get("extraction_validated", True) is True
                 }
-                print(f"\n=== STAGE TOOLRAG ({reg_name}): arms={tr_arms} wls={tr_wls} ===", flush=True)
+                print(f"\n=== STAGE TOOLRAG ({reg_name}, invert={invert}): arms={tr_arms} wls={tr_wls} ===", flush=True)
                 for wl in tr_wls:
                     for ak in tr_arms:
                         for w_rep in range(1, args.warmups + 1):
@@ -538,11 +551,12 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
                                 _run_one(ak, wl, rep, False, reg_name, cache_flag, out_tr)
 
         # Stage A: Cold Prefill (randomized block interleaving)
-        if "A" in stages:
+        if "A" in planned_stages:
             out_a = os.path.join(paths.raw, "raw_trials.jsonl")
             done_a = _done_keys(out_a)
-            conds = [(ak, wl) for wl in workloads for ak in _arms_for_wl(wl, arms_requested)]
-            print(f"\n=== STAGE A (Cold Prefill, cache_prompt=false): {len(conds)} cells ===", flush=True)
+            wl_order = list(reversed(workloads)) if invert else list(workloads)
+            conds = [(ak, wl) for wl in wl_order for ak in (list(reversed(_arms_for_wl(wl, arms_requested))) if invert else _arms_for_wl(wl, arms_requested))]
+            print(f"\n=== STAGE A (Cold Prefill, cache_prompt=false, invert={invert}): {len(conds)} cells ===", flush=True)
             for ak, wl in conds:
                 for w_rep in range(1, args.warmups + 1):
                     if (ak, wl, w_rep, True) not in done_a:
@@ -550,7 +564,10 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
             rng = random.Random(2026)
             for rep in range(1, args.reps + 1):
                 block = list(conds)
-                rng.shuffle(block)
+                if invert:
+                    block.reverse()
+                else:
+                    rng.shuffle(block)
                 for ak, wl in block:
                     if (ak, wl, rep, False) not in done_a:
                         _run_one(ak, wl, rep, False, "A_cold", False, out_a)
@@ -593,7 +610,7 @@ def main() -> None:
     ap.add_argument("--workloads", default="W2,W5")
     ap.add_argument("--stages", default="B,TOOLRAG,A,ANALYZE")
     ap.add_argument("--arms", default=",".join(MAIN_ARMS))
-    ap.add_argument("--sessions", default="1,2", help="Comma-separated sessions (e.g. 1,2)")
+    ap.add_argument("--sessions", default="1", help="Comma-separated sessions to execute (default: 1; wrapper expands sessions)")
     ap.add_argument("--inter-session-cooldown-s", type=float, default=30.0)
     ap.add_argument("--cool-cpu-c", type=float, default=82.0)
     ap.add_argument("--min-clock-mhz", type=int, default=3100)
@@ -602,6 +619,14 @@ def main() -> None:
     ap.add_argument("--trial-timeout-s", type=float, default=480.0)
     ap.add_argument("--suffix", default="")
     args = ap.parse_args()
+
+    sessions = [s.strip() for s in args.sessions.split(",") if s.strip()]
+    if len(sessions) > 1 and "_session" in args.suffix:
+        raise ValueError(
+            f"Ambiguous session configuration: runner received multi-session argument --sessions '{args.sessions}' "
+            f"while suffix '{args.suffix}' already contains an isolated session namespace. "
+            "Pass --sessions 1 when wrapper manages session suffixes."
+        )
 
     if args.smoke_test:
         args.reps = 1

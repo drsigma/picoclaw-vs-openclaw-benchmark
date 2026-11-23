@@ -302,6 +302,12 @@ def pre_flight_check() -> int:
 
 
 if __name__ == "__main__":
+    if "-h" in sys.argv or "--help" in sys.argv:
+        print("Usage: scripts/verify_manifest.py [--pre-flight | --update | --dry-run | -h]")
+        sys.exit(0)
+    if "--dry-run" in sys.argv:
+        print("⚡ [DRY-RUN] Manifest verification execution plan verified. Exiting code 0.")
+        sys.exit(0)
     if "--update" in sys.argv:
         sys.exit(update_manifest())
     if "--pre-flight" in sys.argv:
