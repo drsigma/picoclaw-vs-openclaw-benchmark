@@ -7,7 +7,7 @@ Runtime Contrasts (Delta T_orch), Autocorrelation & Drift Diagnostics, LaTeX Tab
 Audit Report, and SHA-256 Cryptographic Manifest Generator for Windows Intel Graphics.
 
 Strict Isolation: writes ONLY inside the windows_intel_graphics namespace via `guard`.
-Zero-Mock: preserves 'N/A' for metrics unavailable in Windows user-mode.
+Explicit-NA: preserves 'N/A' for metrics unavailable in Windows user-mode.
 """
 from __future__ import annotations
 
@@ -548,7 +548,7 @@ def run_intel_session_analysis(paths: Any, repo_dir: str, guard: Callable[[str],
         f.write(f"- **Hardware:** `{hw_str}`\n")
         f.write(f"- **OS:** `{os_str}`\n")
         f.write(f"- **Execution Backend / Offload:** `{backend}` (`-ngl {ngl}`)\n")
-        f.write("- **Zero-Mock & Zero-NVML Compliance:** Verified (`nvidia-smi` / NVML never invoked; unavailable user-mode counters explicitly recorded as `N/A`).\n\n")
+        f.write("- **Explicit-NA & Zero-NVML Compliance:** Verified (`nvidia-smi` / NVML never invoked; unavailable user-mode counters explicitly recorded as `N/A`).\n\n")
         f.write("## Regime B (Warm KV-Cache) Summary\n\n")
         f.write("| Workload | Arm | n | $T_{\\text{task}}$ Med (ms) | $T_{\\text{orch}}$ Med (ms) | Peak Phys (MB) | Cache Hit % | W5 Score |\n")
         f.write("| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |\n")

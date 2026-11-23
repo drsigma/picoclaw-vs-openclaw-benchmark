@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
 scripts/validate_rag_tool_recall.py - Tool-RAG Semantic Pruner Recall@5 Validation Suite
-Elsevier SoftwareX: picoclaw-vs-openclaw-benchmark
+Empirical Systems Benchmark: picoclaw-vs-openclaw-benchmark
 
-Executes the Zero-Copy Dynamic Tool-RAG Schema Pruner 30 times across all workload tiers (W1-W4),
+Executes the Dynamic Tool-RAG Schema Pruner 30 times across all workload tiers (W1-W4),
 evaluates Recall@5 and precision metrics, verifies that essential tools required to resolve
-agent tasks are never discarded (zero-miss guarantee), and exports publication-grade metrics to:
+agent tasks are preserved, and exports metrics to:
   results/publication_campaign/tool_rag_recall_metrics.json
 
 Author / Autor: Rafael Paniccia Cassetta (UFABC)

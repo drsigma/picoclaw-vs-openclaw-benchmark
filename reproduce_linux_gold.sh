@@ -4,8 +4,6 @@
 # 
 # Master Reproduction Script: Cross-Platform Systems & Microarchitectural Benchmark
 # Automated, Clean-Environment Double-Session Replication Pipeline on Linux x86_64.
-#
-# Adheres strictly to IEEE / ACM Artifact Evaluation & Empirical Reviewer Standards:
 #   1. Sudo & privilege validation (RAPL, NVML, fan PWM, sleep targets)
 #   2. Thermal stabilization (fans locked to 100% PWM via dell_smm / alienware_wmi)
 #   3. Isolated Python virtual environment (.venv_repro)
@@ -36,7 +34,7 @@ xset -dpms 2>/dev/null || true
 # 1. Validação de Permissões (Sudo)
 # ------------------------------------------------------------------------------
 echo -e "\033[1;34m========================================================================\033[0m"
-echo -e "\033[1;34m🚀 INICIANDO REPRODUÇÃO EXPERIMENTAL PADRÃO OURO (LINUX x86_64)\033[0m"
+echo -e "\033[1;34m🚀 INICIANDO REPRODUÇÃO EXPERIMENTAL CONFIRMATÓRIA (LINUX x86_64)\033[0m"
 echo -e "\033[1;34m========================================================================\033[0m"
 echo "Este script requer privilégios de superusuário (sudo) para gerenciar o perfil"
 echo "de energia (Intel RAPL, NVIDIA NVML), desativar suspensão e travar ventoinhas."
@@ -201,7 +199,7 @@ cp "data/manifest_sha256_linux_x86_64_session2.json" "reproducibility/clean_run_
 
 echo ""
 echo -e "\033[1;32m========================================================================\033[0m"
-echo -e "\033[1;32m✅ REPRODUÇÃO PADRÃO OURO LINUX CONCLUÍDA COM SUCESSO!\033[0m"
+echo -e "\033[1;32m✅ REPRODUÇÃO EXPERIMENTAL LINUX CONCLUÍDA COM SUCESSO!\033[0m"
 echo -e "\033[1;32m   - Sessão 1: reproducibility/clean_run_linux_session_1/\033[0m"
 echo -e "\033[1;32m   - Sessão 2: reproducibility/clean_run_linux_session_2/\033[0m"
 echo -e "\033[1;32m   - Réplica inter-sessões validada e pronta para publicação acadêmica.\033[0m"

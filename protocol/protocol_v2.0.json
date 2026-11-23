@@ -1,0 +1,187 @@
+{
+  "protocol_version": "2.0.0",
+  "protocol_name": "Quad-Platform Empirical Systems Benchmark Protocol V2",
+  "frozen_at_utc": "2026-11-22T23:30:00Z",
+  "provenance": {
+    "git_branch": "main",
+    "git_commit": "edc9c0775017361e4ec11a789efce8c4c17a6af5",
+    "author": "Rafael Paniccia Cassetta",
+    "institution": "UFABC",
+    "repository_url": "https://github.com/drsigma/picoclaw-vs-openclaw-benchmark"
+  },
+  "experimental_conditions": {
+    "model": "Meta-Llama-3.2-3B-Instruct",
+    "quantization": "Q4_K_M",
+    "context_window": 32768,
+    "server_binary": "llama-server",
+    "server_version": "b11887",
+    "server_flags": "--ctx-size 32768 --parallel 1 --cont-batching",
+    "runtime_versions": {
+      "go": "1.23+",
+      "node": "v26+",
+      "bun": "v1.4.4+",
+      "cpython": "3.12+"
+    }
+  },
+  "platforms": [
+    {
+      "platform_id": "darwin_arm64",
+      "os": "macOS 15.x",
+      "hardware": "Apple Silicon M4 (10-Core CPU, 10-Core GPU, 24GB Unified Memory)",
+      "telemetry_source": "Apple SMC powermetrics (50ms interval) + libproc rusage",
+      "energy_unit": "Joules (Hardware Shunts)"
+    },
+    {
+      "platform_id": "linux_x86_64",
+      "os": "Ubuntu 26.04 LTS (Kernel 6.x)",
+      "hardware": "Intel Core i9-14900HX (24C/32T, 64GB DDR5)",
+      "telemetry_source": "Linux RAPL (energy_uj) + POSIX getrusage + perf",
+      "energy_unit": "Joules (RAPL MSR Package)"
+    },
+    {
+      "platform_id": "windows_11_nvidia",
+      "os": "Microsoft Windows 11 Pro x86_64",
+      "hardware": "Intel Core i9 + NVIDIA GeForce RTX 4090 24GB VRAM",
+      "telemetry_source": "NVIDIA NVML (Power) + Win32 QueryProcessCycleTime",
+      "energy_unit": "Joules (NVML Board Power)"
+    },
+    {
+      "platform_id": "windows_intel_graphics",
+      "os": "Windows 10/11 x86_64",
+      "hardware": "Intel Core i5-4590 (Haswell, 4C/4T, Intel HD Graphics 4600 UMA)",
+      "telemetry_source": "Win32 PSAPI Process Memory + CPU Cycle Time",
+      "energy_unit": "N/A (Hardware MSR unprivileged, recorded as None)"
+    }
+  ],
+  "workload_matrix": {
+    "W1": {
+      "description": "Single-Tool Arithmetic Dispatch",
+      "schema_tools": 15,
+      "expected_prompt_tokens": 1084,
+      "expected_completion_tokens": 28
+    },
+    "W2": {
+      "description": "Multi-Tool Selection & Bloat Ablation (15 vs 54 tools)",
+      "schema_tools": 15,
+      "schema_tools_bloated": 54,
+      "expected_prompt_tokens_minimal": 1092,
+      "expected_prompt_tokens_bloated": 7091,
+      "expected_completion_tokens": 32
+    },
+    "W3": {
+      "description": "Vector Retrieval-Augmented Generation (Cosine Similarity)",
+      "schema_tools": 15,
+      "expected_prompt_tokens": 1287,
+      "expected_completion_tokens": 42
+    },
+    "W4": {
+      "description": "Multi-Turn Conversational Memory (10 Turns)",
+      "schema_tools": 15,
+      "expected_prompt_tokens": 2150,
+      "expected_completion_tokens": 35
+    },
+    "W5": {
+      "description": "Enterprise Cross-Domain Synthesis (LangChain + SQLite + Policy)",
+      "schema_tools": 2,
+      "expected_prompt_tokens": 2259,
+      "expected_completion_tokens": 38
+    }
+  },
+  "execution_modes": {
+    "full": {
+      "reps_per_cell": 30,
+      "warmup_reps": 3,
+      "purpose": "Confirmatory publication campaigns"
+    },
+    "quick": {
+      "reps_per_cell": 5,
+      "warmup_reps": 1,
+      "purpose": "Regression testing and sensitivity checks"
+    },
+    "smoke_test": {
+      "reps_per_cell": 1,
+      "warmup_reps": 0,
+      "purpose": "End-to-end integration and sanity checking"
+    }
+  },
+  "session_and_block_design": {
+    "sessions": ["S1", "S2"],
+    "counterbalancing": "Explicit block order inversion in S2 (reverse workload and regime sequences)",
+    "inter_block_cooldown_seconds": 15.0,
+    "thermal_abort_ceiling_c": {
+      "cpu": 85.0,
+      "gpu": 80.0
+    },
+    "warmup_policy": "Separate warmup records marked with is_warmup=true, excluded from confirmatory analysis",
+    "statistical_unit": "Cell (platform × workload × regime × tool × session) with median and IQR/MAD; randomized rep index does NOT imply temporal pairing"
+  },
+  "hypotheses_classification": {
+    "confirmatory": [
+      {
+        "id": "H_CONF_1",
+        "description": "T_orch of Compiled Native (Go) is significantly lower than Managed Event-Driven (Node.js) under Warm KV-cache (Regime B)",
+        "metric": "t_orch_ms",
+        "test": "Moving Block Bootstrap (MBB) + Two One-Sided Tests (TOST)",
+        "sesoi_ms": 5.0,
+        "tost_margin_pct": 10.0
+      },
+      {
+        "id": "H_CONF_2",
+        "description": "Inter-session replication equivalence between S1 and S2 within ±10% margin",
+        "metric": "t_task_ms, t_orch_ms",
+        "test": "Two One-Sided Tests (TOST) on paired cell medians"
+      },
+      {
+        "id": "H_CONF_3",
+        "description": "Tool-RAG dynamic pruning mitigates KV-cache prefix thrashing, reducing latency >10x vs unpruned 54-tool catalog",
+        "metric": "t_task_ms",
+        "test": "Mann-Whitney U with Holm-Bonferroni correction"
+      },
+      {
+        "id": "H_CONF_4",
+        "description": "In Cold Prefill (Regime A), neural computation accounts for >75% of latency, yielding practical equivalence across runtimes",
+        "metric": "phi_orch_pct",
+        "test": "Confidence interval bound check (phi_orch < 25%)"
+      }
+    ],
+    "exploratory_and_diagnostic": [
+      {
+        "id": "A_EXPL_1",
+        "description": "Microarchitectural instruction retirement counts across runtimes (diagnostic activity proxy, not standalone efficiency)",
+        "metric": "proc_instructions"
+      },
+      {
+        "id": "A_EXPL_2",
+        "description": "Electrical energy dissipation across heterogeneous hardware probes (Apple SMC vs Linux RAPL vs NVIDIA NVML)",
+        "metric": "energy_net_above_idle_j"
+      },
+      {
+        "id": "A_EXPL_3",
+        "description": "Directional drift and OS scheduler affinity analysis across consecutive experimental sessions",
+        "metric": "delta_latency_pct, cpu_temperature_c"
+      },
+      {
+        "id": "A_EXPL_4",
+        "description": "Hardware thermal throttling event tracking (cpu_pkg_throttle_events)",
+        "metric": "throttle_event_count"
+      }
+    ]
+  },
+  "pre_defined_exclusion_criteria": [
+    "http_status != 200 (unless the trial belongs to an explicit fault-injection ablation)",
+    "prompt_tokens diverges by more than 5% from workload contract in equalized arms",
+    "finish_reason not in ('stop', 'tool_calls', 'length')",
+    "trial execution timeout exceeded (wall clock)",
+    "missing mandatory provenance fields (session_id, timestamp_iso, git_commit, etc.)",
+    "physical sensor read failure resulting in NaN or Inf"
+  ],
+  "statistical_methods": {
+    "primary_inference": "Moving Block Bootstrap (MBB, B=10000) under the null hypothesis",
+    "block_sizes_evaluated": [2, 3, 5, 8, 12],
+    "adaptive_block_size_rule": "Politis-White AR(1) formula: b = ceil((2 * r1 / (1 - r1^2))^(2/3) * n^(1/3)) bounded in [2, floor(n/2)]",
+    "equivalence_framework": "Two One-Sided Tests (TOST) with 90% confidence interval duality",
+    "sesoi_absolute_ms": 5.0,
+    "sesoi_relative_pct": 10.0,
+    "p_value_adjustment": "Holm-Bonferroni step-down correction for family-wise error control"
+  }
+}

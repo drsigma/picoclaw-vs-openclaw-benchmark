@@ -2,7 +2,7 @@
 set -euo pipefail
 
 echo "=================================================================="
-echo " 🍏 DARWIN GOLD STANDARD REPRODUCTION (STRICTLY EMPIRICAL) 🍏 "
+echo " 🍏 DARWIN BENCHMARK REPRODUCTION (EMPIRICAL MEASUREMENT) 🍏 "
 echo "=================================================================="
 
 if [ "$EUID" -ne 0 ]; then

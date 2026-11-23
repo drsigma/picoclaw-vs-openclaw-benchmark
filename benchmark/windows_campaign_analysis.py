@@ -846,7 +846,7 @@ def generate_cross_platform_audit_report(
 ## Physical Node 2: Windows 11 x86_64 vs Physical Node 1: Darwin ARM64 (Mac Mini M4)
 
 **Document Classification:** Systems Benchmark Conformance Report\n\
-**Verification Standard:** Empirical Systems Benchmarking Guidelines (Zero-Mock, Strictly Empirical)\n\
+**Verification Standard:** Empirical Systems Benchmarking Guidelines (Hardware Measurements)\n\
 **Host Architecture:** `{Windows_hw}`\n\
 **Operating System & Kernel:** `{Windows_os}`\n\
 **Git Base Commit (Origin):** `{Windows_git}`\n\

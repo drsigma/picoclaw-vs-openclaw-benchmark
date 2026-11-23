@@ -6,7 +6,7 @@ Dedicated Windows Intel Graphics orchestrator adapter layer.
 Wraps the repository's isomorphic workers (Go PicoClaw, Node.js OpenClaw Minimal/Full/Tool-RAG,
 Python Native + W5 LangChain/SQLite/Evaluator, Bun JSC, and Direct Neural Baseline)
 with isolated portable Windows binaries, Win32 Job Object / QueryProcessCycleTime telemetry,
-and explicit 'N/A' Zero-Mock handling. Does not modify any Mac, Linux, or Windows-NVIDIA adapter.
+and explicit 'N/A' Explicit-NA handling. Does not modify any Mac, Linux, or Windows-NVIDIA adapter.
 """
 from __future__ import annotations
 
@@ -99,7 +99,7 @@ def probe_llama_backend(toolchains: dict[str, str | None]) -> dict[str, Any]:
 class WindowsIntelGraphicsArmAdapter:
     """
     Executes a single benchmark arm on Windows Intel Graphics using Win32 process telemetry
-    and explicit Zero-Mock 'N/A' rules.
+    and explicit Explicit-NA 'N/A' rules.
     """
 
     def __init__(

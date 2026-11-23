@@ -2,7 +2,7 @@
 """
 [LEGACY / EXPLORATORY ARTIFACT - NÃO FAZ PARTE DA CAMPANHA DE PUBLICAÇÃO]
 This script belongs to prior exploratory benchmark runs and is archived for historical
-transparency. It is NOT part of the peer-reviewed SoftwareX publication campaign pipeline.
+transparency. It is NOT part of the peer-reviewed Benchmark publication campaign pipeline.
 """
 import json
 import math

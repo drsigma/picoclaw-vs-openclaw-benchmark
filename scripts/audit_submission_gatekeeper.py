@@ -51,7 +51,7 @@ REQUIRED_PROVENANCE_FIELDS = [
 def audit_jsonl_file(filepath: str, nominal_bw_gbs: float = 120.0) -> Dict[str, Any]:
     """Audits a single JSONL benchmark dataset for schema invariants and physical roofline bounds."""
     stats = {
-        "filepath": filepath,
+        "filepath": os.path.relpath(filepath, REPO_DIR).replace("\\", "/"),
         "total_records": 0,
         "valid_records": 0,
         "schema_violations": 0,
@@ -93,13 +93,39 @@ def audit_jsonl_file(filepath: str, nominal_bw_gbs: float = 120.0) -> Dict[str, 
                 stats["schema_violations"] += 1
                 stats["errors"].append(f"Line {line_no}: Missing provenance fields: {missing}")
 
-            # 2. HTTP Status == 200
+            # 2. HTTP Status == 200 (unless explicit fault injection ablation)
             http_st = rec.get("http_status")
-            if http_st != 200:
+            if http_st != 200 and not rec.get("is_fault_injection", False):
                 stats["http_status_errors"] += 1
                 stats["errors"].append(f"Line {line_no}: Invalid http_status ({http_st}), expected 200")
 
-            # 3. Accumulate ITL per condition cell for Roofline check
+            # 3. Token invariants & finish reason (for LLM agent trials)
+            is_micro_ablation = "iterations" in rec or "total_ops" in rec
+            ptok = rec.get("prompt_tokens")
+            ctok = rec.get("completion_tokens", rec.get("output_tokens"))
+            fr = rec.get("finish_reason")
+            if not is_micro_ablation:
+                if ptok is None or int(ptok) <= 0:
+                    stats["schema_violations"] += 1
+                    stats["errors"].append(f"Line {line_no}: Missing or non-positive prompt_tokens: {ptok}")
+                if ctok is None or int(ctok) <= 0:
+                    stats["schema_violations"] += 1
+                    stats["errors"].append(f"Line {line_no}: Missing or non-positive completion_tokens: {ctok}")
+            if fr and fr not in ("stop", "tool_calls", "length"):
+                stats["schema_violations"] += 1
+                stats["errors"].append(f"Line {line_no}: Invalid finish_reason: {fr}")
+
+            # 4. Physical plausibility check
+            t_task = float(rec.get("t_task_ms", rec.get("t_total_ms", rec.get("t_exec_ms", 0.0))))
+            t_neural = float(rec.get("t_neural_ms", rec.get("prompt_ms", 0.0)))
+            if t_task <= 0.0:
+                stats["schema_violations"] += 1
+                stats["errors"].append(f"Line {line_no}: Non-positive task latency ({t_task})")
+            if rec.get("is_mocked", False) or rec.get("simulated", False):
+                stats["schema_violations"] += 1
+                stats["errors"].append(f"Line {line_no}: Rejected simulated or mocked execution record")
+
+            # 5. Accumulate ITL per condition cell for Roofline check
             itl_ms = rec.get("itl_ms", 0.0)
             if itl_ms > 0:
                 cell_key = (rec.get("workload"), rec.get("agent_key") or rec.get("runtime"))

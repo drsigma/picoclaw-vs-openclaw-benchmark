@@ -5,9 +5,9 @@
     "OpenMCP (Model Context Protocol Specification & Test Suite)",
     "DynamicMCPBench (Dynamic Multi-Tool Telemetry & Invariant Checking)"
   ],
-  "audit_timestamp_iso": "2026-11-13T18:26:18.246363+00:00",
+  "audit_timestamp_iso": "2026-11-23T02:53:47.762088+00:00",
   "total_datasets_audited": 7,
-  "total_records_verified": 3774,
+  "total_records_verified": 4269,
   "overall_ready_for_submission": true,
   "gatekeeper_verdict": "CERTIFIED_VALID",
   "invariants_enforced": [
@@ -18,31 +18,31 @@
   ],
   "datasets": [
     {
-      "filepath": "/Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/raw_trials.jsonl",
-      "total_records": 660,
-      "valid_records": 660,
+      "filepath": "results/publication_campaign/raw_trials.jsonl",
+      "total_records": 825,
+      "valid_records": 825,
       "schema_violations": 0,
       "http_status_errors": 0,
       "roofline_violations": 0,
-      "max_active_bw_gbs": 102.61,
+      "max_active_bw_gbs": 101.14,
       "is_compliant": true,
       "errors": [],
-      "sha256": "596fff28f29cdea03c1ce19698daa4ecbabb94495f0bd82e5e657036a92d9613"
+      "sha256": "9f624bd429c810fbbaa2c952b18ea718b17d42b7b8667d6419c561ec7f60ed01"
     },
     {
-      "filepath": "/Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/warm_cache_trials.jsonl",
-      "total_records": 660,
-      "valid_records": 660,
+      "filepath": "results/publication_campaign/warm_cache_trials.jsonl",
+      "total_records": 825,
+      "valid_records": 825,
       "schema_violations": 0,
       "http_status_errors": 0,
       "roofline_violations": 0,
-      "max_active_bw_gbs": 103.88,
+      "max_active_bw_gbs": 97.97,
       "is_compliant": true,
       "errors": [],
-      "sha256": "6e9156ffd3fbf0a424924c3c7b4710174f00f6b9fb363cfb2d0b0af73c5ad192"
+      "sha256": "bd2854fd866a1d1b963ef7cfe8e659e6c68b59794c1cf6c3ac4f38952f79dea6"
     },
     {
-      "filepath": "/Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/prefill_ablation.jsonl",
+      "filepath": "results/publication_campaign/prefill_ablation.jsonl",
       "total_records": 528,
       "valid_records": 528,
       "schema_violations": 0,
@@ -51,10 +51,10 @@
       "max_active_bw_gbs": 0.0,
       "is_compliant": true,
       "errors": [],
-      "sha256": "e22b701029232e65e72c2a4070b7f9f440b846efab3355a5897576398f677c14"
+      "sha256": "ce1a12908ef22c0c40b1ff42c3a17a0914779234d9e81e003c7cf2d1b2ee9f5f"
     },
     {
-      "filepath": "/Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
+      "filepath": "results/publication_campaign/uma_energy_bandwidth_trials.jsonl",
       "total_records": 120,
       "valid_records": 120,
       "schema_violations": 0,
@@ -63,43 +63,43 @@
       "max_active_bw_gbs": 0.0,
       "is_compliant": true,
       "errors": [],
-      "sha256": "ed7828e014855b06d2c8b0974a34e6e38dad9b5238c4a8161ecf76fb879b18aa"
+      "sha256": "960dbbe9c568134175a5c049a3e5f936bcebeb69c93777c4dc7037c6a58a31e3"
     },
     {
-      "filepath": "/Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/inter_session_trials.jsonl",
-      "total_records": 660,
-      "valid_records": 660,
+      "filepath": "results/publication_campaign/inter_session_trials.jsonl",
+      "total_records": 825,
+      "valid_records": 825,
       "schema_violations": 0,
       "http_status_errors": 0,
       "roofline_violations": 0,
-      "max_active_bw_gbs": 100.9,
+      "max_active_bw_gbs": 97.8,
       "is_compliant": true,
       "errors": [],
-      "sha256": "3a201141f851aea5f0403b8e4a933fee5779619a9b0fc6c87547dabdce16ccf0"
+      "sha256": "ca99fe1748f8e4c171f4a180e258c183797aae3291f7e0d3e44433c77e106ba0"
     },
     {
-      "filepath": "/Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/tool_rag_mitigation_trials.jsonl",
+      "filepath": "results/publication_campaign/tool_rag_mitigation_trials.jsonl",
       "total_records": 1056,
       "valid_records": 1056,
       "schema_violations": 0,
       "http_status_errors": 0,
       "roofline_violations": 0,
-      "max_active_bw_gbs": 107.62,
+      "max_active_bw_gbs": 101.78,
       "is_compliant": true,
       "errors": [],
-      "sha256": "05d0d549f3b798b7a5613dbfdd431d9a5a8eb16513e47fb9f2d799ce342ca9ca"
+      "sha256": "3631f7843cef17e9a6c53fd2fc0970164c10ec090433d1f034e4d3238e35dc22"
     },
     {
-      "filepath": "/Users/rafael/.gemini/antigravity/scratch/picoclaw-vs-openclaw-benchmark/results/publication_campaign/kv_cache_thrashing_trials.jsonl",
+      "filepath": "results/publication_campaign/kv_cache_thrashing_trials.jsonl",
       "total_records": 90,
       "valid_records": 90,
       "schema_violations": 0,
       "http_status_errors": 0,
       "roofline_violations": 0,
-      "max_active_bw_gbs": 102.43,
+      "max_active_bw_gbs": 98.37,
       "is_compliant": true,
       "errors": [],
-      "sha256": "2347a6aae0223a32b0c4d7a63eb05a777e4717ef5e7026173b92c7a6edad009e"
+      "sha256": "48532324bcb7ad5c0d072c80571480e308dfdf48029312cded4677f47bbd3081"
     }
   ]
 }

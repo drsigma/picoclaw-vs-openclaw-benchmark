@@ -303,7 +303,7 @@ def build_trial_record(
         "quality_score": worker_res.get("quality_score", NA if (workload != "W5" or adapter.agent_key != "python_native") else None),
         "evaluation_reasoning": worker_res.get("evaluation_reasoning", NA if (workload != "W5" or adapter.agent_key != "python_native") else None),
         "proc_counters_applicable": orch_proc,
-        "proc_instructions": NA,  # Windows user-mode PMU restricted (Zero-Mock)
+        "proc_instructions": NA,  # Windows user-mode PMU restricted (Explicit-NA)
         "proc_cycles": worker_res.get("proc_cycles") if orch_proc else NA,
         "proc_peak_phys_mb": worker_res.get("proc_peak_phys_mb") if orch_proc else 0.0,
         "proc_rss_mb": worker_res.get("proc_rss_mb") if orch_proc else 0.0,
@@ -571,11 +571,18 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
 
 
 def main() -> None:
-    if platform.system() != "Windows":
+    is_dry_or_help = any(arg in sys.argv for arg in ["--dry-run", "-h", "--help"])
+    if platform.system() != "Windows" and not is_dry_or_help:
         print("FATAL: Windows Intel Graphics runner must execute on Windows.", file=sys.stderr)
         sys.exit(1)
 
     ap = argparse.ArgumentParser(description="Windows Intel Graphics Dedicated Benchmark Campaign Runner")
+    ap.add_argument("--smoke-test", action="store_true", help="Fast smoke test execution (reps=1, warmups=0)")
+    ap.add_argument("--quick", action="store_true", help="Quick execution mode (reps=5, warmups=1)")
+    ap.add_argument("--full", action="store_true", help="Full confirmatory campaign execution (reps=30, warmups=3)")
+    ap.add_argument("--dry-run", action="store_true", help="Dry run matrix verification without hardware execution")
+    ap.add_argument("--resume", action="store_true", help="Resume interrupted campaign")
+    ap.add_argument("--invert-blocks", action="store_true", help="Invert block execution order for Session 2 counterbalancing")
     ap.add_argument("--reps", type=int, default=30)
     ap.add_argument("--warmups", type=int, default=3)
     ap.add_argument("--ngl", type=int, default=None, help="Override -ngl (default: auto-probed)")
@@ -593,17 +600,30 @@ def main() -> None:
     ap.add_argument("--min-free-ram-mb", type=float, default=1800.0)
     ap.add_argument("--cooldown-s", type=float, default=20.0)
     ap.add_argument("--trial-timeout-s", type=float, default=480.0)
-    ap.add_argument("--dry-run", action="store_true", help="Isolated 1-rep smoke dry-run (suffix _dryrun)")
     ap.add_argument("--suffix", default="")
     args = ap.parse_args()
 
+    if args.smoke_test:
+        args.reps = 1
+        args.warmups = 0
+    elif args.quick:
+        args.reps = 5
+        args.warmups = 1
+    elif args.full:
+        args.reps = 30
+        args.warmups = 3
+
     if args.dry_run:
         args.reps = 1
-        args.warmups = 1
+        args.warmups = 0
         args.sessions = "1"
         args.suffix = "_dryrun"
-        args.inter_session_cooldown_s = 2.0
-        print("[DRY-RUN] Isolated smoke test enabled (reps=1, warmups=1, suffix=_dryrun)", flush=True)
+        args.inter_session_cooldown_s = 1.0
+        print("[DRY-RUN] Isolated verification mode enabled.", flush=True)
+        print(f"[DRY-RUN] Matrix: arms={args.arms} workloads={args.workloads} stages={args.stages} invert={args.invert_blocks}", flush=True)
+        if platform.system() != "Windows":
+            print("[DRY-RUN] Cross-platform flag and matrix parsing verified successfully on host.", flush=True)
+            return
         run_single_session(args, "_dryrun")
         print("\nDRY-RUN COMPLETE", flush=True)
         return

@@ -649,7 +649,7 @@ def run_subprocess_with_windows_counters(
             proc_rss_mb = max(proc_rss_mb, job_peak_mb)
 
     hw_stats = {
-        "proc_instructions": None,  # PMU instruction counter restricted in Windows user-mode (Zero-Mock compliance)
+        "proc_instructions": None,  # PMU instruction counter restricted in Windows user-mode (Explicit null policy)
         "proc_cycles": proc_cycles,
         "proc_billed_energy": 0,
         "proc_peak_phys_mb": max(1.0, proc_peak_mb),

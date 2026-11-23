@@ -5,7 +5,7 @@ adapters/windows_intel_graphics/validator.py
 Strict extraction-time validator and per-trial retry coordinator.
 Validates types, absence of NaN/Inf/negative metrics, token field coherence
 (tokens_cached, prompt_eval_count, eval_count, deterministic cache_hit),
-W5 quality_score bounds, and Zero-Mock / Zero-NVML compliance BEFORE writing
+W5 quality_score bounds, and Explicit-NA / Zero-NVML compliance BEFORE writing
 any record to JSONL.
 """
 from __future__ import annotations

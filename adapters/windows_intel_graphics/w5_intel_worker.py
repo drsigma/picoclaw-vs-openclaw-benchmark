@@ -6,7 +6,7 @@ Isolated W5 Real-World RAG worker (LangChain + SQLite + Governance Policy + LLM-
 for the Windows Intel Graphics adapter. Reuses the repository's canonical W5_langchain_real_world
 tools, SQLite database (analytics.db), governance_policy.txt, and evaluator.py, with:
   - Extended HTTP timeout (300s) suited for Intel HD Graphics / Haswell CPU inference
-  - Strict Zero-Mock fail-fast on HTTP != 200 (never falls back to simulated 503 responses)
+  - Strict Explicit-NA fail-fast on HTTP != 200 (never falls back to simulated 503 responses)
   - Deterministic cache_hit, tokens_cached, prompt_eval_count, eval_count, and quality_score (1-5)
 """
 from __future__ import annotations

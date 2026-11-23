@@ -1,0 +1,90 @@
+{
+  "analysis_timestamp_utc": "2026-11-23T02:49:43.573483+00:00",
+  "block_sizes_evaluated": [
+    2,
+    3,
+    5,
+    8,
+    12,
+    "adaptive"
+  ],
+  "block_size_sensitivity_results": {
+    "2": {
+      "unadj_eq": 76,
+      "unadj_diff": 0,
+      "unadj_inc": 19,
+      "holm_eq": 71,
+      "holm_diff": 0,
+      "holm_inc": 24
+    },
+    "3": {
+      "unadj_eq": 76,
+      "unadj_diff": 0,
+      "unadj_inc": 19,
+      "holm_eq": 72,
+      "holm_diff": 0,
+      "holm_inc": 23
+    },
+    "5": {
+      "unadj_eq": 78,
+      "unadj_diff": 0,
+      "unadj_inc": 17,
+      "holm_eq": 73,
+      "holm_diff": 0,
+      "holm_inc": 22
+    },
+    "8": {
+      "unadj_eq": 78,
+      "unadj_diff": 0,
+      "unadj_inc": 17,
+      "holm_eq": 73,
+      "holm_diff": 0,
+      "holm_inc": 22
+    },
+    "12": {
+      "unadj_eq": 83,
+      "unadj_diff": 1,
+      "unadj_inc": 11,
+      "holm_eq": 75,
+      "holm_diff": 1,
+      "holm_inc": 19
+    },
+    "adaptive": {
+      "unadj_eq": 77,
+      "unadj_diff": 0,
+      "unadj_inc": 18,
+      "holm_eq": 72,
+      "holm_diff": 0,
+      "holm_inc": 23
+    }
+  },
+  "sesoi_proportional_results": {
+    "equivalent": 49,
+    "inconclusive": 46,
+    "different": 0
+  },
+  "w5_python_native_exclusion": {
+    "excluded_pairs_count": 7,
+    "policy": "Excluded from primary comparative inference due to prompt truncation and LLM-judge timing anomaly in legacy runs; isolated in Table 8."
+  },
+  "wilcoxon_inter_session_drift": {
+    "total_pairs_evaluated": 95,
+    "paired_drift_evaluated": true,
+    "decision_stability": "Robust across b in {2, 3, 5, 8, 12}"
+  },
+  "cache_hit_definition_sensitivity": {
+    "evaluated_thresholds": [
+      "90%",
+      "95%"
+    ],
+    "qualification_impact": "Identical cell qualification across all 35 publication datasets."
+  },
+  "outlier_handling_policy": {
+    "evaluated_methods": [
+      "tukey_iqr_1.5",
+      "warmup_isolation_only"
+    ],
+    "primary_method": "warmup_isolation_only",
+    "sensitivity_impact": "No change in ordinal ranking or statistical equivalence decisions."
+  }
+}

@@ -428,34 +428,8 @@ def run_workload(tier: str, warmth: str, rss_idle: float) -> dict:
         itl_avg = itl_sum / 10.0
 
     elif tier == "W5":
-        try:
-            from W5_langchain_real_world.agent import run_w5_trial
-            return run_w5_trial(warmth=warmth)
-        except Exception:
-            t0_tool = time.monotonic()
-            pol_path = os.path.join(REPO_DIR, "W5_langchain_real_world", "data", "governance_policy.txt")
-            pol_str = ""
-            if os.path.exists(pol_path):
-                with open(pol_path, "r", encoding="utf-8") as f:
-                    pol_str = f.read()[:1000]
-            t_dispatch_total = t_cat_ms + (time.monotonic() - t0_tool) * 1000.0
-            tool_calls = 2
-            msgs = [
-                {"role": "system", "content": "You are a concise technical systems assistant."},
-                {"role": "user", "content": f"Enterprise Policy:\n{pol_str}\nCross-Domain Query: Identify latency SLA thresholds and compliance quarantine actions."},
-            ]
-            tn, p_ms, pred_ms, ttft, itl, ptok, ctok, c_tok, unc_tok, fr, hstatus, _ = call_llama_stream(msgs, tool_catalog, 256)
-            t_neural_total = tn
-            total_prompt_ms = p_ms
-            total_predicted_ms = pred_ms
-            ttft_first = ttft
-            itl_avg = itl
-            total_prompt_tokens = ptok
-            total_completion_tokens = ctok
-            total_cached_tokens = c_tok
-            total_uncached_prompt_tokens = unc_tok
-            last_finish_reason = fr
-            last_http_status = hstatus
+        from W5_langchain_real_world.agent import run_w5_trial
+        return run_w5_trial(warmth=warmth)
 
     if total_prompt_tokens <= 0 or total_completion_tokens <= 0:
         raise RuntimeError(f"FATAL: Validation failed - prompt_tokens ({total_prompt_tokens}) <= 0 or completion_tokens ({total_completion_tokens}) <= 0")

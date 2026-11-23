@@ -126,8 +126,23 @@ def update_manifest() -> int:
         "audit_export/mbb_coverage_and_tost_power.csv",
         "audit_export/linux_throttling_stratification.csv",
         "audit_export/inter_session_drift_test.csv",
+        "audit_export/sensitivity_analysis_summary.json",
+        "audit_export/V2_READINESS_MATRIX.md",
         "benchmark/linux_x86_64_telemetry_adapter.py",
         "benchmark/windows_x86_64_telemetry_adapter.py",
+        "benchmark/protocol_freeze.py",
+        "benchmark/workload_contracts.py",
+        "benchmark/environment_manifest.py",
+        "protocol/protocol_v2.0.json",
+        "docs/PROTOCOL_V2.md",
+        "docs/TELEMETRY_ARCHITECTURE.md",
+        "docs/REPRODUCIBILITY_INDEPENDENT.md",
+        "scripts/run_linux_campaign.sh",
+        "scripts/run_windows_campaign.ps1",
+        "scripts/run_darwin_campaign.sh",
+        "tests/test_no_hardcoded_metrics_or_mocks.py",
+        "tests/test_protocol_v2_and_contracts.py",
+        "tests/test_campaign_execution_modes.py",
     ]
     # Dynamically include all raw quad-platform session JSONL datasets and consolidated tables
     import glob as _glob
@@ -235,7 +250,60 @@ def verify_manifest() -> int:
         return 1
 
 
+def pre_flight_check() -> int:
+    """
+    Executes comprehensive pre-flight verification:
+    1. Verifies all files in manifest exist and hashes match.
+    2. Validates execution permissions of scripts and binaries.
+    3. Checks protocol freeze and core configuration invariants.
+    Returns 0 on complete compliance, 1 on any failure.
+    """
+    print("========================================================================")
+    print(" 🚀 [PRE-FLIGHT VERIFIER] Comprehensive Pre-Flight & Permission Check")
+    print("========================================================================")
+
+    res = verify_manifest()
+    if res != 0:
+        print("❌ [PRE-FLIGHT FAILED] Manifest integrity check failed.", file=sys.stderr)
+        return 1
+
+    permission_errors = []
+    if os.name != "nt":
+        # Check execution permissions on critical binaries and scripts
+        exec_targets = [
+            "benchmark/picoclaw_orch",
+            "benchmark/picoclaw_orch_linux",
+            "benchmark/python_orch.py",
+            "scripts/reproduce_quad_platform_analysis.py",
+            "scripts/verify_manifest.py",
+            "scripts/audit_submission_gatekeeper.py",
+        ]
+        for rel in exec_targets:
+            abs_p = os.path.join(REPO_DIR, rel)
+            if os.path.exists(abs_p):
+                if not os.access(abs_p, os.X_OK):
+                    permission_errors.append(f"Missing executable permission (chmod +x): {rel}")
+
+    if permission_errors:
+        print("\n❌ [PERMISSION ERRORS]:", file=sys.stderr)
+        for err in permission_errors:
+            print(f"   - {err}", file=sys.stderr)
+        return 1
+
+    # Check protocol file
+    proto_path = os.path.join(REPO_DIR, "protocol", "protocol_v2.0.json")
+    if not os.path.exists(proto_path):
+        print("❌ [PRE-FLIGHT FAILED] Missing protocol/protocol_v2.0.json", file=sys.stderr)
+        return 1
+
+    print("✅ [PRE-FLIGHT PASSED] All files verified, permissions confirmed, protocol present.")
+    print("========================================================================\n")
+    return 0
+
+
 if __name__ == "__main__":
     if "--update" in sys.argv:
         sys.exit(update_manifest())
+    if "--pre-flight" in sys.argv:
+        sys.exit(pre_flight_check())
     sys.exit(verify_manifest())

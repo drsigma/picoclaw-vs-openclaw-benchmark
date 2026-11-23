@@ -24,7 +24,7 @@ from typing import Any
 
 import psutil
 
-# Explicit Zero-Mock constant for hardware counters unavailable in Windows user-mode on Intel iGPU
+# Explicit Explicit-NA constant for hardware counters unavailable in Windows user-mode on Intel iGPU
 NA = "N/A"
 
 # Win32 ExecutionState flags for anti-sleep protection
@@ -155,7 +155,7 @@ def run_subprocess_with_intel_win_counters(
     """
     Run a worker subprocess encapsulated in a Win32 Job Object and extract empirical
     QueryProcessCycleTime, GetProcessMemoryInfo (PeakWorkingSetSize), and PageFaultCount.
-    Hardware retired instructions (PMU) are explicitly declared 'N/A' in user-mode (Zero-Mock).
+    Hardware retired instructions (PMU) are explicitly declared 'N/A' in user-mode (Explicit-NA).
     """
     cmd = list(cmd)
     if cmd and os.path.basename(cmd[0]).lower() in ("py.exe", "py"):
@@ -434,7 +434,7 @@ class IntelGraphicsThermalAndLoadMonitor:
             thermal_source = "LibreHardwareMonitor_WMI_CPU_Package"
         else:
             # ACPI TZ00/TZ01 on desktop Z97 boards are motherboard zones, NOT CPU package diode.
-            # Report ACPI zones transparently and keep cpu_pkg_temp_c as 'N/A' (Zero-Mock).
+            # Report ACPI zones transparently and keep cpu_pkg_temp_c as 'N/A' (Explicit-NA).
             cpu_pkg_temp_c = NA
             thermal_source = "ACPI_ThermalZoneInformation_motherboard_only"
 
@@ -561,7 +561,7 @@ class IntelGraphicsThermalAndLoadMonitor:
             "throttle_delta_events": active_throttle_delta,
             "clock_throttle_detected": clock_throttled,
             "thermal_throttled": thermal_throttled,
-            # Zero-Mock explicit 'N/A' fields for metrics unavailable on Intel HD Graphics user-mode
+            # Explicit-NA explicit 'N/A' fields for metrics unavailable on Intel HD Graphics user-mode
             "energy_cpu_pkg_j": energy_cpu_pkg_j,
             "energy_gpu_j": NA,
             "energy_total_j": NA,

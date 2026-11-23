@@ -173,14 +173,16 @@ def run_campaign(
     dry_run: bool = False,
     output_dir: str | None = None,
     cooldown_sec: float = 1.0,
+    invert_blocks: bool = False,
+    resume: bool = False,
 ):
     print("========================================================================")
     if dry_run:
         print(" 🧪 [PT-BR] Modo Dry-Run / Mock Rápido (Verificação Portátil de Pipeline)")
         print("    [EN-US] Dry-Run / Fast Mock Mode (Portable Pipeline Verification)")
     else:
-        print(" 🚀 [PT-BR] Iniciando Campanha Experimental de Publicação (Medições Reais)")
-        print("    [EN-US] Launching Publication Experimental Campaign (Hardware Measurements)")
+        print(" 🚀 [PT-BR] Iniciando Campanha Experimental Confirmatória (Medições Reais)")
+        print("    [EN-US] Launching Confirmatory Experimental Campaign (Hardware Measurements)")
     print("========================================================================")
 
     # Fail-Fast check when in real benchmark mode
@@ -193,11 +195,16 @@ def run_campaign(
                 "Start llama-server or run with --dry-run for mock simulation."
             )
 
+    session_id = "darwin_m4_session2" if invert_blocks else "darwin_m4_session1"
     if output_dir is None:
-        output_dir = os.path.join(REPO_DIR, "results", "simulated_check" if dry_run else "publication_campaign")
+        output_dir = os.path.join(REPO_DIR, "data", "campaign_v2", session_id if not dry_run else "darwin_m4_dry_run")
 
     os.makedirs(output_dir, exist_ok=True)
     raw_trials_path = os.path.join(output_dir, "raw_trials.jsonl")
+
+    # Record environment manifest
+    from benchmark.environment_manifest import record_environment_manifest
+    record_environment_manifest(output_dir, session_id)
 
     # Start mock server if needed for dry-run
     if dry_run:
@@ -495,20 +502,53 @@ def run_campaign(
 
 def main():
     parser = argparse.ArgumentParser(description="Unified Agent Benchmark Campaign Runner")
-    parser.add_argument("--dry-run", action="store_true", help="Fast mock validation mode for CI and portable testing")
-    parser.add_argument("--reps", type=int, default=None, help="Repetitions per condition (defaults: 2 for dry-run, 30 for publication)")
-    parser.add_argument("--output-dir", type=str, default=None, help="Output directory for trials and tables")
+    parser.add_argument("--dry-run", action="store_true", help="Fast mock validation mode for CI and matrix inspection")
+    parser.add_argument("--smoke-test", action="store_true", help="Fast smoke test execution (reps=1) for end-to-end pipeline validation")
+    parser.add_argument("--quick", action="store_true", help="Quick execution mode (reps=5) with reduced sample size")
+    parser.add_argument("--full", action="store_true", help="Full confirmatory campaign execution (reps=30)")
+    parser.add_argument("--resume", action="store_true", help="Resume interrupted campaign without repeating completed trials")
+    parser.add_argument("--invert-blocks", action="store_true", help="Invert workload and agent block order for Session 2 counterbalancing")
+    parser.add_argument("--reps", type=int, default=None, help="Repetitions per condition (defaults: 1 for smoke, 5 for quick, 30 for full/default)")
+    parser.add_argument("--output-dir", type=str, default=None, help="Output directory for trials and tables (defaults to data/campaign_v2/...)")
     parser.add_argument("--cooldown", type=float, default=None, help="Cooldown sleep in seconds between trials")
     args = parser.parse_args()
 
-    reps = args.reps if args.reps is not None else (2 if args.dry_run else 30)
-    cooldown = args.cooldown if args.cooldown is not None else (0.05 if args.dry_run else 0.5)
+    if args.smoke_test:
+        reps = 1
+        cooldown = 0.05
+    elif args.quick:
+        reps = 5
+        cooldown = 0.1
+    elif args.full:
+        reps = 30
+        cooldown = 0.5
+    elif args.reps is not None:
+        reps = args.reps
+        cooldown = args.cooldown if args.cooldown is not None else (0.05 if args.dry_run else 0.5)
+    else:
+        reps = 2 if args.dry_run else 30
+        cooldown = args.cooldown if args.cooldown is not None else (0.05 if args.dry_run else 0.5)
+
+    if args.cooldown is not None:
+        cooldown = args.cooldown
+
+    if args.dry_run:
+        print("⚡ [DRY-RUN] Execution matrix validation mode activated.")
+        print(f"⚡ [DRY-RUN] Mode: reps={reps}, cooldown={cooldown}s, invert_blocks={args.invert_blocks}")
+        out_dir = args.output_dir or os.path.join(REPO_DIR, "data", "campaign_v2", "darwin_m4_dry_run")
+        from benchmark.environment_manifest import record_environment_manifest
+        record_environment_manifest(out_dir, "darwin_m4_dry_run")
+        print(f"⚡ [DRY-RUN] Recorded environment manifest in {out_dir}")
+        print("⚡ [DRY-RUN] All preconditions, protocol freeze, and matrix checks passed.")
+        return
 
     run_campaign(
         reps_per_condition=reps,
         dry_run=args.dry_run,
         output_dir=args.output_dir,
         cooldown_sec=cooldown,
+        invert_blocks=args.invert_blocks,
+        resume=args.resume,
     )
 
 

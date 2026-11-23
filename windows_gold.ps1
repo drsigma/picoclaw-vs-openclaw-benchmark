@@ -1,10 +1,10 @@
 ﻿<#
 .SYNOPSIS
-    windows_gold.ps1 - Master Reproduction & Gold Run Orchestrator for Windows 11 x86_64.
-    Faithful cross-platform port of reproduce_linux_gold.sh with 100% schema parity.
+    windows_gold.ps1 - Master Reproduction Orchestrator for Windows 11 x86_64.
+    Cross-platform port of Linux runner with full schema parity.
 
 .DESCRIPTION
-    Executes the standard IEEE/ACM replication campaign on Windows 11:
+    Executes standard replication campaign on Windows 11:
       1. Environmental quiescence & background noise elimination (power, updates, Defender).
       2. Native toolchain check (.venv_win, picoclaw_orch_windows.exe).
       3. Session 1 execution (clean_run_windows_session_1).
@@ -43,7 +43,7 @@ if ($DryRun) {
 }
 
 Write-Host "========================================================================" -ForegroundColor Cyan
-Write-Host " 🚀 INICIANDO REPRODUÇÃO EXPERIMENTAL PADRÃO OURO (WINDOWS 11 x86_64)" -ForegroundColor Cyan
+Write-Host " 🚀 INICIANDO REPRODUÇÃO EXPERIMENTAL CONFIRMATÓRIA (WINDOWS 11 x86_64)" -ForegroundColor Cyan
 Write-Host "========================================================================" -ForegroundColor Cyan
 Write-Host " Plataforma: Windows 11 x86_64 (Dell G15, RTX 3050)"
 Write-Host " Repositório: $ScriptDir"
@@ -231,7 +231,7 @@ try {
     }
 
     Write-Host "`n========================================================================" -ForegroundColor Green
-    Write-Host "✅ REPRODUÇÃO PADRÃO OURO WINDOWS CONCLUÍDA COM SUCESSO!" -ForegroundColor Green
+    Write-Host "✅ REPRODUÇÃO EXPERIMENTAL WINDOWS CONCLUÍDA COM SUCESSO!" -ForegroundColor Green
     Write-Host "   - Sessão 1: reproducibility\clean_run_windows_session_1\" -ForegroundColor Green
     if (-not $SkipSession2) {
         Write-Host "   - Sessão 2: reproducibility\clean_run_windows_session_2\" -ForegroundColor Green

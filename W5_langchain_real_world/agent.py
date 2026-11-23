@@ -238,30 +238,16 @@ def run_w5_trial(warmth: str = "Warm", max_tokens: int = 256) -> Dict[str, Any]:
                             finish_reason = str(fr)
                         delta = c0.get("delta", {})
                         content = delta.get("content")
-                        tool_calls = delta.get("tool_calls")
+                        tool_calls_chunk = delta.get("tool_calls")
                         if content:
                             out_chunks.append(content)
-                        if (content or tool_calls) and first_chunk:
+                        if (content or tool_calls_chunk) and first_chunk:
                             ttft_ms = (time.monotonic() - t0_neural) * 1000.0
                             first_chunk = False
-                except Exception:
+                except Exception as e:
                     pass
     except Exception as e:
-        # If llama-server is offline, generate simulated synthesis for testing
-        http_status = 503
-        out_chunks.append(
-            "Executive Audit Summary:\n"
-            "1. Budget Overrun: Alpha-Neural-Gateway spent $162,000 against $150,000 budget (+8.0%), exceeding the 5% threshold.\n"
-            "2. SLA Violation: Beta-Vector-Search exhibited P99 latency of 135.8ms, violating the Tier-2 limit of 120ms.\n"
-            "3. Compliance Action: Gamma-Tool-Router has 1 active violation and is marked NON_COMPLIANT; quarantine required."
-        )
-        total_prompt_tokens = 512
-        total_completion_tokens = 110
-        total_cached_tokens = 450 if warmth == "Warm" else 0
-        total_uncached_tokens = total_prompt_tokens - total_cached_tokens
-        prompt_ms = 45.0
-        predicted_ms = 350.0
-        ttft_ms = 50.0
+        raise RuntimeError(f"FATAL: W5 llama-server call failed with error: {e}") from e
 
     t_neural_ms = (prompt_ms + predicted_ms) if has_server_timings else ((time.monotonic() - t0_neural) * 1000.0)
     if total_prompt_tokens == 0:
@@ -271,10 +257,7 @@ def run_w5_trial(warmth: str = "Warm", max_tokens: int = 256) -> Dict[str, Any]:
 
     agent_output = "".join(out_chunks)
 
-    # 4. Invoke LLM-as-a-judge quality evaluator
-    eval_res = evaluate_quality(agent_output)
-    quality_score = eval_res.get("quality_score", 3)
-
+    # Calculate task timings BEFORE offline LLM judge evaluation so judge latency does NOT pollute T_orch
     t_task_ms = (time.monotonic() - t_start) * 1000.0
     t_orch_ms = max(0.0, t_task_ms - t_neural_ms)
     phi_orch = (t_orch_ms / t_task_ms * 100.0) if t_task_ms > 0 else 0.0
@@ -288,6 +271,12 @@ def run_w5_trial(warmth: str = "Warm", max_tokens: int = 256) -> Dict[str, Any]:
     if ttft_ms <= 0.0:
         ttft_ms = prompt_ms if prompt_ms > 0.0 else max(1.0, (time.monotonic() - t0_neural) * 1000.0)
     itl_ms = max(0.01, (t_neural_ms - ttft_ms) / float(total_completion_tokens - 1)) if total_completion_tokens > 1 else max(0.01, t_neural_ms / max(1, total_completion_tokens))
+
+    # 4. Invoke LLM-as-a-judge quality evaluator post-trial (decoupled from orchestrator overhead)
+    t_eval0 = time.monotonic()
+    eval_res = evaluate_quality(agent_output)
+    eval_judge_ms = (time.monotonic() - t_eval0) * 1000.0
+    quality_score = eval_res.get("quality_score", 3)
 
     return {
         "architecture": "LangChain Real-World Agent",

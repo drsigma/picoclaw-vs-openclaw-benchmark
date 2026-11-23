@@ -403,23 +403,33 @@ def stage_main(ctx: Ctx, regime: str, cache: bool, out_name: str, arms: list[str
     os.environ["BENCH_CACHE_PROMPT"] = "true" if cache else "false"
     ctx.cache_prompt = cache
     n, w = ctx.args.reps, ctx.args.warmups
-    print(f"\n=== {regime}: arms={arms} reps={n} warmups={w} cache_prompt={cache} ===", flush=True)
+    
+    workload_seq = list(reversed(WORKLOADS)) if getattr(ctx.args, "invert_blocks", False) else list(WORKLOADS)
+    arms_seq = list(reversed(arms)) if getattr(ctx.args, "invert_blocks", False) else list(arms)
+    print(f"\n=== {regime}: arms={arms_seq} reps={n} warmups={w} cache_prompt={cache} invert={getattr(ctx.args, 'invert_blocks', False)} ===", flush=True)
+    
     if not cache:
-        for wl in WORKLOADS:
-            for ak in arms:
+        for wl in workload_seq:
+            for ak in arms_seq:
                 for r in range(1, w + 1):
                     if (ak, wl, r, True) not in done:
                         run_trial(ctx, ak, wl, r, True, regime, out)
         rng = random.Random(2026)
         for rep in range(1, n + 1):
-            block = [(ak, wl) for ak in arms for wl in WORKLOADS]
-            rng.shuffle(block)
+            block = [(ak, wl) for ak in arms_seq for wl in workload_seq]
+            if not getattr(ctx.args, "invert_blocks", False):
+                rng.shuffle(block)
+            else:
+                block.reverse()
             for ak, wl in block:
                 if (ak, wl, rep, False) not in done:
                     run_trial(ctx, ak, wl, rep, False, regime, out)
     else:
-        conds = [(ak, wl) for ak in arms for wl in WORKLOADS]
-        random.Random(2027).shuffle(conds)
+        conds = [(ak, wl) for ak in arms_seq for wl in workload_seq]
+        if not getattr(ctx.args, "invert_blocks", False):
+            random.Random(2027).shuffle(conds)
+        else:
+            conds.reverse()
         for ak, wl in conds:
             for r in range(1, w + 1):
                 if (ak, wl, r, True) not in done:
@@ -722,7 +732,13 @@ def main() -> None:
     ap.add_argument("--reps", type=int, default=30)
     ap.add_argument("--warmups", type=int, default=3)
     ap.add_argument("--idle-sec", type=float, default=60.0)
-    ap.add_argument("--ngl", type=int, required=True)
+    ap.add_argument("--ngl", type=int, default=0, help="Number of GPU layers (0 for CPU, 99 for GPU)")
+    ap.add_argument("--smoke-test", action="store_true", help="Fast end-to-end smoke test (1 rep, 0 warmups, suffix _smoke)")
+    ap.add_argument("--quick", action="store_true", help="Quick verification (5 reps, 1 warmup)")
+    ap.add_argument("--full", action="store_true", help="Full confirmatory campaign (30 reps, 3 warmups)")
+    ap.add_argument("--dry-run", action="store_true", help="Display execution matrix and environment without running")
+    ap.add_argument("--resume", action="store_true", help="Resume from previously completed trials")
+    ap.add_argument("--invert-blocks", action="store_true", help="Invert workload and regime execution order for Session 2")
     default_model = os.environ.get("LLAMA_MODEL")
     if not default_model:
         for candidate in [
@@ -739,10 +755,47 @@ def main() -> None:
     ap.add_argument("--suffix", default="", help="namespace suffix for smoke tests (e.g. _smoke)")
     ap.add_argument("--stages", default="A,B,TOOLRAG,KV,MCP,ANALYZE")
     args = ap.parse_args()
+
+    if args.smoke_test:
+        args.reps = 1
+        args.warmups = 0
+        if not args.suffix:
+            args.suffix = "_smoke"
+        args.idle_sec = 0.5
+        args.cool_timeout_s = 5.0
+    elif args.quick:
+        args.reps = 5
+        args.warmups = 1
+        if not args.suffix:
+            args.suffix = "_quick"
+    elif args.full:
+        args.reps = 30
+        args.warmups = 3
+
     args.ctx_expected = 32768
     PATHS = Paths(args.suffix)
     for d in (PATHS.raw, PATHS.tables):
         wmakedirs(d)
+
+    # Capture environment manifest at start of campaign
+    from benchmark.environment_manifest import record_environment_manifest
+    session_tag = "S2_INVERTED" if args.invert_blocks else "S1_CANONICAL"
+    env_path = record_environment_manifest(PATHS.raw, f"{session_tag}_{ARCH_TAG}")
+    print(f"Recorded environment manifest: {env_path}", flush=True)
+
+    if args.dry_run:
+        print("=" * 80)
+        print(f"🔍 [DRY-RUN] Linux x86_64 Campaign Execution Matrix")
+        print(f"   Platform:     {ARCH_TAG}")
+        print(f"   Reps/Cell:    {args.reps} (Warmups: {args.warmups})")
+        print(f"   Model:        {args.model}")
+        print(f"   NGL:          {args.ngl}")
+        print(f"   Stages:       {args.stages}")
+        print(f"   Invert Order: {args.invert_blocks}")
+        print(f"   Destination:  {PATHS.raw}")
+        print(f"   Environment:  {env_path}")
+        print("=" * 80)
+        sys.exit(0)
 
     ctx = Ctx()
     ctx.args = args
