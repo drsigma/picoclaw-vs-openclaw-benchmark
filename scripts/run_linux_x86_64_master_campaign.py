@@ -741,9 +741,10 @@ def main() -> None:
     ap.add_argument("--invert-blocks", action="store_true", help="Invert workload and regime execution order for Session 2")
     default_model = os.environ.get("LLAMA_MODEL")
     if not default_model:
+        repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         for candidate in [
-            os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "models", "Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
-            os.path.expanduser("~/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
+            os.path.join(repo_root, "models", "Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
+            "models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
         ]:
             if os.path.exists(candidate):
                 default_model = candidate

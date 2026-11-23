@@ -15,7 +15,7 @@ Processes raw measured Linux x86_64 JSONL files and derives:
   * cross_platform_audit_report.md (100% dynamic comparison against darwin-aarch64)
   * manifest_sha256_linux_x86_64.json
 
-Strict Fail-Safe: All writes are guarded. Reads from darwin-aarch64 are strictly read-only.
+Strict Fail-Safe: All writes are guarded. Reads from darwin-aarch64 are exclusively read-only.
 Zero hardcoding: every single number, ratio, and percentage is computed from loaded arrays.
 """
 from __future__ import annotations
@@ -882,7 +882,7 @@ To ensure empirical reproducibility and avoid cross-rail conflation, we formally
 | :--- | :--- | :--- | :--- | :--- |
 | **Gross Energy ($E_{{\\text{{gross}}}}$)** | $\\int_{{0}}^{{T_{{\\text{{task}}}}}} P(t)\\,dt$ | Apple SMC (`powermetrics` current shunts) | Intel RAPL (`package-0`) + NVIDIA NVML | Entire SoC / Package + Discrete GPU during trial window |
 | **Quiescent Baseline Power ($\\bar{{P}}_{{\\text{{idle}}}}$)** | $\\frac{{1}}{{T_{{\\text{{calib}}}}}} \\int_{{0}}^{{T_{{\\text{{calib}}}}}} P_{{\\text{{idle}}}}(t)\\,dt$ | Apple SMC 60s quiescent baseline | Intel RAPL + NVML 60s quiescent baseline | Idle background drain with display off and daemons quiescent |
-| **Net Dynamic Energy ($E_{{\\text{{net}}}}$)** | $E_{{\\text{{gross}}}} - (\\bar{{P}}_{{\\text{{idle}}}} \\times T_{{\\text{{task}}}})$ | Apple SMC ($E_{{\\text{{gross}}}} - \\bar{{P}}_{{\\text{{idle}}}} \\cdot T$) | Intel RAPL + NVML ($E_{{\\text{{gross}}}} - \\bar{{P}}_{{\\text{{idle}}}} \\cdot T$) | Dynamic energy strictly attributable to task execution above idle |
+| **Net Dynamic Energy ($E_{{\\text{{net}}}}$)** | $E_{{\\text{{gross}}}} - (\\bar{{P}}_{{\\text{{idle}}}} \\times T_{{\\text{{task}}}})$ | Apple SMC ($E_{{\\text{{gross}}}} - \\bar{{P}}_{{\\text{{idle}}}} \\cdot T$) | Intel RAPL + NVML ($E_{{\\text{{gross}}}} - \\bar{{P}}_{{\\text{{idle}}}} \\cdot T$) | Dynamic energy attributable to task execution above idle |
 | **Agent Billed Energy (Mach-O)** | Thread/QoS microarchitectural accounting units | Darwin XNU `ri_billed_energy` (`RUSAGE_INFO_V4`) | N/A *(Not supported by Linux kernel)* | Process thread-weighted accounting units (uncalibrated to Joules) |
 
 *Integration Window:* Dynamic integration begins immediately before request dispatch and closes upon receipt of the terminal token stream and process termination via `wait4(2)`.
@@ -950,7 +950,7 @@ To mitigate temporal autocorrelation, thermal drift, and memory fragmentation ar
 
 > **Energy Metric Clarification (Apple SMC Mach-O Billed Energy):** The metric *Energy per Agent Cycle (Mach-O Billed Energy)* refers exclusively to the microarchitectural energy units attributed to the agent's execution threads by the Apple System Management Controller (SMC) via Darwin XNU's `RUSAGE_INFO_V4` (`ri_billed_energy`). On Linux x86_64, host energy is instead sampled at full physical hardware resolution via Intel RAPL (`energy_uj`) and NVIDIA NVML, making the Mach-O thread-billing unit not applicable (`N/A`).
 
-> **Interpretive Note (Neural Baseline Telemetry Boundary):** The values of `0.0 MB` (Peak Phys RAM) and `0` (or `N/A`) PMU cycles/instructions recorded for the `neural_baseline` condition (Direct Local LLM Baseline) in Table 1 and master summaries represent zero overhead attributed to the intermediary component according to the measurement boundary, rather than the physical zero of the complete system. The host harness isolates and meters strictly the child process orchestrator runtime overhead via `wait4(2)` (`ru_maxrss`) and `perf_event_open(2)`. Because the direct baseline dispatches requests via raw socket HTTP calls directly to `llama-server` without instantiating an intermediate agent process or runtime engine (no Go, Node.js, or Python orchestrator process is spawned), client-side orchestration latency and memory overhead are zero within this boundary. Total physical system consumption (neural tensor forward passes, GPU VRAM allocation, CUDA/Metal kernel dispatch, and background `llama-server` execution) continues to operate externally to the measured orchestrator harness.
+> **Interpretive Note (Neural Baseline Telemetry Boundary):** The values of `0.0 MB` (Peak Phys RAM) and `0` (or `N/A`) PMU cycles/instructions recorded for the `neural_baseline` condition (Direct Local LLM Baseline) in Table 1 and master summaries represent zero overhead attributed to the intermediary component according to the measurement boundary, rather than the physical zero of the complete system. The host harness isolates and meters exclusively the child process orchestrator runtime overhead via `wait4(2)` (`ru_maxrss`) and `perf_event_open(2)`. Because the direct baseline dispatches requests via raw socket HTTP calls directly to `llama-server` without instantiating an intermediate agent process or runtime engine (no Go, Node.js, or Python orchestrator process is spawned), client-side orchestration latency and memory overhead are zero within this boundary. Total physical system consumption (neural tensor forward passes, GPU VRAM allocation, CUDA/Metal kernel dispatch, and background `llama-server` execution) continues to operate externally to the measured orchestrator harness.
 
 ---
 
@@ -1038,10 +1038,10 @@ This multidimensional design isolates client-side orchestration latency ($T_{{\\
 ## 12. Systems Conformance & Data Integrity Attestation
 
 *   [x] **Zero Telemetry Mocks:** 100% of telemetry values derived from real Linux kernel sysfs, `/proc`, `perf_event_open(2)`, `wait4(2)`, Intel RAPL, NVIDIA NVML, and live `llama-server`. (Note: directory `mock_files/` contains static test payload fixtures for synthetic tool execution, not mock telemetry).
-*   [x] **Zero Data Contamination:** All Linux outputs restricted strictly to `data/linux_x86_64/`, `results/publication_campaign_linux_x86_64/`, and `data/manifest_sha256_linux_x86_64.json`. 0 bytes modified in Darwin folders.
-*   [x] **Fail-Fast Compliance:** All telemetry checks strictly fail-fast without fallbacks.
+*   [x] **Zero Data Contamination:** All Linux outputs restricted exclusively to `data/linux_x86_64/`, `results/publication_campaign_linux_x86_64/`, and `data/manifest_sha256_linux_x86_64.json`. 0 bytes modified in Darwin folders.
+*   [x] **Fail-Fast Compliance:** All telemetry checks enforce fail-fast without fallbacks.
 
-**Conformance Summary:** VERIFIED UNDER TESTBED CONSTRAINTS
+**Conformance Summary:** CONFORMANCE CONFIRMED UNDER TESTBED CONSTRAINTS
 
 ---
 

@@ -8,7 +8,7 @@ Enforces strict fail-fast validation across all benchmark campaigns:
   1. prompt_tokens > 0 and completion_tokens > 0 on every evaluated trial;
   2. Strict prompt_tokens parity across all 15-tool arms within each workload (when require_equalized_tokens=True);
   3. Non-empty finish_reason in {"stop", "tool_calls", "length"};
-  4. HTTP status strictly equal to 200;
+  4. HTTP status required to be 200;
   5. Exact total evaluated trial count (e.g. 600) and balanced per-cell count (e.g. n=30);
   6. Non-empty session_id and git_commit provenance in campaign metadata / trial records;
   7. Positive physical net energy (energy_net_above_idle_j > 0) when require_energy=True;

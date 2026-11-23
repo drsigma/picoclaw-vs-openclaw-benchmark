@@ -3,8 +3,8 @@
 adapters/windows_intel_graphics/telemetry.py
 
 Dedicated Windows Intel Graphics (iGPU / UMA Shared Memory) telemetry module.
-Zero mocks, zero NVML / nvidia-smi calls, strict 'N/A' for metrics unavailable in
-Windows user-mode, and strictly per-trial deltas (never cumulative OS counters).
+Zero mocks, zero NVML / nvidia-smi calls, explicit 'N/A' for metrics unavailable in
+Windows user-mode, and exclusively per-trial deltas (never cumulative OS counters).
 """
 from __future__ import annotations
 
@@ -368,7 +368,7 @@ class IntelGraphicsThermalAndLoadMonitor:
     """
     Per-trial delta telemetry & thermal/RAM safeguard monitor for Windows Intel Graphics.
 
-    - Computes strictly per-trial deltas (end vs start) for throttle counts, shared RAM,
+    - Computes exclusively per-trial deltas (end vs start) for throttle counts, shared RAM,
       and WDDM iGPU memory (never summing cumulative OS counters).
     - Periodically samples CPU utilization, frequency, and iGPU load during each trial.
     - Applies controlled cooldown pauses if temperature exceeds threshold, sustained
@@ -519,7 +519,7 @@ class IntelGraphicsThermalAndLoadMonitor:
         temp_throttled = bool(isinstance(temp_end, (int, float)) and temp_end >= self.cpu_temp_threshold_c)
         thermal_throttled = bool(active_throttle_delta > 0 or clock_throttled or temp_throttled)
 
-        # Energy: strictly 'N/A' unless real hardware sensor (e.g. LibreHardwareMonitor RAPL) reported Watts
+        # Energy: exclusively 'N/A' unless real hardware sensor (e.g. LibreHardwareMonitor RAPL) reported Watts
         p0, p1 = s0.get("cpu_pkg_power_w"), s1.get("cpu_pkg_power_w")
         if isinstance(p0, (int, float)) and isinstance(p1, (int, float)) and p0 > 0 and p1 > 0:
             avg_p = 0.5 * (p0 + p1)

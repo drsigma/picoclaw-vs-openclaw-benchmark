@@ -2,7 +2,7 @@
   "manifest_version": "1.0",
   "collected_at_utc": "2026-11-20T00:40:29.135731+00:00",
   "machine_role": "windows_intel_graphics_dedicated",
-  "gpu_architecture_policy": "Intel Graphics integrated GPU (UMA / shared system RAM). No discrete NVIDIA GPU present; nvidia-smi and NVML are strictly forbidden as GPU probes or primary telemetry metrics.",
+  "gpu_architecture_policy": "Intel Graphics integrated GPU (UMA / shared system RAM). No discrete NVIDIA GPU present; nvidia-smi and NVML are disallowed as GPU probes or primary telemetry metrics.",
   "dedicated_nvidia_gpu_present": false,
   "git_commit": "132b213a7058839f4779c2c354bb1e25eeaf64c2",
   "host": {

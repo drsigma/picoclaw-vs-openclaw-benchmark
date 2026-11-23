@@ -7,7 +7,7 @@
     3. Monitors process liveness, RAM, CPU clock, and thermal state continuously until real exit.
     4. Validates generated JSONL, statistics, TOST replication, and SHA-256 manifests.
     5. Performs isolated git add / commit / push on branch feat/intel-graphics-windows-adapter
-       (strictly Intel Graphics paths only; never touches Mac, Windows NVIDIA, or Linux).
+       (exclusively Intel Graphics paths only; never touches Mac, Windows NVIDIA, or Linux).
 #>
 [CmdletBinding()]
 param(

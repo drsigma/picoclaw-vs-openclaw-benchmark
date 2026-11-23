@@ -9,6 +9,11 @@ set -euo pipefail
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${REPO_DIR}"
 
+MODE="${1:---full}"
+if [ "${MODE}" = "--dry-run" ] || [ "${MODE}" = "--smoke-test" ] || [ "${MODE}" = "--quick" ]; then
+    exec ./scripts/run_darwin_campaign.sh "$@"
+fi
+
 echo "=================================================================="
 echo " 🍏 DARWIN BENCHMARK CAMPAIGN (APPLE SILICON M4 - METAL/UMA) 🍏 "
 echo "=================================================================="

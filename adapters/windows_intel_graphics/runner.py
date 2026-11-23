@@ -586,7 +586,7 @@ def main() -> None:
     ap.add_argument("--reps", type=int, default=30)
     ap.add_argument("--warmups", type=int, default=3)
     ap.add_argument("--ngl", type=int, default=None, help="Override -ngl (default: auto-probed)")
-    ap.add_argument("--n-ctx", type=int, default=32768, help="Context window (32768 for strict cross-platform parity)")
+    ap.add_argument("--n-ctx", type=int, default=32768, help="Context window (32768 for uniform cross-platform parity)")
     ap.add_argument("--threads", type=int, default=4, help="CPU threads for llama-server (4 physical cores on i7-4790K)")
     ap.add_argument("--model", default=DEFAULT_MODEL)
     ap.add_argument("--tools-root", default=r"C:\bench_intel\tools")
@@ -606,6 +606,8 @@ def main() -> None:
     if args.smoke_test:
         args.reps = 1
         args.warmups = 0
+        if not args.suffix:
+            args.suffix = "_smoke"
     elif args.quick:
         args.reps = 5
         args.warmups = 1

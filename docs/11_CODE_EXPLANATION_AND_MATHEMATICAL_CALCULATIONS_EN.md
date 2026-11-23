@@ -186,10 +186,10 @@ $$\lambda_U(k) = \frac{1}{2} \chi^2_{2(k+1), \, 1 - \alpha/2}$$
 
 Where:
 * $\chi^2_{\nu, p}$ denotes the Chi-Square quantile function (`scipy.stats.chi2.ppf`) with $\nu$ degrees of freedom at probability $p$.
-* For $k = 0$, the lower bound is strictly $\lambda_L(0) = 0$.
+* For $k = 0$, the lower bound is $\lambda_L(0) = 0$.
 
 #### Poisson Empirical Assertiveness
-The empirical assertiveness represents the percentage of sampling windows where observed event count $k_w$ falls strictly inside Garwood's confidence bounds:
+The empirical assertiveness represents the percentage of sampling windows where observed event count $k_w$ falls inside Garwood's confidence bounds:
 
 $$\text{Assertiveness} = \left( \frac{1}{W} \sum_{w=1}^{W} \mathbb{I}\Big( k_w \in [\lambda_{L,w}, \lambda_{U,w}] \Big) \right) \times 100\%$$
 

@@ -124,5 +124,5 @@ open figures/fig8_three_campaigns_reproducibility.png
 
 ### 6. The 3 Key Takeaways for Examination Presentations
 * *"We algebraically separated neural inference from orchestrator runtime latency: Go incurs less than 1 ms overhead, whereas Node.js incurs tens to hundreds of milliseconds."*
-* *"Testing was physically reproduced 5 times on the bare-metal machine, proving cross-campaign variance is under 2.5% (strictly invariant)."*
+* *"Testing was physically reproduced 5 times on the bare-metal machine, proving cross-campaign variance is under 2.5% (invariant)."*
 * *"For edge deployment and background assistant agents, PicoClaw in Go is the superior engineering architecture."*

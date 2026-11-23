@@ -24,8 +24,8 @@ from benchmark.protocol_invariants import validate_campaign_invariants  # noqa: 
 def cliffs_delta(lst1: list[float], lst2: list[float]) -> float:
     """
     Compute Cliff's Delta non-parametric effect size d in [-1, 1].
-    - d = +1.0: lst1 is strictly greater than lst2 in all pairwise comparisons.
-    - d = -1.0: lst1 is strictly smaller than lst2 in all pairwise comparisons.
+    - d = +1.0: lst1 is greater than lst2 in all pairwise comparisons.
+    - d = -1.0: lst1 is smaller than lst2 in all pairwise comparisons.
     - d = 0.0: No stochastic dominance.
     """
     n1, n2 = len(lst1), len(lst2)

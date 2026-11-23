@@ -126,7 +126,7 @@ $out | ConvertTo-Json -Depth 6
         "machine_role": "windows_intel_graphics_dedicated",
         "gpu_architecture_policy": (
             "Intel Graphics integrated GPU (UMA / shared system RAM). "
-            "No discrete NVIDIA GPU present; nvidia-smi and NVML are strictly forbidden "
+            "No discrete NVIDIA GPU present; nvidia-smi and NVML are disallowed "
             "as GPU probes or primary telemetry metrics."
         ),
         "dedicated_nvidia_gpu_present": has_nvidia_gpu,
@@ -233,7 +233,7 @@ def save_machine_manifest(out_dir: str, repo_dir: str | None = None) -> tuple[st
         f"CPU               : {m['cpu']['name']} ({m['cpu']['physical_cores']}C/{m['cpu']['logical_processors']}T @ {m['cpu']['max_clock_mhz']} MHz)",
         f"RAM               : {m['memory']['total_usable_gb']} GB usable (Shared with Intel iGPU)",
         f"Primary GPU       : {m['gpu']['primary_name']} | Driver: {m['gpu']['driver_version']} | UMA Shared Memory",
-        f"NVIDIA dGPU       : {m['dedicated_nvidia_gpu_present']} (nvidia-smi / NVML strictly disabled)",
+        f"NVIDIA dGPU       : {m['dedicated_nvidia_gpu_present']} (nvidia-smi / NVML disabled)",
         f"OS / Kernel       : {m['os']['caption']} {m['os']['display_version']} Build {m['os']['build']}.{m['os']['ubr']} (Kernel {m['os']['kernel_version']})",
         f"Active Power Plan : {m['power_scheme']}",
         f"Git Commit        : {m['git_commit']}",

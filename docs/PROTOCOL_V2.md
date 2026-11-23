@@ -2,7 +2,7 @@
 
 **Protocol Version:** 2.0.0  
 **Frozen Status:** Frozen (Immutable)  
-**Protocol Hash (SHA-256):** `2aef611c7be0e2e77e3cc0f30879962221e2484fbe8d3a1db103d86628f53c63`  
+**Protocol Hash (SHA-256):** `f195d5ed67f8606e9d6ef9c1176049702e9d9b221ebc62817ccc34bd379b456f`  
 **Author:** Rafael Paniccia Cassetta (UFABC)  
 **Repository:** `https://github.com/drsigma/picoclaw-vs-openclaw-benchmark`  
 
@@ -12,8 +12,8 @@
 
 This protocol establishes the immutable methodological specification for confirmatory and diagnostic execution of the quad-platform edge AI agent orchestrator benchmark across four heterogeneous operating systems and microarchitectures:
 1. **Apple Silicon M4 macOS ARM64** (Unified Memory Architecture, 120 GB/s bus, physical Apple SMC shunts at 50 ms);
-2. **Ubuntu 26.04 x86_64 Core i5-12500H + NVIDIA RTX 3050** (Linux RAPL energy_uj, POSIX rusage, Linux CFS scheduler, NVIDIA NVML);
-3. **Microsoft Windows 11 Pro x86_64 Core i5-12500H + NVIDIA RTX 3050** (Discrete laptop GPU, Win32 cycle accounting, NVML board power telemetry);
+2. **Ubuntu 26.04 x86_64 Core i5-12500H + NVIDIA RTX 3050** (12C/16T, 32GB DDR5, Linux RAPL energy_uj, POSIX rusage, Linux CFS scheduler, NVIDIA NVML);
+3. **Microsoft Windows 11 Pro x86_64 Core i5-12500H + NVIDIA RTX 3050** (12C/16T, 32GB DDR5, discrete laptop GPU, Win32 cycle accounting, NVML board power telemetry);
 4. **Microsoft Windows 10/11 x86_64 Intel HD Graphics 4600 UMA** (Constrained legacy desktop, Win32 PSAPI rusage).
 
 ---

@@ -4,7 +4,7 @@
   "frozen_at_utc": "2026-11-22T23:30:00Z",
   "provenance": {
     "git_branch": "main",
-    "git_commit": "edc9c0775017361e4ec11a789efce8c4c17a6af5",
+    "git_commit": "5f0420fe031492ee477a2cbe7b698de27c7102a9",
     "author": "Rafael Paniccia Cassetta",
     "institution": "UFABC",
     "repository_url": "https://github.com/drsigma/picoclaw-vs-openclaw-benchmark"
@@ -34,14 +34,14 @@
     {
       "platform_id": "linux_x86_64",
       "os": "Ubuntu 26.04 LTS (Kernel 6.x / 7.x)",
-      "hardware": "Intel Core i5-12500H (12C/16T, 16GB DDR4) + NVIDIA GeForce RTX 3050 Laptop GPU (4GB VRAM)",
+      "hardware": "Intel Core i5-12500H (12C/16T, 32GB DDR5) + NVIDIA GeForce RTX 3050 Laptop GPU (4GB VRAM)",
       "telemetry_source": "Linux RAPL (energy_uj) + POSIX getrusage + perf + NVIDIA NVML",
       "energy_unit": "Joules (RAPL MSR Package + NVML Board Power)"
     },
     {
       "platform_id": "windows_11_nvidia",
       "os": "Microsoft Windows 11 Pro x86_64",
-      "hardware": "Intel Core i5-12500H (12C/16T, 16GB DDR4) + NVIDIA GeForce RTX 3050 Laptop GPU (4GB VRAM)",
+      "hardware": "Intel Core i5-12500H (12C/16T, 32GB DDR5) + NVIDIA GeForce RTX 3050 Laptop GPU (4GB VRAM)",
       "telemetry_source": "NVIDIA NVML (Power) + Win32 QueryProcessCycleTime",
       "energy_unit": "Joules (NVML Board Power)"
     },

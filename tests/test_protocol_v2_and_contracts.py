@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 tests/test_protocol_v2_and_contracts.py - Protocol V2 & Workload Contracts Verification Test
-Validates protocol immutability, SHA-256 verification, and strict contract adherence.
+Validates protocol immutability, SHA-256 verification, and contract adherence.
 """
 from __future__ import annotations
 
@@ -31,7 +31,7 @@ def test_frozen_protocol_exists_and_hashes_match():
 
 
 def test_workload_contracts_token_bounds():
-    """Validates that all W1-W5 contracts define strict non-overlapping token bounds."""
+    """Validates that all W1-W5 contracts define non-overlapping token bounds."""
     for wl, contract in WORKLOAD_CONTRACTS.items():
         exp_p = contract.get("expected_prompt_tokens", contract.get("expected_prompt_tokens_minimal", 0))
         assert exp_p > 0

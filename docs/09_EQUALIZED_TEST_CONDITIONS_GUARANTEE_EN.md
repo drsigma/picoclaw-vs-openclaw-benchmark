@@ -8,7 +8,7 @@
 
 ### 1. Formal Declaration of Experimental Isomorphism
 
-To establish full scientific validity for academic peer reviewers and graduate defense committees, **all experimental benchmark campaigns (Campaigns 1 through 5) were conducted under strictly identical environmental and algorithmic conditions, uniformly applying all 9 methodological adjustments across every single run**:
+To establish full scientific validity for academic peer reviewers and graduate defense committees, **all experimental benchmark campaigns (Campaigns 1 through 5) were conducted under identical environmental and algorithmic conditions, uniformly applying all 9 methodological adjustments across every single run**:
 
 1. **Identical Physical Testbed:** Apple Mac mini M4 (Mac16,10), 10 CPU cores (4P+6E), 10 Metal GPU cores, 24 GB Unified LPDDR5X Memory (120 GB/s bandwidth), running macOS 26.6.2 (Darwin 25.6.0, Build 25G83).
 2. **Identical Runtime Toolchain Versions:**
@@ -26,7 +26,7 @@ To establish full scientific validity for academic peer reviewers and graduate d
 5. **Identical Environmental Quiescence Protocol:**
    * `/usr/bin/caffeinate -dims` daemon active continuously (preventing display sleep, idle sleep, disk spindown, and system sleep).
    * Spotlight background filesystem indexing paused via `sudo mdutil -a -i off`.
-   * Socket communications bound strictly to `127.0.0.1` loopback, eliminating Wi-Fi interference.
+   * Socket communications bound exclusively to `127.0.0.1` loopback, eliminating Wi-Fi interference.
 
 ---
 
@@ -43,4 +43,4 @@ To establish full scientific validity for academic peer reviewers and graduate d
 | **Poisson Sizing** | $K = 300$ events | $K = 300$ events | $K = 300$ events | $K = 300$ events | $K = 300$ events | **Identical (100%)** |
 | **Sleep Suppression** | `caffeinate -dims` | `caffeinate -dims` | `caffeinate -dims` | `caffeinate -dims` | `caffeinate -dims` | **Identical (100%)** |
 
-This rigorous experimental standardization guarantees that observed inter-campaign variation remains strictly below 2.5% (attributable solely to unavoidable thermal noise in semiconductor junctions), ensuring all comparative conclusions are methodologically airtight.
+This rigorous experimental standardization guarantees that observed inter-campaign variation remains below 2.5% (attributable solely to unavoidable thermal noise in semiconductor junctions), ensuring all comparative conclusions are methodologically airtight.

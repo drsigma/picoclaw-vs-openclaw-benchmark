@@ -103,7 +103,7 @@
 
 #### Items 14, 15 & 16: Scope, Terminology and Impact Clarifications
 - **Files Modified:** `paper/manuscript.tex`.
-- **Evidence:** Replaced generic "compiled vs JIT" claims with concrete comparisons of Go / Bun (JSC) vs Node.js (V8) and CPython. Title, Abstract, Introduction, and Impact sections strictly scoped to Llama-3.2-3B-Instruct (Q4_K_M) on llama-server with adapter codebases ranging between 35 and 90 lines.
+- **Evidence:** Replaced generic "compiled vs JIT" claims with concrete comparisons of Go / Bun (JSC) vs Node.js (V8) and CPython. Title, Abstract, Introduction, and Impact sections exclusively scoped to Llama-3.2-3B-Instruct (Q4_K_M) on llama-server with adapter codebases ranging between 35 and 90 lines.
 
 #### Item 17: Related Work DOIs
 - **Files Modified:** `paper/manuscript.tex`, `references.bib`.

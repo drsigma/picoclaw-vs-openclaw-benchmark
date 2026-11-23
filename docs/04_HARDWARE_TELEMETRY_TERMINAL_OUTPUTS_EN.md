@@ -76,7 +76,7 @@ Combined Power (CPU + GPU + ANE): 1458 mW (~1.46 W baseline idle)
 *** Sampled system activity (Mon Oct 25 20:11:15 2026) [PicoClaw W2 Tool Chain + Metal GPU] ***
 CPU Power:  3765 mW (Peak: 4710 mW) | P-Cluster active freq: 4300 MHz
 GPU Power: 12672 mW (Peak: 12672 mW) | GPU HW active freq: 1578 MHz (100.0% residency)
-ANE Power:     0 mW (kernels dispatched strictly to Metal GPU Shaders)
+ANE Power:     0 mW (kernels dispatched exclusively to Metal GPU Shaders)
 Combined Power (CPU + GPU + ANE): 16437 mW (~16.44 W active load, Peak: 16865 mW)
 ```
 

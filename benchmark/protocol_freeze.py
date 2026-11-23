@@ -47,7 +47,7 @@ def compute_protocol_hash(filepath: str = PROTOCOL_PATH) -> str:
 
 
 def load_and_validate_protocol(filepath: str = PROTOCOL_PATH) -> Dict[str, Any]:
-    """Loads and strictly validates protocol structure and invariants."""
+    """Loads and validates protocol structure and invariants."""
     if not os.path.exists(filepath):
         raise FileNotFoundError(f"Protocol file not found: {filepath}")
 

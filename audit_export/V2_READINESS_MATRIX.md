@@ -8,7 +8,7 @@ This matrix maps all 42 methodological, software engineering, telemetry, and sta
 
 | ID | Phase & Requirement | Status | Implemented File / Function / Flag | Verification Evidence & Command |
 | :---: | :--- | :---: | :--- | :--- |
-| **0.1** | **Immutable Protocol Versioning:** Frozen specification v2.0.0 with SHA-256 validation. | `[x]` | `protocol/protocol_v2.0.json`, `benchmark/protocol_freeze.py` | `python3 benchmark/protocol_freeze.py --check-hash 2aef611c7b...` (Exit 0) |
+| **0.1** | **Immutable Protocol Versioning:** Frozen specification v2.0.0 with SHA-256 validation. | `[x]` | `protocol/protocol_v2.0.json`, `benchmark/protocol_freeze.py` | `python3 benchmark/protocol_freeze.py --check-hash f195d5ed67...` (Exit 0) |
 | **0.2** | **Hypotheses Separation:** Formal separation of confirmatory ($H_1$–$H_4$) from exploratory analyses ($A_1$–$A_4$). | `[x]` | `protocol/protocol_v2.0.json`, `docs/PROTOCOL_V2.md` | `pytest tests/test_protocol_v2_and_contracts.py` (Exit 0) |
 | **0.3** | **Statistical Unit Definition:** Fixed cell `platform × workload × regime × runtime × session`, eliminating spurious pairing by random `rep`. | `[x]` | `docs/PROTOCOL_V2.md`, `scripts/reproduce_quad_platform_analysis.py` | `pytest tests/test_statistical_engine.py` (Exit 0) |
 | **1.1** | **Repository Completeness:** Integrity of `benchmark/`, `src/`, `tests/`, `scripts/`, `docs/`, `protocol/`. | `[x]` | Repository root tree | `python3 scripts/verify_manifest.py --pre-flight` (All 302 files valid) |

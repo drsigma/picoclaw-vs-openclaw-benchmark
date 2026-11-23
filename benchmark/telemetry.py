@@ -92,7 +92,7 @@ def get_process_rusage_v4(pid: int | None = None) -> dict[str, Any] | None:
         except Exception:
             pass
 
-    # Darwin ps fallback to strictly isolate child PID
+    # Darwin ps fallback to isolate child PID
     if sys.platform == "darwin":
         try:
             out = subprocess.check_output(["ps", "-p", str(pid), "-o", "rss="], text=True).strip()

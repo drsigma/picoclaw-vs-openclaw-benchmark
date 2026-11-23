@@ -7,9 +7,9 @@
 
 ### Question 1: How do you guarantee that neural inference on Llama-3.2-3B did not introduce noise or bias into the comparative results?
 **Rigorous Response:**  
-We strictly isolated the neural layer via three fundamental deterministic controls:
+We isolated the neural layer via three fundamental deterministic controls:
 1. **Single Shared Neural Server:** Both agent orchestrators communicated exclusively with the identical `llama.cpp b11887` instance on `127.0.0.1:8080`, eliminating any compilation or hardware acceleration disparities.
-2. **Deterministic Greedy Decoding:** We fixed the temperature to `0.0` and set a static random seed (`seed = 42`). This ensures that multinomial sampling is strictly deterministic—identical inputs generate identical logits and token sequences.
+2. **Deterministic Greedy Decoding:** We fixed the temperature to `0.0` and set a static random seed (`seed = 42`). This ensures that multinomial sampling is deterministic—identical inputs generate identical logits and token sequences.
 3. **Algebraic Isolation of Latency:** The `llama.cpp` server returns exact prompt evaluation and token generation latencies (`T_neural`) in its response headers. We calculated $T_{\text{orch}} = T_{\text{task}} - T_{\text{neural}}$, algebraically removing neural inference variance from the runtime analysis.
 
 ---

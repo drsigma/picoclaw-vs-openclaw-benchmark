@@ -11,7 +11,7 @@ Executes in a clean environment the complete verification protocol documented in
       bun_jsc_orchestrator, local_llm_baseline);
   4. Automated verification of pre-registered tolerances:
      - Exact prompt_tokens parity across all 15-tool orchestrators (2,177 tokens on W2)
-     - HTTP status strictly equal to 200 and valid finish_reason
+     - HTTP status required to be 200 and valid finish_reason
      - Host orchestration overhead within physical tolerance (t_orch_ms < 250 ms)
      - Cycle/instruction/time regression R^2 > 0.90 on UMA attribution dataset
      - Gate 0 9-field provenance validation across all campaign .jsonl files

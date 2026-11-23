@@ -32,7 +32,7 @@ def test_edp_calculation():
 
 
 def test_cliffs_delta_and_a12_extremes():
-    """Verify Cliff's delta and Vargha-Delaney A12 for strictly dominated distributions."""
+    """Verify Cliff's delta and Vargha-Delaney A12 for dominated distributions."""
     sample_a = [10.0, 11.0, 12.0]
     sample_b = [20.0, 21.0, 22.0]
 

@@ -13,7 +13,7 @@ Decomposes GGUF tensor memory layout to resolve the naive S_file/ITL artifact (>
      where alpha_kv = (29.50 - 16.76) ms / (13,216 - 60) tok ≈ 0.968 µs/token (linear regression R² > 0.97).
   3. Recomputes true active memory bandwidth:
      BW_active(N) = (S_active_weights + S_kv_cache(N)) / ITL(N)
-     proving that all evaluation cells stay strictly between 82.5% and 90.4% of the 120 GB/s Apple M4 nominal ceiling.
+     proving that all evaluation cells stay between 82.5% and 90.4% of the 120 GB/s Apple M4 nominal ceiling.
 
 Author: Rafael Paniccia Cassetta (UFABC)
 """
