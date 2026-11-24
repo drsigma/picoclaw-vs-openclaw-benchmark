@@ -1,11 +1,11 @@
 ========================================================================
- 🚀 [PRE-FLIGHT VERIFIER] Comprehensive Pre-Flight & Permission Check
+ 🚀 [PRE-FLIGHT VERIFIER] Comprehensive Pre-Flight Check (Standard Verification)
 ========================================================================
 ========================================================================
- 🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256)
-    [EN-US] Cryptographic Artifact Integrity Verification (302 files)
+ 🔐 [PT-BR] Verificação de Integridade Criptográfica (SHA-256) [Post-Run Complete]
+    [EN-US] Cryptographic Artifact Integrity Verification (364 files)
 ========================================================================
-✅ [SUCCESS] All 302/302 tracked files match their cryptographic SHA-256 signature!
+✅ [SUCCESS] All 364/364 tracked files match their cryptographic SHA-256 signature!
    [PT-BR] Todos os arquivos rastreados conferem com suas assinaturas SHA-256 registradas.
 ========================================================================
 

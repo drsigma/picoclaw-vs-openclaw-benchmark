@@ -358,11 +358,7 @@ async function callLlamaStream(messages, tools, maxTokens) {
     }
   }
 
-  let promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedPromptTokens);
-  if (promptTokens <= 0) {
-    const promptChars = JSON.stringify(messages).length + JSON.stringify(tools || []).length;
-    promptTokens = Math.max(1, Math.round(promptChars / 3.8));
-  }
+  const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedPromptTokens);
   const totalNeuralMs = hasServerTimings ? (promptMs + predictedMs) : (performance.now() - t0);
   const finalPromptMs = hasServerTimings ? promptMs : ttftMs;
   const finalPredictedMs = hasServerTimings ? predictedMs : Math.max(0.0, totalNeuralMs - ttftMs);

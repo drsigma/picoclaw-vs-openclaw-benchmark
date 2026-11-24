@@ -306,11 +306,7 @@ async function streamCompletionJSC(messages, tools, maxTokens) {
     }
   }
 
-  let promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedTokens);
-  if (promptTokens <= 0) {
-    const promptChars = JSON.stringify(messages).length + JSON.stringify(tools || []).length;
-    promptTokens = Math.max(1, Math.round(promptChars / 3.8));
-  }
+  const promptTokens = usagePromptTokens > 0 ? usagePromptTokens : (cachedTokens + uncachedTokens);
   const neuralMs = hasTimings ? (promptMs + predictedMs) : (nowMs() - tReq0);
   const finalPromptMs = hasTimings ? promptMs : ttftMs;
   const finalPredictedMs = hasTimings ? predictedMs : Math.max(0.0, neuralMs - ttftMs);

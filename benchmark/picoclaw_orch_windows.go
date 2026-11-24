@@ -473,7 +473,7 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 
 	for {
 		line, readErr := reader.ReadString('\n')
-		if len(line) > 0 {
+		if len(strings.TrimSpace(line)) > 0 {
 			trimmed := strings.TrimSpace(line)
 			if strings.HasPrefix(trimmed, "data: ") {
 				dataStr := strings.TrimPrefix(trimmed, "data: ")

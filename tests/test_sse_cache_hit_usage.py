@@ -89,6 +89,9 @@ def test_all_streaming_orchestrators_request_include_usage():
         ("benchmark/bun_jsc_agent.mjs", "include_usage: true"),
         ("benchmark/python_orch.py", '"include_usage": True'),
         ("benchmark/adapters/neural_baseline_adapter.py", '"include_usage": True'),
+        ("adapters/windows_intel_graphics/w5_intel_worker.py", '"include_usage": True'),
+        ("scripts/run_linux_x86_64_master_campaign.py", '"include_usage": True'),
+        ("scripts/run_windows_x86_64_master_campaign.py", '"include_usage": True'),
     ]
     for rel_path, needle in targets:
         full_path = os.path.join(REPO_DIR, rel_path)
@@ -240,3 +243,24 @@ def test_python_and_node_orchestrators_handle_100pct_kv_cache_hit_eof_chunk():
                 assert rec_js["prompt_tokens"] == 917
                 assert rec_js["cached_tokens"] == 917
                 assert rec_js["completion_tokens"] == 28
+
+            # 3. Bun/JSC minimal agent orchestrator (compatible with Bun or Node >= 18)
+            js_runner = shutil.which("bun") or node_exe
+            with _MockLlamaSSEServer(sse_bytes) as srv:
+                env = os.environ.copy()
+                env["LLAMA_API_URL"] = srv.url
+                env["BENCH_CACHE_PROMPT"] = "true"
+                res_bun = subprocess.run(
+                    [js_runner, os.path.join(REPO_DIR, "benchmark", "bun_jsc_agent.mjs"), "W1", "Warm", "1"],
+                    cwd=REPO_DIR,
+                    env=env,
+                    capture_output=True,
+                    text=True,
+                    timeout=20.0,
+                )
+                assert res_bun.returncode == 0, f"bun_jsc_agent.mjs failed: {res_bun.stderr}"
+                assert srv.captured_requests[0].get("stream_options") == {"include_usage": True}
+                rec_bun = json.loads(res_bun.stdout.strip())[0]
+                assert rec_bun["prompt_tokens"] == 917
+                assert rec_bun["cached_tokens"] == 917
+                assert rec_bun["completion_tokens"] == 28

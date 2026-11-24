@@ -205,7 +205,7 @@ def stream_request(messages: list[dict[str, Any]], tools: list[dict[str, Any]], 
                    max_tokens: int, on_first_token=None) -> dict[str, Any]:
     payload = json.dumps({
         "model": "bench", "messages": messages, "tools": tools, "max_tokens": max_tokens,
-        "temperature": 0.0, "seed": 42, "stream": True, "cache_prompt": cache_prompt,
+        "temperature": 0.0, "seed": 42, "stream": True, "stream_options": {"include_usage": True}, "cache_prompt": cache_prompt,
     }, separators=(",", ":")).encode()
     req = urllib.request.Request(API_URL, data=payload, headers={"Content-Type": "application/json"})
     t0 = time.perf_counter()

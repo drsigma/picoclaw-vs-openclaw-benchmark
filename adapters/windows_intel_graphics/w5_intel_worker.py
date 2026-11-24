@@ -86,6 +86,7 @@ def run_w5_intel_trial(warmth: str = "Warm", max_tokens: int = 256, timeout_s: f
         "seed": 42,
         "max_tokens": max_tokens,
         "stream": True,
+        "stream_options": {"include_usage": True},
         "cache_prompt": cache_prompt,
     }
 
