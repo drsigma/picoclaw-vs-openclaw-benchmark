@@ -1,0 +1,32 @@
+% Warm KV Cache Summary - Regime B (Linux x86_64)
+\begin{table}[t]
+\centering\small
+\caption{Regime B Warm KV-Cache Latency and Energy Net Above Idle (Linux x86_64)}
+\label{tab:linux_warm_cache}
+\begin{tabular}{llrrrr}
+\toprule
+Workload & Orchestrator & $T_{\text{task}}$ (ms) & $T_{\text{orch}}$ (ms) & $E_{\text{net}}$ (J) & EDP (J$\cdot$s) \\
+\midrule
+W1 & neural\_baseline & 1816.9 & 0.00 & 138.35 & 252.45 \\
+W1 & picoclaw & 1815.1 & 4.27 & 140.67 & 255.55 \\
+W1 & openclaw\_minimal & 1859.6 & 29.37 & 144.60 & 267.37 \\
+W1 & openclaw\_full & 4145.6 & 35.14 & 247.30 & 1023.12 \\
+W1 & python\_native & 1848.6 & 9.03 & 138.98 & 256.44 \\
+W2 & neural\_baseline & 1284.4 & 0.00 & 103.94 & 133.69 \\
+W2 & picoclaw & 1301.4 & 6.87 & 100.95 & 131.48 \\
+W2 & openclaw\_minimal & 1326.2 & 31.89 & 106.79 & 141.79 \\
+W2 & openclaw\_full & 2867.2 & 36.78 & 183.95 & 529.47 \\
+W2 & python\_native & 1297.2 & 10.13 & 104.08 & 134.89 \\
+W3 & neural\_baseline & 1484.4 & 0.00 & 119.47 & 176.96 \\
+W3 & picoclaw & 1530.9 & 45.93 & 112.85 & 172.80 \\
+W3 & openclaw\_minimal & 1554.8 & 59.79 & 117.69 & 182.93 \\
+W3 & openclaw\_full & 3428.9 & 64.21 & 214.22 & 735.16 \\
+W3 & python\_native & 1509.3 & 22.52 & 109.59 & 165.91 \\
+W4 & neural\_baseline & 14081.9 & 0.00 & 955.83 & 13461.33 \\
+W4 & picoclaw & 13914.6 & 74.28 & 957.88 & 13347.93 \\
+W4 & openclaw\_minimal & 14236.8 & 97.67 & 986.56 & 14047.42 \\
+W4 & openclaw\_full & 29326.2 & 153.80 & 1663.58 & 48796.60 \\
+W4 & python\_native & 14216.1 & 67.14 & 983.89 & 13984.20 \\
+\bottomrule
+\end{tabular}
+\end{table}

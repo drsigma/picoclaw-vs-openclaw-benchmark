@@ -21,7 +21,7 @@ The following commands were executed in the repository virtual environment (`.ve
 | `python3 scripts/reproduce_quad_platform_analysis.py` | Scanned `35` `.jsonl` files (`18,616` lines, `16,995` measured trials, `1,621` warmups), computed `190` diagnostic cells, generated Tables 1--8 (`.md`/`.tex`), rendered Figures 1--6 (300 DPI), generated reports and `audit_export/REVIEW_PACKAGE_README.md`, and built `audit_export_quad_platform.zip` (exit code 0). |
 | `python3 scripts/generate_audit_txt_chunks.py` | Exported 4 lightweight text chunks (`INDEX.txt`, `audit_pt1_report_and_checklist.txt`, `audit_pt2_tables.txt`, `audit_pt3_summary_and_diagnostics.txt`) in `audit_txt_chunks/`, each `<= 150 KB` (exit code 0). |
 | `pytest -v` | `75/75 tests passed` (exit code 0; full transcript saved in `audit_export/pytest_output.txt`) (58 passed in test suite; 17 Python 3.14 upstream `DeprecationWarning` notices from langsmith `asyncio.iscoroutinefunction` without functional impact). |
-| `python3 scripts/verify_manifest.py` | `302/302` tracked files matched their recorded SHA-256 digests in `data/manifest_sha256.json` (`0` missing, `0` hash mismatches, exit code 0). |
+| `python3 scripts/verify_manifest.py` | `304/304` tracked files matched their recorded SHA-256 digests in `data/manifest_sha256.json` (`0` missing, `0` hash mismatches, exit code 0). |
 
 ---
 

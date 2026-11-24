@@ -1,0 +1,20 @@
+% Tool-RAG Dynamic Schema Pruner Mitigation (Linux x86_64)
+\begin{table}[t]
+\centering\small
+\caption{Zero-Copy Tool-RAG Pruner: Token Reduction and Latency Savings (Linux x86_64)}
+\label{tab:linux_tool_rag}
+\begin{tabular}{llrrrr}
+\toprule
+WL & Arm & Prompt Tokens & $T_{\text{prune}}$ (ms) & $T_{\text{task}}$ (ms) & $E_{\text{net}}$ (J) \\
+\midrule
+W1 & openclaw\_tool\_rag & 893 & 2.767 & 1934.0 & 164.65 \\
+W1 & picoclaw\_tool\_rag & 893 & 0.029 & 1900.5 & 170.48 \\
+W2 & openclaw\_tool\_rag & 917 & 2.647 & 1616.0 & 151.30 \\
+W2 & picoclaw\_tool\_rag & 917 & 0.031 & 1581.3 & 153.37 \\
+W3 & openclaw\_tool\_rag & 1163 & 2.720 & 1978.8 & 172.72 \\
+W3 & picoclaw\_tool\_rag & 1163 & 0.028 & 1958.5 & 166.60 \\
+W4 & openclaw\_tool\_rag & 10380 & 9.140 & 17089.8 & 1259.27 \\
+W4 & picoclaw\_tool\_rag & 10380 & 0.315 & 17111.2 & 1266.74 \\
+\bottomrule
+\end{tabular}
+\end{table}
