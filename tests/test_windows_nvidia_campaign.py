@@ -145,3 +145,4 @@ def test_w5_workers_have_no_1000_char_policy_truncation():
             src = f.read()
         assert ".slice(0, 1000)" not in src, f"Found W5 1000-char truncation in {rel}"
         assert "polStr[:1000]" not in src, f"Found W5 1000-char truncation in {rel}"
+        assert "repoDir" not in src, f"Found undefined repoDir identifier in {rel} (must use REPO_DIR)"

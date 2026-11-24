@@ -35,7 +35,7 @@
   "benchmark/linux_campaign_analysis.py": "c7c7ce9f3141036ecb60f8b918aa98162ed1c85cc8b8bca394187a978eb5eb4b",
   "benchmark/linux_x86_64_telemetry_adapter.py": "27f3f30ea011c4b10c634f0c96d3259c3b65fc50892b982c1aa3b41f030839b7",
   "benchmark/mcp_server.py": "5006418c5f45d991d75c6257f5587d13af798f922d6ca9a7663971340dc12c4e",
-  "benchmark/openclaw_orch.mjs": "53039611f3f72362869cb062953e169389a6f06e7e23c9e895c105b3c2467c3f",
+  "benchmark/openclaw_orch.mjs": "38e473d720a12aff2845d8b27aa76ecda32384ea6029f0bf14b3975b20583da2",
   "benchmark/picoclaw_orch": "fa5615773a8edff95c166644c4975417791facf193dd22aab1377570dd62a841",
   "benchmark/picoclaw_orch.go": "5778236546ec50730899bdf59c445220317db779349d7631901de00db99fc56d",
   "benchmark/picoclaw_orch_linux": "fa5615773a8edff95c166644c4975417791facf193dd22aab1377570dd62a841",
@@ -196,5 +196,5 @@
   "tests/test_statistical_engine.py": "75a89ba70ec27fcb5f4862a3a2b9273b9e5822542cc9317018dfd9b0455b2bdc",
   "tests/test_telemetry_parser.py": "ab6d741b0e3971a1106a3999c240ed612f5e1f0c70401f2dca9b200a62271131",
   "tests/test_windows_intel_graphics_adapter.py": "30df66337084e02506f5c799846b3305f12cd66d6b18ad2813fa00d45b286872",
-  "tests/test_windows_nvidia_campaign.py": "f5d4a343dc1f8cef7e4c4acd5966369073e3bf7c88691bc94ade8285caa49cf0"
+  "tests/test_windows_nvidia_campaign.py": "de966f18562ac8a2e55c8cd62644bca083153680c7be9c9597b81cca6806487e"
 }
