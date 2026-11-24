@@ -52,14 +52,21 @@ ARCH_TAG = f"{platform.system().lower()}_{platform.machine()}"
 
 
 class Paths:
-    def __init__(self, suffix: str = "") -> None:
-        self.data = os.path.join(REPO_DIR, "data", ARCH_TAG + suffix)
-        self.raw = os.path.join(self.data, "raw")
-        self.results = os.path.join(REPO_DIR, "results", f"publication_campaign_{ARCH_TAG}{suffix}")
-        self.tables = os.path.join(self.results, "tables")
-        self.manifest = os.path.join(REPO_DIR, "data", f"manifest_sha256_{ARCH_TAG}{suffix}.json")
-        self.allowed = (self.data, self.results, self.manifest)
-        self.forbidden = tuple(os.path.join(REPO_DIR, p) for p in (
+    def __init__(self, suffix: str = "", output_dir: str | None = None) -> None:
+        if output_dir:
+            self.data = os.path.abspath(output_dir)
+            self.raw = os.path.join(self.data, "raw")
+            self.results = os.path.join(self.data, "results")
+            self.tables = os.path.join(self.results, "tables")
+            self.manifest = os.path.join(self.data, "manifest_sha256.json")
+        else:
+            self.data = os.path.join(REPO_DIR, "data", ARCH_TAG + suffix)
+            self.raw = os.path.join(self.data, "raw")
+            self.results = os.path.join(REPO_DIR, "results", f"publication_campaign_{ARCH_TAG}{suffix}")
+            self.tables = os.path.join(self.results, "tables")
+            self.manifest = os.path.join(REPO_DIR, "data", f"manifest_sha256_{ARCH_TAG}{suffix}.json")
+        self.allowed = tuple(os.path.realpath(p) for p in (self.data, self.results, self.manifest))
+        self.forbidden = tuple(os.path.realpath(os.path.join(REPO_DIR, p)) for p in (
             "data/darwin-aarch64", "data/darwin_aarch64", "data/darwin_arm64",
             "results/publication_campaign", "results/publication_campaign_darwin_aarch64",
             "results/publication_campaign_darwin_arm64", "data/raw", "data/manifest_sha256.json",
@@ -667,7 +674,7 @@ def prepare(ctx: Ctx) -> None:
     ctx.prov = detect_linux_host_provenance(REPO_DIR)
     try:
         if os.path.exists(os.path.join(REPO_DIR, ".git")):
-            ctx.git_dirty = len(subprocess.check_output(["git", "-C", REPO_DIR, "status", "--porcelain"], text=True, stderr=subprocess.DEVNULL).splitlines())
+            ctx.git_dirty = len(subprocess.check_output(["git", "-C", REPO_DIR, "status", "--porcelain", "-uno"], text=True, stderr=subprocess.DEVNULL).splitlines())
         else:
             ctx.git_dirty = 0
     except Exception:
@@ -800,6 +807,7 @@ def main() -> None:
     ap.add_argument("--cool-gpu-c", type=float, default=60.0, help="Thermal ceiling for GPU before trial dispatch")
     ap.add_argument("--cool-timeout-s", type=float, default=600.0)
     ap.add_argument("--suffix", default="", help="namespace suffix for smoke tests (e.g. _smoke)")
+    ap.add_argument("--output-dir", default=None, help="Isolated output directory (e.g. data/campaign_v2/linux_x86_64_session1)")
     ap.add_argument("--stages", default="A,B,TOOLRAG,KV,MCP,ANALYZE")
     args = ap.parse_args()
 
@@ -818,11 +826,11 @@ def main() -> None:
     elif args.full:
         args.reps = 30
         args.warmups = 3
-        if not args.suffix:
+        if not args.suffix and not args.output_dir:
             args.suffix = f"_v2_{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
     args.ctx_expected = 32768
-    PATHS = Paths(args.suffix)
+    PATHS = Paths(args.suffix, args.output_dir)
     for d in (PATHS.raw, PATHS.tables):
         wmakedirs(d)
 
