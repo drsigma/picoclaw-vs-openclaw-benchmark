@@ -682,7 +682,7 @@ def prepare(ctx: Ctx) -> None:
 
     meta_path = os.path.join(PATHS.raw, "hardware_metadata.json")
     existing = json.load(open(meta_path)) if os.path.exists(meta_path) else None
-    ctx.session_id = existing["session_id"] if existing else f"session_{ARCH_TAG}_{uuid.uuid4().hex[:12]}"
+    ctx.session_id = getattr(args, "session_id", None) or (existing["session_id"] if existing else f"session_{ARCH_TAG}_{uuid.uuid4().hex[:12]}")
 
     m = re.match(r"^(.*)-(Q\d\w*)\.gguf$", os.path.basename(args.model))
     if not m:
@@ -782,8 +782,8 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--reps", type=int, default=30)
     ap.add_argument("--warmups", type=int, default=3)
-    ap.add_argument("--idle-sec", type=float, default=60.0)
-    ap.add_argument("--ngl", type=int, default=0, help="Number of GPU layers (0 for CPU, 99 for GPU)")
+    ap.add_argument("--idle-sec", type=float, default=10.0)
+    ap.add_argument("--ngl", type=int, default=16, help="Number of GPU layers (0 for CPU, 16 for 4GB VRAM, 99 for full GPU)")
     ap.add_argument("--smoke-test", action="store_true", help="Fast end-to-end smoke test (1 rep, 0 warmups, suffix _smoke)")
     ap.add_argument("--quick", action="store_true", help="Quick verification (5 reps, 1 warmup)")
     ap.add_argument("--full", action="store_true", help="Full confirmatory campaign (30 reps, 3 warmups)")
@@ -796,17 +796,18 @@ def main() -> None:
         for candidate in [
             os.path.join(repo_root, "models", "Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
             "models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
-            "/home/rafalince/Desktop/mestrado/picoclaw-vs-openclaw-benchmark/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
-            "/home/rafalince/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+            os.path.expanduser("~/Desktop/mestrado/picoclaw-vs-openclaw-benchmark/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
+            os.path.expanduser("~/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
         ]:
             if os.path.exists(candidate):
                 default_model = candidate
                 break
     ap.add_argument("--model", default=default_model or "models/Llama-3.2-3B-Instruct-Q4_K_M.gguf")
-    ap.add_argument("--cool-cpu-c", type=float, default=68.0, help="Thermal ceiling for CPU package before trial dispatch")
+    ap.add_argument("--cool-cpu-c", type=float, default=70.0, help="Thermal ceiling for CPU package before trial dispatch")
     ap.add_argument("--cool-gpu-c", type=float, default=60.0, help="Thermal ceiling for GPU before trial dispatch")
     ap.add_argument("--cool-timeout-s", type=float, default=600.0)
     ap.add_argument("--suffix", default="", help="namespace suffix for smoke tests (e.g. _smoke)")
+    ap.add_argument("--session-id", default=None, help="Explicit session ID override")
     ap.add_argument("--output-dir", default=None, help="Isolated output directory (e.g. data/campaign_v2/linux_x86_64_session1)")
     ap.add_argument("--stages", default="A,B,TOOLRAG,KV,MCP,ANALYZE")
     args = ap.parse_args()
@@ -831,12 +832,27 @@ def main() -> None:
 
     args.ctx_expected = 32768
     PATHS = Paths(args.suffix, args.output_dir)
+
+    if args.dry_run:
+        print("=" * 80)
+        print(f"🔍 [DRY-RUN] Linux x86_64 Campaign Execution Matrix")
+        print(f"   Platform:     {ARCH_TAG}")
+        print(f"   Session ID:   {args.session_id or 'auto'}")
+        print(f"   Reps/Cell:    {args.reps} (Warmups: {args.warmups})")
+        print(f"   Model:        {args.model}")
+        print(f"   NGL:          {args.ngl}")
+        print(f"   Stages:       {args.stages}")
+        print(f"   Invert Order: {args.invert_blocks}")
+        print(f"   Destination:  {PATHS.raw}")
+        print("=" * 80)
+        sys.exit(0)
+
     for d in (PATHS.raw, PATHS.tables):
         wmakedirs(d)
 
     # Capture environment manifest at start of campaign
     from benchmark.environment_manifest import record_environment_manifest
-    session_tag = "S2_INVERTED" if args.invert_blocks else "S1_CANONICAL"
+    session_tag = args.session_id or ("S2_INVERTED" if args.invert_blocks else "S1_CANONICAL")
     is_emulated = (platform.system() != "Linux")
     extra_meta = {
         "cross_platform_emulation": is_emulated,
@@ -845,20 +861,6 @@ def main() -> None:
     }
     env_path = record_environment_manifest(PATHS.raw, f"{session_tag}_{ARCH_TAG}", extra_metadata=extra_meta)
     print(f"Recorded environment manifest: {env_path}", flush=True)
-
-    if args.dry_run:
-        print("=" * 80)
-        print(f"🔍 [DRY-RUN] Linux x86_64 Campaign Execution Matrix")
-        print(f"   Platform:     {ARCH_TAG}")
-        print(f"   Reps/Cell:    {args.reps} (Warmups: {args.warmups})")
-        print(f"   Model:        {args.model}")
-        print(f"   NGL:          {args.ngl}")
-        print(f"   Stages:       {args.stages}")
-        print(f"   Invert Order: {args.invert_blocks}")
-        print(f"   Destination:  {PATHS.raw}")
-        print(f"   Environment:  {env_path}")
-        print("=" * 80)
-        sys.exit(0)
 
     ctx = Ctx()
     ctx.args = args

@@ -93,7 +93,7 @@ def detect_linux_host_provenance(repo_dir: str = REPO_DIR) -> dict[str, str]:
 
     git_commit = os.environ.get("GIT_COMMIT", "").strip()
     if len(git_commit) != 40:
-        for git_dir in (repo_dir, "/home/rafalince/Desktop/mestrado/picoclaw-vs-openclaw-benchmark"):
+        for git_dir in (repo_dir, os.path.expanduser("~/Desktop/mestrado/picoclaw-vs-openclaw-benchmark")):
             try:
                 if os.path.exists(os.path.join(git_dir, ".git")):
                     git_commit = subprocess.check_output(
