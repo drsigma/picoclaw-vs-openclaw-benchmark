@@ -24,6 +24,7 @@ import ctypes
 import glob
 import json
 import os
+import platform
 import select
 import shutil
 import struct
@@ -134,8 +135,11 @@ _F_INHERIT = 1 << 1
 _F_EXCLUDE_HV = 1 << 6
 _F_ENABLE_ON_EXEC = 1 << 12
 
-_libc = ctypes.CDLL(None, use_errno=True)
-_libc.syscall.restype = ctypes.c_long
+if platform.system() == "Linux":
+    _libc = ctypes.CDLL(None, use_errno=True)
+    _libc.syscall.restype = ctypes.c_long
+else:
+    _libc = None
 
 
 def _core_pmus() -> list[tuple[str, int]]:

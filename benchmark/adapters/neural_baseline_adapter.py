@@ -65,6 +65,7 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
             "temperature": 0.0,
             "seed": 42,
             "stream": True,
+            "stream_options": {"include_usage": True},
             "cache_prompt": os.environ.get("BENCH_CACHE_PROMPT", "false").lower() == "true",
         }, separators=(",", ":")).encode("utf-8")
 
@@ -118,6 +119,9 @@ class NeuralBaselineAdapter(AgentOrchestratorAdapter):
                             usage_prompt_tokens = int(usage["prompt_tokens"])
                         if "completion_tokens" in usage and int(usage["completion_tokens"]) > 0:
                             completion_tokens = int(usage["completion_tokens"])
+                        ptd = usage.get("prompt_tokens_details")
+                        if isinstance(ptd, dict) and "cached_tokens" in ptd and cached_tokens == 0:
+                            cached_tokens = int(ptd["cached_tokens"])
 
                     choices = chunk.get("choices")
                     if choices and len(choices) > 0:

@@ -73,15 +73,20 @@ type ChatMessage struct {
 	Content string `json:"content"`
 }
 
+type StreamOptions struct {
+	IncludeUsage bool `json:"include_usage"`
+}
+
 type ChatRequest struct {
-	Model       string           `json:"model"`
-	Messages    []ChatMessage    `json:"messages"`
-	Tools       []ToolDefinition `json:"tools,omitempty"`
-	MaxTokens   int              `json:"max_tokens"`
-	Temperature float64          `json:"temperature"`
-	Seed        int              `json:"seed"`
-	Stream      bool             `json:"stream"`
-	CachePrompt bool             `json:"cache_prompt"`
+	Model         string           `json:"model"`
+	Messages      []ChatMessage    `json:"messages"`
+	Tools         []ToolDefinition `json:"tools,omitempty"`
+	MaxTokens     int              `json:"max_tokens"`
+	Temperature   float64          `json:"temperature"`
+	Seed          int              `json:"seed"`
+	Stream        bool             `json:"stream"`
+	StreamOptions *StreamOptions   `json:"stream_options,omitempty"`
+	CachePrompt   bool             `json:"cache_prompt"`
 }
 
 type TrialResult struct {
@@ -431,14 +436,15 @@ func executeVectorRAG(baseDir string) string {
 
 func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage, tools []ToolDefinition, maxTokens int) StreamResult {
 	reqBody := ChatRequest{
-		Model:       "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
-		Messages:    messages,
-		Tools:       tools,
-		MaxTokens:   maxTokens,
-		Temperature: 0.0,
-		Seed:        42,
-		Stream:      true,
-		CachePrompt: os.Getenv("BENCH_CACHE_PROMPT") == "true",
+		Model:         "Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+		Messages:      messages,
+		Tools:         tools,
+		MaxTokens:     maxTokens,
+		Temperature:   0.0,
+		Seed:          42,
+		Stream:        true,
+		StreamOptions: &StreamOptions{IncludeUsage: true},
+		CachePrompt:   os.Getenv("BENCH_CACHE_PROMPT") == "true",
 	}
 	payload, _ := json.Marshal(reqBody)
 	t0 := getQPC()
@@ -466,69 +472,76 @@ func callLlamaStream(client *http.Client, apiURL string, messages []ChatMessage,
 	reader := bufio.NewReader(resp.Body)
 
 	for {
-		line, err := reader.ReadString('\n')
-		if err != nil {
-			break
+		line, readErr := reader.ReadString('\n')
+		if len(line) > 0 {
+			trimmed := strings.TrimSpace(line)
+			if strings.HasPrefix(trimmed, "data: ") {
+				dataStr := strings.TrimPrefix(trimmed, "data: ")
+				if dataStr == "[DONE]" {
+					break
+				}
+				var chunk map[string]interface{}
+				if err := json.Unmarshal([]byte(dataStr), &chunk); err == nil {
+					if timings, ok := chunk["timings"].(map[string]interface{}); ok {
+						if pMs, ok := timings["prompt_ms"].(float64); ok {
+							promptMs = pMs
+							hasServerTimings = true
+						}
+						if predMs, ok := timings["predicted_ms"].(float64); ok {
+							predictedMs = predMs
+							hasServerTimings = true
+						}
+						if cn, ok := timings["cache_n"].(float64); ok && cn >= 0 {
+							cachedTokens = int(cn)
+						}
+						if pn, ok := timings["prompt_n"].(float64); ok && pn >= 0 {
+							uncachedPromptTokens = int(pn)
+						}
+						if predN, ok := timings["predicted_n"].(float64); ok && predN > 0 {
+							completionTokens = int(predN)
+						}
+					}
+					if usage, ok := chunk["usage"].(map[string]interface{}); ok {
+						if pt, ok := usage["prompt_tokens"].(float64); ok && pt > 0 {
+							usagePromptTokens = int(pt)
+						}
+						if ct, ok := usage["completion_tokens"].(float64); ok && ct > 0 {
+							completionTokens = int(ct)
+						}
+						if ptd, ok := usage["prompt_tokens_details"].(map[string]interface{}); ok {
+							if ctd, ok := ptd["cached_tokens"].(float64); ok && ctd >= 0 && cachedTokens == 0 {
+								cachedTokens = int(ctd)
+							}
+						}
+					}
+					if choices, ok := chunk["choices"].([]interface{}); ok && len(choices) > 0 {
+						if c0, ok := choices[0].(map[string]interface{}); ok {
+							if fr, ok := c0["finish_reason"].(string); ok && fr != "" {
+								finishReason = fr
+							}
+							if delta, ok := c0["delta"].(map[string]interface{}); ok {
+								hasData := false
+								if content, ok := delta["content"].(string); ok && len(content) > 0 {
+									hasData = true
+									tokenCount++
+									outText.WriteString(content)
+								}
+								if toolCalls, ok := delta["tool_calls"].([]interface{}); ok && len(toolCalls) > 0 {
+									hasData = true
+									tokenCount += len(toolCalls)
+								}
+								if hasData && firstChunk {
+									ttftMs = qpcDurationMs(t0)
+									firstChunk = false
+								}
+							}
+						}
+					}
+				}
+			}
 		}
-		line = strings.TrimSpace(line)
-		if strings.HasPrefix(line, "data: ") {
-			dataStr := strings.TrimPrefix(line, "data: ")
-			if dataStr == "[DONE]" {
-				break
-			}
-			var chunk map[string]interface{}
-			if err := json.Unmarshal([]byte(dataStr), &chunk); err == nil {
-				if timings, ok := chunk["timings"].(map[string]interface{}); ok {
-					if pMs, ok := timings["prompt_ms"].(float64); ok {
-						promptMs = pMs
-						hasServerTimings = true
-					}
-					if predMs, ok := timings["predicted_ms"].(float64); ok {
-						predictedMs = predMs
-						hasServerTimings = true
-					}
-					if cn, ok := timings["cache_n"].(float64); ok && cn >= 0 {
-						cachedTokens = int(cn)
-					}
-					if pn, ok := timings["prompt_n"].(float64); ok && pn >= 0 {
-						uncachedPromptTokens = int(pn)
-					}
-					if predN, ok := timings["predicted_n"].(float64); ok && predN > 0 {
-						completionTokens = int(predN)
-					}
-				}
-				if usage, ok := chunk["usage"].(map[string]interface{}); ok {
-					if pt, ok := usage["prompt_tokens"].(float64); ok && pt > 0 {
-						usagePromptTokens = int(pt)
-					}
-					if ct, ok := usage["completion_tokens"].(float64); ok && ct > 0 {
-						completionTokens = int(ct)
-					}
-				}
-				if choices, ok := chunk["choices"].([]interface{}); ok && len(choices) > 0 {
-					if c0, ok := choices[0].(map[string]interface{}); ok {
-						if fr, ok := c0["finish_reason"].(string); ok && fr != "" {
-							finishReason = fr
-						}
-						if delta, ok := c0["delta"].(map[string]interface{}); ok {
-							hasData := false
-							if content, ok := delta["content"].(string); ok && len(content) > 0 {
-								hasData = true
-								tokenCount++
-								outText.WriteString(content)
-							}
-							if toolCalls, ok := delta["tool_calls"].([]interface{}); ok && len(toolCalls) > 0 {
-								hasData = true
-								tokenCount += len(toolCalls)
-							}
-							if hasData && firstChunk {
-								ttftMs = qpcDurationMs(t0)
-								firstChunk = false
-							}
-						}
-					}
-				}
-			}
+		if readErr != nil {
+			break
 		}
 	}
 

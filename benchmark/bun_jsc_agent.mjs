@@ -186,6 +186,7 @@ async function streamCompletionJSC(messages, tools, maxTokens) {
     temperature: 0.0,
     seed: 42,
     stream: true,
+    stream_options: { include_usage: true },
     cache_prompt: ENV.BENCH_CACHE_PROMPT === "true"
   });
 
@@ -218,70 +219,90 @@ async function streamCompletionJSC(messages, tools, maxTokens) {
   let streamBuf = "";
   let done = false;
 
+  const processFrameLine = (rawLine) => {
+    const line = rawLine.trim();
+    if (!line.startsWith("data: ")) return;
+    const payload = line.slice(6);
+    if (payload === "[DONE]") {
+      done = true;
+      return;
+    }
+    const frame = JSON.parse(payload);
+    if (frame.timings) {
+      if (typeof frame.timings.prompt_ms === "number") {
+        promptMs = frame.timings.prompt_ms;
+        hasTimings = true;
+      }
+      if (typeof frame.timings.predicted_ms === "number") {
+        predictedMs = frame.timings.predicted_ms;
+        hasTimings = true;
+      }
+      if (typeof frame.timings.cache_n === "number" && frame.timings.cache_n >= 0) {
+        cachedTokens = frame.timings.cache_n;
+      }
+      if (typeof frame.timings.prompt_n === "number" && frame.timings.prompt_n >= 0) {
+        uncachedTokens = frame.timings.prompt_n;
+      }
+      if (typeof frame.timings.predicted_n === "number" && frame.timings.predicted_n > 0) {
+        completionTokens = frame.timings.predicted_n;
+      }
+    }
+    if (frame.usage) {
+      if (typeof frame.usage.prompt_tokens === "number" && frame.usage.prompt_tokens > 0) {
+        usagePromptTokens = frame.usage.prompt_tokens;
+      }
+      if (typeof frame.usage.completion_tokens === "number" && frame.usage.completion_tokens > 0) {
+        completionTokens = frame.usage.completion_tokens;
+      }
+      if (
+        frame.usage.prompt_tokens_details &&
+        typeof frame.usage.prompt_tokens_details.cached_tokens === "number" &&
+        frame.usage.prompt_tokens_details.cached_tokens >= 0 &&
+        cachedTokens === 0
+      ) {
+        cachedTokens = frame.usage.prompt_tokens_details.cached_tokens;
+      }
+    }
+    const choice = frame.choices?.[0];
+    if (choice) {
+      if (typeof choice.finish_reason === "string" && choice.finish_reason.length > 0) {
+        finishReason = choice.finish_reason;
+      }
+      const delta = choice.delta;
+      if (delta) {
+        let emitted = false;
+        if (delta.content && delta.content.length > 0) {
+          emitted = true;
+          deltaCount++;
+          assistantText += delta.content;
+        }
+        if (delta.tool_calls && delta.tool_calls.length > 0) {
+          emitted = true;
+          deltaCount += delta.tool_calls.length;
+        }
+        if (emitted && awaitingFirstToken) {
+          ttftMs = nowMs() - tReq0;
+          awaitingFirstToken = false;
+        }
+      }
+    }
+  };
+
   for await (const chunk of response.body) {
     if (done) break;
     streamBuf += decoder.decode(chunk, { stream: true });
     const lines = streamBuf.split("\n");
     streamBuf = lines.pop() || "";
-    for (let rawLine of lines) {
-      const line = rawLine.trim();
-      if (!line.startsWith("data: ")) continue;
-      const payload = line.slice(6);
-      if (payload === "[DONE]") {
-        done = true;
-        break;
-      }
-      const frame = JSON.parse(payload);
-      if (frame.timings) {
-        if (typeof frame.timings.prompt_ms === "number") {
-          promptMs = frame.timings.prompt_ms;
-          hasTimings = true;
-        }
-        if (typeof frame.timings.predicted_ms === "number") {
-          predictedMs = frame.timings.predicted_ms;
-          hasTimings = true;
-        }
-        if (typeof frame.timings.cache_n === "number" && frame.timings.cache_n >= 0) {
-          cachedTokens = frame.timings.cache_n;
-        }
-        if (typeof frame.timings.prompt_n === "number" && frame.timings.prompt_n >= 0) {
-          uncachedTokens = frame.timings.prompt_n;
-        }
-        if (typeof frame.timings.predicted_n === "number" && frame.timings.predicted_n > 0) {
-          completionTokens = frame.timings.predicted_n;
-        }
-      }
-      if (frame.usage) {
-        if (typeof frame.usage.prompt_tokens === "number" && frame.usage.prompt_tokens > 0) {
-          usagePromptTokens = frame.usage.prompt_tokens;
-        }
-        if (typeof frame.usage.completion_tokens === "number" && frame.usage.completion_tokens > 0) {
-          completionTokens = frame.usage.completion_tokens;
-        }
-      }
-      const choice = frame.choices?.[0];
-      if (choice) {
-        if (typeof choice.finish_reason === "string" && choice.finish_reason.length > 0) {
-          finishReason = choice.finish_reason;
-        }
-        const delta = choice.delta;
-        if (delta) {
-          let emitted = false;
-          if (delta.content && delta.content.length > 0) {
-            emitted = true;
-            deltaCount++;
-            assistantText += delta.content;
-          }
-          if (delta.tool_calls && delta.tool_calls.length > 0) {
-            emitted = true;
-            deltaCount += delta.tool_calls.length;
-          }
-          if (emitted && awaitingFirstToken) {
-            ttftMs = nowMs() - tReq0;
-            awaitingFirstToken = false;
-          }
-        }
-      }
+    for (const rawLine of lines) {
+      processFrameLine(rawLine);
+      if (done) break;
+    }
+  }
+  streamBuf += decoder.decode();
+  if (!done && streamBuf.trim().length > 0) {
+    for (const rawLine of streamBuf.split("\n")) {
+      processFrameLine(rawLine);
+      if (done) break;
     }
   }
 

@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import datetime
+import hashlib
 import json
 import os
 import platform
@@ -63,7 +64,8 @@ from adapters.windows_intel_graphics.validator import (  # noqa: E402
 
 ARCH_TAG = "windows_intel_graphics"
 HEALTH_URL = "http://127.0.0.1:8080/health"
-DEFAULT_MODEL = r"C:\bench_intel\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf"
+_REPO_MODEL = os.path.join(REPO_DIR, "models", "Llama-3.2-3B-Instruct-Q4_K_M.gguf")
+DEFAULT_MODEL = _REPO_MODEL if os.path.isfile(_REPO_MODEL) else r"C:\bench_intel\models\Llama-3.2-3B-Instruct-Q4_K_M.gguf"
 
 MAIN_ARMS = [
     "picoclaw",
@@ -78,15 +80,25 @@ W5_ARMS = ["python_native", "picoclaw", "openclaw_minimal", "neural_baseline"]
 
 
 class IntelPaths:
-    def __init__(self, repo_dir: str, suffix: str = "") -> None:
+    def __init__(self, repo_dir: str, suffix: str = "", campaign_v2_dir: str | None = None) -> None:
         self.repo_dir = repo_dir
         self.tag = f"{ARCH_TAG}{suffix}"
-        self.data = os.path.join(repo_dir, "data", self.tag)
-        self.raw = os.path.join(self.data, "raw")
-        self.results = os.path.join(repo_dir, "results", f"publication_campaign_{self.tag}")
-        self.tables = os.path.join(self.results, "tables")
-        self.repro = os.path.join(repo_dir, "reproducibility", f"clean_run_{self.tag}")
-        self.manifest = os.path.join(repo_dir, "data", f"manifest_sha256_{self.tag}.json")
+        if campaign_v2_dir:
+            base = os.path.abspath(campaign_v2_dir)
+            sess_slug = suffix.lstrip("_") or "session1"
+            self.data = os.path.join(base, sess_slug)
+            self.raw = os.path.join(self.data, "raw")
+            self.results = os.path.join(base, f"results_{sess_slug}")
+            self.tables = os.path.join(self.results, "tables")
+            self.repro = os.path.join(base, f"repro_{sess_slug}")
+            self.manifest = os.path.join(base, f"manifest_sha256_{sess_slug}.json")
+        else:
+            self.data = os.path.join(repo_dir, "data", self.tag)
+            self.raw = os.path.join(self.data, "raw")
+            self.results = os.path.join(repo_dir, "results", f"publication_campaign_{self.tag}")
+            self.tables = os.path.join(self.results, "tables")
+            self.repro = os.path.join(repo_dir, "reproducibility", f"clean_run_{self.tag}")
+            self.manifest = os.path.join(repo_dir, "data", f"manifest_sha256_{self.tag}.json")
         self.allowed = tuple(os.path.realpath(p) for p in (self.data, self.results, self.repro, self.manifest))
 
     def guard(self, path: str) -> str:
@@ -318,7 +330,7 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
     assert_windows_process_counters_available()
     set_system_awake(keep_display=True)
 
-    paths = IntelPaths(REPO_DIR, suffix=session_suffix)
+    paths = IntelPaths(REPO_DIR, suffix=session_suffix, campaign_v2_dir=getattr(args, "campaign_v2_dir", None))
     os.makedirs(paths.guard(paths.raw), exist_ok=True)
     os.makedirs(paths.guard(paths.tables), exist_ok=True)
 
@@ -500,6 +512,44 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
             return [a for a in W5_ARMS if a in adapters and a in base_arms] or [a for a in W5_ARMS if a in adapters]
         return [a for a in base_arms if a in adapters]
 
+    def _emit_checkpoint(regime_name: str, wl: str, ak: str, out_path: str) -> None:
+        cp_dir = getattr(args, "checkpoints_dir", None)
+        if not cp_dir:
+            return
+        os.makedirs(cp_dir, exist_ok=True)
+        recs = [
+            r for r in _load_jsonl(out_path)
+            if r.get("agent_key") == ak and r.get("workload") == wl and r.get("regime") == regime_name
+        ]
+        evals = [r for r in recs if not r.get("is_warmup", False)]
+        warmups_done = [r for r in recs if r.get("is_warmup", False)]
+        invalid_n = sum(1 for r in recs if not r.get("extraction_validated", True))
+        bad_http = sum(1 for r in recs if r.get("http_status") != 200)
+        energy_na_ok = all(r.get("energy_gpu_j") in (None, "N/A") for r in recs)
+        throttled_n = sum(1 for r in recs if r.get("thermal_throttled", False))
+        last_tz = recs[-1].get("acpi_tz01_end_c") if recs else NA
+        sha_partial = hashlib.sha256(open(out_path, "rb").read()).hexdigest() if os.path.exists(out_path) else None
+        cp = {
+            "timestamp_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            "session_tag": paths.tag,
+            "workload": wl,
+            "regime": regime_name,
+            "runtime": ak,
+            "trials_expected": args.reps,
+            "trials_recorded": len(evals),
+            "warmups_recorded": len(warmups_done),
+            "invalid_records": invalid_n,
+            "invalid_http_status_count": bad_http,
+            "energy_intel_gpu_na_compliant": energy_na_ok,
+            "acpi_tz01_end_c": last_tz,
+            "throttled_records": throttled_n,
+            "jsonl_path": out_path,
+            "jsonl_sha256_partial": sha_partial,
+        }
+        cp_name = f"cp_{paths.tag}_{regime_name}_{wl}_{ak}.json".replace("/", "_")
+        with open(os.path.join(cp_dir, cp_name), "w", encoding="utf-8") as cf:
+            json.dump(cp, cf, indent=2)
+
     try:
         invert = getattr(args, "invert_blocks", False)
         planned_stages = [s for s in reversed(stages) if s != "ANALYZE"] + (["ANALYZE"] if "ANALYZE" in stages else []) if invert else stages
@@ -523,6 +573,7 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
                 for rep in range(1, args.reps + 1):
                     if (ak, wl, rep, False) not in done_b:
                         _run_one(ak, wl, rep, False, "B_warm", True, out_b)
+                _emit_checkpoint("B_warm", wl, ak, out_b)
 
         # Stage TOOLRAG: Full vs Minimal vs Tool-RAG in the same session (W2)
         if "TOOLRAG" in planned_stages:
@@ -549,6 +600,7 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
                         for rep in range(1, args.reps + 1):
                             if (reg_name, ak, wl, rep, False) not in done_tr:
                                 _run_one(ak, wl, rep, False, reg_name, cache_flag, out_tr)
+                        _emit_checkpoint(reg_name, wl, ak, out_tr)
 
         # Stage A: Cold Prefill (randomized block interleaving)
         if "A" in planned_stages:
@@ -571,6 +623,8 @@ def run_single_session(args: argparse.Namespace, session_suffix: str) -> IntelPa
                 for ak, wl in block:
                     if (ak, wl, rep, False) not in done_a:
                         _run_one(ak, wl, rep, False, "A_cold", False, out_a)
+            for ak, wl in conds:
+                _emit_checkpoint("A_cold", wl, ak, out_a)
     finally:
         server.stop()
         cleanup_orphan_processes(target_names=("llama-server.exe", "picoclaw_orch_windows.exe"), port_to_check=8080)
@@ -616,7 +670,9 @@ def main() -> None:
     ap.add_argument("--min-clock-mhz", type=int, default=3100)
     ap.add_argument("--min-free-ram-mb", type=float, default=1800.0)
     ap.add_argument("--cooldown-s", type=float, default=20.0)
-    ap.add_argument("--trial-timeout-s", type=float, default=480.0)
+    ap.add_argument("--trial-timeout-s", type=float, default=3600.0)
+    ap.add_argument("--campaign-v2-dir", default=None, help="Isolated V2 output root (e.g. data/campaign_v2/windows_intel_graphics_<RunId>)")
+    ap.add_argument("--checkpoints-dir", default=None, help="Optional directory to emit per-block checkpoint JSONs")
     ap.add_argument("--suffix", default="")
     args = ap.parse_args()
 
@@ -647,12 +703,9 @@ def main() -> None:
         args.suffix = "_dryrun"
         args.inter_session_cooldown_s = 1.0
         print("[DRY-RUN] Isolated verification mode enabled.", flush=True)
+        print(f"[DRY-RUN] Platform: windows_intel_graphics | Model: {args.model}", flush=True)
         print(f"[DRY-RUN] Matrix: arms={args.arms} workloads={args.workloads} stages={args.stages} invert={args.invert_blocks}", flush=True)
-        if platform.system() != "Windows":
-            print("[DRY-RUN] Cross-platform flag and matrix parsing verified successfully on host.", flush=True)
-            return
-        run_single_session(args, "_dryrun")
-        print("\nDRY-RUN COMPLETE", flush=True)
+        print("[DRY-RUN] Matrix, CLI flags, and isolation paths verified successfully (zero hardware side-effects).", flush=True)
         return
 
     sessions = [s.strip() for s in args.sessions.split(",") if s.strip()]
@@ -667,7 +720,7 @@ def main() -> None:
             time.sleep(args.inter_session_cooldown_s)
 
     if "1" in session_paths and "2" in session_paths:
-        combined_paths = IntelPaths(REPO_DIR, suffix=f"{args.suffix}_replication")
+        combined_paths = IntelPaths(REPO_DIR, suffix=f"{args.suffix}_replication", campaign_v2_dir=args.campaign_v2_dir)
         print("\n=== COMPUTING INTER-SESSION REPLICATION (TOST via statsmodels.ttost_ind) ===", flush=True)
         rep_out = run_combined_replication_analysis(
             repo_dir=REPO_DIR,

@@ -238,6 +238,7 @@ async function callLlamaStream(messages, tools, maxTokens) {
     temperature: 0.0,
     seed: 42,
     stream: true,
+    stream_options: { include_usage: true },
     cache_prompt: process.env.BENCH_CACHE_PROMPT === "true"
   });
   const t0 = performance.now();
@@ -268,73 +269,92 @@ async function callLlamaStream(messages, tools, maxTokens) {
   let buf = "";
 
   let isDone = false;
+  const processSseLine = (rawLine) => {
+    const line = rawLine.trim();
+    if (!line.startsWith("data: ")) return;
+    const dataStr = line.slice(6);
+    if (dataStr === "[DONE]") {
+      isDone = true;
+      return;
+    }
+    try {
+      const parsed = JSON.parse(dataStr);
+      if (parsed.timings) {
+        if (typeof parsed.timings.prompt_ms === "number") {
+          promptMs = parsed.timings.prompt_ms;
+          hasServerTimings = true;
+        }
+        if (typeof parsed.timings.predicted_ms === "number") {
+          predictedMs = parsed.timings.predicted_ms;
+          hasServerTimings = true;
+        }
+        if (typeof parsed.timings.cache_n === "number" && parsed.timings.cache_n >= 0) {
+          cachedTokens = parsed.timings.cache_n;
+        }
+        if (typeof parsed.timings.prompt_n === "number" && parsed.timings.prompt_n >= 0) {
+          uncachedPromptTokens = parsed.timings.prompt_n;
+        }
+        if (typeof parsed.timings.predicted_n === "number" && parsed.timings.predicted_n > 0) {
+          completionTokens = parsed.timings.predicted_n;
+        }
+      }
+      if (parsed.usage) {
+        if (typeof parsed.usage.prompt_tokens === "number" && parsed.usage.prompt_tokens > 0) {
+          usagePromptTokens = parsed.usage.prompt_tokens;
+        }
+        if (typeof parsed.usage.completion_tokens === "number" && parsed.usage.completion_tokens > 0) {
+          completionTokens = parsed.usage.completion_tokens;
+        }
+        if (
+          parsed.usage.prompt_tokens_details &&
+          typeof parsed.usage.prompt_tokens_details.cached_tokens === "number" &&
+          parsed.usage.prompt_tokens_details.cached_tokens >= 0 &&
+          cachedTokens === 0
+        ) {
+          cachedTokens = parsed.usage.prompt_tokens_details.cached_tokens;
+        }
+      }
+      const c0 = parsed.choices?.[0];
+      if (c0) {
+        if (c0.finish_reason && typeof c0.finish_reason === "string") {
+          finishReason = c0.finish_reason;
+        }
+        const delta = c0.delta;
+        if (delta) {
+          let hasData = false;
+          if (delta.content && delta.content.length > 0) {
+            hasData = true;
+            tokenCount++;
+            outText += delta.content;
+          }
+          if (delta.tool_calls && delta.tool_calls.length > 0) {
+            hasData = true;
+            tokenCount += delta.tool_calls.length;
+          }
+          if (hasData && firstChunk) {
+            ttftMs = performance.now() - t0;
+            firstChunk = false;
+          }
+        }
+      }
+    } catch {}
+  };
+
   for await (const chunk of resp.body) {
     if (isDone) break;
     buf += decoder.decode(chunk, { stream: true });
     const lines = buf.split("\n");
     buf = lines.pop() || "";
-    for (let line of lines) {
-      line = line.trim();
-      if (line.startsWith("data: ")) {
-        const dataStr = line.slice(6);
-        if (dataStr === "[DONE]") {
-          isDone = true;
-          break;
-        }
-        try {
-          const parsed = JSON.parse(dataStr);
-          if (parsed.timings) {
-            if (typeof parsed.timings.prompt_ms === "number") {
-              promptMs = parsed.timings.prompt_ms;
-              hasServerTimings = true;
-            }
-            if (typeof parsed.timings.predicted_ms === "number") {
-              predictedMs = parsed.timings.predicted_ms;
-              hasServerTimings = true;
-            }
-            if (typeof parsed.timings.cache_n === "number" && parsed.timings.cache_n >= 0) {
-              cachedTokens = parsed.timings.cache_n;
-            }
-            if (typeof parsed.timings.prompt_n === "number" && parsed.timings.prompt_n >= 0) {
-              uncachedPromptTokens = parsed.timings.prompt_n;
-            }
-            if (typeof parsed.timings.predicted_n === "number" && parsed.timings.predicted_n > 0) {
-              completionTokens = parsed.timings.predicted_n;
-            }
-          }
-          if (parsed.usage) {
-            if (typeof parsed.usage.prompt_tokens === "number" && parsed.usage.prompt_tokens > 0) {
-              usagePromptTokens = parsed.usage.prompt_tokens;
-            }
-            if (typeof parsed.usage.completion_tokens === "number" && parsed.usage.completion_tokens > 0) {
-              completionTokens = parsed.usage.completion_tokens;
-            }
-          }
-          const c0 = parsed.choices?.[0];
-          if (c0) {
-            if (c0.finish_reason && typeof c0.finish_reason === "string") {
-              finishReason = c0.finish_reason;
-            }
-            const delta = c0.delta;
-            if (delta) {
-              let hasData = false;
-              if (delta.content && delta.content.length > 0) {
-                hasData = true;
-                tokenCount++;
-                outText += delta.content;
-              }
-              if (delta.tool_calls && delta.tool_calls.length > 0) {
-                hasData = true;
-                tokenCount += delta.tool_calls.length;
-              }
-              if (hasData && firstChunk) {
-                ttftMs = performance.now() - t0;
-                firstChunk = false;
-              }
-            }
-          }
-        } catch {}
-      }
+    for (const line of lines) {
+      processSseLine(line);
+      if (isDone) break;
+    }
+  }
+  buf += decoder.decode();
+  if (!isDone && buf.trim().length > 0) {
+    for (const line of buf.split("\n")) {
+      processSseLine(line);
+      if (isDone) break;
     }
   }
 
