@@ -91,7 +91,19 @@ def detect_linux_host_provenance(repo_dir: str = REPO_DIR) -> dict[str, str]:
         raise RuntimeError("FAIL-FAST: PRETTY_NAME not found in /etc/os-release")
     uname = subprocess.check_output(["uname", "-srvm"], text=True).strip()
 
-    git_commit = subprocess.check_output(["git", "-C", repo_dir, "rev-parse", "HEAD"], text=True, timeout=10).strip()
+    git_commit = os.environ.get("GIT_COMMIT", "").strip()
+    if len(git_commit) != 40:
+        for git_dir in (repo_dir, "/home/rafalince/Desktop/mestrado/picoclaw-vs-openclaw-benchmark"):
+            try:
+                if os.path.exists(os.path.join(git_dir, ".git")):
+                    git_commit = subprocess.check_output(
+                        ["git", "-C", git_dir, "rev-parse", "HEAD"],
+                        text=True, stderr=subprocess.DEVNULL, timeout=10,
+                    ).strip()
+                    if len(git_commit) == 40:
+                        break
+            except Exception:
+                pass
     if len(git_commit) != 40:
         raise RuntimeError(f"FAIL-FAST: invalid git HEAD {git_commit!r}")
 

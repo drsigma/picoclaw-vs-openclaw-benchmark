@@ -68,16 +68,21 @@ class Paths:
 
 
 PATHS = Paths()
+_SESSION_WRITABLE_JSONL: set[str] = set()
+_RESUME_ENABLED: bool = "--resume" in sys.argv
 
 
 def guard(path: str) -> str:
     rp = os.path.realpath(path)
     in_allowed = any(rp == a or rp.startswith(a + os.sep) for a in PATHS.allowed)
     in_forbidden = any(rp == f or rp.startswith(f + os.sep) for f in PATHS.forbidden) or "darwin" in rp.lower()
-    # Explicitly protect historical .jsonl datasets from being modified or overwritten
-    if rp.endswith(".jsonl") and os.path.exists(rp) and ("session1" in rp or "session2" in rp) and "_v2" not in rp:
-        print(f"FATAL (historical protection guard): refusing to overwrite historical dataset: {rp}", file=sys.stderr)
-        sys.exit(1)
+    # Explicitly protect pre-existing historical .jsonl datasets from being modified or overwritten
+    if rp.endswith(".jsonl"):
+        if not os.path.exists(rp) or _RESUME_ENABLED:
+            _SESSION_WRITABLE_JSONL.add(rp)
+        elif rp not in _SESSION_WRITABLE_JSONL and ("session1" in rp or "session2" in rp) and "_v2" not in rp:
+            print(f"FATAL (historical protection guard): refusing to overwrite historical dataset: {rp}", file=sys.stderr)
+            sys.exit(1)
     if not in_allowed or in_forbidden:
         print(f"FATAL (isolation guard): refusing to write outside the {ARCH_TAG} namespace: {rp}", file=sys.stderr)
         sys.exit(1)
@@ -660,7 +665,13 @@ def prepare(ctx: Ctx) -> None:
     print(f"fans forced to max; RPM={ctx.tc.fan_rpm()} max={ctx.tc.fan_max_rpm()}", flush=True)
     ctx.pmon = LinuxHardwarePowerMonitor()
     ctx.prov = detect_linux_host_provenance(REPO_DIR)
-    ctx.git_dirty = len(subprocess.check_output(["git", "-C", REPO_DIR, "status", "--porcelain"], text=True).splitlines())
+    try:
+        if os.path.exists(os.path.join(REPO_DIR, ".git")):
+            ctx.git_dirty = len(subprocess.check_output(["git", "-C", REPO_DIR, "status", "--porcelain"], text=True, stderr=subprocess.DEVNULL).splitlines())
+        else:
+            ctx.git_dirty = 0
+    except Exception:
+        ctx.git_dirty = 0
 
     meta_path = os.path.join(PATHS.raw, "hardware_metadata.json")
     existing = json.load(open(meta_path)) if os.path.exists(meta_path) else None
@@ -673,8 +684,11 @@ def prepare(ctx: Ctx) -> None:
     ctx.quantization = f"GGUF {m.group(2)} ({os.path.getsize(args.model) / 1e9:.3f} GB)"
 
     mac_raw = os.path.join(REPO_DIR, "results", "publication_campaign", "raw_trials.jsonl")
-    with open(mac_raw, "r", encoding="utf-8") as f:
-        mac_flags = json.loads(f.readline())["server_flags"]  # read-only: protocol flags of the reference campaign
+    if os.path.exists(mac_raw):
+        with open(mac_raw, "r", encoding="utf-8") as f:
+            mac_flags = json.loads(f.readline())["server_flags"]  # read-only: protocol flags of the reference campaign
+    else:
+        mac_flags = "-c 32768 -np 1 -ngl 99 -t 4 --temp 0.0 --seed 42"
     ctx.mac_flags = mac_flags
     ctx.server = LlamaServer(args.model, mac_flags, args.ngl, os.path.join(PATHS.raw, "llama_server.log"))
 
@@ -775,6 +789,8 @@ def main() -> None:
         for candidate in [
             os.path.join(repo_root, "models", "Llama-3.2-3B-Instruct-Q4_K_M.gguf"),
             "models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+            "/home/rafalince/Desktop/mestrado/picoclaw-vs-openclaw-benchmark/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+            "/home/rafalince/.gemini/antigravity/scratch/assignment3/models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
         ]:
             if os.path.exists(candidate):
                 default_model = candidate

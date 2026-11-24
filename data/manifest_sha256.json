@@ -47,7 +47,7 @@
   "benchmark/environment_manifest.py": "dace0be349ded54b9ee4e3b5f8ba3efb1de9dc49de1d51be59bb785ef6b0008b",
   "benchmark/generate_charts.py": "3c7d853242fa1ad3d843adc26ece12f2495ae2fad97ca7fdb6313019d7e671ea",
   "benchmark/generate_datasets.py": "b837fa629118c8df16c13f23f12bad54f325a024b217470eb54c7c3d54136f51",
-  "benchmark/linux_x86_64_telemetry_adapter.py": "124f107f8852d6f25e2b1b609eef8f9fba3458dc9bb8cd993556be9b35aa9199",
+  "benchmark/linux_x86_64_telemetry_adapter.py": "f714d3928c3ea33c9079e21f2365f1f209bd7f8a0cc31694529e48d1bc9d2a11",
   "benchmark/mcp_server.py": "5006418c5f45d991d75c6257f5587d13af798f922d6ca9a7663971340dc12c4e",
   "benchmark/openclaw_orch.mjs": "3f06b5504b7fe830cd91928e3f56460137f0bd80084fa9abd11f75974031d9f4",
   "benchmark/picoclaw_orch": "e288d04dccfa7ef0fad27938bf9fd5c78cb06b978864981b5de8ca6b3f88fc79",
