@@ -741,11 +741,13 @@ func runWorkload(client *http.Client, apiURL, baseDir, tier, warmth string, rssI
 
 	case "W5":
 		tTool0 := time.Now()
-		polBytes, _ := os.ReadFile(filepath.Join(baseDir, "..", "..", "W5_langchain_real_world", "data", "governance_policy.txt"))
-		polStr := string(polBytes)
-		if len(polStr) > 1000 {
-			polStr = polStr[:1000]
+		polPath := filepath.Join(baseDir, "..", "..", "W5_langchain_real_world", "data", "governance_policy.txt")
+		polBytes, err := os.ReadFile(polPath)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "FATAL: failed to read W5 governance policy (%s): %v\n", polPath, err)
+			os.Exit(1)
 		}
+		polStr := string(polBytes)
 		tDispatchTotal = tCatalogMs + float64(time.Since(tTool0).Nanoseconds())/1e6
 		toolCalls = 2
 

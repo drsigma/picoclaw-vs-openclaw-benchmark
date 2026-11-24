@@ -524,11 +524,8 @@ async function runWorkload(tier, warmth, rssIdle) {
     itlAvg = itlSum / 10.0;
   } else if (tier === "W5") {
     const tTool0 = performance.now();
-    let polStr = "";
-    try {
-      const polPath = path.join(repoDir, "W5_langchain_real_world", "data", "governance_policy.txt");
-      polStr = fs.readFileSync(polPath, "utf-8").slice(0, 1000);
-    } catch (_) {}
+    const polPath = path.join(repoDir, "W5_langchain_real_world", "data", "governance_policy.txt");
+    const polStr = fs.readFileSync(polPath, "utf-8");
     tDispatchTotal = tCatalogMs + (performance.now() - tTool0);
     toolCalls = 2;
 
