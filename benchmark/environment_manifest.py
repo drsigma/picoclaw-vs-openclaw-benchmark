@@ -20,12 +20,101 @@ import sys
 from typing import Any, Dict, Optional
 
 
+def _read_win_registry_str(subkey: str, value_name: str) -> Optional[str]:
+    """Read a string value directly from HKLM Windows Registry (no hardcodes)."""
+    if sys.platform != "win32":
+        return None
+    try:
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, subkey) as key:
+            val, _ = winreg.QueryValueEx(key, value_name)
+            if isinstance(val, str) and val.strip():
+                return val.strip()
+    except Exception:
+        return None
+    return None
+
+
+def _query_wmi_cpu_name() -> Optional[str]:
+    """Fallback real hardware query via WMI Win32_Processor (never estimated)."""
+    if sys.platform != "win32":
+        return None
+    try:
+        out = subprocess.check_output(
+            [
+                "powershell",
+                "-NoProfile",
+                "-Command",
+                "(Get-CimInstance Win32_Processor | Select-Object -First 1 -ExpandProperty Name)",
+            ],
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=10,
+        ).strip()
+        return out if out else None
+    except Exception:
+        return None
+
+
+def _query_win_installed_ram_kb() -> tuple[Optional[int], Optional[str]]:
+    """
+    Query physically installed system memory directly from SMBIOS via Win32
+    GetPhysicallyInstalledSystemMemory (primary) or WMI Win32_PhysicalMemory (secondary).
+    Never estimates, rounds up, or hardcodes memory capacity.
+    """
+    if sys.platform != "win32":
+        return None, None
+    try:
+        import ctypes
+        kb = ctypes.c_ulonglong(0)
+        if ctypes.windll.kernel32.GetPhysicallyInstalledSystemMemory(ctypes.byref(kb)) and kb.value > 0:
+            return int(kb.value), "win32_GetPhysicallyInstalledSystemMemory"
+    except Exception:
+        pass
+    try:
+        out = subprocess.check_output(
+            [
+                "powershell",
+                "-NoProfile",
+                "-Command",
+                "(Get-CimInstance Win32_PhysicalMemory | Measure-Object -Property Capacity -Sum).Sum",
+            ],
+            stderr=subprocess.DEVNULL,
+            text=True,
+            timeout=10,
+        ).strip()
+        if out.isdigit() and int(out) > 0:
+            return int(out) // 1024, "wmi_Win32_PhysicalMemory"
+    except Exception:
+        pass
+    return None, None
+
+
+def get_system_product_info() -> Dict[str, Optional[str]]:
+    """Collect real hardware vendor/product identity from firmware/BIOS tables."""
+    if sys.platform == "win32":
+        return {
+            "manufacturer": _read_win_registry_str(r"HARDWARE\DESCRIPTION\System\BIOS", "SystemManufacturer"),
+            "product_name": _read_win_registry_str(r"HARDWARE\DESCRIPTION\System\BIOS", "SystemProductName"),
+        }
+    return {"manufacturer": None, "product_name": None}
+
+
 def get_cpu_info() -> Dict[str, Any]:
-    info = {
-        "architecture": platform.machine(),
-        "processor": platform.processor(),
-        "cpu_count_logical": os.cpu_count() or 1,
-        "model_name": "Unknown",
+    phys_cores: Optional[int] = None
+    try:
+        import psutil
+        phys_cores = psutil.cpu_count(logical=False)
+    except Exception:
+        phys_cores = None
+
+    info: Dict[str, Any] = {
+        "architecture": platform.machine() or None,
+        "processor": platform.processor() or None,
+        "cpu_count_physical": phys_cores,
+        "cpu_count_logical": os.cpu_count(),
+        "model_name": None,
+        "detection_source": None,
     }
     if sys.platform == "linux":
         try:
@@ -33,31 +122,58 @@ def get_cpu_info() -> Dict[str, Any]:
                 for line in f:
                     if "model name" in line:
                         info["model_name"] = line.split(":", 1)[1].strip()
+                        info["detection_source"] = "proc_cpuinfo"
                         break
         except Exception:
             pass
     elif sys.platform == "darwin":
         try:
             out = subprocess.check_output(["sysctl", "-n", "machdep.cpu.brand_string"], text=True).strip()
-            info["model_name"] = out
+            if out:
+                info["model_name"] = out
+                info["detection_source"] = "darwin_sysctl"
         except Exception:
             pass
     elif sys.platform == "win32":
-        info["model_name"] = os.environ.get("PROCESSOR_IDENTIFIER", "x86_64")
+        reg_name = _read_win_registry_str(r"HARDWARE\DESCRIPTION\System\CentralProcessor\0", "ProcessorNameString")
+        if reg_name:
+            info["model_name"] = reg_name
+            info["detection_source"] = "winreg_ProcessorNameString"
+        else:
+            wmi_name = _query_wmi_cpu_name()
+            if wmi_name:
+                info["model_name"] = wmi_name
+                info["detection_source"] = "wmi_Win32_Processor"
+        info["cpuid_identifier"] = os.environ.get("PROCESSOR_IDENTIFIER") or None
     return info
 
 
 def get_ram_info() -> Dict[str, Any]:
+    os_usable_gb: Optional[float] = None
+    available_gb: Optional[float] = None
+    percent_used: Optional[float] = None
     try:
         import psutil
         vm = psutil.virtual_memory()
-        return {
-            "total_gb": round(vm.total / (1024.0 ** 3), 2),
-            "available_gb": round(vm.available / (1024.0 ** 3), 2),
-            "percent_used": vm.percent,
-        }
+        os_usable_gb = round(vm.total / (1024.0 ** 3), 2)
+        available_gb = round(vm.available / (1024.0 ** 3), 2)
+        percent_used = vm.percent
     except Exception:
-        return {"total_gb": None, "available_gb": None, "percent_used": None}
+        pass
+
+    installed_kb, installed_src = _query_win_installed_ram_kb()
+    installed_gb = round(installed_kb / (1024.0 ** 2), 2) if installed_kb is not None else None
+    total_gb = installed_gb if installed_gb is not None else os_usable_gb
+
+    return {
+        "total_gb": total_gb,
+        "installed_physical_gb": installed_gb,
+        "installed_physical_kb": installed_kb,
+        "installed_detection_source": installed_src,
+        "os_usable_gb": os_usable_gb,
+        "available_gb": available_gb,
+        "percent_used": percent_used,
+    }
 
 
 def get_power_source() -> str:
@@ -98,14 +214,15 @@ def get_runtime_versions() -> Dict[str, str]:
         ("bun", "bun", ["bun", "--version"]),
         ("llama_server", "llama-server", ["llama-server", "--version"]),
         ("powershell", "pwsh", ["pwsh", "--version"]),
-        ("powershell", "powershell", ["powershell", "-Version"]),
+        ("powershell", "powershell", ["powershell", "-NoProfile", "-Command", "$PSVersionTable.PSVersion.ToString()"]),
     ]
     for key, binary, cmd in tool_commands:
         resolved = shutil.which(binary)
-        if resolved and (versions[key].startswith("unavailable") or key == "powershell"):
+        if resolved and versions[key].startswith("unavailable"):
             try:
-                out = subprocess.check_output(cmd, stderr=subprocess.DEVNULL, text=True).strip().splitlines()[0]
-                versions[key] = out
+                out_raw = subprocess.check_output(cmd, stderr=subprocess.STDOUT, text=True, timeout=10).strip()
+                lines = [ln.strip() for ln in out_raw.splitlines() if ln.strip()]
+                versions[key] = lines[0] if lines else f"installed_at_{resolved}_empty_output"
             except Exception:
                 versions[key] = f"installed_at_{resolved}_probe_failed"
     return versions
@@ -183,6 +300,7 @@ def record_environment_manifest(
         "platform_release": platform.release(),
         "platform_version": platform.version(),
         "platform_machine": platform.machine(),
+        "system_product": get_system_product_info(),
         "cpu": get_cpu_info(),
         "ram": get_ram_info(),
         "power_source": get_power_source(),

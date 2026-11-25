@@ -195,7 +195,8 @@ def detect_system_provenance() -> tuple[str, str]:
         except Exception:
             pass
     elif sys.platform == "win32":
-        hw = os.environ.get("PROCESSOR_IDENTIFIER", platform.processor() or "x86_64")
+        from benchmark.environment_manifest import get_cpu_info
+        hw = get_cpu_info().get("model_name") or platform.processor() or "Unknown"
     os_str = f"{platform.system()} {platform.release()} ({platform.machine()})"
     return hw, os_str
 

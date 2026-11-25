@@ -29,7 +29,7 @@
   "benchmark/adapters/python_native_adapter.py": "cf32e3c6025e6895ad52bf012fee1ced874b3a3960b56f2b4ae0f15c3f9d4fa5",
   "benchmark/analyze_results.py": "53093e2aa2d92db6176f234a7f2a929ffb18ad5e46713d91beaa669e8c6939b4",
   "benchmark/bun_jsc_agent.mjs": "b4c67a7e4a9c8e102381a535a4ad8205110a7f75475a046468c02316b2d8289e",
-  "benchmark/environment_manifest.py": "dace0be349ded54b9ee4e3b5f8ba3efb1de9dc49de1d51be59bb785ef6b0008b",
+  "benchmark/environment_manifest.py": "c90b1619d2c010c5e33ddcbdb7fa73a1b529cbb386e0e429927e3278db280cea",
   "benchmark/generate_charts.py": "3c7d853242fa1ad3d843adc26ece12f2495ae2fad97ca7fdb6313019d7e671ea",
   "benchmark/generate_datasets.py": "b837fa629118c8df16c13f23f12bad54f325a024b217470eb54c7c3d54136f51",
   "benchmark/linux_campaign_analysis.py": "c7c7ce9f3141036ecb60f8b918aa98162ed1c85cc8b8bca394187a978eb5eb4b",
@@ -44,7 +44,7 @@
   "benchmark/protocol_freeze.py": "5d122187f2526e7208cc3f52249cf0d4c49845a46c5ccb25e1020d580a3b2c12",
   "benchmark/protocol_invariants.py": "74c2549dd44ce96e80c5e028dd6c4a938ecca46c997a92d6ebbcdf33c228f4da",
   "benchmark/python_orch.py": "d11c6ff55fd6463da5d96c756316360633addbbbb8b2cb4c3c13b97da30a5943",
-  "benchmark/run_unified_benchmark.py": "e57a9e1bb78fddcf72df0af7b611b6e5f9c54b51e2f06df57cfa02dc3336eac2",
+  "benchmark/run_unified_benchmark.py": "0641bbc581fda66d8548d67c0af7576358cde44d17831e40c70556f8721df0df",
   "benchmark/stats_core.py": "2ed84fb5cf15067dc29c30d8171451b57895bd465b9254c3c2330f8ae369ec9c",
   "benchmark/telemetry.py": "27a7542cf432cfa6ae0a0e035339715d45726d490ec57d2c40f8fd1a16696658",
   "benchmark/windows_campaign_analysis.py": "590c0e2a9d914885aa38d4f88e323a70659fe9058bae450bebf6448a9e384719",
@@ -196,5 +196,5 @@
   "tests/test_statistical_engine.py": "75a89ba70ec27fcb5f4862a3a2b9273b9e5822542cc9317018dfd9b0455b2bdc",
   "tests/test_telemetry_parser.py": "ab6d741b0e3971a1106a3999c240ed612f5e1f0c70401f2dca9b200a62271131",
   "tests/test_windows_intel_graphics_adapter.py": "6dcb2e43e06a7ee2edd3d02cdfcc18fbe2b7a189a56425e6e70f3dead42ad6cf",
-  "tests/test_windows_nvidia_campaign.py": "de966f18562ac8a2e55c8cd62644bca083153680c7be9c9597b81cca6806487e"
+  "tests/test_windows_nvidia_campaign.py": "7868dcad434b251c73afafc37f12ecc197f0c3db083faaee0738f069d6d11ba5"
 }

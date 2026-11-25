@@ -146,3 +146,31 @@ def test_w5_workers_have_no_1000_char_policy_truncation():
         assert ".slice(0, 1000)" not in src, f"Found W5 1000-char truncation in {rel}"
         assert "polStr[:1000]" not in src, f"Found W5 1000-char truncation in {rel}"
         assert "repoDir" not in src, f"Found undefined repoDir identifier in {rel} (must use REPO_DIR)"
+
+
+def test_environment_manifest_real_windows_hardware_and_fail_safe(monkeypatch):
+    """Verify environment_manifest reads real CPU brand + SMBIOS RAM on Windows without hardcodes."""
+    from benchmark import environment_manifest as em
+
+    if sys.platform == "win32":
+        cpu = em.get_cpu_info()
+        assert cpu["model_name"] is not None
+        assert "Family " not in cpu["model_name"], f"Expected real CPU brand name, got CPUID string: {cpu['model_name']}"
+        assert cpu["detection_source"] in ("winreg_ProcessorNameString", "wmi_Win32_Processor")
+        assert cpu["cpu_count_logical"] >= 1
+        ram = em.get_ram_info()
+        assert ram["installed_physical_gb"] is not None and ram["installed_physical_gb"] > 0
+        assert ram["total_gb"] == ram["installed_physical_gb"]
+        assert ram["os_usable_gb"] is not None and ram["os_usable_gb"] > 0
+
+    # Fail-safe: when Registry/WMI probes fail, must return None rather than hardcoded strings/numbers
+    monkeypatch.setattr(em, "_read_win_registry_str", lambda subkey, val: None)
+    monkeypatch.setattr(em, "_query_wmi_cpu_name", lambda: None)
+    monkeypatch.setattr(em, "_query_win_installed_ram_kb", lambda: (None, None))
+    if sys.platform == "win32":
+        cpu_fail = em.get_cpu_info()
+        assert cpu_fail["model_name"] is None
+        assert cpu_fail["detection_source"] is None
+        ram_fail = em.get_ram_info()
+        assert ram_fail["installed_physical_gb"] is None
+        assert ram_fail["installed_detection_source"] is None
