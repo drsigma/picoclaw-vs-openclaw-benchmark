@@ -140,6 +140,10 @@ class IntelLlamaServer:
         self.log_path = log_path
         self.guard_fn = guard_fn
         self.proc: subprocess.Popen | None = None
+        # --skip-chat-parsing preserves the exact Jinja tool-catalog prompt tokenization
+        # while disabling post-generation PEG tool-call parsing (common_chat_peg_parse),
+        # which in llama.cpp b12556 aborts SSE tasks ("cancel task") before emitting final
+        # timings/usage chunks whenever max_tokens truncates a JSON tool call (e.g. W1 Tool-RAG).
         self.flag_tokens = [
             "-c", str(n_ctx),
             "-np", "1",
@@ -147,6 +151,7 @@ class IntelLlamaServer:
             "-t", str(threads),
             "--temp", "0.0",
             "--seed", "42",
+            "--skip-chat-parsing",
         ]
         self.server_flags = " ".join(self.flag_tokens)
         self._log_file = None

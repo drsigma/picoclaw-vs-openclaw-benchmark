@@ -311,3 +311,21 @@ def test_tost_equivalence_contrasts_and_autocorrelation():
     drift = compute_autocorrelation_and_trend([100.0 + i * 5.0 for i in range(12)])
     assert drift["significant_drift_p05"] is True
     assert drift["trend_spearman_rho"] == pytest.approx(1.0, abs=0.01)
+
+
+def test_intel_llama_server_sets_skip_chat_parsing():
+    """Ensures IntelLlamaServer passes --skip-chat-parsing to prevent llama.cpp PEG abort on truncated tool calls."""
+    from adapters.windows_intel_graphics.runner import IntelLlamaServer
+
+    srv = IntelLlamaServer(
+        exe="llama-server.exe",
+        model="model.gguf",
+        ngl=0,
+        n_ctx=32768,
+        threads=4,
+        log_path="llama_server.log",
+        guard_fn=lambda p: p,
+    )
+    assert "--skip-chat-parsing" in srv.flag_tokens
+    assert "--temp" in srv.flag_tokens and "--seed" in srv.flag_tokens
+    assert "--skip-chat-parsing" in srv.server_flags

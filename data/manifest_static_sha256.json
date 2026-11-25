@@ -14,7 +14,7 @@
   "adapters/windows_intel_graphics/hardware_manifest.py": "f4ac5db2af8728a7ff95b720ff3aad5b507cc1d2dcf22008483e0e2b4347542f",
   "adapters/windows_intel_graphics/machine_manifest_intel_win.json": "7efaf341ff71cb2603b4092710ce4662c9a8348a55a211e0674f202c5b72a9d6",
   "adapters/windows_intel_graphics/machine_manifest_intel_win.txt": "9e07cae52c780b7c00d58f39a8a370cb9422b098e5172f7c4fc72a83b916d85c",
-  "adapters/windows_intel_graphics/runner.py": "99593db436ab875be8193364f7fd352463ed6fab99ea625e5d1240715ff39b49",
+  "adapters/windows_intel_graphics/runner.py": "ce41c84bb19cd54c603209f580191b4be310c73ce0180cd0710940ed239878cc",
   "adapters/windows_intel_graphics/telemetry.py": "4f6f00f11b8cb1fe1965a1fa06530791403236dcbcf1c740c280786d75ecc78d",
   "adapters/windows_intel_graphics/validator.py": "9c033b8b7d1f8ddb6e7249ebc062f47791077a4e998a79b8927de7d71789be66",
   "adapters/windows_intel_graphics/w5_intel_worker.py": "fe4adfdb4eade59c76191496cb2cf2e6186484a481859848f57ea218ca74857e",
@@ -195,6 +195,6 @@
   "tests/test_sse_cache_hit_usage.py": "252bc647c470790cbba7976e7571ca8c928bdf171af7f4f8d0287fc94b6992ff",
   "tests/test_statistical_engine.py": "75a89ba70ec27fcb5f4862a3a2b9273b9e5822542cc9317018dfd9b0455b2bdc",
   "tests/test_telemetry_parser.py": "ab6d741b0e3971a1106a3999c240ed612f5e1f0c70401f2dca9b200a62271131",
-  "tests/test_windows_intel_graphics_adapter.py": "30df66337084e02506f5c799846b3305f12cd66d6b18ad2813fa00d45b286872",
+  "tests/test_windows_intel_graphics_adapter.py": "6dcb2e43e06a7ee2edd3d02cdfcc18fbe2b7a189a56425e6e70f3dead42ad6cf",
   "tests/test_windows_nvidia_campaign.py": "de966f18562ac8a2e55c8cd62644bca083153680c7be9c9597b81cca6806487e"
 }
