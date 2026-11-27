@@ -179,7 +179,7 @@
   "scripts/run_warm_cache_campaign.py": "698e151a7850c39cb1c33b360c4e9a7ec4bc9a421d8765c6b47e9b1402a4a659",
   "scripts/run_windows_campaign.ps1": "25de7b93c7fc8a9f796bda9f6cbcc08e285a12c58a54925a76208b2b8c82f8bf",
   "scripts/run_windows_nvidia_campaign.ps1": "8d81e8b1034e144ab5edb4e9cc6576fe4dae03b1d446018d4139f18b47b5df2b",
-  "scripts/run_windows_nvidia_master_campaign.py": "c0806d3e7ace6dd8ead116bd25948d7525ce3a664605b16ea88e045c23ea0569",
+  "scripts/run_windows_nvidia_master_campaign.py": "f41db0f1aca04a1763a29e8536fb44ab3b7309ae8de3dc13edabf24a1e55c28a",
   "scripts/run_windows_x86_64_master_campaign.py": "a0457e5a9d3ea5326fab6e9443a41c3e4c9c154271a2a3e88e58f1ea4bd7bd2d",
   "scripts/setup_environment.sh": "7d06320f77c70dd34ac8659fd0079d840e68eea804d008f1e041973c6dbe4920",
   "scripts/validate_rag_tool_recall.py": "18b589d53e03d7345493db996b7e64f4d0ff954024a81c5ffc205c837182a182",
@@ -196,5 +196,5 @@
   "tests/test_statistical_engine.py": "75a89ba70ec27fcb5f4862a3a2b9273b9e5822542cc9317018dfd9b0455b2bdc",
   "tests/test_telemetry_parser.py": "ab6d741b0e3971a1106a3999c240ed612f5e1f0c70401f2dca9b200a62271131",
   "tests/test_windows_intel_graphics_adapter.py": "6dcb2e43e06a7ee2edd3d02cdfcc18fbe2b7a189a56425e6e70f3dead42ad6cf",
-  "tests/test_windows_nvidia_campaign.py": "7868dcad434b251c73afafc37f12ecc197f0c3db083faaee0738f069d6d11ba5"
+  "tests/test_windows_nvidia_campaign.py": "a8faf4ce1fdb2437f7a607dfad492d44f5d0b4920fb4cb7810aebcdcf99281c8"
 }

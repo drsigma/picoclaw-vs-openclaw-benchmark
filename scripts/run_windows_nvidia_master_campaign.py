@@ -227,11 +227,17 @@ class LlamaServer:
                 continue
             out.append(toks[i])
             i += 1
+        # --skip-chat-parsing preserves the exact Jinja tool-catalog prompt tokenization
+        # while disabling post-generation PEG tool-call parsing (common_chat_peg_parse),
+        # which in llama.cpp aborts SSE tasks ("cancel task") before emitting final
+        # timings/usage chunks whenever max_tokens truncates a JSON tool call (e.g. W1 Tool-RAG).
         self.flag_tokens = out + ["-ngl", str(ngl)]
+        if "--skip-chat-parsing" not in self.flag_tokens:
+            self.flag_tokens.append("--skip-chat-parsing")
         self.model = model
         self.log_path = log_path
         self.proc: subprocess.Popen | None = None
-        self.server_flags = ""
+        self.server_flags = " ".join(self.flag_tokens)
         self._log = None
 
     def start(self) -> None:

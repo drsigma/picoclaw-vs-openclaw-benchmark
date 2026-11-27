@@ -174,3 +174,18 @@ def test_environment_manifest_real_windows_hardware_and_fail_safe(monkeypatch):
         ram_fail = em.get_ram_info()
         assert ram_fail["installed_physical_gb"] is None
         assert ram_fail["installed_detection_source"] is None
+
+
+def test_windows_nvidia_llama_server_sets_skip_chat_parsing():
+    """Ensures Windows-NVIDIA LlamaServer passes --skip-chat-parsing to prevent llama.cpp PEG abort on truncated tool calls."""
+    srv = nv_runner.LlamaServer(
+        model="models/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+        mac_flags="-c 32768 -np 1 -t 4 --temp 0.0 --seed 42 -ngl 99",
+        ngl=16,
+        log_path="llama_server.log",
+    )
+    assert "--skip-chat-parsing" in srv.flag_tokens
+    assert "-ngl" in srv.flag_tokens
+    assert srv.flag_tokens[srv.flag_tokens.index("-ngl") + 1] == "16"
+    assert "--temp" in srv.flag_tokens and "--seed" in srv.flag_tokens
+    assert "--skip-chat-parsing" in srv.server_flags
