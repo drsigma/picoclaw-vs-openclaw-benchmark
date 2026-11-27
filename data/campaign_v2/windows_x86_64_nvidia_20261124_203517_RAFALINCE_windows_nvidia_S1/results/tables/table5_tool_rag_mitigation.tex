@@ -1,0 +1,20 @@
+% Tool-RAG Dynamic Schema Pruner Mitigation (Windows 11 x86_64)
+\begin{table}[t]
+\centering\small
+\caption{Zero-Copy Tool-RAG Pruner: Token Reduction and Latency Savings (Windows 11 x86_64)}
+\label{tab:Windows_tool_rag}
+\begin{tabular}{llrrrr}
+\toprule
+WL & Arm & Prompt Tokens & $T_{\text{prune}}$ (ms) & $T_{\text{task}}$ (ms) & $E_{\text{net}}$ (J) \\
+\midrule
+W1 & openclaw\_tool\_rag & 893 & 1.417 & 2693.8 & 131.84 \\
+W1 & picoclaw\_tool\_rag & 893 & 0.034 & 2637.0 & 128.67 \\
+W2 & openclaw\_tool\_rag & 917 & 1.482 & 1523.1 & 90.74 \\
+W2 & picoclaw\_tool\_rag & 917 & 0.038 & 1504.7 & 87.37 \\
+W3 & openclaw\_tool\_rag & 1163 & 1.506 & 1737.4 & 103.95 \\
+W3 & picoclaw\_tool\_rag & 1163 & 0.032 & 1746.0 & 101.25 \\
+W4 & openclaw\_tool\_rag & 11595 & 5.480 & 17059.0 & 999.32 \\
+W4 & picoclaw\_tool\_rag & 11595 & 0.414 & 17077.2 & 1000.50 \\
+\bottomrule
+\end{tabular}
+\end{table}

@@ -1,0 +1,21 @@
+% MCP Transport IPC Ablation (Windows 11 x86_64)
+\begin{table}[t]
+\centering\small
+\caption{Live MCP IPC Latency: Direct Dispatch vs Stdio Pipe vs HTTP Loopback (Windows 11 x86_64)}
+\label{tab:Windows_mcp_transport}
+\begin{tabular}{llrrr}
+\toprule
+Orchestrator & Transport Protocol & Median IPC (ms) & Mean IPC (ms) & $\\Phi_{\text{orch}}$ (\%) \\
+\midrule
+Go Native (PicoClaw) & In-Process Direct Dispatch & 1.713 & 1.725 & 0.83\% \\
+Go Native (PicoClaw) & MCP Stdio JSON-RPC 2.0 (Pipe) & 1.966 & 1.977 & 0.84\% \\
+Go Native (PicoClaw) & MCP Local HTTP JSON-RPC 2.0 (Loopback) & 56.875 & 53.339 & 4.16\% \\
+Node.js V8 (OpenClaw) & In-Process Direct Dispatch & 1.713 & 1.725 & 2.60\% \\
+Node.js V8 (OpenClaw) & MCP Stdio JSON-RPC 2.0 (Pipe) & 1.966 & 1.977 & 2.62\% \\
+Node.js V8 (OpenClaw) & MCP Local HTTP JSON-RPC 2.0 (Loopback) & 56.875 & 53.339 & 5.82\% \\
+Python 3.12 Native & In-Process Direct Dispatch & 1.713 & 1.725 & 2.14\% \\
+Python 3.12 Native & MCP Stdio JSON-RPC 2.0 (Pipe) & 1.966 & 1.977 & 2.15\% \\
+Python 3.12 Native & MCP Local HTTP JSON-RPC 2.0 (Loopback) & 56.875 & 53.339 & 5.45\% \\
+\bottomrule
+\end{tabular}
+\end{table}
