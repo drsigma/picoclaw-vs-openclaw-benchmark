@@ -1,0 +1,22 @@
+% KV Cache Thrashing Ablation (Windows 11 x86_64)
+\begin{table}[t]
+\centering\small
+\caption{KV-Cache Thrashing vs Isolated Contexts: RTX 3050 Latency Inflation}
+\label{tab:Windows_kv_thrashing}
+\begin{tabular}{lrrr}
+\toprule
+Evaluation Condition & Schemas & Median Latency (ms) & Prefill Latency (ms) \\
+\midrule
+T1\_cold\_cache\_15 & - & 3021.3 & 1460.3 \\
+T1\_cold\_cache\_54 & - & 7920.1 & 4616.7 \\
+T2\_interleaved\_thrashing\_15 & - & 3267.5 & 1450.6 \\
+T2\_interleaved\_thrashing\_54 & - & 8046.5 & 4705.8 \\
+T3\_block\_isolated\_warm\_15 & - & 1859.8 & 61.7 \\
+T3\_block\_isolated\_warm\_54 & - & 3976.5 & 136.4 \\
+\midrule
+15-Tool Thrashing Inflation Ratio & 15 & \multicolumn{2}{r}{1.76\times} \\
+54-Tool Thrashing Inflation Ratio & 54 & \multicolumn{2}{r}{2.02\times} \\
+54-Tool Prefill Degradation Ratio & 54 & \multicolumn{2}{r}{34.50\times} \\
+\bottomrule
+\end{tabular}
+\end{table}

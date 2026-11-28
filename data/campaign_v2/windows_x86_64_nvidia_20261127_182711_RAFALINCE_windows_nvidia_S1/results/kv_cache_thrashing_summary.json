@@ -1,0 +1,56 @@
+{
+  "session_id": "KV_CACHE_THRASHING_windows_x86_64",
+  "hardware": "Dell Inc. Dell G15 5520 | 12th Gen Intel(R) Core(TM) i5-12500H (16 logical CPUs) | 31.7 GiB RAM | NVIDIA GeForce RTX 3050 Laptop GPU, 4096 MiB, 581.95",
+  "os": "Microsoft Windows 11 64bit (Windows-11-10.0.26200-SP0 build 26200)",
+  "workload": "W2_synthetic_kv_stress",
+  "total_evaluated_trials": 180,
+  "regimes": {
+    "T1_cold_cache_15": {
+      "n_trials": 30,
+      "t_task_median_ms": 3021.27,
+      "t_task_mean_ms": 3032.77,
+      "prompt_ms_median": 1460.27,
+      "prompt_ms_mean": 1462.84
+    },
+    "T1_cold_cache_54": {
+      "n_trials": 30,
+      "t_task_median_ms": 7920.09,
+      "t_task_mean_ms": 7967.16,
+      "prompt_ms_median": 4616.73,
+      "prompt_ms_mean": 4621.04
+    },
+    "T2_interleaved_thrashing_15": {
+      "n_trials": 30,
+      "t_task_median_ms": 3267.46,
+      "t_task_mean_ms": 3266.28,
+      "prompt_ms_median": 1450.62,
+      "prompt_ms_mean": 1451.07
+    },
+    "T2_interleaved_thrashing_54": {
+      "n_trials": 30,
+      "t_task_median_ms": 8046.48,
+      "t_task_mean_ms": 8114.13,
+      "prompt_ms_median": 4705.81,
+      "prompt_ms_mean": 4705.33
+    },
+    "T3_block_isolated_warm_15": {
+      "n_trials": 30,
+      "t_task_median_ms": 1859.8,
+      "t_task_mean_ms": 1914.07,
+      "prompt_ms_median": 61.71,
+      "prompt_ms_mean": 62.36
+    },
+    "T3_block_isolated_warm_54": {
+      "n_trials": 30,
+      "t_task_median_ms": 3976.53,
+      "t_task_mean_ms": 4017.81,
+      "prompt_ms_median": 136.42,
+      "prompt_ms_mean": 137.69
+    }
+  },
+  "thrashing_vs_isolated_comparisons": {
+    "schemas_15_thrashing_latency_penalty_ratio": 1.76,
+    "schemas_54_thrashing_latency_penalty_ratio": 2.02,
+    "schemas_54_prefill_thrashing_penalty_ratio": 34.5
+  }
+}

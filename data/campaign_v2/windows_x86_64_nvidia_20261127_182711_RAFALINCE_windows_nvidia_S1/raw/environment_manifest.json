@@ -1,0 +1,57 @@
+{
+  "manifest_version": "2.0.0",
+  "session_id": "20261127_182711_RAFALINCE_windows_nvidia_S1_windows_x86_64_nvidia",
+  "recorded_at_utc": "2026-11-27T21:27:48.195927+00:00",
+  "platform_system": "Windows",
+  "platform_release": "11",
+  "platform_version": "10.0.26200",
+  "platform_machine": "AMD64",
+  "system_product": {
+    "manufacturer": "Dell Inc.",
+    "product_name": "Dell G15 5520"
+  },
+  "cpu": {
+    "architecture": "AMD64",
+    "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "cpu_count_physical": 12,
+    "cpu_count_logical": 16,
+    "model_name": "12th Gen Intel(R) Core(TM) i5-12500H",
+    "detection_source": "winreg_ProcessorNameString",
+    "cpuid_identifier": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel"
+  },
+  "ram": {
+    "total_gb": 32.0,
+    "installed_physical_gb": 32.0,
+    "installed_physical_kb": 33554432,
+    "installed_detection_source": "win32_GetPhysicallyInstalledSystemMemory",
+    "os_usable_gb": 31.69,
+    "available_gb": 21.77,
+    "percent_used": 31.3
+  },
+  "power_source": "AC_MAINS",
+  "cpu_governor": "default_or_managed",
+  "pmu_and_security": {
+    "perf_event_paranoid": null,
+    "pmu_status": "win32_psapi_cycles_supported",
+    "rapl_status": "not_applicable (Windows RAPL via driver/fallback)",
+    "restriction_reason": null
+  },
+  "runtimes": {
+    "python": "3.12.10",
+    "go": "go version go1.23.3 windows/amd64",
+    "node": "v20.18.1",
+    "bun": "1.4.4",
+    "llama_server": "version: 1.0.0-dev (build 12403, commit dca216ad6)",
+    "powershell": "5.1.26100.9818"
+  },
+  "extra_metadata": {
+    "cross_platform_emulation": false,
+    "target_platform": "windows_x86_64_nvidia",
+    "host_platform": "Windows_AMD64",
+    "gpu_uuid": "GPU-a17dd36a-a4e0-a443-dc0e-b0ecdca79432",
+    "gpu_name": "NVIDIA GeForce RTX 3050 Laptop GPU",
+    "driver_version": "581.95",
+    "invert_blocks": false,
+    "ngl": 16
+  }
+}
